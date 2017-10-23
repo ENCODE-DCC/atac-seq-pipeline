@@ -1,0 +1,4 @@
+ref_fa	/mnt/data/pipeline_genome_data/mm10/mm10_no_alt_analysis_set_ENCODE.fasta
+bowtie2_idx	/mnt/data/pipeline_genome_data/mm10/bowtie2_index/mm10_no_alt_analysis_set_ENCODE.fasta
+chrsz	/srv/scratch/leepc12/mm10.chrom.sizes
+blacklist	/mnt/data/pipeline_genome_data/mm10/mm10.blacklist.bed.gz

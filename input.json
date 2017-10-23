@@ -1,0 +1,22 @@
+{
+	"atac.genome_tsv" : "/users/leepc12/code/atac-seq-pipeline/genome/mm10_klab.tsv",
+	"atac.fastqs" : [
+		[
+			["fastqs/fq1_1-1.fastq.gz","fastqs/fq1_1-2.fastq.gz"],
+			["fastqs/fq1_2-1.fastq.gz","fastqs/fq1_2-2.fastq.gz"]
+		],
+		[
+			["fastqs/fq2_1-1.fq.gz","fastqs/fq2_1-2.fastq.gz"],
+			["fastqs/fq2_2-1.fastq.gz","fastqs/fq2_2-2.fastq.gz"]
+		]
+	],
+	"atac.paired_end" : true,
+	"atac.multimapping" : 4,
+	"atac.cpu" : 4,
+
+	"atac.trim_merge.mem_mb" : 3000,
+	"atac.trim_merge.time_hr" : 2,
+	"atac.trim_merge.queue" : "standard",
+
+	"atac.trim_merge.min_trim_len" : 5,
+}
