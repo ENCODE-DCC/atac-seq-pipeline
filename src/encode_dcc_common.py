@@ -1,10 +1,12 @@
-import multiprocessing
-import subprocess
-import shlex
+import re
 import csv
+import gzip
 
 def strip_ext_fastq(fastq):
     return re.sub(r'\.(fastq|fq|Fastq|Fq)\.gz$','',fastq)
+
+def strip_ext_bam(bam):
+    return re.sub(r'\.(bam|Bam)$','',bam)
 
 def get_read_length(fastq):
     # code extracted from Daniel Kim's ATAQC module
@@ -38,29 +40,8 @@ def read_tsv(tsv):
             result.append(row)
     return result
 
-def func(index):
-    cmd = 'echo {}; sleep 10'.format(index)
-    process = subprocess.check_output(cmd, shell=True)
-    print(process)
-    return "done {}".format(index)
-
-def func2(index):
-    cmd = 'echo {}; sleep 10'.format(index)
-    process = subprocess.check_output(cmd, shell=True)
-    print(process)
-    return "done {}".format(index)
-
-class Bar(object):
-    def __init__(self, x):
-        self.x = x
-
 def main():
-    p = multiprocessing.Pool(6)    
-    ret = p.map(func, [1,2,3,4])
-    print(ret)
-    p.close()
-    p.join()
-    print("finished")
+    pass
 
 if __name__=='__main__':
     main()

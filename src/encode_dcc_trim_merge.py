@@ -8,12 +8,12 @@ import os
 import re
 import json
 import logging
-import gzip
 import collections
 import argparse
 import multiprocessing
 import subprocess
 import copy
+import encode_dcc_common
 
 logger = logging.getLogger(__name__)
 
@@ -67,7 +67,6 @@ def parse_arguments():
         for i in range(len(args.adapters)):
             for j in range(len(args.adapters[i])):
                 args.adapters[i][j] = ''
-
     return args
 
 def detect_adapter(fastq):
@@ -122,9 +121,9 @@ def main():
     temp_files = []
     R1_to_merge = []
     R2_to_merge = []
-        
-    # detect adapters (with multithreading)
-    pool_detect = multiprocessing.Pool(args.nth) 
+    # for multithreading
+    pool = multiprocessing.Pool(args.nth) 
+    # detect adapters
     ret_vals = {}
     for i in range(len(args.fastqs)):
         # for each technical replicate
@@ -133,79 +132,63 @@ def main():
         if args.paired_end:
             if args.auto_detect_adapter and \
                 not (adapters[0] and adapters[1]):
-                ret_val1 = pool_detect.apply_async(detect_adapter,
+                ret_val1 = pool.apply_async(detect_adapter,
                     (fastqs[0]))
-                ret_val2 = pool_detect.apply_async(detect_adapter,
+                ret_val2 = pool.apply_async(detect_adapter,
                     (fastqs[1]))
                 ret_vals[i]=[ret_val1,ret_val2]
         else:
             if args.auto_detect_adapter and \
                 not adapters[0]:
-                ret_val1 = pool_detect.apply_async(detect_adapter,
+                ret_val1 = pool.apply_async(detect_adapter,
                     (fastqs[0]))
                 ret_vals[i]=[ret_val1]
     # update array with detected adapters
     for i in ret_vals:
-        for j, ret_vals[i]:
+        for j in range(len(ret_vals[i])):
             args.adapters[i][j] = ret_vals[i][j].get()
-    pool_detect.close()
-    pool_detect.join()
-
     # trim adapters
-    pool_detect = multiprocessing.Pool(args.nth)
-    adapters[tech_rep][0,1]
-    
-    # merge fastqs
+    trimmed_fastqs = copy.deepcopy(args.fastqs)
+    ret_vals = {}
     for i in range(len(args.fastqs)):
         # for each technical replicate
         fastqs = args.fastqs[i] # R1 and R2
-        adapters = args.adapters[i] if args.adapters else [None,None]
+        adapters = args.adapters[i]
         if args.paired_end:
-            if not args.auto_detect_adapter and \
-                not (adapters[0] and adapters[1]):
-                trimmed_fastqs = fastqs
-            else:
-                if args.auto_detect_adapter and \
-                    not (adapters[0] and adapters[1]): # detect adapters
-                    adapters[0] = detect_adapter(fastqs[0])
-                    adapters[1] = detect_adapter(fastqs[1])
-                if adapters[0] and adapters[1]:
-                    trimmed_fastqs = trim_adapter_pe(
+            if adapters[0] and adapters[1]:
+                ret_vals[i] = pool.apply_async(
+                    trim_adapter_pe,(
                         fastqs[0], fastqs[1], 
                         adapters[1], adapter[2],
                         args.min_trim_len,
                         args.err_rate,
-                        args.out_dir)
-                    temp_files.append(trimmed_fastqs)
-                else:
-                    trimmed_fastqs = fastqs
-            R1_to_merge.append(trimmed_fastqs[0])
-            R2_to_merge.append(trimmed_fastqs[1])
+                        args.out_dir))
         else:
-
-            if not args.auto_detect_adapter and \
-                not adapters[0]:
-                trimmed_fastq = fastq[0]
-            else:
-                if args.auto_detect_adapter and not adapters[0]:
-                    adapters[0] = detect_adapter(fastqs[0])
-                if adapters[0]:
-                    trimmed_fastqs = trim_adapter_se(
+            if adapters[0]:
+                ret_vals[i] = [pool.apply_async(
+                    trim_adapter_se,(
                         fastqs[0],
                         adapters[0],
                         args.min_trim_len,
                         args.err_rate,
-                        args.out_dir)
-                    temp_files.append(trimmed_fastqs)
-                else:
-                    trimmed_fastq = fastqs[0]
-            R1_to_merge.append(trimmed_fastq)
+                        args.out_dir))]
+    # update array with trimmed fastqs
+    for i in ret_vals:
+        trimmed_fastqs[i] = ret_vals[i].get()
+        temp_files.append(trimmed_fastqs[i])
+    for i in range(len(trimmed_fastqs)):        
+        R1_to_merge.append(trimmed_fastqs[i][0])
+        R2_to_merge.append(trimmed_fastqs[i][0])
     # merge fastqs
-    R1_merged = merge_fastqs(R1_to_merge)
-    R2_merged = merge_fastqs(R2_to_merge)
+    ret_val1 = merge_fastqs(R1_to_merge)
+    ret_val2 = merge_fastqs(R2_to_merge)
+    R1_merged = ret_val1.get()
+    R2_merged = ret_val2.get()
     # remove temporary/intermediate files
     subprocess.check_output(shlex.split(
         'rm -rf {}'.format(' '.join(temp_files))))    
+    pool.close()
+    pool.join()
 
 if __name__=='__main__':
     main()
