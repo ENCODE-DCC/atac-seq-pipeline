@@ -1,37 +1,29 @@
+#!/usr/bin/env python
+
+# ENCODE DCC common functions python script
+# Author: Jin Lee (leepc12@gmail.com)
+
+import sys
+import os
 import re
 import csv
 import gzip
+import logging
+import subprocess
+import signal
+
+logging.basicConfig(format='[%(asctime)s %(levelname)s] %(message)s')
+log = logging.getLogger(__name__)
+BIG_INT = 99999999
 
 def strip_ext_fastq(fastq):
-    return re.sub(r'\.(fastq|fq|Fastq|Fq)\.gz$','',fastq)
+    return re.sub(r'\.(fastq|fq|Fastq|Fq)\.gz$','',str(fastq))
 
 def strip_ext_bam(bam):
-    return re.sub(r'\.(bam|Bam)$','',bam)
+    return re.sub(r'\.(bam|Bam)$','',str(bam))
 
-def get_read_length(fastq):
-    # code extracted from Daniel Kim's ATAQC module
-    # https://github.com/kundajelab/ataqc/blob/master/run_ataqc.py
-    def getFileHandle(filename, mode="r"):
-        if (re.search('.gz$',filename) or re.search('.gzip',filename)):
-            if (mode=="r"):
-                mode="rb";
-            return gzip.open(filename,mode)
-        else:
-            return open(filename,mode)
-    total_reads_to_consider = 1000000
-    line_num = 0
-    total_reads_considered = 0
-    max_length = 0
-    with getFileHandle(fastq, 'rb') as fp:
-        for line in fp:
-            if line_num % 4 == 1:
-                if len(line.strip()) > max_length:
-                    max_length = len(line.strip())
-                total_reads_considered += 1
-            if total_reads_considered >= total_reads_to_consider:
-                break
-            line_num += 1
-    return int(max_length)
+def strip_ext_tar(tar):
+    return re.sub(r'\.tar$','',str(tar))
 
 def read_tsv(tsv):
     result = []
@@ -40,9 +32,70 @@ def read_tsv(tsv):
             result.append(row)
     return result
 
-def main():
-    pass
+def mkdir_p(dirname):
+    if not os.path.exists(dirname):
+        os.makedirs(dirname)
 
-if __name__=='__main__':
-    main()
-    #pass
+def untar(tar, out_dir):
+    cmd = 'tar xvf {} -C {}'.format(
+        tar,
+        out_dir)
+    run_shell_cmd(cmd)
+
+def run_shell_cmd(cmd): # kill all children processed when interrupted
+    try:
+        p = subprocess.Popen(cmd, shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            universal_newlines=True,
+            preexec_fn=os.setsid)
+        log.info('run_shell_cmd: PID={}, CMD={}'.format(p.pid, cmd))
+        while True:
+            line = p.stdout.readline()
+            if line=='' and p.poll() is not None:
+                break
+            # log.debug(line.strip('\n'))
+            print(line.strip('\n'))
+            # sys.stdout.flush()        
+        p.communicate()
+        if p.returncode > 0:
+            raise subprocess.CalledProcessError(
+                p.returncode, cmd)
+    except:
+        pgid = os.getpgid(p.pid)
+        log.exception('Unknown exception caught. '+ \
+            'Killing process group {}...'.format(pgid))
+        # os.system("kill -{} -{}".format(signal.SIGKILL,pgid))
+        os.killpg(os.getpgid(p.pid), signal.SIGKILL)
+        p.terminate()
+
+
+def samtools_index(bam, out_dir):
+    prefix = os.path.join(out_dir,
+        os.path.basename(strip_ext_bam(bam)))
+    bai = '{}.bam.bai'.format(prefix)
+    cmd = 'samtools index {}'.format(bam)
+    run_shell_cmd(cmd)
+    return bai    
+
+def samtools_flagstat(bam, out_dir):
+    prefix = os.path.join(out_dir,
+        os.path.basename(strip_ext_bam(bam)))
+    flagstat_qc = '{}.flagstat.qc'.format(prefix)
+    cmd = 'samtools flagstat {} > {}'.format(
+        bam,
+        flagstat_qc)
+    run_shell_cmd(cmd)
+    return flagstat_qc
+
+def samtools_sort(bam, out_dir, nth=1):
+    prefix = os.path.join(out_dir,
+        os.path.basename(strip_ext_bam(bam)))
+    srt_bam = '{}.srt.bam'.format(prefix)
+    cmd = 'samtools sort {} -o {} -@{}'.format(
+        bam,
+        srt_bam,        
+        nth)
+    run_shell_cmd(cmd)
+    return srt_bam
+

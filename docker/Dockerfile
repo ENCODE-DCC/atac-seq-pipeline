@@ -71,4 +71,5 @@ RUN groupadd -r encode && useradd --no-log-init -r -m -d /home/encode/ -g encode
 USER encode
 WORKDIR /home/encode
 
-ENTRYPOINT ["python", "/image_software/pipeline-container/src/filter_qc.py"]
+#ENTRYPOINT ["python", "/image_software/pipeline-container/src/filter_qc.py"]
+ENTRYPOINT ["/bin/bash","-c"]

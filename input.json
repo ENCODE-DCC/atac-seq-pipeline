@@ -2,21 +2,23 @@
 	"atac.genome_tsv" : "/users/leepc12/code/atac-seq-pipeline/genome/mm10_klab.tsv",
 	"atac.fastqs" : [
 		[
-			["fastqs/fq1_1-1.fastq.gz","fastqs/fq1_1-2.fastq.gz"],
-			["fastqs/fq1_2-1.fastq.gz","fastqs/fq1_2-2.fastq.gz"]
+			["/srv/scratch/shared/wotan/leepc12/run/ENCODE3_NEW2/data/ENCSR176BYZ/in_progress/reads/fastq/rep1/pair1/ENCFF071AXB.fastq.gz",
+			"/srv/scratch/shared/wotan/leepc12/run/ENCODE3_NEW2/data/ENCSR176BYZ/in_progress/reads/fastq/rep1/pair2/ENCFF628CBN.fastq.gz"],
+			["/srv/scratch/shared/wotan/leepc12/run/ENCODE3_NEW2/data/ENCSR176BYZ/in_progress/reads/fastq/rep2/pair2/ENCFF409GTD.fastq.gz",			
+			"/srv/scratch/shared/wotan/leepc12/run/ENCODE3_NEW2/data/ENCSR176BYZ/in_progress/reads/fastq/rep2/pair1/ENCFF331IGF.fastq.gz"]
 		],
-		[
-			["fastqs/fq2_1-1.fq.gz","fastqs/fq2_1-2.fastq.gz"],
-			["fastqs/fq2_2-1.fastq.gz","fastqs/fq2_2-2.fastq.gz"]
-		]
 	],
 	"atac.paired_end" : true,
-	"atac.multimapping" : 4,
-	"atac.cpu" : 4,
+	"atac.multimapping" : 4,	
 
-	"atac.trim_merge.mem_mb" : 3000,
-	"atac.trim_merge.time_hr" : 2,
+	"atac.cpu" : 12,
+
+	"atac.trim_merge.auto_detect_adapter" : false,
+	"atac.trim_merge.mem_mb" : 6000,
+	"atac.trim_merge.time_hr" : 12,
 	"atac.trim_merge.queue" : "standard",
 
-	"atac.trim_merge.min_trim_len" : 5,
+	"atac.bowtie2.mem_mb" : 12000,
+	"atac.bowtie2.time_hr" : 23,
+	"atac.bowtie2.queue" : "standard"
 }

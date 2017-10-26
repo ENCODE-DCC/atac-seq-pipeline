@@ -99,3 +99,10 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+# temp fastqs
+fastqs/
+
+# cromwell temp dirs
+cromwell-executions/
+cromwell-workflow-logs/

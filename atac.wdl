@@ -25,10 +25,7 @@ task trim_merge { # detect/trim adapter
 			--out-dir .
 	}
 	output {
-		File bam = glob("*.bam")[0]
-		File bam_idx = glob("*.bai")[0]
-		File align_log = glob("*.align.log")[0]
-		File flagstat_qc = glob("*.flagstat.qc")[0]
+		Array[File] trimmed_fastqs = glob("*.fastq.gz")[0]
 	}
 	runtime {
         cpu : "${select_first([cpu,1])}"
@@ -42,7 +39,7 @@ task bowtie2 {
 	Array[Array[File]] fastqs # fastqs[pair_id]
 	Boolean? paired_end
 	Int? multimapping
-	File ref_prefix # reference file path prefix
+	File idx_tar # reference index tar
 	# resource
 	Int? cpu
 	Int? mem_mb
@@ -51,7 +48,7 @@ task bowtie2 {
 
 	command {
 		python $(which encode_dcc_align.py) \
-			${ref_prefix} \
+			${idx_tar} \
 			${write_tsv(fastqs)} \
 			${if select_first([paired_end,false])
 				then "--paied-end" else ""} \
@@ -61,7 +58,7 @@ task bowtie2 {
 	}
 	output {
 		File bam = glob("*.bam")[0]
-		File bam_idx = glob("*.bai")[0]
+		File bai = glob("*.bai")[0]
 		File align_log = glob("*.align.log")[0]
 		File flagstat_qc = glob("*.flagstat.qc")[0]
 	}
@@ -92,7 +89,7 @@ task filter {
 	}
 	output {
 		File dedup_bam = glob("*.dedup.bam")[0]
-		File dedup_bam_idx = glob("*.bai")[0]
+		File dedup_bai = glob("*.bai")[0]
 		File flagstat_qc = glob("*.flagstat.qc")[0]
 		File pbc_qc = glob("*.pbc.qc")[0]
 	}
@@ -151,7 +148,7 @@ task spr { # make two self pseudo replicates
 			${ta}
 	}
 	output {
-		File ta = glob("*.tagAlign.gz")[0]
+		File ta_spr = glob("*.tagAlign.gz")[0]
 	}
 	runtime {
         cpu : "${select_first([cpu,1])}"
@@ -215,13 +212,33 @@ task macs2 {
 }
 
 task pool_ta {
+	Array[File] tas
+	# resource
+	Int? cpu
+	Int? mem_mb
+	Int? time_hr
+	String? queue
+
+	command {
+		python $(which encode_dcc_pool_ta.py) \
+			${sep=' ' tas}
+	}
+	output {
+		File npeak = glob("*.pooled.tagAlign.gz")[0]
+	}
+	runtime {
+        cpu : "${select_first([cpu,1])}"
+        memory : "${select_first([mem_mb,'100'])} MB"
+        time : "${select_first([time_hr,1])}"
+        queue : queue
+	}
 }
 
-task naive_overlap { # including FRiP calculation
-}
+#task naive_overlap { # including FRiP calculation
+#}
 
-task idr { # including FRiP calculation
-}
+#task idr { # including FRiP calculation
+#}
 
 workflow atac {
 	# general
@@ -235,6 +252,7 @@ workflow atac {
 
 	# trim adapters and merge fastqs from technical replicates
 	scatter(i in range(length(fastqs))) {
+		#Array[Array[String]]? empty
 		call trim_merge {
 			input:
 				fastqs = fastqs[i],
@@ -252,10 +270,9 @@ workflow atac {
 				paired_end = paired_end,
 				multimapping = multimapping,
 				cpu = cpu/length(fastqs),
-				chrsz = sub(tsv["chrsz"],"[\r\n]+","")
+				idx_tar = sub(tsv["bowtie2_idx_tar"],"[\r\n]+","")
 		}
 	}
-	,
 	
 #	# filter/dedup bam
 #	scatter(bam in align.bam) {
@@ -346,22 +363,22 @@ workflow atac {
 #			chrsz = sub(tsv["chrsz"],"[\r\n]+",""),
 #	}
 
-	# naive overlap
-	call naive_overlap {
-		tas = bam2ta.ta,
-		npeaks_tr = macs2_tr.npeak
-		npeaks_pr = macs2_pr.npeak
-		ppr_ta = pool_ta_pr.pooled_ta,
-		blacklist = sub(tsv["blacklist"],"[\r\n]+",""),
-	}
+#	# naive overlap
+#	call naive_overlap {
+#		tas = bam2ta.ta,
+#		npeaks_tr = macs2_tr.npeak
+#		npeaks_pr = macs2_pr.npeak
+#		ppr_ta = pool_ta_pr.pooled_ta,
+#		blacklist = sub(tsv["blacklist"],"[\r\n]+",""),
+#	}
 
-	# naive overlap and idr
-	call idr {
-		tas = bam2ta.ta,
-		pr_tas = spr.pr_ta,
-		pooled_ta = pool_ta_tr.pooled_ta,
-		ppr_ta = pool_ta_pr.pooled_ta,
-		blacklist = sub(tsv["blacklist"],"[\r\n]+",""),
-	}
+#	# naive overlap and idr
+#	call idr {
+#		tas = bam2ta.ta,
+#		pr_tas = spr.pr_ta,
+#		pooled_ta = pool_ta_tr.pooled_ta,
+#		ppr_ta = pool_ta_pr.pooled_ta,
+#		blacklist = sub(tsv["blacklist"],"[\r\n]+",""),
+#	}
 
 }

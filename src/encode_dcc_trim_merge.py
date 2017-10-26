@@ -5,19 +5,13 @@
 
 import sys
 import os
-import re
-import json
-import logging
-import collections
 import argparse
 import multiprocessing
-import subprocess
 import copy
-import encode_dcc_common
+from detect_adapter import detect_most_likely_adapter
+from encode_dcc_common import *
 
-logger = logging.getLogger(__name__)
-
-def parse_arguments():
+def parse_arguments(debug=False):
     parser = argparse.ArgumentParser(prog='ENCODE DCC adapter trimmer and fastq merger',
                                         description='')
     parser.add_argument('fastqs', nargs='+', type=str,
@@ -25,14 +19,11 @@ def parse_arguments():
                             list of FASTQ files delimited by space. Use \
                             TSV for multiple techincal replicates).')
     parser.add_argument('--nth', type=int, default=1,
-                        help='No. threads to parallelize bowtie2.')
+                        help='No. threads to parallelize.')
     parser.add_argument('--paired-end', action="store_true",
-                        help='FASTQs have paired-end')
-    group_out = parser.add_mutually_exclusive_group()
-    group_out.add_argument('--out-dir', default='.', type=str,
+                        help='Paired-end FASTQs.')
+    parser.add_argument('--out-dir', default='.', type=str,
                             help='Output directory. Prefix will be taken from FASTQs.')
-    group_out.add_argument('--out-prefix', type=str,
-                            help='Output prefix path.')
     parser.add_argument('--adapters', nargs='+', type=str,
                         help='TSV file path or \
                             list of adapters delimited by space (\
@@ -47,6 +38,11 @@ def parse_arguments():
                         help='Maximum allowed adapter error rate for cutadapt -e \
                             (no. errors divided by the length \
                             of the matching adapter region).')
+    parser.add_argument('--log-level', default='INFO', 
+                        choices=['NOTSET','DEBUG','INFO',
+                            'WARNING','CRITICAL','ERROR','CRITICAL'],
+                        help='Log level')
+
     args = parser.parse_args()
     # parse fastqs command line
     if args.fastqs[0].endswith('.gz'): # it's fastq
@@ -67,11 +63,9 @@ def parse_arguments():
         for i in range(len(args.adapters)):
             for j in range(len(args.adapters[i])):
                 args.adapters[i][j] = ''
+    log.setLevel(args.log_level)
+    log.info(sys.argv)
     return args
-
-def detect_adapter(fastq):
-    adapter = ''
-    return adapter
 
 def trim_adapter_se(fastq, adapter, min_trim_len, err_rate, out_dir):
     prefix = os.path.join(out_dir,
@@ -83,8 +77,7 @@ def trim_adapter_se(fastq, adapter, min_trim_len, err_rate, out_dir):
         adapter,
         fastq,
         trimmed)     
-    print(cmd)
-    print(subprocess.check_output(cmd, shell=True))
+    run_shell_cmd(cmd)
     return trimmed
 
 def trim_adapter_pe(fastq1, fastq2, adapter1, adapter2,
@@ -101,53 +94,77 @@ def trim_adapter_pe(fastq1, fastq2, adapter1, adapter2,
         adapter1, adapter2,
         fastq1, fastq2,
         trimmed1, trimmed2)
-    print(cmd)
-    print(subprocess.check_output(cmd, shell=True))
+    run_shell_cmd(cmd)
     return [trimmed1, trimmed2]
 
 def merge_fastqs(fastqs, out_dir):
-    prefix1 = os.path.join(out_dir,
+    prefix = os.path.join(out_dir,
         os.path.basename(strip_ext_fastq(fastqs[0])))
     merged = '{}.merged.fastq.gz'.format(prefix)
-    cmd = 'zcat {} | gzip -nc > {}'.format(
+    cmd = 'zcat -f {} | gzip -nc > {}'.format(
         ' '.join(fastqs),
         merged)
-    print(cmd)
-    print(subprocess.check_output(cmd, shell=True))
+    run_shell_cmd(cmd)
     return merged
 
 def main():
+    # read params
     args = parse_arguments()
-    temp_files = []
+    log.info('Initializing and making output directory...')
+
+    # make out_dir
+    mkdir_p(args.out_dir)
+
+    # declare temp arrays
+    temp_files = [] # files to deleted later at the end)
     R1_to_merge = []
     R2_to_merge = []
-    # for multithreading
-    pool = multiprocessing.Pool(args.nth) 
+
+    # initialize multithreading
+    log.info('Initializing multithreading...')
+    if args.paired_end:
+        num_process = min(2*len(args.fastqs),args.nth)
+    else:
+        num_process = min(len(args.fastqs),args.nth)
+    log.info('Number of threads={}.'.format(num_process))
+    pool = multiprocessing.Pool(num_process)
+            
     # detect adapters
+    log.info('Detecting adapters...')
     ret_vals = {}
     for i in range(len(args.fastqs)):
         # for each technical replicate
+        log.info('Detecting adapters for tech_rep{}...'.format(
+                i+1))
         fastqs = args.fastqs[i] # R1 and R2
         adapters = args.adapters[i]
         if args.paired_end:
             if args.auto_detect_adapter and \
-                not (adapters[0] and adapters[1]):
-                ret_val1 = pool.apply_async(detect_adapter,
-                    (fastqs[0]))
-                ret_val2 = pool.apply_async(detect_adapter,
-                    (fastqs[1]))
+                not (adapters[0] and adapters[1]):                
+                ret_val1 = pool.apply_async(
+                    detect_most_likely_adapter,
+                        (fastqs[0],))
+                ret_val2 = pool.apply_async(
+                    detect_most_likely_adapter,
+                        (fastqs[1],))
                 ret_vals[i]=[ret_val1,ret_val2]
         else:
             if args.auto_detect_adapter and \
                 not adapters[0]:
-                ret_val1 = pool.apply_async(detect_adapter,
-                    (fastqs[0]))
+                ret_val1 = pool.apply_async(
+                    detect_most_likely_adapter,
+                        (fastqs[0],))
                 ret_vals[i]=[ret_val1]
+
     # update array with detected adapters
     for i in ret_vals:
         for j in range(len(ret_vals[i])):
-            args.adapters[i][j] = ret_vals[i][j].get()
+            args.adapters[i][j] = str(ret_vals[i][j].get(BIG_INT))
+            log.info('Detected adapters for tech_rep{}, R{}: {}'.format(
+                    i+1, j+1, args.adapters[i][j]))
+
     # trim adapters
+    log.info('Trimming adapters...')
     trimmed_fastqs = copy.deepcopy(args.fastqs)
     ret_vals = {}
     for i in range(len(args.fastqs)):
@@ -159,7 +176,7 @@ def main():
                 ret_vals[i] = pool.apply_async(
                     trim_adapter_pe,(
                         fastqs[0], fastqs[1], 
-                        adapters[1], adapter[2],
+                        adapters[0], adapters[1],
                         args.min_trim_len,
                         args.err_rate,
                         args.out_dir))
@@ -172,23 +189,36 @@ def main():
                         args.min_trim_len,
                         args.err_rate,
                         args.out_dir))]
+
     # update array with trimmed fastqs
     for i in ret_vals:
-        trimmed_fastqs[i] = ret_vals[i].get()
-        temp_files.append(trimmed_fastqs[i])
+        trimmed_fastqs[i] = ret_vals[i].get(BIG_INT)
+        temp_files.extend(trimmed_fastqs[i])
     for i in range(len(trimmed_fastqs)):        
         R1_to_merge.append(trimmed_fastqs[i][0])
-        R2_to_merge.append(trimmed_fastqs[i][0])
+        R2_to_merge.append(trimmed_fastqs[i][1])
+
     # merge fastqs
-    ret_val1 = merge_fastqs(R1_to_merge)
-    ret_val2 = merge_fastqs(R2_to_merge)
-    R1_merged = ret_val1.get()
-    R2_merged = ret_val2.get()
-    # remove temporary/intermediate files
-    subprocess.check_output(shlex.split(
-        'rm -rf {}'.format(' '.join(temp_files))))    
+    log.info('Merging fastqs...')
+    log.info('R1: {}'.format(R1_to_merge))
+    log.info('R2: {}'.format(R2_to_merge))
+    ret_val1 = pool.apply_async(merge_fastqs,
+                    (R1_to_merge,args.out_dir,))
+    ret_val2 = pool.apply_async(merge_fastqs,
+                    (R2_to_merge,args.out_dir,))
+    R1_merged = ret_val1.get(BIG_INT)
+    R2_merged = ret_val2.get(BIG_INT)
+
+    # close multithreading
     pool.close()
     pool.join()
+
+    # remove temporary/intermediate files
+    log.info('Removing temporary files...')
+    run_shell_cmd('rm -rf {}'.format(
+        ' '.join(temp_files)))
+
+    log.info('All done.')
 
 if __name__=='__main__':
     main()
