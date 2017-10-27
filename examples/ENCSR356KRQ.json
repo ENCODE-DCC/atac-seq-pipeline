@@ -1,0 +1,30 @@
+{
+	"atac.genome_tsv" : "/users/leepc12/code/atac-seq-pipeline/genome/hg38_klab.tsv",
+	"atac.fastqs" : [
+		[
+			["data/rep1/pair1/ENCFF341MYG.fastq.gz","data/rep1/pair2/ENCFF248EJF.fastq.gz"],
+			["data/rep1/pair1/ENCFF106QGY.fastq.gz","data/rep1/pair2/ENCFF368TYI.fastq.gz"]
+		],
+		[
+			["data/rep2/pair1/ENCFF641SFZ.fastq.gz","data/rep2/pair2/ENCFF031ARQ.fastq.gz"],
+			["data/rep2/pair1/ENCFF751XTV.fastq.gz","data/rep2/pair2/ENCFF590SYZ.fastq.gz"],
+			["data/rep2/pair1/ENCFF927LSG.fastq.gz","data/rep2/pair2/ENCFF734PEQ.fastq.gz"],
+			["data/rep2/pair1/ENCFF859BDM.fastq.gz","data/rep2/pair2/ENCFF007USV.fastq.gz"],
+			["data/rep2/pair1/ENCFF193RRC.fastq.gz","data/rep2/pair2/ENCFF886FSC.fastq.gz"],
+			["data/rep2/pair1/ENCFF366DFI.fastq.gz","data/rep2/pair2/ENCFF573UXK.fastq.gz"]
+		]
+	],
+	"atac.paired_end" : true,
+	"atac.multimapping" : 4,
+
+	"atac.cpu" : 12,
+
+	"atac.trim_merge.auto_detect_adapter" : true,
+	"atac.trim_merge.mem_mb" : 6000,
+	"atac.trim_merge.time_hr" : 12,
+	"atac.trim_merge.queue" : "standard",
+
+	"atac.bowtie2.mem_mb" : 12000,
+	"atac.bowtie2.time_hr" : 23,
+	"atac.bowtie2.queue" : "standard"
+}

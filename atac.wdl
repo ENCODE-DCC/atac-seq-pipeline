@@ -15,17 +15,18 @@ task trim_merge { # detect/trim adapter
 		python $(which encode_dcc_trim_merge.py) \
 			${write_tsv(fastqs)} \
 			${if select_first([paired_end,false])
-				then "--paied-end" else ""} \
+				then "--paired-end" else ""} \
 			${"--adapters " + write_tsv(adapters)} \
 			${if select_first([auto_detect_adapter,false])
 				then "--auto-detect-adapter" else ""} \
 			${"--min-trim-len " + min_trim_len} \
 			${"--err-rate " + err_rate} \
 			${"--nth " + cpu} \
-			--out-dir .
+			--out-dir . \
+			--out-meta-tsv meta.tmp
 	}
 	output {
-		Array[File] trimmed_fastqs = glob("*.fastq.gz")[0]
+		Array[File] trimmed_fastqs = read_tsv("meta.tmp")[0]
 	}
 	runtime {
         cpu : "${select_first([cpu,1])}"
@@ -36,7 +37,7 @@ task trim_merge { # detect/trim adapter
 }
 
 task bowtie2 {
-	Array[Array[File]] fastqs # fastqs[pair_id]
+	Array[File] fastqs # fastqs[pair_id]
 	Boolean? paired_end
 	Int? multimapping
 	File idx_tar # reference index tar
@@ -47,11 +48,11 @@ task bowtie2 {
 	String? queue
 
 	command {
-		python $(which encode_dcc_align.py) \
+		python $(which encode_dcc_bowtie2.py) \
 			${idx_tar} \
-			${write_tsv(fastqs)} \
+			${sep=' ' fastqs} \
 			${if select_first([paired_end,false])
-				then "--paied-end" else ""} \
+				then "--paired-end" else ""} \
 			${"--multimapping " + multimapping} \
 			${"--nth " + cpu} \
 			--out-dir .
@@ -84,7 +85,7 @@ task filter {
 		python $(which encode_dcc_filter.py) \
 			${bam} \
 			${if select_first([paired_end,false])
-				then "--paied-end" else ""} \
+				then "--paired-end" else ""} \
 			--out-dir .					
 	}
 	output {
@@ -116,7 +117,7 @@ task bam2ta {
 		python $(which encode_dcc_bam2ta.py) \
 			${bam} \
 			${if select_first([paired_end,false])
-				then "--paied-end" else ""} \
+				then "--paired-end" else ""} \
 			--type ${type} \
 			--out-dir .
 	}
@@ -144,7 +145,7 @@ task spr { # make two self pseudo replicates
 	command {
 		python $(which encode_dcc_spr.py) \
 			${if select_first([paired_end,false])
-				then "--paied-end" else ""} \
+				then "--paired-end" else ""} \
 			${ta}
 	}
 	output {
@@ -170,7 +171,7 @@ task subsample_ta {
 	command {
 		python $(which encode_dcc_subsample_ta.py) \
 			${if select_first([paired_end,false])
-				then "--paied-end" else ""} \
+				then "--paired-end" else ""} \
 			${ta}
 	}
 	output {
@@ -186,7 +187,7 @@ task subsample_ta {
 
 task macs2 {
 	File ta
-	Int? cap_npeak # cap number of peaks with top scores
+	Int? cap_num_peak # cap number of peaks with top scores
 	String? rank # ranking column (pval, qval, ...)
 	# resource
 	Int? cpu
@@ -197,8 +198,8 @@ task macs2 {
 	command {
 		python $(which encode_dcc_macs2.py) \
 			${ta} \
-			--${"--cap-npeak " + cap_npeak}
-			--${"--rank " + rank}
+			${"--cap-num-peak " + cap_num_peak}
+			${"--rank " + rank}
 	}
 	output {
 		File npeak = glob("*.narrowPeak.gz")[0]
@@ -247,12 +248,11 @@ workflow atac {
 	Array[Array[Array[File]]] fastqs # fastqs[bio_rep_id][tech_rep_id][pair_id]
 	Array[Array[Array[String]]]? adapters # adapters[bio_rep_id][tech_rep_id][pair_id]
 	Boolean? paired_end
-	Int? multimapping
+	Int? multimapping # used for bowtie2 and filter
 	Int? cpu # must be multiples of number of replicates
 
 	# trim adapters and merge fastqs from technical replicates
 	scatter(i in range(length(fastqs))) {
-		#Array[Array[String]]? empty
 		call trim_merge {
 			input:
 				fastqs = fastqs[i],
@@ -270,7 +270,7 @@ workflow atac {
 				paired_end = paired_end,
 				multimapping = multimapping,
 				cpu = cpu/length(fastqs),
-				idx_tar = sub(tsv["bowtie2_idx_tar"],"[\r\n]+","")
+				idx_tar = sub(genome["bowtie2_idx_tar"],"[\r\n]+","")
 		}
 	}
 	
@@ -336,7 +336,7 @@ workflow atac {
 #		call macs2 as macs2_tr {
 #			input:
 #				ta = ta,
-#				chrsz = sub(tsv["chrsz"],"[\r\n]+",""),
+#				chrsz = sub(genome["chrsz"],"[\r\n]+",""),
 #		}
 #	}
 
@@ -345,7 +345,7 @@ workflow atac {
 #		call macs2 as macs2_pr {
 #			input:
 #				ta = ta,
-#				chrsz = sub(tsv["chrsz"],"[\r\n]+",""),
+#				chrsz = sub(genome["chrsz"],"[\r\n]+",""),
 #		}
 #	}
 
@@ -353,14 +353,14 @@ workflow atac {
 #	call macs2 as macs2_pooled {
 #		input:
 #			ta = pool_ta_tr.pooled_ta,
-#			chrsz = sub(tsv["chrsz"],"[\r\n]+",""),
+#			chrsz = sub(genome["chrsz"],"[\r\n]+",""),
 #	}
 
 #	# call peaks on pseudo replicated pooled tagalign with macs2
 #	call macs2 as macs2_ppr {
 #		input:
 #			ta = pool_ta_pr.pooled_ta,
-#			chrsz = sub(tsv["chrsz"],"[\r\n]+",""),
+#			chrsz = sub(genome["chrsz"],"[\r\n]+",""),
 #	}
 
 #	# naive overlap
@@ -369,7 +369,7 @@ workflow atac {
 #		npeaks_tr = macs2_tr.npeak
 #		npeaks_pr = macs2_pr.npeak
 #		ppr_ta = pool_ta_pr.pooled_ta,
-#		blacklist = sub(tsv["blacklist"],"[\r\n]+",""),
+#		blacklist = sub(genome["blacklist"],"[\r\n]+",""),
 #	}
 
 #	# naive overlap and idr
@@ -378,7 +378,7 @@ workflow atac {
 #		pr_tas = spr.pr_ta,
 #		pooled_ta = pool_ta_tr.pooled_ta,
 #		ppr_ta = pool_ta_pr.pooled_ta,
-#		blacklist = sub(tsv["blacklist"],"[\r\n]+",""),
+#		blacklist = sub(genome["blacklist"],"[\r\n]+",""),
 #	}
 
 }

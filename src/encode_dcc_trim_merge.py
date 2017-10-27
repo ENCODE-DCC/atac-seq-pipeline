@@ -16,14 +16,17 @@ def parse_arguments(debug=False):
                                         description='')
     parser.add_argument('fastqs', nargs='+', type=str,
                         help='TSV file path or \
-                            list of FASTQ files delimited by space. Use \
-                            TSV for multiple techincal replicates).')
+                            list of FASTQs delimited by space. \
+                            FASTQs must be compressed with gzip (with .gz). \
+                            Use TSV for multiple techincal replicates).')
     parser.add_argument('--nth', type=int, default=1,
-                        help='No. threads to parallelize.')
+                        help='Number of threads to parallelize.')
     parser.add_argument('--paired-end', action="store_true",
                         help='Paired-end FASTQs.')
     parser.add_argument('--out-dir', default='.', type=str,
-                            help='Output directory. Prefix will be taken from FASTQs.')
+                            help='Output directory.')
+    parser.add_argument('--out-meta-tsv', default='meta.tsv', type=str,
+                            help='Basename for metadata TSV file with all output files.')
     parser.add_argument('--adapters', nargs='+', type=str,
                         help='TSV file path or \
                             list of adapters delimited by space (\
@@ -42,27 +45,39 @@ def parse_arguments(debug=False):
                         choices=['NOTSET','DEBUG','INFO',
                             'WARNING','CRITICAL','ERROR','CRITICAL'],
                         help='Log level')
-
     args = parser.parse_args()
+
     # parse fastqs command line
     if args.fastqs[0].endswith('.gz'): # it's fastq
         args.fastqs = [args.fastqs]
     else: # it's TSV
         args.fastqs = read_tsv(args.fastqs[0])
+
     # parse --adapters command line
     if args.adapters:
         if os.path.exists(args.adapters[0]): # it's TSV
             args.adapters = read_tsv(args.adapters[0])
+            if not args.adapters[0]: # if empty TSV
+                args.adapters = None
         else:
-            args.adapters = [args.adapters]
-        if args.adapters and len(args.adapters) != len(args.fastqs):
-            raise ValueError(
-                'fastqs and adapters must have the same dimension.')
-    else: # fill empty string in adapter list
+            args.adapters = [args.adapters]        
+    if not args.adapters: # fill empty string in adapter list
         args.adapters = copy.deepcopy(args.fastqs)
-        for i in range(len(args.adapters)):
-            for j in range(len(args.adapters[i])):
+        for i, adapters in enumerate(args.adapters):
+            for j, adapter in enumerate(adapters):
                 args.adapters[i][j] = ''
+
+    # check if fastqs, adapers have correct dimension
+    if len(args.adapters)!=len(args.fastqs):
+        raise ValueError('fastqs and adapters dimension mismatch.')
+    for i, fastqs in enumerate(args.fastqs):
+        if args.paired_end and len(fastqs)!=2:
+            raise ValueError('Need 2 fastqs per replicate for paired end.')
+        if not args.paired_end and len(fastqs)!=1:
+            raise ValueError('Need 1 fastq per replicate for single end.')
+        if len(fastqs)!=len(args.adapters[i]):
+            raise ValueError('fastqs and adapters dimension mismatch.')
+            
     log.setLevel(args.log_level)
     log.info(sys.argv)
     return args
@@ -101,9 +116,14 @@ def merge_fastqs(fastqs, out_dir):
     prefix = os.path.join(out_dir,
         os.path.basename(strip_ext_fastq(fastqs[0])))
     merged = '{}.merged.fastq.gz'.format(prefix)
-    cmd = 'zcat -f {} | gzip -nc > {}'.format(
-        ' '.join(fastqs),
-        merged)
+    if len(fastqs)>1:
+        cmd = 'zcat -f {} | gzip -nc > {}'.format(
+            ' '.join(fastqs),
+            merged)
+    else:
+        cmd = 'cp {} {}'.format(
+            fastqs[0],
+            merged)
     run_shell_cmd(cmd)
     return merged
 
@@ -116,9 +136,7 @@ def main():
     mkdir_p(args.out_dir)
 
     # declare temp arrays
-    temp_files = [] # files to deleted later at the end)
-    R1_to_merge = []
-    R2_to_merge = []
+    temp_files = [] # files to deleted later at the end
 
     # initialize multithreading
     log.info('Initializing multithreading...')
@@ -128,7 +146,7 @@ def main():
         num_process = min(len(args.fastqs),args.nth)
     log.info('Number of threads={}.'.format(num_process))
     pool = multiprocessing.Pool(num_process)
-            
+
     # detect adapters
     log.info('Detecting adapters...')
     ret_vals = {}
@@ -182,36 +200,51 @@ def main():
                         args.out_dir))
         else:
             if adapters[0]:
-                ret_vals[i] = [pool.apply_async(
+                ret_vals[i] = pool.apply_async(
                     trim_adapter_se,(
                         fastqs[0],
                         adapters[0],
                         args.min_trim_len,
                         args.err_rate,
-                        args.out_dir))]
+                        args.out_dir))
 
     # update array with trimmed fastqs
     for i in ret_vals:
-        trimmed_fastqs[i] = ret_vals[i].get(BIG_INT)
+        if args.paired_end:
+            trimmed_fastqs[i] = ret_vals[i].get(BIG_INT)
+        else:
+            trimmed_fastqs[i] = [ret_vals[i].get(BIG_INT)]
         temp_files.extend(trimmed_fastqs[i])
-    for i in range(len(trimmed_fastqs)):        
-        R1_to_merge.append(trimmed_fastqs[i][0])
-        R2_to_merge.append(trimmed_fastqs[i][1])
 
     # merge fastqs
     log.info('Merging fastqs...')
+    R1_to_merge = []
+    R2_to_merge = []
+    for i in range(len(trimmed_fastqs)):
+        R1_to_merge.append(trimmed_fastqs[i][0])
+        if args.paired_end:
+            R2_to_merge.append(trimmed_fastqs[i][1])
     log.info('R1: {}'.format(R1_to_merge))
-    log.info('R2: {}'.format(R2_to_merge))
     ret_val1 = pool.apply_async(merge_fastqs,
                     (R1_to_merge,args.out_dir,))
-    ret_val2 = pool.apply_async(merge_fastqs,
-                    (R2_to_merge,args.out_dir,))
     R1_merged = ret_val1.get(BIG_INT)
-    R2_merged = ret_val2.get(BIG_INT)
+    if args.paired_end:
+        log.info('R2: {}'.format(R2_to_merge))
+        ret_val2 = pool.apply_async(merge_fastqs,
+                        (R2_to_merge,args.out_dir,))
+        R2_merged = ret_val2.get(BIG_INT)
 
     # close multithreading
     pool.close()
     pool.join()
+
+    # write metadata TSV for outputs (for WDL)
+    tsv = os.path.join(args.out_dir, args.out_meta_tsv)
+    if args.paired_end:
+        arr = [[R1_merged, R2_merged]]
+    else:
+        arr = [[R1_merged]]
+    write_tsv(tsv, arr)
 
     # remove temporary/intermediate files
     log.info('Removing temporary files...')

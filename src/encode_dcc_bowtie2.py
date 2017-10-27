@@ -14,17 +14,20 @@ def parse_arguments():
     parser = argparse.ArgumentParser(prog='ENCODE DCC bowtie2 aligner python script',
                                         description='')
     parser.add_argument('bowtie2_index_prefix_or_tar', type=str,
-                        help='Path for prefix (or a tarball .tar) for reference bowtie2 index. \
-                            Prefix must be [PREFIX].1.bt2. Tar ball must be packed without \
-                            compression by tar cvf [TAR] [TAR_PREFIX].*.bt2.')
+                        help='Path for prefix (or a tarball .tar) \
+                            for reference bowtie2 index. \
+                            Prefix must be [PREFIX].1.bt2. \
+                            Tar ball must be packed without compression \
+                            by tar cvf [TAR] [TAR_PREFIX].*.bt2.')
     parser.add_argument('fastqs', nargs='+', type=str,
-                        help='List of FASTQ files delimited by space.')
+                        help='List of FASTQs delimited by space. \
+                            FASTQs must be compressed with gzip (with .gz).')
     parser.add_argument('--nth', type=int, default=1,
-                        help='No. threads to parallelize bowtie2.')
+                        help='Number of threads to parallelize.')
     parser.add_argument('--paired-end', action="store_true",
                         help='Paired-end FASTQs.')
     parser.add_argument('--out-dir', default='.', type=str,
-                            help='Output directory. Prefix will be taken from FASTQs.')
+                            help='Output directory.')
     parser.add_argument('--multimapping', default=0, type=int,
                         help='Multimapping for bowtie2 -k.')
     parser.add_argument('--score-min', default='', type=str,
@@ -34,8 +37,15 @@ def parse_arguments():
                             'WARNING','CRITICAL','ERROR','CRITICAL'],
                         help='Log level')
     args = parser.parse_args()
+
+    # check if fastqs have correct dimension
+    if args.paired_end and len(args.fastqs)!=2:
+        raise ValueError('Need 2 fastqs for paired end.')
+    if not args.paired_end and len(args.fastqs)!=1:
+        raise ValueError('Need 1 fastq for single end.')
+
     log.setLevel(args.log_level)
-    log.info(sys.argv)
+    log.info(sys.argv)    
     return args
 
 def get_read_length(fastq):
@@ -128,16 +138,17 @@ def main():
     mkdir_p(args.out_dir)
 
     # declare temp arrays
-    temp_files = [] # files to deleted later at the end)
+    temp_files = [] # files to deleted later at the end
 
     # generate read length file
     log.info('Generating read length file...')
     R1_read_length_file = make_read_length_file(
                             args.fastqs[0], args.out_dir)
-    R2_read_length_file = make_read_length_file(
+    if args.paired_end:
+        R2_read_length_file = make_read_length_file(
                             args.fastqs[1], args.out_dir)
     
-    # if bowtie2_index_prefix_or_tar is tarball unpack it
+    # if bowtie2 index is tarball then unpack it
     if args.bowtie2_index_prefix_or_tar.endswith('.tar'):
         log.info('Unpacking bowtie2 index tar...')
         tar = args.bowtie2_index_prefix_or_tar

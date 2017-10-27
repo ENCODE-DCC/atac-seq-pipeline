@@ -1,5 +1,5 @@
 {
 	"default_runtime_attributes" : {
-		"docker" : "ubuntu:latest"
+		"docker" : "quay.io/encode-dcc/atac-seq-pipeline:latest"
 	}
 }

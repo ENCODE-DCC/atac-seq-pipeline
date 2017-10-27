@@ -1,5 +1,5 @@
 ############################################################
-# Dockerfile for ENCODE DCC containerized pipelines
+# Dockerfile for ENCODE DCC atac-seq-pipeline
 # Based on Ubuntu 14.04
 ############################################################
 
@@ -21,7 +21,8 @@ RUN apt-get update && apt-get install -y \
     python-setuptools \
     software-properties-common \
     wget \
-    zlib1g-dev
+    zlib1g-dev \
+    unzip
 
 # Install pip and python packages: common and python-dateutils
 RUN easy_install pip
@@ -37,12 +38,12 @@ RUN add-apt-repository ppa:webupd8team/java
 RUN apt-get update && apt-get install -y \
 	oracle-java8-installer
 
-RUN mkdir /image_software
-WORKDIR /image_software
+RUN mkdir /software
+WORKDIR /software
+ENV PATH="/software:${PATH}"
 
-# Install bedtools 2.26.0
-RUN git clone --branch v2.26.0 https://github.com/arq5x/bedtools2.git
-RUN cd bedtools2 && make && make install
+# Install cutadapt 1.9.1
+RUN pip install cutadapt==1.9.1
 
 # Install samtools dependencies
 RUN wget http://zlib.net/zlib-1.2.11.tar.gz && tar -xvf zlib-1.2.11.tar.gz
@@ -51,25 +52,33 @@ RUN wget http://bzip.org/1.0.6/bzip2-1.0.6.tar.gz && tar -xvf bzip2-1.0.6.tar.gz
 RUN cd bzip2-1.0.6 && make && make install
 RUN wget https://tukaani.org/xz/xz-5.2.3.tar.gz && tar -xvf xz-5.2.3.tar.gz
 RUN cd xz-5.2.3 && ./configure && make && make install
-# Install samtools 1.5
-RUN git clone --branch 1.5 https://github.com/samtools/samtools.git
-RUN git clone --branch 1.5 git://github.com/samtools/htslib.git
+
+# Install samtools 1.2
+RUN git clone --branch 1.2 https://github.com/samtools/samtools.git
+RUN git clone --branch 1.2 git://github.com/samtools/htslib.git
 RUN cd samtools && make && make install
+
+# Install bedtools 2.26.0
+RUN git clone --branch v2.26.0 https://github.com/arq5x/bedtools2.git
+RUN cd bedtools2 && make && make install
 
 # Install Picard 2.10.2
 RUN wget https://github.com/broadinstitute/picard/releases/download/2.10.2/picard.jar
-ENV PICARD_HOME /image_software/
+RUN chmod +x picard.jar
 
-# Get ENCODE pipeline container repository
-# This COPY asumes the build context is the root of the pipeline-container repo
+# Install Bowtie2 2.2.6
+RUN wget https://github.com/BenLangmead/bowtie2/releases/download/v2.2.6/bowtie2-2.2.6-linux-x86_64.zip
+RUN unzip bowtie2-2.2.6-linux-x86_64.zip
+ENV PATH="/software/bowtie2-2.2.6:${PATH}"
+
+# Get ENCODE atac-seq-pipeline container repository
+# This COPY assumes the build context is the root of the atac-seq-pipeline repo
 # and it gets whatever is checked out plus local modifications
-RUN mkdir pipeline-container
-COPY / pipeline-container
+RUN mkdir atac-seq-pipeline
+COPY / atac-seq-pipeline
+ENV PATH="/software/atac-seq-pipeline/src:${PATH}"
 
-# Set up the user directory
-RUN groupadd -r encode && useradd --no-log-init -r -m -d /home/encode/ -g encode encode
-USER encode
-WORKDIR /home/encode
+# Add directories for binaries and python scripts to PATH
+ENV PATH="/software:/software/atac-seq-pipeline/src:${PATH}"
 
-#ENTRYPOINT ["python", "/image_software/pipeline-container/src/filter_qc.py"]
 ENTRYPOINT ["/bin/bash","-c"]
