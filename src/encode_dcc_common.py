@@ -48,7 +48,7 @@ def read_tsv(tsv):
             result.append(row)
     return result
 
-def write_tsv(tsv, arr): # arr must be list of list or string
+def write_tsv(tsv, arr): # arr must be list of list of string
     with open(tsv,'w') as fp:
         for a in arr:
             fp.write('\t'.join(a)+'\n')            
@@ -97,7 +97,7 @@ def samtools_index(bam, out_dir):
     bai = '{}.bam.bai'.format(prefix)
     cmd = 'samtools index {}'.format(bam)
     run_shell_cmd(cmd)
-    return bai    
+    return bai
 
 def samtools_flagstat(bam, out_dir):
     prefix = os.path.join(out_dir,

@@ -35,7 +35,7 @@ $ java -jar [JAVA_OPTS] ../cromwell-29.jar run atac.wdl -i input.json -o [WORKFL
      $ java -jar -Dconfig.file=non_docker/slurm.conf cromwell-29.jar run atac.wdl -i input.json
      ```
 
-* For SGE without docker:
+* For SGE without docker: Modify `non_docker/sge.conf` if your parallel environment (PE) is not `shm`.
 
      ```
      $ java -jar -Dconfig.file=non_docker/sge.conf cromwell-29.jar run atac.wdl -i input.json
