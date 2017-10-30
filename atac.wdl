@@ -29,10 +29,10 @@ task trim_merge { # detect/trim adapter
 		Array[File] trimmed_fastqs = read_tsv("meta.tmp")[0]
 	}
 	runtime {
-        cpu : "${select_first([cpu,1])}"
-        memory : "${select_first([mem_mb,'100'])} MB"
-        time : "${select_first([time_hr,1])}"
-        queue : queue
+		cpu : "${select_first([cpu,1])}"
+		memory : "${select_first([mem_mb,'100'])} MB"
+		time : "${select_first([time_hr,1])}"
+		queue : queue
 	}
 }
 
@@ -63,10 +63,10 @@ task bowtie2 {
 		File flagstat_qc = glob("*.flagstat.qc")[0]
 	}
 	runtime {
-        cpu : "${select_first([cpu,1])}"
-        memory : "${select_first([mem_mb,'100'])} MB"
-        time : "${select_first([time_hr,1])}"
-        queue : queue
+		cpu : "${select_first([cpu,1])}"
+		memory : "${select_first([mem_mb,'100'])} MB"
+		time : "${select_first([time_hr,1])}"
+		queue : queue
 	}
 }
 
@@ -97,17 +97,18 @@ task filter {
 			${"--nth " + cpu}			
 	}
 	output {
-		File dedup_bam = glob("*.nodup.bam")[0]
-		File dedup_bai = glob("*.bai")[0]
+		File nodup_bam = glob("*.nodup.bam")[0]
+		File nodup_bai = glob("*.bai")[0]
 		File flagstat_qc = glob("*.flagstat.qc")[0]
+		File dup_qc = glob("*.dup.qc")[0]
 		File pbc_qc = glob("*.pbc.qc")[0]
 	}
 
 	runtime {
-        cpu : "${select_first([cpu,1])}"
-        memory : "${select_first([mem_mb,'100'])} MB"
-        time : "${select_first([time_hr,1])}"
-        queue : queue
+		cpu : "${select_first([cpu,1])}"
+		memory : "${select_first([mem_mb,'100'])} MB"
+		time : "${select_first([time_hr,1])}"
+		queue : queue
 	}
 }
 
@@ -115,6 +116,7 @@ task bam2ta {
 	File bam
 	Boolean? paired_end
 	Boolean? disable_tn5_shift # for dnase-seq
+	String? regex_grep_v_ta # 
 	Int? subsample # number of reads to subsample
 	# resource
 	Int? cpu
@@ -129,7 +131,8 @@ task bam2ta {
 				then "--paired-end" else ""} \
 			${if select_first([disable_tn5_shift,false])
 				then "--disable-tn5-shift" else ""} \
-			${"--nth " + cpu}			
+			${"--regex-grep-v-ta " +"'"+regex_grep_v_t+"'"} \
+			${"--nth " + cpu} \	
 			${"--subsample " + subsample}
 	}
 	output {
@@ -137,10 +140,10 @@ task bam2ta {
 	}
 
 	runtime {
-        cpu : "${select_first([cpu,1])}"
-        memory : "${select_first([mem_mb,'100'])} MB"
-        time : "${select_first([time_hr,1])}"
-        queue : queue
+		cpu : "${select_first([cpu,1])}"
+		memory : "${select_first([mem_mb,'100'])} MB"
+		time : "${select_first([time_hr,1])}"
+		queue : queue
 	}
 }
 
@@ -164,10 +167,10 @@ task spr { # make two self pseudo replicates
 		File ta_pr2 = glob("*.pr2.tagAlign.gz")[0]
 	}
 	runtime {
-        cpu : "${select_first([cpu,1])}"
-        memory : "${select_first([mem_mb,'100'])} MB"
-        time : "${select_first([time_hr,1])}"
-        queue : queue
+		cpu : "${select_first([cpu,1])}"
+		memory : "${select_first([mem_mb,'100'])} MB"
+		time : "${select_first([time_hr,1])}"
+		queue : queue
 	}
 }
 
@@ -187,10 +190,10 @@ task pool_ta {
 		File ta_pooled = glob("*.pooled.tagAlign.gz")[0]
 	}
 	runtime {
-        cpu : "${select_first([cpu,1])}"
-        memory : "${select_first([mem_mb,'100'])} MB"
-        time : "${select_first([time_hr,1])}"
-        queue : queue
+		cpu : "${select_first([cpu,1])}"
+		memory : "${select_first([mem_mb,'100'])} MB"
+		time : "${select_first([time_hr,1])}"
+		queue : queue
 	}
 }
 
@@ -214,10 +217,10 @@ task macs2 {
 		File npeak = glob("*.narrowPeak.gz")[0]
 	}
 	runtime {
-        cpu : "${select_first([cpu,1])}"
-        memory : "${select_first([mem_mb,'100'])} MB"
-        time : "${select_first([time_hr,1])}"
-        queue : queue
+		cpu : "${select_first([cpu,1])}"
+		memory : "${select_first([mem_mb,'100'])} MB"
+		time : "${select_first([time_hr,1])}"
+		queue : queue
 	}
 }
 
@@ -272,12 +275,12 @@ workflow atac {
 	}
 
 	# convert bam to tagalign
-	scatter(bam in filter.dedup_bam) {
+	scatter(bam in filter.nodup_bam) {
 		call bam2ta {
 			input:
 				bam = bam,
 				paired_end = select_first([paired_end,true]),
-				cpu = cpu/length(filter.dedup_bam),
+				cpu = cpu/length(filter.nodup_bam),
 		}
 	}
 

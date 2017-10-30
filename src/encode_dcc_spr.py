@@ -58,7 +58,7 @@ def spr_se(ta, out_dir):
         ta_pr2)
     run_shell_cmd(cmd3)
 
-    rm_rf([tmp_pr1, tmp_pr2])
+    rm_f([tmp_pr1, tmp_pr2])
     return ta_pr1, ta_pr2
 
 def spr_pe(ta, out_dir):
@@ -102,7 +102,7 @@ def spr_pe(ta, out_dir):
         ta_pr2)
     run_shell_cmd(cmd3)
 
-    rm_rf([tmp_pr1, tmp_pr2])
+    rm_f([tmp_pr1, tmp_pr2])
     return ta_pr1, ta_pr2
 
 def main():

@@ -65,7 +65,7 @@ def rm_unmapped_lowq_reads_se(bam, multimapping, nth, out_dir):
             prefix,
             nth)
         run_shell_cmd(cmd2)
-        rm_rf(qname_sort_bam) # remove temporary files
+        rm_f(qname_sort_bam) # remove temporary files
     else:
         cmd = 'samtools view -F 1804 -q {} -u {} | '
         cmd += 'samtools sort /dev/stdin -o {} -T {} -@ {}'
@@ -122,7 +122,7 @@ def rm_unmapped_lowq_reads_pe(bam, multimapping, nth, out_dir):
             tmp_filt_bam,
             fixmate_bam)
         run_shell_cmd(cmd2)
-    rm_rf(tmp_filt_bam)
+    rm_f(tmp_filt_bam)
 
     cmd = 'samtools view -F 1804 -f 2 -u {} | '
     cmd += 'samtools sort /dev/stdin -o {} -T {} -@ {}'
@@ -132,12 +132,14 @@ def rm_unmapped_lowq_reads_pe(bam, multimapping, nth, out_dir):
         prefix,
         nth)
     run_shell_cmd(cmd)
-    rm_rf(fixmate_bam)
+    rm_f(fixmate_bam)
     return filt_bam
 
 def mark_dup_picard(bam, out_dir): # shared by both se and pe
     prefix = os.path.join(out_dir,
         os.path.basename(strip_ext_bam(bam)))
+    # strip extension appended in the previous step
+    prefix = strip_ext(prefix,'filt') 
     dupmark_bam = '{}.dupmark.bam'.format(prefix)
     dup_qc = '{}.dup.qc'
 
@@ -155,6 +157,8 @@ def mark_dup_picard(bam, out_dir): # shared by both se and pe
 def mark_dup_sambamba(bam, nth, out_dir): # shared by both se and pe
     prefix = os.path.join(out_dir,
         os.path.basename(strip_ext_bam(bam)))
+    # strip extension appended in the previous step
+    prefix = strip_ext(prefix,'filt') 
     dupmark_bam = '{}.dupmark.bam'.format(prefix)
     dup_qc = '{}.dup.qc'
 
@@ -172,6 +176,8 @@ def mark_dup_sambamba(bam, nth, out_dir): # shared by both se and pe
 def rm_dup_se(dupmark_bam, nth, out_dir):
     prefix = os.path.join(out_dir,
         os.path.basename(strip_ext_bam(dupmark_bam)))
+    # strip extension appended in the previous step
+    prefix = strip_ext(prefix,'dupmark') 
     nodup_bam = '{}.nodup.bam'.format(prefix)
 
     cmd1 = 'samtools view -@ {} -F 1804 -b {} > {}'
@@ -185,6 +191,8 @@ def rm_dup_se(dupmark_bam, nth, out_dir):
 def rm_dup_pe(dupmark_bam, nth, out_dir):
     prefix = os.path.join(out_dir,
         os.path.basename(strip_ext_bam(dupmark_bam)))
+    # strip extension appended in the previous step
+    prefix = strip_ext(prefix,'dupmark') 
     nodup_bam = '{}.nodup.bam'.format(prefix)
 
     cmd1 = 'samtools view -@ {} -F 1804 -f 2 -b {} > {}'
@@ -233,7 +241,7 @@ def pbc_qc_pe(bam, nth, out_dir):
         nmsrt_bam,
         pbc_qc)
     run_shell_cmd(cmd3)
-    rm_rf(tmp_bam)
+    rm_f(tmp_bam)
     return pbc_qc
 
 def create_empty_dup_qc(bam, out_dir):
@@ -339,7 +347,7 @@ def main():
 
     # remove temporary/intermediate files
     log.info('Removing temporary files...')
-    rm_rf(temp_files)
+    rm_f(temp_files)
 
     log.info('All done.')
 

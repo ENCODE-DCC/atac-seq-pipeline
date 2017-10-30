@@ -251,7 +251,7 @@ def main():
 
     # remove temporary/intermediate files
     log.info('Removing temporary files...')
-    rm_rf(temp_files)
+    rm_f(temp_files)
 
     log.info('All done.')
 

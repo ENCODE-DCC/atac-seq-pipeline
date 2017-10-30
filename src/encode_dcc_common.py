@@ -58,6 +58,9 @@ def strip_ext_bigwig(bw):
     return re.sub(r'\.(bigwig|bw)$','',
                     str(bw))
 
+def strip_ext(file, ext):
+    return re.sub(r'\.{}$'.format(ext),'',str(file))
+
 def human_readable_number(num):
     for unit in ['','K','M','G','T','P']:
         if abs(num) < 1000:
@@ -99,12 +102,12 @@ def get_num_lines(file):
     cmd = 'zcat -f {} | wc -l'.format(file)
     return int(run_shell_cmd(cmd))
 
-def rm_rf(files):
+def rm_f(files):
     if files:
         if type(files)==list:
-            run_shell_cmd('rm -rf {}'.format(' '.join(files)))
+            run_shell_cmd('rm -f {}'.format(' '.join(files)))
         else:
-            run_shell_cmd('rm -rf {}'.format(files))
+            run_shell_cmd('rm -f {}'.format(files))
 
 def run_shell_cmd(cmd): 
     try:
