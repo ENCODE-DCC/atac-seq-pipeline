@@ -86,6 +86,7 @@ def trim_adapter_se(fastq, adapter, min_trim_len, err_rate, out_dir):
     prefix = os.path.join(out_dir,
         os.path.basename(strip_ext_fastq(fastq)))
     trimmed = '{}.trim.fastq.gz'.format(prefix)
+
     cmd = 'cutadapt {} -e {} -a {} {} | gzip -nc > {}'.format(
         '-m {}'.format(min_trim_len) if min_trim_len > 0 else '',
         err_rate,
@@ -103,6 +104,7 @@ def trim_adapter_pe(fastq1, fastq2, adapter1, adapter2,
         os.path.basename(strip_ext_fastq(fastq2)))
     trimmed1 = '{}.trim.fastq.gz'.format(prefix1)
     trimmed2 = '{}.trim.fastq.gz'.format(prefix2)
+
     cmd = 'cutadapt {} -e {} -a {} -A {} {} {} -o {} -p {}'.format(
         '-m {}'.format(min_trim_len) if min_trim_len > 0 else '',
         err_rate,
@@ -116,6 +118,7 @@ def merge_fastqs(fastqs, out_dir):
     prefix = os.path.join(out_dir,
         os.path.basename(strip_ext_fastq(fastqs[0])))
     merged = '{}.merged.fastq.gz'.format(prefix)
+
     if len(fastqs)>1:
         cmd = 'zcat -f {} | gzip -nc > {}'.format(
             ' '.join(fastqs),
@@ -248,8 +251,7 @@ def main():
 
     # remove temporary/intermediate files
     log.info('Removing temporary files...')
-    run_shell_cmd('rm -rf {}'.format(
-        ' '.join(temp_files)))
+    rm_rf(temp_files)
 
     log.info('All done.')
 

@@ -54,8 +54,7 @@ task bowtie2 {
 			${if select_first([paired_end,false])
 				then "--paired-end" else ""} \
 			${"--multimapping " + multimapping} \
-			${"--nth " + cpu} \
-			--out-dir .
+			${"--nth " + cpu}
 	}
 	output {
 		File bam = glob("*.bam")[0]
@@ -75,6 +74,10 @@ task filter {
 	# input from workflow
 	File bam
 	Boolean? paired_end
+	Int? multimapping
+	String? dup_marker
+	Int? mapq_thresh
+	Boolean? no_dup_removal
 	# resource
 	Int? cpu
 	Int? mem_mb
@@ -86,10 +89,15 @@ task filter {
 			${bam} \
 			${if select_first([paired_end,false])
 				then "--paired-end" else ""} \
-			--out-dir .					
+			${"--multimapping " + multimapping} \
+			${"--dup-marker " + dup_marker} \
+			${"--mapq-thresh " + mapq_thresh} \
+			${if select_first([no_dup_removal,false])
+				then "--no-dup-removal" else ""} \
+			${"--nth " + cpu}			
 	}
 	output {
-		File dedup_bam = glob("*.dedup.bam")[0]
+		File dedup_bam = glob("*.nodup.bam")[0]
 		File dedup_bai = glob("*.bai")[0]
 		File flagstat_qc = glob("*.flagstat.qc")[0]
 		File pbc_qc = glob("*.pbc.qc")[0]
@@ -106,7 +114,8 @@ task filter {
 task bam2ta {
 	File bam
 	Boolean? paired_end
-	String type # type of pipeline (atac, dnase)
+	Boolean? disable_tn5_shift # for dnase-seq
+	Int? subsample # number of reads to subsample
 	# resource
 	Int? cpu
 	Int? mem_mb
@@ -118,8 +127,10 @@ task bam2ta {
 			${bam} \
 			${if select_first([paired_end,false])
 				then "--paired-end" else ""} \
-			--type ${type} \
-			--out-dir .
+			${if select_first([disable_tn5_shift,false])
+				then "--disable-tn5-shift" else ""} \
+			${"--nth " + cpu}			
+			${"--subsample " + subsample}
 	}
 	output {
 		File ta = glob("*.tagAlign.gz")[0]
@@ -149,7 +160,8 @@ task spr { # make two self pseudo replicates
 			${ta}
 	}
 	output {
-		File ta_spr = glob("*.tagAlign.gz")[0]
+		File ta_pr1 = glob("*.pr1.tagAlign.gz")[0]
+		File ta_pr2 = glob("*.pr2.tagAlign.gz")[0]
 	}
 	runtime {
         cpu : "${select_first([cpu,1])}"
@@ -159,9 +171,8 @@ task spr { # make two self pseudo replicates
 	}
 }
 
-task subsample_ta {
-	File ta
-	Boolean? paired_end
+task pool_ta {
+	Array[File] tas
 	# resource
 	Int? cpu
 	Int? mem_mb
@@ -169,13 +180,11 @@ task subsample_ta {
 	String? queue
 
 	command {
-		python $(which encode_dcc_subsample_ta.py) \
-			${if select_first([paired_end,false])
-				then "--paired-end" else ""} \
-			${ta}
+		python $(which encode_dcc_pool_ta.py) \
+			${sep=' ' tas}
 	}
 	output {
-		File subsampled_ta = glob("*.tagAlign.gz")[0]
+		File ta_pooled = glob("*.pooled.tagAlign.gz")[0]
 	}
 	runtime {
         cpu : "${select_first([cpu,1])}"
@@ -203,29 +212,6 @@ task macs2 {
 	}
 	output {
 		File npeak = glob("*.narrowPeak.gz")[0]
-	}
-	runtime {
-        cpu : "${select_first([cpu,1])}"
-        memory : "${select_first([mem_mb,'100'])} MB"
-        time : "${select_first([time_hr,1])}"
-        queue : queue
-	}
-}
-
-task pool_ta {
-	Array[File] tas
-	# resource
-	Int? cpu
-	Int? mem_mb
-	Int? time_hr
-	String? queue
-
-	command {
-		python $(which encode_dcc_pool_ta.py) \
-			${sep=' ' tas}
-	}
-	output {
-		File npeak = glob("*.pooled.tagAlign.gz")[0]
 	}
 	runtime {
         cpu : "${select_first([cpu,1])}"
@@ -267,67 +253,64 @@ workflow atac {
 		call bowtie2 {
 			input:
 				fastqs = fastqs,
+				idx_tar = sub(genome["bowtie2_idx_tar"],"[\r\n]+",""),
 				paired_end = paired_end,
 				multimapping = multimapping,
 				cpu = cpu/length(fastqs),
-				idx_tar = sub(genome["bowtie2_idx_tar"],"[\r\n]+","")
 		}
 	}
 	
-#	# filter/dedup bam
-#	scatter(bam in align.bam) {
-#		call filter {
-#			input:
-#				bam = bam,
-#				paired_end = paired_end,
-#				multimapping = multimapping,
-#		}
-#	}
+	# filter/dedup bam
+	scatter(bam in bowtie2.bam) {
+		call filter {
+			input:
+				bam = bam,
+				paired_end = paired_end,
+				multimapping = multimapping,
+				cpu = cpu/length(trim_merge.trimmed_fastqs),
+		}
+	}
 
-#	# convert bam to tagalign
-#	scatter(bam in filter.bam) {
-#		call bam2ta {
-#			input:
-#				bam = bam,
-#				paired_end = select_first([paired_end,true])
-#		}
-#	}
+	# convert bam to tagalign
+	scatter(bam in filter.dedup_bam) {
+		call bam2ta {
+			input:
+				bam = bam,
+				paired_end = select_first([paired_end,true]),
+				cpu = cpu/length(filter.dedup_bam),
+		}
+	}
 
-#	# make self-pseudo replicates
-#	scatter(ta in bam2ta.ta) {
-#		call spr {
-#			input:
-#				ta = ta,
-#				paired_end = select_first([paired_end,true])
-#		}
-#	}
+	# make self-pseudo replicates
+	scatter(ta in bam2ta.ta) {
+		call spr {
+			input:
+				ta = ta,
+				paired_end = select_first([paired_end,true]),
+		}
+	}
 
-#	# subsample tagalign
-#	scatter(ta in bam2ta.ta) {
-#		call subsample_ta {
-#			input:
-#				ta = ta,
-#				paired_end = select_first([paired_end,true])
-#		}
-#	}
+	call pool_ta {
+		input :
+			tas = bam2ta.ta,
+	}
 
-#	call pool_ta as pool_ta_tr {
-#		input :
-#			tas = bam2ta.ta,
-#	}
+	call pool_ta as pool_ta_pr1 {
+		input :
+			tas = spr.ta_pr1,
+	}
 
-#	call pool_ta as pool_ta_pr {
-#		input :
-#			tas_pr1 = spr.ta_pr1,
-#			tas_pr2 = spr.ta_pr2,
-#	}
+	call pool_ta as pool_ta_pr2 {
+		input :
+			tas = spr.ta_pr2,
+	}
 
 #	# cross-correlation analysis on subsampled tagalign
-#	scatter(ta in subsample_ta.subsampled_ta) {
+#	scatter(ta in bam2ta.ta) {
 #		call xcor {
 #			input:
 #				ta = ta,
-#				paired_end = select_first([paired_end,true])
+#				paired_end = select_first([paired_end,true]),
 #		}
 #	}
 

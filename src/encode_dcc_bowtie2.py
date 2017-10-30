@@ -88,6 +88,7 @@ def bowtie2_se(fastq, ref_index_prefix,
         os.path.basename(strip_ext_fastq(fastq)))
     bam = '{}.bam'.format(prefix)
     align_log = '{}.align.log'.format(prefix)
+
     cmd = 'bowtie2 {} {} --local --threads {} -x {} -U {} 2> {} '
     cmd += '| samtools view -Su /dev/stdin | samtools sort - {}'
     cmd = cmd.format(
@@ -108,6 +109,7 @@ def bowtie2_pe(fastq1, fastq2, ref_index_prefix,
     bam = '{}.bam'.format(prefix)
     bai = '{}.bam.bai'.format(prefix)
     align_log = '{}.align.log'.format(prefix)
+
     cmd = 'bowtie2 {} {} -X2000 --mm --local --threads {} -x {} '
     cmd += '-1 {} -2 {} 2>{} | '
     cmd += 'samtools view -Su /dev/stdin | samtools sort - {}'
@@ -204,7 +206,7 @@ def main():
 
     # remove temporary/intermediate files
     log.info('Removing temporary files...')
-    run_shell_cmd('rm -rf {}'.format(' '.join(temp_files)))
+    rm_rf(temp_files)
 
     log.info('All done.')
 
