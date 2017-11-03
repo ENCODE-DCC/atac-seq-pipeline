@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# ENCODE DCC bam 2 self-pseudo replicate python script
+# ENCODE DCC pseudo replicator wrapper
 # Author: Jin Lee (leepc12@gmail.com)
 
 import sys
@@ -10,12 +10,12 @@ import multiprocessing
 from encode_dcc_common import *
 
 def parse_arguments():
-    parser = argparse.ArgumentParser(prog='ENCODE DCC self-pseudo replicate python script',
+    parser = argparse.ArgumentParser(prog='ENCODE DCC pseudo replicator.',
                                         description='')
     parser.add_argument('ta', type=str,
                         help='Path for TAGALIGN file.')
     parser.add_argument('--paired-end', action="store_true",
-                        help='Paired-end BAM')
+                        help='Paired-end TAGALIGN.')
     parser.add_argument('--out-dir', default='.', type=str,
                             help='Output directory.')
     parser.add_argument('--log-level', default='INFO', 

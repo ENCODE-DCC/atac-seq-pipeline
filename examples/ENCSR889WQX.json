@@ -24,5 +24,8 @@
 
 	"atac.bowtie2.mem_mb" : 12000,
 	"atac.bowtie2.time_hr" : 23,
-	"atac.bowtie2.queue" : "standard"
+	"atac.bowtie2.queue" : "standard",
+
+	"atac.xcor.subsample" : 25000000,
+	"atac.macs2.smooth_win" : 73
 }

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# ENCODE DCC bowtie2 aligner python script
+# ENCODE DCC bowtie2 wrapper
 # Author: Jin Lee (leepc12@gmail.com), Daniel Kim
 
 import sys
@@ -11,27 +11,28 @@ import multiprocessing
 from encode_dcc_common import *
 
 def parse_arguments():
-    parser = argparse.ArgumentParser(prog='ENCODE DCC bowtie2 aligner python script',
+    parser = argparse.ArgumentParser(prog='ENCODE DCC bowtie2 aligner.',
                                         description='')
     parser.add_argument('bowtie2_index_prefix_or_tar', type=str,
                         help='Path for prefix (or a tarball .tar) \
                             for reference bowtie2 index. \
-                            Prefix must be [PREFIX].1.bt2. \
+                            Prefix must be like [PREFIX].1.bt2. \
                             Tar ball must be packed without compression \
-                            by tar cvf [TAR] [TAR_PREFIX].*.bt2.')
+                            and directory by using command line \
+                            "tar cvf [TAR] [TAR_PREFIX].*.bt2".')
     parser.add_argument('fastqs', nargs='+', type=str,
-                        help='List of FASTQs delimited by space. \
+                        help='List of FASTQs (R1 and R2). \
                             FASTQs must be compressed with gzip (with .gz).')
-    parser.add_argument('--nth', type=int, default=1,
-                        help='Number of threads to parallelize.')
+    parser.add_argument('--score-min', default='', type=str,
+                        help='--score-min for bowtie2.')
     parser.add_argument('--paired-end', action="store_true",
                         help='Paired-end FASTQs.')
+    parser.add_argument('--multimapping', default=0, type=int,
+                        help='Multimapping reads (for bowtie2 -k).')
+    parser.add_argument('--nth', type=int, default=1,
+                        help='Number of threads to parallelize.')
     parser.add_argument('--out-dir', default='.', type=str,
                             help='Output directory.')
-    parser.add_argument('--multimapping', default=0, type=int,
-                        help='Multimapping for bowtie2 -k.')
-    parser.add_argument('--score-min', default='', type=str,
-                        help='--score-min for bowtie2 -k.')
     parser.add_argument('--log-level', default='INFO', 
                         choices=['NOTSET','DEBUG','INFO',
                             'WARNING','CRITICAL','ERROR','CRITICAL'],
@@ -197,8 +198,8 @@ def main():
     ret_val2 = pool.apply_async(
         samtools_flagstat, (bam, args.out_dir))
 
-    bai = ret_val1.get()
-    flagstat_qc = ret_val2.get()
+    bai = ret_val1.get(BIG_INT)
+    flagstat_qc = ret_val2.get(BIG_INT)
 
     # close multithreading
     pool.close()

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# ENCODE DCC common functions python script
+# ENCODE DCC common functions
 # Author: Jin Lee (leepc12@gmail.com)
 
 import sys
@@ -18,25 +18,24 @@ log = logging.getLogger(__name__)
 
 BIG_INT = 99999999
 
+# string/system functions
+
 def strip_ext_fastq(fastq):
     return re.sub(r'\.(fastq|fq|Fastq|Fq)\.gz$','',
                     str(fastq))
 
 def strip_ext_bam(bam):
-    return re.sub(r'\.(bam|Bam)$','',
-                    str(bam))
+    return re.sub(r'\.(bam|Bam)$','',str(bam))
 
 def strip_ext_tar(tar):
-    return re.sub(r'\.tar$','',
-                    str(tar))
+    return re.sub(r'\.tar$','',str(tar))
 
 def strip_ext_ta(ta):
     return re.sub(r'\.(tagAlign|TagAlign|ta|Ta)\.gz$','',
                     str(ta))
 
 def strip_ext_bed(bed):
-    return re.sub(r'\.(bed|Bed)\.gz$','',
-                    str(bed))
+    return re.sub(r'\.(bed|Bed)\.gz$','',str(bed))
 
 def strip_ext_npeak(npeak):
     return re.sub(r'\.(narrowPeak|NarrowPeak)\.gz$','',
@@ -58,8 +57,11 @@ def strip_ext_bigwig(bw):
     return re.sub(r'\.(bigwig|bw)$','',
                     str(bw))
 
-def strip_ext(file, ext):
-    return re.sub(r'\.{}$'.format(ext),'',str(file))
+def strip_ext(f, ext):
+    return re.sub(r'\.{}$'.format(ext),'',str(f))
+
+def find_genomic_ext(f):
+    return ''
 
 def human_readable_number(num):
     for unit in ['','K','M','G','T','P']:
@@ -109,6 +111,12 @@ def rm_f(files):
         else:
             run_shell_cmd('rm -f {}'.format(files))
 
+def write_txt(f,s):
+    with open(f,'w') as fp:
+        if type(s)!=list: arr = [s]
+        else: arr = s
+        for a in arr: fp.write(a+'\n')
+
 def run_shell_cmd(cmd): 
     try:
         p = subprocess.Popen(cmd, shell=True,
@@ -116,14 +124,16 @@ def run_shell_cmd(cmd):
             stderr=subprocess.STDOUT,
             universal_newlines=True,
             preexec_fn=os.setsid)
-        log.info('run_shell_cmd: PID={}, CMD={}'.format(p.pid, cmd))
+        pid = p.pid
+        pgid = os.getpgid(pid)
+        log.info('run_shell_cmd: PID={}, CMD={}'.format(pid, cmd))
         ret = ''
         while True:
             line = p.stdout.readline()
             if line=='' and p.poll() is not None:
                 break
-            # log.debug('PID={}: {}'.format(p.pid,line.strip('\n')))
-            print('PID={}: {}'.format(p.pid,line.strip('\n')))
+            # log.debug('PID={}: {}'.format(pid,line.strip('\n')))
+            print('PID={}: {}'.format(pid,line.strip('\n')))
             ret += line
             # sys.stdout.flush()
         p.communicate() # wait here
@@ -132,13 +142,15 @@ def run_shell_cmd(cmd):
                 p.returncode, cmd)
         return ret.strip('\n')
     except:
-        # kill all children processes when interrupted
-        pgid = os.getpgid(p.pid)
+        # kill all children processes
         log.exception('Unknown exception caught. '+ \
             'Killing process group {}...'.format(pgid))
         # os.system("kill -{} -{}".format(signal.SIGKILL,pgid))
-        os.killpg(os.getpgid(p.pid), signal.SIGKILL)
+        os.killpg(pgid, signal.SIGKILL)
         p.terminate()
+        raise Exception('Unknown exception caught. PID={}'.format(pid))
+
+# genomic functions
 
 def samtools_index(bam, out_dir):
     prefix = os.path.join(out_dir,
@@ -149,6 +161,15 @@ def samtools_index(bam, out_dir):
     run_shell_cmd(cmd)
     return bai
 
+def sambamba_index(bam, nth, out_dir):
+    prefix = os.path.join(out_dir,
+        os.path.basename(strip_ext_bam(bam)))
+    bai = '{}.bam.bai'.format(prefix)
+
+    cmd = 'sambamba index {} -t {}'.format(bam, nth)
+    run_shell_cmd(cmd)
+    return bai
+
 def samtools_flagstat(bam, out_dir):
     prefix = os.path.join(out_dir,
         os.path.basename(strip_ext_bam(bam)))
@@ -156,6 +177,18 @@ def samtools_flagstat(bam, out_dir):
 
     cmd = 'samtools flagstat {} > {}'.format(
         bam,
+        flagstat_qc)
+    run_shell_cmd(cmd)
+    return flagstat_qc
+
+def sambamba_flagstat(bam, nth, out_dir):
+    prefix = os.path.join(out_dir,
+        os.path.basename(strip_ext_bam(bam)))
+    flagstat_qc = '{}.flagstat.qc'.format(prefix)
+
+    cmd = 'sambamba flagstat {} -t {} > {}'.format(
+        bam,
+        nth,
         flagstat_qc)
     run_shell_cmd(cmd)
     return flagstat_qc
@@ -173,6 +206,18 @@ def samtools_sort(bam, nth, out_dir):
     run_shell_cmd(cmd)
     return srt_bam
 
+def sambamba_sort(bam, nth, out_dir):
+    prefix = os.path.join(out_dir,
+        os.path.basename(strip_ext_bam(bam)))
+    srt_bam = '{}.srt.bam'.format(prefix)
+
+    cmd = 'sambamba sort {} -o {} -t {}'.format(
+        bam,
+        srt_bam,
+        nth)
+    run_shell_cmd(cmd)
+    return srt_bam
+
 def samtools_name_sort(bam, nth, out_dir):
     prefix = os.path.join(out_dir,
         os.path.basename(strip_ext_bam(bam)))
@@ -186,10 +231,22 @@ def samtools_name_sort(bam, nth, out_dir):
     run_shell_cmd(cmd)
     return nmsrt_bam
 
+def sambamba_name_sort(bam, nth, out_dir):
+    prefix = os.path.join(out_dir,
+        os.path.basename(strip_ext_bam(bam)))
+    nmsrt_bam = '{}.nmsrt.bam'.format(prefix)
+
+    cmd = 'sambamba sort -n {} -o {} -t {}'.format(
+        bam,
+        nmsrt_bam,
+        nth)
+    run_shell_cmd(cmd)
+    return nmsrt_bam
+
 def subsample_ta_se(ta, subsample, non_mito, out_dir):
     prefix = os.path.join(out_dir,
         os.path.basename(strip_ext_ta(ta)))
-    subsampled_ta = '{}.{}.tagAlign.gz'.format(
+    ta_subsampled = '{}.{}.tagAlign.gz'.format(
         prefix, human_readable_number(subsample))
 
     cmd = 'zcat -f {} | '
@@ -201,14 +258,14 @@ def subsample_ta_se(ta, subsample, non_mito, out_dir):
         ta,
         subsample,
         ta,
-        subsampled_ta)
+        ta_subsampled)
     run_shell_cmd(cmd)
-    return subsampled_ta
+    return ta_subsampled
 
 def subsample_ta_pe(ta, subsample, non_mito, out_dir):
     prefix = os.path.join(out_dir,
         os.path.basename(strip_ext_ta(ta)))
-    ta = '{}.{}.tagAlign.gz'.format(
+    ta_subsampled = '{}.{}.tagAlign.gz'.format(
         prefix, human_readable_number(subsample))
 
     cmd = 'zcat -f {} | '
@@ -225,6 +282,6 @@ def subsample_ta_pe(ta, subsample, non_mito, out_dir):
         ta,
         subsample,
         ta,
-        subsampled_ta)
+        ta_subsampled)
     run_shell_cmd(cmd)
     return

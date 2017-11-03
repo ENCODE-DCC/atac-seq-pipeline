@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# ENCODE DCC pool_ta python script
+# ENCODE DCC TAGALIGN pooler wrapper
 # Author: Jin Lee (leepc12@gmail.com)
 
 import sys
@@ -9,7 +9,7 @@ import argparse
 from encode_dcc_common import *
 
 def parse_arguments():
-    parser = argparse.ArgumentParser(prog='ENCODE DCC TAGALIGN pooler python script',
+    parser = argparse.ArgumentParser(prog='ENCODE DCC TAGALIGN pooler.',
                                         description='')
     parser.add_argument('tas', nargs='+', type=str,
                         help='List of TAGALIGNs to be pooled.')

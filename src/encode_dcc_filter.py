@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# ENCODE DCC filter python script
+# ENCODE DCC filter wrapper
 # Author: Jin Lee (leepc12@gmail.com)
 
 import sys
@@ -10,25 +10,25 @@ import multiprocessing
 from encode_dcc_common import *
 
 def parse_arguments():
-    parser = argparse.ArgumentParser(prog='ENCODE DCC filter python script',
+    parser = argparse.ArgumentParser(prog='ENCODE DCC filter.',
                                         description='')
     parser.add_argument('bam', type=str,
                         help='Path for raw BAM file.')
     parser.add_argument('--dup-marker', type=str, choices=['picard','sambamba'],
                         default='picard',
                         help='Dupe marker for filtering mapped reads in BAM.')    
-    parser.add_argument('--nth', type=int, default=1,
-                        help='Number of threads to parallelize.')
-    parser.add_argument('--paired-end', action="store_true",
-                        help='Paired-end BAM')
-    parser.add_argument('--out-dir', default='.', type=str,
-                            help='Output directory.')
-    parser.add_argument('--multimapping', default=0, type=int,
-                        help='Multimapping.')
     parser.add_argument('--mapq-thresh', default=30, type=int,
                         help='Threshold for low MAPQ reads removal.')
     parser.add_argument('--no-dup-removal', action="store_true",
                         help='No dupe reads removal when filtering BAM.')
+    parser.add_argument('--paired-end', action="store_true",
+                        help='Paired-end BAM.')
+    parser.add_argument('--multimapping', default=0, type=int,
+                        help='Multimapping reads.')
+    parser.add_argument('--nth', type=int, default=1,
+                        help='Number of threads to parallelize.')
+    parser.add_argument('--out-dir', default='.', type=str,
+                            help='Output directory.')
     parser.add_argument('--log-level', default='INFO', 
                         choices=['NOTSET','DEBUG','INFO',
                             'WARNING','CRITICAL','ERROR','CRITICAL'],
@@ -39,33 +39,34 @@ def parse_arguments():
     log.info(sys.argv)
     return args
 
-def rm_unmapped_lowq_reads_se(bam, multimapping, nth, out_dir):
+def rm_unmapped_lowq_reads_se(bam, multimapping, mapq_thresh, nth, out_dir):
     prefix = os.path.join(out_dir,
         os.path.basename(strip_ext_bam(bam)))
     filt_bam = '{}.filt.bam'.format(prefix)
 
-    if multimapping:
-        # qname_sort_bam = '{}.qnmsrt.bam'.format(prefix)
-        # cmd1 = 'samtools sort {} -@ {} -n -o {}'
-        # cmd1 = cmd1.format(
-        #     bam,
-        #     nth,
-        #     qname_sort_bam)
-        # run_shell_cmd(cmd1)
-        qname_sort_bam = samtools_name_sort(bam, nth, out_dir)
+    if multimapping:        
+        # qname_sort_bam = samtools_name_sort(bam, nth, out_dir)
+        qname_sort_bam = sambamba_name_sort(bam, nth, out_dir)
 
         cmd2 = 'samtools view -h {} | '
         cmd2 += '$(which assign_multimappers.py) -k {} | '
         cmd2 += 'samtools view -F 1804 -Su /dev/stdin | '
-        cmd2 += 'samtools sort /dev/stdin -o {} -T {} -@ {}'
+
+        # cmd2 += 'samtools sort /dev/stdin -o {} -T {} -@ {}'
+        # cmd2 = cmd2.format(
+        #     qname_sort_bam,
+        #     multimapping,
+        #     filt_bam,
+        #     prefix,
+        #     nth)
+        cmd2 += 'sambamba sort /dev/stdin -o {} -t {}'
         cmd2 = cmd2.format(
             qname_sort_bam,
             multimapping,
             filt_bam,
-            prefix,
             nth)
         run_shell_cmd(cmd2)
-        rm_f(qname_sort_bam) # remove temporary files
+        # rm_f(qname_sort_bam) # remove temporary files
     else:
         cmd = 'samtools view -F 1804 -q {} -u {} | '
         cmd += 'samtools sort /dev/stdin -o {} -T {} -@ {}'
@@ -79,26 +80,32 @@ def rm_unmapped_lowq_reads_se(bam, multimapping, nth, out_dir):
 
     return filt_bam
 
-def rm_unmapped_lowq_reads_pe(bam, multimapping, nth, out_dir):
+def rm_unmapped_lowq_reads_pe(bam, multimapping, mapq_thresh, nth, out_dir):
     prefix = os.path.join(out_dir,
         os.path.basename(strip_ext_bam(bam)))
     filt_bam = '{}.filt.bam'.format(prefix)
     tmp_filt_bam = '{}.tmp_filt.bam'.format(prefix)
     fixmate_bam = '{}.fixmate.bam'.format(prefix)
 
-    if multimapping:       
+    if multimapping:
+        # cmd1 = 'samtools view -F 524 -f 2 -u {} | '
+        # cmd1 += 'samtools sort -n /dev/stdin -o {} -T {} -@ {} '
+        # cmd1 = cmd1.format(
+        #     bam,
+        #     tmp_filt_bam,
+        #     prefix,
+        #     nth)
+        # run_shell_cmd(cmd1)
         cmd1 = 'samtools view -F 524 -f 2 -u {} | '
-        cmd1 += 'samtools sort -n /dev/stdin -o {} -T {} -@ {} '
+        cmd1 += 'sambamba sort -n /dev/stdin -o {} -t {} '
         cmd1 = cmd1.format(
             bam,
             tmp_filt_bam,
-            prefix,
             nth)
         run_shell_cmd(cmd1)
 
         cmd2 = 'samtools view -h {} -@ {} | '
-        cmd2 += '$(which assign_multimappers.py) -k {} '
-        cmd2 += '--paired-end | '
+        cmd2 += '$(which assign_multimappers.py) -k {} --paired-end | '
         cmd2 += 'samtools fixmate -r /dev/stdin {}'
         cmd2 = cmd2.format(
             tmp_filt_bam,
@@ -107,13 +114,21 @@ def rm_unmapped_lowq_reads_pe(bam, multimapping, nth, out_dir):
             fixmate_bam)
         run_shell_cmd(cmd2)
     else:
+        # cmd1 = 'samtools view -F 1804 -f 2 -q {} -u {} | '
+        # cmd1 += 'samtools sort -n /dev/stdin -o {} -T {} -@ {}'
+        # cmd1 = cmd1.format(
+        #     mapq_thresh,
+        #     bam,
+        #     tmp_filt_bam,
+        #     prefix,
+        #     nth)
+        # run_shell_cmd(cmd1)
         cmd1 = 'samtools view -F 1804 -f 2 -q {} -u {} | '
-        cmd1 += 'samtools sort -n /dev/stdin -o {} -T {} -@ {}'
+        cmd1 += 'sambamba sort -n /dev/stdin -o {} -t {}'
         cmd1 = cmd1.format(
             mapq_thresh,
             bam,
             tmp_filt_bam,
-            prefix,
             nth)
         run_shell_cmd(cmd1)
 
@@ -122,17 +137,23 @@ def rm_unmapped_lowq_reads_pe(bam, multimapping, nth, out_dir):
             tmp_filt_bam,
             fixmate_bam)
         run_shell_cmd(cmd2)
-    rm_f(tmp_filt_bam)
+    # rm_f(tmp_filt_bam)
 
+    # cmd = 'samtools view -F 1804 -f 2 -u {} | '
+    # cmd += 'samtools sort /dev/stdin -o {} -T {} -@ {}'
+    # cmd = cmd.format(
+    #     fixmate_bam,
+    #     filt_bam,
+    #     prefix,
+    #     nth)
     cmd = 'samtools view -F 1804 -f 2 -u {} | '
-    cmd += 'samtools sort /dev/stdin -o {} -T {} -@ {}'
+    cmd += 'sambamba sort /dev/stdin -o {} -t {}'
     cmd = cmd.format(
         fixmate_bam,
         filt_bam,
-        prefix,
         nth)
     run_shell_cmd(cmd)
-    rm_f(fixmate_bam)
+    # rm_f(fixmate_bam)
     return filt_bam
 
 def mark_dup_picard(bam, out_dir): # shared by both se and pe
@@ -141,9 +162,10 @@ def mark_dup_picard(bam, out_dir): # shared by both se and pe
     # strip extension appended in the previous step
     prefix = strip_ext(prefix,'filt') 
     dupmark_bam = '{}.dupmark.bam'.format(prefix)
-    dup_qc = '{}.dup.qc'
+    dup_qc = '{}.dup.qc'.format(prefix)
 
     cmd = 'java -Xmx4G -jar $(which picard.jar) MarkDuplicates '
+    # cmd = 'picard MarkDuplicates '
     cmd += 'INPUT={} OUTPUT={} '
     cmd += 'METRICS_FILE={} VALIDATION_STRINGENCY=LENIENT '
     cmd += 'ASSUME_SORTED=true REMOVE_DUPLICATES=false'
@@ -206,6 +228,8 @@ def rm_dup_pe(dupmark_bam, nth, out_dir):
 def pbc_qc_se(bam, out_dir):
     prefix = os.path.join(out_dir,
         os.path.basename(strip_ext_bam(bam)))
+    # strip extension appended in the previous step
+    prefix = strip_ext(prefix,'dupmark') 
     pbc_qc = '{}.pbc.qc'.format(prefix)
 
     cmd2 = 'bedtools bamtobed -i {} | '
@@ -227,8 +251,8 @@ def pbc_qc_pe(bam, nth, out_dir):
         os.path.basename(strip_ext_bam(bam)))
     pbc_qc = '{}.pbc.qc'.format(prefix)
 
-    nmsrt_bam = samtools_name_sort(bam, nth, out_dir)
-
+    # nmsrt_bam = samtools_name_sort(bam, nth, out_dir)
+    nmsrt_bam = sambamba_name_sort(bam, nth, out_dir)
     cmd3 = 'bedtools bamtobed -bedpe -i {} | '
     cmd3 += 'awk \'BEGIN{{OFS="\\t"}}{{print $1,$2,$4,$6,$9,$10}}\' | '
     cmd3 += 'grep -v "chrM" | sort | uniq -c | '
@@ -241,7 +265,7 @@ def pbc_qc_pe(bam, nth, out_dir):
         nmsrt_bam,
         pbc_qc)
     run_shell_cmd(cmd3)
-    rm_f(tmp_bam)
+    # rm_f(nmsrt_bam)
     return pbc_qc
 
 def create_empty_dup_qc(bam, out_dir):
@@ -279,18 +303,18 @@ def main():
     log.info('Removing unmapped/low-quality reads...')
     if args.paired_end:
         filt_bam = rm_unmapped_lowq_reads_pe(
-                    args.bam, args.multimapping, args.nth, args.out_dir)
+                args.bam, args.multimapping, args.mapq_thresh, 
+                args.nth, args.out_dir)
     else:
         filt_bam = rm_unmapped_lowq_reads_se(
-                    args.bam, args.multimapping, args.nth, args.out_dir)
+                args.bam, args.multimapping, args.mapq_thresh, 
+                args.nth, args.out_dir)
 
     if args.no_dup_removal:
         nodup_bam = filt_bam
         dup_qc = create_empty_dup_qc(filt_bam, args.out_dir)
     else:
         log.info('Marking dupes with {}...'.format(args.dup_marker))
-        temp_files.append(filt_bam)
-
         if args.dup_marker=='picard':
             dupmark_bam, dup_qc = mark_dup_picard(
                                 filt_bam, args.out_dir)
@@ -300,7 +324,7 @@ def main():
         else:
             raise ValueError('Unsupported --dup-marker {}'.format(
                             args.dup_marker))
-        temp_files.append(dupmark_bam)
+        temp_files.append(filt_bam)
 
         log.info('Removing dupes...')
         if args.paired_end:
@@ -309,6 +333,7 @@ def main():
         else:
             nodup_bam = rm_dup_se(
                         dupmark_bam, args.nth, args.out_dir)
+        temp_files.append(dupmark_bam)
 
     # initialize multithreading
     log.info('Initializing multithreading...')
@@ -316,16 +341,22 @@ def main():
     log.info('Number of threads={}.'.format(num_process))
     pool = multiprocessing.Pool(num_process)
 
-    log.info('samtools index...')
-    ret_val_1 = pool.apply_async(samtools_index, 
-                                (nodup_bam, args.out_dir))
-    log.info('samtools flagstat...')
-    ret_val_2 = pool.apply_async(samtools_flagstat,
-                                (nodup_bam, args.out_dir))
+    # log.info('samtools index...')
+    # ret_val_1 = pool.apply_async(samtools_index, 
+    #                             (nodup_bam, args.out_dir))
+    # log.info('samtools flagstat...')
+    # ret_val_2 = pool.apply_async(samtools_flagstat,
+    #                             (nodup_bam, args.out_dir))
+    log.info('sambamba index...')
+    ret_val_1 = pool.apply_async(sambamba_index, 
+                                (nodup_bam, args.nth, args.out_dir))
+    log.info('sambamba flagstat...')
+    ret_val_2 = pool.apply_async(sambamba_flagstat,
+                                (nodup_bam, args.nth, args.out_dir))
 
     log.info('Generating PBC QC log...')
     if args.no_dup_removal:
-        ret_val_3 = pool.apply_sync(create_empty_dup_qc,
+        ret_val_3 = pool.apply_sync(create_empty_pbc_qc,
                                 (filt_bam, args.out_dir))
     else:
         if args.paired_end:
@@ -337,9 +368,9 @@ def main():
             ret_val_3 = pool.apply_async(pbc_qc_se,
                             (dupmark_bam, args.out_dir))
     # gather
-    nodup_bai = ret_val_1.get()
-    nodup_flagstat_qc = ret_val_2.get()
-    pbc_qc = ret_val_3.get()
+    nodup_bai = ret_val_1.get(BIG_INT)
+    nodup_flagstat_qc = ret_val_2.get(BIG_INT)
+    pbc_qc = ret_val_3.get(BIG_INT)
 
     # close multithreading
     pool.close()
@@ -347,7 +378,7 @@ def main():
 
     # remove temporary/intermediate files
     log.info('Removing temporary files...')
-    rm_f(temp_files)
+    # rm_f(temp_files)
 
     log.info('All done.')
 

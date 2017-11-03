@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# ENCODE DCC bam 2 tag-align python script
+# ENCODE DCC BAM 2 TAGALIGN wrapper
 # Author: Jin Lee (leepc12@gmail.com)
 
 import sys
@@ -9,22 +9,24 @@ import argparse
 from encode_dcc_common import *
 
 def parse_arguments():
-    parser = argparse.ArgumentParser(prog='ENCODE DCC BAM 2 TAGALIGN python script',
+    parser = argparse.ArgumentParser(prog='ENCODE DCC BAM 2 TAGALIGN.',
                                         description='')
     parser.add_argument('bam', type=str,
                         help='Path for BAM file.')
-    parser.add_argument('--subsample', type=int, default=0,
-                        help='Subsample TAGALIGN. This affects all downstream analysis.')
-    parser.add_argument('--regex-grep-v-ta', default='chrM',
-                        help='Perl-style regular expression pattern to remove matching reads from TAGALIGN.')
     parser.add_argument('--disable-tn5-shift', action="store_true",
                         help='Disable TN5 shifting for DNase-Seq.')
-    parser.add_argument('--nth', type=int, default=1,
-                        help='Number of threads to parallelize.')
+    parser.add_argument('--regex-grep-v-ta', default='chrM',
+                        help='Perl-style regular expression pattern \
+                        to remove matching reads from TAGALIGN.')
+    parser.add_argument('--subsample', type=int, default=0,
+                        help='Subsample TAGALIGN. \
+                        This affects all downstream analysis.')
     parser.add_argument('--paired-end', action="store_true",
                         help='Paired-end BAM')
     parser.add_argument('--out-dir', default='.', type=str,
                             help='Output directory.')
+    parser.add_argument('--nth', type=int, default=1,
+                        help='Number of threads to parallelize.')
     parser.add_argument('--log-level', default='INFO', 
                         choices=['NOTSET','DEBUG','INFO',
                             'WARNING','CRITICAL','ERROR','CRITICAL'],
@@ -60,12 +62,13 @@ def bam2ta_pe(bam, regex_grep_v_ta, nth, out_dir):
     nmsrt_bam = samtools_name_sort(bam, nth, out_dir)
 
     cmd1 = 'bedtools bamtobed -bedpe -mate1 -i {} | '
+    cmd1 += 'sort -k1,1 -k2,2n -k3,3n | '
     cmd1 += 'gzip -nc > {}'
     cmd1 = cmd1.format(
         nmsrt_bam,
         bedpe)
     run_shell_cmd(cmd1)
-    rm_f(nmsrt_bam)
+    # rm_f(nmsrt_bam)
 
     cmd2 = 'zcat -f {} | '
     cmd2 += 'awk \'BEGIN{{OFS="\\t"}}'
@@ -73,13 +76,13 @@ def bam2ta_pe(bam, regex_grep_v_ta, nth, out_dir):
     cmd2 += '%s\\t%s\\t%s\\tN\\t1000\\t%s\\n",'
     cmd2 += '$1,$2,$3,$9,$4,$5,$6,$10}}\' | '
     if regex_grep_v_ta:
-        cmd += 'grep -P -v \'{}\' | '.format(regex_grep_v_ta)
+        cmd2 += 'grep -P -v \'{}\' | '.format(regex_grep_v_ta)
     cmd2 += 'gzip -nc > {}'
     cmd2 = cmd2.format(
         bedpe,
         ta)
     run_shell_cmd(cmd2)
-    rm_f(bedpe)
+    # rm_f(bedpe)
     return ta
 
 def tn5_shift_ta(ta, out_dir):
@@ -138,7 +141,7 @@ def main():
 
     # remove temporary/intermediate files
     log.info('Removing temporary files...')
-    rm_f(temp_files)
+    # rm_f(temp_files)
 
     log.info('All done.')
 

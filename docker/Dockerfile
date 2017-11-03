@@ -10,7 +10,7 @@ FROM ubuntu:14.04
 MAINTAINER Jin Lee
 
 # Update the repository sources list
-# Install base packages: git, python, java
+# Install base packages: git, python, java, R
 RUN apt-get update && apt-get install -y \
     ant \
     build-essential \
@@ -22,7 +22,9 @@ RUN apt-get update && apt-get install -y \
     software-properties-common \
     wget \
     zlib1g-dev \
-    unzip
+    unzip \
+    libcurl4-openssl-dev \
+    r-base
 
 # Install pip and python packages: common and python-dateutils
 RUN easy_install pip
@@ -62,14 +64,46 @@ RUN cd samtools && make && make install
 RUN git clone --branch v2.26.0 https://github.com/arq5x/bedtools2.git
 RUN cd bedtools2 && make && make install
 
-# Install Picard 2.10.2
-RUN wget https://github.com/broadinstitute/picard/releases/download/2.10.2/picard.jar
+# Install Picard 2.10.6
+RUN wget https://github.com/broadinstitute/picard/releases/download/2.10.6/picard.jar
 RUN chmod +x picard.jar
 
 # Install Bowtie2 2.2.6
 RUN wget https://github.com/BenLangmead/bowtie2/releases/download/v2.2.6/bowtie2-2.2.6-linux-x86_64.zip
 RUN unzip bowtie2-2.2.6-linux-x86_64.zip
 ENV PATH="/software/bowtie2-2.2.6:${PATH}"
+
+# Install UCSC tools (Kent utils) latest
+RUN wget http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/bedClip
+RUN chmod +x bedClip
+RUN wget http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/bedGraphToBigWig
+RUN chmod +x bedGraphToBigWig
+
+# Install NumPy 1.10.2 (python2)
+RUN pip install numpy==1.10.2
+
+# Install MACS2 2.1.0
+RUN pip install macs2==2.1.0.20151222
+
+# Install R packages (spp==1.14) for phantompeakqualtools
+RUN echo "r <- getOption('repos'); r['CRAN'] <- 'http://cran.us.r-project.org'; options(repos = r);" > ~/.Rprofile
+RUN Rscript -e "install.packages('snow')"
+RUN Rscript -e "install.packages('snowfall')"
+RUN Rscript -e "install.packages('bitops')"
+RUN Rscript -e "install.packages('caTools')"
+RUN Rscript -e "source('http://bioconductor.org/biocLite.R'); biocLite('Rsamtools')"
+RUN Rscript -e "install.packages('./1.14.tar.gz')"
+
+# Install phantompeakqualtools 1.2
+RUN wget https://github.com/kundajelab/phantompeakqualtools/archive/1.2.tar.gz && tar -xvf 1.2.tar.gz
+ENV PATH="/software/phantompeakqualtools-1.2:${PATH}"
+
+# Install Python3 and packages (for IDR)
+RUN apt-get install -y python3-dev python3-numpy python3-scipy python3-setuptools
+
+# Install IDR 2.0.4
+RUN git clone --branch 2.0.4 https://github.com/kundajelab/idr
+RUN cd idr && python3 setup.py install
 
 # Get ENCODE atac-seq-pipeline container repository
 # This COPY assumes the build context is the root of the atac-seq-pipeline repo
