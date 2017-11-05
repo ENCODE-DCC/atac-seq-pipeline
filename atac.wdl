@@ -273,9 +273,9 @@ task macs2 {
 	Int? cap_num_peak # cap number of peaks with top scores
 	String? gensz
 	Float? pval_thresh
-    Int? smooth_win
-    # do not touch
-    Boolean? make_signal
+	Int? smooth_win
+	# do not touch
+	Boolean? make_signal
 	# resource
 	Int? cpu
 	Int? mem_mb
@@ -695,7 +695,8 @@ workflow atac {
 		scatter( pair in pair_gen.pairs ) {
 			call overlap {
 				input : 
-					prefix = "rep"+(pair[0]+1)+"-rep"+(pair[1]+1),
+					prefix = "rep"+(pair[0]+1)+
+							"-rep"+(pair[1]+1),
 					peak1 = macs2.npeak[(pair[0])],
 					peak2 = macs2.npeak[(pair[1])],
 					peak_pooled = macs2_pooled.npeak,
@@ -758,7 +759,8 @@ workflow atac {
 				# IDR on every pair of true replicates
 				call idr {
 					input : 
-						prefix = "rep"+(pair[0]+1)+"-rep"+(pair[1]+1),
+						prefix = "rep"+(pair[0]+1)
+								+"-rep"+(pair[1]+1),
 						peak1 = macs2.npeak[(pair[0])],
 						peak2 = macs2.npeak[(pair[1])],
 						peak_pooled = macs2_pooled.npeak,
