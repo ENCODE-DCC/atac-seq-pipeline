@@ -15,7 +15,8 @@ def parse_arguments(debug=False):
     parser.add_argument('fastqs', nargs='+', type=str,
                         help='TSV file path or list of FASTQs. \
                             FASTQs must be compressed with gzip (with .gz). \
-                            Use TSV for multiple techincal replicates \
+                            Use TSV for paired end fastqs or \
+                            multiple techincal replicates \
                             row=tech_rep_id, col=pair_id). \
                             All rows will be merged.')
     parser.add_argument('--nth', type=int, default=1,
@@ -33,7 +34,7 @@ def parse_arguments(debug=False):
     args = parser.parse_args()
 
     # parse fastqs command line
-    if args.fastqs[0].endswith('.gz'): # it's fastq
+    if args.fastqs[0].endswith('.gz'): # it's single-end fastq
         args.fastqs = [[f] for f in args.fastqs] # make it a matrix
     else: # it's TSV
         args.fastqs = read_tsv(args.fastqs[0])
@@ -53,11 +54,7 @@ def merge_fastqs(fastqs, out_dir):
         run_shell_cmd(cmd)
         return merged
     else:
-        # make hard-link (UNIX only)
-        linked = os.path.join(out_dir,
-            os.path.basename(fastqs[0]))
-        os.link(fastqs[0], linked)
-        return linked
+        return make_hard_link(fastqs[0], out_dir)
 
 def main():
     # read params
@@ -67,9 +64,10 @@ def main():
     # make out_dir
     mkdir_p(args.out_dir)
 
+    paired_end = len(args.fastqs[0])>1
     # initialize multithreading
     log.info('Initializing multithreading...')
-    if args.paired_end:
+    if paired_end:
         num_process = min(2*len(args.fastqs),args.nth)
     else:
         num_process = min(len(args.fastqs),args.nth)
@@ -82,14 +80,14 @@ def main():
     R2_to_merge = []
     for i in range(len(args.fastqs)):
         R1_to_merge.append(args.fastqs[i][0])
-        if args.paired_end:
+        if paired_end:
             R2_to_merge.append(args.fastqs[i][1])
 
     log.info('R1 to be merged: {}'.format(R1_to_merge))
     ret_val1 = pool.apply_async(merge_fastqs,
                     (R1_to_merge,args.out_dir,))
     R1_merged = ret_val1.get(BIG_INT)
-    if args.paired_end:
+    if paired_end:
         log.info('R2 to be merged: {}'.format(R2_to_merge))
         ret_val2 = pool.apply_async(merge_fastqs,
                         (R2_to_merge,args.out_dir,))
@@ -102,7 +100,7 @@ def main():
     # write txt for output filenames (for WDL)
     log.info('Writinig output txt...')    
     txt = os.path.join(args.out_dir, args.out_txt)
-    if args.paired_end:
+    if paired_end:
         arr = [R1_merged, R2_merged]
     else:
         arr = [R1_merged]

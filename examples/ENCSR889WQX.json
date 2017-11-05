@@ -1,5 +1,6 @@
 {
 	"atac.genome_tsv" : "/users/leepc12/code/atac-seq-pipeline/genome/mm10_klab.tsv",
+	"atac.adapters" : [],
 	"atac.fastqs" : [
 		[
 			["data/rep1/ENCFF439VSY.fastq.gz"],
@@ -12,15 +13,19 @@
 			["data/rep2/ENCFF992TSA.fastq.gz"]
 		]
 	],
+	"atac.bams" : [],
+	"atac.nodup_bams" : [],
+	"atac.tas" : [],
+
 	"atac.paired_end" : false,
 	"atac.multimapping" : 4,	
 
-	"atac.cpu" : 12,
+	"atac.cpu" : 10,
 
-	"atac.trim_merge.auto_detect_adapter" : true,
-	"atac.trim_merge.mem_mb" : 6000,
-	"atac.trim_merge.time_hr" : 12,
-	"atac.trim_merge.queue" : "standard",
+	"atac.trim_adapter.auto_detect_adapter" : true,
+	"atac.trim_adapter.mem_mb" : 6000,
+	"atac.trim_adapter.time_hr" : 12,
+	"atac.trim_adapter.queue" : "standard",
 
 	"atac.bowtie2.mem_mb" : 12000,
 	"atac.bowtie2.time_hr" : 23,

@@ -39,10 +39,14 @@ def parse_arguments():
     log.info(sys.argv)
     return args
 
-def macs2(ta, chrsz, gensz, pval_thresh, smooth_win, cap_num_peak, make_signal, out_dir):
+def macs2(ta, chrsz, gensz, pval_thresh, smooth_win, cap_num_peak, 
+    make_signal, out_dir):
     prefix = os.path.join(out_dir,
         os.path.basename(strip_ext_ta(ta)))
-    npeak = '{}.narrowPeak.gz'.format(prefix)
+    npeak = '{}.{}.{}.narrowPeak.gz'.format(
+        prefix,
+        'pval{}'.format(pval_thresh),
+        human_readable_number(cap_num_peak))
     fc_bigwig = '{}.fc.signal.bigwig'.format(prefix)
     pval_bigwig = '{}.pval.signal.bigwig'.format(prefix)
     # temporary files
@@ -54,7 +58,7 @@ def macs2(ta, chrsz, gensz, pval_thresh, smooth_win, cap_num_peak, make_signal, 
     shiftsize = -int(round(float(smooth_win)/2.0))
     temp_files = []
 
-    cmd1 = 'export LC_COLLATE=C && macs2 callpeak '
+    cmd1 = 'macs2 callpeak '
     cmd1 += '-t {} -f BED -n {} -g {} -p {} '
     cmd1 += '--shift {} --extsize {} '
     cmd1 += '--nomodel -B --SPMR '
@@ -68,7 +72,7 @@ def macs2(ta, chrsz, gensz, pval_thresh, smooth_win, cap_num_peak, make_signal, 
         smooth_win)
     run_shell_cmd(cmd1)
 
-    cmd2 = 'sort -k 8gr,8gr "{}"_peaks.narrowPeak | '
+    cmd2 = 'LC_COLLATE=C sort -k 8gr,8gr "{}"_peaks.narrowPeak | '
     cmd2 += 'awk \'BEGIN{{OFS="\\t"}}{{$4="Peak_"NR ; print $0}}\' | '
     cmd2 += 'head -n {} | gzip -nc > {}'
     cmd2 = cmd2.format(
@@ -96,7 +100,7 @@ def macs2(ta, chrsz, gensz, pval_thresh, smooth_win, cap_num_peak, make_signal, 
             fc_bedgraph)
         run_shell_cmd(cmd4)
       
-        cmd5 = 'sort -k1,1 -k2,2n {} > {}'
+        cmd5 = 'LC_COLLATE=C sort -k1,1 -k2,2n {} > {}'
         cmd5 = cmd5.format(
             fc_bedgraph,
             fc_bedgraph_srt)
@@ -110,7 +114,7 @@ def macs2(ta, chrsz, gensz, pval_thresh, smooth_win, cap_num_peak, make_signal, 
         run_shell_cmd(cmd6)
 
         # sval counts the number of tags per million in the (compressed) BED file
-        sval = float(get_num_lines(tag))/1000000.0
+        sval = float(get_num_lines(ta))/1000000.0
         
         cmd7 = 'macs2 bdgcmp -t "{}"_treat_pileup.bdg '
         cmd7 += '-c "{}"_control_lambda.bdg '
@@ -131,7 +135,7 @@ def macs2(ta, chrsz, gensz, pval_thresh, smooth_win, cap_num_peak, make_signal, 
             pval_bedgraph)
         run_shell_cmd(cmd8)
 
-        cmd9 = 'sort -k1,1 -k2,2n {} > {}'
+        cmd9 = 'LC_COLLATE=C sort -k1,1 -k2,2n {} > {}'
         cmd9 = cmd9.format(
             pval_bedgraph,
             pval_bedgraph_srt)
@@ -148,12 +152,12 @@ def macs2(ta, chrsz, gensz, pval_thresh, smooth_win, cap_num_peak, make_signal, 
     temp_files.extend([fc_bedgraph,fc_bedgraph_srt,
                         pval_bedgraph,pval_bedgraph_srt])
     temp_files.append("{}_*".format(prefix))
-    # rm_f(temp_files)
+    rm_f(temp_files)
 
     if make_signal:
-        return npeak
-    else:
         return npeak, fc_bigwig, pval_bigwig
+    else:
+        return npeak
 
 def main():
     # read params
@@ -167,7 +171,7 @@ def main():
     ret = macs2(args.ta, args.chrsz, args.gensz, args.pval_thresh,
         args.smooth_win, args.cap_num_peak, args.make_signal, 
         args.out_dir)
-    if args.make_sig:
+    if args.make_signal:
         npeak, fc_bigwig, pval_bigwig = ret
     else:
         npeak = ret

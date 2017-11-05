@@ -35,39 +35,47 @@ def parse_arguments():
 
 def frip(ta, peak, out_dir):
     prefix = os.path.join(out_dir, 
-        os.path.basename(strip_ext_all_genomic(bed)))
+        os.path.basename(strip_ext(peak)))
     frip_qc = '{}.frip.qc'.format(prefix)
 
-    cmd = 'bedtools intersect -a <(zcat -f {}) '
-    cmd += '-b <(zcat -f {}) -wa -u | wc -l'
+    # due to bedtools bug when .gz is given for -a and -b
+    tmp1 = gunzip(ta, 'tmp1', out_dir)
+    tmp2 = gunzip(peak, 'tmp2', out_dir)    
+
+    cmd = 'bedtools intersect -a {} -b {} -wa -u | wc -l'
     cmd = cmd.format(
-        ta,
-        peak)
+        tmp1, # ta
+        tmp2) # peak
     val1 = run_shell_cmd(cmd)
     val2 = get_num_lines(ta)
     write_txt(frip_qc, float(val1)/float(val2))
+    rm_f([tmp1, tmp2])
     return frip_qc
 
 def frip_shifted(ta, peak, chrsz, fraglen, out_dir):
     prefix = os.path.join(out_dir, 
-        os.path.basename(strip_ext_all_genomic(bed)))
+        os.path.basename(strip_ext(peak)))
     frip_qc = '{}.frip.qc'.format(prefix)
     half_fraglen = (fraglen+1)/2
+
+    # due to bedtools bug when .gz is given for -a and -b
+    tmp2 = gunzip(peak, 'tmp2', out_dir)    
 
     cmd = 'bedtools slop -i {} -g {} '
     cmd += '-s -l {} -r {} | '
     cmd += 'awk \'{{if ($2>=0 && $3>=0 && $2<=$3) print $0}}\' | '
-    cmd += 'bedtools intersect -a stdin -b <(zcat -f {}) '
+    cmd += 'bedtools intersect -a stdin -b {} '
     cmd += '-wa -u | wc -l'
     cmd = cmd.format(
         ta,
         chrsz,
         -half_fraglen,
         helf_fraglen,
-        peak)
+        tmp2) # peak
     val1 = run_shell_cmd(cmd)
     val2 = get_num_lines(ta)
     write_txt(frip_qc, float(val1)/float(val2))
+    rm_f(tmp2)
     return frip_qc
 
 def main():

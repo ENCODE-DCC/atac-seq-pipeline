@@ -66,7 +66,7 @@ def rm_unmapped_lowq_reads_se(bam, multimapping, mapq_thresh, nth, out_dir):
             filt_bam,
             nth)
         run_shell_cmd(cmd2)
-        # rm_f(qname_sort_bam) # remove temporary files
+        rm_f(qname_sort_bam) # remove temporary files
     else:
         cmd = 'samtools view -F 1804 -q {} -u {} | '
         cmd += 'samtools sort /dev/stdin -o {} -T {} -@ {}'
@@ -137,7 +137,7 @@ def rm_unmapped_lowq_reads_pe(bam, multimapping, mapq_thresh, nth, out_dir):
             tmp_filt_bam,
             fixmate_bam)
         run_shell_cmd(cmd2)
-    # rm_f(tmp_filt_bam)
+    rm_f(tmp_filt_bam)
 
     # cmd = 'samtools view -F 1804 -f 2 -u {} | '
     # cmd += 'samtools sort /dev/stdin -o {} -T {} -@ {}'
@@ -153,7 +153,7 @@ def rm_unmapped_lowq_reads_pe(bam, multimapping, mapq_thresh, nth, out_dir):
         filt_bam,
         nth)
     run_shell_cmd(cmd)
-    # rm_f(fixmate_bam)
+    rm_f(fixmate_bam)
     return filt_bam
 
 def mark_dup_picard(bam, out_dir): # shared by both se and pe
@@ -265,7 +265,7 @@ def pbc_qc_pe(bam, nth, out_dir):
         nmsrt_bam,
         pbc_qc)
     run_shell_cmd(cmd3)
-    # rm_f(nmsrt_bam)
+    rm_f(nmsrt_bam)
     return pbc_qc
 
 def create_empty_dup_qc(bam, out_dir):
@@ -378,7 +378,7 @@ def main():
 
     # remove temporary/intermediate files
     log.info('Removing temporary files...')
-    # rm_f(temp_files)
+    rm_f(temp_files)
 
     log.info('All done.')
 

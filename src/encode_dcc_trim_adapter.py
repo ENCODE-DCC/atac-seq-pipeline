@@ -59,8 +59,6 @@ def parse_arguments(debug=False):
     if args.adapters:
         if os.path.exists(args.adapters[0]): # it's TSV
             args.adapters = read_tsv(args.adapters[0])
-            if not args.adapters[0]: # if empty TSV
-                args.adapters = None
         else:
             args.fastqs = [[a] for a in args.adapters] # make it a matrix
 
@@ -131,8 +129,8 @@ def trim_adapter_pe(fastq1, fastq2, adapter1, adapter2,
             os.path.basename(fastq1))
         linked2 = os.path.join(out_dir,
             os.path.basename(fastq2))
-        os.link(fastq1, linked)
-        os.link(fastq2, linked)
+        os.link(fastq1, linked1)
+        os.link(fastq2, linked2)
         return [linked1, linked2]
 
 def main():

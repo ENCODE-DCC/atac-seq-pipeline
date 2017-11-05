@@ -26,16 +26,19 @@ def parse_arguments():
     return args
 
 def pool_ta(tas, out_dir):
-    prefix = os.path.join(out_dir,
-        os.path.basename(strip_ext_ta(tas[0])))
-    pooled_ta = '{}.pooled.tagAlign.gz'.format(prefix)
+    if len(tas)>1:
+        prefix = os.path.join(out_dir,
+            os.path.basename(strip_ext_ta(tas[0])))
+        pooled_ta = '{}.pooled.tagAlign.gz'.format(prefix)
 
-    cmd = 'zcat -f {} | gzip -nc > {}'
-    cmd = cmd.format(
-        ' '.join(tas),
-        pooled_ta)
-    run_shell_cmd(cmd)
-    return pooled_ta
+        cmd = 'zcat -f {} | gzip -nc > {}'
+        cmd = cmd.format(
+            ' '.join(tas),
+            pooled_ta)
+        run_shell_cmd(cmd)
+        return pooled_ta
+    else:
+        return make_hard_link(tas[0], out_dir)
 
 def main():
     # read params

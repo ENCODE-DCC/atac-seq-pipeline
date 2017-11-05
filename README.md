@@ -41,6 +41,14 @@ $ java -jar [JAVA_OPTS] ../cromwell-29.jar run atac.wdl -i input.json -o [WORKFL
      $ java -jar -Dconfig.file=non_docker/sge.conf cromwell-29.jar run atac.wdl -i input.json
      ```
 
+# Keyboard interrupt (Ctrl-C)
+
+To make SIGINT work in Cromwell single workflow mode, add `-Dconfig.file=default.conf`
+
+```
+$ java -jar -Dconfig.file=default.conf cromwell-29.jar run atac.wdl ...
+```
+
 # Dependency installation for platforms without docker support
 
 **We do not recommend running our pipeline without docker!**. Use it with caution.

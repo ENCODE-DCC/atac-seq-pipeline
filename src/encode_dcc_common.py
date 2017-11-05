@@ -10,6 +10,7 @@ import csv
 import gzip
 import logging
 import subprocess
+import math
 import signal
 
 logging.basicConfig(
@@ -57,11 +58,17 @@ def strip_ext_bigwig(bw):
     return re.sub(r'\.(bigwig|bw)$','',
                     str(bw))
 
-def strip_ext(f, ext):
-    return re.sub(r'\.{}$'.format(ext),'',str(f))
+def strip_ext_gz(f):
+    return re.sub(r'\.gz$','',str(f))
 
-def find_genomic_ext(f):
-    return ''
+def strip_ext(f, ext=''):
+    if ext=='': ext = get_ext(f)
+    return re.sub(r'\.({}|{}\.gz)$'.format(
+        ext,ext),'',str(f))
+
+def get_ext(f):    
+    f_wo_gz = re.sub(r'\.gz$','',str(f))    
+    return f_wo_gz.split('.')[-1]
 
 def human_readable_number(num):
     for unit in ['','K','M','G','T','P']:
@@ -100,9 +107,17 @@ def untar(tar, out_dir):
         out_dir)
     run_shell_cmd(cmd)
 
-def get_num_lines(file):
-    cmd = 'zcat -f {} | wc -l'.format(file)
-    return int(run_shell_cmd(cmd))
+def gunzip(f, suffix, out_dir):
+    if not f.endswith('.gz'):
+        raise ValueError('Cannot gunzip a file without .gz extension.')
+    gunzipped = os.path.join(out_dir,
+        os.path.basename(strip_ext_gz(f)))
+    if suffix:
+        gunzipped += '.{}'.format(suffix)
+    # cmd = 'gzip -cd {} > {}'.format(f, gunzipped)
+    cmd = 'zcat -f {} > {}'.format(f, gunzipped)
+    run_shell_cmd(cmd)
+    return gunzipped
 
 def rm_f(files):
     if files:
@@ -110,6 +125,17 @@ def rm_f(files):
             run_shell_cmd('rm -f {}'.format(' '.join(files)))
         else:
             run_shell_cmd('rm -f {}'.format(files))
+
+def make_hard_link(f, out_dir):
+    # make hard-link (UNIX only)
+    linked = os.path.join(out_dir,
+        os.path.basename(f))
+    os.link(f, linked)
+    return linked
+
+def get_num_lines(file):
+    cmd = 'zcat -f {} | wc -l'.format(file)
+    return int(run_shell_cmd(cmd))
 
 def write_txt(f,s):
     with open(f,'w') as fp:
@@ -149,6 +175,11 @@ def run_shell_cmd(cmd):
         os.killpg(pgid, signal.SIGKILL)
         p.terminate()
         raise Exception('Unknown exception caught. PID={}'.format(pid))
+
+# math
+
+def nCr(n,r): # combination
+    return math.factorial(n)/math.factorial(r)/math.factorial(n-r)
 
 # genomic functions
 

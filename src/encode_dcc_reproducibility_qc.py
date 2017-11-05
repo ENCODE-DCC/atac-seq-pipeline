@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# ENCODE DCC FRiP and reproducibility QC (IDR and naive-overlap) wrapper
+# ENCODE DCC reproducibility QC wrapper
 # Author: Jin Lee (leepc12@gmail.com)
 
 import sys
@@ -10,30 +10,18 @@ import multiprocessing
 from encode_dcc_common import *
 
 def parse_arguments():
-    parser = argparse.ArgumentParser(prog='ENCODE DCC FRiP and reproducibility QC.',
-                                        description='')
-    parser.add_argument('--peaks', type=str, nargs='+', required=True,
-                        help='List of peak files from true replicates.')
-    parser.add_argument('--peaks-pr1', type=str, nargs='+', required=True,
-                        help='List of peak files from 1st pseudo replicates.')
-    parser.add_argument('--peaks-pr2', type=str, nargs='+', required=True,
-                        help='List of peak files from 2nd pseudo replicates.')
-    parser.add_argument('--peak-pooled', type=str, required=True,
-                        help='Peak file from pooled replicate.')
-    parser.add_argument('--peak-ppr1', type=str, required=True,
-                        help='Peak file from 1st pooled pseudo replicate.')
-    parser.add_argument('--peak-ppr2', type=str, required=True,
-                        help='Peak file from 2nd pooled pseudo replicate.')
-    parser.add_argument('--method', type=str, required=True,
-                        choices=['idr','overlap']
-                        help='Post-processing method for raw peaks.')
-    parser.add_argument('--idr-thresh', default=0.1, type=float,
-                        help='IDR threshold.')
-    parser.add_argument('--idr-rank', default='p.value', type=str,
-                        choices=['p.value','q.value','signal.value'],
-                        help='IDR ranking method.')
-    parser.add_argument('--blacklist', type=str,
-                        help='Blacklist BED file.')
+    parser = argparse.ArgumentParser(prog='ENCODE DCC reproducibility QC.',
+                        description='IDR peak or overlap peak only.')
+    parser.add_argument('peaks', type=str, nargs='*',
+                        help='List of peak files \
+                        from true replicates in a sorted order. \
+                        For example of 4 true replicates, \
+                         0,1 0,2 0,3 1,2 1,3 2,3. \
+                         x,y means peak file from rep-x vs rep-y.')
+    parser.add_argument('--peaks-pr', type=str, nargs='+', required=True,
+                        help='List of peak files from pseudo replicates.')
+    parser.add_argument('--peak-ppr', type=str,
+                        help='Peak file from pooled pseudo replicate.')
     parser.add_argument('--out-dir', default='.', type=str,
                         help='Output directory.')
     parser.add_argument('--log-level', default='INFO', 
@@ -42,95 +30,33 @@ def parse_arguments():
                         help='Log level')
     args = parser.parse_args()
 
-    if len(args.peaks)!=len(args.peaks_pr1) or \
-        len(args.peaks)!=len(args.peaks_pr2):
-        raise ValueError('--peaks, --peaks-pr1 and --peaks-pr2 '+
-            'must have the same dimension.')
+    if len(args.peaks_pr)!=deduce_num_rep(len(args.peaks)):
+        raise ValueError('Invalid number of peak files or --peak-pr.')
 
     log.setLevel(args.log_level)
     log.info(sys.argv)
     return args
 
-def filter_out_blacklist(bed, blacklist):
-    prefix = os.path.join(out_dir, 
-        os.path.basename(strip_ext_all_genomic(bed)))
-    return
+def deduce_num_rep(num_peaks):
+    if num_peaks:
+        num_rep=1
+        while(nCr(num_rep,2)!=num_peaks):
+            num_rep += 1
+            if num_rep > 99:
+                raise ValueError('Cannot deduce num_rep from num_peaks. '+
+                    'wrong number of peaks in --peaks?')
+        return num_rep
+    else:
+        return 1
 
-def filter_out_chr(bed, pattern):
-    return
-
-def idr(basename_prefix, peak1, peak2, peak_pooled, 
-    thresh, rank, out_dir):
-    prefix = os.path.join(out_dir, basename_prefix)
-
-    npeak = '{}.narrowPeak.gz'.format(prefix)
-    fc_bigwig = '{}.fc.signal.bigwig'.format(prefix)
-    pval_bigwig = '{}.pval.signal.bigwig'.format(prefix)
-    # temporary files
-    fc_bedgraph = '{}.fc.signal.bedgraph'.format(prefix)
-    fc_bedgraph_srt = '{}.fc.signal.srt.bedgraph'.format(prefix)
-    pval_bedgraph = '{}.pval.signal.bedgraph'.format(prefix)
-    pval_bedgraph_srt = '{}.pval.signal.srt.bedgraph'.format(prefix)
-
-    shiftsize = -round(float(smooth_win)/2.0)
-    temp_files = []
-
-    cmd1 = 'export LC_COLLATE=C && macs2 callpeak '
-    cmd1 += '-t {} -f BED -g {} -p {} '
-    cmd1 += '--shift {} --extsize {} '
-    cmd1 += '-n  '
-    cmd1 += '--nomodel -B --SPMR '
-    cmd1 += '--keep-dup all --call-summits '
-    cmd1 = cmd1.format(
-        ta,
-        gensz,
-        pval_thresh,
-        shiftsize,
-        smooth_window,
-        prefix)
-    run_shell_cmd(cmd1)
-    return
-
-def overlap(basename_prefix, peak1, peak2, peak_pooled, out_dir):
-    filter_out_blacklist()
-    return
-
-def frip(ta, peak, out_dir):
-    prefix = os.path.join(out_dir, 
-        os.path.basename(strip_ext_all_genomic(bed)))
-    frip_qc = '{}.frip.qc'.format(prefix)
-
-    cmd1 = 'bedtools intersect -a <(zcat -f {}) '
-    cmd1 += '-b <(zcat -f {}) -wa -u | wc -l'
-    cmd1 = cmd1.format(
-        ta,
-        peak)
-    val1 = run_shell_cmd(cmd1)    
-    val2 = get_num_lines(ta)
-    write_txt(frip_qc, float(val1)/float(val2))
-    return frip_qc
-
-def frip_shifted(ta, peak, chrsz, fraglen, out_dir):
-    prefix = os.path.join(out_dir, 
-        os.path.basename(strip_ext_all_genomic(bed)))
-    frip_qc = '{}.frip.qc'.format(prefix)
-    half_fraglen = (fraglen+1)/2
-
-    cmd1 = 'bedtools slop -i {} -g {} '
-    cmd1 += '-s -l {} -r {} | '
-    cmd1 += 'awk \'{{if ($2>=0 && $3>=0 && $2<=$3) print $0}}\' | '
-    cmd1 += 'bedtools intersect -a stdin -b <(zcat -f {}) '
-    cmd1 += '-wa -u | wc -l'
-    cmd1 = cmd1.format(
-        ta,
-        chrsz,
-        -half_fraglen,
-        helf_fraglen,
-        peak)
-    val1 = run_shell_cmd(cmd1)
-    val2 = get_num_lines(ta)
-    write_txt(frip_qc, float(val1)/float(val2))
-    return frip_qc
+def deduce_pair_label_from_idx(num_rep, idx):
+    cnt = 0
+    for i in range(num_rep):
+        for j in range(i+1,num_rep):
+            if idx==cnt:
+                return 'rep-{}_vs_rep-{}'.format(i+1,j+1)
+            cnt += 1
+    raise ValueError('Cannot deduce rep_id from num_rep and idx.')
 
 def main():
     # read params
@@ -140,92 +66,87 @@ def main():
     # make out_dir (root of all outputs)
     mkdir_p(args.out_dir)
 
-    # initialize multithreading
-    log.info('Initializing multithreading...')
-    num_process = min(3,args.nth)
-    log.info('Number of threads={}.'.format(num_process))
-    pool = multiprocessing.Pool(num_process)
-
-    log.info('Post-processing raw peaks...')
-    ret_val_true={}
-    ret_val_pr={}
-    for i in range(len(args.peaks)):
-        # for every pair of true replicates
-        for j in range(i+1, len(args.peaks)):
-            basename_prefix = 
-                '{}.rep{}_vs_rep{}'.format(t,i+1,j+1)
-            if t=='idr':
-                ret_val_true[(i,j)] = pool.apply_sync(idr,
-                    (basename_prefix, 
-                    args.peaks[i], args.peaks[j], args.peak_pooled,
-                    args.idr_thresh, args.idr_rank, args.out_dir))
-            elif t=='overlap':
-                ret_val_true[(i,j)] = pool.apply_sync(naive_overlap,
-                    (basename_prefix, 
-                    args.peaks[i], args.peaks[j], args.peak_pooled,
-                    args.out_dir))
-    
-        # for pseudo replicates
-        basename_prefix = 
-            'IDR.rep{}_pr'.format(i+1)
-        if t=='idr':
-            ret_val_pr[i] = pool.apply_sync(idr, 
-                (basename_prefix, 
-                args.peaks_pr1[i], args.peaks_pr2[j], args.peaks[i],
-                args.idr_thresh, args.idr_rank, args.out_dir))
-        elif t=='overlap'
-            ret_val_pr[i] = pool.apply_sync(naive_overlap, 
-                (basename_prefix, 
-                args.peaks_pr1[i], args.peaks_pr2[j], args.peaks[i],
-                args.out_dir))
-
-    # for pooled replicates
-    basename_prefix = 'IDR.ppr'
-    if t=='idr':
-        ret_val_ppr = idr(
-            basename_prefix, 
-            args.peak_ppr1, args.peak_ppr2, args.peak_pooled,
-            args.idr_thresh, args.idr_rank, args.out_dir)
-    elif t=='overlap'
-        ret_val_ppr = naive_overlap(
-            basename_prefix, 
-            args.peak_ppr1, args.peak_ppr2, args.peak_pooled,
-            args.out_dir)
-
-    # gather processed peaks
-    out_true={}
-    out_pr={}
-    for i in range(len(args.peaks)):
-        # for every pair of true replicates
-        for j in range(i+1, len(args.peaks)):
-            out_true[(i,j)] = ret_val_true[(i,j)].get(BIG_INT)
-        # for pseudo replicates
-        out_pr[i] = ret_val_pr[i].get(BIG_INT)
-    # for pooled replicates
-    out_ppr = ret_val_ppr.get(BIG_INT)
-
     # reproducibility QC
     log.info('Reproducibility QC...')
+    # description for variables
+    # N: list of number of peaks in peak files from pseudo replicates
+    # Nt: top number of peaks in peak files from true replicates (rep-x_vs_rep-y)
+    # Np: number of peaks in peak files from pooled pseudo replicate
+    N = [get_num_lines(peak) for peak in args.peak_pr]
+    if len(args.peaks):
+        # multiple replicate case
+        num_rep = deduce_num_rep(len(args.peaks))
+        num_peaks_tr = [get_num_lines(peak) for peak in args.peaks]
 
-    # calculate FRiP
-    ret_val_true = {}
-    for t in args.method: # for each type (IDR and NAIVE-OVERLAP)
-        log.info('Cacluating FRiP...')
-        for i in range(len(args.peaks)):
-            ret_val_truefrip(
-            # for every pair of true replicates
-            for j in range(i+1, len(args.peaks)):
+        Nt = max(num_peaks_tr)
+        Np = get_num_lines(args.peak_ppr)
+        rescue_ratio = max(Np,Nt)/min(Np,Nt)
+        self_consistency_ratio = max(N)/min(N)
 
-        # calculate FRiP
-        for i in range(len(args.peaks)):
-            for j in range(i, len(args.peaks)):
-            for j, peak in enumerate(args.peaks):
-            args.peaks[i]
+        Nt_idx = num_peaks_tr.index(Nt)
+        label_tr = deduce_pair_label_from_idx(num_rep, Nt_idx)
 
+        conservative_set = label_tr
+        conservative_peak = make_hard_link(args.peaks[Nt_idx], args.out_dir)
+        N_conservative = Nt
+        if Nt>Np:
+            optimal_set = conservative_set
+            optimal_peak = conservative_peak
+            N_optimal = N_conservative
+        else:
+            optimal_set = "ppr"
+            optimal_peak = make_hard_link(args.peak_ppr, args.out_dir)
+            N_optimal = Np
+    else:
+        # single replicate case
+        num_rep = 1
+        
+        Nt = 0
+        Np = 0
+        rescue_ratio = 0.0
+        self_consistency_ratio = 1.0
 
-    # close multithreading
-    pool.close()
-    pool.join()
+        conservative_set = 'rep1-pr'
+        conservative_peak = make_hard_link(
+                args.peak_pr, args.out_dir)
+        N_conservative = N[0]
+        optimal_set = conservative_set
+        optimal_peak = conservative_peak
+        N_optimal = N_conservative
+
+    reproducibility = 'pass'
+    if rescue_ratio>2.0 or self_consistency_ratio>2.0:
+        reproducibility = 'borderline'
+    if rescue_ratio>2.0 and self_consistency_ratio>2.0:
+        reproducibility = 'fail'
+
+    log.info('Writing reproducibility QC log...')
+    with open('reproducibility.qc','w') as fp:
+        header = '{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n'.format(
+            'Nt',
+            '\t'.join(['N{}'.format(i+1) for i in range(num_rep)]),
+            'Np',
+            'N_opt',
+            'N_consv',
+            'opt_set',
+            'consv_set',
+            'rescue_ratio',
+            'self_consistency_ratio',
+            'reproducibility',
+            )
+        line = '{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n'.format(
+            Nt,
+            '\t'.join([i for i in N]),
+            Np,
+            N_optimal,
+            N_conservative,
+            optimal_set,
+            conservative_set,
+            rescue_ratio,
+            self_consistency_ratio,
+            reproducibility)
+        fp.write(header)
+        fp.write(line)
 
     log.info('All done.')
 

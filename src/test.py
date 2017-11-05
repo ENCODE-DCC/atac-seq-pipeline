@@ -24,31 +24,46 @@ from encode_dcc_common import *
 # pool.join()
 # print("hello2")
 
-def test_log():
-    log.setLevel('DEBUG')
-    log.warning('WARN')
-    log.info('INFO')
-    log.debug('X')
+# def test_log():
+#     log.setLevel('DEBUG')
+#     log.warning('WARN')
+#     log.info('INFO')
+#     log.debug('X')
 
-def test1():
-    log.setLevel('DEBUG')
+# def test1():
+#     log.setLevel('DEBUG')
     
-    pool = Pool(2)
-    # cmd1 = 'zcat -f /srv/scratch/shared/wotan/leepc12/run/ENCODE3_NEW2/data/ENCSR176BYZ/in_progress/reads/fastq/rep1/pair1/ENCFF071AXB.fastq.gz | gzip -nc > test1.fastq.gz'
-    # cmd2 = 'zcat -f /srv/scratch/shared/wotan/leepc12/run/ENCODE3_NEW2/data/ENCSR176BYZ/in_progress/reads/fastq/rep1/pair2/ENCFF628CBN.fastq.gz | gzip -nc > test2.fastq.gz'
+#     pool = Pool(2)
+#     # cmd1 = 'zcat -f /srv/scratch/shared/wotan/leepc12/run/ENCODE3_NEW2/data/ENCSR176BYZ/in_progress/reads/fastq/rep1/pair1/ENCFF071AXB.fastq.gz | gzip -nc > test1.fastq.gz'
+#     # cmd2 = 'zcat -f /srv/scratch/shared/wotan/leepc12/run/ENCODE3_NEW2/data/ENCSR176BYZ/in_progress/reads/fastq/rep1/pair2/ENCFF628CBN.fastq.gz | gzip -nc > test2.fastq.gz'
 
-    cmd1 = 'echo 2; sleep 1; echo 2; sleep 1; echo 2; sleep 1; echo 2; sleep 1; echo 2; sleep 1; echo 2; sleep 1;'
-    cmd2 = 'echo 2; sleep 1; echo 2; sleep 1; echo 2; sleep 1; echo 2; sleep 1; echo 2; sleep 1; echo 2; sleep 1;'
+#     cmd1 = 'echo 2; sleep 1; echo 2; sleep 1; echo 2; sleep 1; echo 2; sleep 1; echo 2; sleep 1; echo 2; sleep 1;'
+#     cmd2 = 'echo 2; sleep 1; echo 2; sleep 1; echo 2; sleep 1; echo 2; sleep 1; echo 2; sleep 1; echo 2; sleep 1;'
 
-    ret_val1 = pool.apply_async(run_shell_cmd,(cmd1,))
-    ret_val2 = pool.apply_async(run_shell_cmd,(cmd2,))
-    print(ret_val1.get())
-    print(ret_val2.get())
+#     ret_val1 = pool.apply_async(run_shell_cmd,(cmd1,))
+#     ret_val2 = pool.apply_async(run_shell_cmd,(cmd2,))
+#     print(ret_val1.get())
+#     print(ret_val2.get())
 
-    pool.close()
-    pool.join()
+#     pool.close()
+#     pool.join()
 
-test1()
+# test1()
+
+#def test3():
+#    path = 'out_rep2_macs2/ENCFF463QCX.trim.merged.nodup.tn5.narrowPeak.gz'
+#    print(get_ext(path))
+#    print(strip_ext(path))
+#    print(strip_ext(path,'narrowP'))
+#    print(strip_ext(path,'narrowPeak'))
+
+#test3()
+
+def test4():
+    a = read_tsv('x.tsv') 
+    print(not a)
+
+test4()
 
 # run_shell_cmd("echo 2; echo 2; echo 3; sleep 10")
 

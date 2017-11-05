@@ -1,20 +1,12 @@
-task detect_adapter {
-	Array[Array[File]] fastqs # fastqs[tech_rep_id][pair_id]
-	Boolean? auto_detect_adapter
-}
-
-task trim_adapter {
-	Array[Array[File]] fastqs # fastqs[tech_rep_id][pair_id]
-	Array[Array[String]] adapters # fastqs[tech_rep_id][pair_id]
-}
-
-task trim { # detect/trim adapter
-	Array[Array[File]] fastqs # fastqs[tech_rep_id][pair_id]
+#### genomic tasks
+task trim_adapter { # detect/trim adapter
+	# mandatory
+	Boolean auto_detect_adapter
 	# optional
-	Boolean? auto_detect_adapter
 	Int? min_trim_len
 	Float? err_rate
 	# do not touch
+	Array[Array[File]] fastqs # fastqs[tech_rep_id][pair_id]
 	Array[Array[String]] adapters # adapters[tech_rep_id][pair_id]
 	Boolean? paired_end
 	# resource
@@ -24,7 +16,7 @@ task trim { # detect/trim adapter
 	String? queue
 
 	command {
-		python $(which encode_dcc_trim.py) \
+		python $(which encode_dcc_trim_adapter.py) \
 			${write_tsv(fastqs)} \
 			${if select_first([auto_detect_adapter,false])
 				then "--auto-detect-adapter" else ""} \
@@ -47,7 +39,7 @@ task trim { # detect/trim adapter
 	}
 }
 
-task merge { # merge fastqs
+task merge_fastq { # merge fastqs
 	Array[Array[File]] fastqs # fastqs[tech_rep_id][pair_id]
 	# resource
 	Int? cpu
@@ -61,7 +53,7 @@ task merge { # merge fastqs
 	}
 	output {
 		# merged_fastqs[pair_id]
-		Array[File] merged_fastqs = read_lines("out.lines")
+		Array[File] merged_fastqs = read_lines("out.txt")
 	}
 	runtime {
 		cpu : "${select_first([cpu,1])}"
@@ -314,36 +306,70 @@ task macs2 {
 	}
 }
 
-task reproducibility { # IDR and naive overlap
-	Array[File] peaks
-	Array[File] peaks_pr1
-	Array[File] peaks_pr2
+task idr {
+	String? prefix
+	File peak1
+	File peak2
 	File peak_pooled
-	File peak_ppr1
-	File peak_ppr2
-	String method # idr, overlap
 	Float? idr_thresh
-	String? idr_rank
 
 	command {
-		python $(which encode_dcc_macs2.py) \
-			${ta} \
-			--peaks ${sep=' ' peaks} \
-			--peak-pr1 ${sep=' ' peaks_pr1} \
-			--peak-pr2 ${sep=' ' peaks_pr2} \
-			${"--peak-pooled "+ peak_pooled} \
-			${"--peak-ppr1 "+ peak_ppr1} \
-			${"--peak-ppr2 "+ peak_ppr2} \
-			${"--method "+ method} \
-			${"--idr-thresh "+ idr_tresh} \
-			${"--idr-rank "+ idr_rank}
+		python $(which encode_dcc_idr.py) \
+			${peak1} ${peak2} ${peak_pooled} \
+			${"--prefix " + prefix} \
+			${"--idr-thresh " + idr_thresh} \
+			--idr-rank signal.value
 	}
 	output {
-		# IDR/overlapping peaks
-		Map[String,File] out_peaks_tr # true 
-		Array[File] out_peak_pr  # pseudo replicated
-		File out_peak_ppr # pooled pseudo replicate
-		File reproducibility_qc 
+		File idr_peak = glob("*peak.gz")[0]
+		File idr_plot = glob("*.txt.png")[0]
+		File idr_unthresholded_peak = glob("*.txt.gz")[0]
+		File idr_log = glob("*.log")[0]
+	}
+	runtime {
+		cpu : "${select_first([cpu,1])}"
+		memory : "${select_first([mem_mb,'100'])} MB"
+		time : "${select_first([time_hr,1])}"
+		queue : queue
+	}
+}
+
+task overlap {
+	String? prefix
+	File peak1
+	File peak2
+	File peak_pooled
+
+	command {
+		python $(which encode_dcc_naive_overlap.py) \
+			${peak1} ${peak2} ${peak_pooled} \
+			${"--prefix " + prefix}
+	}
+	output {
+		File overlap_peak = glob("*peak.gz")[0]
+	}
+	runtime {
+		cpu : "${select_first([cpu,1])}"
+		memory : "${select_first([mem_mb,'100'])} MB"
+		time : "${select_first([time_hr,1])}"
+		queue : queue
+	}
+}
+
+task reproducibility {
+	Array[File]? peaks
+	Array[File] peaks_pr
+	File? peak_ppr
+
+	command {
+		python $(which encode_dcc_reproducibility_qc.py) \			
+			${sep=' ' peaks} \
+			--peaks-pr ${sep=' ' peaks_pr} \
+			${"--peak-ppr "+ peak_ppr}
+	}
+	output {
+		File reproducibility_qc = 
+			glob("*.reproducibility.qc")[0]
 	}
 	runtime {
 		cpu : "${select_first([cpu,1])}"
@@ -396,6 +422,47 @@ task frip { # IDR and naive overlap
 	}
 }
 
+#### workflow system tasks
+task inputs { # determine input type and number of replicates
+	Array[Array[Array[String]]] fastqs 
+	Array[String] bams
+	Array[String] nodup_bams
+	Array[String] tas
+
+	command <<<
+		python <<CODE
+		name = ['fastq','bam','nodup_bam','ta']
+		arr = [${length(fastqs)},${length(bams)},
+		       ${length(nodup_bams)},${length(tas)}]
+		num_rep = max(arr)
+		type = name[arr.index(num_rep)]
+		with open('num_rep.txt','w') as fp:
+		    fp.write(str(num_rep)) 
+		with open('type.txt','w') as fp:
+		    fp.write(type)		    
+		CODE
+	>>>
+	output {
+		String type = read_string("type.txt")
+		Int num_rep = read_int("num_rep.txt")
+	}
+}
+
+task pair_gen { # returns every pair of true replicate
+	Int num_rep
+	command <<<
+		python <<CODE
+		for i in range(${num_rep}):
+		    for j in range(i+1,${num_rep}):
+		        print('{}\t{}'.format(i,j))
+		CODE
+	>>>
+	output {
+		Array[Array[Int]] pairs = read_tsv(stdout())
+	}
+}
+
+#### workflow body
 workflow atac {
 	# mandatory parameters
 	Boolean paired_end 	# endedness of sample
@@ -403,6 +470,8 @@ workflow atac {
 	Map[String,String] genome = read_map(genome_tsv)
 
 	# optional but important
+	Boolean? enable_idr	# enable IDR for called peaks
+	Boolean? true_rep_only # disable all analysis for pseudo replicates
 	Int? multimapping 	# used for bowtie2 and filter
 	Int? cpu 			# total number of threads to process this sample
 						# must be multiples of num_rep
@@ -412,8 +481,6 @@ workflow atac {
 	String? accession_id # accession ID of sample on ENCODE portal
 
 	# mandatory input files
-	Int num_rep 		# number of replicates
-	String input_type 	# choices = ['fastq','bam','nodup_bam','ta']
 	Array[Array[Array[String]]] fastqs 
 						# fastqs[bio_rep_id][tech_rep_id][pair_id]
 	Array[Array[Array[String]]] adapters 
@@ -422,65 +489,76 @@ workflow atac {
 	Array[String] nodup_bams 	# if starting from filtered bams
 	Array[String] tas 			# if starting from tag-aligns
 
-	if (input_type=='fastq') {
-		# trim adapters 
-		scatter(i in range(num_rep)) {
-			call trim {
+	# determin input type and num_rep
+	call inputs {
+		input : 
+			fastqs = fastqs,
+			bams = bams,
+			nodup_bams = nodup_bams,
+			tas = tas,
+	}
+
+	# pipeline starts here
+	if (inputs.type=='fastq') {
+		# trim adapters
+		scatter(i in range(inputs.num_rep)) {
+			call trim_adapter {
 				input:
 					fastqs = fastqs[i],
-					adapters = adapters[i],
+					adapters = if (length(adapters)>0) 
+							then adapters[i] else [],
 					paired_end = paired_end,
-					cpu = cpu/num_rep,
+					cpu = cpu/inputs.num_rep,
 			}
-		}
+		}		
 		# merge fastqs from technical replicates
-		scatter(i in range(num_rep)) {
-			call merge {
+		scatter(i in range(inputs.num_rep)) {
+			call merge_fastq {
 				input: 
-					fastqs = trim.trimmed_fastqs[i]
+					fastqs = trim_adapter.trimmed_fastqs[i]
 			}
 		}
 		# align trimmed/merged fastqs with bowtie2
-		scatter(i in range(num_rep)) {
+		scatter(i in range(inputs.num_rep)) {
 			call bowtie2 {
 				input:
-					fastqs = merge.merged_fastqs[i],
+					fastqs = merge_fastq.merged_fastqs[i],
 					idx_tar = genome["bowtie2_idx_tar"],
 					paired_end = paired_end,
 					multimapping = multimapping,
-					cpu = cpu/num_rep,
+					cpu = cpu/inputs.num_rep,
 			}
 		}
 	}
 
-	if (input_type=='fastq' || input_type=='bam') {
+	if (inputs.type=='fastq' || inputs.type=='bam') {
 		# filter/dedup bam
-		scatter(i in range(num_rep)) {
+		scatter(i in range(inputs.num_rep)) {
 			call filter {
 				input:
 					bam = select_first([bowtie2.bam,bams])[i],
 					paired_end = paired_end,
 					multimapping = multimapping,
-					cpu = cpu/num_rep,
+					cpu = cpu/inputs.num_rep,
 			}
 		}
 	}
 
-	if (input_type=='fastq' || input_type=='bam' ||
-		input_type=='nodup_bam') {
+	if (inputs.type=='fastq' || inputs.type=='bam' ||
+		inputs.type=='nodup_bam') {
 		# convert bam to tagalign and subsample it if necessary
-		scatter(i in range(num_rep)) {
+		scatter(i in range(inputs.num_rep)) {
 			call bam2ta {
 				input:
 					bam = select_first([filter.nodup_bam,nodup_bams])[i],
 					paired_end = select_first([paired_end,true]),
-					cpu = cpu/num_rep,
+					cpu = cpu/inputs.num_rep,
 			}
 		}
 	}
 
 	# subsample tagalign (non-mito) and cross-correlation analysis
-	scatter(i in range(num_rep)) {
+	scatter(i in range(inputs.num_rep)) {
 		call xcor {
 			input:
 				ta = select_first([bam2ta.ta,tas])[i],
@@ -489,7 +567,7 @@ workflow atac {
 	}
 
 	# make two self pseudo replicates per true replicate
-	scatter(i in range(num_rep)) {
+	scatter(i in range(inputs.num_rep)) {
 		call spr {
 			input:
 				ta = select_first([bam2ta.ta,tas])[i],
@@ -497,22 +575,24 @@ workflow atac {
 		}
 	}
 
-	# pool tagaligns from true/pseudo replicates
-	call pool_ta {
-		input :
-			tas = select_first([bam2ta.ta,tas]),
-	}
-	call pool_ta as pool_ta_pr1 {
-		input :
-			tas = spr.ta_pr1,
-	}
-	call pool_ta as pool_ta_pr2 {
-		input :
-			tas = spr.ta_pr2,
+	if ( inputs.num_rep>1 ) {
+		# pool tagaligns from true/pseudo replicates
+		call pool_ta {
+			input :
+				tas = select_first([bam2ta.ta,tas]),
+		}
+		call pool_ta as pool_ta_pr1 {
+			input :
+				tas = spr.ta_pr1,
+		}
+		call pool_ta as pool_ta_pr2 {
+			input :
+				tas = spr.ta_pr2,
+		}
 	}
 
 	# call peaks on tagalign
-	scatter(i in range(num_rep)) {
+	scatter(i in range(inputs.num_rep)) {
 		call macs2 {
 			input:
 				ta = select_first([bam2ta.ta,tas])[i],
@@ -520,55 +600,219 @@ workflow atac {
 				make_signal = true,
 		}
 	}
-	# call peaks on 1st pseudo replicated tagalign 
-	scatter(ta in spr.ta_pr1) {
-		call macs2 as macs2_pr1 {
+	# filter out peaks with blacklist
+	scatter(i in range(inputs.num_rep)) {
+		call blacklist_filter as blacklist_filt_macs2 {
 			input:
-				ta = ta,
+				peak = macs2.npeak[i],
+				blacklist = genome["blacklist"],				
+		}		
+	}
+	if ( inputs.num_rep>1 ) {
+		# call peaks on pooled replicate
+		call macs2 as macs2_pooled {
+			input:
+				ta = pool_ta.ta_pooled,
 				chrsz = genome["chrsz"],
+				make_signal = true,
+		}
+		# filter out peaks with blacklist
+		call blacklist_filter as blacklist_filt_macs2_pooled {
+			input:
+				peak = macs2_pooled.npeak,
+				blacklist = genome["blacklist"],
 		}
 	}
-	# call peaks on 2nd pseudo replicated tagalign 
-	scatter(ta in spr.ta_pr2) {
-		call macs2 as macs2_pr2 {
-			input:
-				ta = ta,
-				chrsz = genome["chrsz"],
+	if ( !select_first([true_rep_only,false]) ) {
+		# call peaks on 1st pseudo replicated tagalign 
+		scatter(ta in spr.ta_pr1) {
+			call macs2 as macs2_pr1 {
+				input:
+					ta = ta,
+					chrsz = genome["chrsz"],
+			}
+		}
+		scatter(peak in macs2_pr1.npeak) {
+			# filter out peaks with blacklist
+			call blacklist_filter as blacklist_filt_macs2_pr1 {
+				input:
+					peak = peak,
+					blacklist = genome["blacklist"],
+			}		
+		}
+		# call peaks on 2nd pseudo replicated tagalign 
+		scatter(ta in spr.ta_pr2) {
+			call macs2 as macs2_pr2 {
+				input:
+					ta = ta,
+					chrsz = genome["chrsz"],
+			}
+		}
+		scatter(peak in macs2_pr2.npeak) {
+			# filter out peaks with blacklist
+			call blacklist_filter as blacklist_filt_macs2_pr2 {
+				input:
+					peak = peak,
+					blacklist = genome["blacklist"],
+			}		
+		}
+		if ( inputs.num_rep>1 ) {
+			# call peaks on 1st pooled pseudo replicates
+			call macs2 as macs2_ppr1 {
+				input:
+					ta = pool_ta_pr1.ta_pooled,
+					chrsz = genome["chrsz"],
+			}
+			# call peaks on 2nd pooled pseudo replicates
+			call macs2 as macs2_ppr2 {
+				input:
+					ta = pool_ta_pr2.ta_pooled,
+					chrsz = genome["chrsz"],
+			}
+			# filter out peaks with blacklist
+			call blacklist_filter as blacklist_filt_macs2_ppr1 {
+				input:
+					peak = macs2_ppr1.npeak,
+					blacklist = genome["blacklist"],
+			}
+			call blacklist_filter as blacklist_filt_macs2_ppr2 {
+				input:
+					peak = macs2_ppr2.npeak,
+					blacklist = genome["blacklist"],
+			}
 		}
 	}
-	# call peaks on pooled replicate
-	call macs2 as macs2_pooled {
-		input:
-			ta = pool_ta.ta_pooled,
-			chrsz = genome["chrsz"],
-			make_signal = true,
-	}
-	# call peaks on 1st pooled pseudo replicates
-	call macs2 as macs2_ppr1 {
-		input:
-			ta = pool_ta_pr1.ta_pooled,
-			chrsz = genome["chrsz"],
-	}
-	# call peaks on 2nd pooled pseudo replicates
-	call macs2 as macs2_ppr2 {
-		input:
-			ta = pool_ta_pr2.ta_pooled,
-			chrsz = genome["chrsz"],
+
+	# generate every pair of true replicates
+	if ( inputs.num_rep>1 ) {
+		call pair_gen { 
+			input : num_rep = inputs.num_rep
+		}
 	}
 
-	# reproducibility QC and FRiP on called peaks
-	## IDR
-	call reproducibility as idr {
-		input:
-			peaks = macs2.
+	# Naive overlap on every pair of true replicates
+	if ( inputs.num_rep>1 ) {
+		scatter( pair in pair_gen.pairs ) {
+			call overlap {
+				input : 
+					prefix = "rep"+(pair[0]+1)+"-rep"+(pair[1]+1),
+					peak1 = macs2.npeak[(pair[0])],
+					peak2 = macs2.npeak[(pair[1])],
+					peak_pooled = macs2_pooled.npeak,
+			}
+		}
+		scatter( peak in overlap.overlap_peak ) {
+			call blacklist_filter as blacklist_filt_overlap {
+				input:
+					peak = peak,
+					blacklist = genome["blacklist"],
+			}
+		}
 	}
-	## naive overlap
-	call reproducibility as overlap {
+	if ( !select_first([true_rep_only,false]) ) {
+		# Naive overlap on pseduo replicates
+		scatter( i in range(inputs.num_rep) ) {
+			call overlap as overlap_pr {
+				input : 
+					prefix = "rep"+(i+1)+"pr",
+					peak1 = macs2_pr1.npeak[i],
+					peak2 = macs2_pr2.npeak[i],
+					peak_pooled = macs2.npeak[i],
+			}
+		}
+		scatter( peak in overlap_pr.overlap_peak ) {
+			call blacklist_filter as blacklist_filt_overlap_pr {
+				input:
+					peak = peak,
+					blacklist = genome["blacklist"],
+			}
+		}
+		if ( inputs.num_rep>1 ) {
+			# Naive overlap on pooled pseudo replicates
+			call overlap as overlap_ppr {
+				input : 
+					prefix = "ppr",
+					peak1 = macs2_ppr1.npeak,
+					peak2 = macs2_ppr2.npeak,
+					peak_pooled = macs2_pooled.npeak,
+			}
+			call blacklist_filter as blacklist_filt_overlap_ppr {
+				input:
+					peak = overlap_ppr.overlap_peak,
+					blacklist = genome["blacklist"],
+			}
+		}
+		# reproducibility QC for overlapping peaks
+		call reproducibility as reproducibility_overlap {
+			input:
+				peaks = select_first(
+					blacklist_filt_overlap.filtered_peak,[]),
+				peaks_pr = blacklist_filt_overlap_pr.filtered_peak,
+				peak_ppr = blacklist_filt_overlap_ppr.filtered_peak,
+		}
 	}
 
-	# filter out peaks overlapping blacklist
-	call blacklist_filter as blacklist_filt_idr {
-		input:
-			blacklist = genome["blacklist"],
-	}
+	if ( select_first([enable_idr,false]) ) {
+		if ( inputs.num_rep>1 ) {
+			scatter( pair in pair_gen.pairs ) {
+				# IDR on every pair of true replicates
+				call idr {
+					input : 
+						prefix = "rep"+(pair[0]+1)+"-rep"+(pair[1]+1),
+						peak1 = macs2.npeak[(pair[0])],
+						peak2 = macs2.npeak[(pair[1])],
+						peak_pooled = macs2_pooled.npeak,
+				}
+			}
+			scatter( peak in idr.idr_peak ) {
+				# filter out peaks with blacklist
+				call blacklist_filter as blacklist_filt_idr {
+					input:
+						peak = peak,
+						blacklist = genome["blacklist"],
+				}
+			}
+		}
+		if ( !select_first([true_rep_only,false]) ) {
+			# IDR on pseduo replicates
+			scatter( i in range(inputs.num_rep) ) {
+				call idr as idr_pr {
+					input : 
+						prefix = "rep"+(i+1)+"pr",
+						peak1 = macs2_pr1.npeak[i],
+						peak2 = macs2_pr2.npeak[i],
+						peak_pooled = macs2.npeak[i],
+				}
+			}
+			scatter( peak in idr_pr ) {			
+				call blacklist_filter as blacklist_filt_idr_pr {
+					input:
+						peak = peak,
+						blacklist = genome["blacklist"],
+				}		
+			}
+			if ( inputs.num_rep>1 ) {
+				call idr as idr_ppr {
+					input : 
+						prefix = "ppr",
+						peak1 = macs2_ppr1.npeak,
+						peak2 = macs2_ppr2.npeak,
+						peak_pooled = macs2_pooled.npeak,
+				}
+				call blacklist_filter as blacklist_filt_idr_ppr {
+					input:
+						peak = idr_ppr.idr_peak,
+						blacklist = genome["blacklist"],
+				}
+			}
+			# reproducibility QC for IDR peaks
+			call reproducibility as reproducibility_idr {
+				input:
+					peaks = select_first(
+						blacklist_filt_idr.filtered_peak,[]),
+					peaks_pr = blacklist_filt_idr_pr.filtered_peak,
+					peak_ppr = blacklist_filt_idr_ppr.filtered_peak,
+			}
+		}
+	}	
 }

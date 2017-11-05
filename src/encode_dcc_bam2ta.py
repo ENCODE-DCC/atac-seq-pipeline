@@ -61,14 +61,14 @@ def bam2ta_pe(bam, regex_grep_v_ta, nth, out_dir):
     bedpe = '{}.bedpe.gz'.format(prefix)
     nmsrt_bam = samtools_name_sort(bam, nth, out_dir)
 
-    cmd1 = 'bedtools bamtobed -bedpe -mate1 -i {} | '
+    cmd1 = 'LC_COLLATE=C bedtools bamtobed -bedpe -mate1 -i {} | '
     cmd1 += 'sort -k1,1 -k2,2n -k3,3n | '
     cmd1 += 'gzip -nc > {}'
     cmd1 = cmd1.format(
         nmsrt_bam,
         bedpe)
     run_shell_cmd(cmd1)
-    # rm_f(nmsrt_bam)
+    rm_f(nmsrt_bam)
 
     cmd2 = 'zcat -f {} | '
     cmd2 += 'awk \'BEGIN{{OFS="\\t"}}'
@@ -141,7 +141,7 @@ def main():
 
     # remove temporary/intermediate files
     log.info('Removing temporary files...')
-    # rm_f(temp_files)
+    rm_f(temp_files)
 
     log.info('All done.')
 
