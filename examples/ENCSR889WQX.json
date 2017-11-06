@@ -3,14 +3,14 @@
 	"atac.adapters" : [],
 	"atac.fastqs" : [
 		[
-			["data/rep1/ENCFF439VSY.fastq.gz"],
-			["data/rep1/ENCFF325FCQ.fastq.gz"],
-			["data/rep1/ENCFF683IQS.fastq.gz"],
-			["data/rep1/ENCFF744CHW.fastq.gz"]
+			["/srv/scratch/shared/kadru/leepc12/run/atac-seq-pipeline/ENCSR889WQX/data/rep1/ENCFF439VSY.fastq.gz"],
+			["/srv/scratch/shared/kadru/leepc12/run/atac-seq-pipeline/ENCSR889WQX/data/rep1/ENCFF325FCQ.fastq.gz"],
+			["/srv/scratch/shared/kadru/leepc12/run/atac-seq-pipeline/ENCSR889WQX/data/rep1/ENCFF683IQS.fastq.gz"],
+			["/srv/scratch/shared/kadru/leepc12/run/atac-seq-pipeline/ENCSR889WQX/data/rep1/ENCFF744CHW.fastq.gz"]
 		],
 		[
-			["data/rep2/ENCFF463QCX.fastq.gz"],
-			["data/rep2/ENCFF992TSA.fastq.gz"]
+			["/srv/scratch/shared/kadru/leepc12/run/atac-seq-pipeline/ENCSR889WQX/data/rep2/ENCFF463QCX.fastq.gz"],
+			["/srv/scratch/shared/kadru/leepc12/run/atac-seq-pipeline/ENCSR889WQX/data/rep2/ENCFF992TSA.fastq.gz"]
 		]
 	],
 	"atac.bams" : [],

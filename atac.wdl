@@ -596,6 +596,7 @@ workflow atac {
 		call macs2 {
 			input:
 				ta = select_first([bam2ta.ta,tas])[i],
+				gensz = genome["gensz"],
 				chrsz = genome["chrsz"],
 				make_signal = true,
 		}
@@ -613,6 +614,7 @@ workflow atac {
 		call macs2 as macs2_pooled {
 			input:
 				ta = pool_ta.ta_pooled,
+				gensz = genome["gensz"],
 				chrsz = genome["chrsz"],
 				make_signal = true,
 		}
@@ -629,6 +631,7 @@ workflow atac {
 			call macs2 as macs2_pr1 {
 				input:
 					ta = ta,
+					gensz = genome["gensz"],
 					chrsz = genome["chrsz"],
 			}
 		}
@@ -645,6 +648,7 @@ workflow atac {
 			call macs2 as macs2_pr2 {
 				input:
 					ta = ta,
+					gensz = genome["gensz"],
 					chrsz = genome["chrsz"],
 			}
 		}
@@ -661,12 +665,14 @@ workflow atac {
 			call macs2 as macs2_ppr1 {
 				input:
 					ta = pool_ta_pr1.ta_pooled,
+					gensz = genome["gensz"],
 					chrsz = genome["chrsz"],
 			}
 			# call peaks on 2nd pooled pseudo replicates
 			call macs2 as macs2_ppr2 {
 				input:
 					ta = pool_ta_pr2.ta_pooled,
+					gensz = genome["gensz"],
 					chrsz = genome["chrsz"],
 			}
 			# filter out peaks with blacklist

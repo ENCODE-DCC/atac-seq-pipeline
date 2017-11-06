@@ -137,7 +137,7 @@ def main():
     else:
         log.info("TN5-shifting TAGALIGN...")
         shifted_ta = tn5_shift_ta(subsampled_ta, args.out_dir)
-        # temp_files.append(subsampled_ta)
+        temp_files.append(subsampled_ta)
 
     # remove temporary/intermediate files
     log.info('Removing temporary files...')
