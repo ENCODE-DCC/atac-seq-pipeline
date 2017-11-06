@@ -41,17 +41,13 @@ $ java -jar [BACKEND_OPTS] cromwell-29.jar run atac.wdl -i input.json -o [WORKFL
      $ java -jar -Dconfig.file=backends/sge.conf cromwell-29.jar run atac.wdl -i input.json
      ```
 
-# Keyboard interrupt (Ctrl-C)
+# Input JSON
 
-To make SIGINT work in Cromwell single workflow mode (with `run` instead of `server`), add `-Dconfig.file=default.conf`
-
-```
-$ java -jar -Dconfig.file=backends/default.conf cromwell-29.jar run atac.wdl ...
-```
+Take a careful look at input definition in [`atac.wdl`](atac.wdl). Read through all comments at the top of the code.
 
 # Dependency installation for systems without docker support
 
-**WE DO NOT RECOMMEND RUNNIG OUR PIPELINE WITHOUT DOCKER!**. Use it with caution.
+**WE DO NOT RECOMMEND RUNNIG OUR PIPELINE WITHOUT DOCKER!** Use it with caution.
 
 1) **Our pipeline is for BASH only. Set your default shell as BASH**.
 
@@ -94,11 +90,11 @@ $ java -jar -Dconfig.file=backends/default.conf cromwell-29.jar run atac.wdl ...
 
 # Genome data installation
 
-**WE DO NOT RECOMMEND RUNNIG OUR PIPELINE WITH LOCALLY INSTALLED/BUILT GENOME DATA!**. Use it with caution.
+**WE DO NOT RECOMMEND RUNNIG OUR PIPELINE WITH LOCALLY INSTALLED/BUILT GENOME DATA!** Use it with caution.
 
 **We will provide an official downloader for all genome data later**. On Google Cloud, TSV files for buckets (`gs://`) will be provided. Cromwell is planning to support AWS buckets (`s3://`) too. Until then, use this installer.
 
-Supported genomes: hg38 (ENCODE), mm10 (ENCODE), hg19 and mm9. A TSV file will be generated under [DEST_DIR]. Use it for `atac.genomve_tsv` value in pipeline's input JSON file
+Supported genomes: hg38 (ENCODE), mm10 (ENCODE), hg19 and mm9. A TSV file will be generated under `[DEST_DIR]`. Use it for `atac.genomv_tsv` value in pipeline's input JSON file
 
 1) Do not install genome data on Stanford clusters (Sherlock and SCG4). They already have all genome data installed. Use `genome/[GENOME]_sherlock.tsv` or `genome/[GENOME]_scg4.tsv` as your TSV file.
 
