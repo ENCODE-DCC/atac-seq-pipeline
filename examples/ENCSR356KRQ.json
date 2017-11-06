@@ -25,15 +25,12 @@
 	"atac.cpu" : 12,
 
 	"atac.trim_adapter.auto_detect_adapter" : true,
-	"atac.trim_adapter.mem_mb" : 6000,
-	"atac.trim_adapter.time_hr" : 12,
 
 	"atac.bowtie2.mem_mb" : 12000,
-	"atac.bowtie2.time_hr" : 23,
+	"atac.bowtie2.time_hr" : 36,
 
 	"atac.filter.mem_mb" : 12000,
 	"atac.filter.time_hr" : 23,
 
-	"atac.xcor.subsample" : 25000000,
-	"atac.macs2.smooth_win" : 73
+	"atac.smooth_win" : 73
 }

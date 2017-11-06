@@ -85,14 +85,24 @@ RUN pip install numpy==1.10.2
 # Install MACS2 2.1.0
 RUN pip install macs2==2.1.0.20151222
 
-# Install R packages (spp==1.14) for phantompeakqualtools
+# Install R packages
 RUN echo "r <- getOption('repos'); r['CRAN'] <- 'http://cran.us.r-project.org'; options(repos = r);" > ~/.Rprofile
 RUN Rscript -e "install.packages('snow')"
 RUN Rscript -e "install.packages('snowfall')"
 RUN Rscript -e "install.packages('bitops')"
 RUN Rscript -e "install.packages('caTools')"
 RUN Rscript -e "source('http://bioconductor.org/biocLite.R'); biocLite('Rsamtools')"
-RUN Rscript -e "install.packages('./1.14.tar.gz')"
+
+# Install boost (required for R-spp)
+RUN apt-get install -y libboost-dev
+
+# Install R package spp 1.14 (required for phantompeakqualtools)
+#RUN wget https://github.com/hms-dbmi/spp/archive/1.14.tar.gz
+#RUN Rscript -e "install.packages('./1.14.tar.gz')"
+
+# Install R package spp 1.13 (required for phantompeakqualtools)
+RUN wget https://github.com/hms-dbmi/spp/archive/1.13.tar.gz
+RUN Rscript -e "install.packages('./1.13.tar.gz')"
 
 # Install phantompeakqualtools 1.2
 RUN wget https://github.com/kundajelab/phantompeakqualtools/archive/1.2.tar.gz && tar -xvf 1.2.tar.gz
@@ -104,6 +114,10 @@ RUN apt-get install -y python3-dev python3-numpy python3-scipy python3-setuptool
 # Install IDR 2.0.4
 RUN git clone --branch 2.0.4 https://github.com/kundajelab/idr
 RUN cd idr && python3 setup.py install
+
+# Install sambamba 0.6.5
+RUN wget https://github.com/lomereiter/sambamba/releases/download/v0.6.5/sambamba_v0.6.5_linux.tar.bz2 && tar -xvjf sambamba_v0.6.5_linux.tar.bz2
+RUN mv sambamba_v0.6.5 sambamba
 
 # Get ENCODE atac-seq-pipeline container repository
 # This COPY assumes the build context is the root of the atac-seq-pipeline repo

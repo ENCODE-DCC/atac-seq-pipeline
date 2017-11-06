@@ -69,7 +69,7 @@ $ java -jar -Dconfig.file=backends/default.conf cromwell-29.jar run atac.wdl ...
    ```
    unset PYTHONPATH
    export PATH=[ATAC_SEQ_PIPELINE_DIR]/src:$PATH
-   export PATH=[MINICONDA3_INSTALL_DIR]:$PATH
+   export PATH=[MINICONDA3_INSTALL_DIR]/bin:$PATH
    ```
 
 6) Re-login.

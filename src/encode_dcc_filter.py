@@ -268,24 +268,6 @@ def pbc_qc_pe(bam, nth, out_dir):
     rm_f(nmsrt_bam)
     return pbc_qc
 
-def create_empty_dup_qc(bam, out_dir):
-    prefix = os.path.join(out_dir,
-        os.path.basename(strip_ext_bam(bam)))
-    dup_qc = '{}.dup.qc'.format(prefix)    
-
-    cmd = 'touch {}'.format(dup_qc)
-    run_shell_cmd(cmd)
-    return dup_qc
-
-def create_empty_pbc_qc(bam, out_dir):
-    prefix = os.path.join(out_dir,
-        os.path.basename(strip_ext_bam(bam)))
-    pbc_qc = '{}.pbc.qc'.format(prefix)    
-
-    cmd = 'touch {}'.format(pbc_qc)
-    run_shell_cmd(cmd)
-    return pbc_qc
-
 def main():
     # filt_bam - dupmark_bam - nodup_bam
     #          \ dup_qc      \ pbc_qc
@@ -312,7 +294,6 @@ def main():
 
     if args.no_dup_removal:
         nodup_bam = filt_bam
-        dup_qc = create_empty_dup_qc(filt_bam, args.out_dir)
     else:
         log.info('Marking dupes with {}...'.format(args.dup_marker))
         if args.dup_marker=='picard':
@@ -355,10 +336,7 @@ def main():
                                 (nodup_bam, args.nth, args.out_dir))
 
     log.info('Generating PBC QC log...')
-    if args.no_dup_removal:
-        ret_val_3 = pool.apply_sync(create_empty_pbc_qc,
-                                (filt_bam, args.out_dir))
-    else:
+    if not args.no_dup_removal:
         if args.paired_end:
             ret_val_3 = pool.apply_async(pbc_qc_pe,
                             (dupmark_bam,
@@ -370,7 +348,8 @@ def main():
     # gather
     nodup_bai = ret_val_1.get(BIG_INT)
     nodup_flagstat_qc = ret_val_2.get(BIG_INT)
-    pbc_qc = ret_val_3.get(BIG_INT)
+    if not args.no_dup_removal:
+        pbc_qc = ret_val_3.get(BIG_INT)
 
     # close multithreading
     pool.close()

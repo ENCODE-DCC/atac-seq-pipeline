@@ -17,8 +17,8 @@ def parse_arguments(debug=False):
     parser.add_argument('fastqs', nargs='+', type=str,
                         help='TSV file path or list of FASTQs. \
                             FASTQs must be compressed with gzip (with .gz). \
-                            Use TSV for multiple techincal replicates \
-                            row=tech_rep_id, col=pair_id).')
+                            Use TSV for multiple fastqs to be merged later. \
+                            row=merge_id, col=end_id).')
     parser.add_argument('--auto-detect-adapter', action='store_true',
                         help='Automatically detect/trim adapters \
                             (supported system: Illumina, Nextera and smallRNA).')
@@ -31,8 +31,8 @@ def parse_arguments(debug=False):
                             of the matching adapter region).')
     parser.add_argument('--adapters', nargs='+', type=str,
                         help='TSV file path or list of adapter strings. \
-                            Use TSV for multiple techincal replicates \
-                            row=tech_rep_id, col=pair_id).')
+                            Use TSV for multiple fastqs to be merged later. \
+                            row=merge_id, col=end_id).')
     parser.add_argument('--paired-end', action="store_true",
                         help='Paired-end FASTQs.')
     parser.add_argument('--nth', type=int, default=1,
@@ -154,8 +154,8 @@ def main():
     log.info('Detecting adapters...')
     ret_vals = []
     for i in range(len(args.fastqs)):
-        # for each technical replicate
-        log.info('Detecting adapters for tech_rep{}...'.format(
+        # for each fastq to be merged later
+        log.info('Detecting adapters for merge_id={}...'.format(
                 i+1))
         fastqs = args.fastqs[i] # R1 and R2
         adapters = args.adapters[i]
@@ -178,14 +178,14 @@ def main():
     for i, ret_vals_ in enumerate(ret_vals):
         for j, ret_val in enumerate(ret_vals_):
             args.adapters[i][j] = str(ret_val.get(BIG_INT))
-            log.info('Detected adapters for tech_rep{}, R{}: {}'.format(
+            log.info('Detected adapters for merge_id={}, R{}: {}'.format(
                     i+1, j+1, args.adapters[i][j]))
 
     # trim adapters
     log.info('Trimming adapters...')
     ret_vals = []
     for i in range(len(args.fastqs)):
-        # for each technical replicate
+        # for each fastq to be merged later
         fastqs = args.fastqs[i] # R1 and R2
         adapters = args.adapters[i]
         if args.paired_end:

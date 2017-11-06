@@ -82,7 +82,7 @@ def bam2ta_pe(bam, regex_grep_v_ta, nth, out_dir):
         bedpe,
         ta)
     run_shell_cmd(cmd2)
-    # rm_f(bedpe)
+    rm_f(bedpe)
     return ta
 
 def tn5_shift_ta(ta, out_dir):

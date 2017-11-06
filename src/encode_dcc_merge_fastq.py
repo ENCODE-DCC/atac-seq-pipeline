@@ -16,8 +16,8 @@ def parse_arguments(debug=False):
                         help='TSV file path or list of FASTQs. \
                             FASTQs must be compressed with gzip (with .gz). \
                             Use TSV for paired end fastqs or \
-                            multiple techincal replicates \
-                            row=tech_rep_id, col=pair_id). \
+                            multiple fastqs to be merged. \
+                            row=merge_id, col=end_id). \
                             All rows will be merged.')
     parser.add_argument('--nth', type=int, default=1,
                         help='Number of threads to parallelize.')
