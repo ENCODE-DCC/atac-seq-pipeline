@@ -197,7 +197,8 @@ workflow atac {
 		# pool tagaligns from true/pseudo replicates
 		call pool_ta {
 			input :
-				tas = select_first([bam2ta.ta,tas]),
+				tas = if defined(bam2ta.ta[0])
+						then bam2ta.ta else tas,
 				queue = queue_short,
 		}
 		if ( !select_first([true_rep_only,false]) ) {
@@ -373,8 +374,8 @@ workflow atac {
 		# reproducibility QC for overlapping peaks
 		call reproducibility as reproducibility_overlap {
 			input:
-				peaks = select_first(
-					bfilt_overlap.filtered_peak,[]),
+				peaks = if defined(bfilt_overlap.filtered_peak[0])
+					then bfilt_overlap.filtered_peak else [],
 				peaks_pr = bfilt_overlap_pr.filtered_peak,
 				peak_ppr = bfilt_overlap_ppr.filtered_peak,
 				queue = queue_short,
@@ -442,8 +443,8 @@ workflow atac {
 			# reproducibility QC for IDR peaks
 			call reproducibility as reproducibility_idr {
 				input:
-					peaks = select_first(
-						bfilt_idr.filtered_peak,[]),
+					peaks = if defined(bfilt_idr.filtered_peak[0])
+						then bfilt_idr.filtered_peak else [],
 					peaks_pr = bfilt_idr_pr.filtered_peak,
 					peak_ppr = bfilt_idr_ppr.filtered_peak,
 					queue = queue_short,
@@ -491,7 +492,8 @@ task trim_adapter { # detect/trim adapter
 }
 
 task merge_fastq { # merge fastqs
-	Array[Array[File]] fastqs # fastqs[merge_id][end_id]
+	# parameters from workflow
+	Array[Array[File]] fastqs # [merge_id][end_id]
 	# resource
 	String? queue
 
@@ -553,7 +555,8 @@ task filter {
 	Boolean paired_end
 	Int? multimapping
 	# optional
-	String? dup_marker 			# picard.jar MarkDuplicates or sambamba markdup
+	String? dup_marker 			# picard.jar MarkDuplicates (picard) or 
+								# sambamba markdup (sambamba)
 	Int? mapq_thresh			# threshold for low MAPQ reads removal
 	Boolean? no_dup_removal 	# no dupe reads removal when filtering BAM
 								# dup.qc and pbc.qc will not be generated
@@ -598,7 +601,7 @@ task bam2ta {
 	File bam
 	Boolean paired_end
 	# optional
-	Boolean? disable_tn5_shift 	# no tn5 shifting for dnase-seq
+	Boolean? disable_tn5_shift 	# no tn5 shifting (it's for dnase-seq)
 	String? regex_grep_v_ta 	# Perl-style regular expression pattern 
                         		# to remove matching reads from TAGALIGN
 	Int? subsample 				# number of reads to subsample TAGALIGN
@@ -651,7 +654,7 @@ task spr { # make two self pseudo replicates
 
 task pool_ta {
 	# parameters from workflow
-	Array[File] tas
+	Array[File?] tas
 	# resource
 	String? queue
 
@@ -684,7 +687,8 @@ task xcor {
 			${ta} \
 			${if select_first([paired_end,false])
 				then "--paired-end" else ""} \
-			${"--subsample " + select_first(subsample,25000000)} \
+			${"--subsample " + select_first(
+								[subsample,25000000])} \
 			--speak=0 \
 			${"--nth " + cpu}
 	}
@@ -700,7 +704,7 @@ task xcor {
 
 task macs2 {
 	# parameters from workflow
-	File ta
+	File? ta
 	String gensz		# Genome size (sum of entries in 2nd column of 
                         # chr. sizes file, or hs for human, ms for mouse)
 	File chrsz			# 2-col chromosome sizes file
@@ -740,9 +744,9 @@ task macs2 {
 task idr {
 	# parameters from workflow
 	String? prefix 		# prefix for IDR output file
-	File peak1 			
-	File peak2
-	File peak_pooled
+	File? peak1 			
+	File? peak2
+	File? peak_pooled
 	Float? idr_thresh
 	# resource
 	String? queue
@@ -768,9 +772,9 @@ task idr {
 task overlap {
 	# parameters from workflow
 	String? prefix 		# prefix for IDR output file
-	File peak1
-	File peak2
-	File peak_pooled
+	File? peak1
+	File? peak2
+	File? peak_pooled
 	# resource
 	String? queue
 
@@ -789,11 +793,11 @@ task overlap {
 
 task reproducibility {
 	# parameters from workflow
-	Array[File]? peaks 	# peak files from pair of true replicates
+	Array[File?]? peaks # peak files from pair of true replicates
 						# in a sorted order. for example of 4 replicates,
 						# 1,2 1,3 1,4 2,3 2,4 3,4.
                         # x,y means peak file from rep-x vs rep-y
-	Array[File] peaks_pr	# peak files from pseudo replicates
+	Array[File?] peaks_pr	# peak files from pseudo replicates
 	File? peak_ppr			# Peak file from pooled pseudo replicate.
 	# resource
 	String? queue
@@ -815,8 +819,8 @@ task reproducibility {
 
 task blacklist_filter {
 	# parameters from workflow
-	File peak
-	File blacklist
+	File? peak
+	File? blacklist
 	# resource
 	String? queue
 
@@ -835,8 +839,8 @@ task blacklist_filter {
 
 task frip {
 	# parameters from workflow
-	File peak
-	File ta
+	File? peak
+	File? ta
 	# resource
 	String? queue
 

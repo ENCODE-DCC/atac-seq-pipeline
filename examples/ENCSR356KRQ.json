@@ -22,9 +22,11 @@
 	"atac.paired_end" : true,
 	"atac.multimapping" : 4,
 
-	"atac.cpu" : 12,
-
+	"atac.cpu" : 12,	
 	"atac.trim_adapter.auto_detect_adapter" : true,
+
+	"atac.queue_short" : "standard",
+	"atac.queue_hard" : "extended",
 
 	"atac.bowtie2.mem_mb" : 12000,
 	"atac.bowtie2.time_hr" : 36,
@@ -32,5 +34,6 @@
 	"atac.filter.mem_mb" : 12000,
 	"atac.filter.time_hr" : 23,
 
-	"atac.smooth_win" : 73
+	"atac.smooth_win" : 73,
+	"atac.enable_idr" : true
 }
