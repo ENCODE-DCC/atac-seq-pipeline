@@ -21,7 +21,7 @@ def parse_arguments():
                         help='Pooled peak.')
     parser.add_argument('--prefix', default='overlap', type=str,
                         help='Prefix basename for output overlap peak.')
-    parser.add_argument('--nonamecheck', action='set_true',
+    parser.add_argument('--nonamecheck', action='store_true',
                         help='bedtools intersect -nonamecheck. \
                         use this if you get bedtools intersect \
                         naming convenction warnings/errors).')
@@ -42,8 +42,8 @@ def naive_overlap(basename_prefix, peak1, peak2, peak_pooled,
     nonamecheck, out_dir):
     prefix = os.path.join(out_dir, basename_prefix)
     prefix += '.overlap'
-    peak_ext = find_genomic_ext(peak1)
-    overlap_peak = '{}.{}.gz'.format(peak_ext)
+    peak_ext = get_ext(peak1)
+    overlap_peak = '{}.{}.gz'.format(prefix,peak_ext)
 
     nonamecheck_param = '-nonamecheck' if nonamecheck else  ''
     # narrowpeak, regionpeak only
@@ -71,7 +71,7 @@ def naive_overlap(basename_prefix, peak1, peak2, peak_pooled,
         nonamecheck_param,
         tmp_pooled, # peak_pooled
         tmp1, # peak1
-        awk_param
+        awk_param,
         cut_param,
         nonamecheck_param,
         tmp2, # peak2
@@ -93,7 +93,7 @@ def main():
     log.info('Do naive overlap...')
     overlap_peak = naive_overlap(
         args.prefix, args.peak1, args.peak2, args.peak_pooled, 
-        args.out_dir)
+        args.nonamecheck, args.out_dir)
 
     log.info('All done.')
 

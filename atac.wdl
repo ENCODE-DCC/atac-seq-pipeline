@@ -7,11 +7,12 @@ workflow atac {
 	# 1) For DNase-Seq, set "bam2ta.disable_tn5_shift"=true
 
 	# 2) Pipeline can start from any type of genome data 
-	# (fastq, bam, nodup_bam, ta)
+	# (fastq, bam, nodup_bam, ta, peak)
 	# WDL currently does not allow optional arrays in workflow level
-	# so DO NOT remove fastqs, adapters, bams, nodup_bams and tas in input.json
+	# so DO NOT remove input file arrays from input.json
+	# (fastqs, adapters, bams, nodup_bams, tas, peaks, peaks_pr1, peaks_pr2)
 	# also DO NOT remove adapters from input.json even if not starting from fastqs
-	# choose one of them to start with but set others as []
+	# choose one of (fastq, bam, nodup_bam, ta, peak) to start with but set others as []	
 
 	# 3) fastqs is 3-dimensional array to allow merging of fastqs 
 	# per replicate/endedness
@@ -35,6 +36,16 @@ workflow atac {
 	# there will be no auto detection for non-empty entries in adapters
 	# if adapters==[], all adapters will be detected/trimmed
 
+	# 7) if starting from peaks. always specify peaks[].
+	# specify peaks_pr1[], peaks_pr2[], peak_pooled, peak_ppr1, peak_ppr2 
+	# according to the following rules:
+	# if num_rep>1:
+	# 	if true_rep_only: peak_pooled, 
+	#	else: peaks_pr1[], peaks_pr2[], peak_pooled, peak_ppr1, peak_ppr2
+	# else:
+	# 	if true_rep_only: not the case
+	#	else: peaks_pr1[], peaks_pr2[]
+
 	# mandatory input files
 	Array[Array[Array[String]]] fastqs 
 								# [rep_id][merge_id][end_id]
@@ -43,6 +54,11 @@ workflow atac {
 	Array[String] bams 			# [rep_id] if starting from bams
 	Array[String] nodup_bams 	# [rep_id] if starting from filtered bams
 	Array[String] tas 			# [rep_id] if starting from tag-aligns
+	Array[String] peaks			# [rep_id] if starting from peaks
+	Array[String] peaks_pr1		# [rep_id] if starting from peaks
+	Array[String] peaks_pr2		# [rep_id] if starting from peaks
+	String? peaks_ppr1			# if starting from peaks
+	String? peaks_ppr2			# if starting from peaks
 
 	# mandaory adapters
 	Array[Array[Array[String]]] adapters 
@@ -96,6 +112,7 @@ workflow atac {
 			bams = bams,
 			nodup_bams = nodup_bams,
 			tas = tas,
+			peaks = peaks,
 	}
 
 	# pipeline starts here (parallelized for each replicate)
@@ -152,16 +169,34 @@ workflow atac {
 					queue = queue_hard,
 			}
 		}
-		# subsample tagalign (non-mito) and cross-correlation analysis
-		call xcor {
-			input:
-				ta = if defined(bam2ta.ta) 
-						then bam2ta.ta else tas[i],
-				paired_end = select_first([paired_end,true]),
-				cpu = cpu/inputs.num_rep,
-				queue = queue_hard,
+		if (inputs.type=='fastq' || inputs.type=='bam' ||
+			inputs.type=='nodup_bam' || inputs.type=='ta') {
+			# subsample tagalign (non-mito) and cross-correlation analysis
+			call xcor {
+				input:
+					ta = if defined(bam2ta.ta) 
+							then bam2ta.ta else tas[i],
+					paired_end = select_first([paired_end,true]),
+					cpu = cpu/inputs.num_rep,
+					queue = queue_hard,
+			}
+			# call peaks on tagalign
+			call macs2 {
+				input:
+					ta = if defined(bam2ta.ta) 
+							then bam2ta.ta else tas[i],
+					gensz = genome["gensz"],
+					chrsz = genome["chrsz"],
+					cap_num_peak = cap_num_peak,
+					pval_thresh = pval_thresh,
+					smooth_win = smooth_win,
+					make_signal = true,
+					queue = queue_hard,
+			}
 		}
-		if ( !select_first([true_rep_only,false]) ) {
+		if ( !select_first([true_rep_only,false]) && 
+			(inputs.type=='fastq' || inputs.type=='bam' ||
+			inputs.type=='nodup_bam' || inputs.type=='ta') ) {
 			# make two self pseudo replicates per true replicate
 			call spr {
 				input:
@@ -171,138 +206,136 @@ workflow atac {
 					queue = queue_short,
 			}
 		}
-		# call peaks on tagalign
-		call macs2 {
-			input:
-				ta = if defined(bam2ta.ta) 
-						then bam2ta.ta else tas[i],
-				gensz = genome["gensz"],
-				chrsz = genome["chrsz"],
-				cap_num_peak = cap_num_peak,
-				pval_thresh = pval_thresh,
-				smooth_win = smooth_win,
-				make_signal = true,
-				queue = queue_hard,
-		}
 		# filter out peaks with blacklist
 		call blacklist_filter as bfilt_macs2 {
 			input:
-				peak = macs2.npeak,
+				peak = if defined(macs2.npeak)
+						then macs2.npeak else peaks[i],
 				blacklist = genome["blacklist"],				
 				queue = queue_short,
 		}
 	}
 
 	if ( inputs.num_rep>1 ) {
-		# pool tagaligns from true/pseudo replicates
-		call pool_ta {
-			input :
-				tas = if defined(bam2ta.ta[0])
-						then bam2ta.ta else tas,
-				queue = queue_short,
-		}
-		if ( !select_first([true_rep_only,false]) ) {
-			call pool_ta as pool_ta_pr1 {
+		if (inputs.type=='fastq' || inputs.type=='bam' ||
+			inputs.type=='nodup_bam' || inputs.type=='ta') {
+			# pool tagaligns from true replicates
+			call pool_ta {
 				input :
-					tas = spr.ta_pr1,
+					tas = if defined(bam2ta.ta[0])
+							then bam2ta.ta else tas,
 					queue = queue_short,
 			}
-			call pool_ta as pool_ta_pr2 {
-				input :
-					tas = spr.ta_pr2,
-					queue = queue_short,
+			# call peaks on pooled replicate
+			call macs2 as macs2_pooled {
+				input:
+					ta = pool_ta.ta_pooled,
+					gensz = genome["gensz"],
+					chrsz = genome["chrsz"],
+					cap_num_peak = cap_num_peak,
+					pval_thresh = pval_thresh,
+					smooth_win = smooth_win,
+					make_signal = true,
+					queue = queue_hard,
 			}
-		}
-		# call peaks on pooled replicate
-		call macs2 as macs2_pooled {
-			input:
-				ta = pool_ta.ta_pooled,
-				gensz = genome["gensz"],
-				chrsz = genome["chrsz"],
-				cap_num_peak = cap_num_peak,
-				pval_thresh = pval_thresh,
-				smooth_win = smooth_win,
-				make_signal = true,
-				queue = queue_hard,
 		}
 		call blacklist_filter as bfilt_macs2_pooled {
 			input:
-				peak = macs2_pooled.npeak,
+				peak = if defined(macs2_pooled.npeak)
+						then macs2_pooled.npeak else peak_pooled,
 				blacklist = genome["blacklist"],
 				queue = queue_short,
 		}
 	}
-	if ( !select_first([true_rep_only,false]) ) {
-		# call peaks on 1st pseudo replicated tagalign 
-		scatter(ta in spr.ta_pr1) {
-			call macs2 as macs2_pr1 {
-				input:
-					ta = ta,
-					gensz = genome["gensz"],
-					chrsz = genome["chrsz"],
-					cap_num_peak = cap_num_peak,
-					pval_thresh = pval_thresh,
-					smooth_win = smooth_win,
-					queue = queue_hard,
+	if ( !select_first([true_rep_only,false]) ) {		
+		scatter(i in range(inputs.num_rep)) {
+			if (inputs.type=='fastq' || inputs.type=='bam' ||
+				inputs.type=='nodup_bam' || inputs.type=='ta') {
+				# call peaks on 1st pseudo replicated tagalign 
+				call macs2 as macs2_pr1 {
+					input:
+						ta = spr.ta_pr1[i],
+						gensz = genome["gensz"],
+						chrsz = genome["chrsz"],
+						cap_num_peak = cap_num_peak,
+						pval_thresh = pval_thresh,
+						smooth_win = smooth_win,
+						queue = queue_hard,
+				}
+				call macs2 as macs2_pr2 {
+					input:
+						ta = spr.ta_pr2[i],
+						gensz = genome["gensz"],
+						chrsz = genome["chrsz"],
+						cap_num_peak = cap_num_peak,
+						pval_thresh = pval_thresh,
+						smooth_win = smooth_win,
+						queue = queue_hard,
+				}
 			}
 			call blacklist_filter as bfilt_macs2_pr1 {
 				input:
-					peak = macs2_pr1.npeak,
+					peak = if defined(macs2_pr1.npeak)
+						then macs2_pr1.npeak else peaks_pr1[i],
 					blacklist = genome["blacklist"],
 					queue = queue_short,
 			}
-		}
- 		# call peaks on 2nd pseudo replicated tagalign 
-		scatter(ta in spr.ta_pr2) {
-			call macs2 as macs2_pr2 {
-				input:
-					ta = ta,
-					gensz = genome["gensz"],
-					chrsz = genome["chrsz"],
-					cap_num_peak = cap_num_peak,
-					pval_thresh = pval_thresh,
-					smooth_win = smooth_win,
-					queue = queue_hard,
-			}
 			call blacklist_filter as bfilt_macs2_pr2 {
 				input:
-					peak = macs2_pr2.npeak,
+					peak = if defined(macs2_pr2.npeak)
+						then macs2_pr2.npeak else peaks_pr2[i],
 					blacklist = genome["blacklist"],
 					queue = queue_short,
 			}
 		}
 		if ( inputs.num_rep>1 ) {
-			# call peaks on 1st pooled pseudo replicates
-			call macs2 as macs2_ppr1 {
-				input:
-					ta = pool_ta_pr1.ta_pooled,
-					gensz = genome["gensz"],
-					chrsz = genome["chrsz"],
-					cap_num_peak = cap_num_peak,
-					pval_thresh = pval_thresh,
-					smooth_win = smooth_win,
-					queue = queue_hard,
+			if (inputs.type=='fastq' || inputs.type=='bam' ||
+				inputs.type=='nodup_bam' || inputs.type=='ta') {
+				# pool tagaligns from pseudo replicates
+				call pool_ta as pool_ta_pr1 {
+					input :
+						tas = spr.ta_pr1,
+						queue = queue_short,
+				}
+				call pool_ta as pool_ta_pr2 {
+					input :
+						tas = spr.ta_pr2,
+						queue = queue_short,
+				}
+				# call peaks on 1st pooled pseudo replicates
+				call macs2 as macs2_ppr1 {
+					input:
+						ta = pool_ta_pr1.ta_pooled,
+						gensz = genome["gensz"],
+						chrsz = genome["chrsz"],
+						cap_num_peak = cap_num_peak,
+						pval_thresh = pval_thresh,
+						smooth_win = smooth_win,
+						queue = queue_hard,
+				}
+				# call peaks on 2nd pooled pseudo replicates
+				call macs2 as macs2_ppr2 {
+					input:
+						ta = pool_ta_pr2.ta_pooled,
+						gensz = genome["gensz"],
+						chrsz = genome["chrsz"],
+						cap_num_peak = cap_num_peak,
+						pval_thresh = pval_thresh,
+						smooth_win = smooth_win,
+						queue = queue_hard,
+				}
 			}
 			call blacklist_filter as bfilt_macs2_ppr1 {
 				input:
-					peak = macs2_ppr1.npeak,
+					peak = if defined(macs2_ppr1.npeak)
+							then macs2_ppr1.npeak else peak_ppr1,
 					blacklist = genome["blacklist"],
 					queue = queue_short,
 			}
-			# call peaks on 2nd pooled pseudo replicates
-			call macs2 as macs2_ppr2 {
-				input:
-					ta = pool_ta_pr2.ta_pooled,
-					gensz = genome["gensz"],
-					chrsz = genome["chrsz"],
-					cap_num_peak = cap_num_peak,
-					pval_thresh = pval_thresh,
-					smooth_win = smooth_win,
-					queue = queue_hard,
-			}
 			call blacklist_filter as bfilt_macs2_ppr2 {
 				input:
-					peak = macs2_ppr2.npeak,
+					peak = if defined(macs2_ppr2.npeak)
+							then macs2_ppr2.npeak else peak_ppr2,
 					blacklist = genome["blacklist"],
 					queue = queue_short,
 			}
@@ -323,9 +356,15 @@ workflow atac {
 				input : 
 					prefix = "rep"+(pair[0]+1)+
 							"-rep"+(pair[1]+1),
-					peak1 = macs2.npeak[(pair[0])],
-					peak2 = macs2.npeak[(pair[1])],
-					peak_pooled = macs2_pooled.npeak,
+					peak1 = if defined(macs2.npeak[0])
+						then macs2.npeak[(pair[0])] 
+						else peaks[(pair[0])],
+					peak2 = if defined(macs2.npeak[0])
+						then macs2.npeak[(pair[1])]
+						else peaks[(pair[1])],
+					peak_pooled = if defined()
+						then macs2_pooled.npeak
+						else peak_pooled,
 					queue = queue_short,
 			}
 			call blacklist_filter as bfilt_overlap {
@@ -341,10 +380,16 @@ workflow atac {
 		scatter( i in range(inputs.num_rep) ) {
 			call overlap as overlap_pr {
 				input : 
-					prefix = "rep"+(i+1)+"pr",
-					peak1 = macs2_pr1.npeak[i],
-					peak2 = macs2_pr2.npeak[i],
-					peak_pooled = macs2.npeak[i],
+					prefix = "rep"+(i+1)+"-pr",
+					peak1 = if defined(macs2_pr1.npeak[0])
+						then macs2_pr1.npeak[i]
+						else peaks_pr1[i],
+					peak2 = if defined(macs2_pr2.npeak[0])
+						then macs2_pr2.npeak[i]
+						else peaks_pr2[i],
+					peak_pooled = if defined(macs2.npeak[i])
+						then macs2.npeak[i]
+						else peak_pooled,
 					queue = queue_short,
 			}
 			call blacklist_filter as bfilt_overlap_pr {
@@ -359,9 +404,15 @@ workflow atac {
 			call overlap as overlap_ppr {
 				input : 
 					prefix = "ppr",
-					peak1 = macs2_ppr1.npeak,
-					peak2 = macs2_ppr2.npeak,
-					peak_pooled = macs2_pooled.npeak,
+					peak1 = if defined(macs2_ppr1.npeak)
+						then macs2_ppr1.npeak
+						else peak_ppr1,
+					peak2 = if defined(macs2_ppr2.npeak)
+						then macs2_ppr2.npeak
+						else peak_ppr2,
+					peak_pooled = if defined(macs2_pooled.npeak)
+						then macs2_pooled.npeak
+						else peak_pooled,
 					queue = queue_short,
 			}
 			call blacklist_filter as bfilt_overlap_ppr {
@@ -390,9 +441,15 @@ workflow atac {
 					input : 
 						prefix = "rep"+(pair[0]+1)
 								+"-rep"+(pair[1]+1),
-						peak1 = macs2.npeak[(pair[0])],
-						peak2 = macs2.npeak[(pair[1])],
-						peak_pooled = macs2_pooled.npeak,
+						peak1 = if defined(macs2.npeak[0])
+							then macs2.npeak[(pair[0])]
+							else peaks[(pair[0])],
+						peak2 = if defined(macs2.npeak[0])
+							then macs2.npeak[(pair[1])]
+							else peaks[(pair[1])],
+						peak_pooled = if defined(macs2_pooled.npeak)
+							then macs2_pooled.npeak 
+							else peak_pooled,
 						idr_thresh = idr_thresh,
 						queue = queue_short,
 				}
@@ -409,10 +466,16 @@ workflow atac {
 			scatter( i in range(inputs.num_rep) ) {
 				call idr as idr_pr {
 					input : 
-						prefix = "rep"+(i+1)+"pr",
-						peak1 = macs2_pr1.npeak[i],
-						peak2 = macs2_pr2.npeak[i],
-						peak_pooled = macs2.npeak[i],
+						prefix = "rep"+(i+1)+"-pr",
+						peak1 = if defined(macs2_pr1.npeak[i])
+							then macs2_pr1.npeak[i]
+							else peaks_pr1[i],
+						peak2 = if defined(macs2_pr2.npeak[i])
+							then macs2_pr2.npeak[i]
+							else peaks_pr2[i],
+						peak_pooled = if defined(macs2.npeak[i])
+							then macs2.npeak[i]
+							else peak_pooled,
 						idr_thresh = idr_thresh,
 						queue = queue_short,
 				}
@@ -427,9 +490,15 @@ workflow atac {
 				call idr as idr_ppr {
 					input : 
 						prefix = "ppr",
-						peak1 = macs2_ppr1.npeak,
-						peak2 = macs2_ppr2.npeak,
-						peak_pooled = macs2_pooled.npeak,
+						peak1 = if defined(macs2_ppr1.npeak)
+							then macs2_ppr1.npeak
+							else peak_ppr1,
+						peak2 = if defined(macs2_ppr2.npeak)
+							then macs2_ppr2.npeak
+							else peak_ppr2,
+						peak_pooled = if defined(macs2_pooled.npeak)
+							then macs2_pooled.npeak
+							else peak_pooled,
 						idr_thresh = idr_thresh,
 						queue = queue_short,
 				}
@@ -543,7 +612,7 @@ task bowtie2 {
 	}
 	runtime {
 		cpu : "${select_first([cpu,1])}"
-		memory : "${select_first([mem_mb,'100'])} MB"
+		memory : "${select_first([mem_mb,'12000'])} MB"
 		time : "${select_first([time_hr,1])}"
 		queue : queue
 	}
@@ -590,7 +659,7 @@ task filter {
 
 	runtime {
 		cpu : "${select_first([cpu,1])}"
-		memory : "${select_first([mem_mb,'100'])} MB"
+		memory : "${select_first([mem_mb,'12000'])} MB"
 		time : "${select_first([time_hr,1])}"
 		queue : queue
 	}
@@ -735,7 +804,7 @@ task macs2 {
 		Array[File] sig_fc = glob("*.fc.signal.bigwig")
 	}
 	runtime {
-		memory : "${select_first([mem_mb,'100'])} MB"
+		memory : "${select_first([mem_mb,'8000'])} MB"
 		time : "${select_first([time_hr,1])}"
 		queue : queue
 	}
@@ -827,7 +896,7 @@ task blacklist_filter {
 	command {
 		python $(which encode_dcc_blacklist_filter.py) \
 			${peak} \
-			${blacklist}
+			--blacklist ${blacklist}
 	}
 	output {
 		File filtered_peak = glob('*.gz')[0]
@@ -864,12 +933,14 @@ task inputs {	# determine input type and number of replicates
 	Array[String] bams
 	Array[String] nodup_bams
 	Array[String] tas
+	Array[String] peaks
 
 	command <<<
 		python <<CODE
-		name = ['fastq','bam','nodup_bam','ta']
+		name = ['fastq','bam','nodup_bam','ta','peak']
 		arr = [${length(fastqs)},${length(bams)},
-		       ${length(nodup_bams)},${length(tas)}]
+		       ${length(nodup_bams)},${length(tas)},
+		       ${length(peaks)}]
 		num_rep = max(arr)
 		type = name[arr.index(num_rep)]
 		with open('num_rep.txt','w') as fp:
