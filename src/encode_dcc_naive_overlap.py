@@ -95,6 +95,9 @@ def main():
         args.prefix, args.peak1, args.peak2, args.peak_pooled, 
         args.nonamecheck, args.out_dir)
 
+    log.info('Checking if output is empty...') # bedtools issue    
+    assert_file_not_empty(overlap_peak)
+    
     log.info('All done.')
 
 if __name__=='__main__':

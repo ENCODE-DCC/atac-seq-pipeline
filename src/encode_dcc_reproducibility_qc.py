@@ -22,6 +22,8 @@ def parse_arguments():
                         help='List of peak files from pseudo replicates.')
     parser.add_argument('--peak-ppr', type=str,
                         help='Peak file from pooled pseudo replicate.')
+    parser.add_argument('--prefix', type=str,
+                        help='Basename prefix for reproducibility QC file.')
     parser.add_argument('--out-dir', default='.', type=str,
                         help='Output directory.')
     parser.add_argument('--log-level', default='INFO', 
@@ -29,34 +31,33 @@ def parse_arguments():
                             'WARNING','CRITICAL','ERROR','CRITICAL'],
                         help='Log level')
     args = parser.parse_args()
-
-    if len(args.peaks_pr)!=deduce_num_rep(len(args.peaks)):
+    if len(args.peaks_pr)!=infer_num_rep(len(args.peaks)):
         raise ValueError('Invalid number of peak files or --peak-pr.')
 
     log.setLevel(args.log_level)
     log.info(sys.argv)
     return args
 
-def deduce_num_rep(num_peaks):
+def infer_num_rep(num_peaks):
     if num_peaks:
-        num_rep=1
+        num_rep=2
         while(nCr(num_rep,2)!=num_peaks):
             num_rep += 1
             if num_rep > 99:
-                raise ValueError('Cannot deduce num_rep from num_peaks. '+
+                raise ValueError('Cannot infer num_rep from num_peaks. '+
                     'wrong number of peaks in --peaks?')
         return num_rep
     else:
         return 1
 
-def deduce_pair_label_from_idx(num_rep, idx):
+def infer_pair_label_from_idx(num_rep, idx):
     cnt = 0
     for i in range(num_rep):
         for j in range(i+1,num_rep):
             if idx==cnt:
                 return 'rep-{}_vs_rep-{}'.format(i+1,j+1)
             cnt += 1
-    raise ValueError('Cannot deduce rep_id from num_rep and idx.')
+    raise ValueError('Cannot infer rep_id from num_rep and idx.')
 
 def main():
     # read params
@@ -72,10 +73,10 @@ def main():
     # N: list of number of peaks in peak files from pseudo replicates
     # Nt: top number of peaks in peak files from true replicates (rep-x_vs_rep-y)
     # Np: number of peaks in peak files from pooled pseudo replicate
-    N = [get_num_lines(peak) for peak in args.peak_pr]
+    N = [get_num_lines(peak) for peak in args.peaks_pr]
     if len(args.peaks):
         # multiple replicate case
-        num_rep = deduce_num_rep(len(args.peaks))
+        num_rep = infer_num_rep(len(args.peaks))
         num_peaks_tr = [get_num_lines(peak) for peak in args.peaks]
 
         Nt = max(num_peaks_tr)
@@ -84,7 +85,7 @@ def main():
         self_consistency_ratio = max(N)/min(N)
 
         Nt_idx = num_peaks_tr.index(Nt)
-        label_tr = deduce_pair_label_from_idx(num_rep, Nt_idx)
+        label_tr = infer_pair_label_from_idx(num_rep, Nt_idx)
 
         conservative_set = label_tr
         conservative_peak = make_hard_link(args.peaks[Nt_idx], args.out_dir)
@@ -121,7 +122,13 @@ def main():
         reproducibility = 'fail'
 
     log.info('Writing reproducibility QC log...')
-    with open('reproducibility.qc','w') as fp:
+    if args.prefix:
+        reproducibility_qc = '{}.reproducibility.qc'.format(args.prefix)
+    else:
+        reproducibility_qc = 'reproducibility.qc'
+    reproducibility_qc = os.path.join(args.out_dir, reproducibility_qc)
+    
+    with open(reproducibility_qc,'w') as fp:
         header = '{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n'.format(
             'Nt',
             '\t'.join(['N{}'.format(i+1) for i in range(num_rep)]),
@@ -136,7 +143,7 @@ def main():
             )
         line = '{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n'.format(
             Nt,
-            '\t'.join([i for i in N]),
+            '\t'.join([str(i) for i in N]),
             Np,
             N_optimal,
             N_conservative,

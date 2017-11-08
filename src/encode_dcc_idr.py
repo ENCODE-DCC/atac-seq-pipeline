@@ -120,6 +120,9 @@ def main():
         args.peak1, args.peak2, args.peak_pooled, 
         args.idr_thresh, args.idr_rank, args.out_dir)
 
+    log.info('Checking if output is empty...') # bedtools issue
+    assert_file_not_empty(idr_peak)
+    
     log.info('All done.')
 
 if __name__=='__main__':

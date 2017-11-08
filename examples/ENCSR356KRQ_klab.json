@@ -18,6 +18,9 @@
 	"atac.bams" : [],
 	"atac.nodup_bams" : [],
 	"atac.tas" : [],
+	"atac.peaks" : [],
+	"atac.peaks_pr1" : [],
+	"atac.peaks_pr2" : [],
 
 	"atac.paired_end" : true,
 	"atac.multimapping" : 4,

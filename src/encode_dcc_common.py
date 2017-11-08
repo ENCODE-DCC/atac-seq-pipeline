@@ -130,12 +130,17 @@ def make_hard_link(f, out_dir):
     # make hard-link (UNIX only)
     linked = os.path.join(out_dir,
         os.path.basename(f))
+    rm_f(linked)
     os.link(f, linked)
     return linked
 
-def get_num_lines(file):
-    cmd = 'zcat -f {} | wc -l'.format(file)
+def get_num_lines(f):
+    cmd = 'zcat -f {} | wc -l'.format(f)
     return int(run_shell_cmd(cmd))
+
+def assert_file_not_empty(f):
+    if get_num_lines(f)==0:
+        raise ValueError('File is empty. {}'.format(f))
 
 def write_txt(f,s):
     with open(f,'w') as fp:
@@ -161,7 +166,6 @@ def run_shell_cmd(cmd):
             # log.debug('PID={}: {}'.format(pid,line.strip('\n')))
             print('PID={}: {}'.format(pid,line.strip('\n')))
             ret += line
-            # sys.stdout.flush()
         p.communicate() # wait here
         if p.returncode > 0:
             raise subprocess.CalledProcessError(
@@ -171,7 +175,6 @@ def run_shell_cmd(cmd):
         # kill all children processes
         log.exception('Unknown exception caught. '+ \
             'Killing process group {}...'.format(pgid))
-        # os.system("kill -{} -{}".format(signal.SIGKILL,pgid))
         os.killpg(pgid, signal.SIGKILL)
         p.terminate()
         raise Exception('Unknown exception caught. PID={}'.format(pid))

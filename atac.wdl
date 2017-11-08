@@ -47,18 +47,19 @@ workflow atac {
 	#	else: peaks_pr1[], peaks_pr2[]
 
 	# mandatory input files
-	Array[Array[Array[String]]] fastqs 
+	Array[Array[Array[File]]] fastqs 
 								# [rep_id][merge_id][end_id]
 								# 	after merging, it will reduce to 
 								# 	[rep_id][end_id]
-	Array[String] bams 			# [rep_id] if starting from bams
-	Array[String] nodup_bams 	# [rep_id] if starting from filtered bams
-	Array[String] tas 			# [rep_id] if starting from tag-aligns
-	Array[String] peaks			# [rep_id] if starting from peaks
-	Array[String] peaks_pr1		# [rep_id] if starting from peaks
-	Array[String] peaks_pr2		# [rep_id] if starting from peaks
-	String? peaks_ppr1			# if starting from peaks
-	String? peaks_ppr2			# if starting from peaks
+	Array[File] bams 			# [rep_id] if starting from bams
+	Array[File] nodup_bams 		# [rep_id] if starting from filtered bams
+	Array[File] tas 			# [rep_id] if starting from tag-aligns
+	Array[File] peaks			# [rep_id] if starting from peaks
+	Array[File] peaks_pr1		# [rep_id] if starting from peaks
+	Array[File] peaks_pr2		# [rep_id] if starting from peaks
+	File? peak_ppr1				# if starting from peaks
+	File? peak_ppr2				# if starting from peaks
+	File? peak_pooled			# if starting from peaks
 
 	# mandaory adapters
 	Array[Array[Array[String]]] adapters 
@@ -353,7 +354,7 @@ workflow atac {
 	if ( inputs.num_rep>1 ) {
 		scatter( pair in pair_gen.pairs ) {
 			call overlap {
-				input : 
+				input :
 					prefix = "rep"+(pair[0]+1)+
 							"-rep"+(pair[1]+1),
 					peak1 = if defined(macs2.npeak[0])
@@ -362,7 +363,7 @@ workflow atac {
 					peak2 = if defined(macs2.npeak[0])
 						then macs2.npeak[(pair[1])]
 						else peaks[(pair[1])],
-					peak_pooled = if defined()
+					peak_pooled = if defined(macs2_pooled.npeak)
 						then macs2_pooled.npeak
 						else peak_pooled,
 					queue = queue_short,
@@ -425,8 +426,9 @@ workflow atac {
 		# reproducibility QC for overlapping peaks
 		call reproducibility as reproducibility_overlap {
 			input:
+				prefix = 'overlap',
 				peaks = if defined(bfilt_overlap.filtered_peak[0])
-					then bfilt_overlap.filtered_peak else [],
+				then bfilt_overlap.filtered_peak else [],
 				peaks_pr = bfilt_overlap_pr.filtered_peak,
 				peak_ppr = bfilt_overlap_ppr.filtered_peak,
 				queue = queue_short,
@@ -512,6 +514,7 @@ workflow atac {
 			# reproducibility QC for IDR peaks
 			call reproducibility as reproducibility_idr {
 				input:
+					prefix = 'idr',
 					peaks = if defined(bfilt_idr.filtered_peak[0])
 						then bfilt_idr.filtered_peak else [],
 					peaks_pr = bfilt_idr_pr.filtered_peak,
@@ -828,7 +831,7 @@ task idr {
 			--idr-rank signal.value
 	}
 	output {
-		File idr_peak = glob("*peak.gz")[0]
+		File idr_peak = glob("*eak.gz")[0]
 		File idr_plot = glob("*.txt.png")[0]
 		File idr_unthresholded_peak = glob("*.txt.gz")[0]
 		File idr_log = glob("*.log")[0]
@@ -853,7 +856,7 @@ task overlap {
 			${"--prefix " + prefix}
 	}
 	output {
-		File overlap_peak = glob("*peak.gz")[0]
+		File overlap_peak = glob("*eak.gz")[0]
 	}
 	runtime {
 		queue : queue
@@ -862,7 +865,8 @@ task overlap {
 
 task reproducibility {
 	# parameters from workflow
-	Array[File?]? peaks # peak files from pair of true replicates
+	String prefix
+	Array[File?] peaks # peak files from pair of true replicates
 						# in a sorted order. for example of 4 replicates,
 						# 1,2 1,3 1,4 2,3 2,4 3,4.
                         # x,y means peak file from rep-x vs rep-y
@@ -872,14 +876,15 @@ task reproducibility {
 	String? queue
 
 	command {
-		python $(which encode_dcc_reproducibility_qc.py) \			
+		python $(which encode_dcc_reproducibility_qc.py) \
 			${sep=' ' peaks} \
 			--peaks-pr ${sep=' ' peaks_pr} \
-			${"--peak-ppr "+ peak_ppr}
+			${"--peak-ppr "+ peak_ppr} \
+			--prefix ${prefix}
 	}
 	output {
 		File reproducibility_qc = 
-			glob("*.reproducibility.qc")[0]
+			glob("*reproducibility.qc")[0]
 	}
 	runtime {
 		queue : queue

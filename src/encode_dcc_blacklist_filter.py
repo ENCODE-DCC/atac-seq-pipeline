@@ -34,7 +34,7 @@ def blacklist_filter(peak, blacklist, keep_irregular_chr, out_dir):
     prefix = os.path.join(out_dir, 
         os.path.basename(strip_ext(peak)))
     peak_ext = get_ext(peak)
-    filtered = '{}.filt.{}.gz'.format(prefix, peak_ext)
+    filtered = '{}.bfilt.{}.gz'.format(prefix, peak_ext)
 
     # due to bedtools bug when .gz is given for -a and -b
     tmp1 = gunzip(peak, 'tmp1', out_dir)
@@ -52,7 +52,7 @@ def blacklist_filter(peak, blacklist, keep_irregular_chr, out_dir):
         filtered)
     run_shell_cmd(cmd)
     rm_f([tmp1, tmp2])
-    return
+    return filtered
 
 def main():
     # read params
@@ -68,6 +68,9 @@ def main():
                 args.peak, args.blacklist, 
                 args.keep_irregular_chr, args.out_dir)
 
+    log.info('Checking if output is empty...') # bedtools issue
+    assert_file_not_empty(filtered)
+    
     log.info('All done.')
 
 if __name__=='__main__':
