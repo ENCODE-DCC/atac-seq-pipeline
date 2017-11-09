@@ -1,5 +1,5 @@
 {
-	"atac.genome_tsv" : "/users/leepc12/code/atac-seq-pipeline/genome/hg38_klab.tsv",
+	"atac.genome_tsv" : "/oak/stanford/groups/akundaje/leepc12/code/atac-seq-pipeline/genome/hg38_sherlock.tsv",
 	"atac.adapters" : [],
 	"atac.fastqs" : [
 		[
@@ -39,11 +39,13 @@
 	"atac.queue_short" : "akundaje",
 	"atac.queue_hard" : "akundaje",
 
-	"atac.bowtie2.mem_mb" : 12000,
+	"atac.bowtie2.mem_mb" : 16000,
 	"atac.bowtie2.time_hr" : 36,
 
-	"atac.filter.mem_mb" : 12000,
+	"atac.filter.mem_mb" : 16000,
 	"atac.filter.time_hr" : 23,
+
+	"atac.macs2.mem_mb" : 16000,
 
 	"atac.smooth_win" : 73,
 	"atac.enable_idr" : true

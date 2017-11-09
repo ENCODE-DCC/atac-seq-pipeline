@@ -72,7 +72,7 @@ def main():
         log.info('Subsampling TAGALIGN for xcor...')
         if args.paired_end:
             ta_subsampled = subsample_ta_pe(
-                args.ta, args.subsample, True, args.out_dir)
+                args.ta, args.subsample, True, True, args.out_dir)
         else:
             ta_subsampled = subsample_ta_se(
                 args.ta, args.subsample, True, args.out_dir)

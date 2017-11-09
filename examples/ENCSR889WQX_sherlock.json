@@ -3,14 +3,14 @@
 	"atac.adapters" : [],
 	"atac.fastqs" : [
 		[
-			["/oak/stanford/groups/akundaje/leepc12/run/ATAC_ENCODE3/ENCODE3/data/DNA+accessibility/ATAC-seq/Mus+musculus/ENCSR889WQX/data/rep1/ENCFF439VSY.fastq.gz"],
-			["/oak/stanford/groups/akundaje/leepc12/run/ATAC_ENCODE3/ENCODE3/data/DNA+accessibility/ATAC-seq/Mus+musculus/ENCSR889WQX/data/rep1/ENCFF325FCQ.fastq.gz"],
-			["/oak/stanford/groups/akundaje/leepc12/run/ATAC_ENCODE3/ENCODE3/data/DNA+accessibility/ATAC-seq/Mus+musculus/ENCSR889WQX/data/rep1/ENCFF683IQS.fastq.gz"],
-			["/oak/stanford/groups/akundaje/leepc12/run/ATAC_ENCODE3/ENCODE3/data/DNA+accessibility/ATAC-seq/Mus+musculus/ENCSR889WQX/data/rep1/ENCFF744CHW.fastq.gz"]
+			["/oak/stanford/groups/akundaje/leepc12/run/ATAC_ENCODE3/ENCODE3/data/DNA+accessibility/ATAC-seq/Mus+musculus/ENCSR889WQX/rep1/ENCFF439VSY.fastq.gz"],
+			["/oak/stanford/groups/akundaje/leepc12/run/ATAC_ENCODE3/ENCODE3/data/DNA+accessibility/ATAC-seq/Mus+musculus/ENCSR889WQX/rep1/ENCFF325FCQ.fastq.gz"],
+			["/oak/stanford/groups/akundaje/leepc12/run/ATAC_ENCODE3/ENCODE3/data/DNA+accessibility/ATAC-seq/Mus+musculus/ENCSR889WQX/rep1/ENCFF683IQS.fastq.gz"],
+			["/oak/stanford/groups/akundaje/leepc12/run/ATAC_ENCODE3/ENCODE3/data/DNA+accessibility/ATAC-seq/Mus+musculus/ENCSR889WQX/rep1/ENCFF744CHW.fastq.gz"]
 		],
 		[
-			["/oak/stanford/groups/akundaje/leepc12/run/ATAC_ENCODE3/ENCODE3/data/DNA+accessibility/ATAC-seq/Mus+musculus/ENCSR889WQX/data/rep2/ENCFF463QCX.fastq.gz"],
-			["/oak/stanford/groups/akundaje/leepc12/run/ATAC_ENCODE3/ENCODE3/data/DNA+accessibility/ATAC-seq/Mus+musculus/ENCSR889WQX/data/rep2/ENCFF992TSA.fastq.gz"]
+			["/oak/stanford/groups/akundaje/leepc12/run/ATAC_ENCODE3/ENCODE3/data/DNA+accessibility/ATAC-seq/Mus+musculus/ENCSR889WQX/rep2/ENCFF463QCX.fastq.gz"],
+			["/oak/stanford/groups/akundaje/leepc12/run/ATAC_ENCODE3/ENCODE3/data/DNA+accessibility/ATAC-seq/Mus+musculus/ENCSR889WQX/rep2/ENCFF992TSA.fastq.gz"]
 		]
 	],
 	"atac.bams" : [],
@@ -34,6 +34,8 @@
 
 	"atac.filter.mem_mb" : 12000,
 	"atac.filter.time_hr" : 23,
+
+	"atac.macs2.mem_mb" : 16000,
 
 	"atac.smooth_win" : 73,
 	"atac.enable_idr" : true

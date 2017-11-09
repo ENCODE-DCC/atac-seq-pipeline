@@ -807,7 +807,7 @@ task macs2 {
 		Array[File] sig_fc = glob("*.fc.signal.bigwig")
 	}
 	runtime {
-		memory : "${select_first([mem_mb,'8000'])} MB"
+		memory : "${select_first([mem_mb,'12000'])} MB"
 		time : "${select_first([time_hr,1])}"
 		queue : queue
 	}

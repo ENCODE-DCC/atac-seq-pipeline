@@ -296,11 +296,14 @@ def subsample_ta_se(ta, subsample, non_mito, out_dir):
     run_shell_cmd(cmd)
     return ta_subsampled
 
-def subsample_ta_pe(ta, subsample, non_mito, out_dir):
+def subsample_ta_pe(ta, subsample, non_mito, r1_only, out_dir):
     prefix = os.path.join(out_dir,
         os.path.basename(strip_ext_ta(ta)))
-    ta_subsampled = '{}.{}.tagAlign.gz'.format(
-        prefix, human_readable_number(subsample))
+    ta_subsampled = '{}.{}{}{}.tagAlign.gz'.format(
+        prefix,
+        'no_chrM.' if non_mito else '',
+        'R1.' if r1_only else '',
+        human_readable_number(subsample))
 
     cmd = 'zcat -f {} | '
     if non_mito:
@@ -308,9 +311,13 @@ def subsample_ta_pe(ta, subsample, non_mito, out_dir):
     cmd += 'sed \'N;s/\\n/\\\t/\' | '
     cmd += 'shuf -n {} --random-source={} | '
     cmd += 'awk \'BEGIN{{OFS="\\t"}} | '
-    cmd += '{{printf "%s\\t%s\\t%s\\t%s\\t%s\\t%s\\n'
-    cmd += '%s\\t%s\\t%s\\t%s\\t%s\\t%s\\n",'
-    cmd += '$1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12}}\' | '
+    if r1_only:
+        cmd += '{{printf "%s\\t%s\\t%s\\t%s\\t%s\\t%s\\n'
+        cmd += '",$1,$2,$3,$4,$5,$6}}\' | '
+    else:
+        cmd += '{{printf "%s\\t%s\\t%s\\t%s\\t%s\\t%s\\n'
+        cmd += '%s\\t%s\\t%s\\t%s\\t%s\\t%s\\n",'
+        cmd += '$1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12}}\' | '
     cmd += 'gzip -nc > {}'
     cmd = cmd.format(
         ta,
