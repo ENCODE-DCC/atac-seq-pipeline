@@ -126,7 +126,4 @@ RUN mkdir atac-seq-pipeline
 COPY / atac-seq-pipeline
 ENV PATH="/software/atac-seq-pipeline/src:${PATH}"
 
-# Add directories for binaries and python scripts to PATH
-ENV PATH="/software:/software/atac-seq-pipeline/src:${PATH}"
-
 ENTRYPOINT ["/bin/bash","-c"]

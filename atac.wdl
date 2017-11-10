@@ -34,7 +34,7 @@ workflow atac {
 	# 6) set "trim_adapter.auto_detect_adapter"=true 
 	# to automatically detect/trim adapters for empty entries in adapters
 	# there will be no auto detection for non-empty entries in adapters
-	# if adapters==[], all adapters will be detected/trimmed
+	# if adapters==[], adapters will be detected/trimmed for all fastqs
 
 	# 7) if starting from peaks. always specify peaks[].
 	# specify peaks_pr1[], peaks_pr2[], peak_pooled, peak_ppr1, peak_ppr2 
