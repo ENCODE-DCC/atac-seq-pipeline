@@ -81,7 +81,7 @@ def idr(basename_prefix, peak1, peak2, peak_pooled,
     cmd2 = 'awk \'BEGIN{{OFS="\\t"}} $12>={} '
     cmd2 += '{{if ($2<0) $2=0; '
     cmd2 += 'print $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12}}\' {} '
-    cmd2 += '| sort | uniq | sort -s -k {}gr,{}gr | gzip -nc > {}'
+    cmd2 += '| sort | uniq | sort -s -grk{},{} | gzip -nc > {}'
     cmd2 = cmd2.format(
         neg_log10_thresh,
         idr_out,
