@@ -80,12 +80,11 @@ def macs2(ta, chrsz, gensz, pval_thresh, smooth_win, cap_num_peak,
         npeak_tmp)
     run_shell_cmd(cmd1)
 
-    cmd2 += 'head -n {} {} | gzip -nc > {}'
-    cmd2 = cmd2.format(        
+    cmd2 = 'head -n {} {} | gzip -nc > {}'.format(
         cap_num_peak,
         npeak_tmp,
         npeak)
-    run_shell_cmd(cmd1)
+    run_shell_cmd(cmd2)
     rm_f(npeak_tmp)
 
     if make_signal:
