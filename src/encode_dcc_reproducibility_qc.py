@@ -55,7 +55,7 @@ def infer_pair_label_from_idx(num_rep, idx):
     for i in range(num_rep):
         for j in range(i+1,num_rep):
             if idx==cnt:
-                return 'rep-{}_vs_rep-{}'.format(i+1,j+1)
+                return 'rep{}-rep{}'.format(i+1,j+1)
             cnt += 1
     raise ValueError('Cannot infer rep_id from num_rep and idx.')
 
@@ -81,8 +81,8 @@ def main():
 
         Nt = max(num_peaks_tr)
         Np = get_num_lines(args.peak_ppr)
-        rescue_ratio = max(Np,Nt)/min(Np,Nt)
-        self_consistency_ratio = max(N)/min(N)
+        rescue_ratio = float(max(Np,Nt))/float(min(Np,Nt))
+        self_consistency_ratio = float(max(N))/float(min(N))
 
         Nt_idx = num_peaks_tr.index(Nt)
         label_tr = infer_pair_label_from_idx(num_rep, Nt_idx)

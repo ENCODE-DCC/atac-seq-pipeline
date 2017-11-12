@@ -794,7 +794,8 @@ task macs2 {
 			${ta} \
 			${"--gensz "+ gensz} \
 			${"--chrsz " + chrsz} \
-			${"--cap-num-peak " + cap_num_peak} \
+			${"--cap-num-peak " + select_first(
+								[cap_num_peak,300000])} \
 			${"--p-val-thresh "+ pval_thresh} \
 			${"--smooth-win "+ smooth_win} \
 			${if select_first([make_signal,false])
@@ -828,7 +829,7 @@ task idr {
 			${peak1} ${peak2} ${peak_pooled} \
 			${"--prefix " + prefix} \
 			${"--idr-thresh " + idr_thresh} \
-			--idr-rank signal.value
+			--idr-rank p.value
 	}
 	output {
 		File idr_peak = glob("*eak.gz")[0]
@@ -925,6 +926,55 @@ task frip {
 	}
 	output {
 		File frip_qc = glob('*.frip.qc')[0]
+	}
+	runtime {
+		queue : queue
+	}
+}
+
+task gather_and_report {
+	Array[Array[Array[File]]] trimmed_fastqs
+	Array[Array[File]] pooled_fastqs
+	Array[File] bams
+	Array[File] nodup_bams
+	Array[File] tas
+
+	Array[File] peaks
+	Array[File] peaks_pr1
+	Array[File] peaks_pr2
+	File? peak_ppr1
+	File? peak_ppr2
+	File? peak_pooled
+
+	Array[File] bfilt_peaks
+	Array[File] bfilt_peaks_pr1
+	Array[File] bfilt_peaks_pr2
+	File? bfilt_peak_ppr1
+	File? bfilt_peak_ppr2
+	File? bfilt_peak_pooled
+
+	Array[File] idr_peaks
+	Array[File] idr_peaks_pr
+	File? idr_peak_ppr
+
+	Array[File] overlap_peaks
+	Array[File] overlap_peaks_pr
+	File? overlap_peak_ppr
+
+	File? idr_reproducibility_qc
+	File? overlap_reproducibility_qc
+
+	command {
+		python $(which encode_dcc_gather_atac.py) \
+			"--bams " + ${sep=' ' bams} \
+			"--nodup-bams " + ${sep=' ' nodup_bams} \
+			"--tas " + ${sep=' ' tas} \
+			"--peaks " + ${sep=' ' peaks} \
+			"--bfilt-peaks " + ${sep=' ' bfilt_peaks}
+	}
+	output {
+		File qc_json = glob('qc.json')[0]
+		File report = glob('report.html')[0]
 	}
 	runtime {
 		queue : queue

@@ -23,7 +23,7 @@ def parse_arguments():
                         help='P-Value threshold.')
     parser.add_argument('--smooth-win', default=150, type=int,
                         help='Smoothing window size.')
-    parser.add_argument('--cap-num-peak', default=500000, type=int,
+    parser.add_argument('--cap-num-peak', default=300000, type=int,
                         help='Capping number of peaks by taking top N peaks.')
     parser.add_argument('--make-signal', action="store_true",
                         help='Generate signal tracks for P-Value and fold enrichment.')
@@ -50,6 +50,7 @@ def macs2(ta, chrsz, gensz, pval_thresh, smooth_win, cap_num_peak,
     fc_bigwig = '{}.fc.signal.bigwig'.format(prefix)
     pval_bigwig = '{}.pval.signal.bigwig'.format(prefix)
     # temporary files
+    npeak_tmp = '{}.tmp'.format(npeak)
     fc_bedgraph = '{}.fc.signal.bedgraph'.format(prefix)
     fc_bedgraph_srt = '{}.fc.signal.srt.bedgraph'.format(prefix)
     pval_bedgraph = '{}.pval.signal.bedgraph'.format(prefix)
@@ -58,28 +59,34 @@ def macs2(ta, chrsz, gensz, pval_thresh, smooth_win, cap_num_peak,
     shiftsize = -int(round(float(smooth_win)/2.0))
     temp_files = []
 
-    cmd1 = 'macs2 callpeak '
-    cmd1 += '-t {} -f BED -n {} -g {} -p {} '
-    cmd1 += '--shift {} --extsize {} '
-    cmd1 += '--nomodel -B --SPMR '
-    cmd1 += '--keep-dup all --call-summits '
-    cmd1 = cmd1.format(
+    cmd0 = 'macs2 callpeak '
+    cmd0 += '-t {} -f BED -n {} -g {} -p {} '
+    cmd0 += '--shift {} --extsize {} '
+    cmd0 += '--nomodel -B --SPMR '
+    cmd0 += '--keep-dup all --call-summits '
+    cmd0 = cmd0.format(
         ta,
         prefix,
         gensz,
         pval_thresh,
         shiftsize,
         smooth_win)
+    run_shell_cmd(cmd0)
+
+    cmd1 = 'LC_COLLATE=C sort -k 8gr,8gr "{}"_peaks.narrowPeak | '
+    cmd1 += 'awk \'BEGIN{{OFS="\\t"}}{{$4="Peak_"NR ; print $0}}\' > {}'
+    cmd1 = cmd1.format(
+        prefix,
+        npeak_tmp)
     run_shell_cmd(cmd1)
 
-    cmd2 = 'LC_COLLATE=C sort -k 8gr,8gr "{}"_peaks.narrowPeak | '
-    cmd2 += 'awk \'BEGIN{{OFS="\\t"}}{{$4="Peak_"NR ; print $0}}\' | '
-    cmd2 += 'head -n {} | gzip -nc > {}'
-    cmd2 = cmd2.format(
-        prefix,
+    cmd2 += 'head -n {} {} | gzip -nc > {}'
+    cmd2 = cmd2.format(        
         cap_num_peak,
+        npeak_tmp,
         npeak)
-    run_shell_cmd(cmd2)
+    run_shell_cmd(cmd1)
+    rm_f(npeak_tmp)
 
     if make_signal:
         cmd3 = 'macs2 bdgcmp -t "{}"_treat_pileup.bdg '

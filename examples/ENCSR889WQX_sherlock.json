@@ -38,5 +38,6 @@
 	"atac.macs2.mem_mb" : 16000,
 
 	"atac.smooth_win" : 73,
-	"atac.enable_idr" : true
+	"atac.enable_idr" : true,
+	"atac.idr_thresh" : 0.05
 }
