@@ -2,50 +2,6 @@
 # Author: Jin Lee (leepc12@gmail.com)
 
 workflow atac {
-	# IMPORTANT NOTE on specifying input files in input.json:
-
-	# 1) For DNase-Seq, set "bam2ta.disable_tn5_shift"=true
-
-	# 2) Pipeline can start from any type of genome data 
-	# (fastq, bam, nodup_bam, ta, peak)
-	# WDL currently does not allow optional arrays in workflow level
-	# so DO NOT remove input file arrays from input.json
-	# (fastqs, adapters, bams, nodup_bams, tas, peaks, peaks_pr1, peaks_pr2)
-	# also DO NOT remove adapters from input.json even if not starting from fastqs
-	# choose one of (fastq, bam, nodup_bam, ta, peak) to start with but set others as []	
-
-	# 3) fastqs is 3-dimensional array to allow merging of fastqs 
-	# per replicate/endedness
-	# 	1st dimension: replicate id
-	# 	2nd dimension: merge id (will reduce after merging)
-	# 	3rd dimension: R1, R2 (single ended or paired end)
-	# for SE, length of 3rd dimension must be 1 [R1]
-	# for PE, length of 3rd dimension must be 2 [R1, R2]
-
-	# 4) other types are just 1-dimensional arrays
-	# 	1st dimension: replicate id
-	
-	# 5) structure of adapters must match with that of fastqs	
-	# if no adapters are given then set adapters = [] in input.json
-	# if only some adapters are known then specify them in adapters and
-	# leave other entries empty ("") while keeping the same structure as in fastqs
-	# all specified/non-empty adapters will be trimmed without auto detection
-	
-	# 6) set "trim_adapter.auto_detect_adapter"=true 
-	# to automatically detect/trim adapters for empty entries in adapters
-	# there will be no auto detection for non-empty entries in adapters
-	# if adapters==[], adapters will be detected/trimmed for all fastqs
-
-	# 7) if starting from peaks. always specify peaks[].
-	# specify peaks_pr1[], peaks_pr2[], peak_pooled, peak_ppr1, peak_ppr2 
-	# according to the following rules:
-	# if num_rep>1:
-	# 	if true_rep_only: peak_pooled, 
-	#	else: peaks_pr1[], peaks_pr2[], peak_pooled, peak_ppr1, peak_ppr2
-	# else:
-	# 	if true_rep_only: not the case
-	#	else: peaks_pr1[], peaks_pr2[]
-
 	# mandatory input files
 	Array[Array[Array[File]]] fastqs 
 								# [rep_id][merge_id][end_id]

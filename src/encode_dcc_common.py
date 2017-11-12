@@ -325,4 +325,4 @@ def subsample_ta_pe(ta, subsample, non_mito, r1_only, out_dir):
         ta,
         ta_subsampled)
     run_shell_cmd(cmd)
-    return
+    return ta_subsampled
