@@ -107,7 +107,7 @@ workflow wf {
   File? f2
   Array[File]? arr  # error there is no type coercion from opt. array to array
   Boolean? flag1
-  Boolean flag2
+  Boolean? flag2
 
   if ( flag1 ) {
     # error when flag1 is not specified in input.json
