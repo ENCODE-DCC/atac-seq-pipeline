@@ -180,6 +180,15 @@ task t1 {
 
 Parallelization is **ALWAYS MAXIMIZED** in WDL. Cromwell first makes a task input/output dependency tree and start **ALL** tasks with **given inputs**. If task-B's input comes from another task-A's output, then task-B waits for task-A.
 
+
+# ATAC-Seq pipeline.WDL
+
+Goals
+1) can start from any type of input files
+2) can customize/fine-tune pipeline (need to have most flags and parameters in original BDS pipeline)
+3) can run on any platforms (local, SGE, SLURM, Google Cloud, AWS, ...)
+4) separate genome specific files and parameters from workflow input JSON
+
 # Issues
 
 ## Resumability (call-caching)
