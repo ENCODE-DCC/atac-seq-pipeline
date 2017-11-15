@@ -42,6 +42,7 @@ workflow atac {
 	Int? cap_num_peak 		# cap number of raw peaks called from MACS2
 	Float? pval_thresh 		# p.value threshold
 	Int? smooth_win 		# size of smoothing window
+	Int? macs2_mem_mb 		# resource
 
 	# optional for IDR
 	Boolean? enable_idr		# enable IDR analysis on raw peaks
@@ -138,6 +139,7 @@ workflow atac {
 					pval_thresh = pval_thresh,
 					smooth_win = smooth_win,
 					make_signal = true,
+					mem_mb = macs2_mem_mb,
 					queue = queue_hard,
 			}
 		}
@@ -183,6 +185,7 @@ workflow atac {
 					pval_thresh = pval_thresh,
 					smooth_win = smooth_win,
 					make_signal = true,
+					mem_mb = macs2_mem_mb,
 					queue = queue_hard,
 			}
 		}
@@ -207,6 +210,7 @@ workflow atac {
 						cap_num_peak = cap_num_peak,
 						pval_thresh = pval_thresh,
 						smooth_win = smooth_win,
+						mem_mb = macs2_mem_mb,
 						queue = queue_hard,
 				}
 				call macs2 as macs2_pr2 {
@@ -217,6 +221,7 @@ workflow atac {
 						cap_num_peak = cap_num_peak,
 						pval_thresh = pval_thresh,
 						smooth_win = smooth_win,
+						mem_mb = macs2_mem_mb,
 						queue = queue_hard,
 				}
 			}
@@ -258,6 +263,7 @@ workflow atac {
 						cap_num_peak = cap_num_peak,
 						pval_thresh = pval_thresh,
 						smooth_win = smooth_win,
+						mem_mb = macs2_mem_mb,
 						queue = queue_hard,
 				}
 				# call peaks on 2nd pooled pseudo replicates
@@ -269,6 +275,7 @@ workflow atac {
 						cap_num_peak = cap_num_peak,
 						pval_thresh = pval_thresh,
 						smooth_win = smooth_win,
+						mem_mb = macs2_mem_mb,
 						queue = queue_hard,
 				}
 			}

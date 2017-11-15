@@ -33,7 +33,7 @@
 	"atac.filter.mem_mb" : 12000,
 	"atac.filter.time_hr" : 23,
 
-	"atac.macs2.mem_mb" : 16000,
+	"atac.macs2_mem_mb" : 16000,
 
 	"atac.smooth_win" : 73,
 	"atac.enable_idr" : true,
