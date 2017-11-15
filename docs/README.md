@@ -186,7 +186,7 @@ Parallelization is **ALWAYS MAXIMIZED** in WDL. Cromwell first makes a task inpu
 Goals
 1) can start from any type of input files
 2) can customize/fine-tune pipeline (need to have most flags and parameters in original BDS pipeline)
-3) can run on any platforms (local, SGE, SLURM, Google Cloud, AWS, ...)
+3) can run on any platforms (local, SGE, SLURM, Google Cloud, AWS, ...) with or w/o docker
 4) separate genome specific files and parameters from workflow input JSON
 
 # Issues
