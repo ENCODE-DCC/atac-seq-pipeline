@@ -6,8 +6,8 @@ Issues and discussion
 ```
 workflow wf {
   File f1 # = "/path/to/file1"
-  call t1 { input f : f1 }
-  call t2 { input f : t1.out }
+  call t1 { input : f = f1 }
+  call t2 { input : f = t1.out }
 }
 
 task t1 {
@@ -111,7 +111,7 @@ workflow wf {
 
   if ( flag1 ) {
     # error when flag1 is not specified in input.json
-    call t1 { input: f1 : f1 }
+    call t1 { input: f1 = f1 }
   }
   else {
     # error. there is no if else both in workflow and task namespace
