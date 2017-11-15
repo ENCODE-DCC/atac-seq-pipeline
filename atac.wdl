@@ -26,15 +26,10 @@ workflow atac {
 							# and parameters
 	Boolean paired_end 		# endedness of sample
 
-	# mandatory resource
-	Int cpu 				# total number of concurrent threads to process sample
-							# this is a rough estimate. more threads can be used
-							# depending on the process hierachy/tree of subtasks
-							# must be >=4 and multiples of number of replicates
 	# optional resource (only for SGE and SLURM)
 							# name of SGE queue or SLURM partition
 							# all sub-tasks of pipeline will be sumitted to two queues
-	String? queue_hard 		# queue for hard/long multi-threaded tasks 
+	String? queue_hard 		# queue for hard/long multi-threaded tasks
 							# (trim_adapter, bowtie2, filter, bam2ta, macs2)
 	String? queue_short 	# queue for easy/short tasks (all others)
 
@@ -57,14 +52,14 @@ workflow atac {
 	String? desc 			# description for sample
 	String? accession_id 	# ENCODE accession ID of sample
 
-	# OTHER IMPORTANT mandatory/optional parameters are declared in task level
+	# OTHER IMPORTANT mandatory/optional parameters are declared in a task level
 
 	# make genome data map
 	Map[String,String] genome = read_map(genome_tsv)
 
-	# determin input file type and num_rep (number of replicates)
+	# determine input file type and num_rep (number of replicates)
 	call inputs {
-		input : 
+		input :
 			fastqs = fastqs,
 			bams = bams,
 			nodup_bams = nodup_bams,
@@ -82,7 +77,6 @@ workflow atac {
 					adapters = if length(adapters)>0 
 							then adapters[i] else [],
 					paired_end = paired_end,
-					cpu = cpu/inputs.num_rep,
 					queue = queue_hard,
 			}
 			# merge fastqs from technical replicates
@@ -98,7 +92,6 @@ workflow atac {
 					fastqs = merge_fastq.merged_fastqs,
 					paired_end = paired_end,
 					multimapping = multimapping,
-					cpu = cpu/inputs.num_rep,
 					queue = queue_hard,
 			}
 		}
@@ -110,7 +103,6 @@ workflow atac {
 							then bowtie2.bam else bams[i],
 					paired_end = paired_end,
 					multimapping = multimapping,
-					cpu = cpu/inputs.num_rep,
 					queue = queue_hard,
 			}
 		}
@@ -122,7 +114,6 @@ workflow atac {
 					bam = if defined(filter.nodup_bam) 
 							then filter.nodup_bam else nodup_bams[i],
 					paired_end = select_first([paired_end,true]),
-					cpu = cpu/inputs.num_rep,
 					queue = queue_hard,
 			}
 		}
@@ -134,7 +125,6 @@ workflow atac {
 					ta = if defined(bam2ta.ta) 
 							then bam2ta.ta else tas[i],
 					paired_end = select_first([paired_end,true]),
-					cpu = cpu/inputs.num_rep,
 					queue = queue_hard,
 			}
 			# call peaks on tagalign
@@ -442,7 +432,7 @@ workflow atac {
 						peak = idr_pr.idr_peak,
 						blacklist = genome["blacklist"],
 						queue = queue_short,
-				}		
+				}
 			}
 			if ( inputs.num_rep>1 ) {
 				call idr as idr_ppr {
@@ -571,8 +561,8 @@ task bowtie2 {
 	}
 	runtime {
 		cpu : "${select_first([cpu,1])}"
-		memory : "${select_first([mem_mb,'12000'])} MB"
-		time : "${select_first([time_hr,1])}"
+		memory : "${select_first([mem_mb,'20000'])} MB"
+		time : "${select_first([time_hr,48])}"
 		queue : queue
 	}
 }
@@ -618,8 +608,8 @@ task filter {
 
 	runtime {
 		cpu : "${select_first([cpu,1])}"
-		memory : "${select_first([mem_mb,'12000'])} MB"
-		time : "${select_first([time_hr,1])}"
+		memory : "${select_first([mem_mb,'20000'])} MB"
+		time : "${select_first([time_hr,24])}"
 		queue : queue
 	}
 }
@@ -764,8 +754,8 @@ task macs2 {
 		Array[File] sig_fc = glob("*.fc.signal.bigwig")
 	}
 	runtime {
-		memory : "${select_first([mem_mb,'12000'])} MB"
-		time : "${select_first([time_hr,1])}"
+		memory : "${select_first([mem_mb,'16000'])} MB"
+		time : "${select_first([time_hr,24])}"
 		queue : queue
 	}
 }

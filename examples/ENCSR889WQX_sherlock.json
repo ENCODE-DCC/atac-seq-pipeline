@@ -23,15 +23,16 @@
 	"atac.paired_end" : false,
 	"atac.multimapping" : 4,	
 
-	"atac.cpu" : 10,
 	"atac.trim_adapter.auto_detect_adapter" : true,
 
 	"atac.queue_short" : "akundaje",
 	"atac.queue_hard" : "akundaje",
 
-	"atac.bowtie2.mem_mb" : 12000,
+	"atac.bowtie2.cpu" : 4,
+	"atac.bowtie2.mem_mb" : 16000,
 	"atac.bowtie2.time_hr" : 36,
 
+	"atac.filter.cpu" : 2,
 	"atac.filter.mem_mb" : 12000,
 	"atac.filter.time_hr" : 23,
 
