@@ -27,7 +27,7 @@ def parse_arguments():
                         help='Multimapping reads.')
     parser.add_argument('--nth', type=int, default=1,
                         help='Number of threads to parallelize.')
-    parser.add_argument('--out-dir', default='.', type=str,
+    parser.add_argument('--out-dir', default='', type=str,
                             help='Output directory.')
     parser.add_argument('--log-level', default='INFO', 
                         choices=['NOTSET','DEBUG','INFO',
@@ -303,8 +303,8 @@ def main():
             dupmark_bam, dup_qc = mark_dup_sambamba(
                                 filt_bam, args.nth, args.out_dir)
         else:
-            raise ValueError('Unsupported --dup-marker {}'.format(
-                            args.dup_marker))
+            raise argparse.ArgumentTypeError(
+            'Unsupported --dup-marker {}'.format(args.dup_marker))
         temp_files.append(filt_bam)
 
         log.info('Removing dupes...')

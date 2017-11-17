@@ -107,7 +107,5 @@ fastqs/
 cromwell-executions/
 cromwell-workflow-logs/
 
-# google auth
-google_jin.conf
-
-hello.*
+test.wdl
+test_google.wdl

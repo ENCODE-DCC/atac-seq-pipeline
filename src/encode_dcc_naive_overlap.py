@@ -25,7 +25,7 @@ def parse_arguments():
                         help='bedtools intersect -nonamecheck. \
                         use this if you get bedtools intersect \
                         naming convenction warnings/errors).')
-    parser.add_argument('--out-dir', default='.', type=str,
+    parser.add_argument('--out-dir', default='', type=str,
                         help='Output directory.')
     parser.add_argument('--log-level', default='INFO', 
                         choices=['NOTSET','DEBUG','INFO',

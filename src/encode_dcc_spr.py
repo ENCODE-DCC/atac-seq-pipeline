@@ -16,7 +16,7 @@ def parse_arguments():
                         help='Path for TAGALIGN file.')
     parser.add_argument('--paired-end', action="store_true",
                         help='Paired-end TAGALIGN.')
-    parser.add_argument('--out-dir', default='.', type=str,
+    parser.add_argument('--out-dir', default='', type=str,
                             help='Output directory.')
     parser.add_argument('--log-level', default='INFO', 
                         choices=['NOTSET','DEBUG','INFO',

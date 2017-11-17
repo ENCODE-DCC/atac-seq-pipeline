@@ -13,7 +13,7 @@ def parse_arguments():
                                         description='')
     parser.add_argument('tas', nargs='+', type=str,
                         help='List of TAGALIGNs to be pooled.')
-    parser.add_argument('--out-dir', default='.', type=str,
+    parser.add_argument('--out-dir', default='', type=str,
                             help='Output directory.')
     parser.add_argument('--log-level', default='INFO', 
                         choices=['NOTSET','DEBUG','INFO',

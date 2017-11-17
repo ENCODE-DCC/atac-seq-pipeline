@@ -23,7 +23,7 @@ def parse_arguments():
                         This affects all downstream analysis.')
     parser.add_argument('--paired-end', action="store_true",
                         help='Paired-end BAM')
-    parser.add_argument('--out-dir', default='.', type=str,
+    parser.add_argument('--out-dir', default='', type=str,
                             help='Output directory.')
     parser.add_argument('--nth', type=int, default=1,
                         help='Number of threads to parallelize.')

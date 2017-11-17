@@ -3,16 +3,16 @@
 
 workflow atac {
 	# mandatory input files
-	Array[Array[Array[File]]] fastqs 
+	Array[Array[Array[String]]] fastqs 
 								# [rep_id][merge_id][end_id]
 								# 	after merging, it will reduce to 
 								# 	[rep_id][end_id]
-	Array[File] bams 			# [rep_id] if starting from bams
-	Array[File] nodup_bams 		# [rep_id] if starting from filtered bams
-	Array[File] tas 			# [rep_id] if starting from tag-aligns
-	Array[File] peaks			# [rep_id] if starting from peaks
-	Array[File] peaks_pr1		# [rep_id] if starting from peaks
-	Array[File] peaks_pr2		# [rep_id] if starting from peaks
+	Array[String] bams 			# [rep_id] if starting from bams
+	Array[String] nodup_bams 		# [rep_id] if starting from filtered bams
+	Array[String] tas 			# [rep_id] if starting from tag-aligns
+	Array[String] peaks			# [rep_id] if starting from peaks
+	Array[String] peaks_pr1		# [rep_id] if starting from peaks
+	Array[String] peaks_pr2		# [rep_id] if starting from peaks
 	File? peak_ppr1				# if starting from peaks
 	File? peak_ppr2				# if starting from peaks
 	File? peak_pooled			# if starting from peaks
@@ -21,7 +21,7 @@ workflow atac {
 	Array[Array[Array[String]]] adapters 
 								# [rep_id][merge_id][end_id]
 	# mandatory genome param
-	File genome_tsv 		# reference genome data TSV file including
+	String genome_tsv 		# reference genome data TSV file including
 							# all important genome specific data file paths
 							# and parameters
 	Boolean paired_end 		# endedness of sample
@@ -55,10 +55,9 @@ workflow atac {
 
 	# OTHER IMPORTANT mandatory/optional parameters are declared in a task level
 
-	# make genome data map
-	Map[String,String] genome = read_map(genome_tsv)
-
-	# determine input file type and num_rep (number of replicates)
+	# 1) determine input file type and num_rep (number of replicates)
+	# 2) generate pairs of all replicates for later use
+	# 3) read from genome_tsv
 	call inputs {
 		input :
 			fastqs = fastqs,
@@ -66,6 +65,7 @@ workflow atac {
 			nodup_bams = nodup_bams,
 			tas = tas,
 			peaks = peaks,
+			genome_tsv = genome_tsv,
 	}
 
 	# pipeline starts here (parallelized for each replicate)
@@ -89,7 +89,7 @@ workflow atac {
 			# align trimmed/merged fastqs with bowtie2
 			call bowtie2 {
 				input:
-					idx_tar = genome["bowtie2_idx_tar"],
+					idx_tar = inputs.bowtie2_idx_tar,
 					fastqs = merge_fastq.merged_fastqs,
 					paired_end = paired_end,
 					multimapping = multimapping,
@@ -133,8 +133,8 @@ workflow atac {
 				input:
 					ta = if defined(bam2ta.ta) 
 							then bam2ta.ta else tas[i],
-					gensz = genome["gensz"],
-					chrsz = genome["chrsz"],
+					gensz = inputs.gensz,
+					chrsz = inputs.chrsz,
 					cap_num_peak = cap_num_peak,
 					pval_thresh = pval_thresh,
 					smooth_win = smooth_win,
@@ -160,7 +160,7 @@ workflow atac {
 			input:
 				peak = if defined(macs2.npeak)
 						then macs2.npeak else peaks[i],
-				blacklist = genome["blacklist"],				
+				blacklist = inputs.blacklist,				
 				queue = queue_short,
 		}
 	}
@@ -179,8 +179,8 @@ workflow atac {
 			call macs2 as macs2_pooled {
 				input:
 					ta = pool_ta.ta_pooled,
-					gensz = genome["gensz"],
-					chrsz = genome["chrsz"],
+					gensz = inputs.gensz,
+					chrsz = inputs.chrsz,
 					cap_num_peak = cap_num_peak,
 					pval_thresh = pval_thresh,
 					smooth_win = smooth_win,
@@ -193,7 +193,7 @@ workflow atac {
 			input:
 				peak = if defined(macs2_pooled.npeak)
 						then macs2_pooled.npeak else peak_pooled,
-				blacklist = genome["blacklist"],
+				blacklist = inputs.blacklist,
 				queue = queue_short,
 		}
 	}
@@ -205,8 +205,8 @@ workflow atac {
 				call macs2 as macs2_pr1 {
 					input:
 						ta = spr.ta_pr1[i],
-						gensz = genome["gensz"],
-						chrsz = genome["chrsz"],
+						gensz = inputs.gensz,
+						chrsz = inputs.chrsz,
 						cap_num_peak = cap_num_peak,
 						pval_thresh = pval_thresh,
 						smooth_win = smooth_win,
@@ -216,8 +216,8 @@ workflow atac {
 				call macs2 as macs2_pr2 {
 					input:
 						ta = spr.ta_pr2[i],
-						gensz = genome["gensz"],
-						chrsz = genome["chrsz"],
+						gensz = inputs.gensz,
+						chrsz = inputs.chrsz,
 						cap_num_peak = cap_num_peak,
 						pval_thresh = pval_thresh,
 						smooth_win = smooth_win,
@@ -229,14 +229,14 @@ workflow atac {
 				input:
 					peak = if defined(macs2_pr1.npeak)
 						then macs2_pr1.npeak else peaks_pr1[i],
-					blacklist = genome["blacklist"],
+					blacklist = inputs.blacklist,
 					queue = queue_short,
 			}
 			call blacklist_filter as bfilt_macs2_pr2 {
 				input:
 					peak = if defined(macs2_pr2.npeak)
 						then macs2_pr2.npeak else peaks_pr2[i],
-					blacklist = genome["blacklist"],
+					blacklist = inputs.blacklist,
 					queue = queue_short,
 			}
 		}
@@ -258,8 +258,8 @@ workflow atac {
 				call macs2 as macs2_ppr1 {
 					input:
 						ta = pool_ta_pr1.ta_pooled,
-						gensz = genome["gensz"],
-						chrsz = genome["chrsz"],
+						gensz = inputs.gensz,
+						chrsz = inputs.chrsz,
 						cap_num_peak = cap_num_peak,
 						pval_thresh = pval_thresh,
 						smooth_win = smooth_win,
@@ -270,8 +270,8 @@ workflow atac {
 				call macs2 as macs2_ppr2 {
 					input:
 						ta = pool_ta_pr2.ta_pooled,
-						gensz = genome["gensz"],
-						chrsz = genome["chrsz"],
+						gensz = inputs.gensz,
+						chrsz = inputs.chrsz,
 						cap_num_peak = cap_num_peak,
 						pval_thresh = pval_thresh,
 						smooth_win = smooth_win,
@@ -283,29 +283,22 @@ workflow atac {
 				input:
 					peak = if defined(macs2_ppr1.npeak)
 							then macs2_ppr1.npeak else peak_ppr1,
-					blacklist = genome["blacklist"],
+					blacklist = inputs.blacklist,
 					queue = queue_short,
 			}
 			call blacklist_filter as bfilt_macs2_ppr2 {
 				input:
 					peak = if defined(macs2_ppr2.npeak)
 							then macs2_ppr2.npeak else peak_ppr2,
-					blacklist = genome["blacklist"],
+					blacklist = inputs.blacklist,
 					queue = queue_short,
 			}
 		}
 	}
 
-	# generate every pair of true replicates
-	if ( inputs.num_rep>1 ) {
-		call pair_gen { 
-			input : num_rep = inputs.num_rep
-		}
-	}
-
 	# Naive overlap on every pair of true replicates
 	if ( inputs.num_rep>1 ) {
-		scatter( pair in pair_gen.pairs ) {
+		scatter( pair in inputs.pairs ) {
 			call overlap {
 				input :
 					prefix = "rep"+(pair[0]+1)+
@@ -324,7 +317,7 @@ workflow atac {
 			call blacklist_filter as bfilt_overlap {
 				input:
 					peak = overlap.overlap_peak,
-					blacklist = genome["blacklist"],
+					blacklist = inputs.blacklist,
 					queue = queue_short,
 			}
 		}
@@ -349,7 +342,7 @@ workflow atac {
 			call blacklist_filter as bfilt_overlap_pr {
 				input:
 					peak = overlap_pr.overlap_peak,
-					blacklist = genome["blacklist"],
+					blacklist = inputs.blacklist,
 					queue = queue_short,
 			}
 		}
@@ -372,7 +365,7 @@ workflow atac {
 			call blacklist_filter as bfilt_overlap_ppr {
 				input:
 					peak = overlap_ppr.overlap_peak,
-					blacklist = genome["blacklist"],
+					blacklist = inputs.blacklist,
 					queue = queue_short,
 			}
 		}
@@ -390,7 +383,7 @@ workflow atac {
 
 	if ( select_first([enable_idr,false]) ) {
 		if ( inputs.num_rep>1 ) {
-			scatter( pair in pair_gen.pairs ) {
+			scatter( pair in inputs.pairs ) {
 				# IDR on every pair of true replicates
 				call idr {
 					input : 
@@ -411,7 +404,7 @@ workflow atac {
 				call blacklist_filter as bfilt_idr {
 					input:
 						peak = idr.idr_peak,
-						blacklist = genome["blacklist"],
+						blacklist = inputs.blacklist,
 						queue = queue_short,
 				}
 			}
@@ -437,7 +430,7 @@ workflow atac {
 				call blacklist_filter as bfilt_idr_pr {
 					input:
 						peak = idr_pr.idr_peak,
-						blacklist = genome["blacklist"],
+						blacklist = inputs.blacklist,
 						queue = queue_short,
 				}
 			}
@@ -460,7 +453,7 @@ workflow atac {
 				call blacklist_filter as bfilt_idr_ppr {
 					input:
 						peak = idr_ppr.idr_peak,
-						blacklist = genome["blacklist"],
+						blacklist = inputs.blacklist,
 						queue = queue_short,
 				}
 			}
@@ -506,12 +499,13 @@ task trim_adapter { # detect/trim adapter
 			${"--err-rate " + err_rate} \
 			${"--nth " + cpu}
 	}
-	output {		
+	output {
 		Array[Array[File]] trimmed_fastqs = read_tsv("out.tsv")
 				# trimmed_fastqs[merge_id][end_id]
 	}
 	runtime {
 		cpu : "${select_first([cpu,2])}"
+		disks: "local-disk 50 HDD"
 		queue : queue
 	}
 }
@@ -531,6 +525,7 @@ task merge_fastq { # merge fastqs
 		Array[File] merged_fastqs = read_lines("out.txt")
 	}
 	runtime {
+		disks: "local-disk 50 HDD"
 		queue : queue
 	}
 }
@@ -570,6 +565,7 @@ task bowtie2 {
 		cpu : "${select_first([cpu,4])}"
 		memory : "${select_first([mem_mb,'20000'])} MB"
 		time : "${select_first([time_hr,48])}"
+		disks: "local-disk 100 SSD"
 		queue : queue
 	}
 }
@@ -617,6 +613,7 @@ task filter {
 		cpu : "${select_first([cpu,2])}"
 		memory : "${select_first([mem_mb,'20000'])} MB"
 		time : "${select_first([time_hr,24])}"
+		disks: "local-disk 100 SSD"
 		queue : queue
 	}
 }
@@ -651,6 +648,7 @@ task bam2ta {
 	}
 	runtime {
 		cpu : "${select_first([cpu,2])}"
+		disks: "local-disk 50 SSD"
 		queue : queue
 	}
 }
@@ -673,6 +671,7 @@ task spr { # make two self pseudo replicates
 		File ta_pr2 = glob("*.pr2.tagAlign.gz")[0]
 	}
 	runtime {
+		disks: "local-disk 20 SSD"
 		queue : queue
 	}
 }
@@ -691,6 +690,7 @@ task pool_ta {
 		File ta_pooled = glob("*.tagAlign.gz")[0]
 	}
 	runtime {
+		disks: "local-disk 20 SSD"
 		queue : queue
 	}
 }
@@ -723,6 +723,7 @@ task xcor {
 	}
 	runtime {
 		cpu : "${select_first([cpu,2])}"
+		disks: "local-disk 20 SSD"
 		queue : queue
 	}
 }
@@ -763,6 +764,7 @@ task macs2 {
 	runtime {
 		memory : "${select_first([mem_mb,'16000'])} MB"
 		time : "${select_first([time_hr,24])}"
+		disks: "local-disk 50 SSD"
 		queue : queue
 	}
 }
@@ -791,6 +793,7 @@ task idr {
 		File idr_log = glob("*.log")[0]
 	}
 	runtime {
+		disks: "local-disk 20 SSD"
 		queue : queue
 	}
 }
@@ -813,6 +816,7 @@ task overlap {
 		File overlap_peak = glob("*eak.gz")[0]
 	}
 	runtime {
+		disks: "local-disk 20 SSD"
 		queue : queue
 	}
 }
@@ -841,6 +845,7 @@ task reproducibility {
 			glob("*reproducibility.qc")[0]
 	}
 	runtime {
+		disks: "local-disk 20 SSD"
 		queue : queue
 	}
 }
@@ -861,6 +866,7 @@ task blacklist_filter {
 		File filtered_peak = glob('*.gz')[0]
 	}
 	runtime {
+		disks: "local-disk 20 SSD"
 		queue : queue
 	}
 }
@@ -881,6 +887,7 @@ task frip {
 		File frip_qc = glob('*.frip.qc')[0]
 	}
 	runtime {
+		disks: "local-disk 20 SSD"
 		queue : queue
 	}
 }
@@ -930,18 +937,25 @@ task gather_and_report {
 		File report = glob('report.html')[0]
 	}
 	runtime {
+		disks: "local-disk 20 SSD"
 		queue : queue
 	}
 }
 
 # workflow system tasks
-task inputs {	# determine input type and number of replicates	
+# to reduce overhead of provisioning extra nodes
+# we have only one task to
+# 	1) determine input type and number of replicates	
+# 	2) generate pair (rep-x_vs_rep-y) of all true replicate
+# 	3) read genome_tsv
+task inputs {
 	# parameters from workflow
 	Array[Array[Array[String]]] fastqs 
 	Array[String] bams
 	Array[String] nodup_bams
 	Array[String] tas
 	Array[String] peaks
+	File genome_tsv
 
 	command <<<
 		python <<CODE
@@ -955,24 +969,24 @@ task inputs {	# determine input type and number of replicates
 		    fp.write(str(num_rep)) 
 		with open('type.txt','w') as fp:
 		    fp.write(type)		    
+		for i in range(num_rep):
+		    for j in range(i+1,num_rep):
+		        print('{}\t{}'.format(i,j))
 		CODE
 	>>>
 	output {
 		String type = read_string("type.txt")
 		Int num_rep = read_int("num_rep.txt")
+		Array[Array[Int]] pairs = if num_rep>1 then 
+									read_tsv(stdout()) else [[]]
+		File ref_fa = read_map(genome_tsv)['ref_fa']
+		File bowtie2_idx_tar = read_map(genome_tsv)['bowtie2_idx_tar']
+		#File bwa_idx_tar = read_map(genome_tsv)['bwa_idx_tar']
+		String blacklist = read_map(genome_tsv)['blacklist']
+		String chrsz = read_map(genome_tsv)['chrsz']
+		String gensz = read_map(genome_tsv)['gensz']
 	}
-}
-
-task pair_gen { # returns every pair of true replicate
-	Int num_rep
-	command <<<
-		python <<CODE
-		for i in range(${num_rep}):
-		    for j in range(i+1,${num_rep}):
-		        print('{}\t{}'.format(i,j))
-		CODE
-	>>>
-	output {
-		Array[Array[Int]] pairs = read_tsv(stdout())
+	runtime {
+		disks: "local-disk 10 SSD"		
 	}
 }

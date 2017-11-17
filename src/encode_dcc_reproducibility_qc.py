@@ -24,7 +24,7 @@ def parse_arguments():
                         help='Peak file from pooled pseudo replicate.')
     parser.add_argument('--prefix', type=str,
                         help='Basename prefix for reproducibility QC file.')
-    parser.add_argument('--out-dir', default='.', type=str,
+    parser.add_argument('--out-dir', default='', type=str,
                         help='Output directory.')
     parser.add_argument('--log-level', default='INFO', 
                         choices=['NOTSET','DEBUG','INFO',
@@ -32,7 +32,8 @@ def parse_arguments():
                         help='Log level')
     args = parser.parse_args()
     if len(args.peaks_pr)!=infer_num_rep(len(args.peaks)):
-        raise ValueError('Invalid number of peak files or --peak-pr.')
+        raise argparse.ArgumentTypeError(
+            'Invalid number of peak files or --peak-pr.')
 
     log.setLevel(args.log_level)
     log.info(sys.argv)
@@ -44,7 +45,8 @@ def infer_num_rep(num_peaks):
         while(nCr(num_rep,2)!=num_peaks):
             num_rep += 1
             if num_rep > 99:
-                raise ValueError('Cannot infer num_rep from num_peaks. '+
+                raise argparse.ArgumentTypeError(
+                    'Cannot infer num_rep from num_peaks. '+
                     'wrong number of peaks in --peaks?')
         return num_rep
     else:
@@ -57,7 +59,8 @@ def infer_pair_label_from_idx(num_rep, idx):
             if idx==cnt:
                 return 'rep{}-rep{}'.format(i+1,j+1)
             cnt += 1
-    raise ValueError('Cannot infer rep_id from num_rep and idx.')
+    raise argparse.ArgumentTypeError(
+        'Cannot infer rep_id from num_rep and idx.')
 
 def main():
     # read params

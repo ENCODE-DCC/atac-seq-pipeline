@@ -37,7 +37,7 @@ def parse_arguments(debug=False):
                         help='Paired-end FASTQs.')
     parser.add_argument('--nth', type=int, default=1,
                         help='Number of threads to parallelize.')
-    parser.add_argument('--out-dir', default='.', type=str,
+    parser.add_argument('--out-dir', default='', type=str,
                             help='Output directory.')
     parser.add_argument('--out-tsv', default='out.tsv', type=str,
                             help='TSV with all output filenames \
@@ -71,14 +71,18 @@ def parse_arguments(debug=False):
 
     # check if fastqs, adapers have same/correct dimension
     if len(args.adapters)!=len(args.fastqs):
-        raise ValueError('fastqs and adapters dimension mismatch.')
+        raise argparse.ArgumentTypeError(
+            'fastqs and adapters dimension mismatch.')
     for i, fastqs in enumerate(args.fastqs):
         if args.paired_end and len(fastqs)!=2:
-            raise ValueError('Need 2 fastqs per replicate for paired end.')
+            raise argparse.ArgumentTypeError(
+                'Need 2 fastqs per replicate for paired end.')
         if not args.paired_end and len(fastqs)!=1:
-            raise ValueError('Need 1 fastq per replicate for single end.')
+            raise argparse.ArgumentTypeError(
+                'Need 1 fastq per replicate for single end.')
         if len(fastqs)!=len(args.adapters[i]):
-            raise ValueError('fastqs and adapters dimension mismatch.')
+            raise argparse.ArgumentTypeError(
+                'fastqs and adapters dimension mismatch.')
             
     log.setLevel(args.log_level)
     log.info(sys.argv)

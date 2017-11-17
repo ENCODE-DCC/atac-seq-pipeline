@@ -31,7 +31,7 @@ def parse_arguments():
                         help='Multimapping reads (for bowtie2 -k).')
     parser.add_argument('--nth', type=int, default=1,
                         help='Number of threads to parallelize.')
-    parser.add_argument('--out-dir', default='.', type=str,
+    parser.add_argument('--out-dir', default='', type=str,
                             help='Output directory.')
     parser.add_argument('--log-level', default='INFO', 
                         choices=['NOTSET','DEBUG','INFO',
@@ -41,9 +41,9 @@ def parse_arguments():
 
     # check if fastqs have correct dimension
     if args.paired_end and len(args.fastqs)!=2:
-        raise ValueError('Need 2 fastqs for paired end.')
+        raise argparse.ArgumentTypeError('Need 2 fastqs for paired end.')
     if not args.paired_end and len(args.fastqs)!=1:
-        raise ValueError('Need 1 fastq for single end.')
+        raise argparse.ArgumentTypeError('Need 1 fastq for single end.')
 
     log.setLevel(args.log_level)
     log.info(sys.argv)    

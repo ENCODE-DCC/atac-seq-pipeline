@@ -26,7 +26,7 @@ def parse_arguments():
     parser.add_argument('--idr-rank', default='p.value', type=str,
                         choices=['p.value','q.value','signal.value'],
                         help='IDR ranking method.')
-    parser.add_argument('--out-dir', default='.', type=str,
+    parser.add_argument('--out-dir', default='', type=str,
                         help='Output directory.')
     parser.add_argument('--log-level', default='INFO', 
                         choices=['NOTSET','DEBUG','INFO',
@@ -46,7 +46,7 @@ def get_npeak_col_by_rank(rank):
     elif rank=='q.value':
         return 9
     else:
-        raise ValueError('Invalid score ranking method')
+        raise Exception('Invalid score ranking method')
 
 # only for narrowPeak (or regionPeak) type 
 def idr(basename_prefix, peak1, peak2, peak_pooled, 

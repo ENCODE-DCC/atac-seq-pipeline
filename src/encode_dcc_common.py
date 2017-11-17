@@ -97,19 +97,19 @@ def write_tsv(tsv, arr): # arr must be list of list of string
             s = '\t'.join(a) + ('\n' if i<len(arr)-1 else '')
             fp.write(s)
 
-def mkdir_p(dirname):
-    if not os.path.exists(dirname):
+def mkdir_p(dirname):    
+    if dirname and not os.path.exists(dirname):
         os.makedirs(dirname)
 
 def untar(tar, out_dir):
     cmd = 'tar xvf {} -C {}'.format(
         tar,
-        out_dir)
+        out_dir if out_dir else '.')
     run_shell_cmd(cmd)
 
 def gunzip(f, suffix, out_dir):
     if not f.endswith('.gz'):
-        raise ValueError('Cannot gunzip a file without .gz extension.')
+        raise Exception('Cannot gunzip a file without .gz extension.')
     gunzipped = os.path.join(out_dir,
         os.path.basename(strip_ext_gz(f)))
     if suffix:
@@ -128,6 +128,8 @@ def rm_f(files):
 
 def make_hard_link(f, out_dir):
     # make hard-link (UNIX only)
+    if os.path.dirname(f)==os.path.dirname(out_dir):
+        raise Exception('Trying to hard-link itself. {}'.format(f))
     linked = os.path.join(out_dir,
         os.path.basename(f))
     rm_f(linked)
@@ -140,7 +142,7 @@ def get_num_lines(f):
 
 def assert_file_not_empty(f):
     if get_num_lines(f)==0:
-        raise ValueError('File is empty. {}'.format(f))
+        raise Exception('File is empty. {}'.format(f))
 
 def write_txt(f,s):
     with open(f,'w') as fp:

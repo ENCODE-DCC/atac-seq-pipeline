@@ -20,7 +20,7 @@ def parse_arguments():
     parser.add_argument('--fraglen', type=int,
                         help='Fragment length for TAGALIGN file. \
                         If given, do shifted FRiP (for ChIP-Seq).')
-    parser.add_argument('--out-dir', default='.', type=str,
+    parser.add_argument('--out-dir', default='', type=str,
                         help='Output directory.')
     parser.add_argument('--log-level', default='INFO', 
                         choices=['NOTSET','DEBUG','INFO',

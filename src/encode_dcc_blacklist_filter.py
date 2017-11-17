@@ -18,7 +18,7 @@ def parse_arguments():
                         help='Blacklist BED file.')
     parser.add_argument('--keep-irregular-chr', action="store_true",
                         help='Keep reads with non-canonical chromosome names.')    
-    parser.add_argument('--out-dir', default='.', type=str,
+    parser.add_argument('--out-dir', default='', type=str,
                         help='Output directory.')    
     parser.add_argument('--log-level', default='INFO', 
                         choices=['NOTSET','DEBUG','INFO',

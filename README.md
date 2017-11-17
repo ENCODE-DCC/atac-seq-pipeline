@@ -37,7 +37,7 @@ Choose `[BACKEND_CONF]` and `[WORKFLOW_OPT]` according to your platform and pres
   $ source deactivate
   ```
 
-## Kundaje Lab cluster with `Docker`
+### Kundaje Lab cluster with `Docker`
 
 Jobs will run locally without being submitted to Sun GridEngine (SGE). Genome data have already been installed and shared.
 1) Run a pipeline. 
@@ -109,18 +109,20 @@ Genome data have already been installed and shared.
   * Google Compute Engine
   * Google Cloud Storage
   * Genomics API
-4) Install [Google Cloud Platform SDK](https://cloud.google.com/sdk/downloads) and authenticate through it. You will be asked to enter verification keys. Get keys from the URLs they provide.
+4) If you are already on a VM instance on your Google Project. Skip step 5 and 6.
+5) Install [Google Cloud Platform SDK](https://cloud.google.com/sdk/downloads) and authenticate through it. You will be asked to enter verification keys. Get keys from the URLs they provide.
   ```
   $ gcloud auth login --no-launch-browser
   $ gcloud auth application-default login --no-launch-browser
   ```
-5) Get on the Google Project.
+6) Get on the Google Project.
   ```
   $ gcloud config set project [PROJ_NAME]
   ```
-6) Run a pipeline. Use any string for `[SAMPLE_NAME]` to distinguish between multiple samples.
+7) You don't have to repeat step 1-6 for next pipeline run. Credential information will be stored in `$HOME/.config/gcloud`. Go directly to step 8.
+8) Run a pipeline. Use any string for `[SAMPLE_NAME]` to distinguish between multiple samples.
   ```
-  $ java -jar -Dconfig.file=backends/google.conf -Dbackend.providers.JES.config.project=[PROJ_NAME] -Dbackend.providers.JES.config.project=[OUT_BUCKET]/[SAMPLE_NAME] cromwell-*.jar run atac.wdl -i input.json -o workflow_opts/docker_google.json
+  $ java -jar -Dconfig.file=backends/google.conf -Dbackend.providers.JES.config.project=[PROJ_NAME] -Dbackend.providers.JES.config.root=[OUT_BUCKET]/[SAMPLE_NAME] cromwell-*.jar run atac.wdl -i input.json -o workflow_opts/docker_google.json
   ```
 
 ### AWS
@@ -209,3 +211,9 @@ Supported genomes: hg38 (from ENCODE), mm10 (from ENCODE), hg19 and mm9. A TSV f
    $ bash install_genome_data.sh [GENOME] [DEST_DIR]
    $ source deactivate
    ```
+
+# Examples
+
+```
+java -jar -Dconfig.file=backends/google.conf -Dbackend.providers.JES.config.project=atac-seq-pipeline -Dbackend.providers.JES.config.root="gs://atac-seq-pipeline-workflows/ENCSR889WQX" cromwell-29.jar run atac.wdl -i examples/ENCSR889WQX_google.json -o workflow_opts/docker_google.json
+```
