@@ -6,8 +6,8 @@ Issues and discussion
 ```
 workflow wf {
   File f1 # = "/path/to/file1"
-  call t1 { input f : f1 }
-  call t2 { input f : t1.out }
+  call t1 { input : f = f1 }
+  call t2 { input : f = t1.out }
 }
 
 task t1 {
@@ -107,11 +107,11 @@ workflow wf {
   File? f2
   Array[File]? arr  # error there is no type coercion from opt. array to array
   Boolean? flag1
-  Boolean flag2
+  Boolean? flag2
 
   if ( flag1 ) {
     # error when flag1 is not specified in input.json
-    call t1 { input: f1 : f1 }
+    call t1 { input: f1 = f1 }
   }
   else {
     # error. there is no if else both in workflow and task namespace
@@ -179,6 +179,15 @@ task t1 {
 `scatter()` works very similar to MPI `scatter()`, but there is no `gather()` function because output of a task is automtically gathered in the namespace of a task.
 
 Parallelization is **ALWAYS MAXIMIZED** in WDL. Cromwell first makes a task input/output dependency tree and start **ALL** tasks with **given inputs**. If task-B's input comes from another task-A's output, then task-B waits for task-A.
+
+
+# ATAC-Seq pipeline.WDL
+
+Goals
+1) can start from any type of input files
+2) can customize/fine-tune pipeline (need to have most flags and parameters in original BDS pipeline)
+3) can run on any platforms (local, SGE, SLURM, Google Cloud, AWS, ...) with or w/o docker
+4) separate genome specific files and parameters from workflow input JSON
 
 # Issues
 
