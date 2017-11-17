@@ -32,12 +32,14 @@ Choose `[BACKEND_CONF]` and `[WORKFLOW_OPT]` according to your platform and pres
 2) Install [genome data](#genome-data-installation).
 3) Run a pipeline.
   ```
+  $ source activate atac-seq-pipeline
   $ java -jar -Dconfig.file=backends/default.conf cromwell-*.jar run atac.wdl -i input.json -o workflow_opts/non_docker.json
+  $ source deactivate
   ```
 
 ## Kundaje Lab cluster with `Docker`
 
-Jobs will run locally without being submitted to Sun GridEngine (SGE). Genome data are already installed and shared.
+Jobs will run locally without being submitted to Sun GridEngine (SGE). Genome data have already been installed and shared.
 1) Run a pipeline. 
   ```
   $ java -jar -Dconfig.file=backends/default.conf cromwell-*.jar run atac.wdl -i input.json -o workflow_opts/docker.json
@@ -45,7 +47,7 @@ Jobs will run locally without being submitted to Sun GridEngine (SGE). Genome da
 
 ### Kundaje Lab cluster with Sun GridEngine (SGE)
 
-Jobs will be submitted to Sun GridEngine (SGE) and distributed to all server nodes. Genome data are already installed and shared.
+Jobs will be submitted to Sun GridEngine (SGE) and distributed to all server nodes. Genome data have already been installed and shared.
 1) Install [dependencies](#dependency-installation).
 2) Run a pipeline.
   ```
@@ -56,7 +58,7 @@ Jobs will be submitted to Sun GridEngine (SGE) and distributed to all server nod
 
 ### Sun GridEngine (SGE)
 
-1) Check if your SGE has a parallel environment named `shm` by `qconf -spl`. If it does not have a PE `shm` then ask your SGE admin to create one or change the name of PE in `backends/sge.conf`.
+1) Check if your SGE has a parallel environment named `shm` by `$ qconf -spl`. If it does not have a PE `shm` then ask your SGE admin to create one or change the name of PE in `backends/sge.conf`.
 2) Install [dependencies](#dependency-installation).
 3) Install [genome data](#genome-data-installation).
 4) Run a pipeline.
@@ -79,7 +81,7 @@ Jobs will be submitted to Sun GridEngine (SGE) and distributed to all server nod
 
 ### Sun GridEngine (SGE) on Stanford SCG4 cluster
 
-Genome data are already installed and shared.
+Genome data have already been installed and shared.
 1) Install [dependencies](#dependency-installation).
 2) Run a pipeline.
   ```
@@ -90,7 +92,7 @@ Genome data are already installed and shared.
 
 ### SLURM on Stanford Sherlock-2 cluster
 
-Genome data are already installed and shared.
+Genome data have already been installed and shared.
 1) Install [dependencies](#dependency-installation).
 2) Run a pipeline.
   ```
@@ -193,7 +195,7 @@ choose one of (`fastqs`, `bams`, `nodup_bams`, `tas`, `peaks`) to start with but
 # Genome data installation
 
 **WE DO NOT RECOMMEND RUNNING OUR PIPELINE WITH LOCALLY INSTALLED/BUILT GENOME DATA!** Use it with caution. **We will provide an official downloader for all genome data later**. Cromwell is planning to support AWS buckets (`s3://`). Until then, use this installer.
-On Google Cloud TSV files are already installed and shared on a bucket `gs://atac-seq-pipeline-genome-data`.
+**On Google Cloud TSV** files are already installed and shared on a bucket `gs://atac-seq-pipeline-genome-data`.
 
 Supported genomes: hg38 (from ENCODE), mm10 (from ENCODE), hg19 and mm9. A TSV file will be generated under `[DEST_DIR]`. Use it for `atac.genomv_tsv` value in pipeline's input JSON file
 
