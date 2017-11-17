@@ -101,6 +101,9 @@ def bowtie2_se(fastq, ref_index_prefix,
         align_log,
         prefix)
     run_shell_cmd(cmd)
+
+    cmd2 = 'cat {}'.format(align_log)
+    run_shell_cmd(cmd2)
     return bam, align_log
 
 def bowtie2_pe(fastq1, fastq2, ref_index_prefix, 
@@ -124,6 +127,9 @@ def bowtie2_pe(fastq1, fastq2, ref_index_prefix,
         align_log,
         prefix)
     run_shell_cmd(cmd)
+
+    cmd2 = 'cat {}'.format(align_log)
+    run_shell_cmd(cmd2)
     return bam, align_log
 
 def chk_bowtie2_index(prefix):    
