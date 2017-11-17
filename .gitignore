@@ -109,3 +109,5 @@ cromwell-workflow-logs/
 
 # google auth
 google_jin.conf
+
+hello.*

@@ -1,0 +1,7 @@
+{
+	"default_runtime_attributes" : {
+		"failOnStderr": "false",
+		"memory": "2 GB",
+		"cpu": "1"
+	}
+}

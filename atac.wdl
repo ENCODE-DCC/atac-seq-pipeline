@@ -511,7 +511,7 @@ task trim_adapter { # detect/trim adapter
 				# trimmed_fastqs[merge_id][end_id]
 	}
 	runtime {
-		cpu : "${select_first([cpu,1])}"
+		cpu : "${select_first([cpu,2])}"
 		queue : queue
 	}
 }
@@ -567,7 +567,7 @@ task bowtie2 {
 		File flagstat_qc = glob("*.flagstat.qc")[0]
 	}
 	runtime {
-		cpu : "${select_first([cpu,1])}"
+		cpu : "${select_first([cpu,4])}"
 		memory : "${select_first([mem_mb,'20000'])} MB"
 		time : "${select_first([time_hr,48])}"
 		queue : queue
@@ -614,7 +614,7 @@ task filter {
 	}
 
 	runtime {
-		cpu : "${select_first([cpu,1])}"
+		cpu : "${select_first([cpu,2])}"
 		memory : "${select_first([mem_mb,'20000'])} MB"
 		time : "${select_first([time_hr,24])}"
 		queue : queue
@@ -650,7 +650,7 @@ task bam2ta {
 		File ta = glob("*.tagAlign.gz")[0]
 	}
 	runtime {
-		cpu : "${select_first([cpu,1])}"
+		cpu : "${select_first([cpu,2])}"
 		queue : queue
 	}
 }
@@ -722,7 +722,7 @@ task xcor {
 		File score = glob("*.cc.qc")[0]
 	}
 	runtime {
-		cpu : "${select_first([cpu,1])}"
+		cpu : "${select_first([cpu,2])}"
 		queue : queue
 	}
 }
