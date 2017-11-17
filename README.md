@@ -8,7 +8,7 @@ ENCODE ATAC-seq pipeline
 * `examples/` : input JSON examples (SE and PE)
 * `genome/` : genome data TSV files
 * `src/` : Python script for each task in WDL
-* `non-docker/` : dependency/genome data installers for Local, SGE and SLURM
+* `installers/` : dependency/genome data installers for Local, SGE and SLURM
 * `docker_image/` : Dockerfile
 
 # Usage
@@ -111,6 +111,7 @@ Genome data are already installed and shared.
   ```
   $ gcloud auth login --no-launch-browser
   $ gcloud auth application-default login --no-launch-browser
+  ```
 5) Get on the Google Project.
   ```
   $ gcloud config set project [PROJ_NAME]
@@ -182,10 +183,10 @@ choose one of (`fastqs`, `bams`, `nodup_bams`, `tas`, `peaks`) to start with but
    $ cd installers/
    $ bash install_dependencies.sh
    ```
-9) Activate Minconda3 environment and run a pipeline
+9) **ACTIVATE MINICONDA3 ENVIRONMENT** and run a pipeline.
    ```
    $ source activate atac-seq-pipeline
-   $ java -jar [BACKEND_OPTS] $(which cromwell-29.jar) run atac.wdl -i input.json
+   $ java -jar -Dconfig.file=[BACKEND_OPT] $(which cromwell-29.jar) run atac.wdl -i input.json -o [WORKFLOW_OPT]
    $ source deactivate
    ```
 
