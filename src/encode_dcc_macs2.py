@@ -165,6 +165,16 @@ def macs2(ta, chrsz, gensz, pval_thresh, smooth_win, cap_num_peak,
     else:
         return npeak
 
+def make_empty_signals(npeak, out_dir):
+    prefix = os.path.join(out_dir,
+        os.path.basename(strip_ext_npeak(npeak)))
+    pval_bigwig = '{}.pval.signal.bigwig'.format(prefix)
+    fc_bigwig = '{}.fc.signal.bigwig'.format(prefix)
+
+    touch(pval_bigwig)
+    touch(fc_bigwig)
+    return pval_bigwig, fc_bigwig
+
 def main():
     # read params
     args = parse_arguments()
@@ -180,7 +190,8 @@ def main():
     if args.make_signal:
         npeak, fc_bigwig, pval_bigwig = ret
     else:
-        npeak = ret
+        npeak = ret        
+        fc_bigwig, pval_bigwig = make_empty_signals(npeak, args.out_dir)
 
     log.info('All done.')
 

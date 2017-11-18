@@ -1,0 +1,36 @@
+{
+	"atac.genome_tsv" : "gs://atac-seq-pipeline-genome-data/mm10_google.tsv",
+	"atac.adapters" : [],
+	"atac.fastqs" : [],
+	"atac.bams" : [
+		"gs://atac-seq-pipeline-test-samples/ENCSR889WQX_bam/rep1/ENCFF439VSY.trim_pooled.bam",
+		"gs://atac-seq-pipeline-test-samples/ENCSR889WQX_bam/rep2/ENCFF463QCX.trim_ENCFF992TSA.trim.bam"
+	],
+	"atac.nodup_bams" : [],
+	"atac.tas" : [],
+	"atac.peaks" : [],
+	"atac.peaks_pr1" : [],
+	"atac.peaks_pr2" : [],
+
+	"atac.paired_end" : false,
+	"atac.multimapping" : 4,	
+
+	"atac.trim_adapter.auto_detect_adapter" : true,
+
+	"atac.queue_short" : "akundaje",
+	"atac.queue_hard" : "akundaje",
+
+	"atac.bowtie2.cpu" : 4,
+	"atac.bowtie2.mem_mb" : 16000,
+	"atac.bowtie2.time_hr" : 36,
+
+	"atac.filter.cpu" : 2,
+	"atac.filter.mem_mb" : 12000,
+	"atac.filter.time_hr" : 23,
+
+	"atac.macs2_mem_mb" : 16000,
+
+	"atac.smooth_win" : 73,
+	"atac.enable_idr" : true,
+	"atac.idr_thresh" : 0.05
+}

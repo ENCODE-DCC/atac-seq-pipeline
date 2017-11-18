@@ -580,9 +580,9 @@ task filter {
 								# sambamba markdup (sambamba)
 	Int? mapq_thresh			# threshold for low MAPQ reads removal
 	Boolean? no_dup_removal 	# no dupe reads removal when filtering BAM
-								# dup.qc and pbc.qc will not be generated
-								# nodup_bam in the output is filtered bam 
-								# with dupes
+								# dup.qc and pbc.qc will be emptry files
+								# and nodup_bam in the output is 
+								# filtered bam with dupes
 	# resource
 	Int? cpu
 	Int? mem_mb
@@ -605,15 +605,16 @@ task filter {
 		File nodup_bam = glob("*.bam")[0]
 		File nodup_bai = glob("*.bai")[0]
 		File flagstat_qc = glob("*.flagstat.qc")[0]
-		Array[File] dup_qc = glob("*.dup.qc")
-		Array[File] pbc_qc = glob("*.pbc.qc")
+		# optional (if no_dup_removall then empty qc files)		
+		File dup_qc = glob("*.dup.qc")
+		File pbc_qc = glob("*.pbc.qc")
 	}
 
 	runtime {
 		cpu : "${select_first([cpu,2])}"
 		memory : "${select_first([mem_mb,'20000'])} MB"
 		time : "${select_first([time_hr,24])}"
-		disks: "local-disk 100 SSD"
+		disks: "local-disk 50 SSD"
 		queue : queue
 	}
 }
@@ -671,7 +672,7 @@ task spr { # make two self pseudo replicates
 		File ta_pr2 = glob("*.pr2.tagAlign.gz")[0]
 	}
 	runtime {
-		disks: "local-disk 20 SSD"
+		disks: "local-disk 20 HDD"
 		queue : queue
 	}
 }
@@ -690,7 +691,7 @@ task pool_ta {
 		File ta_pooled = glob("*.tagAlign.gz")[0]
 	}
 	runtime {
-		disks: "local-disk 20 SSD"
+		disks: "local-disk 20 HDD"
 		queue : queue
 	}
 }
@@ -723,7 +724,7 @@ task xcor {
 	}
 	runtime {
 		cpu : "${select_first([cpu,2])}"
-		disks: "local-disk 20 SSD"
+		disks: "local-disk 20 HDD"
 		queue : queue
 	}
 }
@@ -757,14 +758,14 @@ task macs2 {
 	}
 	output {
 		File npeak = glob("*.narrowPeak.gz")[0]
-		# optional (generated only if make_signal)
-		Array[File] sig_pval = glob("*.pval.signal.bigwig")
-		Array[File] sig_fc = glob("*.fc.signal.bigwig")
+		# optional (if not make_signal then emptry signal files)
+		File sig_pval = glob("*.pval.signal.bigwig")[0]
+		File sig_fc = glob("*.fc.signal.bigwig")[0]
 	}
 	runtime {
 		memory : "${select_first([mem_mb,'16000'])} MB"
 		time : "${select_first([time_hr,24])}"
-		disks: "local-disk 50 SSD"
+		disks: "local-disk 50 HDD"
 		queue : queue
 	}
 }
@@ -793,7 +794,7 @@ task idr {
 		File idr_log = glob("*.log")[0]
 	}
 	runtime {
-		disks: "local-disk 20 SSD"
+		disks: "local-disk 20 HDD"
 		queue : queue
 	}
 }
@@ -816,7 +817,7 @@ task overlap {
 		File overlap_peak = glob("*eak.gz")[0]
 	}
 	runtime {
-		disks: "local-disk 20 SSD"
+		disks: "local-disk 20 HDD"
 		queue : queue
 	}
 }
@@ -845,7 +846,7 @@ task reproducibility {
 			glob("*reproducibility.qc")[0]
 	}
 	runtime {
-		disks: "local-disk 20 SSD"
+		disks: "local-disk 20 HDD"
 		queue : queue
 	}
 }
@@ -866,7 +867,7 @@ task blacklist_filter {
 		File filtered_peak = glob('*.gz')[0]
 	}
 	runtime {
-		disks: "local-disk 20 SSD"
+		disks: "local-disk 20 HDD"
 		queue : queue
 	}
 }
@@ -887,7 +888,7 @@ task frip {
 		File frip_qc = glob('*.frip.qc')[0]
 	}
 	runtime {
-		disks: "local-disk 20 SSD"
+		disks: "local-disk 20 HDD"
 		queue : queue
 	}
 }
@@ -937,7 +938,7 @@ task gather_and_report {
 		File report = glob('report.html')[0]
 	}
 	runtime {
-		disks: "local-disk 20 SSD"
+		disks: "local-disk 50 HDD"
 		queue : queue
 	}
 }
@@ -987,6 +988,6 @@ task inputs {
 		String gensz = read_map(genome_tsv)['gensz']
 	}
 	runtime {
-		disks: "local-disk 10 SSD"		
+		disks: "local-disk 20 HDD"		
 	}
 }

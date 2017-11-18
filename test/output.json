@@ -1,0 +1,144 @@
+{
+  "workflowName": "test_wf",
+  "submittedFiles": {
+    "workflow": "task t1 {\n\tArray[Array[File]] i\n\tInt res_cpu\n\n\tInt? mem_mb\n\tInt? time_hr\n\tString? queue\n\tcommand {\n\t\techo \"${sep=' ' i}\" > \"test.bam\"\n\t}\n\toutput {\n\t\tFile o1 = glob('*.bam')[0]\n\t}\n\truntime {\n\t\tcpu : \"${res_cpu}\"\n\t\tmemory : \"${mem_mb} MB\"\n\t\ttime : \"${time_hr}\"\n\t\tqueue : \"${queue}\"\n\t}\n}\n\ntask gather_outputs {\n\tFile o1\n\tFile o2\n\tcommand {\n\t\tln -s ${o1}\n\t\tln -s ${o2}\n\t}\n}\n\nworkflow test_wf {\n\tArray[Array[Array[File]]]+ fastqs\n\tInt res_cpu\n\n\tscatter( i in fastqs ) {\n\t\tcall t1 {\n\t\t\tinput: i = i,\n\t\t\tres_cpu = res_cpu/length(fastqs),\n\t\t}\n\t}\n\t#call gather_outputs { input: o1 = t1.o1, o2 = test_sub_wf.o2 }\n}\n",
+    "workflowType": "WDL",
+    "options": "{\n\n}",
+    "inputs": "{\n\t\"test_wf.fastqs\" : [\n\t\t[\n\t\t\t[\"fastqs/fq1_1-1.fastq.gz\",\"fastqs/fq1_1-2.fastq.gz\"],\n\t\t\t[\"fastqs/fq1_2-1.fastq.gz\",\"fastqs/fq1_2-2.fastq.gz\"]\n\t\t],\n\t\t[\n\t\t\t[\"fastqs/fq2_1-1.fq.gz\",\"fastqs/fq2_1-2.fastq.gz\"],\n\t\t\t[\"fastqs/fq2_2-1.fastq.gz\",\"fastqs/fq2_2-2.fastq.gz\"]\n\t\t]\n\t],\n\t\"test_wf.res_cpu\" : 2,\n\n\t\"test_wf.t1.mem_mb\" : 3000,\n\t\"test_wf.t1.time_hr\" : 1,\n\t\"test_wf.t1.queue\" : \"standard\"\n}\n",
+    "labels": "{}"
+  },
+  "calls": {
+    "test_wf.t1": [{
+      "executionStatus": "Done",
+      "stdout": "/users/leepc12/code/test_wdl/cromwell-executions/test_wf/a9e9f020-ef1d-454a-a1ba-c54a0ca38f2e/call-t1/shard-0/execution/stdout",
+      "backendStatus": "Done",
+      "shardIndex": 0,
+      "outputs": {
+        "o1": "/users/leepc12/code/test_wdl/cromwell-executions/test_wf/a9e9f020-ef1d-454a-a1ba-c54a0ca38f2e/call-t1/shard-0/execution/glob-3bcbe4e7489c90f75e0523ac6f3a9385/test.bam"
+      },
+      "runtimeAttributes": {
+        "failOnStderr": "false",
+        "continueOnReturnCode": "0"
+      },
+      "callCaching": {
+        "allowResultReuse": false,
+        "effectiveCallCachingMode": "CallCachingOff"
+      },
+      "inputs": {
+        "queue": "standard",
+        "mem_mb": 3000,
+        "time_hr": 1,
+        "i": [["fastqs/fq1_1-1.fastq.gz", "fastqs/fq1_1-2.fastq.gz"], ["fastqs/fq1_2-1.fastq.gz", "fastqs/fq1_2-2.fastq.gz"]],
+        "res_cpu": 1
+      },
+      "returnCode": 0,
+      "jobId": "32042",
+      "backend": "Local",
+      "end": "2017-10-18T03:50:37.734-07:00",
+      "stderr": "/users/leepc12/code/test_wdl/cromwell-executions/test_wf/a9e9f020-ef1d-454a-a1ba-c54a0ca38f2e/call-t1/shard-0/execution/stderr",
+      "callRoot": "/users/leepc12/code/test_wdl/cromwell-executions/test_wf/a9e9f020-ef1d-454a-a1ba-c54a0ca38f2e/call-t1/shard-0",
+      "attempt": 1,
+      "executionEvents": [{
+        "endTime": "2017-10-18T03:50:36.581-07:00",
+        "description": "PreparingJob",
+        "startTime": "2017-10-18T03:50:36.508-07:00"
+      }, {
+        "endTime": "2017-10-18T03:50:37.733-07:00",
+        "startTime": "2017-10-18T03:50:36.581-07:00",
+        "description": "RunningJob"
+      }, {
+        "startTime": "2017-10-18T03:50:36.500-07:00",
+        "description": "WaitingForOutputStore",
+        "endTime": "2017-10-18T03:50:36.508-07:00"
+      }, {
+        "startTime": "2017-10-18T03:50:37.733-07:00",
+        "endTime": "2017-10-18T03:50:37.735-07:00",
+        "description": "UpdatingJobStore"
+      }, {
+        "startTime": "2017-10-18T03:50:36.473-07:00",
+        "description": "Pending",
+        "endTime": "2017-10-18T03:50:36.493-07:00"
+      }, {
+        "startTime": "2017-10-18T03:50:36.493-07:00",
+        "description": "RequestingExecutionToken",
+        "endTime": "2017-10-18T03:50:36.500-07:00"
+      }],
+      "start": "2017-10-18T03:50:36.458-07:00"
+    }, {
+      "executionStatus": "Done",
+      "stdout": "/users/leepc12/code/test_wdl/cromwell-executions/test_wf/a9e9f020-ef1d-454a-a1ba-c54a0ca38f2e/call-t1/shard-1/execution/stdout",
+      "backendStatus": "Done",
+      "shardIndex": 1,
+      "outputs": {
+        "o1": "/users/leepc12/code/test_wdl/cromwell-executions/test_wf/a9e9f020-ef1d-454a-a1ba-c54a0ca38f2e/call-t1/shard-1/execution/glob-3bcbe4e7489c90f75e0523ac6f3a9385/test.bam"
+      },
+      "runtimeAttributes": {
+        "failOnStderr": "false",
+        "continueOnReturnCode": "0"
+      },
+      "callCaching": {
+        "allowResultReuse": false,
+        "effectiveCallCachingMode": "CallCachingOff"
+      },
+      "inputs": {
+        "queue": "standard",
+        "mem_mb": 3000,
+        "time_hr": 1,
+        "i": [["fastqs/fq2_1-1.fq.gz", "fastqs/fq2_1-2.fastq.gz"], ["fastqs/fq2_2-1.fastq.gz", "fastqs/fq2_2-2.fastq.gz"]],
+        "res_cpu": 1
+      },
+      "returnCode": 0,
+      "jobId": "32040",
+      "backend": "Local",
+      "end": "2017-10-18T03:50:37.835-07:00",
+      "stderr": "/users/leepc12/code/test_wdl/cromwell-executions/test_wf/a9e9f020-ef1d-454a-a1ba-c54a0ca38f2e/call-t1/shard-1/execution/stderr",
+      "callRoot": "/users/leepc12/code/test_wdl/cromwell-executions/test_wf/a9e9f020-ef1d-454a-a1ba-c54a0ca38f2e/call-t1/shard-1",
+      "attempt": 1,
+      "executionEvents": [{
+        "startTime": "2017-10-18T03:50:36.508-07:00",
+        "endTime": "2017-10-18T03:50:36.588-07:00",
+        "description": "PreparingJob"
+      }, {
+        "startTime": "2017-10-18T03:50:37.835-07:00",
+        "description": "UpdatingJobStore",
+        "endTime": "2017-10-18T03:50:37.835-07:00"
+      }, {
+        "startTime": "2017-10-18T03:50:36.588-07:00",
+        "description": "RunningJob",
+        "endTime": "2017-10-18T03:50:37.835-07:00"
+      }, {
+        "startTime": "2017-10-18T03:50:36.493-07:00",
+        "endTime": "2017-10-18T03:50:36.500-07:00",
+        "description": "RequestingExecutionToken"
+      }, {
+        "startTime": "2017-10-18T03:50:36.500-07:00",
+        "endTime": "2017-10-18T03:50:36.508-07:00",
+        "description": "WaitingForOutputStore"
+      }, {
+        "startTime": "2017-10-18T03:50:36.473-07:00",
+        "description": "Pending",
+        "endTime": "2017-10-18T03:50:36.493-07:00"
+      }],
+      "start": "2017-10-18T03:50:36.455-07:00"
+    }]
+  },
+  "outputs": {
+    "test_wf.t1.o1": ["/users/leepc12/code/test_wdl/cromwell-executions/test_wf/a9e9f020-ef1d-454a-a1ba-c54a0ca38f2e/call-t1/shard-0/execution/glob-3bcbe4e7489c90f75e0523ac6f3a9385/test.bam", "/users/leepc12/code/test_wdl/cromwell-executions/test_wf/a9e9f020-ef1d-454a-a1ba-c54a0ca38f2e/call-t1/shard-1/execution/glob-3bcbe4e7489c90f75e0523ac6f3a9385/test.bam"]
+  },
+  "workflowRoot": "/users/leepc12/code/test_wdl/cromwell-executions/test_wf/a9e9f020-ef1d-454a-a1ba-c54a0ca38f2e",
+  "id": "a9e9f020-ef1d-454a-a1ba-c54a0ca38f2e",
+  "inputs": {
+    "test_wf.fastqs": [[["fastqs/fq1_1-1.fastq.gz", "fastqs/fq1_1-2.fastq.gz"], ["fastqs/fq1_2-1.fastq.gz", "fastqs/fq1_2-2.fastq.gz"]], [["fastqs/fq2_1-1.fq.gz", "fastqs/fq2_1-2.fastq.gz"], ["fastqs/fq2_2-1.fastq.gz", "fastqs/fq2_2-2.fastq.gz"]]],
+    "test_wf.res_cpu": 2,
+    "test_wf.t1.mem_mb": 3000,
+    "test_wf.t1.queue": "standard",
+    "test_wf.t1.time_hr": 1
+  },
+  "labels": {
+    "cromwell-workflow-id": "cromwell-a9e9f020-ef1d-454a-a1ba-c54a0ca38f2e"
+  },
+  "submission": "2017-10-18T03:50:32.855-07:00",
+  "status": "Succeeded",
+  "end": "2017-10-18T03:50:39.557-07:00",
+  "start": "2017-10-18T03:50:32.907-07:00"
+}

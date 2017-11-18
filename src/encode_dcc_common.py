@@ -126,6 +126,9 @@ def rm_f(files):
         else:
             run_shell_cmd('rm -f {}'.format(files))
 
+def touch(f):
+    run_shell_cmd('touch {}'.format(f))
+
 def make_hard_link(f, out_dir):
     # make hard-link (UNIX only)
     if os.path.dirname(f)==os.path.dirname(out_dir):

@@ -107,5 +107,5 @@ fastqs/
 cromwell-executions/
 cromwell-workflow-logs/
 
-test.wdl
-test_google.wdl
+#test.wdl
+#test_google.wdl

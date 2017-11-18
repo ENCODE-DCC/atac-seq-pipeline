@@ -268,6 +268,23 @@ def pbc_qc_pe(bam, nth, out_dir):
     rm_f(nmsrt_bam)
     return pbc_qc
 
+# if --no-dup-removal is on, 
+# Cromwell/WDL wants to have a empty file 
+# for output { File pbc_qc, File dup_qc }
+def make_empty_pbc_qc(bam, out_dir):
+    prefix = os.path.join(out_dir,
+        os.path.basename(strip_ext_bam(bam)))
+    pbc_qc = '{}.pbc.qc'.format(prefix)
+    touch(pbc_qc)
+    return pbc_qc
+
+def make_empty_dup_qc(bam, out_dir):
+    prefix = os.path.join(out_dir,
+        os.path.basename(strip_ext_bam(bam)))
+    dup_qc = '{}.dup.qc'.format(prefix)
+    touch(dup_qc)
+    return dup_qc
+
 def main():
     # filt_bam - dupmark_bam - nodup_bam
     #          \ dup_qc      \ pbc_qc
@@ -294,6 +311,7 @@ def main():
 
     if args.no_dup_removal:
         nodup_bam = filt_bam
+        dup_qc = make_empty_dup_qc(filt_bam, args.out_dir)
     else:
         log.info('Marking dupes with {}...'.format(args.dup_marker))
         if args.dup_marker=='picard':
@@ -345,11 +363,13 @@ def main():
         else:
             ret_val_3 = pool.apply_async(pbc_qc_se,
                             (dupmark_bam, args.out_dir))
+    else:
+        ret_val_3 = pool.apply_async(make_empty_pbc_qc,
+                            (filt_bam, args.out_dir))
     # gather
     nodup_bai = ret_val_1.get(BIG_INT)
     nodup_flagstat_qc = ret_val_2.get(BIG_INT)
-    if not args.no_dup_removal:
-        pbc_qc = ret_val_3.get(BIG_INT)
+    pbc_qc = ret_val_3.get(BIG_INT)
 
     # close multithreading
     pool.close()

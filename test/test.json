@@ -1,0 +1,20 @@
+{
+	"test_wf.tsv_path" : "/users/leepc12/code/atac-seq-pipeline/genome/mm10_klab.tsv",
+	"test_wf.tsv_path2" : "/users/leepc12/code/atac-seq-pipeline/genome/mm10_klab.tsv2",
+	"test_wf.txt_path" : "/users/leepc12/code/atac-seq-pipeline/genome/mm10_klab.txt",
+	"test_wf.fastqs" : [
+		[
+			["fastqs/fq1_1-1.fastq.gz","fastqs/fq1_1-2.fastq.gz"],
+			["fastqs/fq1_2-1.fastq.gz","fastqs/fq1_2-2.fastq.gz"]
+		],
+		[
+			["fastqs/fq2_1-1.fq.gz","fastqs/fq2_1-2.fastq.gz"],
+			["fastqs/fq2_2-1.fastq.gz","fastqs/fq2_2-2.fastq.gz"]
+		]
+	],
+	"test_wf.res_cpu" : 2,
+
+	"test_wf.t1.mem_mb" : 3000,
+	"test_wf.t1.time_hr" : 2,
+	"test_wf.t1.queue" : "standard"
+}

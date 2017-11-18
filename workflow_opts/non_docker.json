@@ -1,7 +1,8 @@
 {
 	"default_runtime_attributes" : {
 		"failOnStderr": "false",
-		"memory": "2 GB",
-		"cpu": "1"
+		"memory": "4 GB",
+		"cpu": "1",
+		"sge_pe" : "shm"
 	}
 }

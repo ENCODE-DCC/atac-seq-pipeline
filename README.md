@@ -13,7 +13,7 @@ ENCODE ATAC-seq pipeline
 
 # Usage
 
-Choose `[BACKEND_CONF]` and `[WORKFLOW_OPT]` according to your platform and presence of `docker`.
+Choose `[BACKEND_CONF]` and `[WORKFLOW_OPT]` according to your platform and presence of `Docker`.
   ```
   $ java -jar -Dconfig.file=[BACKEND_CONF] cromwell-*.jar run atac.wdl -i input.json -o [WORKFLOW_OPT]
   ```
@@ -58,7 +58,7 @@ Jobs will be submitted to Sun GridEngine (SGE) and distributed to all server nod
 
 ### Sun GridEngine (SGE)
 
-1) Check if your SGE has a parallel environment named `shm` by `$ qconf -spl`. If it does not have a PE `shm` then ask your SGE admin to create one or change the name of PE in `backends/sge.conf`.
+1) Check if your SGE has a parallel environment named `shm` by `$ qconf -spl`. If it does not have a PE `shm` then ask your SGE admin to create one or change the name of PE (`default_runtime_attributes.sge_pe`) in `workflow_opts/non_docker.json`.
 2) Install [dependencies](#dependency-installation).
 3) Install [genome data](#genome-data-installation).
 4) Run a pipeline.
@@ -109,18 +109,27 @@ Genome data have already been installed and shared.
   * Google Compute Engine
   * Google Cloud Storage
   * Genomics API
-4) If you are already on a VM instance on your Google Project. Skip step 5 and 6.
-5) Install [Google Cloud Platform SDK](https://cloud.google.com/sdk/downloads) and authenticate through it. You will be asked to enter verification keys. Get keys from the URLs they provide.
+4) Set `default_runtime_attributes.zones` in `workflow_opts/docker_google.json` as your preferred Google Cloud zone.
+  ```
+  {
+    "default_runtime_attributes" : {
+      "docker" : "quay.io/encode-dcc/atac-seq-pipeline:latest",
+      "zones": "us-west1-a us-west1-b us-west1-c",
+      ...
+  }
+  ```
+5) If you are already on a VM instance on your Google Project. Skip step 6 and 7.
+6) Install [Google Cloud Platform SDK](https://cloud.google.com/sdk/downloads) and authenticate through it. You will be asked to enter verification keys. Get keys from the URLs they provide.
   ```
   $ gcloud auth login --no-launch-browser
   $ gcloud auth application-default login --no-launch-browser
   ```
-6) Get on the Google Project.
+7) Get on the Google Project.
   ```
   $ gcloud config set project [PROJ_NAME]
   ```
-7) You don't have to repeat step 1-6 for next pipeline run. Credential information will be stored in `$HOME/.config/gcloud`. Go directly to step 8.
-8) Run a pipeline. Use any string for `[SAMPLE_NAME]` to distinguish between multiple samples.
+8) You don't have to repeat step 1-7 for next pipeline run. Credential information will be stored in `$HOME/.config/gcloud`. Go directly to step 9.
+9) Run a pipeline. Use any string for `[SAMPLE_NAME]` to distinguish between multiple samples.
   ```
   $ java -jar -Dconfig.file=backends/google.conf -Dbackend.providers.JES.config.project=[PROJ_NAME] -Dbackend.providers.JES.config.root=[OUT_BUCKET]/[SAMPLE_NAME] cromwell-*.jar run atac.wdl -i input.json -o workflow_opts/docker_google.json
   ```
@@ -165,7 +174,7 @@ choose one of (`fastqs`, `bams`, `nodup_bams`, `tas`, `peaks`) to start with but
 **WE DO NOT RECOMMEND RUNNING OUR PIPELINE WITHOUT `DOCKER`!** Use it with caution.
 1) **Our pipeline is for BASH only. Set your default shell as BASH**.
 2) For Mac OSX users, do not install dependencies and just install `Docker` and use our pipeline with it.
-3) Remove any Conda (Anaconda Python and Miniconda) from your `PATH`.**Pipeline will not work if you have other version of Conda binaries in `PATH`**.
+3) Remove any Conda (Anaconda Python and Miniconda) from your `PATH`. **PIPELINE WILL NOT WORK IF YOU HAVE OTHER VERSION OF CONDA BINARIES IN `PATH`**.
 4) Install Miniconda3 for 64-bit Linux on your system. Miniconda2 will not work. If your system is 32-bit Linux then try with `x86_32`.
    ```
    $ wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
@@ -203,7 +212,7 @@ Supported genomes: hg38 (from ENCODE), mm10 (from ENCODE), hg19 and mm9. A TSV f
 
 1) Do not install genome data on Stanford clusters (Sherlock-2 and SCG4). They already have all genome data installed. Use `genome/[GENOME]_sherlock.tsv` or `genome/[GENOME]_scg4.tsv` as your TSV file.
 2) For Mac OSX users, if [dependency installation](#dependency-installation) does not work then post an issue on the repo.
-3) Install [dependencies](#dependency-installation) first .
+3) Install [dependencies](#dependency-installation) first.
 4) Install genome data.
    ```
    $ cd installers/
@@ -216,4 +225,8 @@ Supported genomes: hg38 (from ENCODE), mm10 (from ENCODE), hg19 and mm9. A TSV f
 
 ```
 java -jar -Dconfig.file=backends/google.conf -Dbackend.providers.JES.config.project=atac-seq-pipeline -Dbackend.providers.JES.config.root="gs://atac-seq-pipeline-workflows/ENCSR889WQX" cromwell-29.jar run atac.wdl -i examples/ENCSR889WQX_google.json -o workflow_opts/docker_google.json
+
+java -jar -Dconfig.file=backends/google.conf -Dbackend.providers.JES.config.project=atac-seq-pipeline -Dbackend.providers.JES.config.root="gs://atac-seq-pipeline-workflows/ENCSR889WQX_from_bam" cromwell-29.jar run atac.wdl -i examples/ENCSR889WQX_google_from_bam.json -o workflow_opts/docker_google.json
+
+java -jar -Dconfig.file=backends/google.conf -Dbackend.providers.JES.config.project=atac-seq-pipeline -Dbackend.providers.JES.config.root="gs://atac-seq-pipeline-workflows/ENCSR889WQX_from_ta" cromwell-29.jar run atac.wdl -i examples/ENCSR889WQX_google_from_bam.json -o workflow_opts/docker_google.json
 ```
