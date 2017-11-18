@@ -606,8 +606,8 @@ task filter {
 		File nodup_bai = glob("*.bai")[0]
 		File flagstat_qc = glob("*.flagstat.qc")[0]
 		# optional (if no_dup_removall then empty qc files)		
-		File dup_qc = glob("*.dup.qc")
-		File pbc_qc = glob("*.pbc.qc")
+		File dup_qc = glob("*.dup.qc")[0]
+		File pbc_qc = glob("*.pbc.qc")[0]
 	}
 
 	runtime {
