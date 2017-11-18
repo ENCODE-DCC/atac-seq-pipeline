@@ -517,7 +517,7 @@ task trim_adapter { # detect/trim adapter
 	}
 	runtime {
 		cpu : "${select_first([cpu,2])}"
-		disks: "local-disk 50 HDD"
+		disks: "local-disk 50 SSD"
 		queue : queue
 	}
 }
@@ -545,7 +545,7 @@ task merge_fastq { # merge fastqs
 	}
 	runtime {
 		cpu : "${select_first([cpu,2])}"
-		disks: "local-disk 50 HDD"
+		disks: "local-disk 50 SSD"
 		queue : queue
 	}
 }
@@ -688,7 +688,7 @@ task spr { # make two self pseudo replicates
 		File ta_pr2 = glob("*.pr2.tagAlign.gz")[0]
 	}
 	runtime {
-		disks: "local-disk 20 HDD"
+		disks: "local-disk 20 SSD"
 		queue : queue
 	}
 }
@@ -707,7 +707,7 @@ task pool_ta {
 		File ta_pooled = glob("*.tagAlign.gz")[0]
 	}
 	runtime {
-		disks: "local-disk 20 HDD"
+		disks: "local-disk 20 SSD"
 		queue : queue
 	}
 }
@@ -809,7 +809,7 @@ task idr {
 		File idr_log = glob("*.log")[0]
 	}
 	runtime {
-		disks: "local-disk 20 HDD"
+		disks: "local-disk 20 SSD"
 		queue : queue
 	}
 }
@@ -832,7 +832,7 @@ task overlap {
 		File overlap_peak = glob("*eak.gz")[0]
 	}
 	runtime {
-		disks: "local-disk 20 HDD"
+		disks: "local-disk 20 SSD"
 		queue : queue
 	}
 }
@@ -861,7 +861,7 @@ task reproducibility {
 			glob("*reproducibility.qc")[0]
 	}
 	runtime {
-		disks: "local-disk 20 HDD"
+		disks: "local-disk 20 SSD"
 		queue : queue
 	}
 }
@@ -882,7 +882,7 @@ task blacklist_filter {
 		File filtered_peak = glob('*.gz')[0]
 	}
 	runtime {
-		disks: "local-disk 20 HDD"
+		disks: "local-disk 20 SSD"
 		queue : queue
 	}
 }
@@ -903,7 +903,7 @@ task frip {
 		File frip_qc = glob('*.frip.qc')[0]
 	}
 	runtime {
-		disks: "local-disk 20 HDD"
+		disks: "local-disk 20 SSD"
 		queue : queue
 	}
 }
