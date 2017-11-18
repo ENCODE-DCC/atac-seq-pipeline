@@ -50,16 +50,27 @@ from encode_dcc_common import *
 
 # test1()
 
-def test3():
-    path = 'out_rep2_macs2/ENCFF463QCX.trim.merged.nodup.tn5.narrowPeak.gz'
-    print(get_ext(path))
-    print(strip_ext(path))
-    print(strip_ext(path,'narrowP'))
-    print(strip_ext(path,'narrowPeak'))
+#def test3():
+#    path = 'out_rep2_macs2/ENCFF463QCX.trim.merged.nodup.tn5.narrowPeak.gz'
+#    print(get_ext(path))
+#    print(strip_ext(path))
+#    print(strip_ext(path,'narrowP'))
+#    print(strip_ext(path,'narrowPeak'))
 
+#test3()
 
+def test4():
+    log.setLevel('DEBUG')
+    log.info("INFO DA")
+    log.error("ERROR DA")
+    run_shell_cmd('ls -l')
+    run_shell_cmd('asdfasdf')
+    
+    
+    
+    
 
-test3()
+test4()
 
 # run_shell_cmd("echo 2; echo 2; echo 3; sleep 10")
 

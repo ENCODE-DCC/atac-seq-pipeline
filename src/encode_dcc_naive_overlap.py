@@ -6,7 +6,6 @@
 import sys
 import os
 import argparse
-import multiprocessing
 import math
 from encode_dcc_common import *
 

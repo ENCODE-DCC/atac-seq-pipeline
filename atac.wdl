@@ -70,7 +70,7 @@ workflow atac {
 	}
 
 	# pipeline starts here (parallelized for each replicate)
-	scatter(i in range(inputs.num_rep)) { 
+	scatter(i in range(inputs.num_rep)) {
 		if (inputs.type=='fastq') {
 			# trim adapters
 			call trim_adapter {
@@ -495,6 +495,7 @@ task trim_adapter { # detect/trim adapter
 							# for cutadapt -e	
 	# resource
 	Int? cpu
+	Int? mem_mb
 	String? queue
 
 	command {
@@ -506,11 +507,9 @@ task trim_adapter { # detect/trim adapter
 				then "--auto-detect-adapter" else ""} \
 			${"--min-trim-len " + min_trim_len} \
 			${"--err-rate " + err_rate} \
-			${"--nth " + cpu}
+			${"--nth " + select_first([cpu,2])}
 	}
 	output {
-		# Google Cloud does not support 2-dim array in output
-		# read_tsv() for JES always fails here (Cromwell bug?)
 		Array[File] trimmed_fastqs_R1 = read_lines("out_R1.txt")
 		Array[File] trimmed_fastqs_R2 = if paired_end then 
 			 read_lines("out_R2.txt") else []
@@ -518,13 +517,13 @@ task trim_adapter { # detect/trim adapter
 	runtime {
 		cpu : "${select_first([cpu,2])}"
 		disks: "local-disk 50 SSD"
+		memory : "${select_first([mem_mb,'10000'])} MB"
 		queue : queue
 	}
 }
 
 task merge_fastq { # merge fastqs
 	# parameters from workflow
-	# Google Cloud does not support 2-dim array in output
 	#Array[Array[File]] fastqs # [merge_id][end_id]
 	Array[File] fastqs_R1 # [merge_id]
 	Array[File] fastqs_R2 # [merge_id]
@@ -537,7 +536,8 @@ task merge_fastq { # merge fastqs
 		python $(which encode_dcc_merge_fastq.py) \
 			--fastqs-R1 ${sep=' ' fastqs_R1} \
 			${if paired_end then "--paired-end" else ""} \
-			--fastqs-R2 ${sep=' ' fastqs_R2}
+			--fastqs-R2 ${sep=' ' fastqs_R2} \
+			${"--nth " + select_first([cpu,2])}
 	}
 	output {
 		# merged_fastqs[end_id]
@@ -572,7 +572,7 @@ task bowtie2 {
 			${if paired_end then "--paired-end" else ""} \
 			${"--multimapping " + multimapping} \
 			${"--score-min " + score_min} \
-			${"--nth " + cpu}
+			${"--nth " + select_first([cpu,4])}
 	}
 	output {
 		File bam = glob("*.bam")[0]
@@ -585,6 +585,7 @@ task bowtie2 {
 		memory : "${select_first([mem_mb,'20000'])} MB"
 		time : "${select_first([time_hr,48])}"
 		disks: "local-disk 100 SSD"
+		#preemptible: 0
 		queue : queue
 	}
 }

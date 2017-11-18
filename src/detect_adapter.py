@@ -3,8 +3,6 @@
 import sys
 import gzip
 
-import multiprocessing
-
 VERBOSE = False
 
 adapters = {

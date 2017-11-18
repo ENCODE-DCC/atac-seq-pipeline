@@ -14,7 +14,8 @@ import math
 import signal
 
 logging.basicConfig(
-    format='[%(asctime)s %(levelname)s] %(message)s')
+    format='[%(asctime)s %(levelname)s] %(message)s',
+    stream=sys.stdout)
 log = logging.getLogger(__name__)
 
 BIG_INT = 99999999

@@ -341,9 +341,12 @@ A TSV file will be generated under `[DEST_DIR]`. Use it for `atac.genomv_tsv` va
 ### Example command lines
 
 ```
+# SE
 java -jar -Dconfig.file=backends/google.conf -Dbackend.providers.JES.config.project=atac-seq-pipeline -Dbackend.providers.JES.config.root="gs://atac-seq-pipeline-workflows/ENCSR889WQX" cromwell-29.jar run atac.wdl -i examples/ENCSR889WQX_google.json -o workflow_opts/docker_google.json
 
 java -jar -Dconfig.file=backends/google.conf -Dbackend.providers.JES.config.project=atac-seq-pipeline -Dbackend.providers.JES.config.root="gs://atac-seq-pipeline-workflows/ENCSR889WQX_from_bam" cromwell-29.jar run atac.wdl -i examples/ENCSR889WQX_google_from_bam.json -o workflow_opts/docker_google.json
 
 java -jar -Dconfig.file=backends/google.conf -Dbackend.providers.JES.config.project=atac-seq-pipeline -Dbackend.providers.JES.config.root="gs://atac-seq-pipeline-workflows/ENCSR889WQX_from_ta" cromwell-29.jar run atac.wdl -i examples/ENCSR889WQX_google_from_ta.json -o workflow_opts/docker_google.json
+
+# PE
 ```
