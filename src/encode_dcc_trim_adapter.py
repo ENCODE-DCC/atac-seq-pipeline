@@ -39,9 +39,13 @@ def parse_arguments(debug=False):
                         help='Number of threads to parallelize.')
     parser.add_argument('--out-dir', default='', type=str,
                             help='Output directory.')
-    parser.add_argument('--out-tsv', default='out.tsv', type=str,
-                            help='TSV with all output filenames \
-                            ([OUT_DIR]/[BASENAME]). This TSV will be generated \
+    parser.add_argument('--out-txt-R1', default='out_R1.txt', type=str,
+                            help='Text file with a list of trimmed fastqs for R1 \
+                            ([OUT_DIR]/[BASENAME]). This TXT will be generated \
+                            under [OUT_DIR].')
+    parser.add_argument('--out-txt-R2', default='out_R2.txt', type=str,
+                            help='Text file with a list of trimmed fastqs for R2 \
+                            ([OUT_DIR]/[BASENAME]). This TXT will be generated \
                             under [OUT_DIR].')
     parser.add_argument('--log-level', default='INFO', 
                         choices=['NOTSET','DEBUG','INFO',
@@ -211,21 +215,30 @@ def main():
         ret_vals.append(ret_val)
 
     # update array with trimmed fastqs
-    trimmed_fastqs = []
+    trimmed_fastqs_R1 = []
+    trimmed_fastqs_R2 = []
     for i, ret_val in enumerate(ret_vals):
         if args.paired_end:
-            trimmed_fastqs.append(ret_val.get(BIG_INT))
+            fastqs = ret_val.get(BIG_INT)
+            trimmed_fastqs_R1.append(fastqs[0])
+            trimmed_fastqs_R2.append(fastqs[1])
         else:
-            trimmed_fastqs.append([ret_val.get(BIG_INT)])
+            fastq = ret_val.get(BIG_INT)
+            trimmed_fastqs_R1.append(fastq)
 
     # close multithreading
     pool.close()
     pool.join()
 
     # write TSV for output filenames (for WDL)
-    log.info('Writinig output TSV...')
-    tsv = os.path.join(args.out_dir, args.out_tsv)
-    write_tsv(tsv, trimmed_fastqs)
+    log.info('Writinig output TXTs...')
+    txt_R1 = os.path.join(args.out_dir, args.out_txt_R1)
+    txt_R2 = os.path.join(args.out_dir, args.out_txt_R2)
+    write_txt(txt_R1, trimmed_fastqs_R1)
+    write_txt(txt_R2, trimmed_fastqs_R2)
+
+    log.info('List all files in output directory...')
+    ls_l(args.out_dir)
 
     log.info('All done.')
 

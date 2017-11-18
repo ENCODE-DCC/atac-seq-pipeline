@@ -51,6 +51,9 @@ def main():
     log.info('Pooling TAGALIGNs...')
     pool_ta(args.tas, args.out_dir)
 
+    log.info('List all files in output directory...')
+    ls_l(args.out_dir)
+
     log.info('All done.')
 
 if __name__=='__main__':

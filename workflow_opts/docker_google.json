@@ -2,12 +2,11 @@
 	"default_runtime_attributes" : {
 		"docker" : "quay.io/encode-dcc/atac-seq-pipeline:latest",
 		"zones": "us-west1-a us-west1-b us-west1-c",
-		"preemptible": "0",
+		"preemptible": "5",
 		"failOnStderr": "false",
 		"bootDiskSizeGb": "10",
-		"disks": "local-disk 20 HDD",
+		"disks": "local-disk 50 HDD",
 		"memory": "4 GB",
-		"continueOnReturnCode": "0",
 		"cpu": "1",
 		"noAddress": "false"
 	}

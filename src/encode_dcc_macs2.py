@@ -153,6 +153,10 @@ def macs2(ta, chrsz, gensz, pval_thresh, smooth_win, cap_num_peak,
             chrsz,
             pval_bigwig)
         run_shell_cmd(cmd10)
+    else:
+        # make empty signal bigwigs (WDL wants it in output{})
+        touch(fc_bigwig)
+        touch(pval_bigwig)
 
     # remove temporary files
     temp_files.extend([fc_bedgraph,fc_bedgraph_srt,
@@ -160,20 +164,7 @@ def macs2(ta, chrsz, gensz, pval_thresh, smooth_win, cap_num_peak,
     temp_files.append("{}_*".format(prefix))
     rm_f(temp_files)
 
-    if make_signal:
-        return npeak, fc_bigwig, pval_bigwig
-    else:
-        return npeak
-
-def make_empty_signals(npeak, out_dir):
-    prefix = os.path.join(out_dir,
-        os.path.basename(strip_ext_npeak(npeak)))
-    pval_bigwig = '{}.pval.signal.bigwig'.format(prefix)
-    fc_bigwig = '{}.fc.signal.bigwig'.format(prefix)
-
-    touch(pval_bigwig)
-    touch(fc_bigwig)
-    return pval_bigwig, fc_bigwig
+    return npeak, fc_bigwig, pval_bigwig
 
 def main():
     # read params
@@ -184,14 +175,13 @@ def main():
     mkdir_p(args.out_dir)
 
     log.info('Calling peaks and generating signal tracks with MACS2...')
-    ret = macs2(args.ta, args.chrsz, args.gensz, args.pval_thresh,
+    npeak, fc_bigwig, pval_bigwig = macs2(
+        args.ta, args.chrsz, args.gensz, args.pval_thresh,
         args.smooth_win, args.cap_num_peak, args.make_signal, 
         args.out_dir)
-    if args.make_signal:
-        npeak, fc_bigwig, pval_bigwig = ret
-    else:
-        npeak = ret        
-        fc_bigwig, pval_bigwig = make_empty_signals(npeak, args.out_dir)
+
+    log.info('List all files in output directory...')
+    ls_l(args.out_dir)
 
     log.info('All done.')
 

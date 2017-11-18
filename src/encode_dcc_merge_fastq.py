@@ -12,13 +12,14 @@ from encode_dcc_common import *
 def parse_arguments(debug=False):
     parser = argparse.ArgumentParser(prog='ENCODE DCC fastq merger.',
                                         description='')
-    parser.add_argument('fastqs', nargs='+', type=str,
-                        help='TSV file path or list of FASTQs. \
-                            FASTQs must be compressed with gzip (with .gz). \
-                            Use TSV for paired end fastqs or \
-                            multiple fastqs to be merged. \
-                            row=merge_id, col=end_id). \
-                            All rows will be merged.')
+    parser.add_argument('--fastqs-R1', nargs='+', type=str, required=True,
+                        help='FASTQs to be merged for R1. \
+                            FASTQs must be compressed with gzip (with .gz).')
+    parser.add_argument('--fastqs-R2', nargs='*', type=str,
+                        help='FASTQs to be merged for R2. \
+                            FASTQs must be compressed with gzip (with .gz).')
+    parser.add_argument('--paired-end', action="store_true",
+                        help='Paired-end FASTQs.')
     parser.add_argument('--nth', type=int, default=1,
                         help='Number of threads to parallelize.')
     parser.add_argument('--out-dir', default='', type=str,
@@ -33,12 +34,17 @@ def parse_arguments(debug=False):
                         help='Log level')
     args = parser.parse_args()
 
-    # parse fastqs command line
-    if args.fastqs[0].endswith('.gz'): # it's single-end fastq
-        args.fastqs = [[f] for f in args.fastqs] # make it a matrix
-    else: # it's TSV
-        args.fastqs = read_tsv(args.fastqs[0])
-
+    if args.paired_end:
+        if len(args.fastqs_R2)==0:
+            raise argparse.ArgumentTypeError(
+            'Define --fastqs-R2 for paired end dataset.')
+        if len(args.fastqs_R1)!=len(args.fastqs_R2):
+            raise argparse.ArgumentTypeError(
+            'Dimension mismatch between --fastqs-R2 and --fastqs-R2.')
+    else:
+        if len(args.fastqs_R2)>0:
+            raise argparse.ArgumentTypeError(
+            'Do not define --fastqs-R2 for single ended dataset.')
     log.setLevel(args.log_level)
     log.info(sys.argv)
     return args
@@ -64,33 +70,25 @@ def main():
     # make out_dir
     mkdir_p(args.out_dir)
 
-    paired_end = len(args.fastqs[0])>1
     # initialize multithreading
     log.info('Initializing multithreading...')
-    if paired_end:
-        num_process = min(2*len(args.fastqs),args.nth)
+    if args.paired_end:
+        num_process = min(2*len(args.fastqs_R1),args.nth)
     else:
-        num_process = min(len(args.fastqs),args.nth)
+        num_process = min(len(args.fastqs_R1),args.nth)
     log.info('Number of threads={}.'.format(num_process))
     pool = multiprocessing.Pool(num_process)
 
     # merge fastqs
     log.info('Merging fastqs...')
-    R1_to_merge = []
-    R2_to_merge = []
-    for i in range(len(args.fastqs)):
-        R1_to_merge.append(args.fastqs[i][0])
-        if paired_end:
-            R2_to_merge.append(args.fastqs[i][1])
-
-    log.info('R1 to be merged: {}'.format(R1_to_merge))
+    log.info('R1 to be merged: {}'.format(args.fastqs_R1))
     ret_val1 = pool.apply_async(merge_fastqs,
-                    (R1_to_merge,args.out_dir,))
+                    (args.fastqs_R1, args.out_dir,))
     R1_merged = ret_val1.get(BIG_INT)
-    if paired_end:
-        log.info('R2 to be merged: {}'.format(R2_to_merge))
+    if args.paired_end:
+        log.info('R2 to be merged: {}'.format(args.fastqs_R2))
         ret_val2 = pool.apply_async(merge_fastqs,
-                        (R2_to_merge,args.out_dir,))
+                        (args.fastqs_R2, args.out_dir,))
         R2_merged = ret_val2.get(BIG_INT)
 
     # close multithreading
@@ -100,11 +98,14 @@ def main():
     # write txt for output filenames (for WDL)
     log.info('Writinig output txt...')    
     txt = os.path.join(args.out_dir, args.out_txt)
-    if paired_end:
+    if args.paired_end:
         arr = [R1_merged, R2_merged]
     else:
         arr = [R1_merged]
     write_txt(txt, arr)
+
+    log.info('List all files in output directory...')
+    ls_l(args.out_dir)
 
     log.info('All done.')
 

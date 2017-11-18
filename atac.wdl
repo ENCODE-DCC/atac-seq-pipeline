@@ -42,7 +42,8 @@ workflow atac {
 	Int? cap_num_peak 		# cap number of raw peaks called from MACS2
 	Float? pval_thresh 		# p.value threshold
 	Int? smooth_win 		# size of smoothing window
-	Int? macs2_mem_mb 		# resource
+	Int? macs2_mem_mb 		# resource (memory in MB)
+	Int? macs2_time_hr		# resource (walltime in hour)
 
 	# optional for IDR
 	Boolean? enable_idr		# enable IDR analysis on raw peaks
@@ -83,14 +84,17 @@ workflow atac {
 			# merge fastqs from technical replicates
 			call merge_fastq {
 				input: 
-					fastqs = trim_adapter.trimmed_fastqs,
+					fastqs_R1 = trim_adapter.trimmed_fastqs_R1,
+					fastqs_R2 = if paired_end then 
+						trim_adapter.trimmed_fastqs_R2 else [],
+					paired_end = paired_end,
 					queue = queue_short,
 			}
 			# align trimmed/merged fastqs with bowtie2
 			call bowtie2 {
 				input:
 					idx_tar = inputs.bowtie2_idx_tar,
-					fastqs = merge_fastq.merged_fastqs,
+					fastqs = merge_fastq.merged_fastqs, #[R1,R2]
 					paired_end = paired_end,
 					multimapping = multimapping,
 					queue = queue_hard,
@@ -114,7 +118,7 @@ workflow atac {
 				input:
 					bam = if defined(filter.nodup_bam) 
 							then filter.nodup_bam else nodup_bams[i],
-					paired_end = select_first([paired_end,true]),
+					paired_end = paired_end,
 					queue = queue_hard,
 			}
 		}
@@ -125,7 +129,7 @@ workflow atac {
 				input:
 					ta = if defined(bam2ta.ta) 
 							then bam2ta.ta else tas[i],
-					paired_end = select_first([paired_end,true]),
+					paired_end = paired_end,
 					queue = queue_hard,
 			}
 			# call peaks on tagalign
@@ -140,6 +144,7 @@ workflow atac {
 					smooth_win = smooth_win,
 					make_signal = true,
 					mem_mb = macs2_mem_mb,
+					time_hr = macs2_time_hr,
 					queue = queue_hard,
 			}
 		}
@@ -151,7 +156,7 @@ workflow atac {
 				input:
 					ta = if defined(bam2ta.ta) 
 							then bam2ta.ta else tas[i],
-					paired_end = select_first([paired_end,true]),
+					paired_end = paired_end,
 					queue = queue_short,
 			}
 		}
@@ -186,6 +191,7 @@ workflow atac {
 					smooth_win = smooth_win,
 					make_signal = true,
 					mem_mb = macs2_mem_mb,
+					time_hr = macs2_time_hr,
 					queue = queue_hard,
 			}
 		}
@@ -211,6 +217,7 @@ workflow atac {
 						pval_thresh = pval_thresh,
 						smooth_win = smooth_win,
 						mem_mb = macs2_mem_mb,
+						time_hr = macs2_time_hr,
 						queue = queue_hard,
 				}
 				call macs2 as macs2_pr2 {
@@ -222,6 +229,7 @@ workflow atac {
 						pval_thresh = pval_thresh,
 						smooth_win = smooth_win,
 						mem_mb = macs2_mem_mb,
+						time_hr = macs2_time_hr,
 						queue = queue_hard,
 				}
 			}
@@ -264,6 +272,7 @@ workflow atac {
 						pval_thresh = pval_thresh,
 						smooth_win = smooth_win,
 						mem_mb = macs2_mem_mb,
+						time_hr = macs2_time_hr,
 						queue = queue_hard,
 				}
 				# call peaks on 2nd pooled pseudo replicates
@@ -276,6 +285,7 @@ workflow atac {
 						pval_thresh = pval_thresh,
 						smooth_win = smooth_win,
 						mem_mb = macs2_mem_mb,
+						time_hr = macs2_time_hr,
 						queue = queue_hard,
 				}
 			}
@@ -491,8 +501,7 @@ task trim_adapter { # detect/trim adapter
 		python $(which encode_dcc_trim_adapter.py) \
 			${write_tsv(fastqs)} \
 			${"--adapters " + write_tsv(adapters)} \
-			${if select_first([paired_end,false])
-				then "--paired-end" else ""} \
+			${if paired_end then "--paired-end" else ""} \
 			${if select_first([auto_detect_adapter,false])
 				then "--auto-detect-adapter" else ""} \
 			${"--min-trim-len " + min_trim_len} \
@@ -500,8 +509,11 @@ task trim_adapter { # detect/trim adapter
 			${"--nth " + cpu}
 	}
 	output {
-		Array[Array[File]] trimmed_fastqs = read_tsv("out.tsv")
-				# trimmed_fastqs[merge_id][end_id]
+		# Google Cloud does not support 2-dim array in output
+		# read_tsv() for JES always fails here (Cromwell bug?)
+		Array[File] trimmed_fastqs_R1 = read_lines("out_R1.txt")
+		Array[File] trimmed_fastqs_R2 = if paired_end then 
+			 read_lines("out_R2.txt") else []
 	}
 	runtime {
 		cpu : "${select_first([cpu,2])}"
@@ -512,19 +524,27 @@ task trim_adapter { # detect/trim adapter
 
 task merge_fastq { # merge fastqs
 	# parameters from workflow
-	Array[Array[File]] fastqs # [merge_id][end_id]
+	# Google Cloud does not support 2-dim array in output
+	#Array[Array[File]] fastqs # [merge_id][end_id]
+	Array[File] fastqs_R1 # [merge_id]
+	Array[File] fastqs_R2 # [merge_id]
+	Boolean paired_end
 	# resource
+	Int? cpu
 	String? queue
 
 	command {
 		python $(which encode_dcc_merge_fastq.py) \
-			${write_tsv(fastqs)}
+			--fastqs-R1 ${sep=' ' fastqs_R1} \
+			${if paired_end then "--paired-end" else ""} \
+			--fastqs-R2 ${sep=' ' fastqs_R2}
 	}
 	output {
 		# merged_fastqs[end_id]
 		Array[File] merged_fastqs = read_lines("out.txt")
 	}
 	runtime {
+		cpu : "${select_first([cpu,2])}"
 		disks: "local-disk 50 HDD"
 		queue : queue
 	}
@@ -549,8 +569,7 @@ task bowtie2 {
 		python $(which encode_dcc_bowtie2.py) \
 			${idx_tar} \
 			${sep=' ' fastqs} \
-			${if select_first([paired_end,false])
-				then "--paired-end" else ""} \
+			${if paired_end then "--paired-end" else ""} \
 			${"--multimapping " + multimapping} \
 			${"--score-min " + score_min} \
 			${"--nth " + cpu}
@@ -592,8 +611,7 @@ task filter {
 	command {
 		python $(which encode_dcc_filter.py) \
 			${bam} \
-			${if select_first([paired_end,false])
-				then "--paired-end" else ""} \
+			${if paired_end then "--paired-end" else ""} \
 			${"--multimapping " + multimapping} \
 			${"--dup-marker " + dup_marker} \
 			${"--mapq-thresh " + mapq_thresh} \
@@ -636,8 +654,7 @@ task bam2ta {
 	command {
 		python $(which encode_dcc_bam2ta.py) \
 			${bam} \
-			${if select_first([paired_end,false])
-				then "--paired-end" else ""} \
+			${if paired_end then "--paired-end" else ""} \
 			${if select_first([disable_tn5_shift,false])
 				then "--disable-tn5-shift" else ""} \
 			${"--regex-grep-v-ta " +"'"+regex_grep_v_ta+"'"} \
@@ -664,8 +681,7 @@ task spr { # make two self pseudo replicates
 	command {
 		python $(which encode_dcc_spr.py) \
 			${ta} \
-			${if select_first([paired_end,false])
-				then "--paired-end" else ""}
+			${if paired_end then "--paired-end" else ""}
 	}
 	output {
 		File ta_pr1 = glob("*.pr1.tagAlign.gz")[0]
@@ -711,8 +727,7 @@ task xcor {
 	command {
 		python $(which encode_dcc_xcor.py) \
 			${ta} \
-			${if select_first([paired_end,false])
-				then "--paired-end" else ""} \
+			${if paired_end then "--paired-end" else ""} \
 			${"--subsample " + select_first(
 								[subsample,25000000])} \
 			--speak=0 \
@@ -758,7 +773,7 @@ task macs2 {
 	}
 	output {
 		File npeak = glob("*.narrowPeak.gz")[0]
-		# optional (if not make_signal then emptry signal files)
+		# optional (if not make_signal then empty signal files)
 		File sig_pval = glob("*.pval.signal.bigwig")[0]
 		File sig_fc = glob("*.fc.signal.bigwig")[0]
 	}

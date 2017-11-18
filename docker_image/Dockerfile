@@ -109,7 +109,7 @@ RUN wget https://github.com/kundajelab/phantompeakqualtools/archive/1.2.tar.gz &
 ENV PATH="/software/phantompeakqualtools-1.2:${PATH}"
 
 # Install Python3 and packages (for IDR)
-RUN apt-get install -y python3-dev python3-numpy python3-scipy python3-setuptools
+RUN apt-get install -y python3-dev python3-numpy python3-scipy python3-setuptools python3-matplotlib
 
 # Install IDR 2.0.4
 RUN git clone --branch 2.0.4 https://github.com/kundajelab/idr

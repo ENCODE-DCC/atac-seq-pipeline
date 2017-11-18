@@ -92,6 +92,9 @@ def main():
         frip_qc = frip(args.ta, args.peak, 
             args.out_dir)
 
+    log.info('List all files in output directory...')
+    ls_l(args.out_dir)
+
     log.info('All done.')
 
 if __name__=='__main__':

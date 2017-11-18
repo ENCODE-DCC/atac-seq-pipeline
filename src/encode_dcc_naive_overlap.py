@@ -98,6 +98,9 @@ def main():
     log.info('Checking if output is empty...') # bedtools issue    
     assert_file_not_empty(overlap_peak)
     
+    log.info('List all files in output directory...')
+    ls_l(args.out_dir)
+
     log.info('All done.')
 
 if __name__=='__main__':

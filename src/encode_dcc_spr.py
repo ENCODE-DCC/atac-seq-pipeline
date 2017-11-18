@@ -118,6 +118,10 @@ def main():
         ta_pr1, ta_pr2 = spr_pe(args.ta, args.out_dir)
     else:
         ta_pr1, ta_pr2 = spr_se(args.ta, args.out_dir)
+
+    log.info('List all files in output directory...')
+    ls_l(args.out_dir)
+
     log.info('All done.')
 
 if __name__=='__main__':

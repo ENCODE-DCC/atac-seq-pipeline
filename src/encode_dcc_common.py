@@ -119,6 +119,10 @@ def gunzip(f, suffix, out_dir):
     run_shell_cmd(cmd)
     return gunzipped
 
+def ls_l(d):
+    cmd = 'ls -l {}'.format(d)
+    run_shell_cmd(cmd)
+
 def rm_f(files):
     if files:
         if type(files)==list:

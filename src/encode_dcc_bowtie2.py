@@ -215,6 +215,9 @@ def main():
     log.info('Removing temporary files...')
     rm_f(temp_files)
 
+    log.info('List all files in output directory...')
+    ls_l(args.out_dir)
+
     log.info('All done.')
 
 if __name__=='__main__':
