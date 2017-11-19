@@ -1,0 +1,6 @@
+ref_fa	gs://atac-seq-pipeline-genome-data/mm9/mm9.fa
+bowtie2_idx_tar	gs://atac-seq-pipeline-genome-data/mm9/bowtie2_index/mm9.fa.tar
+bwa_idx_tar	gs://atac-seq-pipeline-genome-data/mm9/bwa_index/mm9.fa.tar
+chrsz	gs://atac-seq-pipeline-genome-data/mm9/mm9.chrom.sizes
+blacklist	gs://atac-seq-pipeline-genome-data/mm9/mm9-blacklist.bed.gz
+gensz	hs

@@ -25,28 +25,40 @@ Choose `[BACKEND_CONF]` and `[WORKFLOW_OPT]` according to your platform and pres
     * Google Compute Engine
     * Google Cloud Storage
     * Genomics API
-4) Set `default_runtime_attributes.zones` in `workflow_opts/docker_google.json` as your preferred Google Cloud zone. Note that pipeline defaults to use [preemptible instances](https://cloud.google.com/compute/docs/instances/preemptible) with 10 retries. Set `default_runtime_attributes.preemptible` as `"0"` to disable preemptible instances. **Disabling it will cost you significantly more** but you can get your samples processed much faster. Preemptible instance is disabled in `atac.wdl` for `bowtie2` task since it can take longer than the limit (24 hours) of preemptible instances.
+4) Set quota for `Google Compute Engine API` on https://console.cloud.google.com/iam-admin/quotas per region. Increase quota for SSD storage and number of vCPUs to process more sample faster simulateneouly.
+    * Persistent Disk SSD (GB)
+    * CPUs
+    * CPUs (all regions)
+5) Set `default_runtime_attributes.zones` in `workflow_opts/docker_google.json` as your preferred Google Cloud zone.
     ```
     {
       "default_runtime_attributes" : {
-        "docker" : "quay.io/encode-dcc/atac-seq-pipeline:latest",
+        ...
         "zones": "us-west1-a us-west1-b us-west1-c",
+        ...
+    }
+    ```
+6) Set `default_runtime_attributes.preemptible` as `"0"` to disable preemptible instances. Pipeline defaults to use [preemptible instances](https://cloud.google.com/compute/docs/instances/preemptible) with 10 retries. **Disabling it will cost you significantly more** but you can get your samples processed much faster and stabler. Preemptible instance is disabled in `atac.wdl` for `bowtie2` task since it can take longer than the limit (24 hours) of preemptible instances.
+    ```
+    {
+      "default_runtime_attributes" : {
+        ...
         "preemptible": "10",
         ...
     }
     ```
-5) If you are already on a VM instance on your Google Project. Skip step 6 and 7.
-6) Install [Google Cloud Platform SDK](https://cloud.google.com/sdk/downloads) and authenticate through it. You will be asked to enter verification keys. Get keys from the URLs they provide.
+7) If you are already on a VM instance on your Google Project. Skip step 8 and 9.
+8) Install [Google Cloud Platform SDK](https://cloud.google.com/sdk/downloads) and authenticate through it. You will be asked to enter verification keys. Get keys from the URLs they provide.
     ```
     $ gcloud auth login --no-launch-browser
     $ gcloud auth application-default login --no-launch-browser
     ```
-7) Get on the Google Project.
+9) Get on the Google Project.
     ```
     $ gcloud config set project [PROJ_NAME]
     ```
-8) You don't have to repeat step 1-7 for next pipeline run. Credential information will be stored in `$HOME/.config/gcloud`. Go directly to step 9.
-9) Run a pipeline. Use any string for `[SAMPLE_NAME]` to distinguish between multiple samples.
+10) You don't have to repeat step 1-9 for next pipeline run. Credential information will be stored in `$HOME/.config/gcloud`. Go directly to step 11.
+11) Run a pipeline. Use any string for `[SAMPLE_NAME]` to distinguish between multiple samples.
     ```
     $ java -jar -Dconfig.file=backends/google.conf -Dbackend.providers.JES.config.project=[PROJ_NAME] -Dbackend.providers.JES.config.root=[OUT_BUCKET]/[SAMPLE_NAME] cromwell-*.jar run atac.wdl -i input.json -o workflow_opts/docker_google.json
     ```
@@ -245,19 +257,33 @@ Optional parameters and flags are marked with `?`.
 
     * `"atac.trim_adapter.cpu"`? : Number of cores for `trim_adapter` (default: 4).
     * `"atac.bowtie2.cpu"`? : Number of cores for `bowtie2` (default: 4).
-    * `"atac.filter.cpu"`? : Number of cores for `filter` (default: 4).
+    * `"atac.filter.cpu"`? : Number of cores for `filter` (default: 2).
     * `"atac.bam2ta.cpu"`? : Number of cores for `bam2ta` (default: 2).
     * `"atac.xcor.cpu"`? : Number of cores for `xcor` (default: 2).
 
     * `"atac.trim_adapter.mem_mb"`? : Max. memory limit in MB for `trim_adapter` (default: 10000).
     * `"atac.bowtie2.mem_mb"`? : Max. memory limit in MB for `bowtie2` (default: 20000).
     * `"atac.filter.mem_mb"`? : Max. memory limit in MB for `filter` (default: 20000).
+    * `"atac.bam2ta.mem_mb"`? : Max. memory limit in MB for `bam2ta` (default: 10000).
+    * `"atac.xcor.mem_mb"`? : Max. memory limit in MB for `xcor` (default: 10000).
     * `"atac.macs2_mem_mb"`? : Max. memory limit in MB for `macs2` (default: 16000).
+
+    Disks (`disks`) is used for Cloud platforms (Google Cloud Platforms, AWS, ...).
+
+    * `"atac.trim_adapter.disks"`? : Disks for `trim_adapter` (default: "local-disk 100 HDD").
+    * `"atac.bowtie2.disks"`? : Disks for `bowtie2` (default: "local-disk 100 HDD").
+    * `"atac.filter.disks"`? : Disks for `filter` (default: "local-disk 100 HDD").
+    * `"atac.bam2ta.disks"`? : Disks for `bam2ta` (default: "local-disk 100 HDD").
+    * `"atac.xcor.disks"`? : Disks for `xcor` (default: "local-disk 100 HDD").
+    * `"atac.macs2_disks"`? : Disks for `macs2` (default: "local-disk 100 HDD").
 
     Walltime (`time`) settings (for SGE and SLURM only).
 
+    * `"atac.trim_adapter.time_hr"`? : Walltime for `trim_adapter` (default: 24).
     * `"atac.bowtie2.time_hr"`? : Walltime for `bowtie2` (default: 48).
     * `"atac.filter.time_hr"`? : Walltime for `filter` (default: 24).
+    * `"atac.bam2ta.time_hr"`? : Walltime for `bam2ta` (default: 6).
+    * `"atac.xcor.time_hr"`? : Walltime for `xcor` (default: 6).
     * `"atac.macs2_time_hr"`? : Walltime for `macs2` (default: 24).
 
 # Dependency installation
@@ -325,13 +351,10 @@ A TSV file will be generated under `[DEST_DIR]`. Use it for `atac.genomv_tsv` va
 
 ```
 # SE
-java -jar -Dconfig.file=backends/google.conf -Dbackend.providers.JES.config.project=atac-seq-pipeline -Dbackend.providers.JES.config.root="gs://atac-seq-pipeline-workflows/ENCSR889WQX" cromwell-29.jar run atac.wdl -i examples/ENCSR889WQX_google.json -o workflow_opts/docker_google.json
-
-java -jar -Dconfig.file=backends/google.conf -Dbackend.providers.JES.config.project=atac-seq-pipeline -Dbackend.providers.JES.config.root="gs://atac-seq-pipeline-workflows/ENCSR889WQX_from_bam" cromwell-29.jar run atac.wdl -i examples/ENCSR889WQX_google_from_bam.json -o workflow_opts/docker_google.json
-
-java -jar -Dconfig.file=backends/google.conf -Dbackend.providers.JES.config.project=atac-seq-pipeline -Dbackend.providers.JES.config.root="gs://atac-seq-pipeline-workflows/ENCSR889WQX_from_ta" cromwell-29.jar run atac.wdl -i examples/ENCSR889WQX_google_from_ta.json -o workflow_opts/docker_google.json
+java -jar -Dconfig.file=backends/google.conf -Dbackend.providers.JES.config.project=atac-seq-pipeline -Dbackend.providers.JES.config.root="gs://atac-seq-pipeline-workflows/ENCSR889WQX" cromwell-29.jar run atac.wdl -i examples/ENCSR889WQX_google.json -o workflow_opts/docker_google.json -m output_ENCSR889WQX.json
 
 # PE
+java -jar -Dconfig.file=backends/google.conf -Dbackend.providers.JES.config.project=atac-seq-pipeline -Dbackend.providers.JES.config.root="gs://atac-seq-pipeline-workflows/ENCSR356KRQ" cromwell-29.jar run atac.wdl -i examples/ENCSR356KRQ_google.json -o workflow_opts/docker_google.json -m output_ENCSR356KRQ.json
 ```
 
 ### Docker build

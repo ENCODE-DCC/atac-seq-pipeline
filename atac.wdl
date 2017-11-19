@@ -37,6 +37,7 @@ workflow atac {
 	Int? smooth_win 		# size of smoothing window
 	Int? macs2_mem_mb 		# resource (memory in MB)
 	Int? macs2_time_hr		# resource (walltime in hour)
+	String? macs2_disks 	# resource disks for cloud platforms
 
 	# optional for IDR
 	Boolean? enable_idr		# enable IDR analysis on raw peaks
@@ -123,6 +124,7 @@ workflow atac {
 					smooth_win = smooth_win,
 					make_signal = true,
 					mem_mb = macs2_mem_mb,
+					disks = macs2_disks,
 					time_hr = macs2_time_hr,
 			}
 		}
@@ -166,6 +168,7 @@ workflow atac {
 					smooth_win = smooth_win,
 					make_signal = true,
 					mem_mb = macs2_mem_mb,
+					disks = macs2_disks,
 					time_hr = macs2_time_hr,
 			}
 		}
@@ -190,6 +193,7 @@ workflow atac {
 						pval_thresh = pval_thresh,
 						smooth_win = smooth_win,
 						mem_mb = macs2_mem_mb,
+						disks = macs2_disks,
 						time_hr = macs2_time_hr,
 				}
 				call macs2 as macs2_pr2 {
@@ -201,6 +205,7 @@ workflow atac {
 						pval_thresh = pval_thresh,
 						smooth_win = smooth_win,
 						mem_mb = macs2_mem_mb,
+						disks = macs2_disks,
 						time_hr = macs2_time_hr,
 				}
 			}
@@ -239,6 +244,7 @@ workflow atac {
 						pval_thresh = pval_thresh,
 						smooth_win = smooth_win,
 						mem_mb = macs2_mem_mb,
+						disks = macs2_disks,
 						time_hr = macs2_time_hr,
 				}
 				# call peaks on 2nd pooled pseudo replicates
@@ -251,6 +257,7 @@ workflow atac {
 						pval_thresh = pval_thresh,
 						smooth_win = smooth_win,
 						mem_mb = macs2_mem_mb,
+						disks = macs2_disks,
 						time_hr = macs2_time_hr,
 				}
 			}
@@ -445,6 +452,8 @@ task trim_adapter { # trim adapters and merge trimmed fastqs
 	# resource
 	Int? cpu
 	Int? mem_mb
+	Int? time_hr
+	String? disks
 
 	command {
 		python $(which encode_trim_adapter.py) \
@@ -458,12 +467,15 @@ task trim_adapter { # trim adapters and merge trimmed fastqs
 			${"--nth " + select_first([cpu,4])}
 	}
 	output {
-		Array[File] trimmed_merged_fastqs = glob("*.R?.fastq.gz")
+		Array[File] trimmed_merged_fastqs = if paired_end then 
+			[glob("*.R1.fastq.gz")[0], glob("*.R2.fastq.gz")[0]]
+			else glob("*.R1.fastq.gz")
 	}
 	runtime {
-		cpu : "${select_first([cpu,4])}"
-		disks: "local-disk 100 SSD"
+		cpu : select_first([cpu,4])
 		memory : "${select_first([mem_mb,'10000'])} MB"
+		time : select_first([time_hr,24])
+		disks : select_first([disks,"local-disk 100 HDD"])
 	}
 }
 
@@ -480,6 +492,7 @@ task bowtie2 {
 	Int? cpu
 	Int? mem_mb
 	Int? time_hr
+	String? disks
 
 	command {
 		python $(which encode_bowtie2.py) \
@@ -497,10 +510,10 @@ task bowtie2 {
 		File flagstat_qc = glob("*.flagstat.qc")[0]
 	}
 	runtime {
-		cpu : "${select_first([cpu,4])}"
+		cpu : select_first([cpu,4])
 		memory : "${select_first([mem_mb,'20000'])} MB"
-		time : "${select_first([time_hr,48])}"
-		disks: "local-disk 100 SSD"
+		time : select_first([time_hr,48])
+		disks : select_first([disks,"local-disk 100 HDD"])
 		preemptible: 0
 	}
 }
@@ -522,6 +535,7 @@ task filter {
 	Int? cpu
 	Int? mem_mb
 	Int? time_hr
+	String? disks
 
 	command {
 		python $(which encode_filter.py) \
@@ -544,10 +558,10 @@ task filter {
 	}
 
 	runtime {
-		cpu : "${select_first([cpu,2])}"
+		cpu : select_first([cpu,2])
 		memory : "${select_first([mem_mb,'20000'])} MB"
-		time : "${select_first([time_hr,24])}"
-		disks: "local-disk 50 SSD"
+		time : select_first([time_hr,24])
+		disks : select_first([disks,"local-disk 100 HDD"])
 	}
 }
 
@@ -563,6 +577,9 @@ task bam2ta {
 								# this affects all downstream analysis
 	# resource
 	Int? cpu
+	Int? mem_mb
+	Int? time_hr
+	String? disks
 
 	command {
 		python $(which encode_bam2ta.py) \
@@ -578,8 +595,10 @@ task bam2ta {
 		File ta = glob("*.tagAlign.gz")[0]
 	}
 	runtime {
-		cpu : "${select_first([cpu,2])}"
-		disks: "local-disk 50 SSD"
+		cpu : select_first([cpu,2])
+		memory : "${select_first([mem_mb,'10000'])} MB"
+		time : select_first([time_hr,6])
+		disks : select_first([disks,"local-disk 100 HDD"])
 	}
 }
 
@@ -597,9 +616,6 @@ task spr { # make two self pseudo replicates
 		File ta_pr1 = glob("*.pr1.tagAlign.gz")[0]
 		File ta_pr2 = glob("*.pr2.tagAlign.gz")[0]
 	}
-	runtime {
-		disks: "local-disk 20 SSD"
-	}
 }
 
 task pool_ta {
@@ -613,9 +629,6 @@ task pool_ta {
 	output {
 		File ta_pooled = glob("*.tagAlign.gz")[0]
 	}
-	runtime {
-		disks: "local-disk 20 SSD"
-	}
 }
 
 task xcor {
@@ -628,6 +641,9 @@ task xcor {
 						# will not affect any downstream analysis
 	# resource
 	Int? cpu
+	Int? mem_mb	
+	Int? time_hr
+	String? disks
 
 	command {
 		python $(which encode_xcor.py) \
@@ -643,8 +659,10 @@ task xcor {
 		File score = glob("*.cc.qc")[0]
 	}
 	runtime {
-		cpu : "${select_first([cpu,2])}"
-		disks: "local-disk 20 HDD"
+		cpu : select_first([cpu,2])
+		memory : "${select_first([mem_mb,'10000'])} MB"
+		time : select_first([time_hr,6])
+		disks : select_first([disks,"local-disk 100 HDD"])
 	}
 }
 
@@ -661,6 +679,7 @@ task macs2 {
 	# resource
 	Int? mem_mb
 	Int? time_hr
+	String? disks
 
 	command {
 		python $(which encode_macs2.py) \
@@ -682,8 +701,8 @@ task macs2 {
 	}
 	runtime {
 		memory : "${select_first([mem_mb,'16000'])} MB"
-		time : "${select_first([time_hr,24])}"
-		disks: "local-disk 50 HDD"
+		time : select_first([time_hr,24])
+		disks : select_first([disks,"local-disk 100 HDD"])
 	}
 }
 
@@ -708,9 +727,6 @@ task idr {
 		File idr_unthresholded_peak = glob("*.txt.gz")[0]
 		File idr_log = glob("*.log")[0]
 	}
-	runtime {
-		disks: "local-disk 20 SSD"
-	}
 }
 
 task overlap {
@@ -727,9 +743,6 @@ task overlap {
 	}
 	output {
 		File overlap_peak = glob("*eak.gz")[0]
-	}
-	runtime {
-		disks: "local-disk 20 SSD"
 	}
 }
 
@@ -754,9 +767,6 @@ task reproducibility {
 		File reproducibility_qc = 
 			glob("*reproducibility.qc")[0]
 	}
-	runtime {
-		disks: "local-disk 20 SSD"
-	}
 }
 
 task blacklist_filter {
@@ -772,9 +782,6 @@ task blacklist_filter {
 	output {
 		File filtered_peak = glob('*.gz')[0]
 	}
-	runtime {
-		disks: "local-disk 20 SSD"
-	}
 }
 
 task frip {
@@ -789,9 +796,6 @@ task frip {
 	}
 	output {
 		File frip_qc = glob('*.frip.qc')[0]
-	}
-	runtime {
-		disks: "local-disk 20 SSD"
 	}
 }
 
@@ -839,9 +843,6 @@ task gather_and_report {
 		File qc_json = glob('qc.json')[0]
 		File report = glob('report.html')[0]
 	}
-	runtime {
-		disks: "local-disk 50 HDD"
-	}
 }
 
 # workflow system tasks
@@ -849,7 +850,9 @@ task gather_and_report {
 # we have only one task to
 # 	1) determine input type and number of replicates	
 # 	2) generate pair (rep-x_vs_rep-y) of all true replicate
-# 	3) read genome_tsv
+# 	3) read genome_tsv and download files 
+# 		On Google Cloud Platform 
+#		files are downloaded from gs://atac-seq-pipeline-genome-data/
 task inputs {
 	# parameters from workflow
 	Array[Array[Array[String]]] fastqs 
@@ -881,9 +884,9 @@ task inputs {
 		Int num_rep = read_int("num_rep.txt")
 		Array[Array[Int]] pairs = if num_rep>1 then 
 									read_tsv(stdout()) else [[]]
-		File ref_fa = read_map(genome_tsv)['ref_fa']
-		File bowtie2_idx_tar = read_map(genome_tsv)['bowtie2_idx_tar']
-		#File bwa_idx_tar = read_map(genome_tsv)['bwa_idx_tar']
+		String ref_fa = read_map(genome_tsv)['ref_fa']
+		String bowtie2_idx_tar = read_map(genome_tsv)['bowtie2_idx_tar']
+		String bwa_idx_tar = read_map(genome_tsv)['bwa_idx_tar']
 		String blacklist = read_map(genome_tsv)['blacklist']
 		String chrsz = read_map(genome_tsv)['chrsz']
 		String gensz = read_map(genome_tsv)['gensz']
@@ -892,3 +895,4 @@ task inputs {
 		disks: "local-disk 20 HDD"		
 	}
 }
+ 
