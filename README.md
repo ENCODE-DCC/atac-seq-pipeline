@@ -25,10 +25,12 @@ Choose `[BACKEND_CONF]` and `[WORKFLOW_OPT]` according to your platform and pres
     * Google Compute Engine
     * Google Cloud Storage
     * Genomics API
-4) Set quota for `Google Compute Engine API` on https://console.cloud.google.com/iam-admin/quotas per region. Increase quota for SSD storage and number of vCPUs to process more sample faster simulateneouly.
-    * Persistent Disk SSD (GB)
+4) Set quota for `Google Compute Engine API` on https://console.cloud.google.com/iam-admin/quotas per region. Increase quota for SSD/HDD storage, number of vCPUs to process more samples faster simulateneouly.
     * CPUs
-    * CPUs (all regions)
+    * Persistent Disk Standard (GB)
+    * Persistent Disk SSD (GB)
+    * In-use IP addresses
+    * Networks
 5) Set `default_runtime_attributes.zones` in `workflow_opts/docker_google.json` as your preferred Google Cloud zone.
     ```
     {

@@ -25,9 +25,6 @@
 
 	"atac.trim_adapter.auto_detect_adapter" : true,
 
-	"atac.queue_short" : "akundaje",
-	"atac.queue_hard" : "akundaje",
-
 	"atac.bowtie2.cpu" : 4,
 	"atac.bowtie2.mem_mb" : 16000,
 	"atac.bowtie2.time_hr" : 36,

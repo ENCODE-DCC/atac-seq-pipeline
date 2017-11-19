@@ -25,9 +25,6 @@
 
 	"atac.trim_adapter.auto_detect_adapter" : true,
 
-	"atac.queue_short" : "akundaje",
-	"atac.queue_hard" : "akundaje",
-
 	"atac.trim_adapter.cpu" : 2,
 
 	"atac.bowtie2.cpu" : 4,

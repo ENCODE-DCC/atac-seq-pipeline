@@ -65,7 +65,7 @@ workflow atac {
 
 	# pipeline starts here (parallelized for each replicate)
 	scatter(i in range(inputs.num_rep)) {
-		if (inputs.type=='fastq') {
+		if ( inputs.is_before_bam ) {
 			# trim adapters and merge trimmed fastqs
 			call trim_adapter {
 				input:
@@ -83,7 +83,7 @@ workflow atac {
 					multimapping = multimapping,
 			}
 		}
-		if (inputs.type=='fastq' || inputs.type=='bam') {
+		if ( inputs.is_before_nodup_bam ) {
 			# filter/dedup bam
 			call filter {
 				input:
@@ -93,8 +93,7 @@ workflow atac {
 					multimapping = multimapping,
 			}
 		}
-		if (inputs.type=='fastq' || inputs.type=='bam' ||
-			inputs.type=='nodup_bam') {
+		if ( inputs.is_before_ta ) {
 			# convert bam to tagalign and subsample it if necessary
 			call bam2ta {
 				input:
@@ -103,8 +102,7 @@ workflow atac {
 					paired_end = paired_end,
 			}
 		}
-		if (inputs.type=='fastq' || inputs.type=='bam' ||
-			inputs.type=='nodup_bam' || inputs.type=='ta') {
+		if ( inputs.is_before_peak ) {
 			# subsample tagalign (non-mito) and cross-correlation analysis
 			call xcor {
 				input:
@@ -129,8 +127,7 @@ workflow atac {
 			}
 		}
 		if ( !select_first([true_rep_only,false]) && 
-			(inputs.type=='fastq' || inputs.type=='bam' ||
-			inputs.type=='nodup_bam' || inputs.type=='ta') ) {
+			inputs.is_before_peak) {
 			# make two self pseudo replicates per true replicate
 			call spr {
 				input:
@@ -149,8 +146,7 @@ workflow atac {
 	}
 
 	if ( inputs.num_rep>1 ) {
-		if (inputs.type=='fastq' || inputs.type=='bam' ||
-			inputs.type=='nodup_bam' || inputs.type=='ta') {
+		if (is_before_peak) {
 			# pool tagaligns from true replicates
 			call pool_ta {
 				input :
@@ -181,8 +177,7 @@ workflow atac {
 	}
 	if ( !select_first([true_rep_only,false]) ) {		
 		scatter(i in range(inputs.num_rep)) {
-			if (inputs.type=='fastq' || inputs.type=='bam' ||
-				inputs.type=='nodup_bam' || inputs.type=='ta') {
+			if ( inputs.is_before_peak ) {
 				# call peaks on 1st pseudo replicated tagalign 
 				call macs2 as macs2_pr1 {
 					input:
@@ -223,8 +218,7 @@ workflow atac {
 			}
 		}
 		if ( inputs.num_rep>1 ) {
-			if (inputs.type=='fastq' || inputs.type=='bam' ||
-				inputs.type=='nodup_bam' || inputs.type=='ta') {
+			if ( inputs.is_before_peak ) {
 				# pool tagaligns from pseudo replicates
 				call pool_ta as pool_ta_pr1 {
 					input :
@@ -460,7 +454,7 @@ task trim_adapter { # trim adapters and merge trimmed fastqs
 			${write_tsv(fastqs)} \
 			${"--adapters " + write_tsv(adapters)} \
 			${if paired_end then "--paired-end" else ""} \
-			${if select_first([auto_detect_adapter,false])
+			${if auto_detect_adapter
 				then "--auto-detect-adapter" else ""} \
 			${"--min-trim-len " + min_trim_len} \
 			${"--err-rate " + err_rate} \
@@ -799,58 +793,12 @@ task frip {
 	}
 }
 
-task gather_and_report {
-	Array[Array[Array[File]]] trimmed_fastqs
-	Array[Array[File]] pooled_fastqs
-	Array[File] bams
-	Array[File] nodup_bams
-	Array[File] tas
-
-	Array[File] peaks
-	Array[File] peaks_pr1
-	Array[File] peaks_pr2
-	File? peak_ppr1
-	File? peak_ppr2
-	File? peak_pooled
-
-	Array[File] bfilt_peaks
-	Array[File] bfilt_peaks_pr1
-	Array[File] bfilt_peaks_pr2
-	File? bfilt_peak_ppr1
-	File? bfilt_peak_ppr2
-	File? bfilt_peak_pooled
-
-	Array[File] idr_peaks
-	Array[File] idr_peaks_pr
-	File? idr_peak_ppr
-
-	Array[File] overlap_peaks
-	Array[File] overlap_peaks_pr
-	File? overlap_peak_ppr
-
-	File? idr_reproducibility_qc
-	File? overlap_reproducibility_qc
-
-	command {
-		python $(which encode_gather_atac.py) \
-			"--bams " + ${sep=' ' bams} \
-			"--nodup-bams " + ${sep=' ' nodup_bams} \
-			"--tas " + ${sep=' ' tas} \
-			"--peaks " + ${sep=' ' peaks} \
-			"--bfilt-peaks " + ${sep=' ' bfilt_peaks}
-	}
-	output {
-		File qc_json = glob('qc.json')[0]
-		File report = glob('report.html')[0]
-	}
-}
-
 # workflow system tasks
 # to reduce overhead of provisioning extra nodes
 # we have only one task to
 # 	1) determine input type and number of replicates	
 # 	2) generate pair (rep-x_vs_rep-y) of all true replicate
-# 	3) read genome_tsv and download files 
+# 	3) read genome_tsv and get ready to download files 
 # 		On Google Cloud Platform 
 #		files are downloaded from gs://atac-seq-pipeline-genome-data/
 task inputs {
@@ -882,8 +830,25 @@ task inputs {
 	output {
 		String type = read_string("type.txt")
 		Int num_rep = read_int("num_rep.txt")
+
+		Boolean is_before_bam =
+			type=='fastq'
+		Boolean is_before_nodup_bam =
+			type=='fastq' || 
+			type=='bam'
+		Boolean is_before_ta =
+			type=='fastq' || 
+			type=='bam' ||
+			type=='nodup_bam'
+		Boolean is_before_peak = 
+			type=='fastq' || 
+			type=='bam' ||
+			type=='nodup_bam' || 
+			type=='ta'
+
 		Array[Array[Int]] pairs = if num_rep>1 then 
 									read_tsv(stdout()) else [[]]
+
 		String ref_fa = read_map(genome_tsv)['ref_fa']
 		String bowtie2_idx_tar = read_map(genome_tsv)['bowtie2_idx_tar']
 		String bwa_idx_tar = read_map(genome_tsv)['bwa_idx_tar']
@@ -891,8 +856,55 @@ task inputs {
 		String chrsz = read_map(genome_tsv)['chrsz']
 		String gensz = read_map(genome_tsv)['gensz']
 	}
-	runtime {
-		disks: "local-disk 20 HDD"		
-	}
 }
  
+task gather_and_report {
+	# fastqs
+	Array[Array[Array[File]]] fastqs
+	# raw bams
+	Array[File] bams
+	# filtered bams
+	Array[File] nodup_bams
+	# tag-aligns
+	Array[File] tas
+	# MACS2 raw peaks
+	Array[File] peaks
+	Array[File] peaks_pr1
+	Array[File] peaks_pr2
+	File? peak_ppr1
+	File? peak_ppr2
+	File? peak_pooled
+	# blacklist filtered MACS2 raw peaks
+	Array[File] bfilt_peaks
+	Array[File] bfilt_peaks_pr1
+	Array[File] bfilt_peaks_pr2
+	File? bfilt_peak_ppr1
+	File? bfilt_peak_ppr2
+	File? bfilt_peak_pooled
+	# adapters
+	Array[Array[Array[String]]] adapters
+	# blacklist filtered IDR peaks
+	Array[File] bfilt_idr_peaks
+	Array[File] bfilt_idr_peaks_pr
+	File? bfilt_idr_peak_ppr
+	# blacklist filtered overlapping peaks
+	Array[File] bfilt_overlap_peaks
+	Array[File] bfilt_overlap_peaks_pr
+	File? bfilt_overlap_peak_ppr
+
+	File? idr_reproducibility_qc
+	File? overlap_reproducibility_qc
+
+	command {
+		python $(which encode_gather_atac.py) \
+			"--bams " + ${sep=' ' bams} \
+			"--nodup-bams " + ${sep=' ' nodup_bams} \
+			"--tas " + ${sep=' ' tas} \
+			"--peaks " + ${sep=' ' peaks} \
+			"--bfilt-peaks " + ${sep=' ' bfilt_peaks}
+	}
+	output {
+		File qc_json = glob('qc.json')[0]
+		File report = glob('report.html')[0]
+	}
+}

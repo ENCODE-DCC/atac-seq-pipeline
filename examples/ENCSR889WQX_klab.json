@@ -25,6 +25,8 @@
 
 	"atac.trim_adapter.auto_detect_adapter" : true,
 
+	"atac.trim_adapter.cpu" : 2,
+
 	"atac.bowtie2.cpu" : 4,
 	"atac.bowtie2.mem_mb" : 16000,
 	"atac.bowtie2.time_hr" : 36,
