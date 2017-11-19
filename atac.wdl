@@ -501,7 +501,7 @@ task bowtie2 {
 		memory : "${select_first([mem_mb,'20000'])} MB"
 		time : "${select_first([time_hr,48])}"
 		disks: "local-disk 100 SSD"
-		#preemptible: 0
+		preemptible: 0
 	}
 }
 

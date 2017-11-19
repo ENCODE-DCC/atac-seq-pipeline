@@ -25,12 +25,13 @@ Choose `[BACKEND_CONF]` and `[WORKFLOW_OPT]` according to your platform and pres
     * Google Compute Engine
     * Google Cloud Storage
     * Genomics API
-4) Set `default_runtime_attributes.zones` in `workflow_opts/docker_google.json` as your preferred Google Cloud zone.
+4) Set `default_runtime_attributes.zones` in `workflow_opts/docker_google.json` as your preferred Google Cloud zone. Note that pipeline defaults to use [preemptible instances](https://cloud.google.com/compute/docs/instances/preemptible) with 10 retries. Set `default_runtime_attributes.preemptible` as `"0"` to disable preemptible instances. **Disabling it will cost you significantly more** but you can get your samples processed much faster. Preemptible instance is disabled in `atac.wdl` for `bowtie2` task since it can take longer than the limit (24 hours) of preemptible instances.
     ```
     {
       "default_runtime_attributes" : {
         "docker" : "quay.io/encode-dcc/atac-seq-pipeline:latest",
         "zones": "us-west1-a us-west1-b us-west1-c",
+        "preemptible": "10",
         ...
     }
     ```
@@ -71,7 +72,7 @@ Choose `[BACKEND_CONF]` and `[WORKFLOW_OPT]` according to your platform and pres
 
 ### Sun GridEngine (SGE)
 
-Genome data have already been installed and shared on Stanford SCG4. You can skip step-3.
+Genome data have already been installed and shared on Stanford SCG4. You can skip step 3 on SCG4.
 1) Set your parallel environment (`default_runtime_attributes.sge_pe`) and queue (`default_runtime_attributes.sge_queue`) in `workflow_opts/non_docker.json`. If there is no parallel environment on your SGE then ask your SGE admin to create one.
     ```
     $ qconf -spl
@@ -87,7 +88,7 @@ Genome data have already been installed and shared on Stanford SCG4. You can ski
 
 ### SLURM
 
-Genome data have already been installed and shared on Stanford Sherlock-2. You can skip step-3.
+Genome data have already been installed and shared on Stanford Sherlock-2. You can skip step 3 on Sherlock-2.
 1) Set your partition (`default_runtime_attributes.slurm_partition`) in `workflow_opts/non_docker.json`.
 2) Install [dependencies](#dependency-installation).
 3) Install [genome data](#genome-data-installation).
@@ -98,7 +99,7 @@ Genome data have already been installed and shared on Stanford Sherlock-2. You c
     $ source deactivate
     ```
 
-### Kundaje Lab cluster with `Docker`
+### Kundaje lab cluster with `Docker`
 
 Jobs will run locally without being submitted to Sun GridEngine (SGE). Genome data have already been installed and shared.
 1) Run a pipeline. 
@@ -106,7 +107,7 @@ Jobs will run locally without being submitted to Sun GridEngine (SGE). Genome da
     $ java -jar -Dconfig.file=backends/default.conf cromwell-*.jar run atac.wdl -i input.json -o workflow_opts/docker.json
     ```
 
-### Kundaje Lab cluster with Sun GridEngine (SGE)
+### Kundaje lab cluster with Sun GridEngine (SGE)
 
 Jobs will be submitted to Sun GridEngine (SGE) and distributed to all server nodes. Genome data have already been installed and shared.
 1) Install [dependencies](#dependency-installation).
