@@ -110,6 +110,7 @@ workflow atac {
 				input:
 					ta = if defined(bam2ta.ta) 
 							then bam2ta.ta else tas[i],
+					blacklist = inputs.blacklist,				
 					gensz = inputs.gensz,
 					chrsz = inputs.chrsz,
 					cap_num_peak = cap_num_peak,
@@ -122,7 +123,7 @@ workflow atac {
 			}
 		}
 		if ( !select_first([true_rep_only,false]) && 
-			inputs.is_before_peak) {
+			inputs.is_before_peak ) {
 			# make two self pseudo replicates per true replicate
 			call spr {
 				input:
@@ -846,6 +847,8 @@ task inputs {
 			type=='bam' ||
 			type=='nodup_bam' || 
 			type=='ta'
+		Boolean is_peak =
+			type=='peak'
 
 		Array[Array[Int]] pairs = if num_rep>1 then 
 									read_tsv(stdout()) else [[]]
@@ -865,11 +868,8 @@ task report {
  	String? name 			# name of sample
 	String? desc 			# description for sample
 	String? accession_id 	# ENCODE accession ID of sample
-
 	# workflow params
 	Boolean paired_end
-	Boolean true_rep_only
-	Boolean enable_idr
 	# fastqs
 	Array[Array[Array[String]]] fastqs
 	# raw bams
@@ -932,6 +932,14 @@ task report {
 			"--nodup-bams " + ${sep=' ' nodup_bams} \
 			"--tas " + ${sep=' ' tas} \
 			"--peaks " + ${sep=' ' peaks} \
+			"--peaks-pr1 " + ${sep=' ' peaks_pr1} \
+			"--peaks-pr2 " + ${sep=' ' peaks_pr2} \
+			${"--peak-ppr1 " + peak_ppr1} \
+			${"--peak-ppr2 " + peak_ppr2} \
+			${"--peak-pooled " + peak_pooled} \
+			--out-report-html report.html
+			--out-qc-json qc.json
+			--out-files-json files.json
 	}
 	output {
 		File qc_json = glob('qc.json')[0]
