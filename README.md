@@ -262,7 +262,6 @@ Optional parameters and flags are marked with `?`.
     * `"atac.filter.cpu"`? : Number of cores for `filter` (default: 2).
     * `"atac.bam2ta.cpu"`? : Number of cores for `bam2ta` (default: 2).
     * `"atac.xcor.cpu"`? : Number of cores for `xcor` (default: 2).
-
     * `"atac.trim_adapter.mem_mb"`? : Max. memory limit in MB for `trim_adapter` (default: 10000).
     * `"atac.bowtie2.mem_mb"`? : Max. memory limit in MB for `bowtie2` (default: 20000).
     * `"atac.filter.mem_mb"`? : Max. memory limit in MB for `filter` (default: 20000).

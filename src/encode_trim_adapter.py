@@ -133,10 +133,16 @@ def trim_adapter_pe(fastq1, fastq2, adapter1, adapter2,
         os.link(fastq2, linked2)
         return [linked1, linked2]
 
-def merge_fastqs(fastqs, suffix, out_dir):
+# WDL glob() globs in an alphabetical order
+# so R1 and R2 can be switched, which results in an
+# unexpected behavior of a workflow
+# so we prepend merge_fastqs_'end'_ (R1 or R2)
+# to the basename of original filename
+def merge_fastqs(fastqs, end, out_dir):
+    basename = os.path.basename(strip_ext_fastq(fastqs[0]))
     prefix = os.path.join(out_dir,
-        os.path.basename(strip_ext_fastq(fastqs[0])))
-    merged = '{}.merged.{}.fastq.gz'.format(prefix, suffix)
+        'merge_fastqs_{}_{}'.format(end, basename))
+    merged = '{}.merged.fastq.gz'.format(prefix)
 
     if len(fastqs)>1:
         cmd = 'zcat -f {} | gzip -nc > {}'.format(

@@ -1,0 +1,237 @@
+{
+  "workflowName": "atac",
+  "submittedFiles": {
+    "workflow": "# ENCODE DCC ATAC-Seq/DNase-Seq pipeline\n# Author: Jin Lee (leepc12@gmail.com)\n\nworkflow atac {\n\t# mandatory input files\n\tArray[Array[Array[String]]] fastqs \n\t\t\t\t\t\t\t\t# [rep_id][merge_id][end_id]\n\t\t\t\t\t\t\t\t# \tafter merging, it will reduce to \n\t\t\t\t\t\t\t\t# \t[rep_id][end_id]\n\tArray[String] bams \t\t\t# [rep_id] if starting from bams\n\tArray[String] nodup_bams \t\t# [rep_id] if starting from filtered bams\n\tArray[String] tas \t\t\t# [rep_id] if starting from tag-aligns\n\tArray[String] peaks\t\t\t# [rep_id] if starting from peaks\n\tArray[String] peaks_pr1\t\t# [rep_id] if starting from peaks\n\tArray[String] peaks_pr2\t\t# [rep_id] if starting from peaks\n\tFile? peak_ppr1\t\t\t\t# if starting from peaks\n\tFile? peak_ppr2\t\t\t\t# if starting from peaks\n\tFile? peak_pooled\t\t\t# if starting from peaks\n\n\t# mandaory adapters\n\tArray[Array[Array[String]]] adapters \n\t\t\t\t\t\t\t\t# [rep_id][merge_id][end_id]\n\t# mandatory genome param\n\tString genome_tsv \t\t# reference genome data TSV file including\n\t\t\t\t\t\t\t# all important genome specific data file paths\n\t\t\t\t\t\t\t# and parameters\n\tBoolean paired_end \t\t# endedness of sample\n\n\t# optional but important\n\tBoolean? true_rep_only \t# disable all analyses for pseudo replicates\n\t\t\t\t\t\t\t# naive-overlap and IDR will also be disabled\n\tInt? multimapping \t\t# multimapping reads\n\n\t# optional for MACS2\n\tInt? cap_num_peak \t\t# cap number of raw peaks called from MACS2\n\tFloat? pval_thresh \t\t# p.value threshold\n\tInt? smooth_win \t\t# size of smoothing window\n\tInt? macs2_mem_mb \t\t# resource (memory in MB)\n\tInt? macs2_time_hr\t\t# resource (walltime in hour)\n\tString? macs2_disks \t# resource disks for cloud platforms\n\n\t# optional for IDR\n\tBoolean? enable_idr\t\t# enable IDR analysis on raw peaks\n\tFloat? idr_thresh\t\t# IDR threshold\n\n\t# optional metadata\n \tString? name \t\t\t# name of sample\n\tString? desc \t\t\t# description for sample\n\tString? accession_id \t# ENCODE accession ID of sample\n\n\t# OTHER IMPORTANT mandatory/optional parameters are declared in a task level\n\n\t# 1) determine input file type and num_rep (number of replicates)\n\t# 2) generate pairs of all replicates for later use\n\t# 3) read from genome_tsv\n\tcall inputs {\n\t\tinput :\n\t\t\tfastqs = fastqs,\n\t\t\tbams = bams,\n\t\t\tnodup_bams = nodup_bams,\n\t\t\ttas = tas,\n\t\t\tpeaks = peaks,\n\t\t\tgenome_tsv = genome_tsv,\n\t}\n\n\t# pipeline starts here (parallelized for each replicate)\n\tscatter(i in range(inputs.num_rep)) {\n\t\tif ( inputs.is_before_bam ) {\n\t\t\t# trim adapters and merge trimmed fastqs\n\t\t\tcall trim_adapter {\n\t\t\t\tinput:\n\t\t\t\t\tfastqs = fastqs[i],\n\t\t\t\t\tadapters = if length(adapters)>0 \n\t\t\t\t\t\t\tthen adapters[i] else [],\n\t\t\t\t\tpaired_end = paired_end,\n\t\t\t}\n\t\t\t# align trimmed/merged fastqs with bowtie2\n\t\t\tcall bowtie2 {\n\t\t\t\tinput:\n\t\t\t\t\tidx_tar = inputs.bowtie2_idx_tar,\n\t\t\t\t\tfastqs = trim_adapter.trimmed_merged_fastqs, #[R1,R2]\n\t\t\t\t\tpaired_end = paired_end,\n\t\t\t\t\tmultimapping = multimapping,\n\t\t\t}\n\t\t}\n\t\tif ( inputs.is_before_nodup_bam ) {\n\t\t\t# filter/dedup bam\n\t\t\tcall filter {\n\t\t\t\tinput:\n\t\t\t\t\tbam = if defined(bowtie2.bam) \n\t\t\t\t\t\t\tthen bowtie2.bam else bams[i],\n\t\t\t\t\tpaired_end = paired_end,\n\t\t\t\t\tmultimapping = multimapping,\n\t\t\t}\n\t\t}\n\t\tif ( inputs.is_before_ta ) {\n\t\t\t# convert bam to tagalign and subsample it if necessary\n\t\t\tcall bam2ta {\n\t\t\t\tinput:\n\t\t\t\t\tbam = if defined(filter.nodup_bam) \n\t\t\t\t\t\t\tthen filter.nodup_bam else nodup_bams[i],\n\t\t\t\t\tpaired_end = paired_end,\n\t\t\t}\n\t\t}\n\t\tif ( inputs.is_before_peak ) {\n\t\t\t# subsample tagalign (non-mito) and cross-correlation analysis\n\t\t\tcall xcor {\n\t\t\t\tinput:\n\t\t\t\t\tta = if defined(bam2ta.ta) \n\t\t\t\t\t\t\tthen bam2ta.ta else tas[i],\n\t\t\t\t\tpaired_end = paired_end,\n\t\t\t}\n\t\t\t# call peaks on tagalign\n\t\t\tcall macs2 {\n\t\t\t\tinput:\n\t\t\t\t\tta = if defined(bam2ta.ta) \n\t\t\t\t\t\t\tthen bam2ta.ta else tas[i],\n\t\t\t\t\tgensz = inputs.gensz,\n\t\t\t\t\tchrsz = inputs.chrsz,\n\t\t\t\t\tcap_num_peak = cap_num_peak,\n\t\t\t\t\tpval_thresh = pval_thresh,\n\t\t\t\t\tsmooth_win = smooth_win,\n\t\t\t\t\tmake_signal = true,\n\t\t\t\t\tmem_mb = macs2_mem_mb,\n\t\t\t\t\tdisks = macs2_disks,\n\t\t\t\t\ttime_hr = macs2_time_hr,\n\t\t\t}\n\t\t}\n\t\tif ( !select_first([true_rep_only,false]) && \n\t\t\tinputs.is_before_peak) {\n\t\t\t# make two self pseudo replicates per true replicate\n\t\t\tcall spr {\n\t\t\t\tinput:\n\t\t\t\t\tta = if defined(bam2ta.ta) \n\t\t\t\t\t\t\tthen bam2ta.ta else tas[i],\n\t\t\t\t\tpaired_end = paired_end,\n\t\t\t}\n\t\t}\n\t\t# filter out peaks with blacklist\n\t\tcall blacklist_filter as bfilt_macs2 {\n\t\t\tinput:\n\t\t\t\tpeak = if defined(macs2.npeak)\n\t\t\t\t\t\tthen macs2.npeak else peaks[i],\n\t\t\t\tblacklist = inputs.blacklist,\t\t\t\t\n\t\t}\n\t}\n\n\tif ( inputs.num_rep>1 ) {\n\t\tif (is_before_peak) {\n\t\t\t# pool tagaligns from true replicates\n\t\t\tcall pool_ta {\n\t\t\t\tinput :\n\t\t\t\t\ttas = if defined(bam2ta.ta[0])\n\t\t\t\t\t\t\tthen bam2ta.ta else tas,\n\t\t\t}\n\t\t\t# call peaks on pooled replicate\n\t\t\tcall macs2 as macs2_pooled {\n\t\t\t\tinput:\n\t\t\t\t\tta = pool_ta.ta_pooled,\n\t\t\t\t\tgensz = inputs.gensz,\n\t\t\t\t\tchrsz = inputs.chrsz,\n\t\t\t\t\tcap_num_peak = cap_num_peak,\n\t\t\t\t\tpval_thresh = pval_thresh,\n\t\t\t\t\tsmooth_win = smooth_win,\n\t\t\t\t\tmake_signal = true,\n\t\t\t\t\tmem_mb = macs2_mem_mb,\n\t\t\t\t\tdisks = macs2_disks,\n\t\t\t\t\ttime_hr = macs2_time_hr,\n\t\t\t}\n\t\t}\n\t\tcall blacklist_filter as bfilt_macs2_pooled {\n\t\t\tinput:\n\t\t\t\tpeak = if defined(macs2_pooled.npeak)\n\t\t\t\t\t\tthen macs2_pooled.npeak else peak_pooled,\n\t\t\t\tblacklist = inputs.blacklist,\n\t\t}\n\t}\n\tif ( !select_first([true_rep_only,false]) ) {\t\t\n\t\tscatter(i in range(inputs.num_rep)) {\n\t\t\tif ( inputs.is_before_peak ) {\n\t\t\t\t# call peaks on 1st pseudo replicated tagalign \n\t\t\t\tcall macs2 as macs2_pr1 {\n\t\t\t\t\tinput:\n\t\t\t\t\t\tta = spr.ta_pr1[i],\n\t\t\t\t\t\tgensz = inputs.gensz,\n\t\t\t\t\t\tchrsz = inputs.chrsz,\n\t\t\t\t\t\tcap_num_peak = cap_num_peak,\n\t\t\t\t\t\tpval_thresh = pval_thresh,\n\t\t\t\t\t\tsmooth_win = smooth_win,\n\t\t\t\t\t\tmem_mb = macs2_mem_mb,\n\t\t\t\t\t\tdisks = macs2_disks,\n\t\t\t\t\t\ttime_hr = macs2_time_hr,\n\t\t\t\t}\n\t\t\t\tcall macs2 as macs2_pr2 {\n\t\t\t\t\tinput:\n\t\t\t\t\t\tta = spr.ta_pr2[i],\n\t\t\t\t\t\tgensz = inputs.gensz,\n\t\t\t\t\t\tchrsz = inputs.chrsz,\n\t\t\t\t\t\tcap_num_peak = cap_num_peak,\n\t\t\t\t\t\tpval_thresh = pval_thresh,\n\t\t\t\t\t\tsmooth_win = smooth_win,\n\t\t\t\t\t\tmem_mb = macs2_mem_mb,\n\t\t\t\t\t\tdisks = macs2_disks,\n\t\t\t\t\t\ttime_hr = macs2_time_hr,\n\t\t\t\t}\n\t\t\t}\n\t\t\tcall blacklist_filter as bfilt_macs2_pr1 {\n\t\t\t\tinput:\n\t\t\t\t\tpeak = if defined(macs2_pr1.npeak)\n\t\t\t\t\t\tthen macs2_pr1.npeak else peaks_pr1[i],\n\t\t\t\t\tblacklist = inputs.blacklist,\n\t\t\t}\n\t\t\tcall blacklist_filter as bfilt_macs2_pr2 {\n\t\t\t\tinput:\n\t\t\t\t\tpeak = if defined(macs2_pr2.npeak)\n\t\t\t\t\t\tthen macs2_pr2.npeak else peaks_pr2[i],\n\t\t\t\t\tblacklist = inputs.blacklist,\n\t\t\t}\n\t\t}\n\t\tif ( inputs.num_rep>1 ) {\n\t\t\tif ( inputs.is_before_peak ) {\n\t\t\t\t# pool tagaligns from pseudo replicates\n\t\t\t\tcall pool_ta as pool_ta_pr1 {\n\t\t\t\t\tinput :\n\t\t\t\t\t\ttas = spr.ta_pr1,\n\t\t\t\t}\n\t\t\t\tcall pool_ta as pool_ta_pr2 {\n\t\t\t\t\tinput :\n\t\t\t\t\t\ttas = spr.ta_pr2,\n\t\t\t\t}\n\t\t\t\t# call peaks on 1st pooled pseudo replicates\n\t\t\t\tcall macs2 as macs2_ppr1 {\n\t\t\t\t\tinput:\n\t\t\t\t\t\tta = pool_ta_pr1.ta_pooled,\n\t\t\t\t\t\tgensz = inputs.gensz,\n\t\t\t\t\t\tchrsz = inputs.chrsz,\n\t\t\t\t\t\tcap_num_peak = cap_num_peak,\n\t\t\t\t\t\tpval_thresh = pval_thresh,\n\t\t\t\t\t\tsmooth_win = smooth_win,\n\t\t\t\t\t\tmem_mb = macs2_mem_mb,\n\t\t\t\t\t\tdisks = macs2_disks,\n\t\t\t\t\t\ttime_hr = macs2_time_hr,\n\t\t\t\t}\n\t\t\t\t# call peaks on 2nd pooled pseudo replicates\n\t\t\t\tcall macs2 as macs2_ppr2 {\n\t\t\t\t\tinput:\n\t\t\t\t\t\tta = pool_ta_pr2.ta_pooled,\n\t\t\t\t\t\tgensz = inputs.gensz,\n\t\t\t\t\t\tchrsz = inputs.chrsz,\n\t\t\t\t\t\tcap_num_peak = cap_num_peak,\n\t\t\t\t\t\tpval_thresh = pval_thresh,\n\t\t\t\t\t\tsmooth_win = smooth_win,\n\t\t\t\t\t\tmem_mb = macs2_mem_mb,\n\t\t\t\t\t\tdisks = macs2_disks,\n\t\t\t\t\t\ttime_hr = macs2_time_hr,\n\t\t\t\t}\n\t\t\t}\n\t\t\tcall blacklist_filter as bfilt_macs2_ppr1 {\n\t\t\t\tinput:\n\t\t\t\t\tpeak = if defined(macs2_ppr1.npeak)\n\t\t\t\t\t\t\tthen macs2_ppr1.npeak else peak_ppr1,\n\t\t\t\t\tblacklist = inputs.blacklist,\n\t\t\t}\n\t\t\tcall blacklist_filter as bfilt_macs2_ppr2 {\n\t\t\t\tinput:\n\t\t\t\t\tpeak = if defined(macs2_ppr2.npeak)\n\t\t\t\t\t\t\tthen macs2_ppr2.npeak else peak_ppr2,\n\t\t\t\t\tblacklist = inputs.blacklist,\n\t\t\t}\n\t\t}\n\t}\n\n\t# Naive overlap on every pair of true replicates\n\tif ( inputs.num_rep>1 ) {\n\t\tscatter( pair in inputs.pairs ) {\n\t\t\tcall overlap {\n\t\t\t\tinput :\n\t\t\t\t\tprefix = \"rep\"+(pair[0]+1)+\n\t\t\t\t\t\t\t\"-rep\"+(pair[1]+1),\n\t\t\t\t\tpeak1 = if defined(macs2.npeak[0])\n\t\t\t\t\t\tthen macs2.npeak[(pair[0])] \n\t\t\t\t\t\telse peaks[(pair[0])],\n\t\t\t\t\tpeak2 = if defined(macs2.npeak[0])\n\t\t\t\t\t\tthen macs2.npeak[(pair[1])]\n\t\t\t\t\t\telse peaks[(pair[1])],\n\t\t\t\t\tpeak_pooled = if defined(macs2_pooled.npeak)\n\t\t\t\t\t\tthen macs2_pooled.npeak\n\t\t\t\t\t\telse peak_pooled,\n\t\t\t}\n\t\t\tcall blacklist_filter as bfilt_overlap {\n\t\t\t\tinput:\n\t\t\t\t\tpeak = overlap.overlap_peak,\n\t\t\t\t\tblacklist = inputs.blacklist,\n\t\t\t}\n\t\t}\n\t}\n\tif ( !select_first([true_rep_only,false]) ) {\n\t\t# Naive overlap on pseduo replicates\n\t\tscatter( i in range(inputs.num_rep) ) {\n\t\t\tcall overlap as overlap_pr {\n\t\t\t\tinput : \n\t\t\t\t\tprefix = \"rep\"+(i+1)+\"-pr\",\n\t\t\t\t\tpeak1 = if defined(macs2_pr1.npeak[0])\n\t\t\t\t\t\tthen macs2_pr1.npeak[i]\n\t\t\t\t\t\telse peaks_pr1[i],\n\t\t\t\t\tpeak2 = if defined(macs2_pr2.npeak[0])\n\t\t\t\t\t\tthen macs2_pr2.npeak[i]\n\t\t\t\t\t\telse peaks_pr2[i],\n\t\t\t\t\tpeak_pooled = if defined(macs2.npeak[i])\n\t\t\t\t\t\tthen macs2.npeak[i]\n\t\t\t\t\t\telse peak_pooled,\n\t\t\t}\n\t\t\tcall blacklist_filter as bfilt_overlap_pr {\n\t\t\t\tinput:\n\t\t\t\t\tpeak = overlap_pr.overlap_peak,\n\t\t\t\t\tblacklist = inputs.blacklist,\n\t\t\t}\n\t\t}\n\t\tif ( inputs.num_rep>1 ) {\n\t\t\t# Naive overlap on pooled pseudo replicates\n\t\t\tcall overlap as overlap_ppr {\n\t\t\t\tinput : \n\t\t\t\t\tprefix = \"ppr\",\n\t\t\t\t\tpeak1 = if defined(macs2_ppr1.npeak)\n\t\t\t\t\t\tthen macs2_ppr1.npeak\n\t\t\t\t\t\telse peak_ppr1,\n\t\t\t\t\tpeak2 = if defined(macs2_ppr2.npeak)\n\t\t\t\t\t\tthen macs2_ppr2.npeak\n\t\t\t\t\t\telse peak_ppr2,\n\t\t\t\t\tpeak_pooled = if defined(macs2_pooled.npeak)\n\t\t\t\t\t\tthen macs2_pooled.npeak\n\t\t\t\t\t\telse peak_pooled,\n\t\t\t}\n\t\t\tcall blacklist_filter as bfilt_overlap_ppr {\n\t\t\t\tinput:\n\t\t\t\t\tpeak = overlap_ppr.overlap_peak,\n\t\t\t\t\tblacklist = inputs.blacklist,\n\t\t\t}\n\t\t}\n\t\t# reproducibility QC for overlapping peaks\n\t\tcall reproducibility as reproducibility_overlap {\n\t\t\tinput:\n\t\t\t\tprefix = 'overlap',\n\t\t\t\tpeaks = if defined(bfilt_overlap.filtered_peak[0])\n\t\t\t\tthen bfilt_overlap.filtered_peak else [],\n\t\t\t\tpeaks_pr = bfilt_overlap_pr.filtered_peak,\n\t\t\t\tpeak_ppr = bfilt_overlap_ppr.filtered_peak,\n\t\t}\n\t}\n\n\tif ( select_first([enable_idr,false]) ) {\n\t\tif ( inputs.num_rep>1 ) {\n\t\t\tscatter( pair in inputs.pairs ) {\n\t\t\t\t# IDR on every pair of true replicates\n\t\t\t\tcall idr {\n\t\t\t\t\tinput : \n\t\t\t\t\t\tprefix = \"rep\"+(pair[0]+1)\n\t\t\t\t\t\t\t\t+\"-rep\"+(pair[1]+1),\n\t\t\t\t\t\tpeak1 = if defined(macs2.npeak[0])\n\t\t\t\t\t\t\tthen macs2.npeak[(pair[0])]\n\t\t\t\t\t\t\telse peaks[(pair[0])],\n\t\t\t\t\t\tpeak2 = if defined(macs2.npeak[0])\n\t\t\t\t\t\t\tthen macs2.npeak[(pair[1])]\n\t\t\t\t\t\t\telse peaks[(pair[1])],\n\t\t\t\t\t\tpeak_pooled = if defined(macs2_pooled.npeak)\n\t\t\t\t\t\t\tthen macs2_pooled.npeak \n\t\t\t\t\t\t\telse peak_pooled,\n\t\t\t\t\t\tidr_thresh = idr_thresh,\n\t\t\t\t}\n\t\t\t\tcall blacklist_filter as bfilt_idr {\n\t\t\t\t\tinput:\n\t\t\t\t\t\tpeak = idr.idr_peak,\n\t\t\t\t\t\tblacklist = inputs.blacklist,\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\tif ( !select_first([true_rep_only,false]) ) {\n\t\t\t# IDR on pseduo replicates\n\t\t\tscatter( i in range(inputs.num_rep) ) {\n\t\t\t\tcall idr as idr_pr {\n\t\t\t\t\tinput : \n\t\t\t\t\t\tprefix = \"rep\"+(i+1)+\"-pr\",\n\t\t\t\t\t\tpeak1 = if defined(macs2_pr1.npeak[i])\n\t\t\t\t\t\t\tthen macs2_pr1.npeak[i]\n\t\t\t\t\t\t\telse peaks_pr1[i],\n\t\t\t\t\t\tpeak2 = if defined(macs2_pr2.npeak[i])\n\t\t\t\t\t\t\tthen macs2_pr2.npeak[i]\n\t\t\t\t\t\t\telse peaks_pr2[i],\n\t\t\t\t\t\tpeak_pooled = if defined(macs2.npeak[i])\n\t\t\t\t\t\t\tthen macs2.npeak[i]\n\t\t\t\t\t\t\telse peak_pooled,\n\t\t\t\t\t\tidr_thresh = idr_thresh,\n\t\t\t\t}\n\t\t\t\tcall blacklist_filter as bfilt_idr_pr {\n\t\t\t\t\tinput:\n\t\t\t\t\t\tpeak = idr_pr.idr_peak,\n\t\t\t\t\t\tblacklist = inputs.blacklist,\n\t\t\t\t}\n\t\t\t}\n\t\t\tif ( inputs.num_rep>1 ) {\n\t\t\t\tcall idr as idr_ppr {\n\t\t\t\t\tinput : \n\t\t\t\t\t\tprefix = \"ppr\",\n\t\t\t\t\t\tpeak1 = if defined(macs2_ppr1.npeak)\n\t\t\t\t\t\t\tthen macs2_ppr1.npeak\n\t\t\t\t\t\t\telse peak_ppr1,\n\t\t\t\t\t\tpeak2 = if defined(macs2_ppr2.npeak)\n\t\t\t\t\t\t\tthen macs2_ppr2.npeak\n\t\t\t\t\t\t\telse peak_ppr2,\n\t\t\t\t\t\tpeak_pooled = if defined(macs2_pooled.npeak)\n\t\t\t\t\t\t\tthen macs2_pooled.npeak\n\t\t\t\t\t\t\telse peak_pooled,\n\t\t\t\t\t\tidr_thresh = idr_thresh,\n\t\t\t\t}\n\t\t\t\tcall blacklist_filter as bfilt_idr_ppr {\n\t\t\t\t\tinput:\n\t\t\t\t\t\tpeak = idr_ppr.idr_peak,\n\t\t\t\t\t\tblacklist = inputs.blacklist,\n\t\t\t\t}\n\t\t\t}\n\t\t\t# reproducibility QC for IDR peaks\n\t\t\tcall reproducibility as reproducibility_idr {\n\t\t\t\tinput:\n\t\t\t\t\tprefix = 'idr',\n\t\t\t\t\tpeaks = if defined(bfilt_idr.filtered_peak[0])\n\t\t\t\t\t\tthen bfilt_idr.filtered_peak else [],\n\t\t\t\t\tpeaks_pr = bfilt_idr_pr.filtered_peak,\n\t\t\t\t\tpeak_ppr = bfilt_idr_ppr.filtered_peak,\n\t\t\t}\n\t\t}\n\t}\n}\n\n# genomic tasks\ntask trim_adapter { # trim adapters and merge trimmed fastqs\n\t# parameters from workflow\n\tArray[Array[File]] fastqs \t\t# [merge_id][end_id]\n\tArray[Array[String]] adapters \t# [merge_id][end_id]\n\tBoolean paired_end\n\t# mandatory\n\tBoolean auto_detect_adapter\t\t# automatically detect/trim adapters\n\t# optional\n\tInt? min_trim_len \t\t# minimum trim length for cutadapt -m\n\tFloat? err_rate\t\t\t# Maximum allowed adapter error rate \n\t\t\t\t\t\t\t# for cutadapt -e\t\n\t# resource\n\tInt? cpu\n\tInt? mem_mb\n\tInt? time_hr\n\tString? disks\n\n\tcommand {\n\t\tpython $(which encode_trim_adapter.py) \\\n\t\t\t${write_tsv(fastqs)} \\\n\t\t\t${\"--adapters \" + write_tsv(adapters)} \\\n\t\t\t${if paired_end then \"--paired-end\" else \"\"} \\\n\t\t\t${if auto_detect_adapter\n\t\t\t\tthen \"--auto-detect-adapter\" else \"\"} \\\n\t\t\t${\"--min-trim-len \" + min_trim_len} \\\n\t\t\t${\"--err-rate \" + err_rate} \\\n\t\t\t${\"--nth \" + select_first([cpu,4])}\n\t}\n\toutput {\n\t\t# WDL glob() globs in an alphabetical order\n\t\t# so R1 and R2 can be switched, which results in an\n\t\t# unexpected behavior of a workflow\n\t\t# so we prepend merge_fastqs_'end'_ (R1 or R2)\n\t\t# to the basename of original filename\n\t\t# this prefix will be later stripped in bowtie2 task\n\t\tArray[File] trimmed_merged_fastqs = \n\t\t\t\t\t\tglob(\"merge_fastqs_R?_*.fastq.gz\")\n\t}\n\truntime {\n\t\tcpu : select_first([cpu,4])\n\t\tmemory : \"${select_first([mem_mb,'10000'])} MB\"\n\t\ttime : select_first([time_hr,24])\n\t\tdisks : select_first([disks,\"local-disk 100 HDD\"])\n\t}\n}\n\ntask bowtie2 {\n\t# parameters from workflow\n\tFile idx_tar \t\t# reference bowtie2 index tar\n\tArray[File] fastqs \t# [end_id]\n\tBoolean paired_end\n\tInt? multimapping\n\t# optional\n\tString? score_min \t# min acceptable alignment score func\n\t\t\t\t\t\t# w.r.t read length\n\t# resource\n\tInt? cpu\n\tInt? mem_mb\n\tInt? time_hr\n\tString? disks\n\n\tcommand {\n\t\tpython $(which encode_bowtie2.py) \\\n\t\t\t${idx_tar} \\\n\t\t\t${sep=' ' fastqs} \\\n\t\t\t${if paired_end then \"--paired-end\" else \"\"} \\\n\t\t\t${\"--multimapping \" + multimapping} \\\n\t\t\t${\"--score-min \" + score_min} \\\n\t\t\t${\"--nth \" + select_first([cpu,4])}\n\t}\n\toutput {\n\t\tFile bam = glob(\"*.bam\")[0]\n\t\tFile bai = glob(\"*.bai\")[0]\n\t\tFile align_log = glob(\"*.align.log\")[0]\n\t\tFile flagstat_qc = glob(\"*.flagstat.qc\")[0]\n\t}\n\truntime {\n\t\tcpu : select_first([cpu,4])\n\t\tmemory : \"${select_first([mem_mb,'20000'])} MB\"\n\t\ttime : select_first([time_hr,48])\n\t\tdisks : select_first([disks,\"local-disk 100 HDD\"])\n\t\tpreemptible: 0\n\t}\n}\n\ntask filter {\n\t# parameters from workflow\n\tFile bam\n\tBoolean paired_end\n\tInt? multimapping\n\t# optional\n\tString? dup_marker \t\t\t# picard.jar MarkDuplicates (picard) or \n\t\t\t\t\t\t\t\t# sambamba markdup (sambamba)\n\tInt? mapq_thresh\t\t\t# threshold for low MAPQ reads removal\n\tBoolean? no_dup_removal \t# no dupe reads removal when filtering BAM\n\t\t\t\t\t\t\t\t# dup.qc and pbc.qc will be emptry files\n\t\t\t\t\t\t\t\t# and nodup_bam in the output is \n\t\t\t\t\t\t\t\t# filtered bam with dupes\n\t# resource\n\tInt? cpu\n\tInt? mem_mb\n\tInt? time_hr\n\tString? disks\n\n\tcommand {\n\t\tpython $(which encode_filter.py) \\\n\t\t\t${bam} \\\n\t\t\t${if paired_end then \"--paired-end\" else \"\"} \\\n\t\t\t${\"--multimapping \" + multimapping} \\\n\t\t\t${\"--dup-marker \" + dup_marker} \\\n\t\t\t${\"--mapq-thresh \" + mapq_thresh} \\\n\t\t\t${if select_first([no_dup_removal,false])\n\t\t\t\tthen \"--no-dup-removal\" else \"\"} \\\n\t\t\t${\"--nth \" + cpu}\t\t\t\n\t}\n\toutput {\n\t\tFile nodup_bam = glob(\"*.bam\")[0]\n\t\tFile nodup_bai = glob(\"*.bai\")[0]\n\t\tFile flagstat_qc = glob(\"*.flagstat.qc\")[0]\n\t\t# optional (if no_dup_removall then empty qc files)\t\t\n\t\tFile dup_qc = glob(\"*.dup.qc\")[0]\n\t\tFile pbc_qc = glob(\"*.pbc.qc\")[0]\n\t}\n\n\truntime {\n\t\tcpu : select_first([cpu,2])\n\t\tmemory : \"${select_first([mem_mb,'20000'])} MB\"\n\t\ttime : select_first([time_hr,24])\n\t\tdisks : select_first([disks,\"local-disk 100 HDD\"])\n\t}\n}\n\ntask bam2ta {\n\t# parameters from workflow\n\tFile bam\n\tBoolean paired_end\n\t# optional\n\tBoolean? disable_tn5_shift \t# no tn5 shifting (it's for dnase-seq)\n\tString? regex_grep_v_ta \t# Perl-style regular expression pattern \n                        \t\t# to remove matching reads from TAGALIGN\n\tInt? subsample \t\t\t\t# number of reads to subsample TAGALIGN\n\t\t\t\t\t\t\t\t# this affects all downstream analysis\n\t# resource\n\tInt? cpu\n\tInt? mem_mb\n\tInt? time_hr\n\tString? disks\n\n\tcommand {\n\t\tpython $(which encode_bam2ta.py) \\\n\t\t\t${bam} \\\n\t\t\t${if paired_end then \"--paired-end\" else \"\"} \\\n\t\t\t${if select_first([disable_tn5_shift,false])\n\t\t\t\tthen \"--disable-tn5-shift\" else \"\"} \\\n\t\t\t${\"--regex-grep-v-ta \" +\"'\"+regex_grep_v_ta+\"'\"} \\\n\t\t\t${\"--subsample \" + subsample} \\\n\t\t\t${\"--nth \" + cpu}\n\t}\n\toutput {\n\t\tFile ta = glob(\"*.tagAlign.gz\")[0]\n\t}\n\truntime {\n\t\tcpu : select_first([cpu,2])\n\t\tmemory : \"${select_first([mem_mb,'10000'])} MB\"\n\t\ttime : select_first([time_hr,6])\n\t\tdisks : select_first([disks,\"local-disk 100 HDD\"])\n\t}\n}\n\ntask spr { # make two self pseudo replicates\n\t# parameters from workflow\n\tFile ta\n\tBoolean paired_end\n\n\tcommand {\n\t\tpython $(which encode_spr.py) \\\n\t\t\t${ta} \\\n\t\t\t${if paired_end then \"--paired-end\" else \"\"}\n\t}\n\toutput {\n\t\tFile ta_pr1 = glob(\"*.pr1.tagAlign.gz\")[0]\n\t\tFile ta_pr2 = glob(\"*.pr2.tagAlign.gz\")[0]\n\t}\n}\n\ntask pool_ta {\n\t# parameters from workflow\n\tArray[File?] tas\n\n\tcommand {\n\t\tpython $(which encode_pool_ta.py) \\\n\t\t\t${sep=' ' tas}\n\t}\n\toutput {\n\t\tFile ta_pooled = glob(\"*.tagAlign.gz\")[0]\n\t}\n}\n\ntask xcor {\n\t# parameters from workflow\n\tFile ta\n\tBoolean paired_end\n\t# optional\n\tInt? subsample \t\t# number of reads to subsample TAGALIGN\n\t\t\t\t\t\t# this will be used for xcor only\n\t\t\t\t\t\t# will not affect any downstream analysis\n\t# resource\n\tInt? cpu\n\tInt? mem_mb\t\n\tInt? time_hr\n\tString? disks\n\n\tcommand {\n\t\tpython $(which encode_xcor.py) \\\n\t\t\t${ta} \\\n\t\t\t${if paired_end then \"--paired-end\" else \"\"} \\\n\t\t\t${\"--subsample \" + select_first(\n\t\t\t\t\t\t\t\t[subsample,25000000])} \\\n\t\t\t--speak=0 \\\n\t\t\t${\"--nth \" + cpu}\n\t}\n\toutput {\n\t\tFile plot = glob(\"*.cc.plot.pdf\")[0]\n\t\tFile score = glob(\"*.cc.qc\")[0]\n\t}\n\truntime {\n\t\tcpu : select_first([cpu,2])\n\t\tmemory : \"${select_first([mem_mb,'10000'])} MB\"\n\t\ttime : select_first([time_hr,6])\n\t\tdisks : select_first([disks,\"local-disk 100 HDD\"])\n\t}\n}\n\ntask macs2 {\n\t# parameters from workflow\n\tFile? ta\n\tString gensz\t\t# Genome size (sum of entries in 2nd column of \n                        # chr. sizes file, or hs for human, ms for mouse)\n\tFile chrsz\t\t\t# 2-col chromosome sizes file\n\tInt? cap_num_peak\t# cap number of raw peaks called from MACS2\n\tFloat? pval_thresh\t# p.value threshold\n\tInt? smooth_win\t\t# size of smoothing window\n\tBoolean? make_signal\n\t# resource\n\tInt? mem_mb\n\tInt? time_hr\n\tString? disks\n\n\tcommand {\n\t\tpython $(which encode_macs2.py) \\\n\t\t\t${ta} \\\n\t\t\t${\"--gensz \"+ gensz} \\\n\t\t\t${\"--chrsz \" + chrsz} \\\n\t\t\t${\"--cap-num-peak \" + select_first(\n\t\t\t\t\t\t\t\t[cap_num_peak,300000])} \\\n\t\t\t${\"--p-val-thresh \"+ pval_thresh} \\\n\t\t\t${\"--smooth-win \"+ smooth_win} \\\n\t\t\t${if select_first([make_signal,false])\n\t\t\t\tthen \"--make-signal\" else \"\"}\n\t}\n\toutput {\n\t\tFile npeak = glob(\"*.narrowPeak.gz\")[0]\n\t\t# optional (if not make_signal then empty signal files)\n\t\tFile sig_pval = glob(\"*.pval.signal.bigwig\")[0]\n\t\tFile sig_fc = glob(\"*.fc.signal.bigwig\")[0]\n\t}\n\truntime {\n\t\tmemory : \"${select_first([mem_mb,'16000'])} MB\"\n\t\ttime : select_first([time_hr,24])\n\t\tdisks : select_first([disks,\"local-disk 100 HDD\"])\n\t}\n}\n\ntask idr {\n\t# parameters from workflow\n\tString? prefix \t\t# prefix for IDR output file\n\tFile? peak1 \t\t\t\n\tFile? peak2\n\tFile? peak_pooled\n\tFloat? idr_thresh\n\n\tcommand {\n\t\tpython $(which encode_idr.py) \\\n\t\t\t${peak1} ${peak2} ${peak_pooled} \\\n\t\t\t${\"--prefix \" + prefix} \\\n\t\t\t${\"--idr-thresh \" + idr_thresh} \\\n\t\t\t--idr-rank p.value\n\t}\n\toutput {\n\t\tFile idr_peak = glob(\"*eak.gz\")[0]\n\t\tFile idr_plot = glob(\"*.txt.png\")[0]\n\t\tFile idr_unthresholded_peak = glob(\"*.txt.gz\")[0]\n\t\tFile idr_log = glob(\"*.log\")[0]\n\t}\n}\n\ntask overlap {\n\t# parameters from workflow\n\tString? prefix \t\t# prefix for IDR output file\n\tFile? peak1\n\tFile? peak2\n\tFile? peak_pooled\n\n\tcommand {\n\t\tpython $(which encode_naive_overlap.py) \\\n\t\t\t${peak1} ${peak2} ${peak_pooled} \\\n\t\t\t${\"--prefix \" + prefix}\n\t}\n\toutput {\n\t\tFile overlap_peak = glob(\"*eak.gz\")[0]\n\t}\n}\n\ntask reproducibility {\n\t# parameters from workflow\n\tString prefix\n\tArray[File?] peaks # peak files from pair of true replicates\n\t\t\t\t\t\t# in a sorted order. for example of 4 replicates,\n\t\t\t\t\t\t# 1,2 1,3 1,4 2,3 2,4 3,4.\n                        # x,y means peak file from rep-x vs rep-y\n\tArray[File?] peaks_pr\t# peak files from pseudo replicates\n\tFile? peak_ppr\t\t\t# Peak file from pooled pseudo replicate.\n\n\tcommand {\n\t\tpython $(which encode_reproducibility_qc.py) \\\n\t\t\t${sep=' ' peaks} \\\n\t\t\t--peaks-pr ${sep=' ' peaks_pr} \\\n\t\t\t${\"--peak-ppr \"+ peak_ppr} \\\n\t\t\t--prefix ${prefix}\n\t}\n\toutput {\n\t\tFile reproducibility_qc = \n\t\t\tglob(\"*reproducibility.qc\")[0]\n\t}\n}\n\ntask blacklist_filter {\n\t# parameters from workflow\n\tFile? peak\n\tFile? blacklist\n\n\tcommand {\n\t\tpython $(which encode_blacklist_filter.py) \\\n\t\t\t${peak} \\\n\t\t\t--blacklist ${blacklist}\n\t}\n\toutput {\n\t\tFile filtered_peak = glob('*.gz')[0]\n\t}\n}\n\ntask frip {\n\t# parameters from workflow\n\tFile? peak\n\tFile? ta\n\n\tcommand {\n\t\tpython $(which encode_frip.py) \\\n\t\t\t${peak} \\\n\t\t\t${ta}\n\t}\n\toutput {\n\t\tFile frip_qc = glob('*.frip.qc')[0]\n\t}\n}\n\n# workflow system tasks\n\n# to reduce overhead of provisioning extra nodes\n# we have only one task to\n# \t1) determine input type and number of replicates\t\n# \t2) generate pair (rep-x_vs_rep-y) of all true replicate\n# \t3) read genome_tsv and get ready to download files \n# \t\tOn Google Cloud Platform \n#\t\tfiles are downloaded from gs://atac-seq-pipeline-genome-data/\ntask inputs {\n\t# parameters from workflow\n\tArray[Array[Array[String]]] fastqs \n\tArray[String] bams\n\tArray[String] nodup_bams\n\tArray[String] tas\n\tArray[String] peaks\n\tFile genome_tsv\n\n\tcommand <<<\n\t\tpython <<CODE\n\t\tname = ['fastq','bam','nodup_bam','ta','peak']\n\t\tarr = [${length(fastqs)},${length(bams)},\n\t\t       ${length(nodup_bams)},${length(tas)},\n\t\t       ${length(peaks)}]\n\t\tnum_rep = max(arr)\n\t\ttype = name[arr.index(num_rep)]\n\t\twith open('num_rep.txt','w') as fp:\n\t\t    fp.write(str(num_rep)) \n\t\twith open('type.txt','w') as fp:\n\t\t    fp.write(type)\t\t    \n\t\tfor i in range(num_rep):\n\t\t    for j in range(i+1,num_rep):\n\t\t        print('{}\\t{}'.format(i,j))\n\t\tCODE\n\t>>>\n\toutput {\n\t\tString type = read_string(\"type.txt\")\n\t\tInt num_rep = read_int(\"num_rep.txt\")\n\n\t\tBoolean is_before_bam =\n\t\t\ttype=='fastq'\n\t\tBoolean is_before_nodup_bam =\n\t\t\ttype=='fastq' || \n\t\t\ttype=='bam'\n\t\tBoolean is_before_ta =\n\t\t\ttype=='fastq' || \n\t\t\ttype=='bam' ||\n\t\t\ttype=='nodup_bam'\n\t\tBoolean is_before_peak = \n\t\t\ttype=='fastq' || \n\t\t\ttype=='bam' ||\n\t\t\ttype=='nodup_bam' || \n\t\t\ttype=='ta'\n\n\t\tArray[Array[Int]] pairs = if num_rep>1 then \n\t\t\t\t\t\t\t\t\tread_tsv(stdout()) else [[]]\n\n\t\tString ref_fa = read_map(genome_tsv)['ref_fa']\n\t\tString bowtie2_idx_tar = read_map(genome_tsv)['bowtie2_idx_tar']\n\t\tString bwa_idx_tar = read_map(genome_tsv)['bwa_idx_tar']\n\t\tString blacklist = read_map(genome_tsv)['blacklist']\n\t\tString chrsz = read_map(genome_tsv)['chrsz']\n\t\tString gensz = read_map(genome_tsv)['gensz']\n\t}\n}\n \n# gather all outputs and generate final HTML report and output.json\ntask gather_and_report {\n\t# fastqs\n\tArray[Array[Array[File]]] fastqs\n\t# raw bams\n\tArray[File] bams\n\t# filtered bams\n\tArray[File] nodup_bams\n\t# tag-aligns\n\tArray[File] tas\n\t# MACS2 raw peaks\n\tArray[File] peaks\n\tArray[File] peaks_pr1\n\tArray[File] peaks_pr2\n\tFile? peak_ppr1\n\tFile? peak_ppr2\n\tFile? peak_pooled\n\t# blacklist filtered MACS2 raw peaks\n\tArray[File] bfilt_peaks\n\tArray[File] bfilt_peaks_pr1\n\tArray[File] bfilt_peaks_pr2\n\tFile? bfilt_peak_ppr1\n\tFile? bfilt_peak_ppr2\n\tFile? bfilt_peak_pooled\n\t# adapters\n\tArray[Array[Array[String]]] adapters\n\t# blacklist filtered IDR peaks\n\tArray[File] bfilt_idr_peaks\n\tArray[File] bfilt_idr_peaks_pr\n\tFile? bfilt_idr_peak_ppr\n\t# blacklist filtered overlapping peaks\n\tArray[File] bfilt_overlap_peaks\n\tArray[File] bfilt_overlap_peaks_pr\n\tFile? bfilt_overlap_peak_ppr\n\n\tFile? idr_reproducibility_qc\n\tFile? overlap_reproducibility_qc\n\n\tcommand {\n\t\tpython $(which encode_gather_atac.py) \\\n\t\t\t\"--bams \" + ${sep=' ' bams} \\\n\t\t\t\"--nodup-bams \" + ${sep=' ' nodup_bams} \\\n\t\t\t\"--tas \" + ${sep=' ' tas} \\\n\t\t\t\"--peaks \" + ${sep=' ' peaks} \\\n\t\t\t\"--bfilt-peaks \" + ${sep=' ' bfilt_peaks}\n\t}\n\toutput {\n\t\tFile qc_json = glob('qc.json')[0]\n\t\tFile report = glob('report.html')[0]\n\t}\n}",
+    "workflowType": "WDL",
+    "options": "{\n  \"default_runtime_attributes\": {\n    \"preemptible\": \"10\",\n    \"failOnStderr\": \"false\",\n    \"bootDiskSizeGb\": \"10\",\n    \"disks\": \"local-disk 100 HDD\",\n    \"docker\": \"quay.io/encode-dcc/atac-seq-pipeline:latest\",\n    \"cpu\": \"1\",\n    \"noAddress\": \"false\",\n    \"zones\": \"us-west1-a us-west1-b us-west1-c us-central1-c us-central1-b\",\n    \"memory\": \"4 GB\"\n  }\n}",
+    "inputs": "{\n\t\"atac.genome_tsv\" : \"gs://atac-seq-pipeline-genome-data/hg38_google.tsv\",\n\t\"atac.adapters\" : [],\n\t\"atac.fastqs\" : [\n\t\t[\n\t\t\t[\"gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep1/pair1/ENCFF341MYG.fastq.gz\",\n\t\t\t\"gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep1/pair2/ENCFF248EJF.fastq.gz\"],\n\t\t\t[\"gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep1/pair1/ENCFF106QGY.fastq.gz\",\n\t\t\t\"gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep1/pair2/ENCFF368TYI.fastq.gz\"]\n\t\t],\n\t\t[\n\t\t\t[\"gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep2/pair1/ENCFF641SFZ.fastq.gz\",\n\t\t\t\"gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep2/pair2/ENCFF031ARQ.fastq.gz\"],\n\t\t\t[\"gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep2/pair1/ENCFF751XTV.fastq.gz\",\n\t\t\t\"gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep2/pair2/ENCFF590SYZ.fastq.gz\"],\n\t\t\t[\"gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep2/pair1/ENCFF927LSG.fastq.gz\",\n\t\t\t\"gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep2/pair2/ENCFF734PEQ.fastq.gz\"],\n\t\t\t[\"gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep2/pair1/ENCFF859BDM.fastq.gz\",\n\t\t\t\"gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep2/pair2/ENCFF007USV.fastq.gz\"],\n\t\t\t[\"gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep2/pair1/ENCFF193RRC.fastq.gz\",\n\t\t\t\"gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep2/pair2/ENCFF886FSC.fastq.gz\"],\n\t\t\t[\"gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep2/pair1/ENCFF366DFI.fastq.gz\",\n\t\t\t\"gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep2/pair2/ENCFF573UXK.fastq.gz\"]\n\t\t]\n\t],\n\t\"atac.bams\" : [],\n\t\"atac.nodup_bams\" : [],\n\t\"atac.tas\" : [],\n\t\"atac.peaks\" : [],\n\t\"atac.peaks_pr1\" : [],\n\t\"atac.peaks_pr2\" : [],\n\n\t\"atac.paired_end\" : true,\n\t\"atac.multimapping\" : 4,\n\n\t\"atac.trim_adapter.auto_detect_adapter\" : true,\n\n\t\"atac.trim_adapter.cpu\" : 2,\n\n\t\"atac.bowtie2.cpu\" : 4,\n\t\"atac.bowtie2.mem_mb\" : 16000,\n\n\t\"atac.filter.cpu\" : 2,\n\t\"atac.filter.mem_mb\" : 12000,\n\n\t\"atac.macs2_mem_mb\" : 16000,\n\n\t\"atac.smooth_win\" : 73,\n\t\"atac.enable_idr\" : true,\n\t\"atac.idr_thresh\" : 0.05\n}\n",
+    "labels": "{}"
+  },
+  "calls": {
+    "atac.inputs": [{
+      "preemptible": true,
+      "executionStatus": "Done",
+      "stdout": "gs://atac-seq-pipeline-workflows/ENCSR356KRQ/atac/26442f6d-a75a-4bea-be31-c2462639fc04/call-inputs/inputs-stdout.log",
+      "backendStatus": "Success",
+      "shardIndex": -1,
+      "jes": {
+        "endpointUrl": "https://genomics.googleapis.com/",
+        "machineType": "us-central1-c/n1-standard-2",
+        "googleProject": "atac-seq-pipeline",
+        "executionBucket": "gs://atac-seq-pipeline-workflows/ENCSR356KRQ",
+        "zone": "us-central1-c",
+        "instanceName": "ggp-8677837369806537992"
+      },
+      "outputs": {
+        "blacklist": "gs://atac-seq-pipeline-genome-data/hg38/hg38.blacklist.bed.gz",
+        "ref_fa": "gs://atac-seq-pipeline-genome-data/hg38/GRCh38_no_alt_analysis_set_GCA_000001405.15.fasta.gz",
+        "bwa_idx_tar": "gs://atac-seq-pipeline-genome-data/hg38/bwa_index/GRCh38_no_alt_analysis_set_GCA_000001405.15.fasta.tar",
+        "is_before_nodup_bam": true,
+        "is_before_bam": true,
+        "chrsz": "gs://atac-seq-pipeline-genome-data/hg38/hg38.chrom.sizes",
+        "bowtie2_idx_tar": "gs://atac-seq-pipeline-genome-data/hg38/bowtie2_index/GRCh38_no_alt_analysis_set_GCA_000001405.15.fasta.tar",
+        "is_before_peak": true,
+        "num_rep": 2,
+        "is_before_ta": true,
+        "gensz": "hs",
+        "pairs": [[0, 1]],
+        "type": "fastq"
+      },
+      "runtimeAttributes": {
+        "preemptible": "10",
+        "failOnStderr": "false",
+        "bootDiskSizeGb": "10",
+        "disks": "local-disk 100 HDD",
+        "continueOnReturnCode": "0",
+        "docker": "quay.io/encode-dcc/atac-seq-pipeline:latest",
+        "cpu": "1",
+        "noAddress": "false",
+        "zones": "us-west1-a,us-west1-b,us-west1-c,us-central1-c,us-central1-b",
+        "memory": "4 GB"
+      },
+      "callCaching": {
+        "allowResultReuse": false,
+        "effectiveCallCachingMode": "CallCachingOff"
+      },
+      "inputs": {
+        "fastqs": [[["gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep1/pair1/ENCFF341MYG.fastq.gz", "gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep1/pair2/ENCFF248EJF.fastq.gz"], ["gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep1/pair1/ENCFF106QGY.fastq.gz", "gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep1/pair2/ENCFF368TYI.fastq.gz"]], [["gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep2/pair1/ENCFF641SFZ.fastq.gz", "gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep2/pair2/ENCFF031ARQ.fastq.gz"], ["gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep2/pair1/ENCFF751XTV.fastq.gz", "gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep2/pair2/ENCFF590SYZ.fastq.gz"], ["gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep2/pair1/ENCFF927LSG.fastq.gz", "gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep2/pair2/ENCFF734PEQ.fastq.gz"], ["gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep2/pair1/ENCFF859BDM.fastq.gz", "gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep2/pair2/ENCFF007USV.fastq.gz"], ["gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep2/pair1/ENCFF193RRC.fastq.gz", "gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep2/pair2/ENCFF886FSC.fastq.gz"], ["gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep2/pair1/ENCFF366DFI.fastq.gz", "gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep2/pair2/ENCFF573UXK.fastq.gz"]]],
+        "tas": [],
+        "genome_tsv": "gs://atac-seq-pipeline-genome-data/hg38_google.tsv",
+        "nodup_bams": [],
+        "peaks": [],
+        "bams": []
+      },
+      "backendLabels": {
+        "wdl-task-name": "inputs",
+        "cromwell-workflow-id": "cromwell-26442f6d-a75a-4bea-be31-c2462639fc04"
+      },
+      "returnCode": 0,
+      "labels": {
+        "cromwell-workflow-id": "cromwell-26442f6d-a75a-4bea-be31-c2462639fc04",
+        "wdl-task-name": "inputs"
+      },
+      "jobId": "operations/EM6vj6n9KxiIirevxeP3tnggtY36-tsbKg9wcm9kdWN0aW9uUXVldWU",
+      "backend": "JES",
+      "end": "2017-11-19T08:39:26.937-08:00",
+      "dockerImageUsed": "quay.io/encode-dcc/atac-seq-pipeline@sha256:02a740c2dc3e7f0a5af6e0b4bb3efa6aca3002b72c66dc9f4790082c7925686d",
+      "stderr": "gs://atac-seq-pipeline-workflows/ENCSR356KRQ/atac/26442f6d-a75a-4bea-be31-c2462639fc04/call-inputs/inputs-stderr.log",
+      "callRoot": "gs://atac-seq-pipeline-workflows/ENCSR356KRQ/atac/26442f6d-a75a-4bea-be31-c2462639fc04/call-inputs",
+      "attempt": 1,
+      "executionEvents": [{
+        "startTime": "2017-11-19T16:39:04.450694225Z",
+        "endTime": "2017-11-19T08:39:26.937-08:00",
+        "description": "cromwell poll interval"
+      }, {
+        "startTime": "2017-11-19T16:37:01Z",
+        "endTime": "2017-11-19T16:37:35.076627672Z",
+        "description": "initializing VM"
+      }, {
+        "startTime": "2017-11-19T08:36:49.860-08:00",
+        "description": "RequestingExecutionToken",
+        "endTime": "2017-11-19T08:36:49.871-08:00"
+      }, {
+        "startTime": "2017-11-19T08:36:49.877-08:00",
+        "description": "PreparingJob",
+        "endTime": "2017-11-19T08:36:50.809-08:00"
+      }, {
+        "description": "waiting for quota",
+        "startTime": "2017-11-19T16:36:56Z",
+        "endTime": "2017-11-19T16:37:01Z"
+      }, {
+        "startTime": "2017-11-19T08:36:49.845-08:00",
+        "endTime": "2017-11-19T08:36:49.860-08:00",
+        "description": "Pending"
+      }, {
+        "startTime": "2017-11-19T08:36:49.871-08:00",
+        "description": "WaitingForOutputStore",
+        "endTime": "2017-11-19T08:36:49.877-08:00"
+      }, {
+        "startTime": "2017-11-19T08:36:50.809-08:00",
+        "endTime": "2017-11-19T16:36:56Z",
+        "description": "RunningJob"
+      }, {
+        "startTime": "2017-11-19T16:38:49.744562172Z",
+        "endTime": "2017-11-19T16:38:54.930256589Z",
+        "description": "localizing-files"
+      }, {
+        "endTime": "2017-11-19T16:38:59.274822510Z",
+        "description": "running-docker",
+        "startTime": "2017-11-19T16:38:54.930256589Z"
+      }, {
+        "startTime": "2017-11-19T08:39:26.937-08:00",
+        "description": "UpdatingJobStore",
+        "endTime": "2017-11-19T08:39:26.938-08:00"
+      }, {
+        "startTime": "2017-11-19T16:39:04.450694225Z",
+        "endTime": "2017-11-19T16:39:04.450694225Z",
+        "description": "ok"
+      }, {
+        "startTime": "2017-11-19T16:37:35.076711010Z",
+        "endTime": "2017-11-19T16:38:49.744562172Z",
+        "description": "pulling-image"
+      }, {
+        "startTime": "2017-11-19T16:37:35.076627672Z",
+        "endTime": "2017-11-19T16:37:35.076711010Z",
+        "description": "start"
+      }, {
+        "description": "delocalizing-files",
+        "startTime": "2017-11-19T16:38:59.274822510Z",
+        "endTime": "2017-11-19T16:39:04.450694225Z"
+      }],
+      "backendLogs": {
+        "log": "gs://atac-seq-pipeline-workflows/ENCSR356KRQ/atac/26442f6d-a75a-4bea-be31-c2462639fc04/call-inputs/inputs.log"
+      },
+      "start": "2017-11-19T08:36:49.831-08:00"
+    }],
+    "atac.$if_6": [{
+      "retryableFailure": false,
+      "executionStatus": "Failed",
+      "shardIndex": -1,
+      "failures": [{
+        "message": "Variable 'is_before_peak' not found",
+        "causedBy": []
+      }],
+      "end": "2017-11-19T08:39:28.981-08:00",
+      "attempt": 1
+    }]
+  },
+  "outputs": {
+
+  },
+  "workflowRoot": "gs://atac-seq-pipeline-workflows/ENCSR356KRQ/atac/26442f6d-a75a-4bea-be31-c2462639fc04/",
+  "id": "26442f6d-a75a-4bea-be31-c2462639fc04",
+  "inputs": {
+    "atac.bowtie2.time_hr": null,
+    "atac.macs2_time_hr": null,
+    "atac.peak_pooled": null,
+    "atac.peaks_pr2": [],
+    "atac.bam2ta.subsample": null,
+    "atac.trim_adapter.err_rate": null,
+    "atac.xcor.time_hr": null,
+    "atac.filter.mapq_thresh": null,
+    "atac.bam2ta.regex_grep_v_ta": null,
+    "atac.name": null,
+    "atac.bowtie2.disks": null,
+    "atac.trim_adapter.disks": null,
+    "atac.macs2_mem_mb": 16000,
+    "atac.adapters": [],
+    "atac.filter.dup_marker": null,
+    "atac.bowtie2.score_min": null,
+    "atac.accession_id": null,
+    "atac.idr_thresh": 0.05,
+    "atac.trim_adapter.cpu": 2,
+    "atac.filter.no_dup_removal": null,
+    "atac.peak_ppr2": null,
+    "atac.bowtie2.mem_mb": 16000,
+    "atac.true_rep_only": null,
+    "atac.bams": [],
+    "atac.macs2_pr2.make_signal": null,
+    "atac.filter.disks": null,
+    "atac.filter.time_hr": null,
+    "atac.trim_adapter.time_hr": null,
+    "atac.macs2_ppr1.make_signal": null,
+    "atac.xcor.disks": null,
+    "atac.trim_adapter.mem_mb": null,
+    "atac.macs2_pr1.make_signal": null,
+    "atac.bam2ta.mem_mb": null,
+    "atac.macs2_ppr2.make_signal": null,
+    "atac.trim_adapter.auto_detect_adapter": true,
+    "atac.macs2_disks": null,
+    "atac.peaks": [],
+    "atac.tas": [],
+    "atac.xcor.mem_mb": null,
+    "atac.bam2ta.time_hr": null,
+    "atac.trim_adapter.min_trim_len": null,
+    "atac.pval_thresh": null,
+    "atac.xcor.subsample": null,
+    "atac.peaks_pr1": [],
+    "atac.bam2ta.disks": null,
+    "atac.nodup_bams": [],
+    "atac.bam2ta.cpu": null,
+    "atac.cap_num_peak": null,
+    "atac.xcor.cpu": null,
+    "atac.bam2ta.disable_tn5_shift": null,
+    "atac.multimapping": 4,
+    "atac.fastqs": [[["gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep1/pair1/ENCFF341MYG.fastq.gz", "gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep1/pair2/ENCFF248EJF.fastq.gz"], ["gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep1/pair1/ENCFF106QGY.fastq.gz", "gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep1/pair2/ENCFF368TYI.fastq.gz"]], [["gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep2/pair1/ENCFF641SFZ.fastq.gz", "gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep2/pair2/ENCFF031ARQ.fastq.gz"], ["gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep2/pair1/ENCFF751XTV.fastq.gz", "gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep2/pair2/ENCFF590SYZ.fastq.gz"], ["gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep2/pair1/ENCFF927LSG.fastq.gz", "gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep2/pair2/ENCFF734PEQ.fastq.gz"], ["gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep2/pair1/ENCFF859BDM.fastq.gz", "gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep2/pair2/ENCFF007USV.fastq.gz"], ["gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep2/pair1/ENCFF193RRC.fastq.gz", "gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep2/pair2/ENCFF886FSC.fastq.gz"], ["gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep2/pair1/ENCFF366DFI.fastq.gz", "gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep2/pair2/ENCFF573UXK.fastq.gz"]]],
+    "atac.filter.mem_mb": 12000,
+    "atac.genome_tsv": "gs://atac-seq-pipeline-genome-data/hg38_google.tsv",
+    "atac.paired_end": true,
+    "atac.peak_ppr1": null,
+    "atac.bowtie2.cpu": 4,
+    "atac.desc": null,
+    "atac.enable_idr": true,
+    "atac.filter.cpu": 2,
+    "atac.smooth_win": 73
+  },
+  "labels": {
+    "cromwell-workflow-id": "cromwell-26442f6d-a75a-4bea-be31-c2462639fc04"
+  },
+  "submission": "2017-11-19T08:36:45.563-08:00",
+  "status": "Failed",
+  "failures": [{
+    "causedBy": [],
+    "message": "Variable 'is_before_peak' not found"
+  }],
+  "end": "2017-11-19T08:39:29.021-08:00",
+  "start": "2017-11-19T08:36:45.603-08:00"
+}

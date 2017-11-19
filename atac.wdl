@@ -43,11 +43,6 @@ workflow atac {
 	Boolean? enable_idr		# enable IDR analysis on raw peaks
 	Float? idr_thresh		# IDR threshold
 
-	# optional metadata
- 	String? name 			# name of sample
-	String? desc 			# description for sample
-	String? accession_id 	# ENCODE accession ID of sample
-
 	# OTHER IMPORTANT mandatory/optional parameters are declared in a task level
 
 	# 1) determine input file type and num_rep (number of replicates)
@@ -146,7 +141,7 @@ workflow atac {
 	}
 
 	if ( inputs.num_rep>1 ) {
-		if (is_before_peak) {
+		if ( inputs.is_before_peak ) {
 			# pool tagaligns from true replicates
 			call pool_ta {
 				input :
@@ -461,9 +456,14 @@ task trim_adapter { # trim adapters and merge trimmed fastqs
 			${"--nth " + select_first([cpu,4])}
 	}
 	output {
-		Array[File] trimmed_merged_fastqs = if paired_end then 
-			[glob("*.R1.fastq.gz")[0], glob("*.R2.fastq.gz")[0]]
-			else glob("*.R1.fastq.gz")
+		# WDL glob() globs in an alphabetical order
+		# so R1 and R2 can be switched, which results in an
+		# unexpected behavior of a workflow
+		# so we prepend merge_fastqs_'end'_ (R1 or R2)
+		# to the basename of original filename
+		# this prefix will be later stripped in bowtie2 task
+		Array[File] trimmed_merged_fastqs = 
+						glob("merge_fastqs_R?_*.fastq.gz")
 	}
 	runtime {
 		cpu : select_first([cpu,4])
@@ -794,6 +794,7 @@ task frip {
 }
 
 # workflow system tasks
+
 # to reduce overhead of provisioning extra nodes
 # we have only one task to
 # 	1) determine input type and number of replicates	
@@ -858,50 +859,79 @@ task inputs {
 	}
 }
  
-task gather_and_report {
+# gather all outputs and generate final HTML report and output.json
+task report {
+	# optional metadata
+ 	String? name 			# name of sample
+	String? desc 			# description for sample
+	String? accession_id 	# ENCODE accession ID of sample
+
+	# workflow params
+	Boolean paired_end
+	Boolean true_rep_only
+	Boolean enable_idr
 	# fastqs
-	Array[Array[Array[File]]] fastqs
+	Array[Array[Array[String]]] fastqs
 	# raw bams
-	Array[File] bams
+	Array[String] bams
 	# filtered bams
-	Array[File] nodup_bams
+	Array[String] nodup_bams
 	# tag-aligns
-	Array[File] tas
+	Array[String] tas
 	# MACS2 raw peaks
-	Array[File] peaks
-	Array[File] peaks_pr1
-	Array[File] peaks_pr2
-	File? peak_ppr1
-	File? peak_ppr2
-	File? peak_pooled
+	Array[String] peaks
+	Array[String] peaks_pr1
+	Array[String] peaks_pr2
+	String? peak_ppr1
+	String? peak_ppr2
+	String? peak_pooled
 	# blacklist filtered MACS2 raw peaks
-	Array[File] bfilt_peaks
-	Array[File] bfilt_peaks_pr1
-	Array[File] bfilt_peaks_pr2
-	File? bfilt_peak_ppr1
-	File? bfilt_peak_ppr2
-	File? bfilt_peak_pooled
+	Array[String] bfilt_peaks
+	Array[String] bfilt_peaks_pr1
+	Array[String] bfilt_peaks_pr2
+	String? bfilt_peak_ppr1
+	String? bfilt_peak_ppr2
+	String? bfilt_peak_pooled
 	# adapters
 	Array[Array[Array[String]]] adapters
+	# raw IDR peaks
+	Array[String] idr_peaks
+	Array[String] idr_peaks_pr
+	String? idr_peak_ppr
 	# blacklist filtered IDR peaks
-	Array[File] bfilt_idr_peaks
-	Array[File] bfilt_idr_peaks_pr
-	File? bfilt_idr_peak_ppr
+	Array[String] bfilt_idr_peaks
+	Array[String] bfilt_idr_peaks_pr
+	String? bfilt_idr_peak_ppr
+	# raw overlapping peaks
+	Array[String] overlap_peaks
+	Array[String] overlap_peaks_pr
+	String? overlap_peak_ppr
 	# blacklist filtered overlapping peaks
-	Array[File] bfilt_overlap_peaks
-	Array[File] bfilt_overlap_peaks_pr
-	File? bfilt_overlap_peak_ppr
-
+	Array[String] bfilt_overlap_peaks
+	Array[String] bfilt_overlap_peaks_pr
+	String? bfilt_overlap_peak_ppr
+	# QCs
+	# qc logs must be parsed so takes in File instead of String
+	Array[File] bowtie2_logs
+	Array[File] flagstat_qcs
+	Array[File] nodup_flagstat_qcs
+	Array[File] dup_qcs
+	Array[File] pbc_qcs
+	Array[File] xcor_plots
+	Array[File] xcor_logs
+	Array[File] frip_qcs
+	Array[File] frip_qcs_pr
+	File? frip_qc_ppr
 	File? idr_reproducibility_qc
 	File? overlap_reproducibility_qc
 
 	command {
-		python $(which encode_gather_atac.py) \
+		python $(which encode_report.py) \
+			"--fastqs " + '[${sep=',' fastqs}]' \
 			"--bams " + ${sep=' ' bams} \
 			"--nodup-bams " + ${sep=' ' nodup_bams} \
 			"--tas " + ${sep=' ' tas} \
 			"--peaks " + ${sep=' ' peaks} \
-			"--bfilt-peaks " + ${sep=' ' bfilt_peaks}
 	}
 	output {
 		File qc_json = glob('qc.json')[0]

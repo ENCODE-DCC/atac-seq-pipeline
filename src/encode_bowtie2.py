@@ -74,9 +74,19 @@ def get_read_length(fastq):
             line_num += 1
     return int(max_length)
 
+# WDL glob() globs in an alphabetical order
+# so R1 and R2 can be switched, which results in an
+# unexpected behavior of a workflow.
+# so we already prepended merge_fastqs_'end'_ (R1 or R2) 
+# to the basename of original filename in 'trim_adapter' task.
+# now it's time to strip it.
+def strip_merge_fastqs_prefix(fastq):
+    return re.sub(r'^merge\_fastqs\_R\d\_','',str(fastq))
+
 def make_read_length_file(fastq, out_dir):
+    basename = os.path.basename(strip_ext_fastq(fastq))
     prefix = os.path.join(out_dir,
-        os.path.basename(strip_ext_fastq(fastq)))
+        strip_merge_fastqs_prefix(basename))
     txt = '{}.read_length.txt'.format(prefix)
     read_length = get_read_length(fastq)
     with open(txt,'w') as fp:
@@ -85,8 +95,9 @@ def make_read_length_file(fastq, out_dir):
 
 def bowtie2_se(fastq, ref_index_prefix, 
         multimapping, score_min, nth, out_dir):
+    basename = os.path.basename(strip_ext_fastq(fastq))
     prefix = os.path.join(out_dir,
-        os.path.basename(strip_ext_fastq(fastq)))
+        strip_merge_fastqs_prefix(basename))        
     bam = '{}.bam'.format(prefix)
     align_log = '{}.align.log'.format(prefix)
 
@@ -108,8 +119,9 @@ def bowtie2_se(fastq, ref_index_prefix,
 
 def bowtie2_pe(fastq1, fastq2, ref_index_prefix, 
         multimapping, score_min, nth, out_dir):
+    basename = os.path.basename(strip_ext_fastq(fastq1))
     prefix = os.path.join(out_dir,
-        os.path.basename(strip_ext_fastq(fastq1)))
+        strip_merge_fastqs_prefix(basename))
     bam = '{}.bam'.format(prefix)
     bai = '{}.bam.bai'.format(prefix)
     align_log = '{}.align.log'.format(prefix)
