@@ -6,7 +6,7 @@
 import sys
 import os
 import argparse
-from encode_dcc_common import *
+from encode_common import *
 
 def parse_arguments():
     parser = argparse.ArgumentParser(prog='ENCODE DCC BAM 2 TAGALIGN.',
@@ -104,9 +104,8 @@ def tn5_shift_ta(ta, out_dir):
 def main():
     # read params
     args = parse_arguments()
-    log.info('Initializing and making output directory...')
 
-    # make out_dir
+    log.info('Initializing and making output directory...')
     mkdir_p(args.out_dir)
 
     # declare temp arrays
@@ -139,7 +138,6 @@ def main():
         shifted_ta = tn5_shift_ta(subsampled_ta, args.out_dir)
         temp_files.append(subsampled_ta)
 
-    # remove temporary/intermediate files
     log.info('Removing temporary files...')
     rm_f(temp_files)
 

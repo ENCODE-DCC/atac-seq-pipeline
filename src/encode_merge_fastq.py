@@ -7,7 +7,7 @@ import sys
 import os
 import argparse
 import multiprocessing
-from encode_dcc_common import *
+from encode_common import *
 
 def parse_arguments(debug=False):
     parser = argparse.ArgumentParser(prog='ENCODE DCC fastq merger.',

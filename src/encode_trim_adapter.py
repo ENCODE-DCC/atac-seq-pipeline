@@ -9,7 +9,7 @@ import argparse
 import multiprocessing
 import copy
 from detect_adapter import detect_most_likely_adapter
-from encode_dcc_common import *
+from encode_common import *
 
 def parse_arguments(debug=False):
     parser = argparse.ArgumentParser(prog='ENCODE DCC adapter trimmer.',
@@ -39,14 +39,6 @@ def parse_arguments(debug=False):
                         help='Number of threads to parallelize.')
     parser.add_argument('--out-dir', default='', type=str,
                             help='Output directory.')
-    parser.add_argument('--out-txt-R1', default='out_R1.txt', type=str,
-                            help='Text file with a list of trimmed fastqs for R1 \
-                            ([OUT_DIR]/[BASENAME]). This TXT will be generated \
-                            under [OUT_DIR].')
-    parser.add_argument('--out-txt-R2', default='out_R2.txt', type=str,
-                            help='Text file with a list of trimmed fastqs for R2 \
-                            ([OUT_DIR]/[BASENAME]). This TXT will be generated \
-                            under [OUT_DIR].')
     parser.add_argument('--log-level', default='INFO', 
                         choices=['NOTSET','DEBUG','INFO',
                             'WARNING','CRITICAL','ERROR','CRITICAL'],
@@ -141,16 +133,31 @@ def trim_adapter_pe(fastq1, fastq2, adapter1, adapter2,
         os.link(fastq2, linked2)
         return [linked1, linked2]
 
+def merge_fastqs(fastqs, suffix, out_dir):
+    prefix = os.path.join(out_dir,
+        os.path.basename(strip_ext_fastq(fastqs[0])))
+    merged = '{}.merged.{}.fastq.gz'.format(prefix, suffix)
+
+    if len(fastqs)>1:
+        cmd = 'zcat -f {} | gzip -nc > {}'.format(
+            ' '.join(fastqs),
+            merged)
+        run_shell_cmd(cmd)
+        return merged
+    else:
+        return hard_link(fastqs[0], merged)
+
 def main():
     # read params
     args = parse_arguments()
-    log.info('Initializing and making output directory...')
 
-    # make out_dir
+    log.info('Initializing and making output directory...')
     mkdir_p(args.out_dir)
 
-    # initialize multithreading
-    log.info('Initializing multithreading...')
+    # declare temp arrays
+    temp_files = [] # files to deleted later at the end
+
+    log.info('Initializing multi-threading...')
     if args.paired_end:
         num_process = min(2*len(args.fastqs),args.nth)
     else:
@@ -158,7 +165,6 @@ def main():
     log.info('Number of threads={}.'.format(num_process))
     pool = multiprocessing.Pool(num_process)
 
-    # detect adapters
     log.info('Detecting adapters...')
     ret_vals = []
     for i in range(len(args.fastqs)):
@@ -189,7 +195,6 @@ def main():
             log.info('Detected adapters for merge_id={}, R{}: {}'.format(
                     i+1, j+1, args.adapters[i][j]))
 
-    # trim adapters
     log.info('Trimming adapters...')
     ret_vals = []
     for i in range(len(args.fastqs)):
@@ -226,16 +231,28 @@ def main():
             fastq = ret_val.get(BIG_INT)
             trimmed_fastqs_R1.append(fastq)
 
-    # close multithreading
+    log.info('Merging fastqs...')
+    log.info('R1 to be merged: {}'.format(trimmed_fastqs_R1))
+    ret_val1 = pool.apply_async(merge_fastqs,
+                    (trimmed_fastqs_R1, 'R1', args.out_dir,))
+    if args.paired_end:
+        log.info('R2 to be merged: {}'.format(trimmed_fastqs_R2))
+        ret_val2 = pool.apply_async(merge_fastqs,
+                        (trimmed_fastqs_R2, 'R2', args.out_dir,))
+    # gather
+    R1_merged = ret_val1.get(BIG_INT)
+    if args.paired_end:
+        R2_merged = ret_val2.get(BIG_INT)
+
+    temp_files.extend(trimmed_fastqs_R1)
+    temp_files.extend(trimmed_fastqs_R2)
+
+    log.info('Closing multi-threading...')
     pool.close()
     pool.join()
 
-    # write TSV for output filenames (for WDL)
-    log.info('Writinig output TXTs...')
-    txt_R1 = os.path.join(args.out_dir, args.out_txt_R1)
-    txt_R2 = os.path.join(args.out_dir, args.out_txt_R2)
-    write_txt(txt_R1, trimmed_fastqs_R1)
-    write_txt(txt_R2, trimmed_fastqs_R2)
+    log.info('Removing temporary files...')
+    rm_f(temp_files)
 
     log.info('List all files in output directory...')
     ls_l(args.out_dir)

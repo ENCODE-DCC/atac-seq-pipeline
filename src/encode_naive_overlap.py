@@ -7,7 +7,7 @@ import sys
 import os
 import argparse
 import math
-from encode_dcc_common import *
+from encode_common import *
 
 def parse_arguments():
     parser = argparse.ArgumentParser(prog='ENCODE DCC Naive overlap.',
@@ -84,9 +84,8 @@ def naive_overlap(basename_prefix, peak1, peak2, peak_pooled,
 def main():
     # read params
     args = parse_arguments()
-    log.info('Initializing and making output directory...')
 
-    # make out_dir (root of all outputs)
+    log.info('Initializing and making output directory...')
     mkdir_p(args.out_dir)
 
     log.info('Do naive overlap...')

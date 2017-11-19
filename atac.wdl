@@ -26,13 +26,6 @@ workflow atac {
 							# and parameters
 	Boolean paired_end 		# endedness of sample
 
-	# optional resource (only for SGE and SLURM)
-							# name of SGE queue or SLURM partition
-							# all sub-tasks of pipeline will be sumitted to two queues
-	String? queue_hard 		# queue for hard/long multi-threaded tasks
-							# (trim_adapter, bowtie2, filter, bam2ta, macs2)
-	String? queue_short 	# queue for easy/short tasks (all others)
-
 	# optional but important
 	Boolean? true_rep_only 	# disable all analyses for pseudo replicates
 							# naive-overlap and IDR will also be disabled
@@ -72,32 +65,21 @@ workflow atac {
 	# pipeline starts here (parallelized for each replicate)
 	scatter(i in range(inputs.num_rep)) {
 		if (inputs.type=='fastq') {
-			# trim adapters
+			# trim adapters and merge trimmed fastqs
 			call trim_adapter {
 				input:
 					fastqs = fastqs[i],
 					adapters = if length(adapters)>0 
 							then adapters[i] else [],
 					paired_end = paired_end,
-					queue = queue_hard,
-			}
-			# merge fastqs from technical replicates
-			call merge_fastq {
-				input: 
-					fastqs_R1 = trim_adapter.trimmed_fastqs_R1,
-					fastqs_R2 = if paired_end then 
-						trim_adapter.trimmed_fastqs_R2 else [],
-					paired_end = paired_end,
-					queue = queue_short,
 			}
 			# align trimmed/merged fastqs with bowtie2
 			call bowtie2 {
 				input:
 					idx_tar = inputs.bowtie2_idx_tar,
-					fastqs = merge_fastq.merged_fastqs, #[R1,R2]
+					fastqs = trim_adapter.trimmed_merged_fastqs, #[R1,R2]
 					paired_end = paired_end,
 					multimapping = multimapping,
-					queue = queue_hard,
 			}
 		}
 		if (inputs.type=='fastq' || inputs.type=='bam') {
@@ -108,7 +90,6 @@ workflow atac {
 							then bowtie2.bam else bams[i],
 					paired_end = paired_end,
 					multimapping = multimapping,
-					queue = queue_hard,
 			}
 		}
 		if (inputs.type=='fastq' || inputs.type=='bam' ||
@@ -119,7 +100,6 @@ workflow atac {
 					bam = if defined(filter.nodup_bam) 
 							then filter.nodup_bam else nodup_bams[i],
 					paired_end = paired_end,
-					queue = queue_hard,
 			}
 		}
 		if (inputs.type=='fastq' || inputs.type=='bam' ||
@@ -130,7 +110,6 @@ workflow atac {
 					ta = if defined(bam2ta.ta) 
 							then bam2ta.ta else tas[i],
 					paired_end = paired_end,
-					queue = queue_hard,
 			}
 			# call peaks on tagalign
 			call macs2 {
@@ -145,7 +124,6 @@ workflow atac {
 					make_signal = true,
 					mem_mb = macs2_mem_mb,
 					time_hr = macs2_time_hr,
-					queue = queue_hard,
 			}
 		}
 		if ( !select_first([true_rep_only,false]) && 
@@ -157,7 +135,6 @@ workflow atac {
 					ta = if defined(bam2ta.ta) 
 							then bam2ta.ta else tas[i],
 					paired_end = paired_end,
-					queue = queue_short,
 			}
 		}
 		# filter out peaks with blacklist
@@ -166,7 +143,6 @@ workflow atac {
 				peak = if defined(macs2.npeak)
 						then macs2.npeak else peaks[i],
 				blacklist = inputs.blacklist,				
-				queue = queue_short,
 		}
 	}
 
@@ -178,7 +154,6 @@ workflow atac {
 				input :
 					tas = if defined(bam2ta.ta[0])
 							then bam2ta.ta else tas,
-					queue = queue_short,
 			}
 			# call peaks on pooled replicate
 			call macs2 as macs2_pooled {
@@ -192,7 +167,6 @@ workflow atac {
 					make_signal = true,
 					mem_mb = macs2_mem_mb,
 					time_hr = macs2_time_hr,
-					queue = queue_hard,
 			}
 		}
 		call blacklist_filter as bfilt_macs2_pooled {
@@ -200,7 +174,6 @@ workflow atac {
 				peak = if defined(macs2_pooled.npeak)
 						then macs2_pooled.npeak else peak_pooled,
 				blacklist = inputs.blacklist,
-				queue = queue_short,
 		}
 	}
 	if ( !select_first([true_rep_only,false]) ) {		
@@ -218,7 +191,6 @@ workflow atac {
 						smooth_win = smooth_win,
 						mem_mb = macs2_mem_mb,
 						time_hr = macs2_time_hr,
-						queue = queue_hard,
 				}
 				call macs2 as macs2_pr2 {
 					input:
@@ -230,7 +202,6 @@ workflow atac {
 						smooth_win = smooth_win,
 						mem_mb = macs2_mem_mb,
 						time_hr = macs2_time_hr,
-						queue = queue_hard,
 				}
 			}
 			call blacklist_filter as bfilt_macs2_pr1 {
@@ -238,14 +209,12 @@ workflow atac {
 					peak = if defined(macs2_pr1.npeak)
 						then macs2_pr1.npeak else peaks_pr1[i],
 					blacklist = inputs.blacklist,
-					queue = queue_short,
 			}
 			call blacklist_filter as bfilt_macs2_pr2 {
 				input:
 					peak = if defined(macs2_pr2.npeak)
 						then macs2_pr2.npeak else peaks_pr2[i],
 					blacklist = inputs.blacklist,
-					queue = queue_short,
 			}
 		}
 		if ( inputs.num_rep>1 ) {
@@ -255,12 +224,10 @@ workflow atac {
 				call pool_ta as pool_ta_pr1 {
 					input :
 						tas = spr.ta_pr1,
-						queue = queue_short,
 				}
 				call pool_ta as pool_ta_pr2 {
 					input :
 						tas = spr.ta_pr2,
-						queue = queue_short,
 				}
 				# call peaks on 1st pooled pseudo replicates
 				call macs2 as macs2_ppr1 {
@@ -273,7 +240,6 @@ workflow atac {
 						smooth_win = smooth_win,
 						mem_mb = macs2_mem_mb,
 						time_hr = macs2_time_hr,
-						queue = queue_hard,
 				}
 				# call peaks on 2nd pooled pseudo replicates
 				call macs2 as macs2_ppr2 {
@@ -286,7 +252,6 @@ workflow atac {
 						smooth_win = smooth_win,
 						mem_mb = macs2_mem_mb,
 						time_hr = macs2_time_hr,
-						queue = queue_hard,
 				}
 			}
 			call blacklist_filter as bfilt_macs2_ppr1 {
@@ -294,14 +259,12 @@ workflow atac {
 					peak = if defined(macs2_ppr1.npeak)
 							then macs2_ppr1.npeak else peak_ppr1,
 					blacklist = inputs.blacklist,
-					queue = queue_short,
 			}
 			call blacklist_filter as bfilt_macs2_ppr2 {
 				input:
 					peak = if defined(macs2_ppr2.npeak)
 							then macs2_ppr2.npeak else peak_ppr2,
 					blacklist = inputs.blacklist,
-					queue = queue_short,
 			}
 		}
 	}
@@ -322,13 +285,11 @@ workflow atac {
 					peak_pooled = if defined(macs2_pooled.npeak)
 						then macs2_pooled.npeak
 						else peak_pooled,
-					queue = queue_short,
 			}
 			call blacklist_filter as bfilt_overlap {
 				input:
 					peak = overlap.overlap_peak,
 					blacklist = inputs.blacklist,
-					queue = queue_short,
 			}
 		}
 	}
@@ -347,13 +308,11 @@ workflow atac {
 					peak_pooled = if defined(macs2.npeak[i])
 						then macs2.npeak[i]
 						else peak_pooled,
-					queue = queue_short,
 			}
 			call blacklist_filter as bfilt_overlap_pr {
 				input:
 					peak = overlap_pr.overlap_peak,
 					blacklist = inputs.blacklist,
-					queue = queue_short,
 			}
 		}
 		if ( inputs.num_rep>1 ) {
@@ -370,13 +329,11 @@ workflow atac {
 					peak_pooled = if defined(macs2_pooled.npeak)
 						then macs2_pooled.npeak
 						else peak_pooled,
-					queue = queue_short,
 			}
 			call blacklist_filter as bfilt_overlap_ppr {
 				input:
 					peak = overlap_ppr.overlap_peak,
 					blacklist = inputs.blacklist,
-					queue = queue_short,
 			}
 		}
 		# reproducibility QC for overlapping peaks
@@ -387,7 +344,6 @@ workflow atac {
 				then bfilt_overlap.filtered_peak else [],
 				peaks_pr = bfilt_overlap_pr.filtered_peak,
 				peak_ppr = bfilt_overlap_ppr.filtered_peak,
-				queue = queue_short,
 		}
 	}
 
@@ -409,13 +365,11 @@ workflow atac {
 							then macs2_pooled.npeak 
 							else peak_pooled,
 						idr_thresh = idr_thresh,
-						queue = queue_short,
 				}
 				call blacklist_filter as bfilt_idr {
 					input:
 						peak = idr.idr_peak,
 						blacklist = inputs.blacklist,
-						queue = queue_short,
 				}
 			}
 		}
@@ -435,13 +389,11 @@ workflow atac {
 							then macs2.npeak[i]
 							else peak_pooled,
 						idr_thresh = idr_thresh,
-						queue = queue_short,
 				}
 				call blacklist_filter as bfilt_idr_pr {
 					input:
 						peak = idr_pr.idr_peak,
 						blacklist = inputs.blacklist,
-						queue = queue_short,
 				}
 			}
 			if ( inputs.num_rep>1 ) {
@@ -458,13 +410,11 @@ workflow atac {
 							then macs2_pooled.npeak
 							else peak_pooled,
 						idr_thresh = idr_thresh,
-						queue = queue_short,
 				}
 				call blacklist_filter as bfilt_idr_ppr {
 					input:
 						peak = idr_ppr.idr_peak,
 						blacklist = inputs.blacklist,
-						queue = queue_short,
 				}
 			}
 			# reproducibility QC for IDR peaks
@@ -475,14 +425,13 @@ workflow atac {
 						then bfilt_idr.filtered_peak else [],
 					peaks_pr = bfilt_idr_pr.filtered_peak,
 					peak_ppr = bfilt_idr_ppr.filtered_peak,
-					queue = queue_short,
 			}
 		}
 	}
 }
 
 # genomic tasks
-task trim_adapter { # detect/trim adapter
+task trim_adapter { # trim adapters and merge trimmed fastqs
 	# parameters from workflow
 	Array[Array[File]] fastqs 		# [merge_id][end_id]
 	Array[Array[String]] adapters 	# [merge_id][end_id]
@@ -496,10 +445,9 @@ task trim_adapter { # detect/trim adapter
 	# resource
 	Int? cpu
 	Int? mem_mb
-	String? queue
 
 	command {
-		python $(which encode_dcc_trim_adapter.py) \
+		python $(which encode_trim_adapter.py) \
 			${write_tsv(fastqs)} \
 			${"--adapters " + write_tsv(adapters)} \
 			${if paired_end then "--paired-end" else ""} \
@@ -507,46 +455,15 @@ task trim_adapter { # detect/trim adapter
 				then "--auto-detect-adapter" else ""} \
 			${"--min-trim-len " + min_trim_len} \
 			${"--err-rate " + err_rate} \
-			${"--nth " + select_first([cpu,2])}
+			${"--nth " + select_first([cpu,4])}
 	}
 	output {
-		Array[File] trimmed_fastqs_R1 = read_lines("out_R1.txt")
-		Array[File] trimmed_fastqs_R2 = if paired_end then 
-			 read_lines("out_R2.txt") else []
+		Array[File] trimmed_merged_fastqs = glob("*.R?.fastq.gz")
 	}
 	runtime {
-		cpu : "${select_first([cpu,2])}"
-		disks: "local-disk 50 SSD"
+		cpu : "${select_first([cpu,4])}"
+		disks: "local-disk 100 SSD"
 		memory : "${select_first([mem_mb,'10000'])} MB"
-		queue : queue
-	}
-}
-
-task merge_fastq { # merge fastqs
-	# parameters from workflow
-	#Array[Array[File]] fastqs # [merge_id][end_id]
-	Array[File] fastqs_R1 # [merge_id]
-	Array[File] fastqs_R2 # [merge_id]
-	Boolean paired_end
-	# resource
-	Int? cpu
-	String? queue
-
-	command {
-		python $(which encode_dcc_merge_fastq.py) \
-			--fastqs-R1 ${sep=' ' fastqs_R1} \
-			${if paired_end then "--paired-end" else ""} \
-			--fastqs-R2 ${sep=' ' fastqs_R2} \
-			${"--nth " + select_first([cpu,2])}
-	}
-	output {
-		# merged_fastqs[end_id]
-		Array[File] merged_fastqs = read_lines("out.txt")
-	}
-	runtime {
-		cpu : "${select_first([cpu,2])}"
-		disks: "local-disk 50 SSD"
-		queue : queue
 	}
 }
 
@@ -563,10 +480,9 @@ task bowtie2 {
 	Int? cpu
 	Int? mem_mb
 	Int? time_hr
-	String? queue
 
 	command {
-		python $(which encode_dcc_bowtie2.py) \
+		python $(which encode_bowtie2.py) \
 			${idx_tar} \
 			${sep=' ' fastqs} \
 			${if paired_end then "--paired-end" else ""} \
@@ -586,7 +502,6 @@ task bowtie2 {
 		time : "${select_first([time_hr,48])}"
 		disks: "local-disk 100 SSD"
 		#preemptible: 0
-		queue : queue
 	}
 }
 
@@ -607,10 +522,9 @@ task filter {
 	Int? cpu
 	Int? mem_mb
 	Int? time_hr
-	String? queue
 
 	command {
-		python $(which encode_dcc_filter.py) \
+		python $(which encode_filter.py) \
 			${bam} \
 			${if paired_end then "--paired-end" else ""} \
 			${"--multimapping " + multimapping} \
@@ -634,7 +548,6 @@ task filter {
 		memory : "${select_first([mem_mb,'20000'])} MB"
 		time : "${select_first([time_hr,24])}"
 		disks: "local-disk 50 SSD"
-		queue : queue
 	}
 }
 
@@ -650,10 +563,9 @@ task bam2ta {
 								# this affects all downstream analysis
 	# resource
 	Int? cpu
-	String? queue
 
 	command {
-		python $(which encode_dcc_bam2ta.py) \
+		python $(which encode_bam2ta.py) \
 			${bam} \
 			${if paired_end then "--paired-end" else ""} \
 			${if select_first([disable_tn5_shift,false])
@@ -668,7 +580,6 @@ task bam2ta {
 	runtime {
 		cpu : "${select_first([cpu,2])}"
 		disks: "local-disk 50 SSD"
-		queue : queue
 	}
 }
 
@@ -676,11 +587,9 @@ task spr { # make two self pseudo replicates
 	# parameters from workflow
 	File ta
 	Boolean paired_end
-	# resource
-	String? queue
 
 	command {
-		python $(which encode_dcc_spr.py) \
+		python $(which encode_spr.py) \
 			${ta} \
 			${if paired_end then "--paired-end" else ""}
 	}
@@ -690,18 +599,15 @@ task spr { # make two self pseudo replicates
 	}
 	runtime {
 		disks: "local-disk 20 SSD"
-		queue : queue
 	}
 }
 
 task pool_ta {
 	# parameters from workflow
 	Array[File?] tas
-	# resource
-	String? queue
 
 	command {
-		python $(which encode_dcc_pool_ta.py) \
+		python $(which encode_pool_ta.py) \
 			${sep=' ' tas}
 	}
 	output {
@@ -709,7 +615,6 @@ task pool_ta {
 	}
 	runtime {
 		disks: "local-disk 20 SSD"
-		queue : queue
 	}
 }
 
@@ -723,10 +628,9 @@ task xcor {
 						# will not affect any downstream analysis
 	# resource
 	Int? cpu
-	String? queue
 
 	command {
-		python $(which encode_dcc_xcor.py) \
+		python $(which encode_xcor.py) \
 			${ta} \
 			${if paired_end then "--paired-end" else ""} \
 			${"--subsample " + select_first(
@@ -741,7 +645,6 @@ task xcor {
 	runtime {
 		cpu : "${select_first([cpu,2])}"
 		disks: "local-disk 20 HDD"
-		queue : queue
 	}
 }
 
@@ -758,10 +661,9 @@ task macs2 {
 	# resource
 	Int? mem_mb
 	Int? time_hr
-	String? queue
 
 	command {
-		python $(which encode_dcc_macs2.py) \
+		python $(which encode_macs2.py) \
 			${ta} \
 			${"--gensz "+ gensz} \
 			${"--chrsz " + chrsz} \
@@ -782,7 +684,6 @@ task macs2 {
 		memory : "${select_first([mem_mb,'16000'])} MB"
 		time : "${select_first([time_hr,24])}"
 		disks: "local-disk 50 HDD"
-		queue : queue
 	}
 }
 
@@ -793,11 +694,9 @@ task idr {
 	File? peak2
 	File? peak_pooled
 	Float? idr_thresh
-	# resource
-	String? queue
 
 	command {
-		python $(which encode_dcc_idr.py) \
+		python $(which encode_idr.py) \
 			${peak1} ${peak2} ${peak_pooled} \
 			${"--prefix " + prefix} \
 			${"--idr-thresh " + idr_thresh} \
@@ -811,7 +710,6 @@ task idr {
 	}
 	runtime {
 		disks: "local-disk 20 SSD"
-		queue : queue
 	}
 }
 
@@ -821,11 +719,9 @@ task overlap {
 	File? peak1
 	File? peak2
 	File? peak_pooled
-	# resource
-	String? queue
 
 	command {
-		python $(which encode_dcc_naive_overlap.py) \
+		python $(which encode_naive_overlap.py) \
 			${peak1} ${peak2} ${peak_pooled} \
 			${"--prefix " + prefix}
 	}
@@ -834,7 +730,6 @@ task overlap {
 	}
 	runtime {
 		disks: "local-disk 20 SSD"
-		queue : queue
 	}
 }
 
@@ -847,11 +742,9 @@ task reproducibility {
                         # x,y means peak file from rep-x vs rep-y
 	Array[File?] peaks_pr	# peak files from pseudo replicates
 	File? peak_ppr			# Peak file from pooled pseudo replicate.
-	# resource
-	String? queue
 
 	command {
-		python $(which encode_dcc_reproducibility_qc.py) \
+		python $(which encode_reproducibility_qc.py) \
 			${sep=' ' peaks} \
 			--peaks-pr ${sep=' ' peaks_pr} \
 			${"--peak-ppr "+ peak_ppr} \
@@ -863,7 +756,6 @@ task reproducibility {
 	}
 	runtime {
 		disks: "local-disk 20 SSD"
-		queue : queue
 	}
 }
 
@@ -871,11 +763,9 @@ task blacklist_filter {
 	# parameters from workflow
 	File? peak
 	File? blacklist
-	# resource
-	String? queue
 
 	command {
-		python $(which encode_dcc_blacklist_filter.py) \
+		python $(which encode_blacklist_filter.py) \
 			${peak} \
 			--blacklist ${blacklist}
 	}
@@ -884,7 +774,6 @@ task blacklist_filter {
 	}
 	runtime {
 		disks: "local-disk 20 SSD"
-		queue : queue
 	}
 }
 
@@ -892,11 +781,9 @@ task frip {
 	# parameters from workflow
 	File? peak
 	File? ta
-	# resource
-	String? queue
 
 	command {
-		python $(which encode_dcc_frip.py) \
+		python $(which encode_frip.py) \
 			${peak} \
 			${ta}
 	}
@@ -905,7 +792,6 @@ task frip {
 	}
 	runtime {
 		disks: "local-disk 20 SSD"
-		queue : queue
 	}
 }
 
@@ -942,7 +828,7 @@ task gather_and_report {
 	File? overlap_reproducibility_qc
 
 	command {
-		python $(which encode_dcc_gather_atac.py) \
+		python $(which encode_gather_atac.py) \
 			"--bams " + ${sep=' ' bams} \
 			"--nodup-bams " + ${sep=' ' nodup_bams} \
 			"--tas " + ${sep=' ' tas} \
@@ -955,7 +841,6 @@ task gather_and_report {
 	}
 	runtime {
 		disks: "local-disk 50 HDD"
-		queue : queue
 	}
 }
 

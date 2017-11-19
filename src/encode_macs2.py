@@ -6,7 +6,7 @@
 import sys
 import os
 import argparse
-from encode_dcc_common import *
+from encode_common import *
 
 def parse_arguments():
     parser = argparse.ArgumentParser(prog='ENCODE DCC MACS2 callpeak',
@@ -168,9 +168,8 @@ def macs2(ta, chrsz, gensz, pval_thresh, smooth_win, cap_num_peak,
 def main():
     # read params
     args = parse_arguments()
-    log.info('Initializing and making output directory...')
 
-    # make out_dir
+    log.info('Initializing and making output directory...')
     mkdir_p(args.out_dir)
 
     log.info('Calling peaks and generating signal tracks with MACS2...')

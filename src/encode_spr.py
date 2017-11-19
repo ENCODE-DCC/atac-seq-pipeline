@@ -7,7 +7,7 @@ import sys
 import os
 import argparse
 import multiprocessing
-from encode_dcc_common import *
+from encode_common import *
 
 def parse_arguments():
     parser = argparse.ArgumentParser(prog='ENCODE DCC pseudo replicator.',
@@ -109,8 +109,6 @@ def main():
     # read params
     args = parse_arguments()
     log.info('Initializing and making output directory...')
-
-    # make out_dir
     mkdir_p(args.out_dir)
 
     log.info('Making self-pseudo replicates...')

@@ -6,7 +6,7 @@
 import sys
 import os
 import argparse
-from encode_dcc_common import *
+from encode_common import *
 
 def parse_arguments():
     parser = argparse.ArgumentParser(prog='ENCODE DCC cross-correlation analysis.',
@@ -60,8 +60,6 @@ def main():
     # read params
     args = parse_arguments()
     log.info('Initializing and making output directory...')
-
-    # make out_dir
     mkdir_p(args.out_dir)
 
     # declare temp arrays

@@ -8,7 +8,7 @@ import os
 import re
 import argparse
 import multiprocessing
-from encode_dcc_common import *
+from encode_common import *
 
 def parse_arguments():
     parser = argparse.ArgumentParser(prog='ENCODE DCC bowtie2 aligner.',
@@ -141,9 +141,8 @@ def chk_bowtie2_index(prefix):
 def main():
     # read params
     args = parse_arguments()
-    log.info('Initializing and making output directory...')
 
-    # make out_dir
+    log.info('Initializing and making output directory...')
     mkdir_p(args.out_dir)
 
     # declare temp arrays
@@ -189,17 +188,15 @@ def main():
             args.out_dir)
 
     # initialize multithreading
-    log.info('Initializing multithreading...')
+    log.info('Initializing multi-threading...')
     num_process = min(2,args.nth)
     log.info('Number of threads={}.'.format(num_process))
     pool = multiprocessing.Pool(num_process)
     
-    # samtools index
     log.info('Running samtools index...')
     ret_val1 = pool.apply_async(
         samtools_index, (bam, args.out_dir))
 
-    # samtools flagstat qc
     log.info('Running samtools flagstat...')
     ret_val2 = pool.apply_async(
         samtools_flagstat, (bam, args.out_dir))
@@ -207,11 +204,10 @@ def main():
     bai = ret_val1.get(BIG_INT)
     flagstat_qc = ret_val2.get(BIG_INT)
 
-    # close multithreading
+    log.info('Closing multi-threading...')
     pool.close()
     pool.join()
 
-    # remove temporary/intermediate files
     log.info('Removing temporary files...')
     rm_f(temp_files)
 

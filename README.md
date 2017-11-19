@@ -17,89 +17,6 @@ Choose `[BACKEND_CONF]` and `[WORKFLOW_OPT]` according to your platform and pres
     $ java -jar -Dconfig.file=[BACKEND_CONF] cromwell-*.jar run atac.wdl -i input.json -o [WORKFLOW_OPT]
     ```
 
-### Local computer with `Docker`
-
-1) Install [genome data](#genome-data-installation).
-2) Run a pipeline.
-    ```
-    $ java -jar -Dconfig.file=backends/default.conf cromwell-*.jar run atac.wdl -i input.json -o workflow_opts/docker.json
-    ```
-
-### Local computer without `Docker`
-
-1) Install [dependencies](#dependency-installation).
-2) Install [genome data](#genome-data-installation).
-3) Run a pipeline.
-    ```
-    $ source activate atac-seq-pipeline
-    $ java -jar -Dconfig.file=backends/default.conf cromwell-*.jar run atac.wdl -i input.json -o workflow_opts/non_docker.json
-    $ source deactivate
-    ```
-
-### Kundaje Lab cluster with `Docker`
-
-Jobs will run locally without being submitted to Sun GridEngine (SGE). Genome data have already been installed and shared.
-1) Run a pipeline. 
-    ```
-    $ java -jar -Dconfig.file=backends/default.conf cromwell-*.jar run atac.wdl -i input.json -o workflow_opts/docker.json
-    ```
-
-### Kundaje Lab cluster with Sun GridEngine (SGE)
-
-Jobs will be submitted to Sun GridEngine (SGE) and distributed to all server nodes. Genome data have already been installed and shared.
-1) Install [dependencies](#dependency-installation).
-2) Run a pipeline.
-    ```
-    $ source activate atac-seq-pipeline
-    $ java -jar -Dconfig.file=backends/sge.conf cromwell-*.jar run atac.wdl -i input.json -o workflow_opts/non_docker.json
-    $ source deactivate
-    ```
-
-### Sun GridEngine (SGE)
-
-1) Check if your SGE has a parallel environment named `shm` by `$ qconf -spl`. If it does not have a PE `shm` then ask your SGE admin to create one or change the name of PE (`default_runtime_attributes.sge_pe`) in `workflow_opts/non_docker.json`.
-2) Install [dependencies](#dependency-installation).
-3) Install [genome data](#genome-data-installation).
-4) Run a pipeline.
-    ```
-    $ source activate atac-seq-pipeline
-    $ java -jar -Dconfig.file=backends/sge.conf cromwell-*.jar run atac.wdl -i input.json -o workflow_opts/non_docker.json
-    $ source deactivate
-    ```
-
-### SLURM
-
-1) Install [dependencies](#dependency-installation).
-2) Install [genome data](#genome-data-installation).
-3) Run a pipeline.
-    ```
-    $ source activate atac-seq-pipeline
-    $ java -jar -Dconfig.file=backends/slurm.conf cromwell-*.jar run atac.wdl -i input.json -o workflow_opts/non_docker.json
-    $ source deactivate
-    ```
-
-### Sun GridEngine (SGE) on Stanford SCG4 cluster
-
-Genome data have already been installed and shared.
-1) Install [dependencies](#dependency-installation).
-2) Run a pipeline.
-    ```
-    $ source activate atac-seq-pipeline
-    $ java -jar -Dconfig.file=backends/sge.conf cromwell-*.jar run atac.wdl -i input.json -o workflow_opts/non_docker.json
-    $ source deactivate
-    ```
-
-### SLURM on Stanford Sherlock-2 cluster
-
-Genome data have already been installed and shared.
-1) Install [dependencies](#dependency-installation).
-2) Run a pipeline.
-    ```
-    $ source activate atac-seq-pipeline
-    $ java -jar -Dconfig.file=backends/slurm.conf cromwell-*.jar run atac.wdl -i input.json -o workflow_opts/non_docker.json
-    $ source deactivate
-    ```
-
 ### Google Cloud Platform
 
 1) Create a [Google Project](https://console.developers.google.com/project).
@@ -131,6 +48,73 @@ Genome data have already been installed and shared.
 9) Run a pipeline. Use any string for `[SAMPLE_NAME]` to distinguish between multiple samples.
     ```
     $ java -jar -Dconfig.file=backends/google.conf -Dbackend.providers.JES.config.project=[PROJ_NAME] -Dbackend.providers.JES.config.root=[OUT_BUCKET]/[SAMPLE_NAME] cromwell-*.jar run atac.wdl -i input.json -o workflow_opts/docker_google.json
+    ```
+
+### Local computer with `Docker`
+
+1) Install [genome data](#genome-data-installation).
+2) Run a pipeline.
+    ```
+    $ java -jar -Dconfig.file=backends/default.conf cromwell-*.jar run atac.wdl -i input.json -o workflow_opts/docker.json
+    ```
+
+### Local computer without `Docker`
+
+1) Install [dependencies](#dependency-installation).
+2) Install [genome data](#genome-data-installation).
+3) Run a pipeline.
+    ```
+    $ source activate atac-seq-pipeline
+    $ java -jar -Dconfig.file=backends/default.conf cromwell-*.jar run atac.wdl -i input.json -o workflow_opts/non_docker.json
+    $ source deactivate
+    ```
+
+### Sun GridEngine (SGE)
+
+Genome data have already been installed and shared on Stanford SCG4. You can skip step-3.
+1) Set your parallel environment (`default_runtime_attributes.sge_pe`) and queue (`default_runtime_attributes.sge_queue`) in `workflow_opts/non_docker.json`. If there is no parallel environment on your SGE then ask your SGE admin to create one.
+    ```
+    $ qconf -spl
+    ```
+2) Install [dependencies](#dependency-installation).
+3) Install [genome data](#genome-data-installation).
+4) Run a pipeline.
+    ```
+    $ source activate atac-seq-pipeline
+    $ java -jar -Dconfig.file=backends/sge.conf cromwell-*.jar run atac.wdl -i input.json -o workflow_opts/non_docker.json
+    $ source deactivate
+    ```
+
+### SLURM
+
+Genome data have already been installed and shared on Stanford Sherlock-2. You can skip step-3.
+1) Set your partition (`default_runtime_attributes.slurm_partition`) in `workflow_opts/non_docker.json`.
+2) Install [dependencies](#dependency-installation).
+3) Install [genome data](#genome-data-installation).
+4) Run a pipeline.
+    ```
+    $ source activate atac-seq-pipeline
+    $ java -jar -Dconfig.file=backends/slurm.conf cromwell-*.jar run atac.wdl -i input.json -o workflow_opts/non_docker.json
+    $ source deactivate
+    ```
+
+### Kundaje Lab cluster with `Docker`
+
+Jobs will run locally without being submitted to Sun GridEngine (SGE). Genome data have already been installed and shared.
+1) Run a pipeline. 
+    ```
+    $ java -jar -Dconfig.file=backends/default.conf cromwell-*.jar run atac.wdl -i input.json -o workflow_opts/docker.json
+    ```
+
+### Kundaje Lab cluster with Sun GridEngine (SGE)
+
+Jobs will be submitted to Sun GridEngine (SGE) and distributed to all server nodes. Genome data have already been installed and shared.
+1) Install [dependencies](#dependency-installation).
+2) Run a pipeline.
+    ```
+    $ source activate atac-seq-pipeline
+    $ java -jar -Dconfig.file=backends/sge.conf cromwell-*.jar run atac.wdl -i input.json -o workflow_opts/non_docker.json
+    $ source deactivate
     ```
 
 ### AWS
@@ -258,24 +242,22 @@ Optional parameters and flags are marked with `?`.
 
     CPU (`cpu`), memory (`mem_mb`) settings are used for submitting jobs to cluster engines (SGE and SLURM) and Cloud platforms (Google Cloud Platform, AWS, ...). VM instance type on cloud platforms will be automatically chosen according to each task's `cpu` and `mem_mb`. Number of cores for tasks without `cpu` parameter is fixed at 1.
 
-    * `"atac.merge_fastq.cpu"`? : Number of cores for `merge_fastq` (default: 2).
+    * `"atac.trim_adapter.cpu"`? : Number of cores for `trim_adapter` (default: 4).
     * `"atac.bowtie2.cpu"`? : Number of cores for `bowtie2` (default: 4).
     * `"atac.filter.cpu"`? : Number of cores for `filter` (default: 4).
     * `"atac.bam2ta.cpu"`? : Number of cores for `bam2ta` (default: 2).
-    * `"atac.xcor.cpu"`? : Number of cores for cross correlation analysis (default: 2).
+    * `"atac.xcor.cpu"`? : Number of cores for `xcor` (default: 2).
 
+    * `"atac.trim_adapter.mem_mb"`? : Max. memory limit in MB for `trim_adapter` (default: 10000).
     * `"atac.bowtie2.mem_mb"`? : Max. memory limit in MB for `bowtie2` (default: 20000).
     * `"atac.filter.mem_mb"`? : Max. memory limit in MB for `filter` (default: 20000).
-    * `"atac.macs2_mem_mb"`? : Max. memory limit in MB for MACS2 (default: 16000).
+    * `"atac.macs2_mem_mb"`? : Max. memory limit in MB for `macs2` (default: 16000).
 
-    Walltime (`time`) and queue settings are for SGE and SLURM only.
+    Walltime (`time`) settings (for SGE and SLURM only).
 
     * `"atac.bowtie2.time_hr"`? : Walltime for `bowtie2` (default: 48).
     * `"atac.filter.time_hr"`? : Walltime for `filter` (default: 24).
-    * `"atac.macs2_time_hr"`? : Walltime for MACS2 (default: 24).
-
-    * `"atac.queue_hard"`? : Queue/partition name for long/hard tasks (`bowtie2`, `filter`, `macs2`).
-    * `"atac.queue_short"`? : Queue/partition name for short/easy tasks (all others).
+    * `"atac.macs2_time_hr"`? : Walltime for `macs2` (default: 24).
 
 # Dependency installation
 
@@ -349,4 +331,10 @@ java -jar -Dconfig.file=backends/google.conf -Dbackend.providers.JES.config.proj
 java -jar -Dconfig.file=backends/google.conf -Dbackend.providers.JES.config.project=atac-seq-pipeline -Dbackend.providers.JES.config.root="gs://atac-seq-pipeline-workflows/ENCSR889WQX_from_ta" cromwell-29.jar run atac.wdl -i examples/ENCSR889WQX_google_from_ta.json -o workflow_opts/docker_google.json
 
 # PE
+```
+
+### Docker build
+
+```
+docker build -f docker_image/Dockerfile .
 ```

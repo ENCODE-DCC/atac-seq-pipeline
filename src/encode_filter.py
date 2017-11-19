@@ -7,7 +7,7 @@ import sys
 import os
 import argparse
 import multiprocessing
-from encode_dcc_common import *
+from encode_common import *
 
 def parse_arguments():
     parser = argparse.ArgumentParser(prog='ENCODE DCC filter.',
@@ -291,9 +291,8 @@ def main():
 
     # read params
     args = parse_arguments()
-    log.info('Initializing and making output directory...')
 
-    # make out_dir
+    log.info('Initializing and making output directory...')
     mkdir_p(args.out_dir)
 
     # declare temp arrays
@@ -335,7 +334,7 @@ def main():
         temp_files.append(dupmark_bam)
 
     # initialize multithreading
-    log.info('Initializing multithreading...')
+    log.info('Initializing multi-threading...')
     num_process = min(3,args.nth)
     log.info('Number of threads={}.'.format(num_process))
     pool = multiprocessing.Pool(num_process)
@@ -371,11 +370,10 @@ def main():
     nodup_flagstat_qc = ret_val_2.get(BIG_INT)
     pbc_qc = ret_val_3.get(BIG_INT)
 
-    # close multithreading
+    log.info('Closing multi-threading...')
     pool.close()
     pool.join()
 
-    # remove temporary/intermediate files
     log.info('Removing temporary files...')
     rm_f(temp_files)
 

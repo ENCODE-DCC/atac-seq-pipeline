@@ -134,8 +134,8 @@ def rm_f(files):
 def touch(f):
     run_shell_cmd('touch {}'.format(f))
 
-def make_hard_link(f, out_dir):
-    # make hard-link (UNIX only)
+def make_hard_link(f, out_dir): # hard-link 'f' to 'out_dir'/'f'
+    # UNIX only
     if os.path.dirname(f)==os.path.dirname(out_dir):
         raise Exception('Trying to hard-link itself. {}'.format(f))
     linked = os.path.join(out_dir,
@@ -143,6 +143,13 @@ def make_hard_link(f, out_dir):
     rm_f(linked)
     os.link(f, linked)
     return linked
+
+def hard_link(f, link):  # hard-link 'f' to 'link'
+    # UNIX only
+    if os.path.abspath(f)==os.path.abspath(link):
+        raise Exception('Trying to hard-link itself. {}'.format(f))    
+    os.link(f, link)
+    return link
 
 def get_num_lines(f):
     cmd = 'zcat -f {} | wc -l'.format(f)
