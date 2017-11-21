@@ -7,7 +7,7 @@ import sys
 import os
 import argparse
 import multiprocessing
-from encode_common import *
+from encode_common_genomic import *
 
 def parse_arguments():
     parser = argparse.ArgumentParser(prog='ENCODE DCC filter.',

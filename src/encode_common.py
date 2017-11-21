@@ -134,23 +134,6 @@ def rm_f(files):
 def touch(f):
     run_shell_cmd('touch {}'.format(f))
 
-def make_hard_link(f, out_dir): # hard-link 'f' to 'out_dir'/'f'
-    # UNIX only
-    if os.path.dirname(f)==os.path.dirname(out_dir):
-        raise Exception('Trying to hard-link itself. {}'.format(f))
-    linked = os.path.join(out_dir,
-        os.path.basename(f))
-    rm_f(linked)
-    os.link(f, linked)
-    return linked
-
-def hard_link(f, link):  # hard-link 'f' to 'link'
-    # UNIX only
-    if os.path.abspath(f)==os.path.abspath(link):
-        raise Exception('Trying to hard-link itself. {}'.format(f))    
-    os.link(f, link)
-    return link
-
 def get_num_lines(f):
     cmd = 'zcat -f {} | wc -l'.format(f)
     return int(run_shell_cmd(cmd))
@@ -164,6 +147,38 @@ def write_txt(f,s):
         if type(s)!=list: arr = [s]
         else: arr = s
         for a in arr: fp.write(a+'\n')
+
+def hard_link(f, link):  # hard-link 'f' to 'link'
+    # UNIX only
+    if os.path.abspath(f)==os.path.abspath(link):
+        raise Exception('Trying to hard-link itself. {}'.format(f))    
+    os.link(f, link)
+    return link
+
+def make_hard_link(f, out_dir): # hard-link 'f' to 'out_dir'/'f'
+    # UNIX only
+    if os.path.dirname(f)==os.path.dirname(out_dir):
+        raise Exception('Trying to hard-link itself. {}'.format(f))
+    linked = os.path.join(out_dir,
+        os.path.basename(f))
+    rm_f(linked)
+    os.link(f, linked)
+    return linked
+
+def pdf2png(pdf, out_dir):
+    prefix = os.path.join(out_dir,
+        os.path.basename(strip_ext(pdf)))
+    png = '{}.png'.format(prefix)
+    
+    cmd = 'gs -dFirstPage=1 -dLastPage=1 -dTextAlphaBits=4 '
+    cmd += '-dGraphicsAlphaBits=4 -r110x110 -dUseCropBox -dQUIET '
+    cmd += '-dSAFER -dBATCH -dNOPAUSE -dNOPROMPT -sDEVICE=png16m '
+    cmd += '-sOutputFile={} -r144 {}'
+    cmd = cmd.format(
+        png,
+        pdf)
+    run_shell_cmd(cmd)
+    return png
 
 def run_shell_cmd(cmd): 
     try:
@@ -189,7 +204,7 @@ def run_shell_cmd(cmd):
                 p.returncode, cmd)
         return ret.strip('\n')
     except:
-        # kill all children processes
+        # kill all child processes
         log.exception('Unknown exception caught. '+ \
             'Killing process group {}...'.format(pgid))
         os.killpg(pgid, signal.SIGKILL)
@@ -201,145 +216,27 @@ def run_shell_cmd(cmd):
 def nCr(n,r): # combination
     return math.factorial(n)/math.factorial(r)/math.factorial(n-r)
 
-# genomic functions
-
-def samtools_index(bam, out_dir):
-    prefix = os.path.join(out_dir,
-        os.path.basename(strip_ext_bam(bam)))
-    bai = '{}.bam.bai'.format(prefix)
-
-    cmd = 'samtools index {}'.format(bam)
-    run_shell_cmd(cmd)
-    return bai
-
-def sambamba_index(bam, nth, out_dir):
-    prefix = os.path.join(out_dir,
-        os.path.basename(strip_ext_bam(bam)))
-    bai = '{}.bam.bai'.format(prefix)
-
-    cmd = 'sambamba index {} -t {}'.format(bam, nth)
-    run_shell_cmd(cmd)
-    return bai
-
-def samtools_flagstat(bam, out_dir):
-    prefix = os.path.join(out_dir,
-        os.path.basename(strip_ext_bam(bam)))
-    flagstat_qc = '{}.flagstat.qc'.format(prefix)
-
-    cmd = 'samtools flagstat {} > {}'.format(
-        bam,
-        flagstat_qc)
-    run_shell_cmd(cmd)
-    return flagstat_qc
-
-def sambamba_flagstat(bam, nth, out_dir):
-    prefix = os.path.join(out_dir,
-        os.path.basename(strip_ext_bam(bam)))
-    flagstat_qc = '{}.flagstat.qc'.format(prefix)
-
-    cmd = 'sambamba flagstat {} -t {} > {}'.format(
-        bam,
-        nth,
-        flagstat_qc)
-    run_shell_cmd(cmd)
-    return flagstat_qc
-
-def samtools_sort(bam, nth, out_dir):
-    prefix = os.path.join(out_dir,
-        os.path.basename(strip_ext_bam(bam)))
-    srt_bam = '{}.srt.bam'.format(prefix)
-
-    cmd = 'samtools sort {} -o {} -T {} -@ {}'.format(
-        bam,
-        srt_bam,
-        prefix,
-        nth)
-    run_shell_cmd(cmd)
-    return srt_bam
-
-def sambamba_sort(bam, nth, out_dir):
-    prefix = os.path.join(out_dir,
-        os.path.basename(strip_ext_bam(bam)))
-    srt_bam = '{}.srt.bam'.format(prefix)
-
-    cmd = 'sambamba sort {} -o {} -t {}'.format(
-        bam,
-        srt_bam,
-        nth)
-    run_shell_cmd(cmd)
-    return srt_bam
-
-def samtools_name_sort(bam, nth, out_dir):
-    prefix = os.path.join(out_dir,
-        os.path.basename(strip_ext_bam(bam)))
-    nmsrt_bam = '{}.nmsrt.bam'.format(prefix)
-
-    cmd = 'samtools sort -n {} -o {} -T {} -@ {}'.format(
-        bam,
-        nmsrt_bam,
-        prefix,
-        nth)
-    run_shell_cmd(cmd)
-    return nmsrt_bam
-
-def sambamba_name_sort(bam, nth, out_dir):
-    prefix = os.path.join(out_dir,
-        os.path.basename(strip_ext_bam(bam)))
-    nmsrt_bam = '{}.nmsrt.bam'.format(prefix)
-
-    cmd = 'sambamba sort -n {} -o {} -t {}'.format(
-        bam,
-        nmsrt_bam,
-        nth)
-    run_shell_cmd(cmd)
-    return nmsrt_bam
-
-def subsample_ta_se(ta, subsample, non_mito, out_dir):
-    prefix = os.path.join(out_dir,
-        os.path.basename(strip_ext_ta(ta)))
-    ta_subsampled = '{}.{}.tagAlign.gz'.format(
-        prefix, human_readable_number(subsample))
-
-    cmd = 'zcat -f {} | '
-    if non_mito:
-        cmd += 'grep -v "chrM" | '
-    cmd += 'shuf -n {} --random-source={} | '
-    cmd += 'gzip -nc > {}'
-    cmd = cmd.format(
-        ta,
-        subsample,
-        ta,
-        ta_subsampled)
-    run_shell_cmd(cmd)
-    return ta_subsampled
-
-def subsample_ta_pe(ta, subsample, non_mito, r1_only, out_dir):
-    prefix = os.path.join(out_dir,
-        os.path.basename(strip_ext_ta(ta)))
-    ta_subsampled = '{}.{}{}{}.tagAlign.gz'.format(
-        prefix,
-        'no_chrM.' if non_mito else '',
-        'R1.' if r1_only else '',
-        human_readable_number(subsample))
-
-    cmd = 'zcat -f {} | '
-    if non_mito:
-        cmd += 'grep -v "chrM" | '
-    cmd += 'sed \'N;s/\\n/\\\t/\' | '
-    cmd += 'shuf -n {} --random-source={} | '
-    cmd += 'awk \'BEGIN{{OFS="\\t"}} | '
-    if r1_only:
-        cmd += '{{printf "%s\\t%s\\t%s\\t%s\\t%s\\t%s\\n'
-        cmd += '",$1,$2,$3,$4,$5,$6}}\' | '
+def infer_n_from_nC2(nC2): # calculate n from nC2
+    if nC2:
+        n=2
+        while(nCr(n,2)!=nC2):
+            n += 1
+            if n > 99:
+                raise argparse.ArgumentTypeError(
+                'Cannot infer n from nC2. '+ \
+                'wrong number of peakfiles '+ \
+                'in command line arg. (--peaks)?')
+        return n
     else:
-        cmd += '{{printf "%s\\t%s\\t%s\\t%s\\t%s\\t%s\\n'
-        cmd += '%s\\t%s\\t%s\\t%s\\t%s\\t%s\\n",'
-        cmd += '$1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12}}\' | '
-    cmd += 'gzip -nc > {}'
-    cmd = cmd.format(
-        ta,
-        subsample,
-        ta,
-        ta_subsampled)
-    run_shell_cmd(cmd)
-    return ta_subsampled
+        return 1
+
+def infer_pair_label_from_idx(n, idx, prefix='rep'):
+    cnt = 0
+    for i in range(n):
+        for j in range(i+1,n):
+            if idx==cnt:
+                return '{}{}-{}{}'.format(
+                    prefix, i+1, prefix, j+1)
+            cnt += 1
+    raise argparse.ArgumentTypeError(
+        'Cannot infer rep_id from n and idx.')

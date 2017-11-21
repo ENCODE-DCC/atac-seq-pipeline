@@ -56,6 +56,8 @@ workflow atac {
 			tas = tas,
 			peaks = peaks,
 			genome_tsv = genome_tsv,
+			enable_idr_ = select_first([enable_idr,false]),
+			true_rep_only_ = select_first([true_rep_only,false]),
 	}
 
 	# pipeline starts here (parallelized for each replicate)
@@ -63,7 +65,7 @@ workflow atac {
 		if ( inputs.is_before_bam ) {
 			# trim adapters and merge trimmed fastqs
 			call trim_adapter {
-				input:
+				input :
 					fastqs = fastqs[i],
 					adapters = if length(adapters)>0 
 							then adapters[i] else [],
@@ -71,7 +73,7 @@ workflow atac {
 			}
 			# align trimmed/merged fastqs with bowtie2
 			call bowtie2 {
-				input:
+				input :
 					idx_tar = inputs.bowtie2_idx_tar,
 					fastqs = trim_adapter.trimmed_merged_fastqs, #[R1,R2]
 					paired_end = paired_end,
@@ -81,7 +83,7 @@ workflow atac {
 		if ( inputs.is_before_nodup_bam ) {
 			# filter/dedup bam
 			call filter {
-				input:
+				input :
 					bam = if defined(bowtie2.bam) 
 							then bowtie2.bam else bams[i],
 					paired_end = paired_end,
@@ -91,7 +93,7 @@ workflow atac {
 		if ( inputs.is_before_ta ) {
 			# convert bam to tagalign and subsample it if necessary
 			call bam2ta {
-				input:
+				input :
 					bam = if defined(filter.nodup_bam) 
 							then filter.nodup_bam else nodup_bams[i],
 					paired_end = paired_end,
@@ -100,44 +102,36 @@ workflow atac {
 		if ( inputs.is_before_peak ) {
 			# subsample tagalign (non-mito) and cross-correlation analysis
 			call xcor {
-				input:
-					ta = if defined(bam2ta.ta) 
+				input :
+					ta = if defined(bam2ta.ta)
 							then bam2ta.ta else tas[i],
 					paired_end = paired_end,
 			}
 			# call peaks on tagalign
 			call macs2 {
-				input:
+				input :
 					ta = if defined(bam2ta.ta) 
 							then bam2ta.ta else tas[i],
-					blacklist = inputs.blacklist,				
 					gensz = inputs.gensz,
 					chrsz = inputs.chrsz,
 					cap_num_peak = cap_num_peak,
 					pval_thresh = pval_thresh,
 					smooth_win = smooth_win,
 					make_signal = true,
+					blacklist = inputs.blacklist,
 					mem_mb = macs2_mem_mb,
 					disks = macs2_disks,
 					time_hr = macs2_time_hr,
 			}
 		}
-		if ( !select_first([true_rep_only,false]) && 
-			inputs.is_before_peak ) {
+		if ( !inputs.true_rep_only && inputs.is_before_peak ) {
 			# make two self pseudo replicates per true replicate
 			call spr {
-				input:
+				input :
 					ta = if defined(bam2ta.ta) 
 							then bam2ta.ta else tas[i],
 					paired_end = paired_end,
 			}
-		}
-		# filter out peaks with blacklist
-		call blacklist_filter as bfilt_macs2 {
-			input:
-				peak = if defined(macs2.npeak)
-						then macs2.npeak else peaks[i],
-				blacklist = inputs.blacklist,				
 		}
 	}
 
@@ -151,7 +145,7 @@ workflow atac {
 			}
 			# call peaks on pooled replicate
 			call macs2 as macs2_pooled {
-				input:
+				input :
 					ta = pool_ta.ta_pooled,
 					gensz = inputs.gensz,
 					chrsz = inputs.chrsz,
@@ -159,58 +153,43 @@ workflow atac {
 					pval_thresh = pval_thresh,
 					smooth_win = smooth_win,
 					make_signal = true,
+					blacklist = inputs.blacklist,
 					mem_mb = macs2_mem_mb,
 					disks = macs2_disks,
 					time_hr = macs2_time_hr,
 			}
 		}
-		call blacklist_filter as bfilt_macs2_pooled {
-			input:
-				peak = if defined(macs2_pooled.npeak)
-						then macs2_pooled.npeak else peak_pooled,
-				blacklist = inputs.blacklist,
-		}
 	}
-	if ( !select_first([true_rep_only,false]) ) {		
+	if ( !inputs.true_rep_only ) {		
 		scatter(i in range(inputs.num_rep)) {
 			if ( inputs.is_before_peak ) {
 				# call peaks on 1st pseudo replicated tagalign 
 				call macs2 as macs2_pr1 {
-					input:
+					input :
 						ta = spr.ta_pr1[i],
 						gensz = inputs.gensz,
 						chrsz = inputs.chrsz,
 						cap_num_peak = cap_num_peak,
 						pval_thresh = pval_thresh,
 						smooth_win = smooth_win,
+						blacklist = inputs.blacklist,
 						mem_mb = macs2_mem_mb,
 						disks = macs2_disks,
 						time_hr = macs2_time_hr,
 				}
 				call macs2 as macs2_pr2 {
-					input:
+					input :
 						ta = spr.ta_pr2[i],
 						gensz = inputs.gensz,
 						chrsz = inputs.chrsz,
 						cap_num_peak = cap_num_peak,
 						pval_thresh = pval_thresh,
 						smooth_win = smooth_win,
+						blacklist = inputs.blacklist,
 						mem_mb = macs2_mem_mb,
 						disks = macs2_disks,
 						time_hr = macs2_time_hr,
 				}
-			}
-			call blacklist_filter as bfilt_macs2_pr1 {
-				input:
-					peak = if defined(macs2_pr1.npeak)
-						then macs2_pr1.npeak else peaks_pr1[i],
-					blacklist = inputs.blacklist,
-			}
-			call blacklist_filter as bfilt_macs2_pr2 {
-				input:
-					peak = if defined(macs2_pr2.npeak)
-						then macs2_pr2.npeak else peaks_pr2[i],
-					blacklist = inputs.blacklist,
 			}
 		}
 		if ( inputs.num_rep>1 ) {
@@ -226,42 +205,32 @@ workflow atac {
 				}
 				# call peaks on 1st pooled pseudo replicates
 				call macs2 as macs2_ppr1 {
-					input:
+					input :
 						ta = pool_ta_pr1.ta_pooled,
 						gensz = inputs.gensz,
 						chrsz = inputs.chrsz,
 						cap_num_peak = cap_num_peak,
 						pval_thresh = pval_thresh,
 						smooth_win = smooth_win,
+						blacklist = inputs.blacklist,
 						mem_mb = macs2_mem_mb,
 						disks = macs2_disks,
 						time_hr = macs2_time_hr,
 				}
 				# call peaks on 2nd pooled pseudo replicates
 				call macs2 as macs2_ppr2 {
-					input:
+					input :
 						ta = pool_ta_pr2.ta_pooled,
 						gensz = inputs.gensz,
 						chrsz = inputs.chrsz,
 						cap_num_peak = cap_num_peak,
 						pval_thresh = pval_thresh,
 						smooth_win = smooth_win,
+						blacklist = inputs.blacklist,
 						mem_mb = macs2_mem_mb,
 						disks = macs2_disks,
 						time_hr = macs2_time_hr,
 				}
-			}
-			call blacklist_filter as bfilt_macs2_ppr1 {
-				input:
-					peak = if defined(macs2_ppr1.npeak)
-							then macs2_ppr1.npeak else peak_ppr1,
-					blacklist = inputs.blacklist,
-			}
-			call blacklist_filter as bfilt_macs2_ppr2 {
-				input:
-					peak = if defined(macs2_ppr2.npeak)
-							then macs2_ppr2.npeak else peak_ppr2,
-					blacklist = inputs.blacklist,
 			}
 		}
 	}
@@ -273,161 +242,211 @@ workflow atac {
 				input :
 					prefix = "rep"+(pair[0]+1)+
 							"-rep"+(pair[1]+1),
-					peak1 = if defined(macs2.npeak[0])
+					peak1 = if inputs.is_before_peak
 						then macs2.npeak[(pair[0])] 
 						else peaks[(pair[0])],
-					peak2 = if defined(macs2.npeak[0])
+					peak2 = if inputs.is_before_peak
 						then macs2.npeak[(pair[1])]
 						else peaks[(pair[1])],
-					peak_pooled = if defined(macs2_pooled.npeak)
+					peak_pooled = if inputs.is_before_peak
 						then macs2_pooled.npeak
 						else peak_pooled,
-			}
-			call blacklist_filter as bfilt_overlap {
-				input:
-					peak = overlap.overlap_peak,
 					blacklist = inputs.blacklist,
+					tas = if inputs.is_before_peak
+						then [pool_ta.ta_pooled]
+						else [],					
 			}
 		}
 	}
-	if ( !select_first([true_rep_only,false]) ) {
+	if ( !inputs.true_rep_only ) {
 		# Naive overlap on pseduo replicates
 		scatter( i in range(inputs.num_rep) ) {
 			call overlap as overlap_pr {
 				input : 
 					prefix = "rep"+(i+1)+"-pr",
-					peak1 = if defined(macs2_pr1.npeak[0])
+					peak1 = if inputs.is_before_peak
 						then macs2_pr1.npeak[i]
 						else peaks_pr1[i],
-					peak2 = if defined(macs2_pr2.npeak[0])
+					peak2 = if inputs.is_before_peak
 						then macs2_pr2.npeak[i]
 						else peaks_pr2[i],
-					peak_pooled = if defined(macs2.npeak[i])
+					peak_pooled = if inputs.is_before_peak
 						then macs2.npeak[i]
 						else peak_pooled,
-			}
-			call blacklist_filter as bfilt_overlap_pr {
-				input:
-					peak = overlap_pr.overlap_peak,
 					blacklist = inputs.blacklist,
+					tas = if inputs.is_before_ta
+						then [bam2ta.ta[i]]
+						else if inputs.is_before_peak
+						then [tas[i]]
+						else [],					
 			}
 		}
-		if ( inputs.num_rep>1 ) {
-			# Naive overlap on pooled pseudo replicates
-			call overlap as overlap_ppr {
-				input : 
-					prefix = "ppr",
-					peak1 = if defined(macs2_ppr1.npeak)
-						then macs2_ppr1.npeak
-						else peak_ppr1,
-					peak2 = if defined(macs2_ppr2.npeak)
-						then macs2_ppr2.npeak
-						else peak_ppr2,
-					peak_pooled = if defined(macs2_pooled.npeak)
-						then macs2_pooled.npeak
-						else peak_pooled,
-			}
-			call blacklist_filter as bfilt_overlap_ppr {
-				input:
-					peak = overlap_ppr.overlap_peak,
-					blacklist = inputs.blacklist,
-			}
+	}
+	if ( !inputs.true_rep_only && inputs.num_rep>1 ) {
+		# Naive overlap on pooled pseudo replicates
+		call overlap as overlap_ppr {
+			input : 
+				prefix = "ppr",
+				peak1 = if inputs.is_before_peak
+					then macs2_ppr1.npeak
+					else peak_ppr1,
+				peak2 = if inputs.is_before_peak
+					then macs2_ppr2.npeak
+					else peak_ppr2,
+				peak_pooled = if inputs.is_before_peak
+					then macs2_pooled.npeak
+					else peak_pooled,
+				blacklist = inputs.blacklist,
+				tas = if inputs.is_before_peak
+					then [pool_ta.ta_pooled]
+					else [],				
 		}
+	}
+	if ( !inputs.true_rep_only ) {
 		# reproducibility QC for overlapping peaks
 		call reproducibility as reproducibility_overlap {
-			input:
+			input :
 				prefix = 'overlap',
-				peaks = if defined(bfilt_overlap.filtered_peak[0])
-				then bfilt_overlap.filtered_peak else [],
-				peaks_pr = bfilt_overlap_pr.filtered_peak,
-				peak_ppr = bfilt_overlap_ppr.filtered_peak,
+				peaks = if inputs.num_rep>1
+					then overlap.bfilt_overlap_peak else [],
+				peaks_pr = overlap_pr.bfilt_overlap_peak,
+				peak_ppr = overlap_ppr.bfilt_overlap_peak,
 		}
 	}
 
-	if ( select_first([enable_idr,false]) ) {
-		if ( inputs.num_rep>1 ) {
-			scatter( pair in inputs.pairs ) {
-				# IDR on every pair of true replicates
-				call idr {
-					input : 
-						prefix = "rep"+(pair[0]+1)
-								+"-rep"+(pair[1]+1),
-						peak1 = if defined(macs2.npeak[0])
-							then macs2.npeak[(pair[0])]
-							else peaks[(pair[0])],
-						peak2 = if defined(macs2.npeak[0])
-							then macs2.npeak[(pair[1])]
-							else peaks[(pair[1])],
-						peak_pooled = if defined(macs2_pooled.npeak)
-							then macs2_pooled.npeak 
-							else peak_pooled,
-						idr_thresh = idr_thresh,
-				}
-				call blacklist_filter as bfilt_idr {
-					input:
-						peak = idr.idr_peak,
-						blacklist = inputs.blacklist,
-				}
+	if ( inputs.enable_idr && inputs.num_rep>1 ) {
+		scatter( pair in inputs.pairs ) {
+			# IDR on every pair of true replicates
+			call idr {
+				input : 
+					prefix = "rep"+(pair[0]+1)
+							+"-rep"+(pair[1]+1),
+					peak1 = if inputs.is_before_peak
+						then macs2.npeak[(pair[0])]
+						else peaks[(pair[0])],
+					peak2 = if inputs.is_before_peak
+						then macs2.npeak[(pair[1])]
+						else peaks[(pair[1])],
+					peak_pooled = if inputs.is_before_peak
+						then macs2_pooled.npeak 
+						else peak_pooled,
+					idr_thresh = select_first([idr_thresh,0.1]),
+					blacklist = inputs.blacklist,
+					tas = if inputs.is_before_peak
+						then [pool_ta.ta_pooled]
+						else [],
 			}
 		}
-		if ( !select_first([true_rep_only,false]) ) {
-			# IDR on pseduo replicates
-			scatter( i in range(inputs.num_rep) ) {
-				call idr as idr_pr {
-					input : 
-						prefix = "rep"+(i+1)+"-pr",
-						peak1 = if defined(macs2_pr1.npeak[i])
-							then macs2_pr1.npeak[i]
-							else peaks_pr1[i],
-						peak2 = if defined(macs2_pr2.npeak[i])
-							then macs2_pr2.npeak[i]
-							else peaks_pr2[i],
-						peak_pooled = if defined(macs2.npeak[i])
-							then macs2.npeak[i]
-							else peak_pooled,
-						idr_thresh = idr_thresh,
-				}
-				call blacklist_filter as bfilt_idr_pr {
-					input:
-						peak = idr_pr.idr_peak,
-						blacklist = inputs.blacklist,
-				}
-			}
-			if ( inputs.num_rep>1 ) {
-				call idr as idr_ppr {
-					input : 
-						prefix = "ppr",
-						peak1 = if defined(macs2_ppr1.npeak)
-							then macs2_ppr1.npeak
-							else peak_ppr1,
-						peak2 = if defined(macs2_ppr2.npeak)
-							then macs2_ppr2.npeak
-							else peak_ppr2,
-						peak_pooled = if defined(macs2_pooled.npeak)
-							then macs2_pooled.npeak
-							else peak_pooled,
-						idr_thresh = idr_thresh,
-				}
-				call blacklist_filter as bfilt_idr_ppr {
-					input:
-						peak = idr_ppr.idr_peak,
-						blacklist = inputs.blacklist,
-				}
-			}
-			# reproducibility QC for IDR peaks
-			call reproducibility as reproducibility_idr {
-				input:
-					prefix = 'idr',
-					peaks = if defined(bfilt_idr.filtered_peak[0])
-						then bfilt_idr.filtered_peak else [],
-					peaks_pr = bfilt_idr_pr.filtered_peak,
-					peak_ppr = bfilt_idr_ppr.filtered_peak,
+	}
+	if ( inputs.enable_idr && !inputs.true_rep_only ) {
+		# IDR on pseduo replicates
+		scatter( i in range(inputs.num_rep) ) {
+			call idr as idr_pr {
+				input : 
+					prefix = "rep"+(i+1)+"-pr",
+					peak1 = if inputs.is_before_peak
+						then macs2_pr1.npeak[i]
+						else peaks_pr1[i],
+					peak2 = if inputs.is_before_peak
+						then macs2_pr2.npeak[i]
+						else peaks_pr2[i],
+					peak_pooled = if inputs.is_before_peak
+						then macs2.npeak[i]
+						else peak_pooled,
+					idr_thresh = select_first([idr_thresh,0.1]),
+					blacklist = inputs.blacklist,
+					tas = if inputs.is_before_ta
+						then [bam2ta.ta[i]]
+						else if inputs.is_before_peak
+						then [tas[i]]
+						else [],
 			}
 		}
+	}
+	if ( inputs.enable_idr && !inputs.true_rep_only &&
+		 inputs.num_rep>1 ) {
+		call idr as idr_ppr {
+			input : 
+				prefix = "ppr",
+				peak1 = if inputs.is_before_peak
+					then macs2_ppr1.npeak
+					else peak_ppr1,
+				peak2 = if inputs.is_before_peak
+					then macs2_ppr2.npeak
+					else peak_ppr2,
+				peak_pooled = if inputs.is_before_peak
+					then macs2_pooled.npeak
+					else peak_pooled,
+				idr_thresh = select_first([idr_thresh,0.1]),
+				blacklist = inputs.blacklist,
+				tas = if inputs.is_before_peak
+					then [pool_ta.ta_pooled]
+					else [],
+		}
+	}
+	if ( inputs.enable_idr && !inputs.true_rep_only ) {
+		# reproducibility QC for IDR peaks
+		call reproducibility as reproducibility_idr {
+			input :
+				prefix = 'idr',
+				peaks = if inputs.num_rep>1
+					then idr.bfilt_idr_peak else [],
+				peaks_pr = idr_pr.bfilt_idr_peak,
+				peak_ppr = idr_ppr.bfilt_idr_peak,
+		}
+	}
+
+	call qc_report {
+		input :
+			paired_end = paired_end,
+			idr_thresh = select_first([idr_thresh,0.1]),
+			flagstat_qcs = if inputs.is_before_bam
+							then bowtie2.flagstat_qc
+							else [],
+			nodup_flagstat_qcs = if inputs.is_before_nodup_bam
+							then filter.flagstat_qc							
+							else [],
+			dup_qcs = if inputs.is_before_nodup_bam
+							then filter.dup_qc else [],
+			pbc_qcs = if inputs.is_before_nodup_bam
+							then filter_pbc_qc else [],
+			xcor_plots = if inputs.is_before_peak
+							then xcor.plot_png else [],
+			xcor_scores = if inputs.is_before_peak
+							then xcor.score else [],
+			idr_plots = if inputs.enable_idr && inputs.num_rep>1
+							then idr.idr_plot else [],
+			idr_plots_pr = if !inputs.true_rep_only && inputs.enable_idr
+							then idr_pr.idr_plot else [],
+			idr_plot_ppr = if !inputs.true_rep_only && inputs.enable_idr &&
+							inputs.num_rep>1
+							then [idr_ppr.idr_plot] else [],
+			frip_idr_qcs = if inputs.enable_idr && inputs.num_rep>1
+							then idr.frip_qc else [],
+			frip_idr_qcs_pr = if !inputs.true_rep_only && inputs.enable_idr
+							then idr_pr.frip_qc else [],
+			frip_idr_qc_ppr = if !inputs.true_rep_only && inputs.enable_idr &&
+							inputs.num_rep>1
+							then [idr_ppr.frip_qc] else [],
+			frip_overlap_qcs = if inputs.num_rep>1
+							then overlap.frip_qc else [],
+			frip_overlap_qcs_pr = if !inputs.true_rep_only
+							then overlap_pr.frip_qc else [],
+			frip_overlap_qc_ppr = if !inputs.true_rep_only && inputs.num_rep>1
+							then [overlap_ppr.frip_qc] else [],
+			idr_reproducibility_qc =
+					if !inputs.true_rep_only && inputs.enable_idr &&
+					defined(reproducibility_idr.reproducibility_qc)
+					then [reproducibility_idr.reproducibility_qc] else [],
+			overlap_reproducibility_qc = 
+					if !inputs.true_rep_only && 
+					defined(reproducibility_overlap.reproducibility_qc)
+					then [reproducibility_overlap.reproducibility_qc] else [],
 	}
 }
 
-# genomic tasks
+### genomic tasks
+
 task trim_adapter { # trim adapters and merge trimmed fastqs
 	# parameters from workflow
 	Array[Array[File]] fastqs 		# [merge_id][end_id]
@@ -650,7 +669,8 @@ task xcor {
 			${"--nth " + cpu}
 	}
 	output {
-		File plot = glob("*.cc.plot.pdf")[0]
+		File plot_pdf = glob("*.cc.plot.pdf")[0]
+		File plot_png = glob("*.cc.plot.png")[0]
 		File score = glob("*.cc.qc")[0]
 	}
 	runtime {
@@ -671,6 +691,7 @@ task macs2 {
 	Float? pval_thresh	# p.value threshold
 	Int? smooth_win		# size of smoothing window
 	Boolean? make_signal
+	File? blacklist 	# blacklist BED to filter raw peaks
 	# resource
 	Int? mem_mb
 	Int? time_hr
@@ -686,10 +707,14 @@ task macs2 {
 			${"--p-val-thresh "+ pval_thresh} \
 			${"--smooth-win "+ smooth_win} \
 			${if select_first([make_signal,false])
-				then "--make-signal" else ""}
+				then "--make-signal" else ""} \
+			${if defined(blacklist) then
+				"--blacklist "+ blacklist else ""}
 	}
 	output {
-		File npeak = glob("*.narrowPeak.gz")[0]
+		# glob picks *.bfilt.narrowPeak.gz first. so pick second
+		File npeak = glob("*.narrowPeak.gz")[1]
+		File bfilt_npeak = glob("*.bfilt.narrowPeak.gz")[0]
 		# optional (if not make_signal then empty signal files)
 		File sig_pval = glob("*.pval.signal.bigwig")[0]
 		File sig_fc = glob("*.fc.signal.bigwig")[0]
@@ -708,19 +733,28 @@ task idr {
 	File? peak2
 	File? peak_pooled
 	Float? idr_thresh
+	File? blacklist 	# blacklist BED to filter raw peaks
+	Array[File] tas
 
 	command {
 		python $(which encode_idr.py) \
 			${peak1} ${peak2} ${peak_pooled} \
 			${"--prefix " + prefix} \
 			${"--idr-thresh " + idr_thresh} \
-			--idr-rank p.value
+			--idr-rank p.value \
+			${if defined(blacklist) then
+				"--blacklist "+ blacklist else ""} \
+			${if length(tas)>0 then
+				"--ta "+ tas[0] else ""}
 	}
 	output {
-		File idr_peak = glob("*eak.gz")[0]
+		# glob picks *.bfilt.*eak.gz first. so pick second
+		File idr_peak = glob("*eak.gz")[1]
+		File bfilt_idr_peak = glob("*.bfilt.*eak.gz")[0]
 		File idr_plot = glob("*.txt.png")[0]
 		File idr_unthresholded_peak = glob("*.txt.gz")[0]
 		File idr_log = glob("*.log")[0]
+		File frip_qc = glob("*.frip.qc")[0]
 	}
 }
 
@@ -730,14 +764,23 @@ task overlap {
 	File? peak1
 	File? peak2
 	File? peak_pooled
+	File? blacklist 	# blacklist BED to filter raw peaks
+	Array[File] tas
 
 	command {
 		python $(which encode_naive_overlap.py) \
 			${peak1} ${peak2} ${peak_pooled} \
-			${"--prefix " + prefix}
+			${"--prefix " + prefix} \
+			${if defined(blacklist) then
+				"--blacklist "+ blacklist else ""} \
+			${if length(tas)>0 then
+				"--ta "+ tas[0] else ""}
 	}
 	output {
-		File overlap_peak = glob("*eak.gz")[0]
+		# glob picks *.bfilt.*eak.gz first. so pick second
+		File overlap_peak = glob("*eak.gz")[1]
+		File bfilt_overlap_peak = glob("*.bfilt.*eak.gz")[0]
+		File frip_qc = glob("*.frip.qc")[0]
 	}
 }
 
@@ -764,37 +807,70 @@ task reproducibility {
 	}
 }
 
-task blacklist_filter {
-	# parameters from workflow
-	File? peak
-	File? blacklist
+# gather all outputs and generate 
+# - qc.html		: organized final HTML report
+# - qc.json		: all QCs
+task qc_report {
+	# optional metadata
+ 	String? name # name of sample
+	String? desc # description for sample
+	#String? encode_accession_id	# ENCODE accession ID of sample
+	# workflow params
+	Boolean paired_end
+	Float idr_thresh
+	# QCs
+	Array[File] flagstat_qcs
+	Array[File] nodup_flagstat_qcs
+	Array[File] dup_qcs
+	Array[File] pbc_qcs
+	Array[File?] xcor_plots
+	Array[File?] xcor_scores
+	Array[File?] idr_plots
+	Array[File?] idr_plots_pr
+	Array[File?] idr_plot_ppr # actually not an array
+	Array[File?] frip_idr_qcs
+	Array[File?] frip_idr_qcs_pr
+	Array[File?] frip_idr_qc_ppr # actually not an array
+	Array[File?] frip_overlap_qcs
+	Array[File?] frip_overlap_qcs_pr
+	Array[File?] frip_overlap_qc_ppr # actually not an array
+	Array[File?] idr_reproducibility_qc # actually not an array
+	Array[File?] overlap_reproducibility_qc # actually not an array
 
 	command {
-		python $(which encode_blacklist_filter.py) \
-			${peak} \
-			--blacklist ${blacklist}
+		python $(which encode_qc_report.py) \
+			${"--name '" + name + "'"} \
+			${"--desc '" + desc + "'"} \
+			${if paired_end then "--paired-end" else ""} \
+			--idr-thresh ${idr_thresh} \
+			--flagstat-qcs ${sep=' ' flagstat_qcs} \
+			--nodup-flagstat-qcs ${sep=' ' nodup_flagstat_qcs} \
+			--dup-qcs ${sep=' ' dup_qcs} \
+			--pbc-qcs ${sep=' ' pbc_qcs} \
+			--xcor-plots ${sep=' ' xcor_plots} \
+			--xcor-scores ${sep=' ' xcor_scores} \
+			--idr-plots ${sep=' ' idr_plots} \
+			--idr-plots-pr ${sep=' ' idr_plots_pr} \
+			--idr-plot-ppr ${sep=' ' idr_plot_ppr} \
+			--frip-idr-qcs ${sep=' ' frip_idr_qcs} \
+			--frip-idr-qcs-pr ${sep=' ' frip_idr_qcs_pr} \
+			--frip-idr-qc-ppr ${sep=' ' frip_idr_qc_ppr} \
+			--frip-overlap-qcs ${sep=' ' frip_overlap_qcs} \
+			--frip-overlap-qcs-pr ${sep=' ' frip_overlap_qcs_pr} \
+			--frip-overlap-qc-ppr ${sep=' ' frip_overlap_qc_ppr} \
+			--idr-reproducibility-qc ${sep=' ' idr_reproducibility_qc} \
+			--overlap-reproducibility-qc ${sep=' ' overlap_reproducibility_qc} \
+			--out-qc-html qc.html \
+			--out-qc-json qc.json
 	}
 	output {
-		File filtered_peak = glob('*.gz')[0]
+		File report = glob('*qc.html')[0]
+		File qc_json = glob('*qc.json')[0]
+		#File encode_accession_json= glob('*encode_accession.json')[0]
 	}
 }
 
-task frip {
-	# parameters from workflow
-	File? peak
-	File? ta
-
-	command {
-		python $(which encode_frip.py) \
-			${peak} \
-			${ta}
-	}
-	output {
-		File frip_qc = glob('*.frip.qc')[0]
-	}
-}
-
-# workflow system tasks
+### workflow system tasks
 
 # to reduce overhead of provisioning extra nodes
 # we have only one task to
@@ -803,6 +879,8 @@ task frip {
 # 	3) read genome_tsv and get ready to download files 
 # 		On Google Cloud Platform 
 #		files are downloaded from gs://atac-seq-pipeline-genome-data/
+#	4) have output booleans for optional flags in workflow
+#		to simplify if-else statements
 task inputs {
 	# parameters from workflow
 	Array[Array[Array[String]]] fastqs 
@@ -811,6 +889,8 @@ task inputs {
 	Array[String] tas
 	Array[String] peaks
 	File genome_tsv
+	Boolean enable_idr_
+	Boolean true_rep_only_
 
 	command <<<
 		python <<CODE
@@ -849,6 +929,8 @@ task inputs {
 			type=='ta'
 		Boolean is_peak =
 			type=='peak'
+		Boolean enable_idr = enable_idr_
+		Boolean true_rep_only = true_rep_only_
 
 		Array[Array[Int]] pairs = if num_rep>1 then 
 									read_tsv(stdout()) else [[]]
@@ -862,87 +944,3 @@ task inputs {
 	}
 }
  
-# gather all outputs and generate final HTML report and output.json
-task report {
-	# optional metadata
- 	String? name 			# name of sample
-	String? desc 			# description for sample
-	String? accession_id 	# ENCODE accession ID of sample
-	# workflow params
-	Boolean paired_end
-	# fastqs
-	Array[Array[Array[String]]] fastqs
-	# raw bams
-	Array[String] bams
-	# filtered bams
-	Array[String] nodup_bams
-	# tag-aligns
-	Array[String] tas
-	# MACS2 raw peaks
-	Array[String] peaks
-	Array[String] peaks_pr1
-	Array[String] peaks_pr2
-	String? peak_ppr1
-	String? peak_ppr2
-	String? peak_pooled
-	# blacklist filtered MACS2 raw peaks
-	Array[String] bfilt_peaks
-	Array[String] bfilt_peaks_pr1
-	Array[String] bfilt_peaks_pr2
-	String? bfilt_peak_ppr1
-	String? bfilt_peak_ppr2
-	String? bfilt_peak_pooled
-	# adapters
-	Array[Array[Array[String]]] adapters
-	# raw IDR peaks
-	Array[String] idr_peaks
-	Array[String] idr_peaks_pr
-	String? idr_peak_ppr
-	# blacklist filtered IDR peaks
-	Array[String] bfilt_idr_peaks
-	Array[String] bfilt_idr_peaks_pr
-	String? bfilt_idr_peak_ppr
-	# raw overlapping peaks
-	Array[String] overlap_peaks
-	Array[String] overlap_peaks_pr
-	String? overlap_peak_ppr
-	# blacklist filtered overlapping peaks
-	Array[String] bfilt_overlap_peaks
-	Array[String] bfilt_overlap_peaks_pr
-	String? bfilt_overlap_peak_ppr
-	# QCs
-	# qc logs must be parsed so takes in File instead of String
-	Array[File] bowtie2_logs
-	Array[File] flagstat_qcs
-	Array[File] nodup_flagstat_qcs
-	Array[File] dup_qcs
-	Array[File] pbc_qcs
-	Array[File] xcor_plots
-	Array[File] xcor_logs
-	Array[File] frip_qcs
-	Array[File] frip_qcs_pr
-	File? frip_qc_ppr
-	File? idr_reproducibility_qc
-	File? overlap_reproducibility_qc
-
-	command {
-		python $(which encode_report.py) \
-			"--fastqs " + '[${sep=',' fastqs}]' \
-			"--bams " + ${sep=' ' bams} \
-			"--nodup-bams " + ${sep=' ' nodup_bams} \
-			"--tas " + ${sep=' ' tas} \
-			"--peaks " + ${sep=' ' peaks} \
-			"--peaks-pr1 " + ${sep=' ' peaks_pr1} \
-			"--peaks-pr2 " + ${sep=' ' peaks_pr2} \
-			${"--peak-ppr1 " + peak_ppr1} \
-			${"--peak-ppr2 " + peak_ppr2} \
-			${"--peak-pooled " + peak_pooled} \
-			--out-report-html report.html
-			--out-qc-json qc.json
-			--out-files-json files.json
-	}
-	output {
-		File qc_json = glob('qc.json')[0]
-		File report = glob('report.html')[0]
-	}
-}

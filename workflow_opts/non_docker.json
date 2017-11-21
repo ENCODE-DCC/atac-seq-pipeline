@@ -5,6 +5,6 @@
 		"cpu": "1",
 		"sge_pe" : "shm",
 		"sge_queue" : "extended",
-		"slurm_partition" : "akundaje",
+		"slurm_partition" : "akundaje"
 	}
 }

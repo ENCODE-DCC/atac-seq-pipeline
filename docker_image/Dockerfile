@@ -119,6 +119,9 @@ RUN cd idr && python3 setup.py install
 RUN wget https://github.com/lomereiter/sambamba/releases/download/v0.6.5/sambamba_v0.6.5_linux.tar.bz2 && tar -xvjf sambamba_v0.6.5_linux.tar.bz2
 RUN mv sambamba_v0.6.5 sambamba
 
+# Install ghostscript for reporting module (pdf2png)
+RUN apt-get install -y ghostscript
+
 # Get ENCODE atac-seq-pipeline container repository
 # This COPY assumes the build context is the root of the atac-seq-pipeline repo
 # and it gets whatever is checked out plus local modifications

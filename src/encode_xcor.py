@@ -6,7 +6,7 @@
 import sys
 import os
 import argparse
-from encode_common import *
+from encode_common_genomic import *
 
 def parse_arguments():
     parser = argparse.ArgumentParser(prog='ENCODE DCC cross-correlation analysis.',
@@ -37,8 +37,7 @@ def parse_arguments():
 def xcor(ta, speak, nth, out_dir):
     prefix = os.path.join(out_dir,
         os.path.basename(strip_ext_ta(ta)))
-    tmp_peak = '{}.tmp.gz'.format(prefix)
-    xcor_plot = '{}.cc.plot.pdf'.format(prefix)
+    xcor_plot_pdf = '{}.cc.plot.pdf'.format(prefix)
     xcor_score = '{}.cc.qc'.format(prefix)
 
     cmd1 = 'Rscript $(which run_spp.R) -rf -c={} -p={} '
@@ -46,7 +45,7 @@ def xcor(ta, speak, nth, out_dir):
     cmd1 = cmd1.format(
         ta,
         nth,
-        xcor_plot,
+        xcor_plot_pdf,
         xcor_score,
         '-speak={}'.format(speak) if speak>=0 else '')
     run_shell_cmd(cmd1)
@@ -54,7 +53,9 @@ def xcor(ta, speak, nth, out_dir):
     cmd2 = 'sed -r \'s/,[^\\t]+//g\' -i {}'
     cmd2 = cmd2.format(xcor_score)
     run_shell_cmd(cmd2)
-    return xcor_plot, xcor_score
+
+    xcor_plot_png = pdf2png(xcor_plot_pdf, out_dir)
+    return xcor_plot_pdf, xcor_plot_png, xcor_score
 
 def main():
     # read params
@@ -78,10 +79,9 @@ def main():
         ta_subsampled = args.ta
 
     log.info('Cross-correlation analysis...')
-    xcor_plot, xcor_score = xcor(
+    xcor_plot_pdf, xcor_plot_png, xcor_score = xcor(
         ta_subsampled, args.speak, args.nth, args.out_dir)
 
-    # remove temporary/intermediate files
     log.info('Removing temporary files...')
     rm_f(temp_files)
 

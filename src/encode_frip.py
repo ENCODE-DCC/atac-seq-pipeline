@@ -16,8 +16,9 @@ def parse_arguments():
     parser.add_argument('ta', type=str,
                         help='TAGALIGN file.')
     parser.add_argument('--chrsz', type=str,
-                        help='2-col chromosome sizes file.')
-    parser.add_argument('--fraglen', type=int,
+                        help='2-col chromosome sizes file. \
+                        If given, do shifted FRiP (for ChIP-Seq).')
+    parser.add_argument('--fraglen', type=int, default=0,
                         help='Fragment length for TAGALIGN file. \
                         If given, do shifted FRiP (for ChIP-Seq).')
     parser.add_argument('--out-dir', default='', type=str,
@@ -47,7 +48,7 @@ def frip(ta, peak, out_dir):
         tmp2) # peak
     val1 = run_shell_cmd(cmd)
     val2 = get_num_lines(ta)
-    write_txt(frip_qc, float(val1)/float(val2))
+    write_txt(frip_qc, str(float(val1)/float(val2)))
     rm_f([tmp1, tmp2])
     return frip_qc
 
@@ -73,7 +74,7 @@ def frip_shifted(ta, peak, chrsz, fraglen, out_dir):
         tmp2) # peak
     val1 = run_shell_cmd(cmd)
     val2 = get_num_lines(ta)
-    write_txt(frip_qc, float(val1)/float(val2))
+    write_txt(frip_qc, str(float(val1)/float(val2)))
     rm_f(tmp2)
     return frip_qc
 

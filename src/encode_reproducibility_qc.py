@@ -31,36 +31,13 @@ def parse_arguments():
                             'WARNING','CRITICAL','ERROR','CRITICAL'],
                         help='Log level')
     args = parser.parse_args()
-    if len(args.peaks_pr)!=infer_num_rep(len(args.peaks)):
+    if len(args.peaks_pr)!=infer_n_from_nC2(len(args.peaks)):
         raise argparse.ArgumentTypeError(
             'Invalid number of peak files or --peak-pr.')
 
     log.setLevel(args.log_level)
     log.info(sys.argv)
     return args
-
-def infer_num_rep(num_peaks):
-    if num_peaks:
-        num_rep=2
-        while(nCr(num_rep,2)!=num_peaks):
-            num_rep += 1
-            if num_rep > 99:
-                raise argparse.ArgumentTypeError(
-                    'Cannot infer num_rep from num_peaks. '+
-                    'wrong number of peaks in --peaks?')
-        return num_rep
-    else:
-        return 1
-
-def infer_pair_label_from_idx(num_rep, idx):
-    cnt = 0
-    for i in range(num_rep):
-        for j in range(i+1,num_rep):
-            if idx==cnt:
-                return 'rep{}-rep{}'.format(i+1,j+1)
-            cnt += 1
-    raise argparse.ArgumentTypeError(
-        'Cannot infer rep_id from num_rep and idx.')
 
 def main():
     # read params
@@ -76,7 +53,7 @@ def main():
     N = [get_num_lines(peak) for peak in args.peaks_pr]
     if len(args.peaks):
         # multiple replicate case
-        num_rep = infer_num_rep(len(args.peaks))
+        num_rep = infer_n_from_nC2(len(args.peaks))
         num_peaks_tr = [get_num_lines(peak) for peak in args.peaks]
 
         Nt = max(num_peaks_tr)
@@ -109,7 +86,7 @@ def main():
 
         conservative_set = 'rep1-pr'
         conservative_peak = make_hard_link(
-                args.peak_pr, args.out_dir)
+                args.peaks_pr[0], args.out_dir)
         N_conservative = N[0]
         optimal_set = conservative_set
         optimal_peak = conservative_peak

@@ -255,6 +255,8 @@ Optional parameters and flags are marked with `?`.
 
 11) Resources
 
+    **RESOURCES DEFINED IN `input.json` ARE PER TASK**. For example, if you have FASTQs for 2 replicates (2 tasks) and set `cpu` for `bowtie2` task as 4 then total number of cpu cores to map FASTQs is 2 x 4 = 8.
+
     CPU (`cpu`), memory (`mem_mb`) settings are used for submitting jobs to cluster engines (SGE and SLURM) and Cloud platforms (Google Cloud Platform, AWS, ...). VM instance type on cloud platforms will be automatically chosen according to each task's `cpu` and `mem_mb`. Number of cores for tasks without `cpu` parameter is fixed at 1.
 
     * `"atac.trim_adapter.cpu"`? : Number of cores for `trim_adapter` (default: 4).
@@ -286,6 +288,11 @@ Optional parameters and flags are marked with `?`.
     * `"atac.bam2ta.time_hr"`? : Walltime for `bam2ta` (default: 6).
     * `"atac.xcor.time_hr"`? : Walltime for `xcor` (default: 6).
     * `"atac.macs2_time_hr"`? : Walltime for `macs2` (default: 24).
+
+12) QC report HTML/JSON
+
+    * `"atac.qc_report.name"`? : Name of sample.
+    * `"atac.qc_report.desc"`? : Description for sample.
 
 # Dependency installation
 

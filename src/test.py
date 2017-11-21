@@ -4,7 +4,8 @@ import random
 import time
 import shlex
 import os, sys
-from encode_dcc_common import *
+from encode_common import *
+from encode_common_genomic import *
 
 # def func(i1,i2):
 #     # print('* started target {} {}'.format(i1,i2))

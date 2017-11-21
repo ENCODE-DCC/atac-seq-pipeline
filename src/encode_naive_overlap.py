@@ -6,8 +6,9 @@
 import sys
 import os
 import argparse
-import math
 from encode_common import *
+from encode_blacklist_filter import blacklist_filter
+from encode_frip import frip
 
 def parse_arguments():
     parser = argparse.ArgumentParser(prog='ENCODE DCC Naive overlap.',
@@ -24,6 +25,15 @@ def parse_arguments():
                         help='bedtools intersect -nonamecheck. \
                         use this if you get bedtools intersect \
                         naming convenction warnings/errors).')
+    parser.add_argument('--blacklist', type=str, required=True,
+                        help='Blacklist BED file.')
+    parser.add_argument('--ta', type=str,
+                        help='TAGALIGN file for FRiP.')
+    parser.add_argument('--chrsz', type=str,
+                        help='2-col chromosome sizes file.')
+    parser.add_argument('--fraglen', type=int, default=0,
+                        help='Fragment length for TAGALIGN file. \
+                        If given, do shifted FRiP (for ChIP-Seq).')
     parser.add_argument('--out-dir', default='', type=str,
                         help='Output directory.')
     parser.add_argument('--log-level', default='INFO', 
@@ -81,6 +91,13 @@ def naive_overlap(basename_prefix, peak1, peak2, peak_pooled,
     rm_f([tmp1,tmp2,tmp_pooled])
     return overlap_peak
 
+def make_empty_frip_qc(peak, out_dir):
+    prefix = os.path.join(out_dir,
+        os.path.basename(strip_ext(peak)))
+    frip_qc = '{}.frip.qc'.format(prefix)
+    touch(frip_qc)
+    return frip_qc
+
 def main():
     # read params
     args = parse_arguments()
@@ -96,6 +113,22 @@ def main():
     log.info('Checking if output is empty...') # bedtools issue    
     assert_file_not_empty(overlap_peak)
     
+    log.info('Blacklist-filtering peaks...')
+    bfilt_overlap_peak = blacklist_filter(
+            overlap_peak, args.blacklist, False, args.out_dir)
+
+    if args.ta: # if TAG-ALIGN is given
+        if args.fraglen: # chip-seq
+            log.info('Shifted FRiP with fragment length...')
+            frip_qc = frip_shifted( bfilt_overlap_peak, args.ta, 
+                args.chrsz, args.fraglen, args.out_dir)
+        else: # atac-seq
+            log.info('FRiP without fragment length...')
+            frip_qc = frip( bfilt_overlap_peak, args.ta, 
+                args.out_dir)
+    else: # create empty frip_qc
+        frip_qc = make_empty_frip_qc(bfilt_overlap_peak, args.out_dir)
+
     log.info('List all files in output directory...')
     ls_l(args.out_dir)
 

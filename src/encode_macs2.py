@@ -7,6 +7,7 @@ import sys
 import os
 import argparse
 from encode_common import *
+from encode_blacklist_filter import blacklist_filter
 
 def parse_arguments():
     parser = argparse.ArgumentParser(prog='ENCODE DCC MACS2 callpeak',
@@ -26,6 +27,8 @@ def parse_arguments():
                         help='Capping number of peaks by taking top N peaks.')
     parser.add_argument('--make-signal', action="store_true",
                         help='Generate signal tracks for P-Value and fold enrichment.')
+    parser.add_argument('--blacklist', type=str, required=True,
+                        help='Blacklist BED file.')
     parser.add_argument('--out-dir', default='', type=str,
                         help='Output directory.')
     parser.add_argument('--log-level', default='INFO', 
@@ -177,6 +180,10 @@ def main():
         args.ta, args.chrsz, args.gensz, args.pval_thresh,
         args.smooth_win, args.cap_num_peak, args.make_signal, 
         args.out_dir)
+
+    log.info('Blacklist-filtering peaks...')
+    bfilt_npeak = blacklist_filter(
+            npeak, args.blacklist, False, args.out_dir)
 
     log.info('List all files in output directory...')
     ls_l(args.out_dir)
