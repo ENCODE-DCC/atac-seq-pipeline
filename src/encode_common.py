@@ -12,6 +12,7 @@ import logging
 import subprocess
 import math
 import signal
+import time
 
 logging.basicConfig(
     format='[%(asctime)s %(levelname)s] %(message)s',
@@ -164,6 +165,9 @@ def make_hard_link(f, out_dir): # hard-link 'f' to 'out_dir'/'f'
     rm_f(linked)
     os.link(f, linked)
     return linked
+
+def now():
+    return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 
 def pdf2png(pdf, out_dir):
     prefix = os.path.join(out_dir,

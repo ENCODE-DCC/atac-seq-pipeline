@@ -1,4 +1,5 @@
 {
+	"atac.pipeline_type" : "atac",
 	"atac.genome_tsv" : "gs://atac-seq-pipeline-genome-data/mm10_google.tsv",
 	"atac.adapters" : [],
 	"atac.fastqs" : [

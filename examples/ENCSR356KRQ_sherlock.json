@@ -1,4 +1,5 @@
 {
+	"atac.pipeline_type" : "atac",
 	"atac.genome_tsv" : "/oak/stanford/groups/akundaje/leepc12/code/atac-seq-pipeline/genome/hg38_sherlock.tsv",
 	"atac.adapters" : [],
 	"atac.fastqs" : [

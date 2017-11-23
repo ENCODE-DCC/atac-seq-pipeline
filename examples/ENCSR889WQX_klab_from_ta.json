@@ -1,4 +1,5 @@
 {
+	"atac.pipeline_type" : "atac",
 	"atac.genome_tsv" : "/users/leepc12/code/atac-seq-pipeline/genome/mm10_klab.tsv",
 	"atac.adapters" : [],
 	"atac.fastqs" : [],

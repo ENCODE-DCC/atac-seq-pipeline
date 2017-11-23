@@ -591,6 +591,7 @@ def main():
         html += html_heading(1, args.name)
     if args.desc:
         html += html_paragraph(args.desc)
+    html += html_paragraph('Report generated at {}'.format(now()))
 
     log.info('Parsing QC logs...')
     if args.flagstat_qcs:

@@ -2,6 +2,9 @@
 # Author: Jin Lee (leepc12@gmail.com)
 
 workflow atac {
+	# mandatory pipeline type 
+	String pipeline_type  		# atac or dnase
+
 	# mandatory input files
 	Array[Array[Array[String]]] fastqs 
 								# [rep_id][merge_id][end_id]
@@ -27,6 +30,8 @@ workflow atac {
 	Boolean paired_end 		# endedness of sample
 
 	# optional but important
+	Boolean? align_only 	# disable downstream analysis (peak calling, ...)
+							# after alignment
 	Boolean? true_rep_only 	# disable all analyses for pseudo replicates
 							# naive-overlap and IDR will also be disabled
 	Int? multimapping 		# multimapping reads
@@ -50,6 +55,7 @@ workflow atac {
 	# 3) read from genome_tsv
 	call inputs {
 		input :
+			pipeline_type = pipeline_type,
 			fastqs = fastqs,
 			bams = bams,
 			nodup_bams = nodup_bams,
@@ -57,6 +63,7 @@ workflow atac {
 			peaks = peaks,
 			genome_tsv = genome_tsv,
 			enable_idr_ = select_first([enable_idr,false]),
+			align_only_ = select_first([align_only_,false]),
 			true_rep_only_ = select_first([true_rep_only,false]),
 	}
 
@@ -67,8 +74,7 @@ workflow atac {
 			call trim_adapter {
 				input :
 					fastqs = fastqs[i],
-					adapters = if length(adapters)>0 
-							then adapters[i] else [],
+					adapters = if length(adapters)>0 then adapters[i] else [],
 					paired_end = paired_end,
 			}
 			# align trimmed/merged fastqs with bowtie2
@@ -84,8 +90,7 @@ workflow atac {
 			# filter/dedup bam
 			call filter {
 				input :
-					bam = if defined(bowtie2.bam) 
-							then bowtie2.bam else bams[i],
+					bam = if defined(bowtie2.bam) then bowtie2.bam else bams[i],
 					paired_end = paired_end,
 					multimapping = multimapping,
 			}
@@ -96,22 +101,21 @@ workflow atac {
 				input :
 					bam = if defined(filter.nodup_bam) 
 							then filter.nodup_bam else nodup_bams[i],
+					disable_tn5_shift = inputs.disable_tn5_shift,
 					paired_end = paired_end,
 			}
 		}
-		if ( inputs.is_before_peak ) {
+		if ( !inputs.align_only && inputs.is_before_peak ) {
 			# subsample tagalign (non-mito) and cross-correlation analysis
 			call xcor {
 				input :
-					ta = if defined(bam2ta.ta)
-							then bam2ta.ta else tas[i],
+					ta = if defined(bam2ta.ta) then bam2ta.ta else tas[i],
 					paired_end = paired_end,
 			}
 			# call peaks on tagalign
 			call macs2 {
 				input :
-					ta = if defined(bam2ta.ta) 
-							then bam2ta.ta else tas[i],
+					ta = if defined(bam2ta.ta) then bam2ta.ta else tas[i],
 					gensz = inputs.gensz,
 					chrsz = inputs.chrsz,
 					cap_num_peak = cap_num_peak,
@@ -124,43 +128,40 @@ workflow atac {
 					time_hr = macs2_time_hr,
 			}
 		}
-		if ( !inputs.true_rep_only && inputs.is_before_peak ) {
+		if ( !inputs.align_only && inputs.is_before_peak 
+			&& !inputs.true_rep_only ) {
 			# make two self pseudo replicates per true replicate
 			call spr {
 				input :
-					ta = if defined(bam2ta.ta) 
-							then bam2ta.ta else tas[i],
+					ta = if defined(bam2ta.ta) then bam2ta.ta else tas[i],
 					paired_end = paired_end,
 			}
 		}
 	}
 
-	if ( inputs.num_rep>1 ) {
-		if ( inputs.is_before_peak ) {
-			# pool tagaligns from true replicates
-			call pool_ta {
-				input :
-					tas = if defined(bam2ta.ta[0])
-							then bam2ta.ta else tas,
-			}
-			# call peaks on pooled replicate
-			call macs2 as macs2_pooled {
-				input :
-					ta = pool_ta.ta_pooled,
-					gensz = inputs.gensz,
-					chrsz = inputs.chrsz,
-					cap_num_peak = cap_num_peak,
-					pval_thresh = pval_thresh,
-					smooth_win = smooth_win,
-					make_signal = true,
-					blacklist = inputs.blacklist,
-					mem_mb = macs2_mem_mb,
-					disks = macs2_disks,
-					time_hr = macs2_time_hr,
-			}
+	if ( !inputs.align_only && inputs.is_before_peak && inputs.num_rep>1 ) {
+		# pool tagaligns from true replicates
+		call pool_ta {
+			input :
+				tas = if defined(bam2ta.ta[0]) then bam2ta.ta else tas,
+		}
+		# call peaks on pooled replicate
+		call macs2 as macs2_pooled {
+			input :
+				ta = pool_ta.ta_pooled,
+				gensz = inputs.gensz,
+				chrsz = inputs.chrsz,
+				cap_num_peak = cap_num_peak,
+				pval_thresh = pval_thresh,
+				smooth_win = smooth_win,
+				make_signal = true,
+				blacklist = inputs.blacklist,
+				mem_mb = macs2_mem_mb,
+				disks = macs2_disks,
+				time_hr = macs2_time_hr,
 		}
 	}
-	if ( !inputs.true_rep_only ) {		
+	if ( !inputs.align_only && !inputs.true_rep_only ) {		
 		scatter(i in range(inputs.num_rep)) {
 			if ( inputs.is_before_peak ) {
 				# call peaks on 1st pseudo replicated tagalign 
@@ -192,205 +193,175 @@ workflow atac {
 				}
 			}
 		}
-		if ( inputs.num_rep>1 ) {
-			if ( inputs.is_before_peak ) {
-				# pool tagaligns from pseudo replicates
-				call pool_ta as pool_ta_pr1 {
-					input :
-						tas = spr.ta_pr1,
-				}
-				call pool_ta as pool_ta_pr2 {
-					input :
-						tas = spr.ta_pr2,
-				}
-				# call peaks on 1st pooled pseudo replicates
-				call macs2 as macs2_ppr1 {
-					input :
-						ta = pool_ta_pr1.ta_pooled,
-						gensz = inputs.gensz,
-						chrsz = inputs.chrsz,
-						cap_num_peak = cap_num_peak,
-						pval_thresh = pval_thresh,
-						smooth_win = smooth_win,
-						blacklist = inputs.blacklist,
-						mem_mb = macs2_mem_mb,
-						disks = macs2_disks,
-						time_hr = macs2_time_hr,
-				}
-				# call peaks on 2nd pooled pseudo replicates
-				call macs2 as macs2_ppr2 {
-					input :
-						ta = pool_ta_pr2.ta_pooled,
-						gensz = inputs.gensz,
-						chrsz = inputs.chrsz,
-						cap_num_peak = cap_num_peak,
-						pval_thresh = pval_thresh,
-						smooth_win = smooth_win,
-						blacklist = inputs.blacklist,
-						mem_mb = macs2_mem_mb,
-						disks = macs2_disks,
-						time_hr = macs2_time_hr,
-				}
+		if ( inputs.is_before_peak && inputs.num_rep>1 ) {
+			# pool tagaligns from pseudo replicates
+			call pool_ta as pool_ta_pr1 {
+				input :
+					tas = spr.ta_pr1,
+			}
+			call pool_ta as pool_ta_pr2 {
+				input :
+					tas = spr.ta_pr2,
+			}
+			# call peaks on 1st pooled pseudo replicates
+			call macs2 as macs2_ppr1 {
+				input :
+					ta = pool_ta_pr1.ta_pooled,
+					gensz = inputs.gensz,
+					chrsz = inputs.chrsz,
+					cap_num_peak = cap_num_peak,
+					pval_thresh = pval_thresh,
+					smooth_win = smooth_win,
+					blacklist = inputs.blacklist,
+					mem_mb = macs2_mem_mb,
+					disks = macs2_disks,
+					time_hr = macs2_time_hr,
+			}
+			# call peaks on 2nd pooled pseudo replicates
+			call macs2 as macs2_ppr2 {
+				input :
+					ta = pool_ta_pr2.ta_pooled,
+					gensz = inputs.gensz,
+					chrsz = inputs.chrsz,
+					cap_num_peak = cap_num_peak,
+					pval_thresh = pval_thresh,
+					smooth_win = smooth_win,
+					blacklist = inputs.blacklist,
+					mem_mb = macs2_mem_mb,
+					disks = macs2_disks,
+					time_hr = macs2_time_hr,
 			}
 		}
 	}
 
 	# Naive overlap on every pair of true replicates
-	if ( inputs.num_rep>1 ) {
+	if ( !inputs.align_only && inputs.num_rep>1 ) {
 		scatter( pair in inputs.pairs ) {
 			call overlap {
 				input :
 					prefix = "rep"+(pair[0]+1)+
 							"-rep"+(pair[1]+1),
-					peak1 = if inputs.is_before_peak
-						then macs2.npeak[(pair[0])] 
-						else peaks[(pair[0])],
-					peak2 = if inputs.is_before_peak
-						then macs2.npeak[(pair[1])]
-						else peaks[(pair[1])],
-					peak_pooled = if inputs.is_before_peak
-						then macs2_pooled.npeak
-						else peak_pooled,
+					peak1 = if inputs.is_before_peak then macs2.npeak[(pair[0])] 
+							else peaks[(pair[0])],
+					peak2 = if inputs.is_before_peak then macs2.npeak[(pair[1])]
+							else peaks[(pair[1])],
+					peak_pooled = if inputs.is_before_peak then macs2_pooled.npeak
+							else peak_pooled,
 					blacklist = inputs.blacklist,
-					tas = if inputs.is_before_peak
-						then [pool_ta.ta_pooled]
-						else [],					
+					tas = if inputs.is_before_peak then [pool_ta.ta_pooled]
+							else [],					
 			}
 		}
 	}
-	if ( !inputs.true_rep_only ) {
+	if ( !inputs.align_only && !inputs.true_rep_only ) {
 		# Naive overlap on pseduo replicates
 		scatter( i in range(inputs.num_rep) ) {
 			call overlap as overlap_pr {
 				input : 
 					prefix = "rep"+(i+1)+"-pr",
-					peak1 = if inputs.is_before_peak
-						then macs2_pr1.npeak[i]
-						else peaks_pr1[i],
-					peak2 = if inputs.is_before_peak
-						then macs2_pr2.npeak[i]
-						else peaks_pr2[i],
-					peak_pooled = if inputs.is_before_peak
-						then macs2.npeak[i]
-						else peak_pooled,
+					peak1 = if inputs.is_before_peak then macs2_pr1.npeak[i]
+							else peaks_pr1[i],
+					peak2 = if inputs.is_before_peak then macs2_pr2.npeak[i]
+							else peaks_pr2[i],
+					peak_pooled = if inputs.is_before_peak then macs2.npeak[i]
+							else peak_pooled,
 					blacklist = inputs.blacklist,
-					tas = if inputs.is_before_ta
-						then [bam2ta.ta[i]]
-						else if inputs.is_before_peak
-						then [tas[i]]
-						else [],					
+					tas = if inputs.is_before_ta then [bam2ta.ta[i]]
+							else if inputs.is_before_peak then [tas[i]]
+							else [],					
 			}
 		}
 	}
-	if ( !inputs.true_rep_only && inputs.num_rep>1 ) {
+	if ( !inputs.align_only && !inputs.true_rep_only && inputs.num_rep>1 ) {
 		# Naive overlap on pooled pseudo replicates
 		call overlap as overlap_ppr {
 			input : 
 				prefix = "ppr",
-				peak1 = if inputs.is_before_peak
-					then macs2_ppr1.npeak
-					else peak_ppr1,
-				peak2 = if inputs.is_before_peak
-					then macs2_ppr2.npeak
-					else peak_ppr2,
-				peak_pooled = if inputs.is_before_peak
-					then macs2_pooled.npeak
-					else peak_pooled,
+				peak1 = if inputs.is_before_peak then macs2_ppr1.npeak
+						else peak_ppr1,
+				peak2 = if inputs.is_before_peak then macs2_ppr2.npeak
+						else peak_ppr2,
+				peak_pooled = if inputs.is_before_peak then macs2_pooled.npeak
+						else peak_pooled,
 				blacklist = inputs.blacklist,
-				tas = if inputs.is_before_peak
-					then [pool_ta.ta_pooled]
-					else [],				
+				tas = if inputs.is_before_peak then [pool_ta.ta_pooled]
+						else [],				
 		}
 	}
-	if ( !inputs.true_rep_only ) {
+	if ( !inputs.align_only && !inputs.true_rep_only ) {
 		# reproducibility QC for overlapping peaks
 		call reproducibility as reproducibility_overlap {
 			input :
 				prefix = 'overlap',
-				peaks = if inputs.num_rep>1
-					then overlap.bfilt_overlap_peak else [],
+				peaks = if inputs.num_rep>1	then overlap.bfilt_overlap_peak else [],
 				peaks_pr = overlap_pr.bfilt_overlap_peak,
 				peak_ppr = overlap_ppr.bfilt_overlap_peak,
 		}
 	}
 
-	if ( inputs.enable_idr && inputs.num_rep>1 ) {
+	if ( !inputs.align_only && inputs.num_rep>1 && inputs.enable_idr ) {
+		# IDR on every pair of true replicates
 		scatter( pair in inputs.pairs ) {
-			# IDR on every pair of true replicates
 			call idr {
 				input : 
 					prefix = "rep"+(pair[0]+1)
 							+"-rep"+(pair[1]+1),
-					peak1 = if inputs.is_before_peak
-						then macs2.npeak[(pair[0])]
-						else peaks[(pair[0])],
-					peak2 = if inputs.is_before_peak
-						then macs2.npeak[(pair[1])]
-						else peaks[(pair[1])],
-					peak_pooled = if inputs.is_before_peak
-						then macs2_pooled.npeak 
-						else peak_pooled,
+					peak1 = if inputs.is_before_peak then macs2.npeak[(pair[0])]
+							else peaks[(pair[0])],
+					peak2 = if inputs.is_before_peak then macs2.npeak[(pair[1])]
+							else peaks[(pair[1])],
+					peak_pooled = if inputs.is_before_peak then macs2_pooled.npeak 
+							else peak_pooled,
 					idr_thresh = select_first([idr_thresh,0.1]),
 					blacklist = inputs.blacklist,
-					tas = if inputs.is_before_peak
-						then [pool_ta.ta_pooled]
-						else [],
+					tas = if inputs.is_before_peak then [pool_ta.ta_pooled]
+							else [],
 			}
 		}
 	}
-	if ( inputs.enable_idr && !inputs.true_rep_only ) {
+	if ( !inputs.align_only && !inputs.true_rep_only && inputs.enable_idr ) {
 		# IDR on pseduo replicates
 		scatter( i in range(inputs.num_rep) ) {
 			call idr as idr_pr {
 				input : 
 					prefix = "rep"+(i+1)+"-pr",
-					peak1 = if inputs.is_before_peak
-						then macs2_pr1.npeak[i]
-						else peaks_pr1[i],
-					peak2 = if inputs.is_before_peak
-						then macs2_pr2.npeak[i]
-						else peaks_pr2[i],
-					peak_pooled = if inputs.is_before_peak
-						then macs2.npeak[i]
-						else peak_pooled,
+					peak1 = if inputs.is_before_peak then macs2_pr1.npeak[i]
+							else peaks_pr1[i],
+					peak2 = if inputs.is_before_peak then macs2_pr2.npeak[i]
+							else peaks_pr2[i],
+					peak_pooled = if inputs.is_before_peak then macs2.npeak[i]
+							else peak_pooled,
 					idr_thresh = select_first([idr_thresh,0.1]),
 					blacklist = inputs.blacklist,
-					tas = if inputs.is_before_ta
-						then [bam2ta.ta[i]]
-						else if inputs.is_before_peak
-						then [tas[i]]
-						else [],
+					tas = if inputs.is_before_ta then [bam2ta.ta[i]]
+							else if inputs.is_before_peak then [tas[i]]
+							else [],
 			}
 		}
 	}
-	if ( inputs.enable_idr && !inputs.true_rep_only &&
-		 inputs.num_rep>1 ) {
+	if ( !inputs.align_only && !inputs.true_rep_only && inputs.num_rep>1 && inputs.enable_idr ) {
+		# IDR on pooled pseduo replicates
 		call idr as idr_ppr {
 			input : 
 				prefix = "ppr",
-				peak1 = if inputs.is_before_peak
-					then macs2_ppr1.npeak
-					else peak_ppr1,
-				peak2 = if inputs.is_before_peak
-					then macs2_ppr2.npeak
-					else peak_ppr2,
-				peak_pooled = if inputs.is_before_peak
-					then macs2_pooled.npeak
-					else peak_pooled,
+				peak1 = if inputs.is_before_peak then macs2_ppr1.npeak
+						else peak_ppr1,
+				peak2 = if inputs.is_before_peak then macs2_ppr2.npeak
+						else peak_ppr2,
+				peak_pooled = if inputs.is_before_peak then macs2_pooled.npeak
+						else peak_pooled,
 				idr_thresh = select_first([idr_thresh,0.1]),
 				blacklist = inputs.blacklist,
-				tas = if inputs.is_before_peak
-					then [pool_ta.ta_pooled]
-					else [],
+				tas = if inputs.is_before_peak then [pool_ta.ta_pooled]	
+						else [],
 		}
 	}
-	if ( inputs.enable_idr && !inputs.true_rep_only ) {
+	if ( !inputs.align_only && !inputs.true_rep_only && inputs.enable_idr ) {
 		# reproducibility QC for IDR peaks
 		call reproducibility as reproducibility_idr {
 			input :
 				prefix = 'idr',
-				peaks = if inputs.num_rep>1
-					then idr.bfilt_idr_peak else [],
+				peaks = if inputs.num_rep>1	then idr.bfilt_idr_peak else [],
 				peaks_pr = idr_pr.bfilt_idr_peak,
 				peak_ppr = idr_ppr.bfilt_idr_peak,
 		}
@@ -400,48 +371,44 @@ workflow atac {
 		input :
 			paired_end = paired_end,
 			idr_thresh = select_first([idr_thresh,0.1]),
-			flagstat_qcs = if inputs.is_before_bam
-							then bowtie2.flagstat_qc
-							else [],
-			nodup_flagstat_qcs = if inputs.is_before_nodup_bam
-							then filter.flagstat_qc							
-							else [],
+			flagstat_qcs = if inputs.is_before_bam 
+							then bowtie2.flagstat_qc else [],
+			nodup_flagstat_qcs = if inputs.is_before_nodup_bam 
+							then filter.flagstat_qc	else [],
 			dup_qcs = if inputs.is_before_nodup_bam
 							then filter.dup_qc else [],
 			pbc_qcs = if inputs.is_before_nodup_bam
 							then filter_pbc_qc else [],
-			xcor_plots = if inputs.is_before_peak
+			xcor_plots = if !inputs.align_only && inputs.is_before_peak
 							then xcor.plot_png else [],
-			xcor_scores = if inputs.is_before_peak
+			xcor_scores = if !inputs.align_only && inputs.is_before_peak
 							then xcor.score else [],
-			idr_plots = if inputs.enable_idr && inputs.num_rep>1
+			idr_plots = if !inputs.align_only && inputs.num_rep>1 && inputs.enable_idr 
 							then idr.idr_plot else [],
-			idr_plots_pr = if !inputs.true_rep_only && inputs.enable_idr
+			idr_plots_pr = if !inputs.align_only && !inputs.true_rep_only && inputs.enable_idr
 							then idr_pr.idr_plot else [],
-			idr_plot_ppr = if !inputs.true_rep_only && inputs.enable_idr &&
-							inputs.num_rep>1
+			idr_plot_ppr = if !inputs.align_only && !inputs.true_rep_only && inputs.num_rep>1 && inputs.enable_idr
 							then [idr_ppr.idr_plot] else [],
-			frip_idr_qcs = if inputs.enable_idr && inputs.num_rep>1
+			frip_idr_qcs = if !inputs.align_only && inputs.num_rep>1 && inputs.enable_idr
 							then idr.frip_qc else [],
-			frip_idr_qcs_pr = if !inputs.true_rep_only && inputs.enable_idr
+			frip_idr_qcs_pr = if !inputs.align_only && !inputs.true_rep_only && inputs.enable_idr
 							then idr_pr.frip_qc else [],
-			frip_idr_qc_ppr = if !inputs.true_rep_only && inputs.enable_idr &&
-							inputs.num_rep>1
+			frip_idr_qc_ppr = if !inputs.align_only && !inputs.true_rep_only && inputs.num_rep>1 && inputs.enable_idr
 							then [idr_ppr.frip_qc] else [],
-			frip_overlap_qcs = if inputs.num_rep>1
+			frip_overlap_qcs = if !inputs.align_only && inputs.num_rep>1
 							then overlap.frip_qc else [],
-			frip_overlap_qcs_pr = if !inputs.true_rep_only
+			frip_overlap_qcs_pr = if !inputs.align_only && !inputs.true_rep_only
 							then overlap_pr.frip_qc else [],
-			frip_overlap_qc_ppr = if !inputs.true_rep_only && inputs.num_rep>1
+			frip_overlap_qc_ppr = if !inputs.align_only && !inputs.true_rep_only && inputs.num_rep>1
 							then [overlap_ppr.frip_qc] else [],
 			idr_reproducibility_qc =
-					if !inputs.true_rep_only && inputs.enable_idr &&
-					defined(reproducibility_idr.reproducibility_qc)
-					then [reproducibility_idr.reproducibility_qc] else [],
+					if !inputs.align_only && !inputs.true_rep_only && inputs.enable_idr &&
+						defined(reproducibility_idr.reproducibility_qc)
+							then [reproducibility_idr.reproducibility_qc] else [],
 			overlap_reproducibility_qc = 
-					if !inputs.true_rep_only && 
-					defined(reproducibility_overlap.reproducibility_qc)
-					then [reproducibility_overlap.reproducibility_qc] else [],
+					if !inputs.align_only && !inputs.true_rep_only && 
+						defined(reproducibility_overlap.reproducibility_qc)
+							then [reproducibility_overlap.reproducibility_qc] else [],
 	}
 }
 
@@ -486,7 +453,7 @@ task trim_adapter { # trim adapters and merge trimmed fastqs
 						glob("merge_fastqs_R?_*.fastq.gz")
 	}
 	runtime {
-		cpu : select_first([cpu,4])
+		cpu : select_first([cpu,2])
 		memory : "${select_first([mem_mb,'10000'])} MB"
 		time : select_first([time_hr,24])
 		disks : select_first([disks,"local-disk 100 HDD"])
@@ -583,8 +550,8 @@ task bam2ta {
 	# parameters from workflow
 	File bam
 	Boolean paired_end
+	Boolean disable_tn5_shift 	# no tn5 shifting (it's for dnase-seq)
 	# optional
-	Boolean? disable_tn5_shift 	# no tn5 shifting (it's for dnase-seq)
 	String? regex_grep_v_ta 	# Perl-style regular expression pattern 
                         		# to remove matching reads from TAGALIGN
 	Int? subsample 				# number of reads to subsample TAGALIGN
@@ -599,7 +566,7 @@ task bam2ta {
 		python $(which encode_bam2ta.py) \
 			${bam} \
 			${if paired_end then "--paired-end" else ""} \
-			${if select_first([disable_tn5_shift,false])
+			${if disable_tn5_shift
 				then "--disable-tn5-shift" else ""} \
 			${"--regex-grep-v-ta " +"'"+regex_grep_v_ta+"'"} \
 			${"--subsample " + subsample} \
@@ -734,7 +701,7 @@ task idr {
 	File? peak_pooled
 	Float? idr_thresh
 	File? blacklist 	# blacklist BED to filter raw peaks
-	Array[File] tas
+	Array[File?] tas
 
 	command {
 		python $(which encode_idr.py) \
@@ -765,7 +732,7 @@ task overlap {
 	File? peak2
 	File? peak_pooled
 	File? blacklist 	# blacklist BED to filter raw peaks
-	Array[File] tas
+	Array[File?] tas
 
 	command {
 		python $(which encode_naive_overlap.py) \
@@ -883,6 +850,7 @@ task qc_report {
 #		to simplify if-else statements
 task inputs {
 	# parameters from workflow
+	String pipeline_type
 	Array[Array[Array[String]]] fastqs 
 	Array[String] bams
 	Array[String] nodup_bams
@@ -890,6 +858,7 @@ task inputs {
 	Array[String] peaks
 	File genome_tsv
 	Boolean enable_idr_
+	Boolean align_only_
 	Boolean true_rep_only_
 
 	command <<<
@@ -916,28 +885,25 @@ task inputs {
 		Boolean is_before_bam =
 			type=='fastq'
 		Boolean is_before_nodup_bam =
-			type=='fastq' || 
-			type=='bam'
+			type=='fastq' || type=='bam'
 		Boolean is_before_ta =
-			type=='fastq' || 
-			type=='bam' ||
-			type=='nodup_bam'
+			type=='fastq' || type=='bam' ||	type=='nodup_bam'
 		Boolean is_before_peak = 
-			type=='fastq' || 
-			type=='bam' ||
-			type=='nodup_bam' || 
+			type=='fastq' || type=='bam' ||	type=='nodup_bam' || 
 			type=='ta'
 		Boolean is_peak =
 			type=='peak'
 		Boolean enable_idr = enable_idr_
+		Boolean align_only = align_only_
 		Boolean true_rep_only = true_rep_only_
+		Boolean disable_tn5_shift = pipeline_type!='atac'
 
 		Array[Array[Int]] pairs = if num_rep>1 then 
 									read_tsv(stdout()) else [[]]
 
 		String ref_fa = read_map(genome_tsv)['ref_fa']
 		String bowtie2_idx_tar = read_map(genome_tsv)['bowtie2_idx_tar']
-		String bwa_idx_tar = read_map(genome_tsv)['bwa_idx_tar']
+		#String bwa_idx_tar = read_map(genome_tsv)['bwa_idx_tar']
 		String blacklist = read_map(genome_tsv)['blacklist']
 		String chrsz = read_map(genome_tsv)['chrsz']
 		String gensz = read_map(genome_tsv)['gensz']

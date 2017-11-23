@@ -197,16 +197,17 @@ Optional parameters and flags are marked with `?`.
 
 3) Pipeline settings
 
+    Pipeline type (ATAC-Seq or DNase-Seq) : The only difference between two types is TN5 shifting.
+
+    * `"atac.pipeline_type` : `atac` for ATAC-Seq. `dnase` for DNase-Seq. 
+
     Input data endedness.
 
     * `"atac.paired_end"` : Set it as `true` if input data are paired end, otherwise `false`.
 
-    Pipeline type (ATAC-Seq or DNase-Seq) : The only difference between two types is TN5 shifting.
-
-    * `"atac.bam2ta.disable_tn5_shift"`? : Set it as `true` for DNase-Seq or `false` for ATAC-Seq (default).
-
     Other important settings.
 
+    * `"atac.align_only`? : Disable all downstream analysis after mapping.
     * `"atac.multimapping"`? : Multimapping reads.
     * `"atac.true_rep_only"`? : Set it as `true` to disable all analyses (including IDR, naive-overlap and reproducibility QC) related to pseudo replicates. This flag suppresses `"atac.enable_idr"`.
 
@@ -230,7 +231,6 @@ Optional parameters and flags are marked with `?`.
 
 7) BAM-2-TAGALIGN settings
 
-    * `"atac.bam2ta.disable_tn5_shift"`? : No TN5 shifting. This is for DNase-Seq.
     * `"atac.bam2ta.regex_grep_v_ta"`? : Perl-style regular expression pattern to remove matching reads from TAGALIGN.
     * `"atac.bam2ta.subsample"`? : Number of reads to subsample TAGALIGN. Subsampled TAGALIGN will be used for all downstream analysis (MACS2, IDR, naive-overlap).
 
@@ -259,7 +259,7 @@ Optional parameters and flags are marked with `?`.
 
     CPU (`cpu`), memory (`mem_mb`) settings are used for submitting jobs to cluster engines (SGE and SLURM) and Cloud platforms (Google Cloud Platform, AWS, ...). VM instance type on cloud platforms will be automatically chosen according to each task's `cpu` and `mem_mb`. Number of cores for tasks without `cpu` parameter is fixed at 1.
 
-    * `"atac.trim_adapter.cpu"`? : Number of cores for `trim_adapter` (default: 4).
+    * `"atac.trim_adapter.cpu"`? : Number of cores for `trim_adapter` (default: 2).
     * `"atac.bowtie2.cpu"`? : Number of cores for `bowtie2` (default: 4).
     * `"atac.filter.cpu"`? : Number of cores for `filter` (default: 2).
     * `"atac.bam2ta.cpu"`? : Number of cores for `bam2ta` (default: 2).

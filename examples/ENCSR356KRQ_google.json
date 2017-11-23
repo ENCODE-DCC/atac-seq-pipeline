@@ -1,4 +1,5 @@
 {
+	"atac.pipeline_type" : "atac",
 	"atac.genome_tsv" : "gs://atac-seq-pipeline-genome-data/hg38_google.tsv",
 	"atac.adapters" : [],
 	"atac.fastqs" : [
@@ -37,7 +38,7 @@
 
 	"atac.trim_adapter.cpu" : 2,
 
-	"atac.bowtie2.cpu" : 4,
+	"atac.bowtie2.cpu" : 8,
 	"atac.bowtie2.mem_mb" : 16000,
 
 	"atac.filter.cpu" : 2,
