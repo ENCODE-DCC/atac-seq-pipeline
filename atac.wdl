@@ -401,11 +401,6 @@ workflow atac {
 					defined(reproducibility_overlap.reproducibility_qc)
 						then [reproducibility_overlap.reproducibility_qc] else [],
 	}
-
-	output {
-		qc_report.report
-		qc_report.qc_json
-	}
 }
 
 ### genomic tasks
@@ -847,6 +842,11 @@ task qc_report {
 			--overlap-reproducibility-qc ${sep=' ' overlap_reproducibility_qc} \
 			--out-qc-html qc.html \
 			--out-qc-json qc.json
+	}
+	output {
+		File report = glob('*qc.html')[0]
+		File qc_json = glob('*qc.json')[0]
+		#File encode_accession_json= glob('*encode_accession.json')[0]
 	}
 }
 

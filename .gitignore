@@ -109,3 +109,4 @@ cromwell-workflow-logs/
 
 #test.wdl
 #test_google.wdl
+output_*.json
