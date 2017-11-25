@@ -40,12 +40,12 @@ Choose `[BACKEND_CONF]` and `[WORKFLOW_OPT]` according to your platform and pres
         ...
     }
     ```
-6) Set `default_runtime_attributes.preemptible` as `"0"` to disable preemptible instances. Pipeline defaults to use [preemptible instances](https://cloud.google.com/compute/docs/instances/preemptible) with 10 retries. **Disabling it will cost you significantly more** but you can get your samples processed much faster and stabler. Preemptible instance is disabled in `atac.wdl` for `bowtie2` task since it can take longer than the limit (24 hours) of preemptible instances.
+6) Set `default_runtime_attributes.preemptible` as `"0"` to disable preemptible instances. Pipeline defaults to use [preemptible instances](https://cloud.google.com/compute/docs/instances/preemptible) with 1 retry. If all retrial fails then the instance will be upgraded to a regular one. **Disabling it will cost you significantly more** but you can get your samples processed much faster and stabler. Preemptible instance is disabled in `atac.wdl` for `bowtie2` task since it can take longer than the limit (24 hours) of preemptible instances.
     ```
     {
       "default_runtime_attributes" : {
         ...
-        "preemptible": "10",
+        "preemptible": "1",
         ...
     }
     ```

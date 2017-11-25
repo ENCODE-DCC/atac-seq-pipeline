@@ -7,6 +7,7 @@ import sys
 import os
 import argparse
 from encode_common_genomic import *
+from encode_common_log_parser import parse_xcor_score
 
 def parse_arguments():
     parser = argparse.ArgumentParser(prog='ENCODE DCC cross-correlation analysis.',
@@ -39,6 +40,7 @@ def xcor(ta, speak, nth, out_dir):
         os.path.basename(strip_ext_ta(ta)))
     xcor_plot_pdf = '{}.cc.plot.pdf'.format(prefix)
     xcor_score = '{}.cc.qc'.format(prefix)
+    fraglen_txt = '{}.cc.fraglen.txt'.format(prefix)
 
     cmd1 = 'Rscript $(which run_spp.R) -rf -c={} -p={} '
     cmd1 += '-filtchr=chrM -savp={} -out={} {}'
@@ -54,8 +56,14 @@ def xcor(ta, speak, nth, out_dir):
     cmd2 = cmd2.format(xcor_score)
     run_shell_cmd(cmd2)
 
+    # parse xcor_score and write fraglen (3rd column) to file
+    cmd3 = 'echo {} > {}'.format(
+        parse_xcor_score(xcor_score)['est_frag_len'],
+        fraglen_txt)
+    run_shell_cmd(cmd3)
+
     xcor_plot_png = pdf2png(xcor_plot_pdf, out_dir)
-    return xcor_plot_pdf, xcor_plot_png, xcor_score
+    return xcor_plot_pdf, xcor_plot_png, xcor_score, fraglen_txt
 
 def main():
     # read params
@@ -79,7 +87,7 @@ def main():
         ta_subsampled = args.ta
 
     log.info('Cross-correlation analysis...')
-    xcor_plot_pdf, xcor_plot_png, xcor_score = xcor(
+    xcor_plot_pdf, xcor_plot_png, xcor_score, fraglen_txt = xcor(
         ta_subsampled, args.speak, args.nth, args.out_dir)
 
     log.info('Removing temporary files...')

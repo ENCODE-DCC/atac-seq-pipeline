@@ -9,7 +9,7 @@ import argparse
 import math
 from encode_common import *
 from encode_blacklist_filter import blacklist_filter
-from encode_frip import frip
+from encode_frip import frip, frip_shifted
 
 def parse_arguments():
     parser = argparse.ArgumentParser(prog='ENCODE DCC IDR.',
@@ -22,6 +22,9 @@ def parse_arguments():
                         help='Pooled peak file.')
     parser.add_argument('--prefix', default='idr', type=str,
                         help='Prefix basename for output IDR peak.')
+    parser.add_argument('--peak-type', type=str, required=True,
+                        choices=['narrowPeak','regionPeak','broadPeak','gappedPeak'],
+                        help='Peak file type.')
     parser.add_argument('--idr-thresh', default=0.1, type=float,
                         help='IDR threshold.')
     parser.add_argument('--idr-rank', default='p.value', type=str,
@@ -43,6 +46,8 @@ def parse_arguments():
                             'WARNING','CRITICAL','ERROR','CRITICAL'],
                         help='Log level')
     args = parser.parse_args()
+    if args.blacklist.endswith('/dev/null'):
+        args.blacklist = ''
 
     log.setLevel(args.log_level)
     log.info(sys.argv)
@@ -59,17 +64,16 @@ def get_npeak_col_by_rank(rank):
         raise Exception('Invalid score ranking method')
 
 # only for narrowPeak (or regionPeak) type 
-def idr(basename_prefix, peak1, peak2, peak_pooled, 
+def idr(basename_prefix, peak1, peak2, peak_pooled, peak_type,
     thresh, rank, out_dir):
     prefix = os.path.join(out_dir, basename_prefix)
     prefix += '.idr{}'.format(thresh)
-    peak_ext = get_ext(peak1)
-    idr_peak = '{}.{}.gz'.format(prefix,peak_ext)
+    idr_peak = '{}.{}.gz'.format(prefix, peak_type)
     idr_out_gz = '{}.unthresholded-peaks.txt.gz'.format(prefix)
     idr_plot = '{}.unthresholded-peaks.txt.png'.format(prefix)
     idr_stdout = '{}.log'.format(prefix)
     # temporary
-    idr_12col_bed = '{}.12-col.bed.gz'.format(peak_ext)
+    idr_12col_bed = '{}.12-col.bed.gz'.format(peak_type)
     idr_out = '{}.unthresholded-peaks.txt'.format(prefix)
 
     cmd1 = 'idr --samples {} {} --peak-list {} --input-file-type narrowPeak '
@@ -116,13 +120,6 @@ def idr(basename_prefix, peak1, peak2, peak_pooled,
     rm_f('{}.*.noalternatesummitpeaks.png'.format(prefix))
     return idr_peak, idr_plot, idr_out_gz, idr_stdout
 
-def make_empty_frip_qc(peak, out_dir):
-    prefix = os.path.join(out_dir,
-        os.path.basename(strip_ext(peak)))
-    frip_qc = '{}.frip.qc'.format(prefix)
-    touch(frip_qc)
-    return frip_qc
-
 def main():
     # read params
     args = parse_arguments()
@@ -133,27 +130,29 @@ def main():
     log.info('Do IDR...')
     idr_peak, idr_plot, idr_out_gz, idr_stdout = idr(
         args.prefix, 
-        args.peak1, args.peak2, args.peak_pooled, 
+        args.peak1, args.peak2, args.peak_pooled, args.peak_type,
         args.idr_thresh, args.idr_rank, args.out_dir)
 
     log.info('Checking if output is empty...') # bedtools issue
     assert_file_not_empty(idr_peak)
 
-    log.info('Blacklist-filtering peaks...')
-    bfilt_idr_peak = blacklist_filter(
-            idr_peak, args.blacklist, False, args.out_dir)
+    if args.blacklist:
+        log.info('Blacklist-filtering peaks...')
+        bfilt_idr_peak = blacklist_filter(
+                idr_peak, args.blacklist, False, args.out_dir)
+    else:        
+        bfilt_idr_peak = idr_peak
 
     if args.ta: # if TAG-ALIGN is given
         if args.fraglen: # chip-seq
             log.info('Shifted FRiP with fragment length...')
-            frip_qc = frip_shifted( bfilt_idr_peak, args.ta, 
+            frip_qc = frip_shifted( args.ta, bfilt_idr_peak,
                 args.chrsz, args.fraglen, args.out_dir)
         else: # atac-seq
             log.info('FRiP without fragment length...')
-            frip_qc = frip( bfilt_idr_peak, args.ta, 
-                args.out_dir)
-    else: # create empty frip_qc
-        frip_qc = make_empty_frip_qc(bfilt_idr_peak, args.out_dir)
+            frip_qc = frip( args.ta, bfilt_idr_peak, args.out_dir)
+    else:
+        frip_qc = '/dev/null'
 
     log.info('List all files in output directory...')
     ls_l(args.out_dir)

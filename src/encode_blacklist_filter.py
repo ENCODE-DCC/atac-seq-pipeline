@@ -25,6 +25,8 @@ def parse_arguments():
                             'WARNING','CRITICAL','ERROR','CRITICAL'],
                         help='Log level')
     args = parser.parse_args()
+    if args.blacklist.endswith('/dev/null'):
+        args.blacklist = ''
 
     log.setLevel(args.log_level)
     log.info(sys.argv)

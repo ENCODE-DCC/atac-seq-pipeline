@@ -1,12 +1,14 @@
 workflow test {
 	File? tmp
+	Boolean? okay
 	call t0 {}
-	call t1 { input: tmp = tmp, t = t0.out }
+	call t1 { input: tmp = tmp, t = t0.out, okay = okay }
 }
 
 task t1 {
 	File? tmp
 	File? t
+	Boolean? okay
 	#Boolean paired_end = true
 	Boolean paired_end = false
 	command {
@@ -16,6 +18,7 @@ task t1 {
 	output {
 		Array[File] a = glob("R?_*.fastq.gz")
 		Array[File] b = if paired_end then glob("R?_*.fastq.gz") else []
+		Boolean maybe = select_first([okay,false])
 	}
 }
 

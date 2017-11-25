@@ -8,7 +8,7 @@ import os
 import argparse
 from encode_common import *
 from encode_blacklist_filter import blacklist_filter
-from encode_frip import frip
+from encode_frip import frip, frip_shifted
 
 def parse_arguments():
     parser = argparse.ArgumentParser(prog='ENCODE DCC Naive overlap.',
@@ -21,6 +21,9 @@ def parse_arguments():
                         help='Pooled peak.')
     parser.add_argument('--prefix', default='overlap', type=str,
                         help='Prefix basename for output overlap peak.')
+    parser.add_argument('--peak-type', type=str, required=True,
+                        choices=['narrowPeak','regionPeak','broadPeak','gappedPeak'],
+                        help='Peak file type.')
     parser.add_argument('--nonamecheck', action='store_true',
                         help='bedtools intersect -nonamecheck. \
                         use this if you get bedtools intersect \
@@ -41,18 +44,19 @@ def parse_arguments():
                             'WARNING','CRITICAL','ERROR','CRITICAL'],
                         help='Log level')
     args = parser.parse_args()
+    if args.blacklist.endswith('/dev/null'):
+        args.blacklist = ''
 
     log.setLevel(args.log_level)
     log.info(sys.argv)
     return args
 
 # only for narrowPeak (or regionPeak) type 
-def naive_overlap(basename_prefix, peak1, peak2, peak_pooled, 
+def naive_overlap(basename_prefix, peak1, peak2, peak_pooled, peak_type, 
     nonamecheck, out_dir):
     prefix = os.path.join(out_dir, basename_prefix)
     prefix += '.overlap'
-    peak_ext = get_ext(peak1)
-    overlap_peak = '{}.{}.gz'.format(prefix,peak_ext)
+    overlap_peak = '{}.{}.gz'.format(prefix, peak_type)
 
     nonamecheck_param = '-nonamecheck' if nonamecheck else  ''
     # narrowpeak, regionpeak only
@@ -91,13 +95,6 @@ def naive_overlap(basename_prefix, peak1, peak2, peak_pooled,
     rm_f([tmp1,tmp2,tmp_pooled])
     return overlap_peak
 
-def make_empty_frip_qc(peak, out_dir):
-    prefix = os.path.join(out_dir,
-        os.path.basename(strip_ext(peak)))
-    frip_qc = '{}.frip.qc'.format(prefix)
-    touch(frip_qc)
-    return frip_qc
-
 def main():
     # read params
     args = parse_arguments()
@@ -108,26 +105,28 @@ def main():
     log.info('Do naive overlap...')
     overlap_peak = naive_overlap(
         args.prefix, args.peak1, args.peak2, args.peak_pooled, 
-        args.nonamecheck, args.out_dir)
+        args.peak_type, args.nonamecheck, args.out_dir)
 
     log.info('Checking if output is empty...') # bedtools issue    
     assert_file_not_empty(overlap_peak)
-    
-    log.info('Blacklist-filtering peaks...')
-    bfilt_overlap_peak = blacklist_filter(
-            overlap_peak, args.blacklist, False, args.out_dir)
+
+    if args.blacklist:    
+        log.info('Blacklist-filtering peaks...')
+        bfilt_overlap_peak = blacklist_filter(
+                overlap_peak, args.blacklist, False, args.out_dir)
+    else:
+        bfilt_overlap_peak = overlap_peak        
 
     if args.ta: # if TAG-ALIGN is given
         if args.fraglen: # chip-seq
             log.info('Shifted FRiP with fragment length...')
-            frip_qc = frip_shifted( bfilt_overlap_peak, args.ta, 
+            frip_qc = frip_shifted( args.ta, bfilt_overlap_peak,
                 args.chrsz, args.fraglen, args.out_dir)
         else: # atac-seq
             log.info('FRiP without fragment length...')
-            frip_qc = frip( bfilt_overlap_peak, args.ta, 
-                args.out_dir)
-    else: # create empty frip_qc
-        frip_qc = make_empty_frip_qc(bfilt_overlap_peak, args.out_dir)
+            frip_qc = frip( args.ta, bfilt_overlap_peak, args.out_dir)
+    else:
+        frip_qc = '/dev/null'
 
     log.info('List all files in output directory...')
     ls_l(args.out_dir)

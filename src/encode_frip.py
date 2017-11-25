@@ -88,8 +88,7 @@ def main():
         frip_qc = frip_shifted(args.ta, args.peak, 
             args.chrsz, args.fraglen, args.out_dir)
     else:
-        frip_qc = frip(args.ta, args.peak, 
-            args.out_dir)
+        frip_qc = frip(args.ta, args.peak, args.out_dir)
 
     log.info('List all files in output directory...')
     ls_l(args.out_dir)

@@ -8,6 +8,7 @@ import os
 import argparse
 from encode_common import *
 from encode_blacklist_filter import blacklist_filter
+from encode_frip import frip
 
 def parse_arguments():
     parser = argparse.ArgumentParser(prog='ENCODE DCC MACS2 callpeak',
@@ -36,6 +37,8 @@ def parse_arguments():
                             'WARNING','CRITICAL','ERROR','CRITICAL'],
                         help='Log level')
     args = parser.parse_args()
+    if args.blacklist.endswith('/dev/null'):
+        args.blacklist = ''
 
     log.setLevel(args.log_level)
     log.info(sys.argv)
@@ -157,8 +160,8 @@ def macs2(ta, chrsz, gensz, pval_thresh, smooth_win, cap_num_peak,
         run_shell_cmd(cmd10)
     else:
         # make empty signal bigwigs (WDL wants it in output{})
-        touch(fc_bigwig)
-        touch(pval_bigwig)
+        fc_bigwig = '/dev/null'
+        pval_bigwig = '/dev/null'
 
     # remove temporary files
     temp_files.extend([fc_bedgraph,fc_bedgraph_srt,
@@ -181,9 +184,18 @@ def main():
         args.smooth_win, args.cap_num_peak, args.make_signal, 
         args.out_dir)
 
-    log.info('Blacklist-filtering peaks...')
-    bfilt_npeak = blacklist_filter(
-            npeak, args.blacklist, False, args.out_dir)
+    if args.blacklist:
+        log.info('Blacklist-filtering peaks...')
+        bfilt_npeak = blacklist_filter(
+                npeak, args.blacklist, False, args.out_dir)
+    else:
+        bfilt_npeak = npeak
+
+    if args.ta: # if TAG-ALIGN is given
+        log.info('FRiP without fragment length...')
+        frip_qc = frip( args.ta, bfilt_npeak, args.out_dir)
+    else:
+        frip_qc = '/dev/null'
 
     log.info('List all files in output directory...')
     ls_l(args.out_dir)

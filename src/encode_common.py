@@ -160,11 +160,15 @@ def make_hard_link(f, out_dir): # hard-link 'f' to 'out_dir'/'f'
     # UNIX only
     if os.path.dirname(f)==os.path.dirname(out_dir):
         raise Exception('Trying to hard-link itself. {}'.format(f))
-    linked = os.path.join(out_dir,
-        os.path.basename(f))
+    linked = os.path.join(out_dir, os.path.basename(f))
     rm_f(linked)
     os.link(f, linked)
     return linked
+
+def make_empty_file(filename, out_dir):
+    f = os.path.join(out_dir, os.path.basename(filename))
+    touch(f)
+    return f
 
 def now():
     return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
