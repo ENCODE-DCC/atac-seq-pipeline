@@ -151,7 +151,7 @@ def main():
     if args.frip_qcs or args.frip_qcs_pr1 or args.frip_qcs_pr2 \
         or args.frip_qc_pooled or args.frip_qc_ppr1 or args.frip_qc_ppr2:
         html += html_heading(2, 'Enrichment QC (Fraction of reads in {} raw peaks)'.format(
-            args.peak_caller.upper())
+            args.peak_caller.upper()))
         json_objs_frip = []
         row_header_frip = []
         true_rep_labels = ['rep{}'.format(i+1) for i, qc in enumerate(args.frip_qcs)]            
