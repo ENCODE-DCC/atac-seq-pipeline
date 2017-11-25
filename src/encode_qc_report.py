@@ -154,11 +154,11 @@ def main():
             args.peak_caller.upper()))
         json_objs_frip = []
         row_header_frip = []
-        true_rep_labels = ['rep{}'.format(i+1) for i, qc in enumerate(args.frip_qcs)]            
+        true_rep_labels = ['rep{}'.format(i+1) for i, qc in enumerate(args.frip_qcs)]
         rep_pr1_labels = ['rep{}-pr1'.format(i+1) for i, qc in enumerate(args.frip_qcs_pr1)]
         rep_pr2_labels = ['rep{}-pr2'.format(i+1) for i, qc in enumerate(args.frip_qcs_pr2)]
 
-        if args.frip_qcs:            
+        if args.frip_qcs:
             json_objs = [parse_frip_qc(qc) for qc in args.frip_qcs]
             json_objs_frip.extend(json_objs)
             row_header_frip.extend(true_rep_labels)
@@ -166,8 +166,8 @@ def main():
             json_objs = [parse_frip_qc(qc) for qc in args.frip_qcs_pr1]
             json_objs_frip.extend(json_objs)
             row_header_frip.extend(rep_pr1_labels)
-        if args.frip_qcs_pr1:
-            json_objs = [parse_frip_qc(qc) for qc in args.frip_qcs_pr1]
+        if args.frip_qcs_pr2:
+            json_objs = [parse_frip_qc(qc) for qc in args.frip_qcs_pr2]
             json_objs_frip.extend(json_objs)
             row_header_frip.extend(rep_pr2_labels)
         if args.frip_qc_pooled:

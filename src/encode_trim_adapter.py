@@ -7,7 +7,6 @@ import sys
 import os
 import argparse
 import multiprocessing
-import copy
 from detect_adapter import detect_most_likely_adapter
 from encode_common import *
 

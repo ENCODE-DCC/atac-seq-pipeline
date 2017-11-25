@@ -17,7 +17,6 @@ fi
 
 # pipeline specific params
 CONDA_ENV="atac-seq-pipeline"
-# CONDA_ENV="bds_atac"
 BUILD_BWT2_IDX=1
 BUILD_BWA_IDX=0
 
@@ -120,6 +119,8 @@ touch ${TSV}
 
 if [[ $BLACKLIST != "" ]]; then
   echo -e "blacklist\t${DEST_DIR}/$(basename $BLACKLIST)" >> ${TSV};
+else
+  echo -e "blacklist\t/dev/null" >> ${TSV};
 fi
 echo -e "chrsz\t${DEST_DIR}/$(basename $CHRSZ)" >> ${TSV}
 echo -e "gensz\t$GENSZ" >> ${TSV}

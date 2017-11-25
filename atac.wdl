@@ -4,7 +4,7 @@
 workflow atac {
 	# mandatory pipeline type 
 	String pipeline_type  		# atac or dnase
-	String peak_caller = "macs2"
+	String? peak_caller 		# force to use peak_caller if specifed. macs2 or spp
 
 	# mandatory input files
 	Array[Array[Array[String]]] fastqs 
@@ -57,7 +57,7 @@ workflow atac {
 	call inputs {
 		input :
 			pipeline_type = pipeline_type,
-			peak_caller = peak_caller,
+			peak_caller_ = select_first([peak_caller,'']),
 			fastqs = fastqs,
 			bams = bams,
 			nodup_bams = nodup_bams,
@@ -348,7 +348,7 @@ workflow atac {
 
 	call qc_report { input :
 		paired_end = paired_end,
-		peak_caller = peak_caller,
+		peak_caller = inputs.peak_caller,
 		idr_thresh = select_first([idr_thresh,0.1]),
 		flagstat_qcs = if inputs.is_before_bam 
 						then bowtie2.flagstat_qc else [],
@@ -488,6 +488,94 @@ task bowtie2 {
 	}
 }
 
+task xcor {
+	# parameters from workflow
+	File ta
+	Boolean paired_end
+	# optional
+	Int? subsample 		# number of reads to subsample TAGALIGN
+						# this will be used for xcor only
+						# will not affect any downstream analysis
+	# resource
+	Int? cpu
+	Int? mem_mb	
+	Int? time_hr
+	String? disks
+
+	command {
+		python $(which encode_xcor.py) \
+			${ta} \
+			${if paired_end then "--paired-end" else ""} \
+			${"--subsample " + select_first([subsample,25000000])} \
+			--speak=0 \
+			${"--nth " + cpu}
+	}
+	output {
+		File plot_pdf = glob("*.cc.plot.pdf")[0]
+		File plot_png = glob("*.cc.plot.png")[0]
+		File score = glob("*.cc.qc")[0]
+		Int fraglen = read_int(glob("*.cc.fraglen.txt")[0])
+	}
+	runtime {
+		cpu : select_first([cpu,2])
+		memory : "${select_first([mem_mb,'10000'])} MB"
+		time : select_first([time_hr,6])
+		disks : select_first([disks,"local-disk 100 HDD"])
+	}
+}
+
+task macs2 {
+	# parameters from workflow
+	File? ta
+	String gensz		# Genome size (sum of entries in 2nd column of 
+                        # chr. sizes file, or hs for human, ms for mouse)
+	File chrsz			# 2-col chromosome sizes file
+	Int? cap_num_peak	# cap number of raw peaks called from MACS2
+	Float? pval_thresh	# p.value threshold
+	Int? smooth_win		# size of smoothing window
+	Boolean? make_signal
+	Array[File] blacklist 	# blacklist BED to filter raw peaks
+	# fixed var
+	String peak_type = "narrowPeak"
+	# resource
+	Int? mem_mb
+	Int? time_hr
+	String? disks
+	# temporary boolean (cromwell bug when if select_first is in output)
+	Boolean make_signal_ = select_first([make_signal,false])
+
+	command {
+		python $(which encode_macs2_atac.py) \
+			${ta} \
+			${"--gensz "+ gensz} \
+			${"--chrsz " + chrsz} \
+			${"--cap-num-peak " + select_first([cap_num_peak,300000])} \
+			${"--p-val-thresh "+ pval_thresh} \
+			${"--smooth-win "+ smooth_win} \
+			${if make_signal_ then "--make-signal" else ""} \
+			${if length(blacklist)>0 then "--blacklist "+ blacklist[0] else ""}
+
+		# ugly part to deal with optional outputs
+		${if make_signal_ then "" 
+			else "touch null.pval.signal.bigwig null.fc.signal.bigwig"}
+		${if length(blacklist)>0 then "" 
+			else "touch null.bfilt."+peak_type+".gz"}
+		touch null
+	}
+	output {
+		File npeak = glob("*[!.][!b][!f][!i][!l][!t]."+peak_type+".gz")[0]
+		File bfilt_npeak = if length(blacklist)>0 then glob("*.bfilt."+peak_type+".gz")[0] else npeak
+		File sig_pval = if make_signal_ then glob("*.pval.signal.bigwig")[0] else glob("null")[0]
+		File sig_fc = if make_signal_ then glob("*.fc.signal.bigwig")[0] else glob("null")[0]
+		File frip_qc = glob("*.frip.qc")[0]
+	}
+	runtime {
+		memory : "${select_first([mem_mb,'16000'])} MB"
+		time : select_first([time_hr,24])
+		disks : select_first([disks,"local-disk 100 HDD"])
+	}
+}
+
 task filter {
 	# parameters from workflow
 	File bam
@@ -500,12 +588,13 @@ task filter {
 	Boolean? no_dup_removal 	# no dupe reads removal when filtering BAM
 								# dup.qc and pbc.qc will be emptry files
 								# and nodup_bam in the output is 
-								# filtered bam with dupes
-	# resource
+	# resource					# filtered bam with dupes	
 	Int? cpu
 	Int? mem_mb
 	Int? time_hr
 	String? disks
+	# temporary boolean (cromwell bug when if select_first is in output)
+	Boolean no_dup_removal_ = select_first([no_dup_removal,false])
 
 	command {
 		python $(which encode_filter.py) \
@@ -514,17 +603,17 @@ task filter {
 			${"--multimapping " + multimapping} \
 			${"--dup-marker " + dup_marker} \
 			${"--mapq-thresh " + mapq_thresh} \
-			${if select_first([no_dup_removal,false]) then "--no-dup-removal" else ""} \
+			${if no_dup_removal_ then "--no-dup-removal" else ""} \
 			${"--nth " + cpu}
+
+		# ugly part to deal with optional outputs
+		${if no_dup_removal_ then "touch null.pbc.qc null.dup.qc" else ""}
 		touch null
 	}
 	output {
 		File nodup_bam = glob("*.bam")[0]
 		File nodup_bai = glob("*.bai")[0]
 		File flagstat_qc = glob("*.flagstat.qc")[0]
-		# optional (if no_dup_removal then empty qc files)
-		# need temporary boolean in output (cromwell if bug in output)
-		Boolean no_dup_removal_ = select_first([no_dup_removal,false])
 		File dup_qc = if no_dup_removal_ then glob("null")[0] else glob("*.dup.qc")[0]
 		File pbc_qc = if no_dup_removal_ then glob("null")[0] else glob("*.pbc.qc")[0]
 	}
@@ -602,89 +691,6 @@ task pool_ta {
 	}
 }
 
-task xcor {
-	# parameters from workflow
-	File ta
-	Boolean paired_end
-	# optional
-	Int? subsample 		# number of reads to subsample TAGALIGN
-						# this will be used for xcor only
-						# will not affect any downstream analysis
-	# resource
-	Int? cpu
-	Int? mem_mb	
-	Int? time_hr
-	String? disks
-
-	command {
-		python $(which encode_xcor.py) \
-			${ta} \
-			${if paired_end then "--paired-end" else ""} \
-			${"--subsample " + select_first([subsample,25000000])} \
-			--speak=0 \
-			${"--nth " + cpu}
-	}
-	output {
-		File plot_pdf = glob("*.cc.plot.pdf")[0]
-		File plot_png = glob("*.cc.plot.png")[0]
-		File score = glob("*.cc.qc")[0]
-		Int fraglen = read_int(glob("*.cc.fraglen.txt")[0])
-	}
-	runtime {
-		cpu : select_first([cpu,2])
-		memory : "${select_first([mem_mb,'10000'])} MB"
-		time : select_first([time_hr,6])
-		disks : select_first([disks,"local-disk 100 HDD"])
-	}
-}
-
-task macs2 {
-	# parameters from workflow
-	File? ta
-	String gensz		# Genome size (sum of entries in 2nd column of 
-                        # chr. sizes file, or hs for human, ms for mouse)
-	File chrsz			# 2-col chromosome sizes file
-	Int? cap_num_peak	# cap number of raw peaks called from MACS2
-	Float? pval_thresh	# p.value threshold
-	Int? smooth_win		# size of smoothing window
-	Boolean? make_signal
-	Array[File] blacklist 	# blacklist BED to filter raw peaks
-	# fixed var
-	String peak_type = "narrowPeak"
-	# resource
-	Int? mem_mb
-	Int? time_hr
-	String? disks
-
-	command {
-		python $(which encode_macs2_atac.py) \
-			${ta} \
-			${"--gensz "+ gensz} \
-			${"--chrsz " + chrsz} \
-			${"--cap-num-peak " + select_first([cap_num_peak,300000])} \
-			${"--p-val-thresh "+ pval_thresh} \
-			${"--smooth-win "+ smooth_win} \
-			${if select_first([make_signal,false]) then "--make-signal" else ""} \
-			${if length(blacklist)>0 then "--blacklist "+ blacklist[0] else ""}
-		touch null
-	}
-	output {
-		File npeak = glob("*[!.][!b][!f][!i][!l][!t]."+peak_type+".gz")[0]
-		File bfilt_npeak = if length(blacklist)>0 then 
-						glob("*.bfilt."+peak_type+".gz")[0] else npeak
-		# need temporary boolean in output (cromwell if bug in output)
-		Boolean make_signal_ = select_first([make_signal,false])
-		File sig_pval = if make_signal_ then glob("*.pval.signal.bigwig")[0] else glob("null")[0]
-		File sig_fc = if make_signal_ then glob("*.fc.signal.bigwig")[0] else glob("null")[0]
-		File frip_qc = glob("*.frip.qc")[0]
-	}
-	runtime {
-		memory : "${select_first([mem_mb,'16000'])} MB"
-		time : select_first([time_hr,24])
-		disks : select_first([disks,"local-disk 100 HDD"])
-	}
-}
-
 task idr {
 	# parameters from workflow
 	String? prefix 		# prefix for IDR output file
@@ -693,7 +699,10 @@ task idr {
 	File? peak_pooled
 	Float? idr_thresh
 	Array[File] blacklist 	# blacklist BED to filter raw peaks
+	# parameters to compute FRiP
 	Array[File?] ta		# to calculate FRiP
+	Int? fraglen 		# fragment length from xcor
+	File? chrsz			# 2-col chromosome sizes file
 	String peak_type
 
 	command {
@@ -703,8 +712,16 @@ task idr {
 			${"--idr-thresh " + idr_thresh} \
 			${"--peak-type " + peak_type} \
 			--idr-rank p.value \
+			${"--fraglen " + fraglen} \
+			${"--chrsz " + chrsz} \
 			${if length(blacklist)>0 then "--blacklist "+ blacklist[0] else ""} \
 			${if length(ta)>0 then "--ta "+ ta[0] else ""}
+
+		# ugly part to deal with optional outputs
+		${if length(blacklist)>0 then "" 
+			else "touch null.bfilt."+peak_type+".gz"}
+		${if length(ta)>0 then "" 
+			else "touch null.frip.qc"}
 		touch null
 	}
 	output {
@@ -714,9 +731,6 @@ task idr {
 		File idr_plot = glob("*.txt.png")[0]
 		File idr_unthresholded_peak = glob("*.txt.gz")[0]
 		File idr_log = glob("*.log")[0]
-		# need temporary boolean in output (cromwell if bug in output)
-		#Boolean has_ta = length(ta)>0
-		#File frip_qc = if has_ta then glob("*.frip.qc")[0] else glob("null")[0]
 		File frip_qc = if length(ta)>0 then glob("*.frip.qc")[0] else glob("null")[0]
 	}
 }
@@ -728,7 +742,10 @@ task overlap {
 	File? peak2
 	File? peak_pooled
 	Array[File] blacklist 	# blacklist BED to filter raw peaks
-	Array[File?] ta 		# to calculate FRiP	
+	# parameters to compute FRiP
+	Array[File?] ta		# to calculate FRiP
+	Int? fraglen 		# fragment length from xcor
+	File? chrsz			# 2-col chromosome sizes file
 	String peak_type
 
 	command {
@@ -736,8 +753,16 @@ task overlap {
 			${peak1} ${peak2} ${peak_pooled} \
 			${"--prefix " + prefix} \
 			${"--peak-type " + peak_type} \
+			${"--fraglen " + fraglen} \
+			${"--chrsz " + chrsz} \
 			${if length(blacklist)>0 then "--blacklist "+ blacklist[0] else ""} \
 			${if length(ta)>0 then "--ta "+ ta[0] else ""}
+
+		# ugly part to deal with optional outputs
+		${if length(blacklist)>0 then "" 
+			else "touch null.bfilt."+peak_type+".gz"}
+		${if length(ta)>0 then "" 
+			else "touch null.frip.qc"}
 		touch null
 	}
 	output {
@@ -745,8 +770,6 @@ task overlap {
 		File bfilt_overlap_peak = if length(blacklist)>0 then 
 							glob("*.bfilt."+peak_type+".gz")[0] else overlap_peak
 		# need temporary boolean in output (cromwell if bug in output)
-		#Boolean has_ta = length(ta)>0
-		#File frip_qc = if has_ta then glob("*.frip.qc")[0] else glob("null")[0]
 		File frip_qc = if length(ta)>0 then glob("*.frip.qc")[0] else glob("null")[0]
 	}
 }
@@ -831,7 +854,7 @@ task qc_report {
 			--frip-qcs-pr2 ${sep=' ' frip_qcs_pr2} \
 			--frip-qc-pooled ${sep=' ' frip_qc_pooled} \
 			--frip-qc-ppr1 ${sep=' ' frip_qc_ppr1} \
-			--frip-qc-ppr1 ${sep=' ' frip_qc_ppr2} \
+			--frip-qc-ppr2 ${sep=' ' frip_qc_ppr2} \
 			--frip-idr-qcs ${sep=' ' frip_idr_qcs} \
 			--frip-idr-qcs-pr ${sep=' ' frip_idr_qcs_pr} \
 			--frip-idr-qc-ppr ${sep=' ' frip_idr_qc_ppr} \
@@ -859,12 +882,14 @@ task qc_report {
 # 	3) read genome_tsv and get ready to download files 
 # 		On Google Cloud Platform 
 #		files are downloaded from gs://atac-seq-pipeline-genome-data/
+# 		ENCODE DCC chip-seq and atac-seq pipelines 
+#		share the genome data same location
 #	4) have output booleans for optional flags in workflow
 #		to simplify if-else statements
 task inputs {
 	# parameters from workflow
 	String pipeline_type
-	String peak_caller
+	String peak_caller_
 	Array[Array[Array[String]]] fastqs 
 	Array[String] bams
 	Array[String] nodup_bams
@@ -893,10 +918,16 @@ task inputs {
 		CODE
 	>>>
 	output {
+		# peak caller
+		String peak_caller = if peak_caller_!='' then peak_caller_
+							else if pipeline_type=='atac' || pipeline_type=='dnase' then 'macs2'
+							else if pipeline_type=='tf' then 'spp'
+							else if pipeline_type=='histone' then 'macs2'
+							else 'macs2'
 		# peak file type
 		String peak_type = if peak_caller=='macs2' then 'narrowPeak'
-						else if peak_caller=='spp' then 'regionPeak'
-						else 'narrowPeak'
+							else if peak_caller=='spp' then 'regionPeak'
+							else 'narrowPeak'
 		# read genome TSV
 		Map[String,String] genome = read_map(genome_tsv)
 		String ref_fa = genome['ref_fa']
@@ -906,7 +937,7 @@ task inputs {
 		String chrsz = genome['chrsz']
 		String gensz = genome['gensz']
 
-		# input types and usefule booleans
+		# input types and useful booleans
 		String type = read_string("type.txt")
 		Int num_rep = read_int("num_rep.txt")
 		Boolean is_before_bam =
@@ -928,4 +959,3 @@ task inputs {
 		Array[Array[Int]] pairs = if num_rep>1 then read_tsv(stdout()) else [[]]
 	}
 }
- 

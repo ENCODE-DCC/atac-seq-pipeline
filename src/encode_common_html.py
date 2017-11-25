@@ -42,7 +42,7 @@ def html_vert_table_multi_rep(json_objs, paired_end=False, row_header=[]): # jso
         content += '<tr><th bgcolor="#EEEEEE" style="text-align:left">{}</th><td>{}</td></tr>\n'.format(
             get_long_keyname(row, paired_end),
             '</td><td>'.join(
-                [str(json_obj[row]) for json_obj in json_objs]))
+                [str_float_4_dec_pts(json_obj[row]) for json_obj in json_objs]))
     return html.format(header=header, content=content)
 
 def html_horz_table(json_obj, paired_end=False):
@@ -54,7 +54,7 @@ def html_horz_table(json_obj, paired_end=False):
             [get_long_keyname(key, paired_end) for key in json_obj])+'</th></tr>\n'
     # contents
     content = '<tr><td>'+\
-        '</th><th>'.join([json_obj[col] for col in json_obj])+'</td></tr>\n'
+        '</td><td>'.join(str_float_4_dec_pts([json_obj[col]) for col in json_obj])+'</td></tr>\n'
     return html.format(header=header, content=content)
 
 def html_help_pbc():
@@ -151,3 +151,13 @@ def html_help_overlap_FRiP():
     </ul></p></div><br>
     """
     return html
+
+# for float, limit it to 4 decimal points
+def str_float_4_dec_pts(num):
+    if type(num)==int:
+        return str(num)
+    elif type(num)==float:
+        return '{0:.4f}'.format(num)
+    else:
+        return str(num)
+

@@ -49,31 +49,6 @@ def parse_arguments():
     log.info(sys.argv)    
     return args
 
-def get_read_length(fastq):
-    # code extracted from Daniel Kim's ATAQC module
-    # https://github.com/kundajelab/ataqc/blob/master/run_ataqc.py
-    def getFileHandle(filename, mode="r"):
-        if (re.search('.gz$',filename) or re.search('.gzip',filename)):
-            if (mode=="r"):
-                mode="rb";
-            return gzip.open(filename,mode)
-        else:
-            return open(filename,mode)
-    total_reads_to_consider = 1000000
-    line_num = 0
-    total_reads_considered = 0
-    max_length = 0
-    with getFileHandle(fastq, 'rb') as fp:
-        for line in fp:
-            if line_num % 4 == 1:
-                if len(line.strip()) > max_length:
-                    max_length = len(line.strip())
-                total_reads_considered += 1
-            if total_reads_considered >= total_reads_to_consider:
-                break
-            line_num += 1
-    return int(max_length)
-
 # WDL glob() globs in an alphabetical order
 # so R1 and R2 can be switched, which results in an
 # unexpected behavior of a workflow.
@@ -82,16 +57,6 @@ def get_read_length(fastq):
 # now it's time to strip it.
 def strip_merge_fastqs_prefix(fastq):
     return re.sub(r'^merge\_fastqs\_R\d\_','',str(fastq))
-
-def make_read_length_file(fastq, out_dir):
-    basename = os.path.basename(strip_ext_fastq(fastq))
-    prefix = os.path.join(out_dir,
-        strip_merge_fastqs_prefix(basename))
-    txt = '{}.read_length.txt'.format(prefix)
-    read_length = get_read_length(fastq)
-    with open(txt,'w') as fp:
-        fp.write(str(read_length))
-    return txt
 
 def bowtie2_se(fastq, ref_index_prefix, 
         multimapping, score_min, nth, out_dir):
