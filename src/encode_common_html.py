@@ -54,7 +54,7 @@ def html_horz_table(json_obj, paired_end=False):
             [get_long_keyname(key, paired_end) for key in json_obj])+'</th></tr>\n'
     # contents
     content = '<tr><td>'+\
-        '</td><td>'.join(str_float_4_dec_pts([json_obj[col]) for col in json_obj])+'</td></tr>\n'
+        '</td><td>'.join([str_float_4_dec_pts(json_obj[col]) for col in json_obj])+'</td></tr>\n'
     return html.format(header=header, content=content)
 
 def html_help_pbc():

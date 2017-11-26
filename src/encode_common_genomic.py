@@ -171,13 +171,3 @@ def get_read_length(fastq):
                 break
             line_num += 1
     return int(max_length)
-
-def make_read_length_file(fastq, out_dir):
-    basename = os.path.basename(strip_ext_fastq(fastq))
-    prefix = os.path.join(out_dir,
-        strip_merge_fastqs_prefix(basename))
-    txt = '{}.read_length.txt'.format(prefix)
-    read_length = get_read_length(fastq)
-    with open(txt,'w') as fp:
-        fp.write(str(read_length))
-    return txt

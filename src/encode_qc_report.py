@@ -288,10 +288,9 @@ def main():
         log.info('Creating HTML report...')
         write_txt(args.out_qc_html, html)
 
-    if json_all:
-        log.info('Write JSON file...')        
-        write_txt(args.out_qc_json, json.dumps(json_all, indent=4))
-        # b = json.loads(a, object_pairs_hook=OrderedDict)
+    log.info('Write JSON file...')
+    write_txt(args.out_qc_json, json.dumps(json_all, indent=4))
+    # b = json.loads(a, object_pairs_hook=OrderedDict)
 
     log.info('All done.')
 

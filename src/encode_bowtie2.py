@@ -58,6 +58,16 @@ def parse_arguments():
 def strip_merge_fastqs_prefix(fastq):
     return re.sub(r'^merge\_fastqs\_R\d\_','',str(fastq))
 
+def make_read_length_file(fastq, out_dir):
+    basename = os.path.basename(strip_ext_fastq(fastq))
+    prefix = os.path.join(out_dir,
+        strip_merge_fastqs_prefix(basename))
+    txt = '{}.read_length.txt'.format(prefix)
+    read_length = get_read_length(fastq)
+    with open(txt,'w') as fp:
+        fp.write(str(read_length))
+    return txt
+
 def bowtie2_se(fastq, ref_index_prefix, 
         multimapping, score_min, nth, out_dir):
     basename = os.path.basename(strip_ext_fastq(fastq))

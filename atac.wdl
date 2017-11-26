@@ -357,7 +357,7 @@ workflow atac {
 		dup_qcs = if inputs.is_before_nodup_bam
 						then filter.dup_qc else [],
 		pbc_qcs = if inputs.is_before_nodup_bam
-						then filter_pbc_qc else [],
+						then filter.pbc_qc else [],
 		xcor_plots = if !inputs.align_only && inputs.is_before_peak
 						then xcor.plot_png else [],
 		xcor_scores = if !inputs.align_only && inputs.is_before_peak
@@ -809,10 +809,10 @@ task qc_report {
 	String peak_caller
 	Float idr_thresh
 	# QCs
-	Array[File] flagstat_qcs
-	Array[File] nodup_flagstat_qcs
-	Array[File] dup_qcs
-	Array[File] pbc_qcs
+	Array[File?] flagstat_qcs
+	Array[File?] nodup_flagstat_qcs
+	Array[File?] dup_qcs
+	Array[File?] pbc_qcs
 	Array[File?] xcor_plots
 	Array[File?] xcor_scores
 	Array[File?] idr_plots
