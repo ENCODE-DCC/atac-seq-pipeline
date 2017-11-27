@@ -363,18 +363,20 @@ workflow atac {
 						then xcor.plot_png else [],
 		xcor_scores = if !inputs.align_only && inputs.is_before_peak
 						then xcor.score else [],
-		frip_qcs = if !inputs.align_only && inputs.is_before_peak
-						then macs2.frip_qc else [],
-		frip_qcs_pr1 = if !inputs.align_only && inputs.is_before_peak && !inputs.true_rep_only 
-						then macs2_pr1.frip_qc else [],
-		frip_qcs_pr2 = if !inputs.align_only && inputs.is_before_peak && !inputs.true_rep_only 
-						then macs2_pr2.frip_qc else [],
-		frip_qc_pooled = if !inputs.align_only && inputs.is_before_peak && inputs.num_rep>1 
-						then [macs2_pooled.frip_qc] else [],
-		frip_qc_ppr1 = if !inputs.align_only && inputs.is_before_peak && !inputs.true_rep_only && inputs.num_rep>1 
-						then [macs2_ppr1.frip_qc] else [],
-		frip_qc_ppr2 = if !inputs.align_only && inputs.is_before_peak && !inputs.true_rep_only && inputs.num_rep>1 
-						then [macs2_ppr2.frip_qc] else [],
+
+		frip_qcs = if inputs.align_only || !inputs.is_before_peak then []
+						else macs2.frip_qc,
+		frip_qcs_pr1 = if inputs.align_only || !inputs.is_before_peak || inputs.true_rep_only then []
+						else macs2_pr1.frip_qc,
+		frip_qcs_pr2 = if inputs.align_only || !inputs.is_before_peak || inputs.true_rep_only then []
+						else macs2_pr2.frip_qc,
+		frip_qc_pooled = if inputs.align_only || !inputs.is_before_peak || inputs.num_rep<=1 then []
+						else [macs2_pooled.frip_qc],
+		frip_qc_ppr1 = if inputs.align_only || !inputs.is_before_peak || inputs.true_rep_only || inputs.num_rep<=1 then []
+						else [macs2_ppr1.frip_qc],
+		frip_qc_ppr2 = if inputs.align_only || !inputs.is_before_peak || inputs.true_rep_only || inputs.num_rep<=1 then []
+						else [macs2_ppr2.frip_qc],
+
 		idr_plots = if !inputs.align_only && inputs.num_rep>1 && inputs.enable_idr 
 						then idr.idr_plot else [],
 		idr_plots_pr = if !inputs.align_only && !inputs.true_rep_only && inputs.enable_idr
@@ -509,7 +511,7 @@ task xcor {
 			${if paired_end then "--paired-end" else ""} \
 			${"--subsample " + select_first([subsample,25000000])} \
 			--speak=0 \
-			${"--nth " + cpu}
+			${"--nth " + select_first([cpu,2])}
 	}
 	output {
 		File plot_pdf = glob("*.cc.plot.pdf")[0]

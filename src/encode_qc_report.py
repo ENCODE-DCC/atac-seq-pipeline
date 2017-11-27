@@ -113,15 +113,14 @@ def main():
     log.info('Initializing...')
     html = ''
     json_all = OrderedDict()
+    json_all['name']=args.name
+    json_all['desc']=args.desc
 
-    if args.name:
-        html += html_heading(1, args.name)
-    if args.desc:
-        html += html_paragraph(args.desc)
+    html += html_heading(1, args.name)
+    html += html_paragraph(args.desc)
     html += html_paragraph('Report generated at {}'.format(now()))
     html += html_paragraph('Pipeline type: {}'.format(get_full_name(args.pipeline_type)))
     html += html_paragraph('Peak caller: {}'.format(args.peak_caller.upper()))
-    html += html_paragraph('Peak type: {}'.format(args.peak_type))
 
     log.info('Parsing QC logs...')
     if args.flagstat_qcs:

@@ -70,7 +70,7 @@ def frip_shifted(ta, peak, chrsz, fraglen, out_dir):
         ta,
         chrsz,
         -half_fraglen,
-        helf_fraglen,
+        half_fraglen,
         tmp2) # peak
     val1 = run_shell_cmd(cmd)
     val2 = get_num_lines(ta)
