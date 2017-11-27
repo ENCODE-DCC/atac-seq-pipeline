@@ -96,7 +96,7 @@ def read_tsv(tsv):
 def write_tsv(tsv, arr): # arr must be list of list of string
     with open(tsv,'w') as fp:
         for i, a in enumerate(arr):
-            s = '\t'.join(a) + ('\n' if i<len(arr)-1 else '')
+            s = '\t'.join(str(a)) + ('\n' if i<len(arr)-1 else '')
             fp.write(s)
 
 def mkdir_p(dirname):    
@@ -147,7 +147,7 @@ def write_txt(f,s):
     with open(f,'w') as fp:
         if type(s)!=list: arr = [s]
         else: arr = s
-        for a in arr: fp.write(a+'\n')
+        for a in arr: fp.write(str(a)+'\n')
 
 def hard_link(f, link):  # hard-link 'f' to 'link'
     # UNIX only

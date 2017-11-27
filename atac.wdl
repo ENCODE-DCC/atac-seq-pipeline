@@ -348,6 +348,7 @@ workflow atac {
 
 	call qc_report { input :
 		paired_end = paired_end,
+		pipeline_type = pipeline_type,
 		peak_caller = inputs.peak_caller,
 		idr_thresh = select_first([idr_thresh,0.1]),
 		flagstat_qcs = if inputs.is_before_bam 
@@ -806,6 +807,7 @@ task qc_report {
 	#String? encode_accession_id	# ENCODE accession ID of sample
 	# workflow params
 	Boolean paired_end
+	String pipeline_type
 	String peak_caller
 	Float idr_thresh
 	# QCs
@@ -817,27 +819,28 @@ task qc_report {
 	Array[File?] xcor_scores
 	Array[File?] idr_plots
 	Array[File?] idr_plots_pr
-	Array[File?] idr_plot_ppr # actually not an array
+	Array[File?] idr_plot_ppr # not actually an array
 	Array[File?] frip_qcs
 	Array[File?] frip_qcs_pr1
 	Array[File?] frip_qcs_pr2
-	Array[File?] frip_qc_pooled # actually not an array
-	Array[File?] frip_qc_ppr1 # actually not an array
-	Array[File?] frip_qc_ppr2 # actually not an array
+	Array[File?] frip_qc_pooled # not actually an array
+	Array[File?] frip_qc_ppr1 # not actually an array
+	Array[File?] frip_qc_ppr2 # not actually an array
 	Array[File?] frip_idr_qcs
 	Array[File?] frip_idr_qcs_pr
-	Array[File?] frip_idr_qc_ppr # actually not an array
+	Array[File?] frip_idr_qc_ppr # not actually an array
 	Array[File?] frip_overlap_qcs
 	Array[File?] frip_overlap_qcs_pr
-	Array[File?] frip_overlap_qc_ppr # actually not an array
-	Array[File?] idr_reproducibility_qc # actually not an array
-	Array[File?] overlap_reproducibility_qc # actually not an array
+	Array[File?] frip_overlap_qc_ppr # not actually an array
+	Array[File?] idr_reproducibility_qc # not actually an array
+	Array[File?] overlap_reproducibility_qc # not actually an array
 
 	command {
 		python $(which encode_qc_report.py) \
 			${"--name '" + name + "'"} \
 			${"--desc '" + desc + "'"} \
 			${if paired_end then "--paired-end" else ""} \
+			--pipeline-type ${pipeline_type} \
 			--peak-caller ${peak_caller} \
 			--idr-thresh ${idr_thresh} \
 			--flagstat-qcs ${sep=' ' flagstat_qcs} \
@@ -920,10 +923,10 @@ task inputs {
 	output {
 		# peak caller
 		String peak_caller = if peak_caller_!='' then peak_caller_
-							else if pipeline_type=='atac' || pipeline_type=='dnase' then 'macs2'
-							else if pipeline_type=='tf' then 'spp'
-							else if pipeline_type=='histone' then 'macs2'
-							else 'macs2'
+			else if pipeline_type=='atac' || pipeline_type=='dnase' then 'macs2'
+			else if pipeline_type=='tf' then 'spp'
+			else if pipeline_type=='histone' then 'macs2'
+			else 'macs2'
 		# peak file type
 		String peak_type = if peak_caller=='macs2' then 'narrowPeak'
 							else if peak_caller=='spp' then 'regionPeak'

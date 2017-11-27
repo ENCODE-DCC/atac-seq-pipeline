@@ -23,6 +23,9 @@ def parse_arguments():
                         help='Description for sample.')
     parser.add_argument('--paired-end', action="store_true",
                         help='Paired-end sample.')
+    parser.add_argument('--pipeline-type', type=str, required=True,
+                        choices=['atac','dnase','tf','histone'],
+                        help='Pipeline type.')
     parser.add_argument('--peak-caller', type=str, required=True,
                         help='Description for sample.')
     parser.add_argument('--idr-thresh', type=float, required=True,
@@ -92,6 +95,17 @@ def parse_arguments():
     log.info(sys.argv)
     return args
 
+def get_full_name(pipeline_type):
+    if pipeline_type=='atac':
+        return 'ATAC-Seq'
+    elif pipeline_type=='dnase':
+        return 'DNase-Seq'
+    elif pipeline_type=='tf':
+        return 'TF ChIP-Seq'
+    elif pipeline_type=='histone':
+        return 'Histone ChIP-Seq'
+    return pipeline_type
+
 def main():
     # read params
     args = parse_arguments()
@@ -105,6 +119,9 @@ def main():
     if args.desc:
         html += html_paragraph(args.desc)
     html += html_paragraph('Report generated at {}'.format(now()))
+    html += html_paragraph('Pipeline type: {}'.format(get_full_name(args.pipeline_type)))
+    html += html_paragraph('Peak caller: {}'.format(args.peak_caller.upper()))
+    html += html_paragraph('Peak type: {}'.format(args.peak_type))
 
     log.info('Parsing QC logs...')
     if args.flagstat_qcs:
