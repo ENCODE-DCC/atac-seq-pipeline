@@ -670,6 +670,9 @@ task spr { # make two self pseudo replicates
 	File ta
 	Boolean paired_end
 
+	# resource
+	Int? mem_mb
+
 	command {
 		python $(which encode_spr.py) \
 			${ta} \
@@ -678,6 +681,9 @@ task spr { # make two self pseudo replicates
 	output {
 		File ta_pr1 = glob("*.pr1.tagAlign.gz")[0]
 		File ta_pr2 = glob("*.pr2.tagAlign.gz")[0]
+	}
+	runtime {
+		memory : "${select_first([mem_mb,'12000'])} MB"
 	}
 }
 

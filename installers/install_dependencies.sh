@@ -19,7 +19,7 @@ echo "=== Installing additional packages for python3 env..."
   rm -rf idr_tmp
   git clone https://github.com/kundajelab/idr idr_tmp
   cd idr_tmp
-  python3 setup.py install
+  $CONDA_BIN/python3 setup.py install
   cd $CONDA_BIN
   rm -rf idr_tmp
 
@@ -28,6 +28,11 @@ source activate atac-seq-pipeline
   CONDA_BIN=$(dirname $(which activate))
   CONDA_LIB="$CONDA_BIN/../lib"
   cd $CONDA_BIN
+
+  # soft-link IDR
+  ln -s ../../../bin/idr
+  ln -s ../../../bin/python3
+  ln -s ../../../bin/pip3
 
   # graphviz in bioconda has segmentation fault bug
   conda uninstall -y graphviz -y

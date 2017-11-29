@@ -231,7 +231,9 @@ Optional parameters and flags are marked with `?`.
 
 7) BAM-2-TAGALIGN settings
 
-    * `"atac.bam2ta.regex_grep_v_ta"`? : Perl-style regular expression pattern to remove matching reads from TAGALIGN.
+    Pipeline filters out chrM reads by default.
+
+    * `"atac.bam2ta.regex_grep_v_ta"`? : Perl-style regular expression pattern to remove matching reads from TAGALIGN (default: `chrM`).
     * `"atac.bam2ta.subsample"`? : Number of reads to subsample TAGALIGN. Subsampled TAGALIGN will be used for all downstream analysis (MACS2, IDR, naive-overlap).
 
 8) Cross correlation analysis settings
@@ -268,6 +270,7 @@ Optional parameters and flags are marked with `?`.
     * `"atac.bowtie2.mem_mb"`? : Max. memory limit in MB for `bowtie2` (default: 20000).
     * `"atac.filter.mem_mb"`? : Max. memory limit in MB for `filter` (default: 20000).
     * `"atac.bam2ta.mem_mb"`? : Max. memory limit in MB for `bam2ta` (default: 10000).
+    * `"atac.spr.mem_mb"`? : Max. memory limit in MB for `spr` (default: 12000).
     * `"atac.xcor.mem_mb"`? : Max. memory limit in MB for `xcor` (default: 10000).
     * `"atac.macs2_mem_mb"`? : Max. memory limit in MB for `macs2` (default: 16000).
 

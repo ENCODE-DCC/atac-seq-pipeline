@@ -120,6 +120,10 @@ def main():
     log.info('List all files in output directory...')
     ls_l(args.out_dir)
 
+    log.info('Checking if output is empty...')
+    assert_file_not_empty(ta_pr1)
+    assert_file_not_empty(ta_pr2)
+
     log.info('All done.')
 
 if __name__=='__main__':
