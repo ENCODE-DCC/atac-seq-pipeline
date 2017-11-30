@@ -21,6 +21,8 @@ gnuplot #==5.0.3
 numpy ==1.10.2 #1.9.0, 1.8.2 conflicts with ATAQC
 scipy # ==0.17.0: to fix 'undefined symbol: PyUnicodeUCS2_DecodeUTF8'
 matplotlib
+six==1.11.0 # to fix (ImportError: cannot import name _thread)
+python-dateutil==2.6.1
 libgfortran==3.0 # ataqc
 pandas ==0.18.0 #==0.16.1 # ataqc
 metaseq #==0.5.6 # ataqc
