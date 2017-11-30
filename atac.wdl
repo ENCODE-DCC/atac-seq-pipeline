@@ -97,8 +97,7 @@ workflow atac {
 		if ( inputs.is_before_ta ) {
 			# convert bam to tagalign and subsample it if necessary
 			call bam2ta { input :
-				bam = if defined(filter.nodup_bam) 
-						then filter.nodup_bam else nodup_bams[i],
+				bam = if defined(filter.nodup_bam) then filter.nodup_bam else nodup_bams[i],
 				disable_tn5_shift = inputs.disable_tn5_shift,
 				paired_end = paired_end,
 			}

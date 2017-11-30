@@ -93,10 +93,11 @@ def read_tsv(tsv):
             result.append(row)
     return result
 
-def write_tsv(tsv, arr): # arr must be list of list of string
+def write_tsv(tsv, arr): # arr must be list of list of something
     with open(tsv,'w') as fp:
-        for i, a in enumerate(arr):
-            s = '\t'.join(str(a)) + ('\n' if i<len(arr)-1 else '')
+        for i, arr2 in enumerate(arr):
+            s = '\t'.join([str(a) for a in arr2]) \
+                + ('\n' if i<len(arr)-1 else '')
             fp.write(s)
 
 def mkdir_p(dirname):    

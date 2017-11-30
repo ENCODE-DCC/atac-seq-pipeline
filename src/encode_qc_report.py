@@ -42,6 +42,10 @@ def parse_arguments():
                         help='List of cross-correlation QC plot files per replicate.')
     parser.add_argument('--xcor-scores', type=str, nargs='*',
                         help='List of cross-correlation QC score files per replicate.')
+    parser.add_argument('--jsd-plot', type=str, nargs='*',
+                        help='Fingerprint JSD plot.')
+    parser.add_argument('--jsd-qcs', type=str, nargs='*',
+                        help='List of JSD qc files.')
     parser.add_argument('--idr-plots', type=str, nargs='*',
                         help='List of IDR plot files per a pair of two replicates.')
     parser.add_argument('--idr-plots-pr', type=str, nargs='*',
@@ -162,6 +166,13 @@ def main():
         for i, xcor_plot in enumerate(args.xcor_plots):
             html += html_embedded_png(xcor_plot, 'rep{}'.format(i+1), 60)
         json_all['xcor_score'] = json_objs
+
+    if args.jsd_plot:
+        html += html_heading(2, 'Fingerprint and JS distance')
+        json_objs = [parse_jsd_qc(qc) for qc in args.jsd_qcs]
+        html += html_vert_table_multi_rep(json_objs, args.paired_end)
+        html += html_embedded_png(args.jsd_plot[0], '', 40)
+        json_all['jsd_qc'] = json_objs
 
     # frip (Enrichment QC) for raw peaks
     if args.frip_qcs or args.frip_qcs_pr1 or args.frip_qcs_pr2 \
