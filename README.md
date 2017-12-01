@@ -2,20 +2,21 @@ ENCODE ATAC-seq pipeline
 ===================================================
 
 # Directories
-    * `backends/` : Backend configuration files (`.conf`)
-    * `workflow_opts/` : Workflow option files (`.json`)
-    * `examples/` : input JSON examples (SE and PE)
-    * `genome/` : genome data TSV files
-    * `src/` : Python script for each task in WDL
-    * `installers/` : dependency/genome data installers for Local, SGE and SLURM
-    * `docker_image/` : Dockerfile
+* `backends/` : Backend configuration files (`.conf`)
+* `workflow_opts/` : Workflow option files (`.json`)
+* `examples/` : input JSON examples (SE and PE)
+* `genome/` : genome data TSV files
+* `src/` : Python script for each task in WDL
+* `installers/` : dependency/genome data installers for Local, SGE and SLURM
+* `docker_image/` : Dockerfile
 
 # Usage
 
 Choose `[BACKEND_CONF]` and `[WORKFLOW_OPT]` according to your platform and presence of `Docker`.
-    ```
-    $ java -jar -Dconfig.file=[BACKEND_CONF] cromwell-*.jar run atac.wdl -i input.json -o [WORKFLOW_OPT]
-    ```
+
+```
+$ java -jar -Dconfig.file=[BACKEND_CONF] cromwell-*.jar run atac.wdl -i input.json -o [WORKFLOW_OPT]
+```
 
 ### Google Cloud Platform
 

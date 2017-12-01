@@ -6,23 +6,25 @@
 import os
 from encode_common import *
 
-def samtools_index(bam, out_dir):
-    prefix = os.path.join(out_dir,
-        os.path.basename(strip_ext_bam(bam)))
-    bai = '{}.bam.bai'.format(prefix)
-
+def samtools_index(bam, out_dir=''):
+    bai = '{}.bai'.format(bam)
     cmd = 'samtools index {}'.format(bam)
     run_shell_cmd(cmd)
-    return bai
+    if os.path.abspath(out_dir)!=os.getcwd():
+        cmd2 = 'mv {} {}'.format(bai, out_dir)
+        return os.path.join(out_dir, os.path.basename(bai))
+    else:
+        return bai
 
-def sambamba_index(bam, nth, out_dir):
-    prefix = os.path.join(out_dir,
-        os.path.basename(strip_ext_bam(bam)))
-    bai = '{}.bam.bai'.format(prefix)
-
+def sambamba_index(bam, nth, out_dir=''):
+    bai = '{}.bai'.format(bam)
     cmd = 'sambamba index {} -t {}'.format(bam, nth)
     run_shell_cmd(cmd)
-    return bai
+    if os.path.abspath(out_dir)!=os.getcwd():
+        cmd2 = 'mv {} {}'.format(bai, out_dir)
+        return os.path.join(out_dir, os.path.basename(bai))
+    else:
+        return bai
 
 def samtools_flagstat(bam, out_dir):
     prefix = os.path.join(out_dir,
