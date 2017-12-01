@@ -712,6 +712,7 @@ task idr {
 	Int? fraglen 		# fragment length from xcor
 	File? chrsz			# 2-col chromosome sizes file
 	String peak_type
+	String rank
 
 	command {
 		python $(which encode_idr.py) \
@@ -719,7 +720,7 @@ task idr {
 			${"--prefix " + prefix} \
 			${"--idr-thresh " + idr_thresh} \
 			${"--peak-type " + peak_type} \
-			--idr-rank p.value \
+			--idr-rank ${rank} \			
 			${"--fraglen " + fraglen} \
 			${"--chrsz " + chrsz} \
 			${if length(blacklist)>0 then "--blacklist "+ blacklist[0] else ""} \
@@ -938,6 +939,9 @@ task inputs {
 		String peak_type = if peak_caller=='macs2' then 'narrowPeak'
 							else if peak_caller=='spp' then 'regionPeak'
 							else 'narrowPeak'
+		String idr_rank = if peak_caller=='macs2' then 'p.value'
+							else if peak_caller=='spp' then 'signal.value'
+							else 'p.value'
 		# read genome TSV
 		Map[String,String] genome = read_map(genome_tsv)
 		String ref_fa = genome['ref_fa']
