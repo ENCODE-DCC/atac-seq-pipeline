@@ -294,6 +294,7 @@ workflow atac {
 						else peak_pooled,
 				idr_thresh = select_first([idr_thresh,0.1]),
 				peak_type = inputs.peak_type,
+				rank = inputs.idr_rank,
 				blacklist = if inputs.has_blacklist then [inputs.blacklist] else [],
 				ta = if inputs.is_before_peak then [pool_ta.ta_pooled] else [],
 			}
@@ -312,6 +313,7 @@ workflow atac {
 						else peak_pooled,
 				idr_thresh = select_first([idr_thresh,0.1]),
 				peak_type = inputs.peak_type,
+				rank = inputs.idr_rank,
 				blacklist = if inputs.has_blacklist then [inputs.blacklist] else [],
 				ta = if inputs.is_before_ta then [bam2ta.ta[i]]
 						else if inputs.is_before_peak then [tas[i]]
@@ -331,6 +333,7 @@ workflow atac {
 					else peak_pooled,
 			idr_thresh = select_first([idr_thresh,0.1]),
 			peak_type = inputs.peak_type,
+			rank = inputs.idr_rank,
 			blacklist = if inputs.has_blacklist then [inputs.blacklist] else [],
 			ta = if inputs.is_before_peak then [pool_ta.ta_pooled] else [],
 		}
@@ -720,7 +723,7 @@ task idr {
 			${"--prefix " + prefix} \
 			${"--idr-thresh " + idr_thresh} \
 			${"--peak-type " + peak_type} \
-			--idr-rank ${rank} \			
+			--idr-rank ${rank} \
 			${"--fraglen " + fraglen} \
 			${"--chrsz " + chrsz} \
 			${if length(blacklist)>0 then "--blacklist "+ blacklist[0] else ""} \
