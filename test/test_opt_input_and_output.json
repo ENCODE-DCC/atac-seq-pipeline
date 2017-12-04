@@ -1,0 +1,3 @@
+{
+	"test.genome_tsv" : "gs://atac-seq-pipeline-genome-data/hg38_google.tsv"
+}

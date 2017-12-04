@@ -37,7 +37,9 @@ workflow atac {
 							# naive-overlap and IDR will also be disabled
 	Int? multimapping 		# multimapping reads
 
-	# optional for MACS2
+	# task-specific variables but defined in workflow level (limit of WDL)
+
+	# optional for MACS2 
 	Int? cap_num_peak 		# cap number of raw peaks called from MACS2
 	Float? pval_thresh 		# p.value threshold
 	Int? smooth_win 		# size of smoothing window
@@ -51,9 +53,10 @@ workflow atac {
 
 	# OTHER IMPORTANT mandatory/optional parameters are declared in a task level
 
-	# 1) determine input file type and num_rep (number of replicates)
+	# initialization 
+	# 1) determine input file type and num_rep (number of exp replicates)
 	# 2) generate pairs of all replicates for later use
-	# 3) read from genome_tsv
+	# 3) useful booleans for better code readability
 	call inputs {
 		input :
 			pipeline_type = pipeline_type,
@@ -68,6 +71,8 @@ workflow atac {
 			align_only_ = align_only,
 			true_rep_only_ = true_rep_only,
 	}
+	# temp null variable for optional inputs
+	String? null
 
 	# pipeline starts here (parallelized for each replicate)
 	scatter(i in range(inputs.num_rep)) {
@@ -80,7 +85,7 @@ workflow atac {
 			}
 			# align trimmed/merged fastqs with bowtie2
 			call bowtie2 { input :
-				idx_tar = inputs.bowtie2_idx_tar,
+				idx_tar = inputs.genome['bowtie2_idx_tar'],
 				fastqs = trim_adapter.trimmed_merged_fastqs, #[R1,R2]
 				paired_end = paired_end,
 				multimapping = multimapping,
@@ -111,13 +116,13 @@ workflow atac {
 			# call peaks on tagalign
 			call macs2 { input :
 				ta = if defined(bam2ta.ta) then bam2ta.ta else tas[i],
-				gensz = inputs.gensz,
-				chrsz = inputs.chrsz,
+				gensz = inputs.genome['gensz'],
+				chrsz = inputs.genome['chrsz'],
 				cap_num_peak = cap_num_peak,
 				pval_thresh = pval_thresh,
 				smooth_win = smooth_win,
 				make_signal = true,
-				blacklist = if inputs.has_blacklist then [inputs.blacklist] else [],
+				blacklist = if inputs.genome['blacklist']!='/dev/null' then inputs.genome['blacklist'] else null,
 				mem_mb = macs2_mem_mb,
 				disks = macs2_disks,
 				time_hr = macs2_time_hr,
@@ -140,13 +145,13 @@ workflow atac {
 		# call peaks on pooled replicate
 		call macs2 as macs2_pooled { input :
 			ta = pool_ta.ta_pooled,
-			gensz = inputs.gensz,
-			chrsz = inputs.chrsz,
+			gensz = inputs.genome['gensz'],
+			chrsz = inputs.genome['chrsz'],
 			cap_num_peak = cap_num_peak,
 			pval_thresh = pval_thresh,
 			smooth_win = smooth_win,
 			make_signal = true,
-			blacklist = if inputs.has_blacklist then [inputs.blacklist] else [],
+			blacklist = if inputs.genome['blacklist']!='/dev/null' then inputs.genome['blacklist'] else null,
 			mem_mb = macs2_mem_mb,
 			disks = macs2_disks,
 			time_hr = macs2_time_hr,
@@ -158,24 +163,24 @@ workflow atac {
 				# call peaks on 1st pseudo replicated tagalign 
 				call macs2 as macs2_pr1 { input :
 					ta = spr.ta_pr1[i],
-					gensz = inputs.gensz,
-					chrsz = inputs.chrsz,
+					gensz = inputs.genome['gensz'],
+					chrsz = inputs.genome['chrsz'],
 					cap_num_peak = cap_num_peak,
 					pval_thresh = pval_thresh,
 					smooth_win = smooth_win,
-					blacklist = if inputs.has_blacklist then [inputs.blacklist] else [],
+					blacklist = if inputs.genome['blacklist']!='/dev/null' then inputs.genome['blacklist'] else null,
 					mem_mb = macs2_mem_mb,
 					disks = macs2_disks,
 					time_hr = macs2_time_hr,
 				}
 				call macs2 as macs2_pr2 { input :
 					ta = spr.ta_pr2[i],
-					gensz = inputs.gensz,
-					chrsz = inputs.chrsz,
+					gensz = inputs.genome['gensz'],
+					chrsz = inputs.genome['chrsz'],
 					cap_num_peak = cap_num_peak,
 					pval_thresh = pval_thresh,
 					smooth_win = smooth_win,
-					blacklist = if inputs.has_blacklist then [inputs.blacklist] else [],
+					blacklist = if inputs.genome['blacklist']!='/dev/null' then inputs.genome['blacklist'] else null,
 					mem_mb = macs2_mem_mb,
 					disks = macs2_disks,
 					time_hr = macs2_time_hr,
@@ -193,12 +198,12 @@ workflow atac {
 			# call peaks on 1st pooled pseudo replicates
 			call macs2 as macs2_ppr1 { input :
 				ta = pool_ta_pr1.ta_pooled,
-				gensz = inputs.gensz,
-				chrsz = inputs.chrsz,
+				gensz = inputs.genome['gensz'],
+				chrsz = inputs.genome['chrsz'],
 				cap_num_peak = cap_num_peak,
 				pval_thresh = pval_thresh,
 				smooth_win = smooth_win,
-				blacklist = if inputs.has_blacklist then [inputs.blacklist] else [],
+				blacklist = if inputs.genome['blacklist']!='/dev/null' then inputs.genome['blacklist'] else null,
 				mem_mb = macs2_mem_mb,
 				disks = macs2_disks,
 				time_hr = macs2_time_hr,
@@ -206,12 +211,12 @@ workflow atac {
 			# call peaks on 2nd pooled pseudo replicates
 			call macs2 as macs2_ppr2 { input :
 				ta = pool_ta_pr2.ta_pooled,
-				gensz = inputs.gensz,
-				chrsz = inputs.chrsz,
+				gensz = inputs.genome['gensz'],
+				chrsz = inputs.genome['chrsz'],
 				cap_num_peak = cap_num_peak,
 				pval_thresh = pval_thresh,
 				smooth_win = smooth_win,
-				blacklist = if inputs.has_blacklist then [inputs.blacklist] else [],
+				blacklist = if inputs.genome['blacklist']!='/dev/null' then inputs.genome['blacklist'] else null,
 				mem_mb = macs2_mem_mb,
 				disks = macs2_disks,
 				time_hr = macs2_time_hr,
@@ -231,8 +236,8 @@ workflow atac {
 				peak_pooled = if inputs.is_before_peak then macs2_pooled.npeak
 						else peak_pooled,
 				peak_type = inputs.peak_type,
-				blacklist = if inputs.has_blacklist then [inputs.blacklist] else [],
-				ta = if inputs.is_before_peak then [pool_ta.ta_pooled] else [],
+				blacklist = if inputs.genome['blacklist']!='/dev/null' then inputs.genome['blacklist'] else null,
+				ta = if inputs.is_before_peak then pool_ta.ta_pooled else null,
 			}
 		}
 	}
@@ -248,10 +253,10 @@ workflow atac {
 				peak_pooled = if inputs.is_before_peak then macs2.npeak[i]
 						else peak_pooled,
 				peak_type = inputs.peak_type,
-				blacklist = if inputs.has_blacklist then [inputs.blacklist] else [],
-				ta = if inputs.is_before_ta then [bam2ta.ta[i]]
-						else if inputs.is_before_peak then [tas[i]]
-						else [],
+				blacklist = if inputs.genome['blacklist']!='/dev/null' then inputs.genome['blacklist'] else null,
+				ta = if inputs.is_before_ta then bam2ta.ta[i]
+						else if inputs.is_before_peak then tas[i]
+						else null,
 			}
 		}
 	}
@@ -266,9 +271,8 @@ workflow atac {
 			peak_pooled = if inputs.is_before_peak then macs2_pooled.npeak
 					else peak_pooled,
 			peak_type = inputs.peak_type,
-			blacklist = if inputs.has_blacklist then [inputs.blacklist] else [],
-			ta = if inputs.is_before_peak then [pool_ta.ta_pooled]
-					else [],
+			blacklist = if inputs.genome['blacklist']!='/dev/null' then inputs.genome['blacklist'] else null,
+			ta = if inputs.is_before_peak then pool_ta.ta_pooled else null,
 		}
 	}
 	if ( !inputs.align_only && !inputs.true_rep_only ) {
@@ -295,8 +299,8 @@ workflow atac {
 				idr_thresh = select_first([idr_thresh,0.1]),
 				peak_type = inputs.peak_type,
 				rank = inputs.idr_rank,
-				blacklist = if inputs.has_blacklist then [inputs.blacklist] else [],
-				ta = if inputs.is_before_peak then [pool_ta.ta_pooled] else [],
+				blacklist = if inputs.genome['blacklist']!='/dev/null' then inputs.genome['blacklist'] else null,
+				ta = if inputs.is_before_peak then pool_ta.ta_pooled else null,
 			}
 		}
 	}
@@ -314,10 +318,10 @@ workflow atac {
 				idr_thresh = select_first([idr_thresh,0.1]),
 				peak_type = inputs.peak_type,
 				rank = inputs.idr_rank,
-				blacklist = if inputs.has_blacklist then [inputs.blacklist] else [],
-				ta = if inputs.is_before_ta then [bam2ta.ta[i]]
-						else if inputs.is_before_peak then [tas[i]]
-						else [],
+				blacklist = if inputs.genome['blacklist']!='/dev/null' then inputs.genome['blacklist'] else null,
+				ta = if inputs.is_before_ta then bam2ta.ta[i]
+						else if inputs.is_before_peak then tas[i]
+						else null,
 			}
 		}
 	}
@@ -334,8 +338,8 @@ workflow atac {
 			idr_thresh = select_first([idr_thresh,0.1]),
 			peak_type = inputs.peak_type,
 			rank = inputs.idr_rank,
-			blacklist = if inputs.has_blacklist then [inputs.blacklist] else [],
-			ta = if inputs.is_before_peak then [pool_ta.ta_pooled] else [],
+			blacklist = if inputs.genome['blacklist']!='/dev/null' then inputs.genome['blacklist'] else null,
+			ta = if inputs.is_before_peak then pool_ta.ta_pooled else null,
 		}
 	}
 	if ( !inputs.align_only && !inputs.true_rep_only && inputs.enable_idr ) {
@@ -372,39 +376,39 @@ workflow atac {
 						else macs2_pr1.frip_qc,
 		frip_qcs_pr2 = if inputs.align_only || !inputs.is_before_peak || inputs.true_rep_only then []
 						else macs2_pr2.frip_qc,
-		frip_qc_pooled = if inputs.align_only || !inputs.is_before_peak || inputs.num_rep<=1 then []
-						else [macs2_pooled.frip_qc],
-		frip_qc_ppr1 = if inputs.align_only || !inputs.is_before_peak || inputs.true_rep_only || inputs.num_rep<=1 then []
-						else [macs2_ppr1.frip_qc],
-		frip_qc_ppr2 = if inputs.align_only || !inputs.is_before_peak || inputs.true_rep_only || inputs.num_rep<=1 then []
-						else [macs2_ppr2.frip_qc],
+		frip_qc_pooled = if inputs.align_only || !inputs.is_before_peak || inputs.num_rep<=1 then null
+						else macs2_pooled.frip_qc,
+		frip_qc_ppr1 = if inputs.align_only || !inputs.is_before_peak || inputs.true_rep_only || inputs.num_rep<=1 then null
+						else macs2_ppr1.frip_qc,
+		frip_qc_ppr2 = if inputs.align_only || !inputs.is_before_peak || inputs.true_rep_only || inputs.num_rep<=1 then null
+						else macs2_ppr2.frip_qc,
 
 		idr_plots = if !inputs.align_only && inputs.num_rep>1 && inputs.enable_idr 
 						then idr.idr_plot else [],
 		idr_plots_pr = if !inputs.align_only && !inputs.true_rep_only && inputs.enable_idr
 						then idr_pr.idr_plot else [],
 		idr_plot_ppr = if !inputs.align_only && !inputs.true_rep_only && inputs.num_rep>1 && inputs.enable_idr
-						then [idr_ppr.idr_plot] else [],
+						then idr_ppr.idr_plot else null,
 		frip_idr_qcs = if !inputs.align_only && inputs.is_before_peak && inputs.num_rep>1 && inputs.enable_idr
 						then idr.frip_qc else [],
 		frip_idr_qcs_pr = if !inputs.align_only && inputs.is_before_peak && !inputs.true_rep_only && inputs.enable_idr
 						then idr_pr.frip_qc else [],
 		frip_idr_qc_ppr = if !inputs.align_only && inputs.is_before_peak && !inputs.true_rep_only && inputs.num_rep>1 && inputs.enable_idr
-						then [idr_ppr.frip_qc] else [],
+						then idr_ppr.frip_qc else null,
 		frip_overlap_qcs = if !inputs.align_only && inputs.is_before_peak && inputs.num_rep>1
 						then overlap.frip_qc else [],
 		frip_overlap_qcs_pr = if !inputs.align_only && inputs.is_before_peak && !inputs.true_rep_only
 						then overlap_pr.frip_qc else [],
 		frip_overlap_qc_ppr = if !inputs.align_only && inputs.is_before_peak && !inputs.true_rep_only && inputs.num_rep>1
-						then [overlap_ppr.frip_qc] else [],
+						then overlap_ppr.frip_qc else null,
 		idr_reproducibility_qc =
 				if !inputs.align_only && !inputs.true_rep_only && inputs.enable_idr &&
 					defined(reproducibility_idr.reproducibility_qc)
-						then [reproducibility_idr.reproducibility_qc] else [],
+						then reproducibility_idr.reproducibility_qc else null,
 		overlap_reproducibility_qc = 
 				if !inputs.align_only && !inputs.true_rep_only && 
 					defined(reproducibility_overlap.reproducibility_qc)
-						then [reproducibility_overlap.reproducibility_qc] else [],
+						then reproducibility_overlap.reproducibility_qc else null,
 	}
 }
 
@@ -539,7 +543,7 @@ task macs2 {
 	Float? pval_thresh	# p.value threshold
 	Int? smooth_win		# size of smoothing window
 	Boolean? make_signal
-	Array[File] blacklist 	# blacklist BED to filter raw peaks
+	File? blacklist 	# blacklist BED to filter raw peaks
 	# fixed var
 	String peak_type = "narrowPeak"
 	# resource
@@ -558,18 +562,18 @@ task macs2 {
 			${"--p-val-thresh "+ pval_thresh} \
 			${"--smooth-win "+ smooth_win} \
 			${if make_signal_ then "--make-signal" else ""} \
-			${if length(blacklist)>0 then "--blacklist "+ blacklist[0] else ""}
+			${"--blacklist "+ blacklist}
 
 		# ugly part to deal with optional outputs
 		${if make_signal_ then "" 
 			else "touch null.pval.signal.bigwig null.fc.signal.bigwig"}
-		${if length(blacklist)>0 then "" 
+		${if defined(blacklist) then "" 
 			else "touch null.bfilt."+peak_type+".gz"}
 		touch null
 	}
 	output {
 		File npeak = glob("*[!.][!b][!f][!i][!l][!t]."+peak_type+".gz")[0]
-		File bfilt_npeak = if length(blacklist)>0 then glob("*.bfilt."+peak_type+".gz")[0] else npeak
+		File bfilt_npeak = if defined(blacklist) then glob("*.bfilt."+peak_type+".gz")[0] else npeak
 		File sig_pval = if make_signal_ then glob("*.pval.signal.bigwig")[0] else glob("null")[0]
 		File sig_fc = if make_signal_ then glob("*.fc.signal.bigwig")[0] else glob("null")[0]
 		File frip_qc = glob("*.frip.qc")[0]
@@ -709,9 +713,9 @@ task idr {
 	File? peak2
 	File? peak_pooled
 	Float? idr_thresh
-	Array[File] blacklist 	# blacklist BED to filter raw peaks
+	File? blacklist 	# blacklist BED to filter raw peaks
 	# parameters to compute FRiP
-	Array[File?] ta		# to calculate FRiP
+	File? ta			# to calculate FRiP
 	Int? fraglen 		# fragment length from xcor
 	File? chrsz			# 2-col chromosome sizes file
 	String peak_type
@@ -726,24 +730,24 @@ task idr {
 			--idr-rank ${rank} \
 			${"--fraglen " + fraglen} \
 			${"--chrsz " + chrsz} \
-			${if length(blacklist)>0 then "--blacklist "+ blacklist[0] else ""} \
-			${if length(ta)>0 then "--ta "+ ta[0] else ""}
+			${"--blacklist "+ blacklist} \
+			${"--ta " + ta}
 
 		# ugly part to deal with optional outputs
-		${if length(blacklist)>0 then "" 
+		${if defined(blacklist) then "" 
 			else "touch null.bfilt."+peak_type+".gz"}
-		${if length(ta)>0 then "" 
+		${if defined(ta) then "" 
 			else "touch null.frip.qc"}
 		touch null
 	}
 	output {
 		File idr_peak = glob("*[!.][!b][!f][!i][!l][!t]."+peak_type+".gz")[0]
-		File bfilt_idr_peak = if length(blacklist)>0 then 
+		File bfilt_idr_peak = if defined(blacklist) then 
 							glob("*.bfilt."+peak_type+".gz")[0] else idr_peak
 		File idr_plot = glob("*.txt.png")[0]
 		File idr_unthresholded_peak = glob("*.txt.gz")[0]
 		File idr_log = glob("*.log")[0]
-		File frip_qc = if length(ta)>0 then glob("*.frip.qc")[0] else glob("null")[0]
+		File frip_qc = if defined(ta) then glob("*.frip.qc")[0] else glob("null")[0]
 	}
 }
 
@@ -753,9 +757,9 @@ task overlap {
 	File? peak1
 	File? peak2
 	File? peak_pooled
-	Array[File] blacklist 	# blacklist BED to filter raw peaks
+	File? blacklist 	# blacklist BED to filter raw peaks
 	# parameters to compute FRiP
-	Array[File?] ta		# to calculate FRiP
+	File? ta			# to calculate FRiP
 	Int? fraglen 		# fragment length from xcor
 	File? chrsz			# 2-col chromosome sizes file
 	String peak_type
@@ -767,22 +771,22 @@ task overlap {
 			${"--peak-type " + peak_type} \
 			${"--fraglen " + fraglen} \
 			${"--chrsz " + chrsz} \
-			${if length(blacklist)>0 then "--blacklist "+ blacklist[0] else ""} \
-			${if length(ta)>0 then "--ta "+ ta[0] else ""}
+			${"--blacklist "+ blacklist} \
+			${"--ta " + ta}
 
 		# ugly part to deal with optional outputs
-		${if length(blacklist)>0 then "" 
+		${if defined(blacklist) then "" 
 			else "touch null.bfilt."+peak_type+".gz"}
-		${if length(ta)>0 then "" 
+		${if defined(ta) then "" 
 			else "touch null.frip.qc"}
 		touch null
 	}
 	output {
 		File overlap_peak = glob("*[!.][!b][!f][!i][!l][!t]."+peak_type+".gz")[0]
-		File bfilt_overlap_peak = if length(blacklist)>0 then 
+		File bfilt_overlap_peak = if defined(blacklist) then 
 							glob("*.bfilt."+peak_type+".gz")[0] else overlap_peak
 		# need temporary boolean in output (cromwell if bug in output)
-		File frip_qc = if length(ta)>0 then glob("*.frip.qc")[0] else glob("null")[0]
+		File frip_qc = if defined(ta) then glob("*.frip.qc")[0] else glob("null")[0]
 	}
 }
 
@@ -830,21 +834,21 @@ task qc_report {
 	Array[File?] xcor_scores
 	Array[File?] idr_plots
 	Array[File?] idr_plots_pr
-	Array[File?] idr_plot_ppr # not actually an array
+	File? idr_plot_ppr
 	Array[File?] frip_qcs
 	Array[File?] frip_qcs_pr1
 	Array[File?] frip_qcs_pr2
-	Array[File?] frip_qc_pooled # not actually an array
-	Array[File?] frip_qc_ppr1 # not actually an array
-	Array[File?] frip_qc_ppr2 # not actually an array
+	File? frip_qc_pooled
+	File? frip_qc_ppr1 
+	File? frip_qc_ppr2 
 	Array[File?] frip_idr_qcs
 	Array[File?] frip_idr_qcs_pr
-	Array[File?] frip_idr_qc_ppr # not actually an array
+	File? frip_idr_qc_ppr 
 	Array[File?] frip_overlap_qcs
 	Array[File?] frip_overlap_qcs_pr
-	Array[File?] frip_overlap_qc_ppr # not actually an array
-	Array[File?] idr_reproducibility_qc # not actually an array
-	Array[File?] overlap_reproducibility_qc # not actually an array
+	File? frip_overlap_qc_ppr
+	File? idr_reproducibility_qc
+	File? overlap_reproducibility_qc
 
 	command {
 		python $(which encode_qc_report.py) \
@@ -862,21 +866,21 @@ task qc_report {
 			--xcor-scores ${sep=' ' xcor_scores} \
 			--idr-plots ${sep=' ' idr_plots} \
 			--idr-plots-pr ${sep=' ' idr_plots_pr} \
-			--idr-plot-ppr ${sep=' ' idr_plot_ppr} \
+			${"--idr-plot-ppr " + idr_plot_ppr} \
 			--frip-qcs ${sep=' ' frip_qcs} \
 			--frip-qcs-pr1 ${sep=' ' frip_qcs_pr1} \
 			--frip-qcs-pr2 ${sep=' ' frip_qcs_pr2} \
-			--frip-qc-pooled ${sep=' ' frip_qc_pooled} \
-			--frip-qc-ppr1 ${sep=' ' frip_qc_ppr1} \
-			--frip-qc-ppr2 ${sep=' ' frip_qc_ppr2} \
+			${"--frip-qc-pooled " + frip_qc_pooled} \
+			${"--frip-qc-ppr1 " + frip_qc_ppr1} \
+			${"--frip-qc-ppr2 " + frip_qc_ppr2} \
 			--frip-idr-qcs ${sep=' ' frip_idr_qcs} \
 			--frip-idr-qcs-pr ${sep=' ' frip_idr_qcs_pr} \
-			--frip-idr-qc-ppr ${sep=' ' frip_idr_qc_ppr} \
+			${"--frip-idr-qc-ppr " + frip_idr_qc_ppr} \
 			--frip-overlap-qcs ${sep=' ' frip_overlap_qcs} \
 			--frip-overlap-qcs-pr ${sep=' ' frip_overlap_qcs_pr} \
-			--frip-overlap-qc-ppr ${sep=' ' frip_overlap_qc_ppr} \
-			--idr-reproducibility-qc ${sep=' ' idr_reproducibility_qc} \
-			--overlap-reproducibility-qc ${sep=' ' overlap_reproducibility_qc} \
+			${"--frip-overlap-qc-ppr " + frip_overlap_qc_ppr} \
+			${"--idr-reproducibility-qc " + idr_reproducibility_qc} \
+			${"--overlap-reproducibility-qc " + overlap_reproducibility_qc} \
 			--out-qc-html qc.html \
 			--out-qc-json qc.json
 	}
@@ -893,7 +897,7 @@ task qc_report {
 # we have only one task to
 # 	1) determine input type and number of replicates	
 # 	2) generate pair (rep-x_vs_rep-y) of all true replicate
-# 	3) read genome_tsv and get ready to download files 
+# 	3) read genome_tsv
 # 		On Google Cloud Platform 
 #		files are downloaded from gs://atac-seq-pipeline-genome-data/
 # 		ENCODE DCC chip-seq and atac-seq pipelines 
@@ -945,18 +949,10 @@ task inputs {
 		String idr_rank = if peak_caller=='macs2' then 'p.value'
 							else if peak_caller=='spp' then 'signal.value'
 							else 'p.value'
-		# read genome TSV
-		Map[String,String] genome = read_map(genome_tsv)
-		String ref_fa = genome['ref_fa']
-		String bowtie2_idx_tar = genome['bowtie2_idx_tar']
-		#String bwa_idx_tar = genome['bwa_idx_tar']
-		String blacklist = genome['blacklist']
-		String chrsz = genome['chrsz']
-		String gensz = genome['gensz']
-
-		# input types and useful booleans
+		# input types and number of exp replicates
 		String type = read_string("type.txt")
 		Int num_rep = read_int("num_rep.txt")
+		# useful booleans
 		Boolean is_before_bam =
 			type=='fastq'
 		Boolean is_before_nodup_bam =
@@ -970,8 +966,8 @@ task inputs {
 		Boolean align_only = select_first([align_only_,false])
 		Boolean true_rep_only = select_first([true_rep_only_,false])
 		Boolean disable_tn5_shift = pipeline_type!='atac'
-		Boolean has_blacklist = blacklist!='/dev/null'
-
+		# read genome_tsv
+		Map[String,String] genome = read_map(genome_tsv)
 		# pair of true replicates
 		Array[Array[Int]] pairs = if num_rep>1 then read_tsv(stdout()) else [[]]
 	}
