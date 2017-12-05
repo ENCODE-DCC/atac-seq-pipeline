@@ -38,6 +38,14 @@ def parse_arguments():
                         help='List of dup QC files per replicate.')
     parser.add_argument('--pbc-qcs', type=str, nargs='*',
                         help='List of PBC QC files per replicate.')
+    parser.add_argument('--ctl-flagstat-qcs', type=str, nargs='*',
+                        help='List of flagstat QC (raw BAM) files per control.')
+    parser.add_argument('--ctl-nodup-flagstat-qcs', type=str, nargs='*',
+                        help='List of flagstat QC (filtered BAM) files per control.')
+    parser.add_argument('--ctl-dup-qcs', type=str, nargs='*',
+                        help='List of dup QC files per control.')
+    parser.add_argument('--ctl-pbc-qcs', type=str, nargs='*',
+                        help='List of PBC QC files per control.')
     parser.add_argument('--xcor-plots', type=str, nargs='*',
                         help='List of cross-correlation QC plot files per replicate.')
     parser.add_argument('--xcor-scores', type=str, nargs='*',
@@ -110,6 +118,12 @@ def get_full_name(pipeline_type):
         return 'Histone ChIP-Seq'
     return pipeline_type
 
+def get_rep_labels(arr):
+    return (['rep'+str(i+1) for i, a in enumerate(arr)])
+
+def get_ctl_labels(arr):
+    return (['ctl'+str(i+1) for i, a in enumerate(arr)])
+
 def main():
     # read params
     args = parse_arguments()
@@ -127,36 +141,76 @@ def main():
     html += html_paragraph('Peak caller: {}'.format(args.peak_caller.upper()))
 
     log.info('Parsing QC logs...')
-    if args.flagstat_qcs:
+    if args.flagstat_qcs or args.ctl_flagstat_qcs:
         html += html_heading(2, 'Flagstat QC (raw BAM)')
-        json_objs = [parse_flagstat_qc(qc) for qc in args.flagstat_qcs]
-        html += html_vert_table_multi_rep(json_objs, args.paired_end)
-        json_all['flagstat_qc'] = json_objs
+        json_objs_all = []
+        row_header = []
+        if args.flagstat_qcs:
+            json_objs = [parse_flagstat_qc(qc) for qc in args.flagstat_qcs]
+            json_all['flagstat_qc'] = json_objs
+            json_objs_all.extend(json_objs)
+            row_header.extend(get_rep_labels(json_objs))
+        if args.ctl_flagstat_qcs:
+            json_objs = [parse_flagstat_qc(qc) for qc in args.ctl_flagstat_qcs]
+            json_all['ctl_flagstat_qc'] = json_objs
+            json_objs_all.extend(json_objs)
+            row_header.extend(get_ctl_labels(json_objs))
+        html += html_vert_table_multi_rep(json_objs_all, args.paired_end, row_header)
 
-    if args.nodup_flagstat_qcs:
+    if args.nodup_flagstat_qcs or args.ctl_nodup_flagstat_qcs:
         html += html_heading(2, 'Flagstat QC (filtered BAM)')
-        json_objs = [parse_flagstat_qc(qc) for qc in args.nodup_flagstat_qcs]
-        html += html_vert_table_multi_rep(json_objs, args.paired_end)
-        json_all['nodup_flagstat_qc'] = json_objs
+        json_objs_all = []
+        row_header = []
+        if args.nodup_flagstat_qcs:
+            json_objs = [parse_flagstat_qc(qc) for qc in args.nodup_flagstat_qcs]
+            json_all['nodup_flagstat_qc'] = json_objs
+            json_objs_all.extend(json_objs)
+            row_header.extend(get_rep_labels(json_objs))
+        if args.ctl_nodup_flagstat_qcs:
+            json_objs = [parse_flagstat_qc(qc) for qc in args.ctl_nodup_flagstat_qcs]
+            json_all['ctl_nodup_flagstat_qc'] = json_objs
+            json_objs_all.extend(json_objs)
+            row_header.extend(get_ctl_labels(json_objs))
+        html += html_vert_table_multi_rep(json_objs_all, args.paired_end, row_header)
 
-    if args.dup_qcs:
+    if args.dup_qcs and get_num_lines(args.dup_qcs[0]) \
+        or args.ctl_dup_qcs and get_num_lines(args.ctl_dup_qcs[0]):
+        html += html_heading(2, 'MarkDuplicate QC')
         # check if file is empty (when filter.no_dup_removal is on)
         # if empty then skip
-        if get_num_lines(args.dup_qcs[0]):
-            html += html_heading(2, 'MarkDuplicate QC')
+        json_objs_all = []
+        row_header = []
+        if args.dup_qcs and get_num_lines(args.dup_qcs[0]):
             json_objs = [parse_dup_qc(qc) for qc in args.dup_qcs]
-            html += html_vert_table_multi_rep(json_objs, args.paired_end)
             json_all['dup_qc'] = json_objs
+            json_objs_all.extend(json_objs)
+            row_header.extend(get_rep_labels(json_objs))
+        if args.ctl_dup_qcs and get_num_lines(args.ctl_dup_qcs[0]):
+            json_objs = [parse_dup_qc(qc) for qc in args.ctl_dup_qcs]
+            json_all['ctl_dup_qc'] = json_objs
+            json_objs_all.extend(json_objs)
+            row_header.extend(get_ctl_labels(json_objs))
+        html += html_vert_table_multi_rep(json_objs_all, args.paired_end, row_header)
 
-    if args.pbc_qcs:
+    if args.pbc_qcs and get_num_lines(args.pbc_qcs[0]) \
+        or args.ctl_pbc_qcs and get_num_lines(args.ctl_pbc_qcs[0]):
+        html += html_heading(2, 'Library complexity QC')
         # check if file is empty (when filter.no_dup_removal is on)
         # if empty then skip
-        if get_num_lines(args.pbc_qcs[0]):
-            html += html_heading(2, 'Library complexity QC')
+        json_objs_all = []
+        row_header = []
+        if args.pbc_qcs and get_num_lines(args.pbc_qcs[0]):
             json_objs = [parse_pbc_qc(qc) for qc in args.pbc_qcs]
-            html += html_vert_table_multi_rep(json_objs, args.paired_end)
-            html += html_help_pbc()
             json_all['pbc_qc'] = json_objs
+            json_objs_all.extend(json_objs)
+            row_header.extend(get_rep_labels(json_objs))
+        if args.ctl_pbc_qcs and get_num_lines(args.ctl_pbc_qcs[0]):
+            json_objs = [parse_pbc_qc(qc) for qc in args.ctl_pbc_qcs]
+            json_all['ctl_pbc_qc'] = json_objs
+            json_objs_all.extend(json_objs)
+            row_header.extend(get_ctl_labels(json_objs))
+        html += html_vert_table_multi_rep(json_objs_all, args.paired_end, row_header)
+        html += html_help_pbc()
 
     if args.xcor_plots:
         html += html_heading(2, 'Enrichment (strand cross-correlation measures) QC')

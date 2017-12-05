@@ -25,13 +25,14 @@ def html_embedded_png(png, caption, size_pct=100):
     return html.format(size_pct=size_pct, encoded=encoded, caption=caption)
 
 def html_vert_table_multi_rep(json_objs, paired_end=False, row_header=[]): # json_objs=list of OrderedDict
+    if len(json_objs)==0: return ''
     html = '<table border="1" style="border-collapse:collapse">{header}{content}</table><br>\n'
     # make row header list
     if row_header:
         row_header = [' '] + row_header
     else:
         row_header = [' '] + ['rep'+str(i+1) 
-        for i, json_obj in enumerate(json_objs)]
+            for i, json_obj in enumerate(json_objs)]
     # make column header list
     col_header = json_objs[0].keys()
     # make row header

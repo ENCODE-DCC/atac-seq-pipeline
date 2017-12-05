@@ -136,8 +136,11 @@ def parse_flagstat_qc(txt):
         result['paired_properly'] = int(paired_properly)
     if paired_properly_qc_failed:
         result['paired_properly_qc_failed'] = int(paired_properly_qc_failed)
-    if paired_properly_pct and paired_properly_pct!='N/A':
-        result['paired_properly_pct'] = float(paired_properly_pct)
+    if paired_properly_pct:
+        if paired_properly_pct!='N/A' and not 'nan' in paired_properly_pct:
+            result['paired_properly_pct'] = float(paired_properly_pct)
+        else:
+            result['paired_properly_pct'] = 0.0
     if with_itself:
         result['with_itself'] = int(with_itself)
     if with_itself_qc_failed:
@@ -146,8 +149,11 @@ def parse_flagstat_qc(txt):
         result['singletons'] = int(singletons)
     if singletons_qc_failed:
         result['singletons_qc_failed'] = int(singletons_qc_failed)
-    if singletons_pct and singletons_pct!='N/A':
-        result['singletons_pct'] = float(singletons_pct)
+    if singletons_pct:
+        if singletons_pct!='N/A' and not 'nan' in singletons_pct:
+            result['singletons_pct'] = float(singletons_pct)
+        else:
+            result['singletons_pct'] = 0.0
     if diff_chroms:
         result['diff_chroms'] = int(diff_chroms)
     if diff_chroms_qc_failed:
