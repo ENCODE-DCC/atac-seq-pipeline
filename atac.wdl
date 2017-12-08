@@ -42,6 +42,7 @@ workflow atac {
 							# after alignment
 	Boolean? true_rep_only 	# disable all analyses for pseudo replicates
 							# naive-overlap and IDR will also be disabled
+	Boolean? disable_xcor 	# disable cross-correlation analysis
 	Int? multimapping 		# multimapping reads
 
 	# task-specific variables but defined in workflow level (limit of WDL)
@@ -75,6 +76,7 @@ workflow atac {
 	Boolean align_only_ = select_first([align_only, false])
 	Boolean true_rep_only_ = select_first([true_rep_only, false])
 	Boolean enable_idr_ = select_first([enable_idr, false])
+	Boolean disable_xcor_ = select_first([disable_xcor, false])
 
 	###### pipeline starts here ######
 
@@ -124,11 +126,13 @@ workflow atac {
 	Array[String] tas_ = select_first([tas,bam2ta.ta,[]])
 	Int tas_len = length(tas_)
 	if ( tas_len>0 ) {
-		# subsample tagalign (non-mito) and cross-correlation analysis
-		scatter(ta in tas_) {
-			call xcor { input :
-				ta = ta,
-				paired_end = paired_end,
+		if ( !disable_xcor_ ) {
+			# subsample tagalign (non-mito) and cross-correlation analysis
+			scatter(ta in tas_) {
+				call xcor { input :
+					ta = ta,
+					paired_end = paired_end,
+				}
 			}
 		}
 		if ( !align_only_ ) {

@@ -384,8 +384,6 @@ task macs2 {
 	# resource
 	Int? mem_mb
 	String? disks
-	# temporary boolean (cromwell bug when if select_first is in output)
-	Boolean make_signal_ = select_first([make_signal,false])
 
 	command {
 		python $(which encode_macs2_atac.py) \
@@ -395,18 +393,19 @@ task macs2 {
 			${"--cap-num-peak " + select_first([cap_num_peak,300000])} \
 			${"--p-val-thresh "+ pval_thresh} \
 			${"--smooth-win "+ smooth_win} \
-			${if make_signal_ then "--make-signal" else ""} \
+			${if select_first([make_signal,false]) then "--make-signal" else ""} \
 			${"--blacklist "+ blacklist}
 
-		# ugly part to deal with optional outputs
-		${if make_signal_ then "" 
+		# ugly part to deal with optional outputs with Google JES backend
+		${if select_first([make_signal,false]) then "" 
 			else "touch null.pval.signal.bigwig null.fc.signal.bigwig"}
+		touch null 
 	}
 	output {
 		File npeak = glob("*[!.][!b][!f][!i][!l][!t]."+peak_type+".gz")[0]
 		File bfilt_npeak = glob("*.bfilt."+peak_type+".gz")[0]
-		File sig_pval = if make_signal_ then glob("*.pval.signal.bigwig")[0] else glob("null")[0]
-		File sig_fc = if make_signal_ then glob("*.fc.signal.bigwig")[0] else glob("null")[0]
+		File sig_pval = if select_first([make_signal,false]) then glob("*.pval.signal.bigwig")[0] else glob("null")[0]
+		File sig_fc = if select_first([make_signal,false]) then glob("*.fc.signal.bigwig")[0] else glob("null")[0]
 		File frip_qc = glob("*.frip.qc")[0]
 	}
 	runtime {
@@ -589,13 +588,12 @@ task overlap {
 			${"--peak-type " + peak_type} \
 			${"--fraglen " + fraglen} \
 			${"--chrsz " + chrsz} \
-			${"--blacklist "+ blacklist[0]} \
+			${"--blacklist "+ blacklist} \
 			${"--ta "+ ta}
 	}
 	output {
 		File overlap_peak = glob("*[!.][!b][!f][!i][!l][!t]."+peak_type+".gz")[0]
 		File bfilt_overlap_peak = glob("*.bfilt."+peak_type+".gz")[0]
-		# need temporary boolean in output (cromwell if bug in output)
 		File frip_qc = glob("*.frip.qc")[0]
 	}
 }

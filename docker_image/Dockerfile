@@ -37,7 +37,7 @@ RUN echo debconf shared/accepted-oracle-license-v1-1 select true | \
 RUN echo debconf shared/accepted-oracle-license-v1-1 seen true | \
     sudo debconf-set-selections
 RUN add-apt-repository ppa:webupd8team/java
-RUN apt-get update && apt-get install -y \
+RUN apt-get update --fix-missing && apt-get install -y \
 	oracle-java8-installer
 
 RUN mkdir /software
@@ -83,7 +83,7 @@ RUN chmod +x bedGraphToBigWig
 RUN pip install numpy==1.10.2
 
 # Install MACS2 2.1.0
-RUN pip install macs2==2.1.0.20151222
+RUN pip install macs2==2.1.0.20150731
 
 # Install R packages
 RUN echo "r <- getOption('repos'); r['CRAN'] <- 'http://cran.us.r-project.org'; options(repos = r);" > ~/.Rprofile
