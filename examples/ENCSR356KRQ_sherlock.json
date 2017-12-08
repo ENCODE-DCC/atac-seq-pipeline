@@ -1,7 +1,6 @@
 {
 	"atac.pipeline_type" : "atac",
 	"atac.genome_tsv" : "/oak/stanford/groups/akundaje/leepc12/code/atac-seq-pipeline/genome/hg38_sherlock.tsv",
-	"atac.adapters" : [],
 	"atac.fastqs" : [
 		[
 			["/oak/stanford/groups/akundaje/leepc12/run/ATAC_ENCODE3/ENCODE3_NEW_GGR/data/ENCSR356KRQ/in_progress/reads/fastq/rep1/pair1/ENCFF341MYG.fastq.gz",
@@ -24,12 +23,6 @@
 			"/oak/stanford/groups/akundaje/leepc12/run/ATAC_ENCODE3/ENCODE3_NEW_GGR/data/ENCSR356KRQ/in_progress/reads/fastq/rep2/pair2/ENCFF573UXK.fastq.gz"]
 		]
 	],
-	"atac.bams" : [],
-	"atac.nodup_bams" : [],
-	"atac.tas" : [],
-	"atac.peaks" : [],
-	"atac.peaks_pr1" : [],
-	"atac.peaks_pr2" : [],
 
 	"atac.paired_end" : true,
 	"atac.multimapping" : 4,

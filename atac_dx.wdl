@@ -3,7 +3,6 @@
 
 workflow atac {
 	String pipeline_type  		# atac or dnase
-	Int num_rep
 	Array[Array[Array[File]]] fastqs 
 								# [rep_id][merge_id][end_id]
 								# 	after merging, it will reduce to 
@@ -20,7 +19,10 @@ workflow atac {
 	File bowtie2_idx_tar
 	File blacklist
 	File chrsz
-	String gensz
+	String gensz	
+
+	# init
+	Int num_rep = length(fastqs)
 
 	# pipeline starts here (parallelized for each replicate)
 	scatter(i in range(num_rep)) {
@@ -88,9 +90,6 @@ workflow atac {
 			gensz = gensz,
 			chrsz = chrsz,
 			blacklist = blacklist,
-			mem_mb = macs2_mem_mb,
-			disks = macs2_disks,
-			time_hr = macs2_time_hr,
 		}
 		call macs2 as macs2_pr2 { input :
 			ta = spr.ta_pr2[i],
@@ -130,9 +129,10 @@ workflow atac {
 			prefix = "rep"+(pair[0]+1)+"-rep"+(pair[1]+1),
 			peak1 = macs2.npeak[(pair[0])],
 			peak2 = macs2.npeak[(pair[1])],
-			peak_pooled = peak_pooled,
+			peak_pooled = macs2_pooled.npeak,
 			peak_type = "narrowPeak",
 			blacklist = blacklist,
+			chrsz = chrsz,
 			ta = pool_ta.ta_pooled,
 		}
 	}
@@ -145,6 +145,7 @@ workflow atac {
 			peak_pooled = macs2.npeak[i],
 			peak_type = "narrowPeak",
 			blacklist = blacklist,
+			chrsz = chrsz,
 			ta = bam2ta.ta[i],
 		}
 	}
@@ -156,6 +157,7 @@ workflow atac {
 		peak_pooled = macs2_pooled.npeak,
 		peak_type = "narrowPeak",
 		blacklist = blacklist,
+		chrsz = chrsz,
 		ta = pool_ta.ta_pooled,
 	}
 	# reproducibility QC for overlapping peaks
@@ -167,51 +169,56 @@ workflow atac {
 	}
 
 	# IDR on every pair of true replicates
-	scatter( pair in pair_gen.pairs ) {
-		call idr { input : 
-			prefix = "rep"+(pair[0]+1)+"-rep"+(pair[1]+1),
-			peak1 = macs2.npeak[(pair[0])],
-			peak2 = macs2.npeak[(pair[1])],
+	if ( enable_idr ) {
+		scatter( pair in pair_gen.pairs ) {
+			call idr { input : 
+				prefix = "rep"+(pair[0]+1)+"-rep"+(pair[1]+1),
+				peak1 = macs2.npeak[(pair[0])],
+				peak2 = macs2.npeak[(pair[1])],
+				peak_pooled = macs2_pooled.npeak,
+				idr_thresh = idr_thresh,
+				peak_type = "narrowPeak",
+				rank = "p.value",
+				blacklist = blacklist,
+				chrsz = chrsz,
+				ta = pool_ta.ta_pooled,
+			}
+		}
+		# IDR on pseduo replicates
+		scatter( i in range(num_rep) ) {
+			call idr as idr_pr { input : 
+				prefix = "rep"+(i+1)+"-pr",
+				peak1 = macs2_pr1.npeak[i],
+				peak2 = macs2_pr2.npeak[i],
+				peak_pooled = macs2.npeak[i],
+				idr_thresh = idr_thresh,
+				peak_type = "narrowPeak",
+				rank = "p.value",
+				blacklist = blacklist,
+				chrsz = chrsz,
+				ta = bam2ta.ta[i],
+			}
+		}
+		# IDR on pooled pseduo replicates
+		call idr as idr_ppr { input : 
+			prefix = "ppr",
+			peak1 = macs2_ppr1.npeak,
+			peak2 = macs2_ppr2.npeak,
 			peak_pooled = macs2_pooled.npeak,
 			idr_thresh = idr_thresh,
 			peak_type = "narrowPeak",
-			rank = inputs.idr_rank,
+			rank = "p.value",
 			blacklist = blacklist,
+			chrsz = chrsz,
 			ta = pool_ta.ta_pooled,
 		}
-	}
-	# IDR on pseduo replicates
-	scatter( i in range(num_rep) ) {
-		call idr as idr_pr { input : 
-			prefix = "rep"+(i+1)+"-pr",
-			peak1 = macs2_pr1.npeak[i],
-			peak2 = macs2_pr2.npeak[i],
-			peak_pooled = macs2.npeak[i],
-			idr_thresh = idr_thresh,
-			peak_type = "narrowPeak",
-			rank = inputs.idr_rank,
-			blacklist = blacklist,
-			ta = bam2ta.ta[i],
+		# reproducibility QC for IDR peaks
+		call reproducibility as reproducibility_idr { input :
+			prefix = 'idr',
+			peaks = idr.bfilt_idr_peak,
+			peaks_pr = idr_pr.bfilt_idr_peak,
+			peak_ppr = idr_ppr.bfilt_idr_peak,
 		}
-	}
-	# IDR on pooled pseduo replicates
-	call idr as idr_ppr { input : 
-		prefix = "ppr",
-		peak1 = macs2_ppr1.npeak,
-		peak2 = macs2_ppr2.npeak,
-		peak_pooled = macs2_pooled.npeak,
-		idr_thresh = idr_thresh,
-		peak_type = "narrowPeak",
-		rank = inputs.idr_rank,
-		blacklist = blacklist,
-		ta = pool_ta.ta_pooled,
-	}
-	# reproducibility QC for IDR peaks
-	call reproducibility as reproducibility_idr { input :
-		prefix = 'idr',
-		peaks = idr.bfilt_idr_peak,
-		peaks_pr = idr_pr.bfilt_idr_peak,
-		peak_ppr = idr_ppr.bfilt_idr_peak,
 	}
 
 	call qc_report { input :
@@ -241,7 +248,7 @@ workflow atac {
 		frip_overlap_qcs = overlap.frip_qc,
 		frip_overlap_qcs_pr = overlap_pr.frip_qc,
 		frip_overlap_qc_ppr = [overlap_ppr.frip_qc],
-		idr_reproducibility_qc = enable_idr [reproducibility_idr.reproducibility_qc],
+		idr_reproducibility_qc = if enable_idr then [reproducibility_idr.reproducibility_qc] else [],
 		overlap_reproducibility_qc = [reproducibility_overlap.reproducibility_qc],
 	}
 }
@@ -267,7 +274,7 @@ task trim_adapter { # trim adapters and merge trimmed fastqs
 	command {
 		python $(which encode_trim_adapter.py) \
 			${write_tsv(fastqs)} \
-			${"--adapters " + write_tsv(adapters)} \
+			--adapters ${write_tsv(adapters)} \
 			${if paired_end then "--paired-end" else ""} \
 			${if auto_detect_adapter then "--auto-detect-adapter" else ""} \
 			${"--min-trim-len " + min_trim_len} \

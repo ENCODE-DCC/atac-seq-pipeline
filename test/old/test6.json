@@ -1,0 +1,3 @@
+{
+	"test_wf.map" : { "rep1" : "fastqs/fq1_1-1.fastq.gz", "rep2" : "fastqs/fq1_1-2.fastq.gz"}
+}

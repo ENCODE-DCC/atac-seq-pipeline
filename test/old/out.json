@@ -1,0 +1,734 @@
+{
+  "workflowName": "test_cc",
+  "submittedFiles": {
+    "workflow": "workflow test_cc {\n\tArray[File] fastqs = [\"fastqs/fq1_1-1.fastq.gz\",\"fastqs/fq1_1-2.fastq.gz\"]\n\n\tscatter(fastq in fastqs){\n\t\tcall t1 {\n\t\t\tinput:\n\t\t\t\tfastq = fastq\n\t\t}\n\t\tcall t2 {\n\t\t\tinput:\n\t\t\t\tbam = t1.bam\n\t\t}\n\t}\n}\n\ntask t1 {\n\tFile fastq\n\tcommand {\n\t\tzcat -f ${fastq} > ${basename(fastq) + \".bam\"}\n\t}\n\toutput {\n\t\tFile bam = basename(fastq) + \".bam\"\n\t}\n}\n\ntask t2 {\n\tFile bam\n\tcommand {\t\t\n\t\tcat ${bam} > ${basename(bam) + \".bed\"}\n\t}\n\toutput {\n\t\tFile bed = basename(bam) + \".bed\"\n\t}\n}",
+    "workflowType": "WDL",
+    "options": "{\n\n}",
+    "inputs": "{}",
+    "labels": "{}"
+  },
+  "calls": {
+    "test_cc.t2": [{
+      "executionStatus": "Done",
+      "stdout": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t2/shard-0/execution/stdout",
+      "backendStatus": "Done",
+      "shardIndex": 0,
+      "outputs": {
+        "bed": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t2/shard-0/execution/fq1_1-1.fastq.gz.bam.bed"
+      },
+      "runtimeAttributes": {
+        "continueOnReturnCode": "0",
+        "failOnStderr": "false"
+      },
+      "callCaching": {
+        "allowResultReuse": true,
+        "hit": false,
+        "result": "Cache Miss",
+        "hashes": {
+          "output count": "C4CA4238A0B923820DCC509A6F75849B",
+          "runtime attribute": {
+            "docker": "N/A",
+            "continueOnReturnCode": "CFCD208495D565EF66E7DFF9F98764DA",
+            "failOnStderr": "68934A3E9455FA72420237EB05902327"
+          },
+          "output expression": {
+            "File bed": "9D1D3CC67EC1DDFC240C38199491A791"
+          },
+          "input count": "C4CA4238A0B923820DCC509A6F75849B",
+          "backend name": "509820290D57F333403F490DDE7316F4",
+          "command template": "115369909152F85EB5447DA8D41B38D1",
+          "input": {
+            "File bam": "0d1c83b0869ac77b2cdb3d60edfd48c8"
+          }
+        },
+        "effectiveCallCachingMode": "ReadAndWriteCache",
+        "hitFailures": [{
+          "d7249226-44a4-440a-a56c-4867ac755393:test_cc.t2:0": [{
+            "message": "",
+            "causedBy": [{
+              "causedBy": [{
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t2/shard-0/execution/stdout doesn't exists"
+              }, {
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t2/shard-0/execution/stdout -> /users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t2/shard-0/execution/stdout"
+              }, {
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t2/shard-0/execution/stdout"
+              }, {
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t2/shard-0/execution/stdout"
+              }],
+              "message": "Could not cache /users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t2/shard-0/execution/stdout -> /users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t2/shard-0/execution/stdout"
+            }, {
+              "message": "Could not cache /users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t2/shard-0/execution/stderr -> /users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t2/shard-0/execution/stderr",
+              "causedBy": [{
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t2/shard-0/execution/stderr doesn't exists"
+              }, {
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t2/shard-0/execution/stderr -> /users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t2/shard-0/execution/stderr"
+              }, {
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t2/shard-0/execution/stderr"
+              }, {
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t2/shard-0/execution/stderr"
+              }]
+            }, {
+              "causedBy": [{
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t2/shard-0/execution/fq1_1-1.fastq.gz.bam.bed doesn't exists"
+              }, {
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t2/shard-0/execution/fq1_1-1.fastq.gz.bam.bed -> /users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t2/shard-0/execution/fq1_1-1.fastq.gz.bam.bed"
+              }, {
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t2/shard-0/execution/fq1_1-1.fastq.gz.bam.bed"
+              }, {
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t2/shard-0/execution/fq1_1-1.fastq.gz.bam.bed"
+              }],
+              "message": "Could not cache /users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t2/shard-0/execution/fq1_1-1.fastq.gz.bam.bed -> /users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t2/shard-0/execution/fq1_1-1.fastq.gz.bam.bed"
+            }, {
+              "causedBy": [{
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t2/shard-0/execution/script doesn't exists"
+              }, {
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t2/shard-0/execution/script -> /users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t2/shard-0/execution/script"
+              }, {
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t2/shard-0/execution/script"
+              }, {
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t2/shard-0/execution/script"
+              }],
+              "message": "Could not cache /users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t2/shard-0/execution/script -> /users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t2/shard-0/execution/script"
+            }, {
+              "causedBy": [{
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t2/shard-0/execution/rc doesn't exists"
+              }, {
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t2/shard-0/execution/rc -> /users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t2/shard-0/execution/rc",
+                "causedBy": []
+              }, {
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t2/shard-0/execution/rc"
+              }, {
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t2/shard-0/execution/rc"
+              }],
+              "message": "Could not cache /users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t2/shard-0/execution/rc -> /users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t2/shard-0/execution/rc"
+            }]
+          }]
+        }]
+      },
+      "inputs": {
+        "bam": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t1/shard-0/execution/fq1_1-1.fastq.gz.bam"
+      },
+      "returnCode": 0,
+      "jobId": "42009",
+      "backend": "Local",
+      "end": "2017-11-13T08:29:36.834-08:00",
+      "stderr": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t2/shard-0/execution/stderr",
+      "callRoot": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t2/shard-0",
+      "attempt": 1,
+      "executionEvents": [{
+        "startTime": "2017-11-13T08:29:34.532-08:00",
+        "description": "InvalidatingCacheEntry",
+        "endTime": "2017-11-13T08:29:34.540-08:00"
+      }, {
+        "startTime": "2017-11-13T08:29:34.468-08:00",
+        "description": "RequestingExecutionToken",
+        "endTime": "2017-11-13T08:29:34.468-08:00"
+      }, {
+        "startTime": "2017-11-13T08:29:34.474-08:00",
+        "description": "CheckingCallCache",
+        "endTime": "2017-11-13T08:29:34.494-08:00"
+      }, {
+        "startTime": "2017-11-13T08:29:34.540-08:00",
+        "description": "CheckingCallCache",
+        "endTime": "2017-11-13T08:29:34.553-08:00"
+      }, {
+        "startTime": "2017-11-13T08:29:34.553-08:00",
+        "description": "RunningJob",
+        "endTime": "2017-11-13T08:29:35.769-08:00"
+      }, {
+        "startTime": "2017-11-13T08:29:35.769-08:00",
+        "description": "UpdatingCallCache",
+        "endTime": "2017-11-13T08:29:36.834-08:00"
+      }, {
+        "startTime": "2017-11-13T08:29:34.468-08:00",
+        "description": "WaitingForOutputStore",
+        "endTime": "2017-11-13T08:29:34.471-08:00"
+      }, {
+        "startTime": "2017-11-13T08:29:36.834-08:00",
+        "description": "UpdatingJobStore",
+        "endTime": "2017-11-13T08:29:36.834-08:00"
+      }, {
+        "startTime": "2017-11-13T08:29:34.494-08:00",
+        "description": "FetchingCachedOutputsFromDatabase",
+        "endTime": "2017-11-13T08:29:34.502-08:00"
+      }, {
+        "startTime": "2017-11-13T08:29:34.468-08:00",
+        "description": "Pending",
+        "endTime": "2017-11-13T08:29:34.468-08:00"
+      }, {
+        "startTime": "2017-11-13T08:29:34.502-08:00",
+        "description": "BackendIsCopyingCachedOutputs",
+        "endTime": "2017-11-13T08:29:34.532-08:00"
+      }, {
+        "startTime": "2017-11-13T08:29:34.471-08:00",
+        "description": "PreparingJob",
+        "endTime": "2017-11-13T08:29:34.474-08:00"
+      }],
+      "start": "2017-11-13T08:29:34.467-08:00"
+    }, {
+      "executionStatus": "Done",
+      "stdout": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t2/shard-1/execution/stdout",
+      "backendStatus": "Done",
+      "shardIndex": 1,
+      "outputs": {
+        "bed": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t2/shard-1/execution/fq1_1-2.fastq.gz.bam.bed"
+      },
+      "runtimeAttributes": {
+        "continueOnReturnCode": "0",
+        "failOnStderr": "false"
+      },
+      "callCaching": {
+        "allowResultReuse": true,
+        "hit": false,
+        "result": "Cache Miss",
+        "hashes": {
+          "output count": "C4CA4238A0B923820DCC509A6F75849B",
+          "runtime attribute": {
+            "docker": "N/A",
+            "continueOnReturnCode": "CFCD208495D565EF66E7DFF9F98764DA",
+            "failOnStderr": "68934A3E9455FA72420237EB05902327"
+          },
+          "output expression": {
+            "File bed": "9D1D3CC67EC1DDFC240C38199491A791"
+          },
+          "input count": "C4CA4238A0B923820DCC509A6F75849B",
+          "backend name": "509820290D57F333403F490DDE7316F4",
+          "command template": "115369909152F85EB5447DA8D41B38D1",
+          "input": {
+            "File bam": "44b94bb5952bc3ed363a38cfc7e991e1"
+          }
+        },
+        "effectiveCallCachingMode": "ReadAndWriteCache",
+        "hitFailures": [{
+          "d7249226-44a4-440a-a56c-4867ac755393:test_cc.t2:1": [{
+            "causedBy": [{
+              "causedBy": [{
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t2/shard-1/execution/stderr doesn't exists"
+              }, {
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t2/shard-1/execution/stderr -> /users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t2/shard-1/execution/stderr"
+              }, {
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t2/shard-1/execution/stderr"
+              }, {
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t2/shard-1/execution/stderr"
+              }],
+              "message": "Could not cache /users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t2/shard-1/execution/stderr -> /users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t2/shard-1/execution/stderr"
+            }, {
+              "causedBy": [{
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t2/shard-1/execution/stdout doesn't exists"
+              }, {
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t2/shard-1/execution/stdout -> /users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t2/shard-1/execution/stdout"
+              }, {
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t2/shard-1/execution/stdout"
+              }, {
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t2/shard-1/execution/stdout"
+              }],
+              "message": "Could not cache /users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t2/shard-1/execution/stdout -> /users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t2/shard-1/execution/stdout"
+            }, {
+              "causedBy": [{
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t2/shard-1/execution/script doesn't exists"
+              }, {
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t2/shard-1/execution/script -> /users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t2/shard-1/execution/script"
+              }, {
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t2/shard-1/execution/script"
+              }, {
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t2/shard-1/execution/script"
+              }],
+              "message": "Could not cache /users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t2/shard-1/execution/script -> /users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t2/shard-1/execution/script"
+            }, {
+              "causedBy": [{
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t2/shard-1/execution/fq1_1-2.fastq.gz.bam.bed doesn't exists"
+              }, {
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t2/shard-1/execution/fq1_1-2.fastq.gz.bam.bed -> /users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t2/shard-1/execution/fq1_1-2.fastq.gz.bam.bed"
+              }, {
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t2/shard-1/execution/fq1_1-2.fastq.gz.bam.bed"
+              }, {
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t2/shard-1/execution/fq1_1-2.fastq.gz.bam.bed"
+              }],
+              "message": "Could not cache /users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t2/shard-1/execution/fq1_1-2.fastq.gz.bam.bed -> /users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t2/shard-1/execution/fq1_1-2.fastq.gz.bam.bed"
+            }, {
+              "causedBy": [{
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t2/shard-1/execution/rc doesn't exists"
+              }, {
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t2/shard-1/execution/rc -> /users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t2/shard-1/execution/rc"
+              }, {
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t2/shard-1/execution/rc"
+              }, {
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t2/shard-1/execution/rc"
+              }],
+              "message": "Could not cache /users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t2/shard-1/execution/rc -> /users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t2/shard-1/execution/rc"
+            }],
+            "message": ""
+          }]
+        }]
+      },
+      "inputs": {
+        "bam": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t1/shard-1/execution/fq1_1-2.fastq.gz.bam"
+      },
+      "returnCode": 0,
+      "jobId": "42007",
+      "backend": "Local",
+      "end": "2017-11-13T08:29:36.835-08:00",
+      "stderr": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t2/shard-1/execution/stderr",
+      "callRoot": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t2/shard-1",
+      "attempt": 1,
+      "executionEvents": [{
+        "startTime": "2017-11-13T08:29:34.457-08:00",
+        "description": "Pending",
+        "endTime": "2017-11-13T08:29:34.458-08:00"
+      }, {
+        "startTime": "2017-11-13T08:29:34.542-08:00",
+        "description": "CheckingCallCache",
+        "endTime": "2017-11-13T08:29:34.553-08:00"
+      }, {
+        "startTime": "2017-11-13T08:29:34.502-08:00",
+        "description": "BackendIsCopyingCachedOutputs",
+        "endTime": "2017-11-13T08:29:34.534-08:00"
+      }, {
+        "startTime": "2017-11-13T08:29:36.834-08:00",
+        "description": "UpdatingJobStore",
+        "endTime": "2017-11-13T08:29:36.834-08:00"
+      }, {
+        "startTime": "2017-11-13T08:29:34.470-08:00",
+        "description": "PreparingJob",
+        "endTime": "2017-11-13T08:29:34.475-08:00"
+      }, {
+        "startTime": "2017-11-13T08:29:34.553-08:00",
+        "description": "RunningJob",
+        "endTime": "2017-11-13T08:29:35.689-08:00"
+      }, {
+        "startTime": "2017-11-13T08:29:34.458-08:00",
+        "description": "WaitingForOutputStore",
+        "endTime": "2017-11-13T08:29:34.470-08:00"
+      }, {
+        "startTime": "2017-11-13T08:29:34.494-08:00",
+        "description": "FetchingCachedOutputsFromDatabase",
+        "endTime": "2017-11-13T08:29:34.502-08:00"
+      }, {
+        "startTime": "2017-11-13T08:29:34.458-08:00",
+        "description": "RequestingExecutionToken",
+        "endTime": "2017-11-13T08:29:34.458-08:00"
+      }, {
+        "startTime": "2017-11-13T08:29:35.689-08:00",
+        "description": "UpdatingCallCache",
+        "endTime": "2017-11-13T08:29:36.834-08:00"
+      }, {
+        "startTime": "2017-11-13T08:29:34.475-08:00",
+        "description": "CheckingCallCache",
+        "endTime": "2017-11-13T08:29:34.494-08:00"
+      }, {
+        "startTime": "2017-11-13T08:29:34.534-08:00",
+        "description": "InvalidatingCacheEntry",
+        "endTime": "2017-11-13T08:29:34.542-08:00"
+      }],
+      "start": "2017-11-13T08:29:34.457-08:00"
+    }],
+    "test_cc.t1": [{
+      "executionStatus": "Done",
+      "stdout": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t1/shard-0/execution/stdout",
+      "backendStatus": "Done",
+      "shardIndex": 0,
+      "outputs": {
+        "bam": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t1/shard-0/execution/fq1_1-1.fastq.gz.bam"
+      },
+      "runtimeAttributes": {
+        "continueOnReturnCode": "0",
+        "failOnStderr": "false"
+      },
+      "callCaching": {
+        "allowResultReuse": true,
+        "hit": false,
+        "result": "Cache Miss",
+        "hashes": {
+          "output count": "C4CA4238A0B923820DCC509A6F75849B",
+          "runtime attribute": {
+            "docker": "N/A",
+            "continueOnReturnCode": "CFCD208495D565EF66E7DFF9F98764DA",
+            "failOnStderr": "68934A3E9455FA72420237EB05902327"
+          },
+          "output expression": {
+            "File bam": "F5714316C58A7197724B67D8598B3085"
+          },
+          "input count": "C4CA4238A0B923820DCC509A6F75849B",
+          "backend name": "509820290D57F333403F490DDE7316F4",
+          "command template": "C66557AE34D34EB75EF6AE885D89C1BB",
+          "input": {
+            "File fastq": "0d1c83b0869ac77b2cdb3d60edfd48c8"
+          }
+        },
+        "effectiveCallCachingMode": "ReadAndWriteCache",
+        "hitFailures": [{
+          "d7249226-44a4-440a-a56c-4867ac755393:test_cc.t1:0": [{
+            "causedBy": [{
+              "causedBy": [{
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t1/shard-0/execution/stdout doesn't exists"
+              }, {
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t1/shard-0/execution/stdout -> /users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t1/shard-0/execution/stdout",
+                "causedBy": []
+              }, {
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t1/shard-0/execution/stdout"
+              }, {
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t1/shard-0/execution/stdout"
+              }],
+              "message": "Could not cache /users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t1/shard-0/execution/stdout -> /users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t1/shard-0/execution/stdout"
+            }, {
+              "causedBy": [{
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t1/shard-0/execution/script doesn't exists"
+              }, {
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t1/shard-0/execution/script -> /users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t1/shard-0/execution/script"
+              }, {
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t1/shard-0/execution/script"
+              }, {
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t1/shard-0/execution/script",
+                "causedBy": []
+              }],
+              "message": "Could not cache /users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t1/shard-0/execution/script -> /users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t1/shard-0/execution/script"
+            }, {
+              "causedBy": [{
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t1/shard-0/execution/rc doesn't exists"
+              }, {
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t1/shard-0/execution/rc -> /users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t1/shard-0/execution/rc"
+              }, {
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t1/shard-0/execution/rc"
+              }, {
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t1/shard-0/execution/rc"
+              }],
+              "message": "Could not cache /users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t1/shard-0/execution/rc -> /users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t1/shard-0/execution/rc"
+            }, {
+              "causedBy": [{
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t1/shard-0/execution/fq1_1-1.fastq.gz.bam doesn't exists"
+              }, {
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t1/shard-0/execution/fq1_1-1.fastq.gz.bam -> /users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t1/shard-0/execution/fq1_1-1.fastq.gz.bam"
+              }, {
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t1/shard-0/execution/fq1_1-1.fastq.gz.bam"
+              }, {
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t1/shard-0/execution/fq1_1-1.fastq.gz.bam"
+              }],
+              "message": "Could not cache /users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t1/shard-0/execution/fq1_1-1.fastq.gz.bam -> /users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t1/shard-0/execution/fq1_1-1.fastq.gz.bam"
+            }, {
+              "causedBy": [{
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t1/shard-0/execution/stderr doesn't exists"
+              }, {
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t1/shard-0/execution/stderr -> /users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t1/shard-0/execution/stderr"
+              }, {
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t1/shard-0/execution/stderr"
+              }, {
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t1/shard-0/execution/stderr"
+              }],
+              "message": "Could not cache /users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t1/shard-0/execution/stderr -> /users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t1/shard-0/execution/stderr"
+            }],
+            "message": ""
+          }]
+        }]
+      },
+      "inputs": {
+        "fastq": "fastqs/fq1_1-1.fastq.gz"
+      },
+      "returnCode": 0,
+      "jobId": "41915",
+      "backend": "Local",
+      "end": "2017-11-13T08:29:33.872-08:00",
+      "stderr": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t1/shard-0/execution/stderr",
+      "callRoot": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t1/shard-0",
+      "attempt": 1,
+      "executionEvents": [{
+        "startTime": "2017-11-13T08:29:29.888-08:00",
+        "description": "CheckingCallCache",
+        "endTime": "2017-11-13T08:29:29.907-08:00"
+      }, {
+        "startTime": "2017-11-13T08:29:29.407-08:00",
+        "description": "RequestingExecutionToken",
+        "endTime": "2017-11-13T08:29:29.413-08:00"
+      }, {
+        "startTime": "2017-11-13T08:29:29.391-08:00",
+        "description": "Pending",
+        "endTime": "2017-11-13T08:29:29.407-08:00"
+      }, {
+        "startTime": "2017-11-13T08:29:29.497-08:00",
+        "description": "CheckingCallCache",
+        "endTime": "2017-11-13T08:29:29.645-08:00"
+      }, {
+        "startTime": "2017-11-13T08:29:29.862-08:00",
+        "description": "InvalidatingCacheEntry",
+        "endTime": "2017-11-13T08:29:29.888-08:00"
+      }, {
+        "startTime": "2017-11-13T08:29:29.907-08:00",
+        "description": "RunningJob",
+        "endTime": "2017-11-13T08:29:31.649-08:00"
+      }, {
+        "startTime": "2017-11-13T08:29:29.704-08:00",
+        "description": "BackendIsCopyingCachedOutputs",
+        "endTime": "2017-11-13T08:29:29.862-08:00"
+      }, {
+        "startTime": "2017-11-13T08:29:29.413-08:00",
+        "description": "WaitingForOutputStore",
+        "endTime": "2017-11-13T08:29:29.422-08:00"
+      }, {
+        "startTime": "2017-11-13T08:29:29.645-08:00",
+        "description": "FetchingCachedOutputsFromDatabase",
+        "endTime": "2017-11-13T08:29:29.704-08:00"
+      }, {
+        "startTime": "2017-11-13T08:29:29.422-08:00",
+        "description": "PreparingJob",
+        "endTime": "2017-11-13T08:29:29.497-08:00"
+      }, {
+        "startTime": "2017-11-13T08:29:31.649-08:00",
+        "description": "UpdatingCallCache",
+        "endTime": "2017-11-13T08:29:33.868-08:00"
+      }, {
+        "startTime": "2017-11-13T08:29:33.868-08:00",
+        "description": "UpdatingJobStore",
+        "endTime": "2017-11-13T08:29:33.870-08:00"
+      }],
+      "start": "2017-11-13T08:29:29.377-08:00"
+    }, {
+      "executionStatus": "Done",
+      "stdout": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t1/shard-1/execution/stdout",
+      "backendStatus": "Done",
+      "shardIndex": 1,
+      "outputs": {
+        "bam": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t1/shard-1/execution/fq1_1-2.fastq.gz.bam"
+      },
+      "runtimeAttributes": {
+        "continueOnReturnCode": "0",
+        "failOnStderr": "false"
+      },
+      "callCaching": {
+        "allowResultReuse": true,
+        "hit": false,
+        "result": "Cache Miss",
+        "hashes": {
+          "output count": "C4CA4238A0B923820DCC509A6F75849B",
+          "runtime attribute": {
+            "docker": "N/A",
+            "continueOnReturnCode": "CFCD208495D565EF66E7DFF9F98764DA",
+            "failOnStderr": "68934A3E9455FA72420237EB05902327"
+          },
+          "output expression": {
+            "File bam": "F5714316C58A7197724B67D8598B3085"
+          },
+          "input count": "C4CA4238A0B923820DCC509A6F75849B",
+          "backend name": "509820290D57F333403F490DDE7316F4",
+          "command template": "C66557AE34D34EB75EF6AE885D89C1BB",
+          "input": {
+            "File fastq": "86b09528fef714acb16f58885a60a4b5"
+          }
+        },
+        "effectiveCallCachingMode": "ReadAndWriteCache",
+        "hitFailures": [{
+          "d7249226-44a4-440a-a56c-4867ac755393:test_cc.t1:1": [{
+            "causedBy": [{
+              "causedBy": [{
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t1/shard-1/execution/script doesn't exists"
+              }, {
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t1/shard-1/execution/script -> /users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t1/shard-1/execution/script",
+                "causedBy": []
+              }, {
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t1/shard-1/execution/script"
+              }, {
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t1/shard-1/execution/script"
+              }],
+              "message": "Could not cache /users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t1/shard-1/execution/script -> /users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t1/shard-1/execution/script"
+            }, {
+              "causedBy": [{
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t1/shard-1/execution/stdout doesn't exists"
+              }, {
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t1/shard-1/execution/stdout -> /users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t1/shard-1/execution/stdout"
+              }, {
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t1/shard-1/execution/stdout"
+              }, {
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t1/shard-1/execution/stdout"
+              }],
+              "message": "Could not cache /users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t1/shard-1/execution/stdout -> /users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t1/shard-1/execution/stdout"
+            }, {
+              "causedBy": [{
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t1/shard-1/execution/rc doesn't exists"
+              }, {
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t1/shard-1/execution/rc -> /users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t1/shard-1/execution/rc"
+              }, {
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t1/shard-1/execution/rc"
+              }, {
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t1/shard-1/execution/rc"
+              }],
+              "message": "Could not cache /users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t1/shard-1/execution/rc -> /users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t1/shard-1/execution/rc"
+            }, {
+              "causedBy": [{
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t1/shard-1/execution/stderr doesn't exists"
+              }, {
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t1/shard-1/execution/stderr -> /users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t1/shard-1/execution/stderr"
+              }, {
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t1/shard-1/execution/stderr"
+              }, {
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t1/shard-1/execution/stderr"
+              }],
+              "message": "Could not cache /users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t1/shard-1/execution/stderr -> /users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t1/shard-1/execution/stderr"
+            }, {
+              "causedBy": [{
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t1/shard-1/execution/fq1_1-2.fastq.gz.bam doesn't exists"
+              }, {
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t1/shard-1/execution/fq1_1-2.fastq.gz.bam -> /users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t1/shard-1/execution/fq1_1-2.fastq.gz.bam"
+              }, {
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t1/shard-1/execution/fq1_1-2.fastq.gz.bam",
+                "causedBy": []
+              }, {
+                "causedBy": [],
+                "message": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t1/shard-1/execution/fq1_1-2.fastq.gz.bam"
+              }],
+              "message": "Could not cache /users/leepc12/code/test_wdl/cromwell-executions/test_cc/d7249226-44a4-440a-a56c-4867ac755393/call-t1/shard-1/execution/fq1_1-2.fastq.gz.bam -> /users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t1/shard-1/execution/fq1_1-2.fastq.gz.bam"
+            }],
+            "message": ""
+          }]
+        }]
+      },
+      "inputs": {
+        "fastq": "fastqs/fq1_1-2.fastq.gz"
+      },
+      "returnCode": 0,
+      "jobId": "41916",
+      "backend": "Local",
+      "end": "2017-11-13T08:29:33.869-08:00",
+      "stderr": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t1/shard-1/execution/stderr",
+      "callRoot": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t1/shard-1",
+      "attempt": 1,
+      "executionEvents": [{
+        "startTime": "2017-11-13T08:29:30.939-08:00",
+        "description": "UpdatingCallCache",
+        "endTime": "2017-11-13T08:29:33.868-08:00"
+      }, {
+        "startTime": "2017-11-13T08:29:29.422-08:00",
+        "description": "PreparingJob",
+        "endTime": "2017-11-13T08:29:29.497-08:00"
+      }, {
+        "startTime": "2017-11-13T08:29:29.888-08:00",
+        "description": "CheckingCallCache",
+        "endTime": "2017-11-13T08:29:29.907-08:00"
+      }, {
+        "startTime": "2017-11-13T08:29:29.862-08:00",
+        "description": "InvalidatingCacheEntry",
+        "endTime": "2017-11-13T08:29:29.888-08:00"
+      }, {
+        "startTime": "2017-11-13T08:29:29.391-08:00",
+        "description": "Pending",
+        "endTime": "2017-11-13T08:29:29.407-08:00"
+      }, {
+        "startTime": "2017-11-13T08:29:29.413-08:00",
+        "description": "WaitingForOutputStore",
+        "endTime": "2017-11-13T08:29:29.422-08:00"
+      }, {
+        "startTime": "2017-11-13T08:29:29.907-08:00",
+        "description": "RunningJob",
+        "endTime": "2017-11-13T08:29:30.939-08:00"
+      }, {
+        "startTime": "2017-11-13T08:29:29.704-08:00",
+        "description": "BackendIsCopyingCachedOutputs",
+        "endTime": "2017-11-13T08:29:29.862-08:00"
+      }, {
+        "startTime": "2017-11-13T08:29:29.497-08:00",
+        "description": "CheckingCallCache",
+        "endTime": "2017-11-13T08:29:29.645-08:00"
+      }, {
+        "startTime": "2017-11-13T08:29:29.407-08:00",
+        "description": "RequestingExecutionToken",
+        "endTime": "2017-11-13T08:29:29.413-08:00"
+      }, {
+        "startTime": "2017-11-13T08:29:33.868-08:00",
+        "description": "UpdatingJobStore",
+        "endTime": "2017-11-13T08:29:33.870-08:00"
+      }, {
+        "startTime": "2017-11-13T08:29:29.645-08:00",
+        "description": "FetchingCachedOutputsFromDatabase",
+        "endTime": "2017-11-13T08:29:29.704-08:00"
+      }],
+      "start": "2017-11-13T08:29:29.374-08:00"
+    }]
+  },
+  "outputs": {
+    "test_cc.t1.bam": ["/users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t1/shard-0/execution/fq1_1-1.fastq.gz.bam", "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t1/shard-1/execution/fq1_1-2.fastq.gz.bam"],
+    "test_cc.t2.bed": ["/users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t2/shard-0/execution/fq1_1-1.fastq.gz.bam.bed", "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57/call-t2/shard-1/execution/fq1_1-2.fastq.gz.bam.bed"]
+  },
+  "workflowRoot": "/users/leepc12/code/test_wdl/cromwell-executions/test_cc/8a666a90-0f11-4704-ad9b-737090b2ae57",
+  "id": "8a666a90-0f11-4704-ad9b-737090b2ae57",
+  "inputs": {
+
+  },
+  "labels": {
+    "cromwell-workflow-id": "cromwell-8a666a90-0f11-4704-ad9b-737090b2ae57"
+  },
+  "submission": "2017-11-13T08:29:25.737-08:00",
+  "status": "Succeeded",
+  "end": "2017-11-13T08:29:38.595-08:00",
+  "start": "2017-11-13T08:29:25.791-08:00"
+}

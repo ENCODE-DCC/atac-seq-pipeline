@@ -1,0 +1,9 @@
+{
+	"test_wf.adapters" : [],
+	"test_wf.fastqs" : [],
+	"test_wf.sams" : ["fastqs/1.sam", "fastqs/2.sam"],
+
+	"test_wf.input_type" : "sam",
+
+	"test_wf.num_rep" : "2"
+}

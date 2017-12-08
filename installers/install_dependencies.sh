@@ -52,10 +52,6 @@ source activate atac-seq-pipeline
   wget -N -c https://github.com/broadinstitute/picard/releases/download/2.10.6/picard.jar
   chmod +x picard.jar
 
-  # install cromwell 30
-  wget -N -c https://github.com/broadinstitute/cromwell/releases/download/30/cromwell-30.jar
-  chmod +x cromwell-*.jar
-
   # resolve permission issue for python libraries
   if [[ $(find $CONDA_LIB -name '*egg-info*' -not -perm -o+r | wc -l ) > 0 ]]; then
     find $CONDA_LIB -name '*egg-info*' -not -perm -o+r -exec dirname {} \; | xargs chmod o+r -R

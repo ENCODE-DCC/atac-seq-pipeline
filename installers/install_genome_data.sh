@@ -126,9 +126,13 @@ echo -e "chrsz\t${DEST_DIR}/$(basename $CHRSZ)" >> ${TSV}
 echo -e "gensz\t$GENSZ" >> ${TSV}
 if [[ ${BUILD_BWT2_IDX} == 1 ]]; then
   echo -e "bowtie2_idx_tar\t${DEST_DIR}/bowtie2_index/${REF_FA_PREFIX}" >> ${TSV}
+else
+  echo -e "bowtie2_idx_tar\t/dev/null" >> ${TSV}
 fi
 if [[ ${BUILD_BWA_IDX} == 1 ]]; then
   echo -e "bwa_idx_tar\t${DEST_DIR}/bwa_index/${REF_FA_PREFIX}" >> ${TSV}
+else
+  echo -e "bwa_idx_tar\t/dev/null" >> ${TSV}
 fi
 echo -e "ref_fa\t${DEST_DIR}/${REF_FA_PREFIX}" >> ${TSV}
 

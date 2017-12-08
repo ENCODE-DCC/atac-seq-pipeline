@@ -1,17 +1,10 @@
 {
 	"atac.pipeline_type" : "atac",
 	"atac.genome_tsv" : "/users/leepc12/code/atac-seq-pipeline/genome/mm10_klab.tsv",
-	"atac.adapters" : [],
-	"atac.fastqs" : [],
-	"atac.bams" : [],
-	"atac.nodup_bams" : [],
 	"atac.tas" : [
 		"/srv/scratch/shared/kadru/leepc12/run/atac-seq-pipeline/bds/ENCSR889WQX/out/align/rep1/ENCFF439VSY.trim_pooled.nodup.tn5.tagAlign.gz",
 		"/srv/scratch/shared/kadru/leepc12/run/atac-seq-pipeline/bds/ENCSR889WQX/out/align/rep2/ENCFF463QCX.trim_ENCFF992TSA.trim.nodup.tn5.tagAlign.gz"
 	],
-	"atac.peaks" : [],
-	"atac.peaks_pr1" : [],
-	"atac.peaks_pr2" : [],
 
 	"atac.paired_end" : false,
 	"atac.multimapping" : 4,	

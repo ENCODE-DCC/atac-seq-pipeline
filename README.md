@@ -10,12 +10,16 @@ ENCODE ATAC-seq pipeline
 * `installers/` : dependency/genome data installers for Local, SGE and SLURM
 * `docker_image/` : Dockerfile
 
+# Important notice
+
+Cromwell has been recently updated to `cromwell-30.jar` but there is a [known bug](https://github.com/broadinstitute/cromwell/issues/2992) for multiple conditionals in a workflow level so our pipeline does not work with `cromwell-30.jar`. This bug is fixed but will not be applied until a new release 31 comes out. We included `cromwell-30-x.jar` in this repository. Use it until `cromwell-31.jar`.
+
 # Usage
 
 Choose `[BACKEND_CONF]` and `[WORKFLOW_OPT]` according to your platform and presence of `Docker`.
 
 ```
-$ java -jar -Dconfig.file=[BACKEND_CONF] cromwell-*.jar run atac.wdl -i input.json -o [WORKFLOW_OPT]
+$ java -jar -Dconfig.file=[BACKEND_CONF] cromwell-30-x.jar run atac.wdl -i input.json -o [WORKFLOW_OPT]
 ```
 
 ### Google Cloud Platform
@@ -63,7 +67,7 @@ $ java -jar -Dconfig.file=[BACKEND_CONF] cromwell-*.jar run atac.wdl -i input.js
 10) You don't have to repeat step 1-9 for next pipeline run. Credential information will be stored in `$HOME/.config/gcloud`. Go directly to step 11.
 11) Run a pipeline. Use any string for `[SAMPLE_NAME]` to distinguish between multiple samples.
     ```
-    $ java -jar -Dconfig.file=backends/google.conf -Dbackend.providers.JES.config.project=[PROJ_NAME] -Dbackend.providers.JES.config.root=[OUT_BUCKET]/[SAMPLE_NAME] cromwell-*.jar run atac.wdl -i input.json -o workflow_opts/docker_google.json
+    $ java -jar -Dconfig.file=backends/google.conf -Dbackend.providers.JES.config.project=[PROJ_NAME] -Dbackend.providers.JES.config.root=[OUT_BUCKET]/[SAMPLE_NAME] cromwell-30-x.jar run atac.wdl -i input.json -o workflow_opts/docker_google.json
     ```
 
 ### Local computer with `Docker`
@@ -71,7 +75,7 @@ $ java -jar -Dconfig.file=[BACKEND_CONF] cromwell-*.jar run atac.wdl -i input.js
 1) Install [genome data](#genome-data-installation).
 2) Run a pipeline.
     ```
-    $ java -jar -Dconfig.file=backends/default.conf cromwell-*.jar run atac.wdl -i input.json -o workflow_opts/docker.json
+    $ java -jar -Dconfig.file=backends/default.conf cromwell-30-x.jar run atac.wdl -i input.json -o workflow_opts/docker.json
     ```
 
 ### Local computer without `Docker`
@@ -81,7 +85,7 @@ $ java -jar -Dconfig.file=[BACKEND_CONF] cromwell-*.jar run atac.wdl -i input.js
 3) Run a pipeline.
     ```
     $ source activate atac-seq-pipeline
-    $ java -jar -Dconfig.file=backends/default.conf cromwell-*.jar run atac.wdl -i input.json -o workflow_opts/non_docker.json
+    $ java -jar -Dconfig.file=backends/default.conf cromwell-30-x.jar run atac.wdl -i input.json -o workflow_opts/non_docker.json
     $ source deactivate
     ```
 
@@ -97,7 +101,7 @@ Genome data have already been installed and shared on Stanford SCG4. You can ski
 4) Run a pipeline.
     ```
     $ source activate atac-seq-pipeline
-    $ java -jar -Dconfig.file=backends/sge.conf cromwell-*.jar run atac.wdl -i input.json -o workflow_opts/non_docker.json
+    $ java -jar -Dconfig.file=backends/sge.conf cromwell-30-x.jar run atac.wdl -i input.json -o workflow_opts/non_docker.json
     $ source deactivate
     ```
 
@@ -110,7 +114,7 @@ Genome data have already been installed and shared on Stanford Sherlock-2. You c
 4) Run a pipeline.
     ```
     $ source activate atac-seq-pipeline
-    $ java -jar -Dconfig.file=backends/slurm.conf cromwell-*.jar run atac.wdl -i input.json -o workflow_opts/non_docker.json
+    $ java -jar -Dconfig.file=backends/slurm.conf cromwell-30-x.jar run atac.wdl -i input.json -o workflow_opts/non_docker.json
     $ source deactivate
     ```
 
@@ -119,7 +123,7 @@ Genome data have already been installed and shared on Stanford Sherlock-2. You c
 Jobs will run locally without being submitted to Sun GridEngine (SGE). Genome data have already been installed and shared.
 1) Run a pipeline. 
     ```
-    $ java -jar -Dconfig.file=backends/default.conf cromwell-*.jar run atac.wdl -i input.json -o workflow_opts/docker.json
+    $ java -jar -Dconfig.file=backends/default.conf cromwell-30-x.jar run atac.wdl -i input.json -o workflow_opts/docker.json
     ```
 
 ### Kundaje lab cluster with Sun GridEngine (SGE)
@@ -129,7 +133,7 @@ Jobs will be submitted to Sun GridEngine (SGE) and distributed to all server nod
 2) Run a pipeline.
     ```
     $ source activate atac-seq-pipeline
-    $ java -jar -Dconfig.file=backends/sge.conf cromwell-*.jar run atac.wdl -i input.json -o workflow_opts/non_docker.json
+    $ java -jar -Dconfig.file=backends/sge.conf cromwell-30-x.jar run atac.wdl -i input.json -o workflow_opts/non_docker.json
     $ source deactivate
     ```
 
@@ -163,7 +167,7 @@ Optional parameters and flags are marked with `?`.
     * `"atac.genome_tsv"` : TSV file path/URI.
 
 2) Input genome data files
-    Choose any genome data type you want to start with and set all others as `[]`.
+    Choose any genome data type you want to start with and do not define others.
 
     * `"atac.fastqs"` : 3-dimensional array with FASTQ file path/URI.
         - 1st dimension: replicate ID
@@ -185,7 +189,7 @@ Optional parameters and flags are marked with `?`.
     * `"atac.peak_ppr2"`? : NARROWPEAK file path/URI for pooled 2nd pseudo replicates.
     * `"atac.peak_pooled"`? : NARROWPEAK file path/URI for pooled replicate.
 
-    If starting from peaks then always define `"atac.peaks"`. Define `"atac.peaks_pr1"`, `"atac.peaks_pr2"`, `"atac.peak_pooled"`, `"atac.peak_ppr1"` and `"atac.peak_ppr2"` according to the following rules:    
+    If starting from peaks then always define `"atac.peaks"`. Define `"atac.peaks_pr1"`, `"atac.peaks_pr2"`, `"atac.peak_pooled"`, `"atac.peak_ppr1"` and `"atac.peak_ppr2"` according to the following rules:
 
     ```
     if num_rep>1:
@@ -214,9 +218,9 @@ Optional parameters and flags are marked with `?`.
 
 4) Adapter trimmer settings
 
-    Structure/dimension of `"atac.adapters` must match with that of `"atac.fastqs"`. If no adapters are given then set `"atac.adapters"` as `[]` in `input.json`. If some adapters are known then define them in `"atac.adapters"` and leave other entries empty (`""`) while keeping the same structure/dimension as in `"atac.fastqs"`. All undefined/non-empty adapters will be trimmed without auto detection.
+    Structure/dimension of `"atac.adapters` must match with that of `"atac.fastqs"`. If no adapters are given then do not define `"atac.adapters"` in `input.json`. If some adapters are known then define them in `"atac.adapters"` and leave other entries empty (`""`) while keeping the same structure/dimension as in `"atac.fastqs"`. All undefined/non-empty adapters will be trimmed without auto detection.
     
-    * `"atac.trim_adapter.auto_detect_adapter"` : Set it as `true` to automatically detect/trim adapters for empty entries in `"atac.adapters"`. There will be no auto detection for non-empty entries it. if it is set as `[]`, adapters will be detected/trimmed for all fastqs.
+    * `"atac.trim_adapter.auto_detect_adapter"` : Set it as `true` to automatically detect/trim adapters for empty entries in `"atac.adapters"`. There will be no auto detection for non-empty entries it. If `"atac.adapters"`t is not defined then all adapters will be detected/trimmed for all fastqs.
     * `"atac.trim_adapter.min_trim_len"`? : Minimum trim length for `cutadapt -m`.
     * `"atac.trim_adapter.err_rate"`? : Maximum allowed adapter error rate for `cutadapt -e`.
 
@@ -356,6 +360,23 @@ A TSV file will be generated under `[DEST_DIR]`. Use it for `atac.genomv_tsv` va
    $ bash install_genome_data.sh [GENOME] [DEST_DIR]
    $ source deactivate
    ```
+
+### Custom genome data installation
+
+You can also install genome data for any species if you have a valid URL for reference `fasta` or `2bit` file. Modfy `installers/install_genome_data.sh` like the following.
+```
+...
+elif [[ $GENOME == "mm10" ]]; then
+  REF_FA="https://www.encodeproject.org/files/mm10_no_alt_analysis_set_ENCODE/@@download/mm10_no_alt_analysis_set_ENCODE.fasta.gz"
+  BLACKLIST="http://mitra.stanford.edu/kundaje/genome_data/mm10/mm10.blacklist.bed.gz"
+
+elif [[ $GENOME == "[YOUR_CUSTOM_GENOME_NAME]" ]]; then
+  REF_FA="[YOUR_CUSTOM_GENOME_FA_OR_2BIT_URL]"
+  BLACKLIST="[YOUR_CUSTOM_GENOME_BLACKLIST_BED]" # if it doesn't exist then comment this line out.
+
+fi
+...
+```
 
 # Dev
 

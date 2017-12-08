@@ -90,6 +90,8 @@ def read_tsv(tsv):
     result = []
     with open(tsv,'r') as fp:        
         for row in csv.reader(fp,delimiter='\t'):
+            if len(row)==0:
+                row=['']
             result.append(row)
     return result
 

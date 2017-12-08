@@ -1,0 +1,59 @@
+{
+	"atac.pipeline_type" : "atac",
+
+	"atac.ref_fa" : "/mnt/data/pipeline_genome_data/mm10/mm10_no_alt_analysis_set_ENCODE.fasta.gz",
+	"atac.bowtie2_idx_tar" : "/mnt/data/pipeline_genome_data/mm10/bowtie2_index/mm10_no_alt_analysis_set_ENCODE.fasta.tar",
+	"atac.chrsz" : "/mnt/data/pipeline_genome_data/mm10/mm10.chrom.sizes",
+	"atac.blacklist" : "/mnt/data/pipeline_genome_data/mm10/mm10.blacklist.bed.gz",
+	"atac.gensz" : "mm",
+
+	"atac.fastqs" : [
+		[
+			["/srv/scratch/shared/kadru/leepc12/run/atac-seq-pipeline/ENCSR889WQX/data/rep1/ENCFF439VSY.fastq.gz"],
+			["/srv/scratch/shared/kadru/leepc12/run/atac-seq-pipeline/ENCSR889WQX/data/rep1/ENCFF325FCQ.fastq.gz"],
+			["/srv/scratch/shared/kadru/leepc12/run/atac-seq-pipeline/ENCSR889WQX/data/rep1/ENCFF683IQS.fastq.gz"],
+			["/srv/scratch/shared/kadru/leepc12/run/atac-seq-pipeline/ENCSR889WQX/data/rep1/ENCFF744CHW.fastq.gz"]
+		],
+		[
+			["/srv/scratch/shared/kadru/leepc12/run/atac-seq-pipeline/ENCSR889WQX/data/rep2/ENCFF463QCX.fastq.gz"],
+			["/srv/scratch/shared/kadru/leepc12/run/atac-seq-pipeline/ENCSR889WQX/data/rep2/ENCFF992TSA.fastq.gz"]
+		]
+	],
+
+	"atac.adapters" : [
+		[
+			[""],
+			[""],
+			[""],
+			[""]
+		],
+		[
+			[""],
+			[""]
+		]
+	],
+
+	"atac.paired_end" : false,
+	"atac.multimapping" : 4,	
+
+	"atac.trim_adapter.auto_detect_adapter" : true,
+
+	"atac.trim_adapter.cpu" : 2,
+
+	"atac.bowtie2.cpu" : 4,
+	"atac.bowtie2.mem_mb" : 16000,
+	"atac.bowtie2.time_hr" : 36,
+
+	"atac.filter.cpu" : 2,
+	"atac.filter.mem_mb" : 12000,
+	"atac.filter.time_hr" : 23,
+
+	"atac.macs2_mem_mb" : 16000,
+
+	"atac.smooth_win" : 73,
+	"atac.enable_idr" : true,
+	"atac.idr_thresh" : 0.05,
+
+	"atac.qc_report.name" : "ENCSR889WQX",
+	"atac.qc_report.desc" : "ATAC-seq on Mus musculus C57BL/6 frontal cortex adult"
+}

@@ -1,7 +1,6 @@
 {
 	"atac.pipeline_type" : "atac",
 	"atac.genome_tsv" : "/oak/stanford/groups/akundaje/leepc12/code/atac-seq-pipeline/genome/mm10_sherlock.tsv",
-	"atac.adapters" : [],
 	"atac.fastqs" : [
 		[
 			["/oak/stanford/groups/akundaje/leepc12/run/ATAC_ENCODE3/ENCODE3/data/DNA+accessibility/ATAC-seq/Mus+musculus/ENCSR889WQX/rep1/ENCFF439VSY.fastq.gz"],
@@ -14,12 +13,6 @@
 			["/oak/stanford/groups/akundaje/leepc12/run/ATAC_ENCODE3/ENCODE3/data/DNA+accessibility/ATAC-seq/Mus+musculus/ENCSR889WQX/rep2/ENCFF992TSA.fastq.gz"]
 		]
 	],
-	"atac.bams" : [],
-	"atac.nodup_bams" : [],
-	"atac.tas" : [],
-	"atac.peaks" : [],
-	"atac.peaks_pr1" : [],
-	"atac.peaks_pr2" : [],
 
 	"atac.paired_end" : false,
 	"atac.multimapping" : 4,	

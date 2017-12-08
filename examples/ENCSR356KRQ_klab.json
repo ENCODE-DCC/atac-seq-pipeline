@@ -1,7 +1,6 @@
 {
 	"atac.pipeline_type" : "atac",
 	"atac.genome_tsv" : "/users/leepc12/code/atac-seq-pipeline/genome/hg38_klab.tsv",
-	"atac.adapters" : [],
 	"atac.fastqs" : [
 		[
 			["/srv/scratch/shared/kadru/leepc12/run/atac-seq-pipeline/ENCSR356KRQ/data/rep1/pair1/ENCFF341MYG.fastq.gz","/srv/scratch/shared/kadru/leepc12/run/atac-seq-pipeline/ENCSR356KRQ/data/rep1/pair2/ENCFF248EJF.fastq.gz"],
@@ -16,12 +15,6 @@
 			["/srv/scratch/shared/kadru/leepc12/run/atac-seq-pipeline/ENCSR356KRQ/data/rep2/pair1/ENCFF366DFI.fastq.gz","/srv/scratch/shared/kadru/leepc12/run/atac-seq-pipeline/ENCSR356KRQ/data/rep2/pair2/ENCFF573UXK.fastq.gz"]
 		]
 	],
-	"atac.bams" : [],
-	"atac.nodup_bams" : [],
-	"atac.tas" : [],
-	"atac.peaks" : [],
-	"atac.peaks_pr1" : [],
-	"atac.peaks_pr2" : [],
 
 	"atac.paired_end" : true,
 	"atac.multimapping" : 4,

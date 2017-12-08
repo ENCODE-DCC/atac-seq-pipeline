@@ -1,0 +1,15 @@
+{
+	"test_wf.fastqs" : [
+		[
+			["fastqs/fq1_1-1.fastq.gz","fastqs/fq1_1-2.fastq.gz"],
+			["fastqs/fq1_2-1.fastq.gz","fastqs/fq1_2-2.fastq.gz"]
+		],
+		[
+			["fastqs/fq2_1-1.fq.gz","fastqs/fq2_1-2.fastq.gz"],
+			["fastqs/fq2_2-1.fastq.gz","fastqs/fq2_2-2.fastq.gz"]
+		]
+	],
+	"test_wf.adapters" : [
+	]
+
+}

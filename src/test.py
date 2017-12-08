@@ -67,11 +67,12 @@ def test4():
     run_shell_cmd('ls -l')
     run_shell_cmd('asdfasdf')
     
+def test_read_tsv():
+    print(read_tsv('test.tsv'))
     
-    
-    
+test_read_tsv()    
 
-test4()
+#test4()
 
 # run_shell_cmd("echo 2; echo 2; echo 3; sleep 10")
 
