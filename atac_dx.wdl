@@ -10,9 +10,8 @@ workflow atac {
 	Array[Array[Array[String]]] adapters 
 								# [rep_id][merge_id][end_id]
 	Boolean paired_end 		# endedness of sample
-	Int multimapping 		# multimapping reads
-	Boolean enable_idr		# enable IDR analysis on raw peaks
-	Float idr_thresh		# IDR threshold
+	Int? multimapping 		# multimapping reads
+	Float? idr_thresh		# IDR threshold
 
 	# genome ref. data files
 	File ref_fa
@@ -23,6 +22,8 @@ workflow atac {
 
 	# init
 	Int num_rep = length(fastqs)
+	Float idr_thresh_ = select_first([idr_thresh, 0.1])
+	Int multimapping_ = select_first([multi_mapping, 0])
 
 	# pipeline starts here (parallelized for each replicate)
 	scatter(i in range(num_rep)) {
@@ -37,13 +38,13 @@ workflow atac {
 			idx_tar = bowtie2_idx_tar,
 			fastqs = trim_adapter.trimmed_merged_fastqs, #[R1,R2]
 			paired_end = paired_end,
-			multimapping = multimapping,
+			multimapping = multimapping_,
 		}
 		# filter/dedup bam
 		call filter { input :
 			bam = bowtie2.bam,
 			paired_end = paired_end,
-			multimapping = multimapping,
+			multimapping = multimapping_,
 		}
 		# convert bam to tagalign and subsample it if necessary
 		call bam2ta { input :
@@ -169,63 +170,61 @@ workflow atac {
 	}
 
 	# IDR on every pair of true replicates
-	if ( enable_idr ) {
-		scatter( pair in pair_gen.pairs ) {
-			call idr { input : 
-				prefix = "rep"+(pair[0]+1)+"-rep"+(pair[1]+1),
-				peak1 = macs2.npeak[(pair[0])],
-				peak2 = macs2.npeak[(pair[1])],
-				peak_pooled = macs2_pooled.npeak,
-				idr_thresh = idr_thresh,
-				peak_type = "narrowPeak",
-				rank = "p.value",
-				blacklist = blacklist,
-				chrsz = chrsz,
-				ta = pool_ta.ta_pooled,
-			}
-		}
-		# IDR on pseduo replicates
-		scatter( i in range(num_rep) ) {
-			call idr as idr_pr { input : 
-				prefix = "rep"+(i+1)+"-pr",
-				peak1 = macs2_pr1.npeak[i],
-				peak2 = macs2_pr2.npeak[i],
-				peak_pooled = macs2.npeak[i],
-				idr_thresh = idr_thresh,
-				peak_type = "narrowPeak",
-				rank = "p.value",
-				blacklist = blacklist,
-				chrsz = chrsz,
-				ta = bam2ta.ta[i],
-			}
-		}
-		# IDR on pooled pseduo replicates
-		call idr as idr_ppr { input : 
-			prefix = "ppr",
-			peak1 = macs2_ppr1.npeak,
-			peak2 = macs2_ppr2.npeak,
+	scatter( pair in pair_gen.pairs ) {
+		call idr { input : 
+			prefix = "rep"+(pair[0]+1)+"-rep"+(pair[1]+1),
+			peak1 = macs2.npeak[(pair[0])],
+			peak2 = macs2.npeak[(pair[1])],
 			peak_pooled = macs2_pooled.npeak,
-			idr_thresh = idr_thresh,
+			idr_thresh = idr_thresh_,
 			peak_type = "narrowPeak",
 			rank = "p.value",
 			blacklist = blacklist,
 			chrsz = chrsz,
 			ta = pool_ta.ta_pooled,
 		}
-		# reproducibility QC for IDR peaks
-		call reproducibility as reproducibility_idr { input :
-			prefix = 'idr',
-			peaks = idr.bfilt_idr_peak,
-			peaks_pr = idr_pr.bfilt_idr_peak,
-			peak_ppr = idr_ppr.bfilt_idr_peak,
+	}
+	# IDR on pseduo replicates
+	scatter( i in range(num_rep) ) {
+		call idr as idr_pr { input : 
+			prefix = "rep"+(i+1)+"-pr",
+			peak1 = macs2_pr1.npeak[i],
+			peak2 = macs2_pr2.npeak[i],
+			peak_pooled = macs2.npeak[i],
+			idr_thresh = idr_thresh_,
+			peak_type = "narrowPeak",
+			rank = "p.value",
+			blacklist = blacklist,
+			chrsz = chrsz,
+			ta = bam2ta.ta[i],
 		}
+	}
+	# IDR on pooled pseduo replicates
+	call idr as idr_ppr { input : 
+		prefix = "ppr",
+		peak1 = macs2_ppr1.npeak,
+		peak2 = macs2_ppr2.npeak,
+		peak_pooled = macs2_pooled.npeak,
+		idr_thresh = idr_thresh_,
+		peak_type = "narrowPeak",
+		rank = "p.value",
+		blacklist = blacklist,
+		chrsz = chrsz,
+		ta = pool_ta.ta_pooled,
+	}
+	# reproducibility QC for IDR peaks
+	call reproducibility as reproducibility_idr { input :
+		prefix = 'idr',
+		peaks = idr.bfilt_idr_peak,
+		peaks_pr = idr_pr.bfilt_idr_peak,
+		peak_ppr = idr_ppr.bfilt_idr_peak,
 	}
 
 	call qc_report { input :
 		paired_end = paired_end,
 		pipeline_type = pipeline_type,
 		peak_caller = 'macs2',
-		idr_thresh = idr_thresh,
+		idr_thresh = idr_thresh_,
 		flagstat_qcs = bowtie2.flagstat_qc,
 		nodup_flagstat_qcs = filter.flagstat_qc,
 		dup_qcs = filter.dup_qc,
@@ -239,16 +238,16 @@ workflow atac {
 		frip_qc_ppr1 = [macs2_ppr1.frip_qc],
 		frip_qc_ppr2 = [macs2_ppr2.frip_qc],
 
-		idr_plots = if enable_idr then idr.idr_plot else [],
-		idr_plots_pr = if enable_idr then idr_pr.idr_plot else [],
-		idr_plot_ppr = if enable_idr then [idr_ppr.idr_plot] else [],
-		frip_idr_qcs = if enable_idr then idr.frip_qc else [],
-		frip_idr_qcs_pr = if enable_idr then idr_pr.frip_qc else [],
-		frip_idr_qc_ppr = if enable_idr then [idr_ppr.frip_qc] else [],
+		idr_plots = idr.idr_plot,
+		idr_plots_pr = idr_pr.idr_plot,
+		idr_plot_ppr = [idr_ppr.idr_plot],
+		frip_idr_qcs = idr.frip_qc,
+		frip_idr_qcs_pr = idr_pr.frip_qc,
+		frip_idr_qc_ppr = [idr_ppr.frip_qc],
 		frip_overlap_qcs = overlap.frip_qc,
 		frip_overlap_qcs_pr = overlap_pr.frip_qc,
 		frip_overlap_qc_ppr = [overlap_ppr.frip_qc],
-		idr_reproducibility_qc = if enable_idr then [reproducibility_idr.reproducibility_qc] else [],
+		idr_reproducibility_qc = [reproducibility_idr.reproducibility_qc],
 		overlap_reproducibility_qc = [reproducibility_overlap.reproducibility_qc],
 	}
 }
