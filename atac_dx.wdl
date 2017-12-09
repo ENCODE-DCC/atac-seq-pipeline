@@ -23,7 +23,7 @@ workflow atac {
 	# init
 	Int num_rep = length(fastqs)
 	Float idr_thresh_ = select_first([idr_thresh, 0.1])
-	Int multimapping_ = select_first([multi_mapping, 0])
+	Int multimapping_ = select_first([multimapping, 0])
 
 	# pipeline starts here (parallelized for each replicate)
 	scatter(i in range(num_rep)) {
