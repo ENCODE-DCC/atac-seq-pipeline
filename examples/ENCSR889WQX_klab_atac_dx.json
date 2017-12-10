@@ -51,7 +51,6 @@
 	"atac.macs2_mem_mb" : 16000,
 
 	"atac.smooth_win" : 73,
-	"atac.enable_idr" : true,
 	"atac.idr_thresh" : 0.05,
 
 	"atac.qc_report.name" : "ENCSR889WQX",

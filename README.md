@@ -215,6 +215,7 @@ Optional parameters and flags are marked with `?`.
     * `"atac.align_only`? : Disable all downstream analysis after mapping.
     * `"atac.multimapping"`? : Multimapping reads.
     * `"atac.true_rep_only"`? : Set it as `true` to disable all analyses (including IDR, naive-overlap and reproducibility QC) related to pseudo replicates. This flag suppresses `"atac.enable_idr"`.
+    * `"atac.disable_xcor`? : Disable cross-correlation analysis.
 
 4) Adapter trimmer settings
 

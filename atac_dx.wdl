@@ -12,6 +12,7 @@ workflow atac {
 	Boolean paired_end 		# endedness of sample
 	Int? multimapping 		# multimapping reads
 	Float? idr_thresh		# IDR threshold
+	Int? smooth_win			# smoothing window for MACS2
 
 	# genome ref. data files
 	File ref_fa
@@ -24,6 +25,7 @@ workflow atac {
 	Int num_rep = length(fastqs)
 	Float idr_thresh_ = select_first([idr_thresh, 0.1])
 	Int multimapping_ = select_first([multimapping, 0])
+	Int smooth_win_	= select_first([smooth_win, 150])
 
 	# pipeline starts here (parallelized for each replicate)
 	scatter(i in range(num_rep)) {
@@ -62,6 +64,7 @@ workflow atac {
 			ta = bam2ta.ta,
 			gensz = gensz,
 			chrsz = chrsz,
+			smooth_win = smooth_win_,
 			make_signal = true,
 			blacklist = blacklist,
 		}
@@ -81,6 +84,7 @@ workflow atac {
 		ta = pool_ta.ta_pooled,
 		gensz = gensz,
 		chrsz = chrsz,
+		smooth_win = smooth_win_,
 		make_signal = true,
 		blacklist = blacklist,
 	}
@@ -90,12 +94,14 @@ workflow atac {
 			ta = spr.ta_pr1[i],
 			gensz = gensz,
 			chrsz = chrsz,
+			smooth_win = smooth_win_,
 			blacklist = blacklist,
 		}
 		call macs2 as macs2_pr2 { input :
 			ta = spr.ta_pr2[i],
 			gensz = gensz,
 			chrsz = chrsz,
+			smooth_win = smooth_win_,
 			blacklist = blacklist,
 		}
 	}
@@ -111,6 +117,7 @@ workflow atac {
 		ta = pool_ta_pr1.ta_pooled,
 		gensz = gensz,
 		chrsz = chrsz,
+		smooth_win = smooth_win_,
 		blacklist = blacklist,
 	}
 	# call peaks on 2nd pooled pseudo replicates
@@ -118,6 +125,7 @@ workflow atac {
 		ta = pool_ta_pr2.ta_pooled,
 		gensz = gensz,
 		chrsz = chrsz,
+		smooth_win = smooth_win_,
 		blacklist = blacklist,
 	}
 	# generate every pair of true replicates
