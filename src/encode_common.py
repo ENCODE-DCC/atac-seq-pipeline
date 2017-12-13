@@ -168,6 +168,19 @@ def make_hard_link(f, out_dir): # hard-link 'f' to 'out_dir'/'f'
     os.link(f, linked)
     return linked
 
+def copy_f_to_f(f, dest): # copy 'f' to 'out_dir'/'f'
+    if os.path.abspath(f)==os.path.abspath(dest):
+        raise Exception('Trying to copy to itself. {}'.format(f))    
+    cmd = 'cp -f {} {}'.format(f, dest)
+    run_shell_cmd(cmd)
+    return dest
+
+def copy_f_to_dir(f, out_dir): # copy 'f' to 'out_dir'/'f'
+    if not os.path.isdir(out_dir):
+        raise Exception('Invalid destination directory {}.'.format(out_dir))
+    dest = os.path.join(out_dir, os.path.basename(f))
+    return copy_f_to_f(f, dest)
+
 def make_empty_file(filename, out_dir):
     f = os.path.join(out_dir, os.path.basename(filename))
     touch(f)

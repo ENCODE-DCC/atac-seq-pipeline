@@ -1,8 +1,6 @@
 # channels : defaults, r, bioconda
 
-bowtie ==1.1.2
-bowtie2 ==2.2.6
-ncurses
+nomkl
 samtools ==1.2
 htslib ==1.4 # 1.5 in bioconda needed libbz2.so.1.0
 bedtools ==2.26.0 #2.22 # 2.21.0
@@ -12,27 +10,19 @@ ucsc-wigtobigwig
 ucsc-bedgraphtobigwig
 ucsc-bigwiginfo
 ucsc-bedclip
-ucsc-bigWigAverageOverBed
 ucsc-bedtobigbed
 ucsc-twobittofa
-macs2 ==2.1.0
+macs2 ==2.1.1.20160309 #2.1.0 (no binaries for OSX)
 boost ==1.57.0
-gnuplot #==5.0.3
-numpy ==1.10.2 #1.9.0, 1.8.2 conflicts with ATAQC
-scipy # ==0.17.0: to fix 'undefined symbol: PyUnicodeUCS2_DecodeUTF8'
-matplotlib
+openblas ==0.2.19
+numpy ==1.11.3 #1.13.3 #1.10.2 (no binaries for OSX) #1.9.0, 1.8.2 conflicts with ATAQC
+matplotlib ==1.5.1
 six==1.11.0 # to fix (ImportError: cannot import name _thread)
 python-dateutil==2.6.1
-libgfortran==3.0 # ataqc
-pandas ==0.18.0 #==0.16.1 # ataqc
-metaseq #==0.5.6 # ataqc
-jinja2 # ataqc
-graphviz==2.38.0
+libgfortran==3.0
+graphviz ==2.38.0
 libtool
 ghostscript # pdf2png
-gsl # for preseq
-pysam==0.8.2.1 # 0.8.3, 0.9 from bioconda has an issue with ATAQC (segmentation fault), need to use -c bcbio
-pybedtools==0.6.9 # same issue as in pysam
 pigz
 zlib
 sambamba ==0.6.5 # to fix seg fault error in 0.6.1
@@ -43,10 +33,22 @@ r-bitops
 r-catools
 bioconductor-rsamtools
 r-spp ==1.13
+#glibc #segmentation fault in conda with openssl
+pyfaidx ==0.4.7.1
+
 cutadapt ==1.9.1
 preseq ==2.0.2 
 trim-galore ==0.4.1 # for old trimmer
 python-levenshtein # for old trimmer (trimAdapter.py)
-#glibc #segmentation fault in conda with openssl
-pyfaidx ==0.4.7.1
-six ==1.4.1
+
+bowtie2 ==2.2.6
+ncurses
+ucsc-bigWigAverageOverBed
+gnuplot #==5.0.3
+scipy # ==0.17.0: to fix 'undefined symbol: PyUnicodeUCS2_DecodeUTF8'
+pandas #==0.18.0 #==0.16.1 # ataqc
+metaseq #==0.5.6 # ataqc
+jinja2 # ataqc
+gsl # for preseq
+pysam==0.8.2.1 # 0.8.3, 0.9 from bioconda has an issue with ATAQC (segmentation fault), need to use -c bcbio
+pybedtools==0.6.9 # same issue as in pysam

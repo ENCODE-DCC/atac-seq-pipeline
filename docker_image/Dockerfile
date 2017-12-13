@@ -79,11 +79,33 @@ RUN chmod +x bedClip
 RUN wget http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/bedGraphToBigWig
 RUN chmod +x bedGraphToBigWig
 
-# Install NumPy 1.10.2 (python2)
-RUN pip install numpy==1.10.2
+# Install NumPy 1.11.3 (python2 pip)
+# numpy on Ubuntu 14.04 is built with old version of openblas
+# so this will be later uninstalled.
+# just a work-around to install the latest MACS2 2.1.1.20160309
+RUN pip install numpy==1.11.3
 
-# Install MACS2 2.1.0
-RUN pip install macs2==2.1.0.20150731
+# Install MACS2 2.1.1.20160309
+RUN pip install --no-dependencies macs2==2.1.1.20160309
+
+# Uninstall pip-installed numpy
+RUN pip uninstall -y numpy
+
+# Install OpenBLAS 0.2.19
+# to have the same result as of conda's non-MKL openblas 0.2.19
+# setting TARGET=HASWELL will give you different result.
+# let's stick to TARGET=NEHALEM
+RUN git clone --branch v0.2.19 https://github.com/xianyi/OpenBLAS
+RUN cd OpenBLAS && make FC=gfortran TARGET=NEHALEM USE_THREAD=0 && make PREFIX=/opt/openblas install
+ENV LD_LIBRARY_PATH="/opt/openblas/lib:${LD_LIBRARY_PATH}"
+
+# Install cython
+RUN pip install cython
+
+# Install numpy 1.11.3 (python2, using openblas 0.2.19)
+RUN git clone --branch v1.11.3 https://github.com/numpy/numpy
+COPY /docker_image/site.cfg numpy/
+RUN cd numpy && python setup.py install
 
 # Install R packages
 RUN echo "r <- getOption('repos'); r['CRAN'] <- 'http://cran.us.r-project.org'; options(repos = r);" > ~/.Rprofile
@@ -109,10 +131,20 @@ RUN wget https://github.com/kundajelab/phantompeakqualtools/archive/1.2.tar.gz &
 ENV PATH="/software/phantompeakqualtools-1.2:${PATH}"
 
 # Install Python3 and packages (for IDR)
-RUN apt-get install -y python3-dev python3-numpy python3-scipy python3-setuptools python3-matplotlib
+RUN apt-get install -y python3-dev python3-setuptools python3-pip python3-numpy python3-scipy python3-matplotlib
 
-# Install IDR 2.0.4
-RUN git clone --branch 2.0.4 https://github.com/kundajelab/idr
+# Install cython for python3
+RUN pip3 install cython
+
+# Install numpy 1.11.3 for python3
+RUN cd numpy && python3 setup.py install
+
+# Install scipy 1.0.0 for python3
+RUN git clone --branch v1.0.0 https://github.com/scipy/scipy
+RUN cd scipy && python3 setup.py install
+
+# Install IDR 2.0.4.1
+RUN git clone --branch 2.0.4.1 https://github.com/kundajelab/idr
 RUN cd idr && python3 setup.py install
 
 # Install sambamba 0.6.5
@@ -125,6 +157,8 @@ RUN apt-get install -y ghostscript
 # Get ENCODE atac-seq-pipeline container repository
 # This COPY assumes the build context is the root of the atac-seq-pipeline repo
 # and it gets whatever is checked out plus local modifications
+# so the buildling command should:
+# cd [GIT_REPO_DIR] && docker build -f docker_image/Dockerfile .
 RUN mkdir atac-seq-pipeline
 COPY / atac-seq-pipeline
 ENV PATH="/software/atac-seq-pipeline/src:${PATH}"

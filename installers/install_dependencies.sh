@@ -3,6 +3,7 @@
 set -e
 
 echo "=== Installing packages for python3 env..."
+conda install nomkl -y
 conda install --file requirements_py3.txt -y \
   -c defaults -c bioconda -c r -c bcbio -c daler -c asmeurer
 
@@ -17,7 +18,7 @@ echo "=== Installing additional packages for python3 env..."
   # uninstall IDR 2.0.3 and install the latest one
   conda uninstall idr -y
   rm -rf idr_tmp
-  git clone https://github.com/kundajelab/idr idr_tmp
+  git clone --branch 2.0.4.1 https://github.com/kundajelab/idr idr_tmp
   cd idr_tmp
   $CONDA_BIN/python3 setup.py install
   cd $CONDA_BIN
