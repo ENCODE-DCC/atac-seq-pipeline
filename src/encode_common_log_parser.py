@@ -5,10 +5,6 @@
 
 from collections import OrderedDict
 
-def parse_bowtie2_align_log(txt):
-    result = OrderedDict()
-    return result
-
 def parse_flagstat_qc(txt):
     result = OrderedDict()
     total = ''

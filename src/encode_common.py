@@ -181,11 +181,6 @@ def copy_f_to_dir(f, out_dir): # copy 'f' to 'out_dir'/'f'
     dest = os.path.join(out_dir, os.path.basename(f))
     return copy_f_to_f(f, dest)
 
-def make_empty_file(filename, out_dir):
-    f = os.path.join(out_dir, os.path.basename(filename))
-    touch(f)
-    return f
-
 def now():
     return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 

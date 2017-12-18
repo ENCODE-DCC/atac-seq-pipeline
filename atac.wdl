@@ -27,7 +27,7 @@ workflow atac {
 	# you can selectively trim adapter for each fastq
 	#  by keeping the same structure as "fastqs" and only fill in known adapters
 	# activate "atac.trim_adapter.auto_detect_adapter" 
-	#  if you want auto adapter detection/removal for unfilled entries in "adapters"
+	#  if you want auto adapter detection/removal for non-empty entries in "adapters"
 	Array[Array[Array[String]]]? adapters 
 								# [rep_id][merge_id][end_id]
 

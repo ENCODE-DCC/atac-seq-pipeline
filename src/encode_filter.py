@@ -296,8 +296,7 @@ def main():
                 args.nth, args.out_dir)
 
     if args.no_dup_removal:
-        nodup_bam = filt_bam
-        dup_qc = make_empty_file('this_file_is_dummy.dup.qc', args.out_dir)
+        nodup_bam = filt_bam        
     else:
         log.info('Marking dupes with {}...'.format(args.dup_marker))
         if args.dup_marker=='picard':
@@ -349,13 +348,12 @@ def main():
         else:
             ret_val_3 = pool.apply_async(pbc_qc_se,
                             (dupmark_bam, args.out_dir))
-    else:
-        ret_val_3 = pool.apply_async(make_empty_file,
-                        ('this_file_is_dummy.pbc.qc', args.out_dir))
+            
     # gather
     nodup_bai = ret_val_1.get(BIG_INT)
     nodup_flagstat_qc = ret_val_2.get(BIG_INT)
-    pbc_qc = ret_val_3.get(BIG_INT)
+    if not args.no_dup_removal:
+        pbc_qc = ret_val_3.get(BIG_INT)
 
     log.info('Closing multi-threading...')
     pool.close()
