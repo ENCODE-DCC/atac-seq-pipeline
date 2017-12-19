@@ -59,10 +59,11 @@ def bam2ta_pe(bam, regex_grep_v_ta, nth, out_dir):
     ta = '{}.tagAlign.gz'.format(prefix)
     # intermediate files
     bedpe = '{}.bedpe.gz'.format(prefix)
-    nmsrt_bam = samtools_name_sort(bam, nth, out_dir)
+    # nmsrt_bam = samtools_name_sort(bam, nth, out_dir)
+    nmsrt_bam = sambamba_name_sort(bam, nth, out_dir)
 
     cmd1 = 'LC_COLLATE=C bedtools bamtobed -bedpe -mate1 -i {} | '
-    cmd1 += 'sort -k1,1 -k2,2n -k3,3n | '
+    # cmd1 += 'sort -k1,1 -k2,2n -k3,3n | '
     cmd1 += 'gzip -nc > {}'
     cmd1 = cmd1.format(
         nmsrt_bam,

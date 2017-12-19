@@ -3,6 +3,11 @@
 # Based on Ubuntu 14.04
 ############################################################
 
+# IMPORTANT!
+# If you install python2/3 packages using pip/pip3
+#  and not sure about math library dependencies like BLAS and numpy,
+#  then install with --no-dependencies
+
 # Set the base image to Ubuntu 14.04
 FROM ubuntu:14.04
 
@@ -10,26 +15,41 @@ FROM ubuntu:14.04
 MAINTAINER Jin Lee
 
 # Update the repository sources list
-# Install base packages: git, python, java, R
+# Install base packages: git, python2/3, java, R
 RUN apt-get update && apt-get install -y \
     ant \
     build-essential \
-    git \
+    software-properties-common \
     libncurses5-dev \
     libncursesw5-dev \
+    libcurl4-openssl-dev \
+    libboost-dev \
+    libfreetype6-dev \
+    zlib1g-dev \
+    r-base \
     python-dev \
     python-setuptools \
-    software-properties-common \
+    python-pip \
+    python3-dev \
+    python3-setuptools \
+    python3-pip \
+    git \
     wget \
-    zlib1g-dev \
     unzip \
-    libcurl4-openssl-dev \
-    r-base
+    ghostscript
 
-# Install pip and python packages: common and python-dateutils
-RUN easy_install pip
-RUN pip install common
-RUN pip install python-dateutil
+# Make directory for all softwares
+RUN mkdir /software
+WORKDIR /software
+ENV PATH="/software:${PATH}"
+
+# Install OpenBLAS 0.2.19 (NEHALEM architecture, single-threaded)
+# to have the same result as of Conda's non-MKL openblas 0.2.19
+# setting TARGET=HASWELL will give you different result.
+# so let's stick to TARGET=NEHALEM
+RUN git clone --branch v0.2.19 https://github.com/xianyi/OpenBLAS
+RUN cd OpenBLAS && make FC=gfortran TARGET=NEHALEM USE_THREAD=0 && make PREFIX=/opt/openblas install
+ENV LD_LIBRARY_PATH="/opt/openblas/lib:${LD_LIBRARY_PATH}"
 
 # Install Java 8 for picard
 RUN echo debconf shared/accepted-oracle-license-v1-1 select true | \
@@ -38,14 +58,19 @@ RUN echo debconf shared/accepted-oracle-license-v1-1 seen true | \
     sudo debconf-set-selections
 RUN add-apt-repository ppa:webupd8team/java
 RUN apt-get update --fix-missing && apt-get install -y \
-	oracle-java8-installer
+    oracle-java8-installer
 
-RUN mkdir /software
-WORKDIR /software
-ENV PATH="/software:${PATH}"
+# Install R packages
+RUN echo "r <- getOption('repos'); r['CRAN'] <- 'http://cran.us.r-project.org'; options(repos = r);" > ~/.Rprofile
+RUN Rscript -e "install.packages('snow')"
+RUN Rscript -e "install.packages('snowfall')"
+RUN Rscript -e "install.packages('bitops')"
+RUN Rscript -e "install.packages('caTools')"
+RUN Rscript -e "source('http://bioconductor.org/biocLite.R'); biocLite('Rsamtools')"
 
-# Install cutadapt 1.9.1
-RUN pip install cutadapt==1.9.1
+# Install R package spp 1.13 (required for phantompeakqualtools)
+RUN wget https://github.com/hms-dbmi/spp/archive/1.13.tar.gz
+RUN Rscript -e "install.packages('./1.13.tar.gz')"
 
 # Install samtools dependencies
 RUN wget http://zlib.net/zlib-1.2.11.tar.gz && tar -xvf zlib-1.2.11.tar.gz
@@ -54,6 +79,41 @@ RUN wget http://bzip.org/1.0.6/bzip2-1.0.6.tar.gz && tar -xvf bzip2-1.0.6.tar.gz
 RUN cd bzip2-1.0.6 && make && make install
 RUN wget https://tukaani.org/xz/xz-5.2.3.tar.gz && tar -xvf xz-5.2.3.tar.gz
 RUN cd xz-5.2.3 && ./configure && make && make install
+
+# Install basic python2 packages
+RUN pip install common python-dateutil cython
+
+# Install basic python3 packages
+RUN pip3 install common python-dateutil cython
+
+# Install numpy 1.11.3 (python2/3)
+RUN git clone --branch v1.11.3 https://github.com/numpy/numpy
+COPY /docker_image/site.cfg numpy/
+RUN cd numpy && python setup.py install
+RUN cd numpy && python3 setup.py install
+
+# Install scipy 1.0.0 (python2/3)
+RUN git clone --branch v1.0.0 https://github.com/scipy/scipy
+RUN cd scipy && python setup.py install
+RUN cd scipy && python3 setup.py install
+
+# Install matplotlib 1.5.1 (python2/3)
+RUN git clone --branch v1.5.1 https://github.com/matplotlib/matplotlib
+RUN cd matplotlib && python setup.py install
+RUN cd matplotlib && python3 setup.py install
+
+# Install MACS2 2.1.1.20160309 (python2)
+RUN pip install --no-dependencies macs2==2.1.1.20160309
+
+# Install IDR 2.0.4.1 (python3)
+RUN git clone --branch 2.0.4.1 https://github.com/kundajelab/idr
+RUN cd idr && python3 setup.py install
+
+# Install UCSC tools (Kent utils) latest
+RUN wget http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/bedClip
+RUN chmod +x bedClip
+RUN wget http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/bedGraphToBigWig
+RUN chmod +x bedGraphToBigWig
 
 # Install samtools 1.2
 RUN git clone --branch 1.2 https://github.com/samtools/samtools.git
@@ -68,91 +128,21 @@ RUN cd bedtools2 && make && make install
 RUN wget https://github.com/broadinstitute/picard/releases/download/2.10.6/picard.jar
 RUN chmod +x picard.jar
 
-# Install Bowtie2 2.2.6
-RUN wget https://github.com/BenLangmead/bowtie2/releases/download/v2.2.6/bowtie2-2.2.6-linux-x86_64.zip
-RUN unzip bowtie2-2.2.6-linux-x86_64.zip
-ENV PATH="/software/bowtie2-2.2.6:${PATH}"
-
-# Install UCSC tools (Kent utils) latest
-RUN wget http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/bedClip
-RUN chmod +x bedClip
-RUN wget http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/bedGraphToBigWig
-RUN chmod +x bedGraphToBigWig
-
-# Install NumPy 1.11.3 (python2 pip)
-# numpy on Ubuntu 14.04 is built with old version of openblas
-# so this will be later uninstalled.
-# just a work-around to install the latest MACS2 2.1.1.20160309
-RUN pip install numpy==1.11.3
-
-# Install MACS2 2.1.1.20160309
-RUN pip install --no-dependencies macs2==2.1.1.20160309
-
-# Uninstall pip-installed numpy
-RUN pip uninstall -y numpy
-
-# Install OpenBLAS 0.2.19
-# to have the same result as of conda's non-MKL openblas 0.2.19
-# setting TARGET=HASWELL will give you different result.
-# let's stick to TARGET=NEHALEM
-RUN git clone --branch v0.2.19 https://github.com/xianyi/OpenBLAS
-RUN cd OpenBLAS && make FC=gfortran TARGET=NEHALEM USE_THREAD=0 && make PREFIX=/opt/openblas install
-ENV LD_LIBRARY_PATH="/opt/openblas/lib:${LD_LIBRARY_PATH}"
-
-# Install cython
-RUN pip install cython
-
-# Install numpy 1.11.3 (python2, using openblas 0.2.19)
-RUN git clone --branch v1.11.3 https://github.com/numpy/numpy
-COPY /docker_image/site.cfg numpy/
-RUN cd numpy && python setup.py install
-
-# Install R packages
-RUN echo "r <- getOption('repos'); r['CRAN'] <- 'http://cran.us.r-project.org'; options(repos = r);" > ~/.Rprofile
-RUN Rscript -e "install.packages('snow')"
-RUN Rscript -e "install.packages('snowfall')"
-RUN Rscript -e "install.packages('bitops')"
-RUN Rscript -e "install.packages('caTools')"
-RUN Rscript -e "source('http://bioconductor.org/biocLite.R'); biocLite('Rsamtools')"
-
-# Install boost (required for R-spp)
-RUN apt-get install -y libboost-dev
-
-# Install R package spp 1.14 (required for phantompeakqualtools)
-#RUN wget https://github.com/hms-dbmi/spp/archive/1.14.tar.gz
-#RUN Rscript -e "install.packages('./1.14.tar.gz')"
-
-# Install R package spp 1.13 (required for phantompeakqualtools)
-RUN wget https://github.com/hms-dbmi/spp/archive/1.13.tar.gz
-RUN Rscript -e "install.packages('./1.13.tar.gz')"
-
 # Install phantompeakqualtools 1.2
 RUN wget https://github.com/kundajelab/phantompeakqualtools/archive/1.2.tar.gz && tar -xvf 1.2.tar.gz
 ENV PATH="/software/phantompeakqualtools-1.2:${PATH}"
-
-# Install Python3 and packages (for IDR)
-RUN apt-get install -y python3-dev python3-setuptools python3-pip python3-numpy python3-scipy python3-matplotlib
-
-# Install cython for python3
-RUN pip3 install cython
-
-# Install numpy 1.11.3 for python3
-RUN cd numpy && python3 setup.py install
-
-# Install scipy 1.0.0 for python3
-RUN git clone --branch v1.0.0 https://github.com/scipy/scipy
-RUN cd scipy && python3 setup.py install
-
-# Install IDR 2.0.4.1
-RUN git clone --branch 2.0.4.1 https://github.com/kundajelab/idr
-RUN cd idr && python3 setup.py install
 
 # Install sambamba 0.6.5
 RUN wget https://github.com/lomereiter/sambamba/releases/download/v0.6.5/sambamba_v0.6.5_linux.tar.bz2 && tar -xvjf sambamba_v0.6.5_linux.tar.bz2
 RUN mv sambamba_v0.6.5 sambamba
 
-# Install ghostscript for reporting module (pdf2png)
-RUN apt-get install -y ghostscript
+# Install cutadapt 1.9.1
+RUN pip install --no-dependencies cutadapt==1.9.1 
+
+# Install Bowtie2 2.2.6
+RUN wget https://github.com/BenLangmead/bowtie2/releases/download/v2.2.6/bowtie2-2.2.6-linux-x86_64.zip
+RUN unzip bowtie2-2.2.6-linux-x86_64.zip
+ENV PATH="/software/bowtie2-2.2.6:${PATH}"
 
 # Get ENCODE atac-seq-pipeline container repository
 # This COPY assumes the build context is the root of the atac-seq-pipeline repo
