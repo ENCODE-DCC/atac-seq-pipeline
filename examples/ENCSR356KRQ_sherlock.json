@@ -1,48 +1,48 @@
 {
-	"atac.pipeline_type" : "atac",
-	"atac.genome_tsv" : "/oak/stanford/groups/akundaje/leepc12/code/atac-seq-pipeline/genome/hg38_sherlock.tsv",
-	"atac.fastqs" : [
-		[
-			["/oak/stanford/groups/akundaje/leepc12/run/ATAC_ENCODE3/ENCODE3_NEW_GGR/data/ENCSR356KRQ/in_progress/reads/fastq/rep1/pair1/ENCFF341MYG.fastq.gz",
-			"/oak/stanford/groups/akundaje/leepc12/run/ATAC_ENCODE3/ENCODE3_NEW_GGR/data/ENCSR356KRQ/in_progress/reads/fastq/rep1/pair2/ENCFF248EJF.fastq.gz"],
-			["/oak/stanford/groups/akundaje/leepc12/run/ATAC_ENCODE3/ENCODE3_NEW_GGR/data/ENCSR356KRQ/in_progress/reads/fastq/rep1/pair1/ENCFF106QGY.fastq.gz",
-			"/oak/stanford/groups/akundaje/leepc12/run/ATAC_ENCODE3/ENCODE3_NEW_GGR/data/ENCSR356KRQ/in_progress/reads/fastq/rep1/pair2/ENCFF368TYI.fastq.gz"]
-		],
-		[
-			["/oak/stanford/groups/akundaje/leepc12/run/ATAC_ENCODE3/ENCODE3_NEW_GGR/data/ENCSR356KRQ/in_progress/reads/fastq/rep2/pair1/ENCFF641SFZ.fastq.gz",
-			"/oak/stanford/groups/akundaje/leepc12/run/ATAC_ENCODE3/ENCODE3_NEW_GGR/data/ENCSR356KRQ/in_progress/reads/fastq/rep2/pair2/ENCFF031ARQ.fastq.gz"],
-			["/oak/stanford/groups/akundaje/leepc12/run/ATAC_ENCODE3/ENCODE3_NEW_GGR/data/ENCSR356KRQ/in_progress/reads/fastq/rep2/pair1/ENCFF751XTV.fastq.gz",
-			"/oak/stanford/groups/akundaje/leepc12/run/ATAC_ENCODE3/ENCODE3_NEW_GGR/data/ENCSR356KRQ/in_progress/reads/fastq/rep2/pair2/ENCFF590SYZ.fastq.gz"],
-			["/oak/stanford/groups/akundaje/leepc12/run/ATAC_ENCODE3/ENCODE3_NEW_GGR/data/ENCSR356KRQ/in_progress/reads/fastq/rep2/pair1/ENCFF927LSG.fastq.gz",
-			"/oak/stanford/groups/akundaje/leepc12/run/ATAC_ENCODE3/ENCODE3_NEW_GGR/data/ENCSR356KRQ/in_progress/reads/fastq/rep2/pair2/ENCFF734PEQ.fastq.gz"],
-			["/oak/stanford/groups/akundaje/leepc12/run/ATAC_ENCODE3/ENCODE3_NEW_GGR/data/ENCSR356KRQ/in_progress/reads/fastq/rep2/pair1/ENCFF859BDM.fastq.gz",
-			"/oak/stanford/groups/akundaje/leepc12/run/ATAC_ENCODE3/ENCODE3_NEW_GGR/data/ENCSR356KRQ/in_progress/reads/fastq/rep2/pair2/ENCFF007USV.fastq.gz"],
-			["/oak/stanford/groups/akundaje/leepc12/run/ATAC_ENCODE3/ENCODE3_NEW_GGR/data/ENCSR356KRQ/in_progress/reads/fastq/rep2/pair1/ENCFF193RRC.fastq.gz",
-			"/oak/stanford/groups/akundaje/leepc12/run/ATAC_ENCODE3/ENCODE3_NEW_GGR/data/ENCSR356KRQ/in_progress/reads/fastq/rep2/pair2/ENCFF886FSC.fastq.gz"],
-			["/oak/stanford/groups/akundaje/leepc12/run/ATAC_ENCODE3/ENCODE3_NEW_GGR/data/ENCSR356KRQ/in_progress/reads/fastq/rep2/pair1/ENCFF366DFI.fastq.gz",
-			"/oak/stanford/groups/akundaje/leepc12/run/ATAC_ENCODE3/ENCODE3_NEW_GGR/data/ENCSR356KRQ/in_progress/reads/fastq/rep2/pair2/ENCFF573UXK.fastq.gz"]
-		]
-	],
+    "atac.pipeline_type" : "atac",
+    "atac.genome_tsv" : "/oak/stanford/groups/akundaje/leepc12/code/atac-seq-pipeline/genome/hg38_sherlock.tsv",
+    "atac.fastqs" : [
+        [
+            ["/oak/stanford/groups/akundaje/leepc12/run/ATAC_ENCODE3/ENCODE3_NEW_GGR/data/ENCSR356KRQ/in_progress/reads/fastq/rep1/pair1/ENCFF341MYG.fastq.gz",
+            "/oak/stanford/groups/akundaje/leepc12/run/ATAC_ENCODE3/ENCODE3_NEW_GGR/data/ENCSR356KRQ/in_progress/reads/fastq/rep1/pair2/ENCFF248EJF.fastq.gz"],
+            ["/oak/stanford/groups/akundaje/leepc12/run/ATAC_ENCODE3/ENCODE3_NEW_GGR/data/ENCSR356KRQ/in_progress/reads/fastq/rep1/pair1/ENCFF106QGY.fastq.gz",
+            "/oak/stanford/groups/akundaje/leepc12/run/ATAC_ENCODE3/ENCODE3_NEW_GGR/data/ENCSR356KRQ/in_progress/reads/fastq/rep1/pair2/ENCFF368TYI.fastq.gz"]
+        ],
+        [
+            ["/oak/stanford/groups/akundaje/leepc12/run/ATAC_ENCODE3/ENCODE3_NEW_GGR/data/ENCSR356KRQ/in_progress/reads/fastq/rep2/pair1/ENCFF641SFZ.fastq.gz",
+            "/oak/stanford/groups/akundaje/leepc12/run/ATAC_ENCODE3/ENCODE3_NEW_GGR/data/ENCSR356KRQ/in_progress/reads/fastq/rep2/pair2/ENCFF031ARQ.fastq.gz"],
+            ["/oak/stanford/groups/akundaje/leepc12/run/ATAC_ENCODE3/ENCODE3_NEW_GGR/data/ENCSR356KRQ/in_progress/reads/fastq/rep2/pair1/ENCFF751XTV.fastq.gz",
+            "/oak/stanford/groups/akundaje/leepc12/run/ATAC_ENCODE3/ENCODE3_NEW_GGR/data/ENCSR356KRQ/in_progress/reads/fastq/rep2/pair2/ENCFF590SYZ.fastq.gz"],
+            ["/oak/stanford/groups/akundaje/leepc12/run/ATAC_ENCODE3/ENCODE3_NEW_GGR/data/ENCSR356KRQ/in_progress/reads/fastq/rep2/pair1/ENCFF927LSG.fastq.gz",
+            "/oak/stanford/groups/akundaje/leepc12/run/ATAC_ENCODE3/ENCODE3_NEW_GGR/data/ENCSR356KRQ/in_progress/reads/fastq/rep2/pair2/ENCFF734PEQ.fastq.gz"],
+            ["/oak/stanford/groups/akundaje/leepc12/run/ATAC_ENCODE3/ENCODE3_NEW_GGR/data/ENCSR356KRQ/in_progress/reads/fastq/rep2/pair1/ENCFF859BDM.fastq.gz",
+            "/oak/stanford/groups/akundaje/leepc12/run/ATAC_ENCODE3/ENCODE3_NEW_GGR/data/ENCSR356KRQ/in_progress/reads/fastq/rep2/pair2/ENCFF007USV.fastq.gz"],
+            ["/oak/stanford/groups/akundaje/leepc12/run/ATAC_ENCODE3/ENCODE3_NEW_GGR/data/ENCSR356KRQ/in_progress/reads/fastq/rep2/pair1/ENCFF193RRC.fastq.gz",
+            "/oak/stanford/groups/akundaje/leepc12/run/ATAC_ENCODE3/ENCODE3_NEW_GGR/data/ENCSR356KRQ/in_progress/reads/fastq/rep2/pair2/ENCFF886FSC.fastq.gz"],
+            ["/oak/stanford/groups/akundaje/leepc12/run/ATAC_ENCODE3/ENCODE3_NEW_GGR/data/ENCSR356KRQ/in_progress/reads/fastq/rep2/pair1/ENCFF366DFI.fastq.gz",
+            "/oak/stanford/groups/akundaje/leepc12/run/ATAC_ENCODE3/ENCODE3_NEW_GGR/data/ENCSR356KRQ/in_progress/reads/fastq/rep2/pair2/ENCFF573UXK.fastq.gz"]
+        ]
+    ],
 
-	"atac.paired_end" : true,
-	"atac.multimapping" : 4,
+    "atac.paired_end" : true,
+    "atac.multimapping" : 4,
 
-	"atac.trim_adapter.auto_detect_adapter" : true,
+    "atac.trim_adapter.auto_detect_adapter" : true,
 
-	"atac.bowtie2.cpu" : 6,
-	"atac.bowtie2.mem_mb" : 16000,
-	"atac.bowtie2.time_hr" : 36,
+    "atac.bowtie2.cpu" : 6,
+    "atac.bowtie2.mem_mb" : 16000,
+    "atac.bowtie2.time_hr" : 36,
 
-	"atac.filter.cpu" : 2,
-	"atac.filter.mem_mb" : 12000,
-	"atac.filter.time_hr" : 23,
+    "atac.filter.cpu" : 2,
+    "atac.filter.mem_mb" : 12000,
+    "atac.filter.time_hr" : 23,
 
-	"atac.macs2_mem_mb" : 16000,
+    "atac.macs2_mem_mb" : 16000,
 
-	"atac.smooth_win" : 73,
-	"atac.enable_idr" : true,
-	"atac.idr_thresh" : 0.05,
+    "atac.smooth_win" : 73,
+    "atac.enable_idr" : true,
+    "atac.idr_thresh" : 0.05,
 
-	"atac.qc_report.name" : "ENCSR356KRQ",
-	"atac.qc_report.desc" : "ATAC-seq on primary keratinocytes in day 0.0 of differentiation"
+    "atac.qc_report.name" : "ENCSR356KRQ",
+    "atac.qc_report.desc" : "ATAC-seq on primary keratinocytes in day 0.0 of differentiation"
 }

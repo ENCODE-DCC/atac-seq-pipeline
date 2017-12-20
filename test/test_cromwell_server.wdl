@@ -1,9 +1,9 @@
 #java -jar $(which cromwell-30.jar) run *.wdl
 
 workflow test {
-	Boolean b0 = true
-	Boolean b1 = true
-	Boolean b2 = true
+	Boolean b0
+	Boolean b1
+	Boolean b2
 	scatter( i in range(3) ) {
 		if ( b0 ) {
 			call t0 as t1 { input: i=i }

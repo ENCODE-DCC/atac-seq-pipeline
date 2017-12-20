@@ -1,48 +1,48 @@
 {
-	"atac.pipeline_type" : "atac",
-	"atac.genome_tsv" : "gs://atac-seq-pipeline-genome-data/hg38_google.tsv",
-	"atac.fastqs" : [
-		[
-			["gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep1/pair1/ENCFF341MYG.fastq.gz",
-			"gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep1/pair2/ENCFF248EJF.fastq.gz"],
-			["gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep1/pair1/ENCFF106QGY.fastq.gz",
-			"gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep1/pair2/ENCFF368TYI.fastq.gz"]
-		],
-		[
-			["gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep2/pair1/ENCFF641SFZ.fastq.gz",
-			"gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep2/pair2/ENCFF031ARQ.fastq.gz"],
-			["gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep2/pair1/ENCFF751XTV.fastq.gz",
-			"gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep2/pair2/ENCFF590SYZ.fastq.gz"],
-			["gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep2/pair1/ENCFF927LSG.fastq.gz",
-			"gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep2/pair2/ENCFF734PEQ.fastq.gz"],
-			["gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep2/pair1/ENCFF859BDM.fastq.gz",
-			"gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep2/pair2/ENCFF007USV.fastq.gz"],
-			["gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep2/pair1/ENCFF193RRC.fastq.gz",
-			"gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep2/pair2/ENCFF886FSC.fastq.gz"],
-			["gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep2/pair1/ENCFF366DFI.fastq.gz",
-			"gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep2/pair2/ENCFF573UXK.fastq.gz"]
-		]
-	],
+    "atac.pipeline_type" : "atac",
+    "atac.genome_tsv" : "gs://atac-seq-pipeline-genome-data/hg38_google.tsv",
+    "atac.fastqs" : [
+        [
+            ["gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep1/pair1/ENCFF341MYG.fastq.gz",
+            "gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep1/pair2/ENCFF248EJF.fastq.gz"],
+            ["gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep1/pair1/ENCFF106QGY.fastq.gz",
+            "gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep1/pair2/ENCFF368TYI.fastq.gz"]
+        ],
+        [
+            ["gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep2/pair1/ENCFF641SFZ.fastq.gz",
+            "gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep2/pair2/ENCFF031ARQ.fastq.gz"],
+            ["gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep2/pair1/ENCFF751XTV.fastq.gz",
+            "gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep2/pair2/ENCFF590SYZ.fastq.gz"],
+            ["gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep2/pair1/ENCFF927LSG.fastq.gz",
+            "gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep2/pair2/ENCFF734PEQ.fastq.gz"],
+            ["gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep2/pair1/ENCFF859BDM.fastq.gz",
+            "gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep2/pair2/ENCFF007USV.fastq.gz"],
+            ["gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep2/pair1/ENCFF193RRC.fastq.gz",
+            "gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep2/pair2/ENCFF886FSC.fastq.gz"],
+            ["gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep2/pair1/ENCFF366DFI.fastq.gz",
+            "gs://atac-seq-pipeline-test-samples/ENCSR356KRQ/rep2/pair2/ENCFF573UXK.fastq.gz"]
+        ]
+    ],
 
-	"atac.paired_end" : true,
-	"atac.multimapping" : 4,
+    "atac.paired_end" : true,
+    "atac.multimapping" : 4,
 
-	"atac.trim_adapter.auto_detect_adapter" : true,
+    "atac.trim_adapter.auto_detect_adapter" : true,
 
-	"atac.trim_adapter.cpu" : 2,
+    "atac.trim_adapter.cpu" : 2,
 
-	"atac.bowtie2.cpu" : 8,
-	"atac.bowtie2.mem_mb" : 16000,
+    "atac.bowtie2.cpu" : 8,
+    "atac.bowtie2.mem_mb" : 16000,
 
-	"atac.filter.cpu" : 2,
-	"atac.filter.mem_mb" : 12000,
+    "atac.filter.cpu" : 2,
+    "atac.filter.mem_mb" : 12000,
 
-	"atac.macs2_mem_mb" : 16000,
+    "atac.macs2_mem_mb" : 16000,
 
-	"atac.smooth_win" : 73,
-	"atac.enable_idr" : true,
-	"atac.idr_thresh" : 0.05,
+    "atac.smooth_win" : 73,
+    "atac.enable_idr" : true,
+    "atac.idr_thresh" : 0.05,
 
-	"atac.qc_report.name" : "ENCSR356KRQ",
-	"atac.qc_report.desc" : "ATAC-seq on primary keratinocytes in day 0.0 of differentiation"
+    "atac.qc_report.name" : "ENCSR356KRQ",
+    "atac.qc_report.desc" : "ATAC-seq on primary keratinocytes in day 0.0 of differentiation"
 }

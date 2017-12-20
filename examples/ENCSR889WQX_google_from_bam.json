@@ -1,30 +1,30 @@
 {
-	"atac.pipeline_type" : "atac",
-	"atac.genome_tsv" : "gs://atac-seq-pipeline-genome-data/mm10_google.tsv",
-	"atac.bams" : [
-		"gs://atac-seq-pipeline-test-samples/ENCSR889WQX_bam/rep1/ENCFF439VSY.trim_pooled.bam",
-		"gs://atac-seq-pipeline-test-samples/ENCSR889WQX_bam/rep2/ENCFF463QCX.trim_ENCFF992TSA.trim.bam"
-	],
+    "atac.pipeline_type" : "atac",
+    "atac.genome_tsv" : "gs://atac-seq-pipeline-genome-data/mm10_google.tsv",
+    "atac.bams" : [
+        "gs://atac-seq-pipeline-test-samples/ENCSR889WQX_bam/rep1/ENCFF439VSY.trim_pooled.bam",
+        "gs://atac-seq-pipeline-test-samples/ENCSR889WQX_bam/rep2/ENCFF463QCX.trim_ENCFF992TSA.trim.bam"
+    ],
 
-	"atac.paired_end" : false,
-	"atac.multimapping" : 4,	
+    "atac.paired_end" : false,
+    "atac.multimapping" : 4,    
 
-	"atac.trim_adapter.auto_detect_adapter" : true,
+    "atac.trim_adapter.auto_detect_adapter" : true,
 
-	"atac.trim_adapter.cpu" : 2,
+    "atac.trim_adapter.cpu" : 2,
 
-	"atac.bowtie2.cpu" : 4,
-	"atac.bowtie2.mem_mb" : 16000,
+    "atac.bowtie2.cpu" : 4,
+    "atac.bowtie2.mem_mb" : 16000,
 
-	"atac.filter.cpu" : 2,
-	"atac.filter.mem_mb" : 12000,
+    "atac.filter.cpu" : 2,
+    "atac.filter.mem_mb" : 12000,
 
-	"atac.macs2_mem_mb" : 16000,
+    "atac.macs2_mem_mb" : 16000,
 
-	"atac.smooth_win" : 73,
-	"atac.enable_idr" : true,
-	"atac.idr_thresh" : 0.05,
+    "atac.smooth_win" : 73,
+    "atac.enable_idr" : true,
+    "atac.idr_thresh" : 0.05,
 
-	"atac.qc_report.name" : "ENCSR889WQX",
-	"atac.qc_report.desc" : "ATAC-seq on Mus musculus C57BL/6 frontal cortex adult"
+    "atac.qc_report.name" : "ENCSR889WQX",
+    "atac.qc_report.desc" : "ATAC-seq on Mus musculus C57BL/6 frontal cortex adult"
 }
