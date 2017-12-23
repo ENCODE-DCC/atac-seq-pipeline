@@ -84,7 +84,7 @@ $ java -jar -Dconfig.file=[BACKEND_CONF] cromwell-30-x.jar run atac.wdl -i input
 2) Install [genome data](#genome-data-installation).
 3) Run a pipeline.
     ```
-    $ source activate atac-seq-pipeline
+    $ source activate encode-atac-seq-pipeline
     $ java -jar -Dconfig.file=backends/default.conf cromwell-30-x.jar run atac.wdl -i input.json -o workflow_opts/non_docker.json
     $ source deactivate
     ```
@@ -100,7 +100,7 @@ Genome data have already been installed and shared on Stanford SCG4. You can ski
 3) Install [genome data](#genome-data-installation).
 4) Run a pipeline.
     ```
-    $ source activate atac-seq-pipeline
+    $ source activate encode-atac-seq-pipeline
     $ java -jar -Dconfig.file=backends/sge.conf cromwell-30-x.jar run atac.wdl -i input.json -o workflow_opts/non_docker.json
     $ source deactivate
     ```
@@ -113,7 +113,7 @@ Genome data have already been installed and shared on Stanford Sherlock-2. You c
 3) Install [genome data](#genome-data-installation).
 4) Run a pipeline.
     ```
-    $ source activate atac-seq-pipeline
+    $ source activate encode-atac-seq-pipeline
     $ java -jar -Dconfig.file=backends/slurm.conf cromwell-30-x.jar run atac.wdl -i input.json -o workflow_opts/non_docker.json
     $ source deactivate
     ```
@@ -132,7 +132,7 @@ Jobs will be submitted to Sun GridEngine (SGE) and distributed to all server nod
 1) Install [dependencies](#dependency-installation).
 2) Run a pipeline.
     ```
-    $ source activate atac-seq-pipeline
+    $ source activate encode-atac-seq-pipeline
     $ java -jar -Dconfig.file=backends/sge.conf cromwell-30-x.jar run atac.wdl -i input.json -o workflow_opts/non_docker.json
     $ source deactivate
     ```
@@ -332,7 +332,7 @@ Optional parameters and flags are marked with `?`.
    ```
 9) **ACTIVATE MINICONDA3 ENVIRONMENT** and run a pipeline.
    ```
-   $ source activate atac-seq-pipeline
+   $ source activate encode-atac-seq-pipeline
    $ java -jar -Dconfig.file=[BACKEND_OPT] $(which cromwell-29.jar) run atac.wdl -i input.json -o [WORKFLOW_OPT]
    $ source deactivate
    ```
@@ -340,7 +340,7 @@ Optional parameters and flags are marked with `?`.
 # Genome data installation
 
 **WE DO NOT RECOMMEND RUNNING OUR PIPELINE WITH LOCALLY INSTALLED/BUILT GENOME DATA!** Use it with caution. **We will provide an official downloader for all genome data later**. Cromwell is planning to support AWS buckets (`s3://`). Until then, use this installer.
-**On Google Cloud TSV** files are already installed and shared on a bucket `gs://atac-seq-pipeline-genome-data`.
+**On Google Cloud TSV** files are already installed and shared on a bucket `gs://encode-atac-seq-pipeline-genome-data`.
 
 Supported genomes:
 
@@ -357,7 +357,7 @@ A TSV file will be generated under `[DEST_DIR]`. Use it for `atac.genomv_tsv` va
 4) Install genome data.
    ```
    $ cd installers/
-   $ source activate atac-seq-pipeline
+   $ source activate encode-atac-seq-pipeline
    $ bash install_genome_data.sh [GENOME] [DEST_DIR]
    $ source deactivate
    ```
@@ -385,10 +385,10 @@ fi
 
 ```
 # SE
-java -jar -Dconfig.file=backends/google.conf -Dbackend.providers.JES.config.project=atac-seq-pipeline -Dbackend.providers.JES.config.root="gs://atac-seq-pipeline-workflows/ENCSR889WQX" cromwell-29.jar run atac.wdl -i examples/ENCSR889WQX_google.json -o workflow_opts/docker_google.json -m output_ENCSR889WQX.json
+java -jar -Dconfig.file=backends/google.conf -Dbackend.providers.JES.config.project=encode-atac-seq-pipeline -Dbackend.providers.JES.config.root="gs://encode-atac-seq-pipeline-workflows/ENCSR889WQX" cromwell-29.jar run atac.wdl -i examples/ENCSR889WQX_google.json -o workflow_opts/docker_google.json -m output_ENCSR889WQX.json
 
 # PE
-java -jar -Dconfig.file=backends/google.conf -Dbackend.providers.JES.config.project=atac-seq-pipeline -Dbackend.providers.JES.config.root="gs://atac-seq-pipeline-workflows/ENCSR356KRQ" cromwell-29.jar run atac.wdl -i examples/ENCSR356KRQ_google.json -o workflow_opts/docker_google.json -m output_ENCSR356KRQ.json
+java -jar -Dconfig.file=backends/google.conf -Dbackend.providers.JES.config.project=encode-atac-seq-pipeline -Dbackend.providers.JES.config.root="gs://encode-atac-seq-pipeline-workflows/ENCSR356KRQ" cromwell-29.jar run atac.wdl -i examples/ENCSR356KRQ_google.json -o workflow_opts/docker_google.json -m output_ENCSR356KRQ.json
 ```
 
 ### Docker build

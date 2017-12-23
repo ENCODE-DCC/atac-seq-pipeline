@@ -1,12 +1,15 @@
 {
     "atac.pipeline_type" : "atac",
-    "atac.genome_tsv" : "gs://atac-seq-pipeline-genome-data/mm10_google.tsv",
-    "atac.tas" : [
-        "gs://atac-seq-pipeline-test-samples/ENCSR889WQX_ta/rep1/ENCFF439VSY.trim_pooled.nodup.tn5.tagAlign.gz",
-        "gs://atac-seq-pipeline-test-samples/ENCSR889WQX_ta/rep2/ENCFF463QCX.trim_ENCFF992TSA.trim.nodup.tn5.tagAlign.gz"
+    "atac.genome_tsv" : "gs://encode-pipeline-genome-data/mm10_google.tsv",
+    "atac.fastqs" : [
+        [
+            ["gs://encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR889WQX/fastq_chr19/ENCSR889WQX.chr19.rep1.fastq.gz"]
+        ],
+        [
+            ["gs://encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR889WQX/fastq_chr19/ENCSR889WQX.chr19.rep2.fastq.gz"]
+        ]
     ],
-    "atac.align_only" : true,
-    
+
     "atac.paired_end" : false,
     "atac.multimapping" : 4,    
 

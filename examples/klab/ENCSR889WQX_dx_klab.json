@@ -9,14 +9,14 @@
 
     "atac.fastqs" : [
         [
-            ["/srv/scratch/shared/kadru/leepc12/run/atac-seq-pipeline/ENCSR889WQX/data/rep1/ENCFF439VSY.fastq.gz"],
-            ["/srv/scratch/shared/kadru/leepc12/run/atac-seq-pipeline/ENCSR889WQX/data/rep1/ENCFF325FCQ.fastq.gz"],
-            ["/srv/scratch/shared/kadru/leepc12/run/atac-seq-pipeline/ENCSR889WQX/data/rep1/ENCFF683IQS.fastq.gz"],
-            ["/srv/scratch/shared/kadru/leepc12/run/atac-seq-pipeline/ENCSR889WQX/data/rep1/ENCFF744CHW.fastq.gz"]
+            ["/mnt/data/pipeline_test_samples/encode-atac-seq-pipeline/ENCSR889WQX/fastq/rep1/ENCFF439VSY.fastq.gz"],
+            ["/mnt/data/pipeline_test_samples/encode-atac-seq-pipeline/ENCSR889WQX/fastq/rep1/ENCFF325FCQ.fastq.gz"],
+            ["/mnt/data/pipeline_test_samples/encode-atac-seq-pipeline/ENCSR889WQX/fastq/rep1/ENCFF683IQS.fastq.gz"],
+            ["/mnt/data/pipeline_test_samples/encode-atac-seq-pipeline/ENCSR889WQX/fastq/rep1/ENCFF744CHW.fastq.gz"]
         ],
         [
-            ["/srv/scratch/shared/kadru/leepc12/run/atac-seq-pipeline/ENCSR889WQX/data/rep2/ENCFF463QCX.fastq.gz"],
-            ["/srv/scratch/shared/kadru/leepc12/run/atac-seq-pipeline/ENCSR889WQX/data/rep2/ENCFF992TSA.fastq.gz"]
+            ["/mnt/data/pipeline_test_samples/encode-atac-seq-pipeline/ENCSR889WQX/fastq/rep2/ENCFF463QCX.fastq.gz"],
+            ["/mnt/data/pipeline_test_samples/encode-atac-seq-pipeline/ENCSR889WQX/fastq/rep2/ENCFF992TSA.fastq.gz"]
         ]
     ],
 

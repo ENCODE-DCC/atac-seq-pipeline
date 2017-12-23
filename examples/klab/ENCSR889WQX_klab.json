@@ -3,14 +3,14 @@
     "atac.genome_tsv" : "/users/leepc12/code/atac-seq-pipeline/genome/mm10_klab.tsv",
     "atac.fastqs" : [
         [
-            ["/mnt/data/pipeline_test_samples/atac/ENCSR889WQX/fastq/rep1/ENCFF439VSY.fastq.gz"],
-            ["/mnt/data/pipeline_test_samples/atac/ENCSR889WQX/fastq/rep1/ENCFF325FCQ.fastq.gz"],
-            ["/mnt/data/pipeline_test_samples/atac/ENCSR889WQX/fastq/rep1/ENCFF683IQS.fastq.gz"],
-            ["/mnt/data/pipeline_test_samples/atac/ENCSR889WQX/fastq/rep1/ENCFF744CHW.fastq.gz"]
+            ["/mnt/data/pipeline_test_samples/encode-atac-seq-pipeline/ENCSR889WQX/fastq/rep1/ENCFF439VSY.fastq.gz"],
+            ["/mnt/data/pipeline_test_samples/encode-atac-seq-pipeline/ENCSR889WQX/fastq/rep1/ENCFF325FCQ.fastq.gz"],
+            ["/mnt/data/pipeline_test_samples/encode-atac-seq-pipeline/ENCSR889WQX/fastq/rep1/ENCFF683IQS.fastq.gz"],
+            ["/mnt/data/pipeline_test_samples/encode-atac-seq-pipeline/ENCSR889WQX/fastq/rep1/ENCFF744CHW.fastq.gz"]
         ],
         [
-            ["/mnt/data/pipeline_test_samples/atac/ENCSR889WQX/fastq/rep2/ENCFF463QCX.fastq.gz"],
-            ["/mnt/data/pipeline_test_samples/atac/ENCSR889WQX/fastq/rep2/ENCFF992TSA.fastq.gz"]
+            ["/mnt/data/pipeline_test_samples/encode-atac-seq-pipeline/ENCSR889WQX/fastq/rep2/ENCFF463QCX.fastq.gz"],
+            ["/mnt/data/pipeline_test_samples/encode-atac-seq-pipeline/ENCSR889WQX/fastq/rep2/ENCFF992TSA.fastq.gz"]
         ]
     ],
 

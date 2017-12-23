@@ -3,10 +3,10 @@
     "atac.genome_tsv" : "/users/leepc12/code/atac-seq-pipeline/genome/mm10_klab.tsv",
     "atac.fastqs" : [
         [
-            ["/mnt/data/pipeline_test_samples/atac/ENCSR889WQX/fastq_chr19/ENCSR889WQX.chr19.rep1.fastq.gz"]
+            ["/mnt/data/pipeline_test_samples/encode-atac-seq-pipeline/ENCSR889WQX/fastq_chr19/ENCSR889WQX.chr19.rep1.fastq.gz"]
         ],
         [
-            ["/mnt/data/pipeline_test_samples/atac/ENCSR889WQX/fastq_chr19/ENCSR889WQX.chr19.rep2.fastq.gz"]
+            ["/mnt/data/pipeline_test_samples/encode-atac-seq-pipeline/ENCSR889WQX/fastq_chr19/ENCSR889WQX.chr19.rep2.fastq.gz"]
         ]
     ],
 

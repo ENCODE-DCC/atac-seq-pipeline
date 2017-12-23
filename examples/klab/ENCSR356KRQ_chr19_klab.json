@@ -3,10 +3,12 @@
     "atac.genome_tsv" : "/users/leepc12/code/atac-seq-pipeline/genome/hg38_klab.tsv",
     "atac.fastqs" : [
         [
-            ["/mnt/data/pipeline_test_samples/atac/ENCSR356KRQ/fastq_chr19/ENCSR356KRQ.chr19.rep1-R1.fastq.gz","/mnt/data/pipeline_test_samples/atac/ENCSR356KRQ/fastq_chr19/ENCSR356KRQ.chr19.rep1-R2.fastq.gz"]
+            ["/mnt/data/pipeline_test_samples/encode-atac-seq-pipeline/ENCSR356KRQ/fastq_chr19/ENCSR356KRQ.chr19.rep1-R1.fastq.gz",
+             "/mnt/data/pipeline_test_samples/encode-atac-seq-pipeline/ENCSR356KRQ/fastq_chr19/ENCSR356KRQ.chr19.rep1-R2.fastq.gz"]
         ],
         [
-            ["/mnt/data/pipeline_test_samples/atac/ENCSR356KRQ/fastq_chr19/ENCSR356KRQ.chr19.rep2-R1.fastq.gz","/mnt/data/pipeline_test_samples/atac/ENCSR356KRQ/fastq_chr19/ENCSR356KRQ.chr19.rep2-R2.fastq.gz"]
+            ["/mnt/data/pipeline_test_samples/encode-atac-seq-pipeline/ENCSR356KRQ/fastq_chr19/ENCSR356KRQ.chr19.rep2-R1.fastq.gz",
+             "/mnt/data/pipeline_test_samples/encode-atac-seq-pipeline/ENCSR356KRQ/fastq_chr19/ENCSR356KRQ.chr19.rep2-R2.fastq.gz"]
         ]
     ],
 

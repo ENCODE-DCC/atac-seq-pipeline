@@ -16,7 +16,7 @@ if [[ "$#" -lt 2 ]]; then
 fi
 
 # pipeline specific params
-CONDA_ENV="atac-seq-pipeline"
+CONDA_ENV="encode-atac-seq-pipeline"
 BUILD_BWT2_IDX=1
 BUILD_BWA_IDX=0
 
