@@ -1,5 +1,5 @@
 nomkl
-python ==3.5
+python ==3.5.0
 numpy ==1.11.3
 idr ==2.0.3
 bedtools ==2.26.0
