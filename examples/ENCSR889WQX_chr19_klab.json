@@ -3,21 +3,17 @@
     "atac.genome_tsv" : "/users/leepc12/code/atac-seq-pipeline/genome/mm10_klab.tsv",
     "atac.fastqs" : [
         [
-            ["/mnt/data/pipeline_test_samples/atac/ENCSR889WQX/fastq/rep1/ENCFF439VSY.fastq.gz"],
-            ["/mnt/data/pipeline_test_samples/atac/ENCSR889WQX/fastq/rep1/ENCFF325FCQ.fastq.gz"],
-            ["/mnt/data/pipeline_test_samples/atac/ENCSR889WQX/fastq/rep1/ENCFF683IQS.fastq.gz"],
-            ["/mnt/data/pipeline_test_samples/atac/ENCSR889WQX/fastq/rep1/ENCFF744CHW.fastq.gz"]
+            ["/mnt/data/pipeline_test_samples/atac/ENCSR889WQX/fastq_chr19/ENCSR889WQX.chr19.rep1.fastq.gz"]
         ],
         [
-            ["/mnt/data/pipeline_test_samples/atac/ENCSR889WQX/fastq/rep2/ENCFF463QCX.fastq.gz"],
-            ["/mnt/data/pipeline_test_samples/atac/ENCSR889WQX/fastq/rep2/ENCFF992TSA.fastq.gz"]
+            ["/mnt/data/pipeline_test_samples/atac/ENCSR889WQX/fastq_chr19/ENCSR889WQX.chr19.rep2.fastq.gz"]
         ]
     ],
 
     "atac.paired_end" : false,
     "atac.multimapping" : 4,    
 
-    "atac.trim_adapter.auto_detect_adapter" : true,
+    "atac.trim_adapter.auto_detect_adapter" : false,
 
     "atac.trim_adapter.cpu" : 2,
 
