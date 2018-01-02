@@ -1,5 +1,7 @@
 {
     "default_runtime_attributes" : {
-        "docker" : "quay.io/encode-dcc/atac-seq-pipeline:latest"
+        "docker" : "quay.io/encode-dcc/atac-seq-pipeline:latest",
+        "cpu": "1",
+        "memory": "4 GB"
     }
 }
