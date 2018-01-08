@@ -10,16 +10,12 @@ ENCODE ATAC-seq pipeline
 * `installers/` : dependency/genome data installers for Local, SGE and SLURM
 * `docker_image/` : Dockerfile
 
-# Important notice
-
-Cromwell has been recently updated to `cromwell-30.jar` but there is a [known bug](https://github.com/broadinstitute/cromwell/issues/2992) for multiple conditionals in a workflow level so our pipeline does not work with `cromwell-30.jar`. This bug is fixed but will not be applied until a new release 31 comes out. We included `cromwell-30-x.jar` in this repository. Use it until `cromwell-31.jar`.
-
 # Usage
 
 Choose `[BACKEND_CONF]` and `[WORKFLOW_OPT]` according to your platform and presence of `Docker`.
 
 ```
-$ java -jar -Dconfig.file=[BACKEND_CONF] cromwell-30-x.jar run atac.wdl -i input.json -o [WORKFLOW_OPT]
+$ java -jar -Dconfig.file=[BACKEND_CONF] cromwell-30.1.jar run atac.wdl -i input.json -o [WORKFLOW_OPT]
 ```
 
 ### Google Cloud Platform
@@ -67,7 +63,7 @@ $ java -jar -Dconfig.file=[BACKEND_CONF] cromwell-30-x.jar run atac.wdl -i input
 10) You don't have to repeat step 1-9 for next pipeline run. Credential information will be stored in `$HOME/.config/gcloud`. Go directly to step 11.
 11) Run a pipeline. Use any string for `[SAMPLE_NAME]` to distinguish between multiple samples.
     ```
-    $ java -jar -Dconfig.file=backends/google.conf -Dbackend.providers.JES.config.project=[PROJ_NAME] -Dbackend.providers.JES.config.root=[OUT_BUCKET]/[SAMPLE_NAME] cromwell-30-x.jar run atac.wdl -i input.json -o workflow_opts/docker_google.json
+    $ java -jar -Dconfig.file=backends/google.conf -Dbackend.providers.JES.config.project=[PROJ_NAME] -Dbackend.providers.JES.config.root=[OUT_BUCKET]/[SAMPLE_NAME] cromwell-30.1.jar run atac.wdl -i input.json -o workflow_opts/docker_google.json
     ```
 
 ### Local computer with `Docker`
@@ -75,7 +71,7 @@ $ java -jar -Dconfig.file=[BACKEND_CONF] cromwell-30-x.jar run atac.wdl -i input
 1) Install [genome data](#genome-data-installation).
 2) Run a pipeline.
     ```
-    $ java -jar -Dconfig.file=backends/default.conf cromwell-30-x.jar run atac.wdl -i input.json -o workflow_opts/docker.json
+    $ java -jar -Dconfig.file=backends/default.conf cromwell-30.1.jar run atac.wdl -i input.json -o workflow_opts/docker.json
     ```
 
 ### Local computer without `Docker`
@@ -85,7 +81,7 @@ $ java -jar -Dconfig.file=[BACKEND_CONF] cromwell-30-x.jar run atac.wdl -i input
 3) Run a pipeline.
     ```
     $ source activate encode-atac-seq-pipeline
-    $ java -jar -Dconfig.file=backends/default.conf cromwell-30-x.jar run atac.wdl -i input.json -o workflow_opts/non_docker.json
+    $ java -jar -Dconfig.file=backends/default.conf cromwell-30.1.jar run atac.wdl -i input.json -o workflow_opts/non_docker.json
     $ source deactivate
     ```
 
@@ -101,7 +97,7 @@ Genome data have already been installed and shared on Stanford SCG4. You can ski
 4) Run a pipeline.
     ```
     $ source activate encode-atac-seq-pipeline
-    $ java -jar -Dconfig.file=backends/sge.conf cromwell-30-x.jar run atac.wdl -i input.json -o workflow_opts/non_docker.json
+    $ java -jar -Dconfig.file=backends/sge.conf cromwell-30.1.jar run atac.wdl -i input.json -o workflow_opts/non_docker.json
     $ source deactivate
     ```
 
@@ -114,7 +110,7 @@ Genome data have already been installed and shared on Stanford Sherlock-2. You c
 4) Run a pipeline.
     ```
     $ source activate encode-atac-seq-pipeline
-    $ java -jar -Dconfig.file=backends/slurm.conf cromwell-30-x.jar run atac.wdl -i input.json -o workflow_opts/non_docker.json
+    $ java -jar -Dconfig.file=backends/slurm.conf cromwell-30.1.jar run atac.wdl -i input.json -o workflow_opts/non_docker.json
     $ source deactivate
     ```
 
@@ -123,7 +119,7 @@ Genome data have already been installed and shared on Stanford Sherlock-2. You c
 Jobs will run locally without being submitted to Sun GridEngine (SGE). Genome data have already been installed and shared.
 1) Run a pipeline. 
     ```
-    $ java -jar -Dconfig.file=backends/default.conf cromwell-30-x.jar run atac.wdl -i input.json -o workflow_opts/docker.json
+    $ java -jar -Dconfig.file=backends/default.conf cromwell-30.1.jar run atac.wdl -i input.json -o workflow_opts/docker.json
     ```
 
 ### Kundaje lab cluster with Sun GridEngine (SGE)
@@ -133,7 +129,7 @@ Jobs will be submitted to Sun GridEngine (SGE) and distributed to all server nod
 2) Run a pipeline.
     ```
     $ source activate encode-atac-seq-pipeline
-    $ java -jar -Dconfig.file=backends/sge.conf cromwell-30-x.jar run atac.wdl -i input.json -o workflow_opts/non_docker.json
+    $ java -jar -Dconfig.file=backends/sge.conf cromwell-30.1.jar run atac.wdl -i input.json -o workflow_opts/non_docker.json
     $ source deactivate
     ```
 
