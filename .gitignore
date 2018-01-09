@@ -106,6 +106,7 @@ fastqs/
 # cromwell temp dirs
 cromwell-executions/
 cromwell-workflow-logs/
+cromwell*.jar
 
 #test.wdl
 #test_google.wdl

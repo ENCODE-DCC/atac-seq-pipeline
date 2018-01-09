@@ -29,7 +29,7 @@ task t0 {
 }
 
 task t1 {
-	Array[File?] arr
+	Array[File?]? arr
 	command {
 		echo ${sep=' ' arr}
 	}
