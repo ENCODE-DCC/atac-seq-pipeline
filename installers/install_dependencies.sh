@@ -12,7 +12,7 @@ conda create -n encode-atac-seq-pipeline --file requirements.txt \
   -y -c defaults -c bioconda -c r -c bcbio -c daler -c asmeurer
 
 echo "=== Installing additional packages for python3 env..."
-  CONDA_BIN=$(dirname $(which activate))
+  CONDA_BIN=$(dirname $(which bedtools))
   cd $CONDA_BIN
 
   # uninstall IDR 2.0.3 and install the latest one
@@ -26,8 +26,7 @@ echo "=== Installing additional packages for python3 env..."
 
 echo "=== Installing additional packages for python2 env..."
 source activate encode-atac-seq-pipeline
-  # CONDA_BIN=$(dirname $(which activate))/../envs/encode-atac-seq-pipeline/bin
-  CONDA_BIN=$(dirname $(which activate))
+  CONDA_BIN=$(dirname $(which bedtools))
   CONDA_LIB="$CONDA_BIN/../lib"
   cd $CONDA_BIN
 

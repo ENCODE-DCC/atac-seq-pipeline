@@ -8,7 +8,7 @@ ENCODE ATAC-seq pipeline
 * `genome/` : genome data TSV files
 * `src/` : Python script for each task in WDL
 * `installers/` : dependency/genome data installers for systems (Local, SGE and SLURM) without docker support
-* `docker_imagll ..e/` : Dockerfile and MySQL DB initialization script
+* `docker_image/` : Dockerfile and MySQL DB initialization script
 
 # Usage
 
