@@ -545,7 +545,7 @@ task macs2 {
 			${"--gensz "+ gensz} \
 			${"--chrsz " + chrsz} \
 			${"--cap-num-peak " + select_first([cap_num_peak,300000])} \
-			${"--p-val-thresh "+ pval_thresh} \
+			${"--pval-thresh "+ pval_thresh} \
 			${"--smooth-win "+ smooth_win} \
 			${if select_first([make_signal,false]) then "--make-signal" else ""} \
 			${"--blacklist "+ blacklist}
@@ -581,7 +581,7 @@ task filter {
 								# sambamba markdup (sambamba)
 	Int? mapq_thresh			# threshold for low MAPQ reads removal
 	Boolean? no_dup_removal 	# no dupe reads removal when filtering BAM
-								# dup.qc and pbc.qc will be emptry files
+								# dup.qc and pbc.qc will be empty files
 								# and nodup_bam in the output is 
 	# resource					# filtered bam with dupes	
 	Int? cpu
@@ -598,7 +598,10 @@ task filter {
 			${"--mapq-thresh " + mapq_thresh} \
 			${if select_first([no_dup_removal,false]) then "--no-dup-removal" else ""} \
 			${"--nth " + cpu}
-		touch null # ugly part to deal with optional outputs
+		# ugly part to deal with optional outputs with Google JES backend
+		${if select_first([no_dup_removal,false]) then 
+			"touch null.dup.qc null.pbc.qc; " else ""}
+		touch null
 	}
 	output {
 		File nodup_bam = glob("*.bam")[0]
