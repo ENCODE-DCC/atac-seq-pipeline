@@ -69,7 +69,7 @@ RUN pip3 install common python-dateutil cython
 
 # Install numpy 1.11.3 (python2/3)
 RUN git clone --branch v1.11.3 https://github.com/numpy/numpy
-COPY /docker_images/pipeline/site.cfg numpy/
+COPY /docker_image/site.cfg numpy/
 RUN cd numpy && python setup.py install
 RUN cd numpy && python3 setup.py install
 
