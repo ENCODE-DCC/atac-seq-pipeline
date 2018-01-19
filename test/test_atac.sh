@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CROMWELL_SVR_URL=35.199.188.128:8000
+CROMWELL_SVR_URL=35.199.163.61:8000
 TEST_WDL=test_atac.wdl
 WDL=../atac.wdl
 STANDALONE_WDL=test_atac_standalone.wdl
@@ -17,6 +17,7 @@ sed -n $LINE_TASK_BEGIN','$LINE_TASK_END'p' $WDL >> $STANDALONE_WDL
 # Submit workflow (POST)
 curl -X POST --header "Accept: application/json" -v "$CROMWELL_SVR_URL/api/workflows/v1" -F workflowSource=@$STANDALONE_WDL -F workflowInputs=@$INPUT > tmp.json
 # curl -X POST --header "Accept: application/json" -v "localhost:8000/api/workflows/v1" -F workflowSource=@test_cromwell_server.wdl -F workflowInputs=@test_cromwell_server.json > submit.json
+rm -f $STANDALONE_WDL
 
 # Get workflow-id
 WF_ID=$(cat submit.json | python -c 'import json,sys;obj=json.load(sys.stdin);print(obj["id"])')

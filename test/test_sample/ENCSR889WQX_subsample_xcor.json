@@ -9,7 +9,7 @@
     "atac.filter.no_dup_removal" : true,
     "atac.paired_end" : false,
     "atac.multimapping" : 4,    
-    "atac.xcor.subsample" : 30000,
+    "atac.xcor.subsample" : 170000,
 
     "atac.trim_adapter.auto_detect_adapter" : true,
 

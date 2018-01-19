@@ -111,3 +111,4 @@ cromwell*.jar
 #test.wdl
 #test_google.wdl
 output_*.json
+test/*_standalone.wdl

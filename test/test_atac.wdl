@@ -137,24 +137,24 @@ workflow test_atac {
 		cpu = 1,
 	}
 	call filter as pe_filter_no_dup_removal { input :
-		bam = pe_bam
+		bam = pe_bam,
 		multimapping = multimapping,
 		no_dup_removal = true,
 		paired_end = true,
 		cpu = 1,
 	}
 	call bam2ta as pe_bam2ta { input :
-		bam = pe_nodup_bam
+		bam = pe_nodup_bam,
 		disable_tn5_shift = false,
 		paired_end = true,
 	}
 	call bam2ta as pe_bam2ta_disable_tn5_shift { input :
-		bam = pe_nodup_bam
+		bam = pe_nodup_bam,
 		disable_tn5_shift = true,
 		paired_end = true,
 	}
 	call bam2ta as pe_bam2ta_subsample { input :
-		bam = pe_nodup_bam
+		bam = pe_nodup_bam,
 		disable_tn5_shift = false,
 		subsample = bam2ta_subsample,
 		paired_end = true,
@@ -198,6 +198,7 @@ workflow test_atac {
 	}
 	call filter as se_filter { input :
 		bam = se_bam,
+		multimapping = multimapping,
 		paired_end = false,
 		cpu = 1,
 	}
@@ -207,24 +208,24 @@ workflow test_atac {
 		cpu = 1,
 	}
 	call filter as se_filter_no_dup_removal { input :
-		bam = se_bam
+		bam = se_bam,
 		multimapping = multimapping,
 		no_dup_removal = true,
 		paired_end = false,
 		cpu = 1,
 	}
 	call bam2ta as se_bam2ta { input :
-		bam = se_nodup_bam
+		bam = se_nodup_bam,
 		disable_tn5_shift = false,
 		paired_end = false,
 	}
 	call bam2ta as se_bam2ta_disable_tn5_shift { input :
-		bam = se_nodup_bam
+		bam = se_nodup_bam,
 		disable_tn5_shift = true,
 		paired_end = false,
 	}
 	call bam2ta as se_bam2ta_subsample { input :
-		bam = se_nodup_bam
+		bam = se_nodup_bam,
 		disable_tn5_shift = false,
 		subsample = bam2ta_subsample,
 		paired_end = false,

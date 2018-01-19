@@ -67,6 +67,7 @@ workflow test_atac {
 
 	String ref_se_pooled_ta
 	String ref_se_macs2_frip_qc # test macs2 for SE set only
+	String ref_se_macs2_sig_pval
 	String ref_se_overlap_frip_qc_rep1_vs_rep2
 	String ref_se_idr_frip_qc_rep1_vs_rep2
 	String ref_se_reproducibility_overlap_qc
@@ -136,24 +137,24 @@ workflow test_atac {
 		cpu = 1,
 	}
 	call filter as pe_filter_no_dup_removal { input :
-		bam = pe_bam
+		bam = pe_bam,
 		multimapping = multimapping,
 		no_dup_removal = true,
 		paired_end = true,
 		cpu = 1,
 	}
 	call bam2ta as pe_bam2ta { input :
-		bam = pe_nodup_bam
+		bam = pe_nodup_bam,
 		disable_tn5_shift = false,
 		paired_end = true,
 	}
 	call bam2ta as pe_bam2ta_disable_tn5_shift { input :
-		bam = pe_nodup_bam
+		bam = pe_nodup_bam,
 		disable_tn5_shift = true,
 		paired_end = true,
 	}
 	call bam2ta as pe_bam2ta_subsample { input :
-		bam = pe_nodup_bam
+		bam = pe_nodup_bam,
 		disable_tn5_shift = false,
 		subsample = bam2ta_subsample,
 		paired_end = true,
@@ -197,6 +198,7 @@ workflow test_atac {
 	}
 	call filter as se_filter { input :
 		bam = se_bam,
+		multimapping = multimapping,
 		paired_end = false,
 		cpu = 1,
 	}
@@ -206,24 +208,24 @@ workflow test_atac {
 		cpu = 1,
 	}
 	call filter as se_filter_no_dup_removal { input :
-		bam = se_bam
+		bam = se_bam,
 		multimapping = multimapping,
 		no_dup_removal = true,
 		paired_end = false,
 		cpu = 1,
 	}
 	call bam2ta as se_bam2ta { input :
-		bam = se_nodup_bam
+		bam = se_nodup_bam,
 		disable_tn5_shift = false,
 		paired_end = false,
 	}
 	call bam2ta as se_bam2ta_disable_tn5_shift { input :
-		bam = se_nodup_bam
+		bam = se_nodup_bam,
 		disable_tn5_shift = true,
 		paired_end = false,
 	}
 	call bam2ta as se_bam2ta_subsample { input :
-		bam = se_nodup_bam
+		bam = se_nodup_bam,
 		disable_tn5_shift = false,
 		subsample = bam2ta_subsample,
 		paired_end = false,
@@ -312,6 +314,7 @@ workflow test_atac {
 			'se_pool_ta',
 
 			'se_macs2',
+			'se_macs2_sig_pval',
 			'se_overlap',
 			'se_idr',
 			'se_reproducibility_overlap',
@@ -349,6 +352,7 @@ workflow test_atac {
 			se_pool_ta.ta_pooled,
 
 			se_macs2.frip_qc,
+			se_macs2.sig_pval,
 			se_overlap.frip_qc,
 			se_idr.frip_qc,
 			se_reproducibility_overlap.reproducibility_qc,
@@ -386,6 +390,7 @@ workflow test_atac {
 			ref_se_pooled_ta,
 
 			ref_se_macs2_frip_qc,
+			ref_se_macs2_sig_pval,
 			ref_se_overlap_frip_qc_rep1_vs_rep2,
 			ref_se_idr_frip_qc_rep1_vs_rep2,
 			ref_se_reproducibility_overlap_qc,
@@ -468,10 +473,12 @@ task compare_md5sum {
 	output {
 		Map[String,String] match = read_map('match.tsv') # key:label, val:match
 		Boolean match_overall = read_boolean('match_overall.txt')
-		File json = glob('result.json')[0] # details
+		File json = glob('result.json')[0] # details (json file)
+		String json_str =read_string('result.json') # details (string)
 	}
 }
-#@TASK_DEF_END#@TASK_DEF_BEGIN
+#@TASK_DEF_END
+#@TASK_DEF_BEGIN
 ### genomic tasks
 task trim_adapter { # trim adapters and merge trimmed fastqs
 	# parameters from workflow
