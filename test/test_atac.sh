@@ -15,7 +15,10 @@ echo >> $STANDALONE_WDL
 sed -n $LINE_TASK_BEGIN','$LINE_TASK_END'p' $WDL >> $STANDALONE_WDL
 
 # Submit workflow (POST)
-curl -X POST --header "Accept: application/json" -v "$CROMWELL_SVR_URL/api/workflows/v1" -F workflowSource=@$STANDALONE_WDL -F workflowInputs=@$INPUT > tmp.json
+curl -X POST --header "Accept: application/json" -v "$CROMWELL_SVR_URL/api/workflows/v1" \
+-F workflowSource=@$STANDALONE_WDL \
+-F workflowInputs=@$INPUT \
+-F workflowOptions=@$WF_OPT > submit.json
 # curl -X POST --header "Accept: application/json" -v "localhost:8000/api/workflows/v1" -F workflowSource=@test_cromwell_server.wdl -F workflowInputs=@test_cromwell_server.json > submit.json
 rm -f $STANDALONE_WDL
 
@@ -31,7 +34,7 @@ ITER_MAX=20
 while true; do
   ITER=$(($ITER+1))
   # Get status (GET)
-  curl -X GET --header "Accept: application/json" -v "localhost:8000/api/workflows/v1/$WF_ID/status" > status.json
+  curl -X GET --header "Accept: application/json" -v "$CROMWELL_SVR_URL/api/workflows/v1/$WF_ID/status" > status.json
   WF_STATUS=$(cat status.json | python -c 'import json,sys;obj=json.load(sys.stdin);print(obj["status"])')
   rm -f status.json
   echo "Workflow status: $WF_STATUS, Iter: $ITER"
@@ -48,7 +51,7 @@ while true; do
 done 
 
 # Get output of workflow
-curl -X GET --header "Accept: application/json" -v "localhost:8000/api/workflows/v1/$WF_ID/outputs" > output.tmp.json
+curl -X GET --header "Accept: application/json" -v "$CROMWELL_SVR_URL/api/workflows/v1/$WF_ID/outputs" > output.tmp.json
 RESULT=$(cat output.tmp.json | python -c 'import json,sys;obj=json.load(sys.stdin);print(obj["outputs"]["test_atac.compare_md5sum.match_overall"])')
 cat output.tmp.json | python -c 'import json,sys;obj=json.load(sys.stdin);print(obj["outputs"]["test_atac.compare_md5sum.json_str"])' > result.json
 rm -f output.tmp.json
