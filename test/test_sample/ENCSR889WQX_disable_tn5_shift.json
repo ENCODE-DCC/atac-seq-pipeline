@@ -1,0 +1,20 @@
+{
+    "atac.pipeline_type" : "dnase",
+    "atac.genome_tsv" : "gs://encode-pipeline-genome-data/mm10_google.tsv",
+    "atac.nodup_bams" : [
+        "gs://encode-pipeline-test-runs/test_atac_subsampled_sample/ENCSR889WQX/atac/7d0da2d1-955d-4a5b-b720-637045fb8f28/call-filter/shard-0/glob-3bcbe4e7489c90f75e0523ac6f3a9385/ENCFF439VSY.subsampled.trim.merged.nodup.bam"
+    ],
+
+    "atac.align_only" : true,
+    "atac.paired_end" : false,
+    "atac.multimapping" : 4,    
+
+    "atac.trim_adapter.auto_detect_adapter" : true,
+
+    "atac.smooth_win" : 73,
+    "atac.enable_idr" : true,
+    "atac.idr_thresh" : 0.05,
+
+    "atac.qc_report.name" : "ENCSR889WQX (subsampled to 1/200 reads, disable_tn5_shift)",
+    "atac.qc_report.desc" : "ATAC-seq on Mus musculus C57BL/6 frontal cortex adult"
+}

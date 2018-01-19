@@ -1,0 +1,96 @@
+{
+    "test_atac.se_genome_tsv" : "gs://encode-pipeline-genome-data/mm10_google.tsv",
+    "test_atac.pe_genome_tsv" : "gs://encode-pipeline-genome-data/hg38_google.tsv",
+
+    "test_atac.pe_adapters" : [
+        ["CTGTCTCTTATA",
+        "CTGTCTCTTATA"],
+        ["CTGTCTCTTATA",
+        "CTGTCTCTTATA"]
+    ],
+    "test_atac.pe_fastqs" : [
+        ["gs://encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ/fastq_subsampled/rep1/pair1/ENCFF341MYG.subsampled.fastq.gz",
+         "gs://encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ/fastq_subsampled/rep1/pair2/ENCFF248EJF.subsampled.fastq.gz"],
+        ["gs://encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ/fastq_subsampled/rep1/pair1/ENCFF106QGY.subsampled.fastq.gz",
+         "gs://encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ/fastq_subsampled/rep1/pair2/ENCFF368TYI.subsampled.fastq.gz"]
+    ],
+    "test_atac.pe_trimmed_fastq_R1" : "gs://encode-pipeline-test-runs/test_atac_subsampled_sample/ENCSR356KRQ/atac/3b19ba01-4719-46c7-b4ba-7ba551f92674/call-trim_adapter/shard-0/glob-4f26c666d13d1cb48973da7f646a7de2/merge_fastqs_R1_ENCFF341MYG.subsampled.trim.merged.fastq.gz",
+    "test_atac.pe_trimmed_fastq_R2" : "gs://encode-pipeline-test-runs/test_atac_subsampled_sample/ENCSR356KRQ/atac/3b19ba01-4719-46c7-b4ba-7ba551f92674/call-trim_adapter/shard-0/glob-4f26c666d13d1cb48973da7f646a7de2/merge_fastqs_R2_ENCFF248EJF.subsampled.trim.merged.fastq.gz",
+    "test_atac.pe_bam" : "gs://encode-pipeline-test-runs/test_atac_subsampled_sample/ENCSR356KRQ/atac/3b19ba01-4719-46c7-b4ba-7ba551f92674/call-bowtie2/shard-0/glob-3bcbe4e7489c90f75e0523ac6f3a9385/ENCFF341MYG.subsampled.trim.merged.bam",
+    "test_atac.pe_bam_no_multimapping" : "",
+    "test_atac.pe_nodup_bam" : "gs://encode-pipeline-test-runs/test_atac_subsampled_sample/ENCSR356KRQ/atac/3b19ba01-4719-46c7-b4ba-7ba551f92674/call-filter/shard-0/glob-3bcbe4e7489c90f75e0523ac6f3a9385/ENCFF341MYG.subsampled.trim.merged.nodup.bam",
+    "test_atac.pe_nodup_bam_no_multimapping" : "",
+    "test_atac.pe_ta" : "gs://encode-pipeline-test-runs/test_atac_subsampled_sample/ENCSR356KRQ/atac/3b19ba01-4719-46c7-b4ba-7ba551f92674/call-bam2ta/shard-0/glob-199637d3015dccbe277f621a18be9eb4/ENCFF341MYG.subsampled.trim.merged.nodup.tn5.tagAlign.gz",
+    
+    "test_atac.se_adapters" : [
+        ["CTGTCTCTTATA"],
+        ["CTGTCTCTTATA"],
+        ["CTGTCTCTTATA"],
+        ["CTGTCTCTTATA"]
+    ],
+    "test_atac.se_fastqs" : [
+        ["gs://encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR889WQX/fastq_subsampled/rep1/ENCFF439VSY.subsampled.fastq.gz"],
+        ["gs://encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR889WQX/fastq_subsampled/rep1/ENCFF325FCQ.subsampled.fastq.gz"],
+        ["gs://encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR889WQX/fastq_subsampled/rep1/ENCFF683IQS.subsampled.fastq.gz"],
+        ["gs://encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR889WQX/fastq_subsampled/rep1/ENCFF744CHW.subsampled.fastq.gz"]
+    ],
+    "test_atac.se_trimmed_fastq" : "gs://encode-pipeline-test-runs/test_atac_subsampled_sample/ENCSR889WQX/atac/7d0da2d1-955d-4a5b-b720-637045fb8f28/call-trim_adapter/shard-0/glob-4f26c666d13d1cb48973da7f646a7de2/merge_fastqs_R1_ENCFF439VSY.subsampled.trim.merged.fastq.gz",
+    "test_atac.se_bam" : "gs://encode-pipeline-test-runs/test_atac_subsampled_sample/ENCSR889WQX/atac/7d0da2d1-955d-4a5b-b720-637045fb8f28/call-bowtie2/shard-0/glob-3bcbe4e7489c90f75e0523ac6f3a9385/ENCFF439VSY.subsampled.trim.merged.bam",
+    "test_atac.se_bam_no_multimapping" : "",
+    "test_atac.se_nodup_bam" : "gs://encode-pipeline-test-runs/test_atac_subsampled_sample/ENCSR889WQX/atac/7d0da2d1-955d-4a5b-b720-637045fb8f28/call-filter/shard-0/glob-3bcbe4e7489c90f75e0523ac6f3a9385/ENCFF439VSY.subsampled.trim.merged.nodup.bam",
+    "test_atac.se_nodup_bam_no_multimapping" : "",
+    "test_atac.se_ta" : "gs://encode-pipeline-test-runs/test_atac_subsampled_sample/ENCSR889WQX/atac/7d0da2d1-955d-4a5b-b720-637045fb8f28/call-bam2ta/shard-0/glob-199637d3015dccbe277f621a18be9eb4/ENCFF439VSY.subsampled.trim.merged.nodup.tn5.tagAlign.gz",
+
+    "test_atac.se_ta_rep2" : "gs://encode-pipeline-test-runs/test_atac_subsampled_sample/ENCSR889WQX/atac/7d0da2d1-955d-4a5b-b720-637045fb8f28/call-bam2ta/shard-1/glob-199637d3015dccbe277f621a18be9eb4/ENCFF463QCX.subsampled.trim.merged.nodup.tn5.tagAlign.gz",
+    "test_atac.se_ta_pooled" : "gs://encode-pipeline-test-runs/test_atac_subsampled_sample/ENCSR889WQX/atac/7d0da2d1-955d-4a5b-b720-637045fb8f28/call-pool_ta/glob-199637d3015dccbe277f621a18be9eb4/ENCFF439VSY.subsampled.trim.merged.nodup.tn5.pooled.tagAlign.gz",
+    "test_atac.se_peak_rep1" : "gs://encode-pipeline-test-runs/test_atac_subsampled_sample/ENCSR889WQX/atac/7d0da2d1-955d-4a5b-b720-637045fb8f28/call-macs2/shard-0/glob-254907fcd430d7e6c9bf67ac4585adb4/ENCFF439VSY.subsampled.trim.merged.nodup.tn5.pval0.01.300K.narrowPeak.gz",
+    "test_atac.se_peak_rep2" : "gs://encode-pipeline-test-runs/test_atac_subsampled_sample/ENCSR889WQX/atac/7d0da2d1-955d-4a5b-b720-637045fb8f28/call-macs2/shard-1/glob-254907fcd430d7e6c9bf67ac4585adb4/ENCFF463QCX.subsampled.trim.merged.nodup.tn5.pval0.01.300K.narrowPeak.gz",
+    "test_atac.se_peak_pooled" : "gs://encode-pipeline-test-runs/test_atac_subsampled_sample/ENCSR889WQX/atac/7d0da2d1-955d-4a5b-b720-637045fb8f28/call-macs2_pooled/glob-254907fcd430d7e6c9bf67ac4585adb4/ENCFF439VSY.subsampled.trim.merged.nodup.tn5.pooled.pval0.01.300K.narrowPeak.gz",
+    "test_atac.se_overlap_peak_rep1_vs_rep2" : "gs://encode-pipeline-test-runs/test_atac_subsampled_sample/ENCSR889WQX/atac/7d0da2d1-955d-4a5b-b720-637045fb8f28/call-idr/shard-0/glob-2e6c87fc90e45fa5dbda88934d454cd3/rep1-rep2.idr0.05.bfilt.narrowPeak.gz",
+    "test_atac.se_overlap_peak_rep1_pr" : "gs://encode-pipeline-test-runs/test_atac_subsampled_sample/ENCSR889WQX/atac/7d0da2d1-955d-4a5b-b720-637045fb8f28/call-idr_pr/shard-0/glob-2e6c87fc90e45fa5dbda88934d454cd3/rep1-pr.idr0.05.bfilt.narrowPeak.gz",
+    "test_atac.se_overlap_peak_rep2_pr" : "gs://encode-pipeline-test-runs/test_atac_subsampled_sample/ENCSR889WQX/atac/7d0da2d1-955d-4a5b-b720-637045fb8f28/call-idr_pr/shard-1/glob-2e6c87fc90e45fa5dbda88934d454cd3/rep2-pr.idr0.05.bfilt.narrowPeak.gz",
+    "test_atac.se_overlap_peak_ppr" : "gs://encode-pipeline-test-runs/test_atac_subsampled_sample/ENCSR889WQX/atac/7d0da2d1-955d-4a5b-b720-637045fb8f28/call-idr_ppr/glob-2e6c87fc90e45fa5dbda88934d454cd3/ppr.idr0.05.bfilt.narrowPeak.gz",
+
+    "test_atac.ref_pe_trimmed_fastq_R1" : "gs://encode-pipeline-test-runs/test_atac_subsampled_sample/ENCSR356KRQ/atac/3b19ba01-4719-46c7-b4ba-7ba551f92674/call-trim_adapter/shard-0/glob-4f26c666d13d1cb48973da7f646a7de2/merge_fastqs_R1_ENCFF341MYG.subsampled.trim.merged.fastq.gz",
+    "test_atac.ref_pe_trimmed_fastq_R2" : "gs://encode-pipeline-test-runs/test_atac_subsampled_sample/ENCSR356KRQ/atac/3b19ba01-4719-46c7-b4ba-7ba551f92674/call-trim_adapter/shard-0/glob-4f26c666d13d1cb48973da7f646a7de2/merge_fastqs_R2_ENCFF248EJF.subsampled.trim.merged.fastq.gz",
+    "test_atac.ref_pe_flagstat" : "gs://encode-pipeline-test-runs/test_atac_subsampled_sample/ENCSR356KRQ/atac/3b19ba01-4719-46c7-b4ba-7ba551f92674/call-bowtie2/shard-0/glob-e2a84eed5523fc4955f617236139026c/ENCFF341MYG.subsampled.trim.merged.flagstat.qc",
+    "test_atac.ref_pe_flagstat_no_multimapping" : "",
+    "test_atac.ref_pe_nodup_bam" : "gs://encode-pipeline-test-runs/test_atac_subsampled_sample/ENCSR356KRQ/atac/3b19ba01-4719-46c7-b4ba-7ba551f92674/call-filter/shard-0/glob-3bcbe4e7489c90f75e0523ac6f3a9385/ENCFF341MYG.subsampled.trim.merged.nodup.bam",
+    "test_atac.ref_pe_nodup_bam_no_multimapping" : "",
+    "test_atac.ref_pe_filt_bam" : "",
+    "test_atac.ref_pe_ta" : "gs://encode-pipeline-test-runs/test_atac_subsampled_sample/ENCSR356KRQ/atac/3b19ba01-4719-46c7-b4ba-7ba551f92674/call-bam2ta/shard-0/glob-199637d3015dccbe277f621a18be9eb4/ENCFF341MYG.subsampled.trim.merged.nodup.tn5.tagAlign.gz",
+    "test_atac.ref_pe_ta_disable_tn5_shift" : "",
+    "test_atac.ref_pe_ta_subsample" : "",
+    "test_atac.ref_pe_xcor_log" : "gs://encode-pipeline-test-runs/test_atac_subsampled_sample/ENCSR356KRQ/atac/3b19ba01-4719-46c7-b4ba-7ba551f92674/call-xcor/shard-0/glob-75e08482e6a5fe7a0d0013bbdfdf694c/ENCFF341MYG.subsampled.trim.merged.nodup.tn5.no_chrM.R1.25M.cc.qc",
+    "test_atac.ref_pe_ta_pr1" : "gs://encode-pipeline-test-runs/test_atac_subsampled_sample/ENCSR356KRQ/atac/3b19ba01-4719-46c7-b4ba-7ba551f92674/call-spr/shard-0/glob-478c0ad30d0d033ce59a75ef84dab32e/ENCFF341MYG.subsampled.trim.merged.nodup.tn5.pr1.tagAlign.gz",
+
+    "test_atac.ref_se_trimmed_fastq" : "gs://encode-pipeline-test-runs/test_atac_subsampled_sample/ENCSR889WQX/atac/7d0da2d1-955d-4a5b-b720-637045fb8f28/call-trim_adapter/shard-0/glob-4f26c666d13d1cb48973da7f646a7de2/merge_fastqs_R1_ENCFF439VSY.subsampled.trim.merged.fastq.gz",
+    "test_atac.ref_se_flagstat" : "gs://encode-pipeline-test-runs/test_atac_subsampled_sample/ENCSR889WQX/atac/7d0da2d1-955d-4a5b-b720-637045fb8f28/call-bowtie2/shard-0/glob-e2a84eed5523fc4955f617236139026c/ENCFF439VSY.subsampled.trim.merged.flagstat.qc",
+    "test_atac.ref_se_flagstat_no_multimapping" : "",
+    "test_atac.ref_se_nodup_bam" : "gs://encode-pipeline-test-runs/test_atac_subsampled_sample/ENCSR889WQX/atac/7d0da2d1-955d-4a5b-b720-637045fb8f28/call-filter/shard-0/glob-3bcbe4e7489c90f75e0523ac6f3a9385/ENCFF439VSY.subsampled.trim.merged.nodup.bam",
+    "test_atac.ref_se_nodup_bam_no_multimapping" : "",
+    "test_atac.ref_se_filt_bam" : "",
+    "test_atac.ref_se_ta" : "gs://encode-pipeline-test-runs/test_atac_subsampled_sample/ENCSR889WQX/atac/7d0da2d1-955d-4a5b-b720-637045fb8f28/call-bam2ta/shard-0/glob-199637d3015dccbe277f621a18be9eb4/ENCFF439VSY.subsampled.trim.merged.nodup.tn5.tagAlign.gz",
+    "test_atac.ref_se_ta_disable_tn5_shift" : "",
+    "test_atac.ref_se_ta_subsample" : "",
+    "test_atac.ref_se_xcor_log" : "",
+    "test_atac.ref_se_ta_pr1" : "gs://encode-pipeline-test-runs/test_atac_subsampled_sample/ENCSR889WQX/atac/7d0da2d1-955d-4a5b-b720-637045fb8f28/call-spr/shard-0/glob-478c0ad30d0d033ce59a75ef84dab32e/ENCFF439VSY.subsampled.trim.merged.nodup.tn5.pr1.tagAlign.gz",
+
+    "test_atac.ref_se_pooled_ta" : "gs://encode-pipeline-test-runs/test_atac_subsampled_sample/ENCSR889WQX/atac/7d0da2d1-955d-4a5b-b720-637045fb8f28/call-pool_ta/glob-199637d3015dccbe277f621a18be9eb4/ENCFF439VSY.subsampled.trim.merged.nodup.tn5.pooled.tagAlign.gz",
+    "test_atac.ref_se_macs2_frip_qc" : "gs://encode-pipeline-test-runs/test_atac_subsampled_sample/ENCSR889WQX/atac/7d0da2d1-955d-4a5b-b720-637045fb8f28/call-macs2/shard-0/glob-156b027b56a0fc9230201b265d9f4bf4/ENCFF439VSY.subsampled.trim.merged.nodup.tn5.pval0.01.300K.bfilt.frip.qc",
+    "test_atac.ref_se_macs2_sig_pval" : "gs://encode-pipeline-test-runs/test_atac_subsampled_sample/ENCSR889WQX/atac/7d0da2d1-955d-4a5b-b720-637045fb8f28/call-macs2/shard-0/glob-7ab0340dfeb10ca109917cbdcc568548/ENCFF439VSY.subsampled.trim.merged.nodup.tn5.pval.signal.bigwig",
+    "test_atac.ref_se_overlap_frip_qc_rep1_vs_rep2" : "gs://encode-pipeline-test-runs/test_atac_subsampled_sample/ENCSR889WQX/atac/7d0da2d1-955d-4a5b-b720-637045fb8f28/call-overlap/shard-0/glob-156b027b56a0fc9230201b265d9f4bf4/rep1-rep2.overlap.bfilt.frip.qc",
+    "test_atac.ref_se_idr_frip_qc_rep1_vs_rep2" : "gs://encode-pipeline-test-runs/test_atac_subsampled_sample/ENCSR889WQX/atac/7d0da2d1-955d-4a5b-b720-637045fb8f28/call-idr/shard-0/glob-156b027b56a0fc9230201b265d9f4bf4/rep1-rep2.idr0.05.bfilt.frip.qc",
+    "test_atac.ref_se_reproducibility_overlap_qc" : "gs://encode-pipeline-test-runs/test_atac_subsampled_sample/ENCSR889WQX/atac/7d0da2d1-955d-4a5b-b720-637045fb8f28/call-reproducibility_overlap/glob-2e0755477c7b64fb4cd35cd75c0b0f2a/overlap.reproducibility.qc",
+    
+    "test_atac.multimapping" : 4,    
+    "test_atac.cap_num_peak" : 300000,
+    "test_atac.pval_thresh" : 0.01,
+    "test_atac.smooth_win" : 73,    
+    "test_atac.idr_thresh" : 0.05,
+    "test_atac.bam2ta_subsample" : 30000,
+    "test_atac.xcor_subsample" : 30000,
+
+    "test_atac.qc_report.name" : "SE: ENCSR889WQX, PE: ENCSR356KRQ (both subsampled to 1/200 reads)",
+    "test_atac.qc_report.desc" : "Test ATAC/DNase-seq pipeline."
+}

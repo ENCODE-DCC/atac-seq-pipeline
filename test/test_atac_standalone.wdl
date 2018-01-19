@@ -1,407 +1,477 @@
-# ENCODE DCC ATAC-Seq/DNase-Seq pipeline
+# ENCODE DCC ATAC-Seq/DNase-Seq pipeline tester
 # Author: Jin Lee (leepc12@gmail.com)
 
 # DO NOT REMOVE ANY COMMENTS STARTING WITH #@
-# THESE COMMENTS ARE USED FOR TESTING WDL
+# This WDL script is not stand-alone.
+# You will need to append TASK_DEF block from ../atac.wdl
 
 #@WORKFLOW_DEF_BEGIN
-workflow atac {
-	String pipeline_type  		# atac or dnase
+workflow test_atac {
+	### pe samples (replicate 1)
+	Array[Array[String]] pe_adapters
+	Array[Array[String]] pe_fastqs
+	String pe_trimmed_fastq_R1
+	String pe_trimmed_fastq_R2
+	String pe_bam
+	String pe_bam_no_multimapping
+	String pe_nodup_bam
+	String pe_nodup_bam_no_multimapping
+	String pe_ta
 
-	# input files (choose one of the input types)
-	Array[Array[Array[String]]]? fastqs 
-								# [rep_id][merge_id][end_id] if starting from fastqs
-								# 	after merging, it will reduce to 
-								# 	[rep_id][end_id]	
-	Array[String]? bams 		# [rep_id] if starting from bams	
-	Array[String]? nodup_bams 	# [rep_id] if starting from filtered bams
-	Array[String]? tas 			# [rep_id] if starting from tag-aligns
+	### se samples (replicate 1), _rep2 is for replicate 2
+	Array[Array[String]] se_adapters
+	Array[Array[String]] se_fastqs
+	String se_trimmed_fastq
+	String se_bam
+	String se_bam_no_multimapping
+	String se_nodup_bam
+	String se_nodup_bam_no_multimapping
+	String se_ta
 
-	Array[String]? peaks		# [rep_id] if starting from peaks
-	Array[String]? peaks_pr1	# [rep_id] if starting from peaks
-	Array[String]? peaks_pr2	# [rep_id] if starting from peaks
-	File? peak_ppr1				# if starting from peaks
-	File? peak_ppr2				# if starting from peaks
-	File? peak_pooled			# if starting from peaks
+	String se_ta_rep2
+	String se_ta_pooled
+	String se_peak_rep1 # test overlap,idr for SE set only
+	String se_peak_rep2
+	String se_peak_pooled
+	String se_overlap_peak_rep1_vs_rep2
+	String se_overlap_peak_rep1_pr
+	String se_overlap_peak_rep2_pr
+	String se_overlap_peak_ppr
 
-	# adapters (define if starting from fastqs)
-	# if there are no adapters to be trimmed, do not define
-	# you can selectively trim adapter for each fastq
-	#  by keeping the same structure as "fastqs" and only fill in known adapters
-	# activate "atac.trim_adapter.auto_detect_adapter" 
-	#  if you want auto adapter detection/removal for non-empty entries in "adapters"
-	Array[Array[Array[String]]]? adapters 
-								# [rep_id][merge_id][end_id]
+	### pe reference
+	String ref_pe_trimmed_fastq_R1
+	String ref_pe_trimmed_fastq_R2
+	String ref_pe_flagstat
+	String ref_pe_flagstat_no_multimapping
+	String ref_pe_nodup_bam
+	String ref_pe_nodup_bam_no_multimapping
+	String ref_pe_filt_bam # with flag no_dup_removal on
+	String ref_pe_ta
+	String ref_pe_ta_disable_tn5_shift
+	String ref_pe_ta_subsample
+	String ref_pe_xcor_log
+	String ref_pe_ta_pr1
 
-	# mandatory genome param
-	File genome_tsv 		# reference genome data TSV file including
-							# all important genome specific data file paths
-							# and parameters
-	Boolean paired_end 		# endedness of sample
+	### se reference
+	String ref_se_trimmed_fastq
+	String ref_se_flagstat
+	String ref_se_flagstat_no_multimapping
+	String ref_se_nodup_bam
+	String ref_se_nodup_bam_no_multimapping
+	String ref_se_filt_bam # with flag no_dup_removal on
+	String ref_se_ta
+	String ref_se_ta_disable_tn5_shift
+	String ref_se_ta_subsample
+	String ref_se_xcor_log
+	String ref_se_ta_pr1
 
-	# optional but important
-	Boolean? align_only 	# disable downstream analysis (peak calling, ...)
-							# after alignment
-	Boolean? true_rep_only 	# disable all analyses for pseudo replicates
-							# naive-overlap and IDR will also be disabled
-	Boolean? disable_xcor 	# disable cross-correlation analysis
-	Int? multimapping 		# multimapping reads
+	String ref_se_pooled_ta
+	String ref_se_macs2_frip_qc # test macs2 for SE set only
+	String ref_se_overlap_frip_qc_rep1_vs_rep2
+	String ref_se_idr_frip_qc_rep1_vs_rep2
+	String ref_se_reproducibility_overlap_qc
 
-	# task-specific variables but defined in workflow level (limit of WDL)
-	# optional for MACS2 
-	Int? cap_num_peak 		# cap number of raw peaks called from MACS2
-	Float? pval_thresh 		# p.value threshold
-	Int? smooth_win 		# size of smoothing window
-	Int? macs2_mem_mb 		# resource (memory in MB)
-	Int? macs2_time_hr		# resource (walltime in hour)
-	String? macs2_disks 	# resource disks for cloud platforms
-	# optional for IDR
-	Boolean? enable_idr		# enable IDR analysis on raw peaks
-	Float? idr_thresh		# IDR threshold
+	# genome data and parameters
+	File pe_genome_tsv
+	File se_genome_tsv
 
-	# OTHER IMPORTANT mandatory/optional parameters are declared in a task level
+	# common parameters for both samples	
+	Int multimapping
+	Int cap_num_peak
+	Float pval_thresh
+	Int smooth_win
+	Float idr_thresh
+	Int bam2ta_subsample
+	Int xcor_subsample
 
-	# temp null variable for optional File/String
-	String? null
+	# read genome data from tsv file for se and pe
+	call read_genome_tsv as pe_read_genome_tsv { input: genome_tsv = pe_genome_tsv }
+	call read_genome_tsv as se_read_genome_tsv { input: genome_tsv = se_genome_tsv }
+	String pe_bowtie2_idx_tar = pe_read_genome_tsv.genome['bowtie2_idx_tar']
+	String pe_blacklist = pe_read_genome_tsv.genome['blacklist']
+	String pe_chrsz = pe_read_genome_tsv.genome['chrsz']
+	String pe_gensz = pe_read_genome_tsv.genome['gensz']
+	String se_bowtie2_idx_tar = se_read_genome_tsv.genome['bowtie2_idx_tar']
+	String se_blacklist = se_read_genome_tsv.genome['blacklist']
+	String se_chrsz = se_read_genome_tsv.genome['chrsz']
+	String se_gensz = se_read_genome_tsv.genome['gensz']
 
-	# read genome data and paths
-	call read_genome_tsv { input: genome_tsv = genome_tsv }	# For Google JES backend
-	String bowtie2_idx_tar = read_genome_tsv.genome['bowtie2_idx_tar']
-	String? blacklist = if read_genome_tsv.genome['blacklist']=='/dev/null' then null 
-					else read_genome_tsv.genome['blacklist']
-	String chrsz = read_genome_tsv.genome['chrsz']
-	String gensz = read_genome_tsv.genome['gensz']
-
-	# simplified variables for optional flags
-	Boolean align_only_ = select_first([align_only, false])
-	Boolean true_rep_only_ = select_first([true_rep_only, false])
-	Boolean enable_idr_ = select_first([enable_idr, false])
-	Boolean disable_xcor_ = select_first([disable_xcor, false])
-
-	###### pipeline starts here ######
-
-	Array[Array[Array[String]]] fastqs_ = select_first([fastqs, []])
-	Array[Array[Array[String]]] adapters_ = select_first([adapters, []])
-	Int fastqs_len = length(fastqs_)
-	Int adapters_len = length(adapters_)
-	if ( fastqs_len>0 ) {
-		scatter(i in range(fastqs_len)) {
-			# trim adapters and merge trimmed fastqs
-			call trim_adapter { input :
-				fastqs = fastqs_[i],
-				adapters = if adapters_len>0 then adapters_[i] else [],
-				paired_end = paired_end,
-			}
-			# align trimmed/merged fastqs with bowtie2
-			call bowtie2 { input :
-				idx_tar = bowtie2_idx_tar,
-				fastqs = trim_adapter.trimmed_merged_fastqs, #[R1,R2]
-				paired_end = paired_end,
-				multimapping = multimapping,
-			}
-		}
+	### test pe
+	call trim_adapter as pe_trim_adapter { input :
+		fastqs = pe_fastqs,
+		adapters = pe_adapters,
+		auto_detect_adapter = false,
+		paired_end = true,
+		cpu = 1,
 	}
-	Array[String] bams_ = select_first([bams, bowtie2.bam, []])
-	if ( length(bams_)>0 ) {
-		scatter(bam in bams_) {
-			# filter/dedup bam
-			call filter { input :
-				bam = bam,
-				paired_end = paired_end,
-				multimapping = multimapping,
-			}
-		}
+	call trim_adapter as pe_trim_adapter_auto { input :
+		fastqs = pe_fastqs,
+		adapters = [],
+		auto_detect_adapter = true,
+		paired_end = true,
+		cpu = 1,
 	}
-	Array[String] nodup_bams_ = select_first([nodup_bams, filter.nodup_bam, []])
-	if ( length(nodup_bams_)>0 ) {
-		scatter(bam in nodup_bams_) {
-			# convert bam to tagalign and subsample it if necessary
-			call bam2ta { input :
-				bam = bam,
-				disable_tn5_shift = if pipeline_type=='atac' then false else true,
-				paired_end = paired_end,
-			}
-		}
+	call bowtie2 as pe_bowtie2 { input :
+		idx_tar = pe_bowtie2_idx_tar,
+		fastqs = [pe_trimmed_fastq_R1, pe_trimmed_fastq_R2],
+		multimapping = multimapping,
+		paired_end = true,
+		cpu = 2,
 	}
-	Array[String] tas_ = select_first([tas,bam2ta.ta,[]])
-	Int tas_len = length(tas_)
-	if ( tas_len>0 ) {
-		if ( !disable_xcor_ ) {
-			# subsample tagalign (non-mito) and cross-correlation analysis
-			scatter(ta in tas_) {
-				call xcor { input :
-					ta = ta,
-					paired_end = paired_end,
-				}
-			}
-		}
-		if ( !align_only_ ) {
-			# subsample tagalign (non-mito) and cross-correlation analysis
-			scatter(ta in tas_) {
-				# call peaks on tagalign
-				call macs2 { input :
-					ta = ta,
-					gensz = gensz,
-					chrsz = chrsz,
-					cap_num_peak = cap_num_peak,
-					pval_thresh = pval_thresh,
-					smooth_win = smooth_win,
-					make_signal = true,
-					blacklist = blacklist,
-					mem_mb = macs2_mem_mb,
-					disks = macs2_disks,
-					time_hr = macs2_time_hr,
-				}
-			}
-			if ( !true_rep_only_ ) {
-				scatter(ta in tas_) {
-					# make two self pseudo replicates per true replicate
-					call spr { input :
-						ta = ta,
-						paired_end = paired_end,
-					}
-					# call peaks on 1st pseudo replicated tagalign 
-					call macs2 as macs2_pr1 { input :
-						ta = spr.ta_pr1,
-						gensz = gensz,
-						chrsz = chrsz,
-						cap_num_peak = cap_num_peak,
-						pval_thresh = pval_thresh,
-						smooth_win = smooth_win,
-						blacklist = blacklist,
-						mem_mb = macs2_mem_mb,
-						disks = macs2_disks,
-						time_hr = macs2_time_hr,
-					}
-					# call peaks on 2nd pseudo replicated tagalign 
-					call macs2 as macs2_pr2 { input :
-						ta = spr.ta_pr2,
-						gensz = gensz,
-						chrsz = chrsz,
-						cap_num_peak = cap_num_peak,
-						pval_thresh = pval_thresh,
-						smooth_win = smooth_win,
-						blacklist = blacklist,
-						mem_mb = macs2_mem_mb,
-						disks = macs2_disks,
-						time_hr = macs2_time_hr,
-					}				
-				}
-			}
-			if ( tas_len>1 ) {
-				# pool tagaligns from true replicates
-				call pool_ta { input :
-					tas = tas_,
-				}
-				# call peaks on pooled replicate
-				call macs2 as macs2_pooled { input :
-					ta = pool_ta.ta_pooled,
-					gensz = gensz,
-					chrsz = chrsz,
-					cap_num_peak = cap_num_peak,
-					pval_thresh = pval_thresh,
-					smooth_win = smooth_win,
-					make_signal = true,
-					blacklist = blacklist,
-					mem_mb = macs2_mem_mb,
-					disks = macs2_disks,
-					time_hr = macs2_time_hr,
-				}
-				if ( !true_rep_only_ ) {
-					# pool tagaligns from pseudo replicates
-					call pool_ta as pool_ta_pr1 { input :
-						tas = select_first([spr.ta_pr1]),
-					}
-					call pool_ta as pool_ta_pr2 { input :
-						tas = select_first([spr.ta_pr2]),
-					}
-					# call peaks on 1st pooled pseudo replicates
-					call macs2 as macs2_ppr1 { input :
-						ta = pool_ta_pr1.ta_pooled,
-						gensz = gensz,
-						chrsz = chrsz,
-						cap_num_peak = cap_num_peak,
-						pval_thresh = pval_thresh,
-						smooth_win = smooth_win,
-						blacklist = blacklist,
-						mem_mb = macs2_mem_mb,
-						disks = macs2_disks,
-						time_hr = macs2_time_hr,
-					}
-					# call peaks on 2nd pooled pseudo replicates
-					call macs2 as macs2_ppr2 { input :
-						ta = pool_ta_pr2.ta_pooled,
-						gensz = gensz,
-						chrsz = chrsz,
-						cap_num_peak = cap_num_peak,
-						pval_thresh = pval_thresh,
-						smooth_win = smooth_win,
-						blacklist = blacklist,
-						mem_mb = macs2_mem_mb,
-						disks = macs2_disks,
-						time_hr = macs2_time_hr,
-					}
-				}
-			}
-		}
+	call bowtie2 as pe_bowtie2_no_multimapping { input :
+		idx_tar = pe_bowtie2_idx_tar,
+		fastqs = [pe_trimmed_fastq_R1, pe_trimmed_fastq_R2],
+		paired_end = true,
+		cpu = 2,
+	}
+	call filter as pe_filter { input :
+		bam = pe_bam,
+		multimapping = multimapping,
+		paired_end = true,
+		cpu = 1,
+	}
+	call filter as pe_filter_no_multimapping { input :
+		bam = pe_bam_no_multimapping,
+		paired_end = true,
+		cpu = 1,
+	}
+	call filter as pe_filter_no_dup_removal { input :
+		bam = pe_bam
+		multimapping = multimapping,
+		no_dup_removal = true,
+		paired_end = true,
+		cpu = 1,
+	}
+	call bam2ta as pe_bam2ta { input :
+		bam = pe_nodup_bam
+		disable_tn5_shift = false,
+		paired_end = true,
+	}
+	call bam2ta as pe_bam2ta_disable_tn5_shift { input :
+		bam = pe_nodup_bam
+		disable_tn5_shift = true,
+		paired_end = true,
+	}
+	call bam2ta as pe_bam2ta_subsample { input :
+		bam = pe_nodup_bam
+		disable_tn5_shift = false,
+		subsample = bam2ta_subsample,
+		paired_end = true,
+	}
+	call xcor as pe_xcor { input :
+		ta = pe_ta,
+		subsample = xcor_subsample,
+		paired_end = true,
+	}
+	call spr as pe_spr { input :
+		ta = pe_ta,
+		paired_end = true,
+	}	
+	### test se
+	call trim_adapter as se_trim_adapter { input :
+		fastqs = se_fastqs,
+		adapters = se_adapters,
+		auto_detect_adapter = false,
+		paired_end = false,
+		cpu = 1,
+	}
+	call trim_adapter as se_trim_adapter_auto { input :
+		fastqs = se_fastqs,
+		adapters = [],
+		auto_detect_adapter = true,
+		paired_end = false,
+		cpu = 1,
+	}
+	call bowtie2 as se_bowtie2 { input :
+		idx_tar = se_bowtie2_idx_tar,
+		fastqs = [se_trimmed_fastq],
+		multimapping = multimapping,
+		paired_end = false,
+		cpu = 2,
+	}
+	call bowtie2 as se_bowtie2_no_multimapping { input :
+		idx_tar = se_bowtie2_idx_tar,
+		fastqs = [se_trimmed_fastq],
+		paired_end = false,
+		cpu = 2,
+	}
+	call filter as se_filter { input :
+		bam = se_bam,
+		paired_end = false,
+		cpu = 1,
+	}
+	call filter as se_filter_no_multimapping { input :
+		bam = se_bam_no_multimapping,
+		paired_end = false,
+		cpu = 1,
+	}
+	call filter as se_filter_no_dup_removal { input :
+		bam = se_bam
+		multimapping = multimapping,
+		no_dup_removal = true,
+		paired_end = false,
+		cpu = 1,
+	}
+	call bam2ta as se_bam2ta { input :
+		bam = se_nodup_bam
+		disable_tn5_shift = false,
+		paired_end = false,
+	}
+	call bam2ta as se_bam2ta_disable_tn5_shift { input :
+		bam = se_nodup_bam
+		disable_tn5_shift = true,
+		paired_end = false,
+	}
+	call bam2ta as se_bam2ta_subsample { input :
+		bam = se_nodup_bam
+		disable_tn5_shift = false,
+		subsample = bam2ta_subsample,
+		paired_end = false,
+	}
+	call xcor as se_xcor { input :
+		ta = se_ta,
+		subsample = xcor_subsample,
+		paired_end = false,
+	}
+	call spr as se_spr { input :
+		ta = se_ta,
+		paired_end = false,
+	}
+	call pool_ta as se_pool_ta { input :
+		tas = [se_ta, se_ta_rep2],
 	}
 
-	Array[String] peaks_ = select_first([peaks, macs2.npeak, []])
-	Array[String] peaks_pr1_ = select_first([peaks_pr1, macs2_pr1.npeak, []])
-	Array[String] peaks_pr2_ = select_first([peaks_pr2, macs2_pr2.npeak, []])
-	Int num_rep = length(peaks_)
-	String? peak_pooled_ = select_first([peak_pooled, macs2_pooled.npeak, '/dev/null'])
-	String? peak_ppr1_ = select_first([peak_ppr1, macs2_ppr1.npeak, '/dev/null'])
-	String? peak_ppr2_ = select_first([peak_ppr2, macs2_ppr2.npeak, '/dev/null'])
-	# determine peak_type
-	String peak_type = 'narrowPeak'
-	# determine idr ranking method
-	String idr_rank = 'p.value'
-	# generate all possible pairs of true replicates
-	call pair_gen { input: num_rep = num_rep }
-
-	if ( !align_only_ ) {
-		if ( num_rep>1 ) {
-			# Naive overlap on every pair of true replicates
-			scatter( pair in pair_gen.pairs ) {
-				call overlap { input :
-					prefix = "rep"+(pair[0]+1)+"-rep"+(pair[1]+1),
-					peak1 = peaks_[(pair[0])],
-					peak2 = peaks_[(pair[1])],
-					peak_pooled = peak_pooled_,
-					peak_type = peak_type,
-					blacklist = blacklist,
-					ta = if tas_len>0 then pool_ta.ta_pooled else null,
-				}
-			}
-			if ( enable_idr_ ) {
-				# IDR on every pair of true replicates
-				scatter( pair in pair_gen.pairs ) {
-					call idr { input : 
-						prefix = "rep"+(pair[0]+1)+"-rep"+(pair[1]+1),
-						peak1 = peaks_[(pair[0])],
-						peak2 = peaks_[(pair[1])],
-						peak_pooled = peak_pooled_,
-						idr_thresh = select_first([idr_thresh,0.1]),
-						peak_type = peak_type,
-						rank = idr_rank,
-						blacklist = blacklist,
-						ta = if tas_len>0 then pool_ta.ta_pooled else null,
-					}
-				}
-			}
-		}
-		if ( !true_rep_only_ ) {
-			# Naive overlap on pseduo replicates
-			scatter( i in range(num_rep) ) {
-				call overlap as overlap_pr { input : 
-					prefix = "rep"+(i+1)+"-pr",
-					peak1 = peaks_pr1_[i],
-					peak2 = peaks_pr2_[i],
-					peak_pooled = peaks_[i],
-					peak_type = peak_type,
-					blacklist = blacklist,
-					ta = if tas_len>0 then tas_[i] else null,
-				}
-			}
-			if ( enable_idr_ ) {
-				# IDR on pseduo replicates
-				scatter( i in range(num_rep) ) {
-					call idr as idr_pr { input : 
-						prefix = "rep"+(i+1)+"-pr",
-						peak1 = peaks_pr1_[i],
-						peak2 = peaks_pr2_[i],
-						peak_pooled = peaks_[i],
-						idr_thresh = select_first([idr_thresh,0.1]),
-						peak_type = peak_type,
-						rank = idr_rank,
-						blacklist = blacklist,
-						ta = if tas_len>0 then tas_[i] else null,
-					}
-				}
-			}
-			if ( num_rep>1 ) {
-				# Naive overlap on pooled pseudo replicates
-				call overlap as overlap_ppr { input : 
-					prefix = "ppr",
-					peak1 = peak_ppr1_,
-					peak2 = peak_ppr2_,
-					peak_pooled = peak_pooled_,
-					peak_type = peak_type,
-					blacklist = blacklist,
-					ta = if tas_len>0 then pool_ta.ta_pooled else null,
-				}
-				if ( enable_idr_ ) {
-					# IDR on pooled pseduo replicates
-					call idr as idr_ppr { input : 
-						prefix = "ppr",
-						peak1 = peak_ppr1_,
-						peak2 = peak_ppr2_,
-						peak_pooled = peak_pooled_,
-						idr_thresh = select_first([idr_thresh,0.1]),
-						peak_type = peak_type,
-						rank = idr_rank,
-						blacklist = blacklist,
-						ta = if tas_len>0 then pool_ta.ta_pooled else null,
-					}
-				}
-			}
-			# reproducibility QC for overlapping peaks
-			call reproducibility as reproducibility_overlap { input :
-				prefix = 'overlap',
-				peaks = select_first([overlap.bfilt_overlap_peak, []]),
-				peaks_pr = overlap_pr.bfilt_overlap_peak,
-				peak_ppr = overlap_ppr.bfilt_overlap_peak,
-			}
-			if ( enable_idr_ ) {
-				# reproducibility QC for IDR peaks
-				call reproducibility as reproducibility_idr { input :
-					prefix = 'idr',
-					peaks = select_first([idr.bfilt_idr_peak, []]),
-					peaks_pr = idr_pr.bfilt_idr_peak,
-					peak_ppr = idr_ppr.bfilt_idr_peak,
-				}
-			}
-		}
+	# test peak-caling
+	call macs2 as se_macs2 { input :
+		ta = se_ta,
+		gensz = se_gensz,
+		chrsz = se_chrsz,
+		cap_num_peak = cap_num_peak,
+		pval_thresh = pval_thresh,
+		smooth_win = smooth_win,
+		make_signal = true,
+		blacklist = se_blacklist,
+	}
+	call overlap as se_overlap { input :
+		prefix = "rep1-rep2",
+		peak1 = se_peak_rep1,
+		peak2 = se_peak_rep2,
+		peak_pooled = se_peak_pooled,
+		peak_type = 'narrowPeak',
+		blacklist = se_blacklist,
+		ta = se_ta_pooled,
+	}
+	call idr as se_idr { input : 
+		prefix = "rep1-rep2",
+		peak1 = se_peak_rep1,
+		peak2 = se_peak_rep2,
+		peak_pooled = se_peak_pooled,
+		idr_thresh = idr_thresh,
+		peak_type = 'narrowPeak',
+		rank = 'p.value',
+		blacklist = se_blacklist,
+		ta = se_ta_pooled,
+	}
+	call reproducibility as se_reproducibility_overlap { input :
+		prefix = 'overlap',
+		peaks = [se_overlap_peak_rep1_vs_rep2],
+		peaks_pr = [se_overlap_peak_rep1_pr, se_overlap_peak_rep2_pr],
+		peak_ppr = se_overlap_peak_ppr,
 	}
 
-	call qc_report { input :
-		paired_end = paired_end,
-		pipeline_type = pipeline_type,
-		peak_caller = 'macs2',
-		idr_thresh = select_first([idr_thresh,0.1]),
-		flagstat_qcs = select_first([bowtie2.flagstat_qc, []]),
-		nodup_flagstat_qcs = select_first([filter.flagstat_qc, []]),
-		dup_qcs = select_first([filter.dup_qc, []]),
-		pbc_qcs = select_first([filter.pbc_qc, []]),
-		xcor_plots = select_first([xcor.plot_png, []]),
-		xcor_scores = select_first([xcor.score, []]),
+	call compare_md5sum { input :
+		labels = [
+			'pe_trim_adapter_R1',
+			'pe_trim_adapter_R2',
+			'pe_trim_adapter_auto_R1',
+			'pe_trim_adapter_auto_R2',
+			'pe_bowtie2',
+			'pe_bowtie2_no_multimapping',
+			'pe_filter',
+			'pe_filter_no_multimapping',
+			'pe_filter_no_dup_removal',
+			'pe_bam2ta',
+			'pe_bam2ta_disable_tn5_shift',
+			'pe_bam2ta_subsample',
+			'pe_xcor',
+			'pe_spr',
 
-		frip_qcs = select_first([macs2.frip_qc, []]),
-		frip_qcs_pr1 = select_first([macs2_pr1.frip_qc, []]),
-		frip_qcs_pr2 = select_first([macs2_pr2.frip_qc, []]),
-		frip_qc_pooled = if defined(macs2_pooled.frip_qc) then macs2_pooled.frip_qc else null,
-		frip_qc_ppr1 = if defined(macs2_ppr1.frip_qc) then macs2_ppr1.frip_qc else null,
-		frip_qc_ppr2 = if defined(macs2_ppr2.frip_qc) then macs2_ppr2.frip_qc else null,
+			'se_trim_adapter',
+			'se_trim_adapter_auto',
+			'se_bowtie2',
+			'se_bowtie2_no_multimapping',
+			'se_filter',
+			'se_filter_no_multimapping',
+			'se_filter_no_dup_removal',
+			'se_bam2ta',
+			'se_bam2ta_disable_tn5_shift',
+			'se_bam2ta_subsample',
+			'se_xcor',
+			'se_spr',
 
-		idr_plots = select_first([idr.idr_plot, []]),
-		idr_plots_pr = select_first([idr_pr.idr_plot, []]),
-		idr_plot_ppr = if defined(idr_ppr.idr_plot) then idr_ppr.idr_plot else null,
-		frip_idr_qcs = select_first([idr.frip_qc, []]),
-		frip_idr_qcs_pr = select_first([idr_pr.frip_qc, []]),
-		frip_idr_qc_ppr = if defined(idr_ppr.frip_qc) then idr_ppr.frip_qc else null,
-		frip_overlap_qcs = select_first([overlap.frip_qc, []]),
-		frip_overlap_qcs_pr = select_first([overlap_pr.frip_qc, []]),
-		frip_overlap_qc_ppr = if defined(overlap_ppr.frip_qc) then overlap_ppr.frip_qc else null,
-		idr_reproducibility_qc = if defined(reproducibility_idr.reproducibility_qc) 
-								then reproducibility_idr.reproducibility_qc else null,
-		overlap_reproducibility_qc = if defined(reproducibility_overlap.reproducibility_qc) 
-								then reproducibility_overlap.reproducibility_qc else null,
+			'se_pool_ta',
+
+			'se_macs2',
+			'se_overlap',
+			'se_idr',
+			'se_reproducibility_overlap',
+		],
+
+		files = [
+			pe_trim_adapter.trimmed_merged_fastqs[0], 
+			pe_trim_adapter.trimmed_merged_fastqs[1],
+			pe_trim_adapter_auto.trimmed_merged_fastqs[0], 
+			pe_trim_adapter_auto.trimmed_merged_fastqs[1],
+			pe_bowtie2.flagstat_qc,
+			pe_bowtie2_no_multimapping.flagstat_qc,
+			pe_filter.nodup_bam,
+			pe_filter_no_multimapping.nodup_bam,
+			pe_filter_no_dup_removal.nodup_bam,
+			pe_bam2ta.ta,
+			pe_bam2ta_disable_tn5_shift.ta,
+			pe_bam2ta_subsample.ta,
+			pe_xcor.score,
+			pe_spr.ta_pr1,
+
+			se_trim_adapter.trimmed_merged_fastqs[0], 
+			se_trim_adapter_auto.trimmed_merged_fastqs[0], 
+			se_bowtie2.flagstat_qc,
+			se_bowtie2_no_multimapping.flagstat_qc,
+			se_filter.nodup_bam,
+			se_filter_no_multimapping.nodup_bam,
+			se_filter_no_dup_removal.nodup_bam,
+			se_bam2ta.ta,
+			se_bam2ta_disable_tn5_shift.ta,
+			se_bam2ta_subsample.ta,
+			se_xcor.score,			
+			se_spr.ta_pr1,
+
+			se_pool_ta.ta_pooled,
+
+			se_macs2.frip_qc,
+			se_overlap.frip_qc,
+			se_idr.frip_qc,
+			se_reproducibility_overlap.reproducibility_qc,
+		],
+
+		ref_files = [
+			ref_pe_trimmed_fastq_R1,
+			ref_pe_trimmed_fastq_R2,
+			ref_pe_trimmed_fastq_R1,
+			ref_pe_trimmed_fastq_R2,
+			ref_pe_flagstat,
+			ref_pe_flagstat_no_multimapping,
+			ref_pe_nodup_bam,
+			ref_pe_nodup_bam_no_multimapping,
+			ref_pe_filt_bam,
+			ref_pe_ta,
+			ref_pe_ta_disable_tn5_shift,
+			ref_pe_ta_subsample,
+			ref_pe_xcor_log,
+			ref_pe_ta_pr1,
+
+			ref_se_trimmed_fastq,
+			ref_se_trimmed_fastq,
+			ref_se_flagstat,
+			ref_se_flagstat_no_multimapping,
+			ref_se_nodup_bam,
+			ref_se_nodup_bam_no_multimapping,
+			ref_se_filt_bam,
+			ref_se_ta,
+			ref_se_ta_disable_tn5_shift,
+			ref_se_ta_subsample,
+			ref_se_xcor_log,
+			ref_se_ta_pr1,
+
+			ref_se_pooled_ta,
+
+			ref_se_macs2_frip_qc,
+			ref_se_overlap_frip_qc_rep1_vs_rep2,
+			ref_se_idr_frip_qc_rep1_vs_rep2,
+			ref_se_reproducibility_overlap_qc,
+		],
 	}
 }
 #@WORKFLOW_DEF_END
 
 #@TASK_DEF_BEGIN
+task compare_md5sum {
+	Array[String] labels
+	Array[File] files
+	Array[File] ref_files
+
+	command <<<
+		python <<CODE	
+		from collections import OrderedDict
+		from json import dumps
+		import os
+		import json
+		import hashlib
+
+		def md5sum(filename, blocksize=65536):
+		    hash = hashlib.md5()
+		    with open(filename, 'rb') as f:
+		        for block in iter(lambda: f.read(blocksize), b""):
+		            hash.update(block)
+		    return hash.hexdigest()
+
+		with open('${write_lines(labels)}','r') as fp:
+			labels = fp.read().splitlines()
+		with open('${write_lines(files)}','r') as fp:
+			files = fp.read().splitlines()
+		with open('${write_lines(ref_files)}','r') as fp:
+			ref_files = fp.read().splitlines()
+
+		result = []
+		match = OrderedDict()
+		match_overall = True
+		for i, label in enumerate(labels):
+			f = files[i]
+			ref_f = ref_files[i]
+			md5 = md5sum(f)
+			ref_md5 = md5sum(ref_f)
+			# if text file, read in contents
+			if f.endswith('.qc') or f.endswith('.txt') or \
+				f.endswith('.log') or f.endswith('.out'):
+				with open(f,'r') as fp:
+					contents = fp.read()
+				with open(ref_f,'r') as fp:
+					ref_contents = fp.read()
+			else:
+				contents = ''
+				ref_contents = ''
+			matched = md5==ref_md5
+			result.append(OrderedDict([
+				('label', label),
+				('match', matched),
+				('md5sum', md5),
+				('ref_md5sum', ref_md5),
+				('basename', os.path.basename(f)),
+				('ref_basename', os.path.basename(ref_f)),
+				('contents', contents),
+				('ref_contents', ref_contents),
+				]))
+			match[label] = matched
+			match_overall &= matched
+		with open('result.json','w') as fp:
+			fp.write(json.dumps(result, indent=4))
+		match_tmp = []
+		for key in match:
+			val = match[key]
+			match_tmp.append('{}\t{}'.format(key, val))
+		with open('match.tsv','w') as fp:
+			fp.writelines('\n'.join(match_tmp))
+		with open('match_overall.txt','w') as fp:
+			fp.write(str(match_overall))
+		CODE
+	>>>
+	output {
+		Map[String,String] match = read_map('match.tsv') # key:label, val:match
+		Boolean match_overall = read_boolean('match_overall.txt')
+		File json = glob('result.json')[0] # details
+	}
+}
+#@TASK_DEF_END#@TASK_DEF_BEGIN
 ### genomic tasks
 task trim_adapter { # trim adapters and merge trimmed fastqs
 	# parameters from workflow
