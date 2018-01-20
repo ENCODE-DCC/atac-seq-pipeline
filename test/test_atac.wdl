@@ -408,7 +408,6 @@ task compare_md5sum {
 	command <<<
 		python <<CODE	
 		from collections import OrderedDict
-		from json import dumps
 		import os
 		import json
 		import hashlib

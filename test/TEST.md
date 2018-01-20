@@ -3,7 +3,9 @@ ENCODE ATAC-seq pipeline test
 
 # How to generate reference outputs
 
-1) Specify correct file paths in `subsample_fastq.sh` and run to subsample test samples (to 1/200 reads).
+0) Make sure that you have an executable `cromwell-30.1.jar` in your `PATH`.
+
+1) Specify correct file paths in `subsample_fastq.sh` and run to subsample test samples.
 ```
 $ cd test_sample
 $ bash subsample_fastq.sh
@@ -43,7 +45,7 @@ $ bash ENCSR889WQX_subsample_xcor.sh
 * disk: `Standard persistent disk 20GB`
 * Network tags: add a tag `cromwell-server`.
 * Cloud API access scopes: `Allow full access to all Cloud APIs`.
-* External IP: any static IP address.
+* External IP (optional): any static IP address.
 
 2) SSH to the instance and run the followings to install Docker and Java 8:
 ```
@@ -82,9 +84,8 @@ $ bash run_cromwell_server_on_gc.sh
 ```
 
 5) Firewall settings to open port 8000
-* Go to cloud.google.com
-* Go to my Console
-* Choose you Project.
+* Go to Google Cloud Console
+* Choose your Project.
 * Choose Networking > VPC network
 * Choose "Firewalls rules"
 * Choose Create Firewall Rule `encode-cromwell-test-server-open-port-8000`.
