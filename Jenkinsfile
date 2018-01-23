@@ -31,6 +31,8 @@ pipeline {
                         agent {label 'master-builder'} //this will actually run on master
                         steps{
                                 echo "run cromwell tests"
+                                sh "./test/test_atac.sh"
+                                sh "cat result.json"
                         }
                 }
         }
