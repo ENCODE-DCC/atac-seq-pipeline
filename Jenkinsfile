@@ -8,15 +8,20 @@ pipeline {
 		stage('Unit-tests') {
                         agent {label 'master-builder'}
 			steps { 
+                                // the tag gets built here, and can be referenced in the other stages 
+                                script {
+                                        TAG = sh([script: "echo quay.io/encode-dcc/atac-seq-pipeline:${env.BRANCH_NAME}_${env.BUILD_NUMBER}", returnStdout: true]).trim()
+                                       }
 				echo "Running unit tests.."
 			}
 		}
                 stage('Build-nonmaster') {
-                        agent {label 'slave-w-docker-cromwell-60GB-ebs'}
+                        agent {label 'master-builder'} //this will be the slave in the real thing
                         when { not { branch 'master' } }
                         steps { 
+                                echo "the tag is $TAG"
                                 slackSend "started job: ${env.JOB_NAME}, build number ${env.BUILD_NUMBER} on branch: ${env.BRANCH_NAME}."
-				slackSend "The images will be tagged as ${env.BRANCH_NAME}:${env.BUILD_NUMBER}"
+				slackSend "The images will be tagged as $TAG"
                                 sh 'docker login -u=${QUAY_USER} -p=${QUAY_PASS} quay.io'
                                 sh 'docker logout'
                                 
@@ -27,7 +32,7 @@ pipeline {
                         when { branch 'master'}
                         steps {
 				slackSend "started job: ${env.JOB_NAME}, build number ${env.BUILD_NUMBER} on branch: ${env.BRANCH_NAME}."
-				slackSend "The images will be tagged as ${env.BRANCH_NAME}:${env.BUILD_NUMBER}"
+				slackSend "The images will be tagged as ${env.BRANCH_NAME}_${env.BUILD_NUMBER}"
                                 echo "${env.BRANCH_NAME}"
                                 echo "Running master build steps."
                         }
