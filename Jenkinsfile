@@ -1,8 +1,8 @@
 pipeline {
         agent none
         environment {
-                QUAY-USER = credentials('quay-robot')
-                QUAY-PASS = credentials('quay-robot-token')
+                QUAY_USER = credentials('quay-robot')
+                QUAY_PASS = credentials('quay-robot-token')
         }
         stages {
 		stage('Unit-tests') {
@@ -17,7 +17,7 @@ pipeline {
                         steps { 
                                 slackSend "started job: ${env.JOB_NAME}, build number ${env.BUILD_NUMBER} on branch: ${env.BRANCH_NAME}."
 				slackSend "The images will be tagged as ${env.BRANCH_NAME}:${env.BUILD_NUMBER}"
-                                sh 'docker login -u=${QUAY-USER} -p=${QUAY-PASS} quay.io'
+                                sh 'docker login -u=${QUAY_USER} -p=${QUAY_PASS} quay.io'
                                 sh 'docker logout'
                                 
                         }
