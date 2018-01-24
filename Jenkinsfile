@@ -1,5 +1,9 @@
 pipeline {
         agent none
+        environment {
+                QUAY-USER = credentials('quay-robot')
+                QUAY-PASS = credentials('quay-robot-token')
+        }
         stages {
 		stage('Unit-tests') {
                         agent {label 'master-builder'}
@@ -8,17 +12,18 @@ pipeline {
 			}
 		}
                 stage('Build-nonmaster') {
-                        agent {label 'master-builder'} //this will happen on slave in the real thing
+                        agent {label 'slave-w-docker-cromwell-60GB-ebs'}
                         when { not { branch 'master' } }
                         steps { 
                                 slackSend "started job: ${env.JOB_NAME}, build number ${env.BUILD_NUMBER} on branch: ${env.BRANCH_NAME}."
 				slackSend "The images will be tagged as ${env.BRANCH_NAME}:${env.BUILD_NUMBER}"
-                                echo "${env.BRANCH_NAME}"
-                                echo "Running non-master build steps."
+                                sh 'docker login -u=${QUAY-USER} -p=${QUAY-PASS} quay.io'
+                                sh 'docker logout'
+                                
                         }
                 }
                 stage('Build-master') {
-                        agent {label 'master-builder'} //this will happen on slave in the real thing
+                        agent {label 'slave-w-docker-cromwell-60GB-ebs'} 
                         when { branch 'master'}
                         steps {
 				slackSend "started job: ${env.JOB_NAME}, build number ${env.BUILD_NUMBER} on branch: ${env.BRANCH_NAME}."
@@ -31,7 +36,7 @@ pipeline {
                         agent {label 'master-builder'} //this will actually run on master
                         steps{
                                 echo "run cromwell tests"
-                                sh "cd test && ./test_atac.sh"
+                                //sh "cd test && ./test_atac.sh"
                                 sh "ls"
                                 
                         }
