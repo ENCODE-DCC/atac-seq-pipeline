@@ -16,7 +16,7 @@ pipeline {
 			}
 		}
                 stage('Build-nonmaster') {
-                        agent {label 'master-builder'} //this will be the slave in the real thing
+                        agent {label 'master-builder'} //this will be the slave-w-docker-cromwell-60GB-ebs 
                         when { not { branch 'master' } }
                         steps { 
                                 echo "the tag is $TAG"
@@ -28,12 +28,12 @@ pipeline {
                         }
                 }
                 stage('Build-master') {
-                        agent {label 'slave-w-docker-cromwell-60GB-ebs'} 
+                        agent {label 'slave-w-docker-cromwell-60GB-ebs'} //this will be the slave-w-docker-cromwell-60GB-ebs
                         when { branch 'master'}
                         steps {
+                                echo "the tag is $TAG"
 				slackSend "started job: ${env.JOB_NAME}, build number ${env.BUILD_NUMBER} on branch: ${env.BRANCH_NAME}."
-				slackSend "The images will be tagged as ${env.BRANCH_NAME}_${env.BUILD_NUMBER}"
-                                echo "${env.BRANCH_NAME}"
+				slackSend "The images will be tagged as $TAG"
                                 echo "Running master build steps."
                         }
                 }
@@ -42,7 +42,7 @@ pipeline {
                         steps{
                                 echo "run cromwell tests"
                                 //sh "cd test && ./test_atac.sh"
-                                sh "ls"
+                                
                                 
                         }
                 }
