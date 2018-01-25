@@ -16,18 +16,19 @@ pipeline {
 			}
 		}
                 stage('Build-nonmaster') {
-                        agent {label 'slave-w-docker-cromwell-60GB-ebs'} 
+                        agent {label 'master-builder'} 
                         when { not { branch 'master' } }
                         steps { 
                                 echo "the tag is $TAG"
                                 echo "going to build a docker image now.."
                                 slackSend "started job: ${env.JOB_NAME}, build number ${env.BUILD_NUMBER} on branch: ${env.BRANCH_NAME}."
 				slackSend "The images will be tagged as $TAG"
-                                sh 'docker login -u=${QUAY_USER} -p=${QUAY_PASS} quay.io'
-                                sh 'docker build -f docker_image/Dockerfile -t atac-seq-pipeline .'
-                                sh 'docker tag atac-seq-pipeline $TAG'
-                                sh 'docker push $TAG'
-                                sh 'docker logout'
+                                sh 'echo $TAG'
+                                //sh 'docker login -u=${QUAY_USER} -p=${QUAY_PASS} quay.io'
+                                //sh 'docker build -f docker_image/Dockerfile -t atac-seq-pipeline .'
+                                //sh 'docker tag atac-seq-pipeline $TAG'
+                                //sh 'docker push $TAG'
+                                //sh 'docker logout'
                                 
                         }
                 }
