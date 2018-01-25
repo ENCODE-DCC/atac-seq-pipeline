@@ -23,7 +23,7 @@ pipeline {
                                 echo "going to build a docker image now.."
                                 slackSend "started job: ${env.JOB_NAME}, build number ${env.BUILD_NUMBER} on branch: ${env.BRANCH_NAME}."
 				slackSend "The images will be tagged as $TAG"
-                                sh 'echo $TAG'
+                                sh "echo $TAG"
                                 //sh 'docker login -u=${QUAY_USER} -p=${QUAY_PASS} quay.io'
                                 //sh 'docker build -f docker_image/Dockerfile -t atac-seq-pipeline .'
                                 //sh 'docker tag atac-seq-pipeline $TAG'
