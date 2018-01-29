@@ -20,13 +20,24 @@ $ ./test.sh [WDL] [INPUT_JSON] [DOCKER_IMAGE](optional)
 Make sure that you have a Cromwell server running on GC. This shell script will submit `../atac.wdl` to the server and wait for a response (`result.json`). There are two input JSON files (original and subsampled) for each endedness (SE and PE). You can also check all outputs on GC bucket `gs://encode-pipeline-test-runs/test_atac`.
 ```
 $ cd test_workflow/
-$ ./test_atac.sh [INPUT_JSON] [DOCKER_IMAGE](optional)
+$ ./test_atac.sh [INPUT_JSON] [QC_JSON_TO_COMPARE] [DOCKER_IMAGE](optional)
 ```
-* `ENCSR356KRQ.json`:
-* `ENCSR356KRQ_subsampled.json`:
-* `ENCSR889WQX.json`:
-* `ENCSR889WQX_subsampled.json`: 
 
+Jenkins must do the following:
+```
+$ cd test_workflow/
+# For master branch (full test sample)
+$ ./test_atac.sh ENCSR356KRQ.json ref_output/ENCSR356KRQ_qc.json [NEW_DOCKER_IMAGE]
+$ ./test_atac.sh ENCSR889WQX.json ref_output/ENCSR889WQX_qc.json [NEW_DOCKER_IMAGE]
+# For develop master branch (1/400 subsampled test sample)
+$ ./test_atac.sh ENCSR356KRQ_subsampled.json ref_output/ENCSR356KRQ_subsampled_qc.json [NEW_DOCKER_IMAGE]
+$ ./test_atac.sh ENCSR889WQX_subsampled.json ref_output/ENCSR889WQX_subsampled_qc.json [NEW_DOCKER_IMAGE]
+```
+
+`test_atac.sh` will generate the following files to validate pipeline outputs. Jenkins must check if `PREFIX.qc_json_diff.txt` is empty or not.
+* `PREFIX.result.json`: all outputs of `atac.wdl`.
+* `PREFIX.result.qc.json`: qc summary JSON file `qc.json` of `atac.wdl`.
+* `PREFIX.qc_json_diff.txt`: diff between `PREFIX.result.qc.json` and reference in `ref_output/`.
 
 # How to run a Cromwell server on GC
 
