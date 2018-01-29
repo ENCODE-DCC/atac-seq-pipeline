@@ -10,7 +10,8 @@ def samtools_index(bam, out_dir=''):
     bai = '{}.bai'.format(bam)
     cmd = 'samtools index {}'.format(bam)
     run_shell_cmd(cmd)
-    if os.path.abspath(out_dir)!=os.getcwd():
+    if os.path.abspath(out_dir)!= \
+        os.path.abspath(os.path.dirname(bam)):
         cmd2 = 'mv {} {}'.format(bai, out_dir)
         return os.path.join(out_dir, os.path.basename(bai))
     else:
@@ -20,7 +21,8 @@ def sambamba_index(bam, nth, out_dir=''):
     bai = '{}.bai'.format(bam)
     cmd = 'sambamba index {} -t {}'.format(bam, nth)
     run_shell_cmd(cmd)
-    if os.path.abspath(out_dir)!=os.getcwd():
+    if os.path.abspath(out_dir)!= \
+        os.path.abspath(os.path.dirname(bam)):
         cmd2 = 'mv {} {}'.format(bai, out_dir)
         return os.path.join(out_dir, os.path.basename(bai))
     else:
@@ -102,8 +104,10 @@ def sambamba_name_sort(bam, nth, out_dir):
 def subsample_ta_se(ta, subsample, non_mito, out_dir):
     prefix = os.path.join(out_dir,
         os.path.basename(strip_ext_ta(ta)))
-    ta_subsampled = '{}.{}.tagAlign.gz'.format(
-        prefix, human_readable_number(subsample))
+    ta_subsampled = '{}.{}{}.tagAlign.gz'.format(
+        prefix,
+        'no_chrM.' if non_mito else '',
+        human_readable_number(subsample))
 
     cmd = 'zcat -f {} | '
     if non_mito:

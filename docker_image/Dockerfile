@@ -142,8 +142,8 @@ ENV PATH="/software/bowtie2-2.2.6:${PATH}"
 # and it gets whatever is checked out plus local modifications
 # so the buildling command should:
 # cd [GIT_REPO_DIR] && docker build -f docker_images/pipeline/Dockerfile .
-RUN mkdir atac-seq-pipeline
-COPY / atac-seq-pipeline
+RUN mkdir -p atac-seq-pipeline/src
+COPY /src atac-seq-pipeline/src
 ENV PATH="/software/atac-seq-pipeline/src:${PATH}"
 
 ENTRYPOINT ["/bin/bash","-c"]

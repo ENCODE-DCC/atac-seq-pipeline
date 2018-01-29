@@ -1,41 +1,34 @@
 ENCODE ATAC-seq pipeline test
 ===================================================
 
-# How to generate reference outputs
+# Task level test (local)
 
-0) Make sure that you have an executable `cromwell-30.1.jar` in your `PATH`.
-
-1) Specify correct file paths in `subsample_fastq.sh` and run to subsample test samples.
+This test requires `atac-seq-pipeline-test-data` directory in `test_task/`. Git glone [a data repo](https://github.com/leepc12/atac-seq-pipeline-test-data) on `test_task/`. This repo has 1/400 subsampled test samples and chr19-chrM only bowtie2 indices and other genome data for hg38 and mm10. Make sure that you have `cromwell-30.1.jar` in your `$PATH` as an executable (`chmod +x`) and `Docker` installed on your system.
 ```
-$ cd test_sample
-$ bash subsample_fastq.sh
+$ cd test_task/
+$ git clone https://github.com/leepc12/atac-seq-pipeline-test-data
 ```
 
-2) Generate base reference outputs by running the following shell scripts. These test samples are subsampled down to 1/200 reads.
+Each task in `../atac.wdl` has a corresponding pair of tester WDL/JSON (`[TASK_NAME].WDL` and [TASK_NAME].json`). You can also specify your own docker image to test each task.
 ```
-$ cd test_sample
-$ bash ENCSR356KRQ.sh
-$ bash ENCSR889WQX.sh
-```
-
-3) Wait until 2) is done. Link outputs of 2) to JSON files in `test_sample/*.sh`, run other shell scripts.
-```
-$ cd test_sample
-$ bash ENCSR356KRQ_disable_tn5_shift.sh
-$ bash ENCSR356KRQ_no_dup_removal.sh
-$ bash ENCSR356KRQ_no_multimapping.sh
-$ bash ENCSR356KRQ_subsample.sh
-$ bash ENCSR356KRQ_subsample_xcor.sh
-$ bash ENCSR889WQX_disable_tn5_shift.sh
-$ bash ENCSR889WQX_no_dup_removal.sh
-$ bash ENCSR889WQX_no_multimapping.sh
-$ bash ENCSR889WQX_subsample.sh
-$ bash ENCSR889WQX_subsample_xcor.sh
+$ cd test_task/
+$ ./test.sh [WDL] [INPUT_JSON] [DOCKER_IMAGE](optional)
 ```
 
-4) Link generated input/reference outputs (starting with `gs://`) on GC (Google Cloud) into `test_atac.json`. `se_` prefix is for SE samples and `pe_` for PE ones.
+# Workflow level test (on GC)
 
-# How to run cromwell server on GC
+Make sure that you have a Cromwell server running on GC. This shell script will submit `../atac.wdl` to the server and wait for a response (`result.json`). There are two input JSON files (original and subsampled) for each endedness (SE and PE). You can also check all outputs on GC bucket `gs://encode-pipeline-test-runs/test_atac`.
+```
+$ cd test_workflow/
+$ ./test_atac.sh [INPUT_JSON] [DOCKER_IMAGE](optional)
+```
+* `ENCSR356KRQ.json`:
+* `ENCSR356KRQ_subsampled.json`:
+* `ENCSR889WQX.json`:
+* `ENCSR889WQX_subsampled.json`: 
+
+
+# How to run a Cromwell server on GC
 
 1) Create/restart an instance with the following settings.
 * name : `encode-cromwell-test-server`. 
@@ -93,33 +86,3 @@ $ bash run_cromwell_server_on_gc.sh
 * Target tags: cromwell-server
 * Source IP ranges: `0.0.0.0/0`.
 * Protocols and Ports: `Specified protocols and ports` with `tcp:8000`.
-
-# How `test_atac.sh` works (for Jenkins)
-
-`test_atac.wdl` is not stand-alone. Cromwell/WDL supports importing a sub-workflow by `import` but the sub-workflow WDL to be imported should be in the remote workig directory (or URL) where cromwell server runs on GC. There is no way for Jenkins to update `atac.wdl` in this working directory on GC. So we are not using this `import "../atac.wdl"` feature.
-
-`test_atac.sh` appends all task blocks (`task {}`) in `../atac.wdl` to `test_atac.wdl` and sends POST message with the appended `test_atac_standalone.wdl` to the cromwell server running on GC.
-
-Task blocks in `../atac.wdl` should be wrapped in decorator-like comments:
-```
-#@WORKFLOW_DEF_BEGIN
-
-workflow atac {
-...
-}
-
-#@WORKFLOW_DEF_END
-
-#@TASK_DEF_BEGIN
-
-task trim_adapter {
-	...
-}
-
-task bowtie2 {
-	...
-}
-...
-
-#@TASK_DEF_END
-```

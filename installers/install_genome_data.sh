@@ -44,6 +44,14 @@ elif [[ $GENOME == "hg38" ]]; then
 elif [[ $GENOME == "mm10" ]]; then
   REF_FA="https://www.encodeproject.org/files/mm10_no_alt_analysis_set_ENCODE/@@download/mm10_no_alt_analysis_set_ENCODE.fasta.gz"
   BLACKLIST="http://mitra.stanford.edu/kundaje/genome_data/mm10/mm10.blacklist.bed.gz"
+
+elif [[ $GENOME == "hg38_chr19_chrM" ]]; then
+  REF_FA="http://mitra.stanford.edu/kundaje/genome_data/hg38_chr19_chrM/GRCh38_no_alt_analysis_set_GCA_000001405.15.chr19_chrM.fasta.gz"
+  BLACKLIST="http://mitra.stanford.edu/kundaje/genome_data/hg38/hg38.blacklist.bed.gz"
+
+elif [[ $GENOME == "mm10_chr19_chrM" ]]; then
+  REF_FA="http://mitra.stanford.edu/kundaje/genome_data/mm10_chr19_chrM/mm10_no_alt_analysis_set_ENCODE.chr19_chrM.fasta.gz"
+  BLACKLIST="http://mitra.stanford.edu/kundaje/genome_data/mm10/mm10.blacklist.bed.gz"
 fi
 
 if [[ ${REF_FA} == "" ]]; then
@@ -125,12 +133,12 @@ fi
 echo -e "chrsz\t${DEST_DIR}/$(basename $CHRSZ)" >> ${TSV}
 echo -e "gensz\t$GENSZ" >> ${TSV}
 if [[ ${BUILD_BWT2_IDX} == 1 ]]; then
-  echo -e "bowtie2_idx_tar\t${DEST_DIR}/bowtie2_index/${REF_FA_PREFIX}" >> ${TSV}
+  echo -e "bowtie2_idx_tar\t${DEST_DIR}/bowtie2_index/${REF_FA_PREFIX}.tar" >> ${TSV}
 else
   echo -e "bowtie2_idx_tar\t/dev/null" >> ${TSV}
 fi
 if [[ ${BUILD_BWA_IDX} == 1 ]]; then
-  echo -e "bwa_idx_tar\t${DEST_DIR}/bwa_index/${REF_FA_PREFIX}" >> ${TSV}
+  echo -e "bwa_idx_tar\t${DEST_DIR}/bwa_index/${REF_FA_PREFIX}.tar" >> ${TSV}
 else
   echo -e "bwa_idx_tar\t/dev/null" >> ${TSV}
 fi
