@@ -112,3 +112,4 @@ cromwell*.jar
 #test_google.wdl
 output_*.json
 test/*_standalone.wdl
+.DS_Store
