@@ -977,6 +977,6 @@ task compare_md5sum {
 		Map[String,String] match = read_map('match.tsv') # key:label, val:match
 		Boolean match_overall = read_boolean('match_overall.txt')
 		File json = glob('result.json')[0] # details (json file)
-		String json_str =read_string('result.json') # details (string)
+		String json_str = read_string('result.json') # details (string)
 	}
 }

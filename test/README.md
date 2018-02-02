@@ -17,7 +17,7 @@ $ ./test.sh [WDL] [INPUT_JSON] [DOCKER_IMAGE](optional)
 
 # Workflow level test (on GC)
 
-Make sure that you have a Cromwell server running on GC. This shell script will submit `../atac.wdl` to the server and wait for a response (`result.json`). There are two input JSON files (original and subsampled) for each endedness (SE and PE). You can also check all outputs on GC bucket `gs://encode-pipeline-test-runs/test_atac`.
+Make sure that you have a Cromwell server running on GC. This shell script will submit `../atac.wdl` to the server and wait for a response (`result.json`). There are two input JSON files (original and subsampled) for each endedness (SE and PE). You can also check all outputs on GC bucket `gs://encode-pipeline-test-runs`.
 ```
 $ cd test_workflow/
 $ ./test_atac.sh [INPUT_JSON] [QC_JSON_TO_COMPARE] [DOCKER_IMAGE](optional)

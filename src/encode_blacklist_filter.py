@@ -38,22 +38,26 @@ def blacklist_filter(peak, blacklist, keep_irregular_chr, out_dir):
     peak_ext = get_ext(peak)
     filtered = '{}.bfilt.{}.gz'.format(prefix, peak_ext)
 
-    # due to bedtools bug when .gz is given for -a and -b
-    tmp1 = gunzip(peak, 'tmp1', out_dir)
-    tmp2 = gunzip(blacklist, 'tmp2', out_dir)
+    if get_num_lines(peak)==0:
+        cmd = 'zcat -f {} | gzip -nc > {}'.format(peak, filtered)
+        run_shell_cmd(cmd)
+    else:
+        # due to bedtools bug when .gz is given for -a and -b
+        tmp1 = gunzip(peak, 'tmp1', out_dir)
+        tmp2 = gunzip(blacklist, 'tmp2', out_dir)
 
-    cmd = 'bedtools intersect -v -a {} -b {} | '
-    cmd += 'awk \'BEGIN{{OFS="\\t"}} '
-    cmd += '{{if ($5>1000) $5=1000; print $0}}\' | '
-    if not keep_irregular_chr:
-        cmd += 'grep -P \'chr[\\dXY]+[ \\t]\' | '
-    cmd += 'gzip -nc > {}'
-    cmd = cmd.format(
-        tmp1, # peak
-        tmp2, # blacklist
-        filtered)
-    run_shell_cmd(cmd)
-    rm_f([tmp1, tmp2])
+        cmd = 'bedtools intersect -v -a {} -b {} | '
+        cmd += 'awk \'BEGIN{{OFS="\\t"}} '
+        cmd += '{{if ($5>1000) $5=1000; print $0}}\' | '
+        if not keep_irregular_chr:
+            cmd += 'grep -P \'chr[\\dXY]+[ \\t]\' | '
+        cmd += 'gzip -nc > {}'
+        cmd = cmd.format(
+            tmp1, # peak
+            tmp2, # blacklist
+            filtered)
+        run_shell_cmd(cmd)
+        rm_f([tmp1, tmp2])
     return filtered
 
 def main():
@@ -69,9 +73,6 @@ def main():
     filtered = blacklist_filter(
                 args.peak, args.blacklist, 
                 args.keep_irregular_chr, args.out_dir)
-
-    log.info('Checking if output is empty...') # bedtools issue
-    assert_file_not_empty(filtered)
     
     log.info('All done.')
 

@@ -133,9 +133,6 @@ def main():
         args.peak1, args.peak2, args.peak_pooled, args.peak_type,
         args.idr_thresh, args.idr_rank, args.out_dir)
 
-    log.info('Checking if output is empty...') # bedtools issue
-    assert_file_not_empty(idr_peak)
-
     if args.blacklist:
         log.info('Blacklist-filtering peaks...')
         bfilt_idr_peak = blacklist_filter(

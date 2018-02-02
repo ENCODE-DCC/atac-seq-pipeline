@@ -1,3 +1,6 @@
 *qc_json_diff.txt
-*result.json
-*result.qc.json
+*.result.json
+*.result.qc.json
+*.status.json
+*.submit.json
+*.test_atac_wf_opt.json

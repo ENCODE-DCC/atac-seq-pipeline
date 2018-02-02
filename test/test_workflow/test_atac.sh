@@ -56,6 +56,7 @@ while true; do
   # Get status (GET)
   curl -X GET --header "Accept: application/json" -v "$CROMWELL_SVR_URL/api/workflows/v1/$WF_ID/status" > $PREFIX.status.json
   WF_STATUS=$(cat $PREFIX.status.json | python -c 'import json,sys;obj=json.load(sys.stdin);print(obj["status"])')
+  rm -f $PREFIX.status.json
   echo "Workflow status: $WF_STATUS, Iter: $ITER"
   if [ $WF_STATUS == Succeeded ]; then
   	echo "Workflow has been done successfully."
@@ -70,13 +71,12 @@ while true; do
   	exit 3
     break
   fi
-  rm -f $PREFIX.status.json
   sleep 300
 done 
 
 # Get output of workflow
 curl -X GET --header "Accept: application/json" -v "$CROMWELL_SVR_URL/api/workflows/v1/$WF_ID/outputs" > $PREFIX.result.json
-cat $PREFIX.result.json | python -c "import json,sys;obj=json.load(sys.stdin);print(obj['outputs']['atac.qc_report.qc_json_str'])" > $PREFIX.result.qc.json
+cat $PREFIX.result.json | python -c "import json,sys;obj=json.load(sys.stdin);print(obj['outputs']['atac.qc_report.json_str'])" > $PREFIX.result.qc.json
 
 echo "Done testing successfully."
 diff $PREFIX.result.qc.json $QC_JSON_TO_COMPARE > $PREFIX.qc_json_diff.txt
