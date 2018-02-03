@@ -26,12 +26,12 @@ $ ./test_atac.sh [INPUT_JSON] [QC_JSON_TO_COMPARE] [DOCKER_IMAGE](optional)
 Jenkins must do the following:
 ```
 $ cd test_workflow/
-# For master branch (full test sample)
+# For master branch (full test sample, ~24hr)
 $ ./test_atac.sh ENCSR356KRQ.json ref_output/ENCSR356KRQ_qc.json [NEW_DOCKER_IMAGE]
 $ ./test_atac.sh ENCSR889WQX.json ref_output/ENCSR889WQX_qc.json [NEW_DOCKER_IMAGE]
-# For develop master branch (1/400 subsampled test sample)
-$ ./test_atac.sh ENCSR356KRQ_subsampled.json ref_output/ENCSR356KRQ_subsampled_qc.json [NEW_DOCKER_IMAGE]
-$ ./test_atac.sh ENCSR889WQX_subsampled.json ref_output/ENCSR889WQX_subsampled_qc.json [NEW_DOCKER_IMAGE]
+# For develop branch (1/400 subsampled and chr19 only test sample ~30mins)
+$ ./test_atac.sh ENCSR356KRQ_subsampled.json ref_output/ENCSR356KRQ_subsampled_chr19_only_qc.json [NEW_DOCKER_IMAGE]
+$ ./test_atac.sh ENCSR889WQX_subsampled.json ref_output/ENCSR889WQX_subsampled_chr19_only_qc.json [NEW_DOCKER_IMAGE]
 ```
 
 `test_atac.sh` will generate the following files to validate pipeline outputs. Jenkins must check if `PREFIX.qc_json_diff.txt` is empty or not.

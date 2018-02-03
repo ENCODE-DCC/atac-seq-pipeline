@@ -50,7 +50,7 @@ sleep 30
 
 # Check status of running job every 300 second
 ITER=0
-ITER_MAX=40
+ITER_MAX=1000
 while true; do
   ITER=$(($ITER+1))
   # Get status (GET)
@@ -76,7 +76,7 @@ done
 
 # Get output of workflow
 curl -X GET --header "Accept: application/json" -v "$CROMWELL_SVR_URL/api/workflows/v1/$WF_ID/outputs" > $PREFIX.result.json
-cat $PREFIX.result.json | python -c "import json,sys;obj=json.load(sys.stdin);print(obj['outputs']['atac.qc_report.json_str'])" > $PREFIX.result.qc.json
+cat $PREFIX.result.json | python -c "import json,sys;obj=json.load(sys.stdin);print(obj['outputs']['atac.qc_report.qc_json_str'])" > $PREFIX.result.qc.json
 
 echo "Done testing successfully."
 diff $PREFIX.result.qc.json $QC_JSON_TO_COMPARE > $PREFIX.qc_json_diff.txt
