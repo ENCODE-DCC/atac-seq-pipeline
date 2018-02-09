@@ -107,9 +107,6 @@ def main():
         args.prefix, args.peak1, args.peak2, args.peak_pooled, 
         args.peak_type, args.nonamecheck, args.out_dir)
 
-    log.info('Checking if output is empty...') # bedtools issue    
-    assert_file_not_empty(overlap_peak)
-
     if args.blacklist:    
         log.info('Blacklist-filtering peaks...')
         bfilt_overlap_peak = blacklist_filter(

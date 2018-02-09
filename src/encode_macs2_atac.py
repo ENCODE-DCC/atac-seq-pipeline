@@ -184,6 +184,9 @@ def main():
         args.smooth_win, args.cap_num_peak, args.make_signal, 
         args.out_dir)
 
+    log.info('Checking if output is empty...')
+    assert_file_not_empty(npeak)
+
     if args.blacklist:
         log.info('Blacklist-filtering peaks...')
         bfilt_npeak = blacklist_filter(

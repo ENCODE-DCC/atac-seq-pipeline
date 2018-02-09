@@ -50,12 +50,13 @@ sleep 30
 
 # Check status of running job every 300 second
 ITER=0
-ITER_MAX=40
+ITER_MAX=1000
 while true; do
   ITER=$(($ITER+1))
   # Get status (GET)
   curl -X GET --header "Accept: application/json" -v "$CROMWELL_SVR_URL/api/workflows/v1/$WF_ID/status" > $PREFIX.status.json
   WF_STATUS=$(cat $PREFIX.status.json | python -c 'import json,sys;obj=json.load(sys.stdin);print(obj["status"])')
+  rm -f $PREFIX.status.json
   echo "Workflow status: $WF_STATUS, Iter: $ITER"
   if [ $WF_STATUS == Succeeded ]; then
   	echo "Workflow has been done successfully."
@@ -70,7 +71,6 @@ while true; do
   	exit 3
     break
   fi
-  rm -f $PREFIX.status.json
   sleep 300
 done 
 
