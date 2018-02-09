@@ -68,10 +68,10 @@ RUN pip install common python-dateutil cython
 RUN pip3 install common python-dateutil cython
 
 # Install numpy 1.11.3 (python2/3)
-RUN git clone --branch v1.11.3 --single-branch https://github.com/numpy/numpy
-COPY /docker_image/site.cfg numpy/
-RUN cd numpy && python setup.py install
-RUN cd numpy && python3 setup.py install
+RUN wget https://github.com/numpy/numpy/archive/v1.11.3.zip && unzip v1.11.3.zip && rm v1.11.3.zip
+COPY /docker_image/site.cfg numpy-1.11.3/
+RUN cd numpy-1.11.3 && python setup.py install
+RUN cd numpy-1.11.3 && python3 setup.py install
 
 # Install scipy 1.0.0 (python2/3)
 RUN git clone --branch v1.0.0 --single-branch https://github.com/scipy/scipy
