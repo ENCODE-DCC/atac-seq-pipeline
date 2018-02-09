@@ -68,7 +68,7 @@ RUN pip install common python-dateutil cython
 RUN pip3 install common python-dateutil cython
 
 # Install numpy 1.11.3 (python2/3)
-RUN wget wget https://github.com/ottojolanki/numpy/archive/numpy_1.11.3_release.zip && unzip numpy_1.11.3_release.zip 
+RUN wget https://github.com/ottojolanki/numpy/archive/numpy_1.11.3_release.zip && unzip numpy_1.11.3_release.zip 
 RUN cd numpy-numpy_1.11.3_release && python setup.py install
 RUN cd numpy-numpy_1.11.3_release && python3 setup.py install
 
