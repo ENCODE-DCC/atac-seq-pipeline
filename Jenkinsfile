@@ -22,9 +22,11 @@ pipeline {
                                 echo "the tag is $TAG"
                                 echo "going to build a docker image now.."
                                 slackSend "started job: ${env.JOB_NAME}, build number ${env.BUILD_NUMBER} on branch: ${env.BRANCH_NAME}."
-				slackSend "The images will be tagged as $TAG"
+				                slackSend "The images will be tagged as $TAG"
+                                // pull the cache template image (the image is going to stay pretty much the same so it is no need to be dynamic)
+                                sh "docker pull quay.io/encode-dcc/atac-seq-pipeline:develop_test_jenkins_30"
                                 sh "docker login -u=${QUAY_USER} -p=${QUAY_PASS} quay.io"
-                                sh "docker build -f docker_image/Dockerfile -t atac-seq-pipeline ."
+                                sh "docker build --cache-from quay.io/encode-dcc/atac-seq-pipeline:develop_test_jenkins_30 -f docker_image/Dockerfile -t atac-seq-pipeline ."
                                 sh "docker tag atac-seq-pipeline $TAG"
                                 sh "docker push $TAG"
                                 sh "docker logout"
