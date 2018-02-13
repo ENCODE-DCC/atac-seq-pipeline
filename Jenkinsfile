@@ -19,7 +19,6 @@ pipeline {
                         agent {label 'slave-w-docker-cromwell-60GB-ebs'} 
                         when { not { branch 'master' } }
                         steps { 
-                                cleanWS()
                                 echo "the tag is $TAG"
                                 echo "going to build a docker image now.."
                                 slackSend (color: '#7CFC00', message: "started job: ${env.JOB_NAME}, build number ${env.BUILD_NUMBER} on branch: ${env.BRANCH_NAME}.")
@@ -63,7 +62,14 @@ pipeline {
                         //add the test run here
                     }
                 }
+                stage('Cleanup'){
+                    agent {label 'slave-w-docker-cromwell-60GB-ebs'}
+                    steps{
+                        deleteDir()
+                        }
+                }
         }
+                
 	post {
                 success {
                         echo "Post build actions that run on success"
