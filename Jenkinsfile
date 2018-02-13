@@ -5,7 +5,7 @@ pipeline {
                 QUAY_PASS = credentials('quay-robot-token')
         }
         stages {
-        		stage('Unit-tests') {
+        		stage('Tag Non-master') {
                         agent {label 'master-builder'}
                         when { not {branch 'master'}}
             			steps { 
@@ -15,14 +15,20 @@ pipeline {
                                        }
         				echo "On non-master"
             			}
+                        
+        		}
+
+                stage('Tag Master') {
+                        agent {label 'master-builder'}
                         when { branch 'master'}
-                        steps {
+                        steps { 
+                                // the tag gets built here, and can be referenced in the other stages 
                                 script {
                                         TAG = sh([script: "echo quay.io/encode-dcc/atac-seq-pipeline:latest", returnStdout: true]).trim()
                                        }
-                        echo "On master"
+                        echo "On non-master"
                         }
-        		}
+                }
 
                 stage('Build-nonmaster') {
                         agent {label 'slave-w-docker-cromwell-60GB-ebs'} 
