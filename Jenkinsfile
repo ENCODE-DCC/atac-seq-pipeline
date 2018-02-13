@@ -51,7 +51,10 @@ pipeline {
                                 sh "cd test/test_task && git clone https://github.com/leepc12/atac-seq-pipeline-test-data"
                                 sh """cd test/test_task
                                       ./test.sh test_bam2ta.wdl test_bam2ta.json $TAG
+                                      python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'match_overall']))" < test_bam2ta.result.json
                                       ./test.sh test_bowtie2.wdl test_bowtie2.json $TAG
+                                      python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'match_overall']))" < test_bowtie2.result.json
+
                                    """
                         }
                 }
@@ -71,12 +74,13 @@ pipeline {
                         echo "Post build actions that run on success"
                         slackSend "Job ${env.JOB_NAME}, build number ${env.BUILD_NUMBER} on branch ${env.BRANCH_NAME} finished with"
                         slackSend (color: '#7cfc00', message: "SUCCESS")
-                        
+                        slackSend "For details, visit ${env.BUILD_URL}"
                 }
                 failure {
                         echo "Post build actions that run on failure"
                         slackSend "Job ${env.JOB_NAME}, build number ${env.BUILD_NUMBER} on branch ${env.BRANCH_NAME} finished with"
                         slackSend (color: '#FF0000', message: "FAILURE")
+                        slackSend "For details, visit ${env.BUILD_URL}"
 
                 }
 
