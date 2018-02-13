@@ -49,9 +49,9 @@ pipeline {
                         steps{
                                 echo "running task level tests on every push on every branch"
                                 sh "cd test/test_task && git clone https://github.com/leepc12/atac-seq-pipeline-test-data"
-                                sh '''cd test/test_task
+                                sh """cd test/test_task
                                       ./test.sh test_bam2ta.wdl test_bam2ta.json $TAG
-                                   '''
+                                   """
                         }
                 }
                 stage('Run-Workflow-Level-Tests'){
