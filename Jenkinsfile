@@ -51,6 +51,7 @@ pipeline {
                                 sh "cd test/test_task && git clone https://github.com/leepc12/atac-seq-pipeline-test-data"
                                 sh """cd test/test_task
                                       ./test.sh test_bam2ta.wdl test_bam2ta.json $TAG
+                                      ./test.sh test_bowtie2.wdl test_bowtie2.json $TAG
                                    """
                         }
                 }
@@ -62,12 +63,7 @@ pipeline {
                         //add the test run here
                     }
                 }
-                stage('Cleanup'){
-                    agent {label 'slave-w-docker-cromwell-60GB-ebs'}
-                    steps{
-                        deleteDir()
-                        }
-                }
+
         }
                 
 	post {
