@@ -95,5 +95,5 @@ $ bash run_cromwell_server_on_gc.sh
 * Choose Create Firewall Rule `encode-cromwell-test-server-open-port-8000`.
 * Targets: `Specified target rags`.
 * Target tags: cromwell-server
-* Source IP ranges: `0.0.0.0/0`.
+* Source IP ranges: `0.0.0.0/0` (CIDR notation for allowed IP range)
 * Protocols and Ports: `Specified protocols and ports` with `tcp:8000`.
