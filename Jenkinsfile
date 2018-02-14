@@ -69,7 +69,7 @@ pipeline {
                 stage('Run-Task-Level-Tests-Non-Master'){
                         agent {label 'slave-w-docker-cromwell-60GB-ebs'} 
                         steps{
-                                sh "cd test/test_task && git clone https://github.com/leepc12/atac-seq-pipeline-test-data"
+                                sh "cd test/test_task && git clone https://github.com/ENCODE-DCC/atac-seq-pipeline-test-data"
                                 sh """cd test/test_task
                                       ./test.sh test_bam2ta.wdl test_bam2ta.json $TAG
                                       python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'match_overall']))" < test_bam2ta.result.json
@@ -102,6 +102,11 @@ pipeline {
                     when {not {branch 'master'}}
                     steps{
                         echo "running quick workflow level tests when there is an event on non-master branch"
+                        sh """cd test/test_workflow
+                              ./test_atac.sh ENCSR889WQX_subsampled.json ref_output/ENCSR889WQX_subsampled_chr19_only_qc.json $TAG
+                              ls -la  
+                              cat ENCSR889WQX_subsampled.qc_json_diff.txt
+                           """
                     }
                 }
 
