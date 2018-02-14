@@ -1,28 +1,26 @@
 # ENCODE DCC ATAC-Seq/DNase-Seq pipeline for DNANexus
 # Author: Jin Lee (leepc12@gmail.com)
 
-workflow atac {
+workflow atac_dx {
 	String pipeline_type  		# atac or dnase
-	Array[Array[Array[File]]] fastqs 
-								# [rep_id][merge_id][end_id]
-								# 	after merging, it will reduce to 
-								# 	[rep_id][end_id]
-	Array[Array[Array[String]]] adapters 
-								# [rep_id][merge_id][end_id]
+	Array[File] fastqs_R1
+	#Array[File]? fastqs_R2
+	Array[String] adapters_R1
+	#Array[String]? adapters_R2
 	Boolean paired_end 		# endedness of sample
 	Int? multimapping 		# multimapping reads
 	Float? idr_thresh		# IDR threshold
 	Int? smooth_win			# smoothing window for MACS2
 
 	# genome ref. data files
-	File ref_fa
+	#File ref_fa
 	File bowtie2_idx_tar
 	File blacklist
 	File chrsz
 	String gensz	
 
 	# init
-	Int num_rep = length(fastqs)
+	Int num_rep = length(fastqs_R1)
 	Float idr_thresh_ = select_first([idr_thresh, 0.1])
 	Int multimapping_ = select_first([multimapping, 0])
 	Int smooth_win_	= select_first([smooth_win, 150])
@@ -31,8 +29,10 @@ workflow atac {
 	scatter(i in range(num_rep)) {
 		# trim adapters and merge trimmed fastqs
 		call trim_adapter { input :
-			fastqs = fastqs[i],
-			adapters = if length(adapters)>0 then adapters[i] else [],
+			#fastqs = if paired_end then [[fastqs_R1[i],fastqs_R2[i]]] else [[fastqs_R1[i]]],
+			#adapters = if paired_end then [[adapters_R1[i],adapters_R2[i]]] else [[fastqs_R1[i]]],
+			fastqs = [[fastqs_R1[i]]],
+			adapters = [[fastqs_R1[i]]],
 			paired_end = paired_end,
 		}
 		# align trimmed/merged fastqs with bowtie2
@@ -73,6 +73,21 @@ workflow atac {
 			ta = bam2ta.ta,
 			paired_end = paired_end,
 		}
+		# call peaks on 1st pseudo replicated tagalign 
+		call macs2 as macs2_pr1 { input :
+			ta = spr.ta_pr1,
+			gensz = gensz,
+			chrsz = chrsz,
+			smooth_win = smooth_win_,
+			blacklist = blacklist,
+		}
+		call macs2 as macs2_pr2 { input :
+			ta = spr.ta_pr2,
+			gensz = gensz,
+			chrsz = chrsz,
+			smooth_win = smooth_win_,
+			blacklist = blacklist,
+		}
 	}
 
 	# pool tagaligns from true replicates
@@ -87,23 +102,6 @@ workflow atac {
 		smooth_win = smooth_win_,
 		make_signal = true,
 		blacklist = blacklist,
-	}
-	scatter(i in range(num_rep)) {
-		# call peaks on 1st pseudo replicated tagalign 
-		call macs2 as macs2_pr1 { input :
-			ta = spr.ta_pr1[i],
-			gensz = gensz,
-			chrsz = chrsz,
-			smooth_win = smooth_win_,
-			blacklist = blacklist,
-		}
-		call macs2 as macs2_pr2 { input :
-			ta = spr.ta_pr2[i],
-			gensz = gensz,
-			chrsz = chrsz,
-			smooth_win = smooth_win_,
-			blacklist = blacklist,
-		}
 	}
 	# pool tagaligns from pseudo replicates
 	call pool_ta as pool_ta_pr1 { input :
@@ -135,9 +133,9 @@ workflow atac {
 	# Naive overlap on every pair of true replicates
 	scatter( pair in pair_gen.pairs ) {
 		call overlap { input :
-			prefix = "rep"+(pair[0]+1)+"-rep"+(pair[1]+1),
-			peak1 = macs2.npeak[(pair[0])],
-			peak2 = macs2.npeak[(pair[1])],
+			prefix = "rep1-rep2",
+			peak1 = macs2.npeak[0], #macs2.npeak[(pair[0])],
+			peak2 = macs2.npeak[1], #macs2.npeak[(pair[1])],
 			peak_pooled = macs2_pooled.npeak,
 			peak_type = "narrowPeak",
 			blacklist = blacklist,
@@ -180,9 +178,9 @@ workflow atac {
 	# IDR on every pair of true replicates
 	scatter( pair in pair_gen.pairs ) {
 		call idr { input : 
-			prefix = "rep"+(pair[0]+1)+"-rep"+(pair[1]+1),
-			peak1 = macs2.npeak[(pair[0])],
-			peak2 = macs2.npeak[(pair[1])],
+			prefix = "rep1-rep2",
+			peak1 = macs2.npeak[0], #macs2.npeak[(pair[0])],
+			peak2 = macs2.npeak[1], #macs2.npeak[(pair[1])],
 			peak_pooled = macs2_pooled.npeak,
 			idr_thresh = idr_thresh_,
 			peak_type = "narrowPeak",
@@ -257,7 +255,7 @@ workflow atac {
 		frip_overlap_qc_ppr = [overlap_ppr.frip_qc],
 		idr_reproducibility_qc = [reproducibility_idr.reproducibility_qc],
 		overlap_reproducibility_qc = [reproducibility_overlap.reproducibility_qc],
-	}
+	}	
 }
 
 ### genomic tasks
@@ -298,6 +296,7 @@ task trim_adapter { # trim adapters and merge trimmed fastqs
 		Array[File] trimmed_merged_fastqs = glob("merge_fastqs_R?_*.fastq.gz")
 	}
 	runtime {
+		docker : "quay.io/encode-dcc/atac-seq-pipeline:latest"
 		cpu : select_first([cpu,2])
 		memory : "${select_first([mem_mb,'10000'])} MB"
 		disks : select_first([disks,"local-disk 100 HDD"])
@@ -334,6 +333,7 @@ task bowtie2 {
 		File flagstat_qc = glob("*.flagstat.qc")[0]
 	}
 	runtime {
+		docker : "quay.io/encode-dcc/atac-seq-pipeline:latest"
 		cpu : select_first([cpu,4])
 		memory : "${select_first([mem_mb,'20000'])} MB"
 		disks : select_first([disks,"local-disk 100 HDD"])
@@ -369,6 +369,7 @@ task xcor {
 		Int fraglen = read_int(glob("*.cc.fraglen.txt")[0])
 	}
 	runtime {
+		docker : "quay.io/encode-dcc/atac-seq-pipeline:latest"
 		cpu : select_first([cpu,2])
 		memory : "${select_first([mem_mb,'10000'])} MB"
 		disks : select_first([disks,"local-disk 100 HDD"])
@@ -386,8 +387,6 @@ task macs2 {
 	Int? smooth_win		# size of smoothing window
 	Boolean? make_signal
 	File blacklist 		# blacklist BED to filter raw peaks
-	# fixed var
-	String peak_type = "narrowPeak"
 	# resource
 	Int? mem_mb
 	String? disks
@@ -409,13 +408,14 @@ task macs2 {
 		touch null 
 	}
 	output {
-		File npeak = glob("*[!.][!b][!f][!i][!l][!t]."+peak_type+".gz")[0]
-		File bfilt_npeak = glob("*.bfilt."+peak_type+".gz")[0]
+		File npeak = glob("*[!.][!b][!f][!i][!l][!t]."+"narrowPeak"+".gz")[0]
+		File bfilt_npeak = glob("*.bfilt."+"narrowPeak"+".gz")[0]
 		File sig_pval = if select_first([make_signal,false]) then glob("*.pval.signal.bigwig")[0] else glob("null")[0]
 		File sig_fc = if select_first([make_signal,false]) then glob("*.fc.signal.bigwig")[0] else glob("null")[0]
 		File frip_qc = glob("*.frip.qc")[0]
 	}
 	runtime {
+		docker : "quay.io/encode-dcc/atac-seq-pipeline:latest"
 		memory : "${select_first([mem_mb,'16000'])} MB"
 		disks : select_first([disks,"local-disk 100 HDD"])
 	}
@@ -463,6 +463,7 @@ task filter {
 	}
 
 	runtime {
+		docker : "quay.io/encode-dcc/atac-seq-pipeline:latest"
 		cpu : select_first([cpu,2])
 		memory : "${select_first([mem_mb,'20000'])} MB"
 		disks : select_first([disks,"local-disk 100 HDD"])
@@ -497,6 +498,7 @@ task bam2ta {
 		File ta = glob("*.tagAlign.gz")[0]
 	}
 	runtime {
+		docker : "quay.io/encode-dcc/atac-seq-pipeline:latest"
 		cpu : select_first([cpu,2])
 		memory : "${select_first([mem_mb,'10000'])} MB"
 		disks : select_first([disks,"local-disk 100 HDD"])
@@ -573,6 +575,9 @@ task idr {
 		File idr_log = glob("*.log")[0]
 		File frip_qc = glob("*.frip.qc")[0]
 	}
+	runtime {
+		docker : "quay.io/encode-dcc/atac-seq-pipeline:latest"		
+	}
 }
 
 task overlap {
@@ -603,6 +608,9 @@ task overlap {
 		File bfilt_overlap_peak = glob("*.bfilt."+peak_type+".gz")[0]
 		File frip_qc = glob("*.frip.qc")[0]
 	}
+	runtime {
+		docker : "quay.io/encode-dcc/atac-seq-pipeline:latest"		
+	}
 }
 
 task reproducibility {
@@ -624,6 +632,9 @@ task reproducibility {
 	}
 	output {
 		File reproducibility_qc = glob("*reproducibility.qc")[0]
+	}
+	runtime {
+		docker : "quay.io/encode-dcc/atac-seq-pipeline:latest"		
 	}
 }
 
@@ -703,6 +714,9 @@ task qc_report {
 		File report = glob('*qc.html')[0]
 		File qc_json = glob('*qc.json')[0]
 		#File encode_accession_json= glob('*encode_accession.json')[0]
+	}
+	runtime {
+		docker : "quay.io/encode-dcc/atac-seq-pipeline:latest"		
 	}
 }
 
