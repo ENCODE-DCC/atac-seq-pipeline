@@ -101,11 +101,11 @@ pipeline {
                     agent {label 'master-builder'}
                     when {not {branch 'master'}}
                     steps{
-                        echo "running quick workflow level tests when there is an event on non-master branch"
-                        sh """cd test/test_workflow
-                              ./test_atac.sh ENCSR889WQX_subsampled_chr19_only.json ref_output/ENCSR889WQX_subsampled_chr19_only_qc.json $TAG
-                              ./test_atac.sh ENCSR356KRQ_subsampled_chr19_only.json ref_output/ENCSR356KRQ_subsampled_chr19_only_qc.json $TAG
-                           """
+                        echo "Disabled for now"
+                        //sh """cd test/test_workflow
+                          //    ./test_atac.sh ENCSR889WQX_subsampled_chr19_only.json ref_output/ENCSR889WQX_subsampled_chr19_only_qc.json $TAG
+                          //    ./test_atac.sh ENCSR356KRQ_subsampled_chr19_only.json ref_output/ENCSR356KRQ_subsampled_chr19_only_qc.json $TAG
+                           //"""
                     }
                 }
 
