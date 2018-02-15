@@ -103,9 +103,8 @@ pipeline {
                     steps{
                         echo "running quick workflow level tests when there is an event on non-master branch"
                         sh """cd test/test_workflow
-                              ./test_atac.sh ENCSR889WQX_subsampled.json ref_output/ENCSR889WQX_subsampled_chr19_only_qc.json $TAG
-                              ls -la  
-                              cat ENCSR889WQX_subsampled.qc_json_diff.txt
+                              ./test_atac.sh ENCSR889WQX_subsampled_chr19_only.json ref_output/ENCSR889WQX_subsampled_chr19_only_qc.json $TAG
+                              ./test_atac.sh ENCSR356KRQ_subsampled_chr19_only.json ref_output/ENCSR356KRQ_subsampled_chr19_only_qc.json $TAG
                            """
                     }
                 }
