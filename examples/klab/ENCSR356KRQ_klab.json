@@ -21,18 +21,6 @@
 
     "atac.trim_adapter.auto_detect_adapter" : true,
 
-    "atac.trim_adapter.cpu" : 2,
-
-    "atac.bowtie2.cpu" : 6,
-    "atac.bowtie2.mem_mb" : 16000,
-    "atac.bowtie2.time_hr" : 36,
-
-    "atac.filter.cpu" : 2,
-    "atac.filter.mem_mb" : 12000,
-    "atac.filter.time_hr" : 23,
-
-    "atac.macs2_mem_mb" : 16000,
-
     "atac.smooth_win" : 73,
     "atac.enable_idr" : true,
     "atac.idr_thresh" : 0.05,

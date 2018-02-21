@@ -1,38 +1,70 @@
 # ENCODE DCC ATAC-Seq/DNase-Seq pipeline for DNANexus
 # Author: Jin Lee (leepc12@gmail.com)
 
-workflow atac_dx {
+workflow atac {
 	String pipeline_type  		# atac or dnase
-	Array[File] fastqs_R1
-	#Array[File]? fastqs_R2
-	Array[String] adapters_R1
-	#Array[String]? adapters_R2
-	Boolean paired_end 		# endedness of sample
+	Array[File] fastqs_rep1_R1
+	Array[File] fastqs_rep1_R2
+	Array[File]? fastqs_rep2_R1
+	Array[File]? fastqs_rep2_R2
+	Array[String]? adapters_rep1_R1
+	Array[String]? adapters_rep1_R2
+	Array[String]? adapters_rep2_R1
+	Array[String]? adapters_rep2_R2
+	# init
+	Int num_rep = if defined(fastqs_rep2_R1) then 2 else 1
+	Boolean paired_end = defined(fastqs_rep1_R2)
+	Boolean adapters_given = defined(adapters_rep1_R1)
+
+	# construct 3-dim fastqs from the above fastq vars
+	Array[Array[Array[File]]] fastqs =
+		if num_rep==1 && paired_end then
+			[transpose([fastqs_rep1_R1,fastqs_rep1_R2])]
+		else if num_rep==1 then
+			[[fastqs_rep1_R1]]
+		else if num_rep==2 && paired_end then
+			[transpose([fastqs_rep1_R1,fastqs_rep1_R2]),transpose(select_all([fastqs_rep2_R1,fastqs_rep2_R2]))]
+		else
+			[[fastqs_rep1_R1],select_all([fastqs_rep2_R1])]
+
+	# construct 3-dim adapter string from the above adapter vars
+	Array[Array[Array[String]]] adapters =
+		if !adapters_given then []
+		else if num_rep==1 && paired_end then
+			[transpose(select_all([adapters_rep1_R1,adapters_rep1_R2]))]
+		else if num_rep==1 then
+			[select_all([adapters_rep1_R1])]
+		else if num_rep==2 && paired_end then
+			[transpose(select_all([adapters_rep1_R1,adapters_rep1_R2])),transpose(select_all([adapters_rep2_R1,adapters_rep2_R2]))]
+		else
+			[select_all([adapters_rep1_R1,adapters_rep2_R1])]
 	Int? multimapping 		# multimapping reads
-	Float? idr_thresh		# IDR threshold
+
+	# optional for MACS2 
+	Int? cap_num_peak 		# cap number of raw peaks called from MACS2
+	Float? pval_thresh 		# p.value threshold
 	Int? smooth_win			# smoothing window for MACS2
+	Int? macs2_mem_mb 		# resource (memory in MB)
+	String? macs2_disks 	# resource disks for cloud platforms
+	# optional for IDR
+	Float? idr_thresh		# IDR threshold
 
 	# genome ref. data files
-	#File ref_fa
 	File bowtie2_idx_tar
 	File blacklist
 	File chrsz
 	String gensz	
 
-	# init
-	Int num_rep = length(fastqs_R1)
-	Float idr_thresh_ = select_first([idr_thresh, 0.1])
-	Int multimapping_ = select_first([multimapping, 0])
-	Int smooth_win_	= select_first([smooth_win, 150])
+	#Float idr_thresh = select_first([idr_thresh, 0.1])
+	#Int multimapping_ = select_first([multimapping, 0])
+	#Int smooth_win	= select_first([smooth_win, 150])
 
 	# pipeline starts here (parallelized for each replicate)
 	scatter(i in range(num_rep)) {
 		# trim adapters and merge trimmed fastqs
 		call trim_adapter { input :
-			#fastqs = if paired_end then [[fastqs_R1[i],fastqs_R2[i]]] else [[fastqs_R1[i]]],
-			#adapters = if paired_end then [[adapters_R1[i],adapters_R2[i]]] else [[fastqs_R1[i]]],
-			fastqs = [[fastqs_R1[i]]],
-			adapters = [[fastqs_R1[i]]],
+			fastqs = fastqs[i],
+			adapters = if adapters_given then adapters[i] else [],
 			paired_end = paired_end,
 		}
 		# align trimmed/merged fastqs with bowtie2
@@ -40,13 +72,13 @@ workflow atac_dx {
 			idx_tar = bowtie2_idx_tar,
 			fastqs = trim_adapter.trimmed_merged_fastqs, #[R1,R2]
 			paired_end = paired_end,
-			multimapping = multimapping_,
+			multimapping = multimapping,
 		}
 		# filter/dedup bam
 		call filter { input :
 			bam = bowtie2.bam,
 			paired_end = paired_end,
-			multimapping = multimapping_,
+			multimapping = multimapping,
 		}
 		# convert bam to tagalign and subsample it if necessary
 		call bam2ta { input :
@@ -64,9 +96,13 @@ workflow atac_dx {
 			ta = bam2ta.ta,
 			gensz = gensz,
 			chrsz = chrsz,
-			smooth_win = smooth_win_,
+			cap_num_peak = cap_num_peak,
+			pval_thresh = pval_thresh,			
+			smooth_win = smooth_win,
 			make_signal = true,
 			blacklist = blacklist,
+			mem_mb = macs2_mem_mb,
+			disks = macs2_disks,
 		}
 		# make two self pseudo replicates per true replicate
 		call spr { input :
@@ -78,15 +114,23 @@ workflow atac_dx {
 			ta = spr.ta_pr1,
 			gensz = gensz,
 			chrsz = chrsz,
-			smooth_win = smooth_win_,
+			cap_num_peak = cap_num_peak,
+			pval_thresh = pval_thresh,
+			smooth_win = smooth_win,
 			blacklist = blacklist,
+			mem_mb = macs2_mem_mb,
+			disks = macs2_disks,
 		}
 		call macs2 as macs2_pr2 { input :
 			ta = spr.ta_pr2,
 			gensz = gensz,
 			chrsz = chrsz,
-			smooth_win = smooth_win_,
+			cap_num_peak = cap_num_peak,
+			pval_thresh = pval_thresh,
+			smooth_win = smooth_win,
 			blacklist = blacklist,
+			mem_mb = macs2_mem_mb,
+			disks = macs2_disks,
 		}
 	}
 
@@ -99,9 +143,13 @@ workflow atac_dx {
 		ta = pool_ta.ta_pooled,
 		gensz = gensz,
 		chrsz = chrsz,
-		smooth_win = smooth_win_,
+		cap_num_peak = cap_num_peak,
+		pval_thresh = pval_thresh,
+		smooth_win = smooth_win,
 		make_signal = true,
 		blacklist = blacklist,
+		mem_mb = macs2_mem_mb,
+		disks = macs2_disks,
 	}
 	# pool tagaligns from pseudo replicates
 	call pool_ta as pool_ta_pr1 { input :
@@ -115,27 +163,31 @@ workflow atac_dx {
 		ta = pool_ta_pr1.ta_pooled,
 		gensz = gensz,
 		chrsz = chrsz,
-		smooth_win = smooth_win_,
+		cap_num_peak = cap_num_peak,
+		pval_thresh = pval_thresh,
+		smooth_win = smooth_win,
 		blacklist = blacklist,
+		mem_mb = macs2_mem_mb,
+		disks = macs2_disks,
 	}
 	# call peaks on 2nd pooled pseudo replicates
 	call macs2 as macs2_ppr2 { input :
 		ta = pool_ta_pr2.ta_pooled,
 		gensz = gensz,
 		chrsz = chrsz,
-		smooth_win = smooth_win_,
+		cap_num_peak = cap_num_peak,
+		pval_thresh = pval_thresh,
+		smooth_win = smooth_win,
 		blacklist = blacklist,
-	}
-	# generate every pair of true replicates
-	call pair_gen { input : 
-		num_rep = num_rep,
+		mem_mb = macs2_mem_mb,
+		disks = macs2_disks,
 	}
 	# Naive overlap on every pair of true replicates
-	scatter( pair in pair_gen.pairs ) {
+	if ( num_rep>1 ) {
 		call overlap { input :
 			prefix = "rep1-rep2",
-			peak1 = macs2.npeak[0], #macs2.npeak[(pair[0])],
-			peak2 = macs2.npeak[1], #macs2.npeak[(pair[1])],
+			peak1 = macs2.npeak[0],
+			peak2 = macs2.npeak[1],
 			peak_pooled = macs2_pooled.npeak,
 			peak_type = "narrowPeak",
 			blacklist = blacklist,
@@ -170,19 +222,19 @@ workflow atac_dx {
 	# reproducibility QC for overlapping peaks
 	call reproducibility as reproducibility_overlap { input :
 		prefix = 'overlap',
-		peaks = overlap.bfilt_overlap_peak,
+		peaks = if num_rep>1 then select_all([overlap.bfilt_overlap_peak]) else [],
 		peaks_pr = overlap_pr.bfilt_overlap_peak,
 		peak_ppr = overlap_ppr.bfilt_overlap_peak,
 	}
 
 	# IDR on every pair of true replicates
-	scatter( pair in pair_gen.pairs ) {
+	if ( num_rep>1 ) {
 		call idr { input : 
 			prefix = "rep1-rep2",
-			peak1 = macs2.npeak[0], #macs2.npeak[(pair[0])],
-			peak2 = macs2.npeak[1], #macs2.npeak[(pair[1])],
+			peak1 = macs2.npeak[0],
+			peak2 = macs2.npeak[1],
 			peak_pooled = macs2_pooled.npeak,
-			idr_thresh = idr_thresh_,
+			idr_thresh = idr_thresh,
 			peak_type = "narrowPeak",
 			rank = "p.value",
 			blacklist = blacklist,
@@ -197,7 +249,7 @@ workflow atac_dx {
 			peak1 = macs2_pr1.npeak[i],
 			peak2 = macs2_pr2.npeak[i],
 			peak_pooled = macs2.npeak[i],
-			idr_thresh = idr_thresh_,
+			idr_thresh = idr_thresh,
 			peak_type = "narrowPeak",
 			rank = "p.value",
 			blacklist = blacklist,
@@ -211,7 +263,7 @@ workflow atac_dx {
 		peak1 = macs2_ppr1.npeak,
 		peak2 = macs2_ppr2.npeak,
 		peak_pooled = macs2_pooled.npeak,
-		idr_thresh = idr_thresh_,
+		idr_thresh = idr_thresh,
 		peak_type = "narrowPeak",
 		rank = "p.value",
 		blacklist = blacklist,
@@ -221,7 +273,7 @@ workflow atac_dx {
 	# reproducibility QC for IDR peaks
 	call reproducibility as reproducibility_idr { input :
 		prefix = 'idr',
-		peaks = idr.bfilt_idr_peak,
+		peaks = if num_rep>1 then select_all([idr.bfilt_idr_peak]) else [],
 		peaks_pr = idr_pr.bfilt_idr_peak,
 		peak_ppr = idr_ppr.bfilt_idr_peak,
 	}
@@ -230,7 +282,7 @@ workflow atac_dx {
 		paired_end = paired_end,
 		pipeline_type = pipeline_type,
 		peak_caller = 'macs2',
-		idr_thresh = idr_thresh_,
+		idr_thresh = idr_thresh,
 		flagstat_qcs = bowtie2.flagstat_qc,
 		nodup_flagstat_qcs = filter.flagstat_qc,
 		dup_qcs = filter.dup_qc,
@@ -244,13 +296,13 @@ workflow atac_dx {
 		frip_qc_ppr1 = [macs2_ppr1.frip_qc],
 		frip_qc_ppr2 = [macs2_ppr2.frip_qc],
 
-		idr_plots = idr.idr_plot,
+		idr_plots = if num_rep>1 then select_all([idr.idr_plot]) else [],
 		idr_plots_pr = idr_pr.idr_plot,
 		idr_plot_ppr = [idr_ppr.idr_plot],
-		frip_idr_qcs = idr.frip_qc,
+		frip_idr_qcs = if num_rep>1 then select_all([idr.frip_qc]) else [],
 		frip_idr_qcs_pr = idr_pr.frip_qc,
 		frip_idr_qc_ppr = [idr_ppr.frip_qc],
-		frip_overlap_qcs = overlap.frip_qc,
+		frip_overlap_qcs = if num_rep>1 then select_all([overlap.frip_qc]) else [],
 		frip_overlap_qcs_pr = overlap_pr.frip_qc,
 		frip_overlap_qc_ppr = [overlap_ppr.frip_qc],
 		idr_reproducibility_qc = [reproducibility_idr.reproducibility_qc],
@@ -523,7 +575,9 @@ task spr { # make two self pseudo replicates
 		File ta_pr2 = glob("*.pr2.tagAlign.gz")[0]
 	}
 	runtime {
+		docker : "quay.io/encode-dcc/atac-seq-pipeline:latest"
 		memory : "${select_first([mem_mb,'12000'])} MB"
+		disks : "local-disk 50 HDD"
 	}
 }
 
@@ -537,6 +591,11 @@ task pool_ta {
 	}
 	output {
 		File ta_pooled = glob("*.tagAlign.gz")[0]
+	}
+	runtime {
+		docker : "quay.io/encode-dcc/atac-seq-pipeline:latest"
+		memory : "4000 MB"
+		disks : "local-disk 50 HDD"
 	}
 }
 
@@ -577,6 +636,8 @@ task idr {
 	}
 	runtime {
 		docker : "quay.io/encode-dcc/atac-seq-pipeline:latest"		
+		memory : "4000 MB"
+		disks : "local-disk 50 HDD"
 	}
 }
 
@@ -610,6 +671,8 @@ task overlap {
 	}
 	runtime {
 		docker : "quay.io/encode-dcc/atac-seq-pipeline:latest"		
+		memory : "4000 MB"
+		disks : "local-disk 50 HDD"
 	}
 }
 
@@ -635,6 +698,8 @@ task reproducibility {
 	}
 	runtime {
 		docker : "quay.io/encode-dcc/atac-seq-pipeline:latest"		
+		memory : "4000 MB"
+		disks : "local-disk 50 HDD"
 	}
 }
 
@@ -717,19 +782,7 @@ task qc_report {
 	}
 	runtime {
 		docker : "quay.io/encode-dcc/atac-seq-pipeline:latest"		
-	}
-}
-
-task pair_gen {
-	Int num_rep
-	command <<<
-		python <<CODE
-		for i in range(${num_rep}):
-		    for j in range(i+1,${num_rep}):
-		        print('{}\t{}'.format(i,j))
-		CODE
-	>>>
-	output {
-		Array[Array[Int]] pairs = read_tsv(stdout())
+		memory : "4000 MB"
+		disks : "local-disk 50 HDD"
 	}
 }

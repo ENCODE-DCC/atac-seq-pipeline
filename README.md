@@ -14,7 +14,39 @@ ENCODE ATAC-seq pipeline
 
 See [Usage](https://github.com/kundajelab/wdl_pipelines/blob/master/USAGE.md).
 
-# Input JSON
+# Input JSON for DNANexus (`atac_dx.wdl`)
+
+On DNANexus, you can start a pipeline with FASTQs only and number of replicates are limited to 1 or 2. Therefore, parameters for `atac_dx.wdl` are slightly different from that of `atac.wdl`. All parameters in 1) and 2) and some parameters in 3), 4), 10) and 11) are not used.
+
+1) Reference genome
+    See [Usage](https://github.com/kundajelab/wdl_pipelines/blob/master/USAGE.md) to generate genome data files for each species.
+
+    * `"atac.bowtie2_idx_tar"` : Bowtie2 index TAR file (must be `dx://file-...`).
+    * `"atac.blacklist"` : BED file for blacklisted regions (must be `dx://file-...`).
+    * `"atac.chrsz"` : Chromosome sizes file (must be `dx://file-...`).
+    * `"atac.gensz"` : Genome size (`hs` for human, `mm` for mouse or sum of 2nd column in a chromosome sizes file).
+
+2) Input genome data files
+    * `"atac.fastqs_rep1_R1"` : Array of FASTQ file to be merged for rep1-R1.
+    * `"atac.fastqs_rep1_R2"`? : Array of FASTQ file to be merged for rep1-R2. Do not define this for single ended dataset.
+    * `"atac.fastqs_rep2_R1"`? : Array of FASTQ file to be merged for rep2-R1. Do not define this for dataset with a single replicate.
+    * `"atac.fastqs_rep2_R2"`? : Array of FASTQ file to be merged for rep2-R2. Do not define this for single ended dataset.
+
+3) Pipeline settings
+    Do not define `"atac.paired_end"` since it is automatically detected by the pipeline. `"atac.align_only"`,  `"atac.true_rep_only"` and `"atac.disable_xcor` are not supported.
+
+4) Adapter trimmer settings
+    Do not define any of the followings if you don't have information about adapter or adapters are already trimmed. These adapter strings must have the same dimension as FASTQs defined in item 2).
+
+    * `"atac.adapters_rep1_R1"`? : Array of adapter string of each FASTQ for rep1-R1.
+    * `"atac.adapters_rep1_R2"`? : Array of adapter string of each FASTQ for rep1-R1. Do not define this for single ended dataset.
+    * `"atac.adapters_rep2_R1"`? : Array of adapter string of each FASTQ for rep1-R1. Do not define this for dataset with a single replicate.
+    * `"atac.adapters_rep2_R2"`? : Array of adapter string of each FASTQ for rep1-R1. Do not define this for single ended dataset.
+
+10) IDR settings.
+    `"atac.enable_idr"` is not supported.
+
+# Input JSON for other platforms (`atac.wdl`)
 
 Optional parameters and flags are marked with `?`.
 
@@ -77,7 +109,7 @@ Optional parameters and flags are marked with `?`.
 
     Other important settings.
 
-    * `"atac.align_only`? : Disable all downstream analysis after mapping.
+    * `"atac.align_only"`? : Disable all downstream analysis after mapping.
     * `"atac.multimapping"`? : Multimapping reads.
     * `"atac.true_rep_only"`? : Set it as `true` to disable all analyses (including IDR, naive-overlap and reproducibility QC) related to pseudo replicates. This flag suppresses `"atac.enable_idr"`.
     * `"atac.disable_xcor`? : Disable cross-correlation analysis.
