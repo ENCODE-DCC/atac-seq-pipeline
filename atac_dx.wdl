@@ -86,14 +86,20 @@ workflow atac {
 			disable_tn5_shift = if pipeline_type=='atac' then false else true,
 			paired_end = paired_end,
 		}
-		# subsample tagalign (non-mito) and cross-correlation analysis
-		call xcor { input :
+		# make two self pseudo replicates per true replicate
+		call spr { input :
 			ta = bam2ta.ta,
 			paired_end = paired_end,
 		}
+	}
+	# pool tagaligns from true replicates
+	call pool_ta { input :
+		tas = bam2ta.ta,
+	}
+	scatter(i in range(num_rep)) {
 		# call peaks on tagalign
 		call macs2 { input :
-			ta = bam2ta.ta,
+			ta = bam2ta.ta[i],
 			gensz = gensz,
 			chrsz = chrsz,
 			cap_num_peak = cap_num_peak,
@@ -104,25 +110,11 @@ workflow atac {
 			mem_mb = macs2_mem_mb,
 			disks = macs2_disks,
 		}
-		# make two self pseudo replicates per true replicate
-		call spr { input :
-			ta = bam2ta.ta,
-			paired_end = paired_end,
-		}
+	}
+	scatter(i in range(num_rep)) {
 		# call peaks on 1st pseudo replicated tagalign 
 		call macs2 as macs2_pr1 { input :
-			ta = spr.ta_pr1,
-			gensz = gensz,
-			chrsz = chrsz,
-			cap_num_peak = cap_num_peak,
-			pval_thresh = pval_thresh,
-			smooth_win = smooth_win,
-			blacklist = blacklist,
-			mem_mb = macs2_mem_mb,
-			disks = macs2_disks,
-		}
-		call macs2 as macs2_pr2 { input :
-			ta = spr.ta_pr2,
+			ta = spr.ta_pr1[i],
 			gensz = gensz,
 			chrsz = chrsz,
 			cap_num_peak = cap_num_peak,
@@ -133,10 +125,26 @@ workflow atac {
 			disks = macs2_disks,
 		}
 	}
-
-	# pool tagaligns from true replicates
-	call pool_ta { input :
-		tas = bam2ta.ta,
+	scatter(i in range(num_rep)) {
+		# call peaks on 2nd pseudo replicated tagalign 
+		call macs2 as macs2_pr2 { input :
+			ta = spr.ta_pr2[i],
+			gensz = gensz,
+			chrsz = chrsz,
+			cap_num_peak = cap_num_peak,
+			pval_thresh = pval_thresh,
+			smooth_win = smooth_win,
+			blacklist = blacklist,
+			mem_mb = macs2_mem_mb,
+			disks = macs2_disks,
+		}
+	}
+	scatter(i in range(num_rep)) {
+		# subsample tagalign (non-mito) and cross-correlation analysis
+		call xcor { input :
+			ta = bam2ta.ta[i],
+			paired_end = paired_end,
+		}
 	}
 	# call peaks on pooled replicate
 	call macs2 as macs2_pooled { input :
