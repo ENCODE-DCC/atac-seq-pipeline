@@ -6,7 +6,7 @@ ENCODE ATAC-seq pipeline test
 This test requires `atac-seq-pipeline-test-data` directory in `test_task/`. Git glone [a data repo](https://github.com/leepc12/atac-seq-pipeline-test-data) on `test_task/`. This repo has 1/400 subsampled test samples and chr19-chrM only bowtie2 indices and other genome data for hg38 and mm10. Make sure that you have `cromwell-30.1.jar` in your `$PATH` as an executable (`chmod +x`) and `Docker` installed on your system.
 ```
 $ cd test_task/
-$ git clone https://github.com/leepc12/atac-seq-pipeline-test-data
+$ git clone https://github.com/encode-dcc/atac-seq-pipeline-test-data
 ```
 
 Each task in `../atac.wdl` has a corresponding pair of tester WDL/JSON (`[TASK_NAME].WDL` and [TASK_NAME].json`). You can also specify your own docker image to test each task.
@@ -95,5 +95,5 @@ $ bash run_cromwell_server_on_gc.sh
 * Choose Create Firewall Rule `encode-cromwell-test-server-open-port-8000`.
 * Targets: `Specified target rags`.
 * Target tags: cromwell-server
-* Source IP ranges: `0.0.0.0/0`.
+* Source IP ranges: `0.0.0.0/0` (CIDR notation for allowed IP range)
 * Protocols and Ports: `Specified protocols and ports` with `tcp:8000`.
