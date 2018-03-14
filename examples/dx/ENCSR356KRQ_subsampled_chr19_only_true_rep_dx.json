@@ -26,6 +26,7 @@
          "dx://project-FBGgPY00j8pQ114YGQ0yP64Z:encode-atac-seq-pipeline/ENCSR356KRQ/fastq_subsampled/rep2/pair2/ENCFF573UXK.subsampled.400.fastq.gz"
     ],
     "atac.paired_end" : true,
+    "atac.true_rep_only" : true,
     "atac.multimapping" : 4,
     "atac.trim_adapter.auto_detect_adapter" : true,
 

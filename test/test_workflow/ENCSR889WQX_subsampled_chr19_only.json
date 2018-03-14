@@ -1,4 +1,5 @@
 {
+    "atac.qc_report.qc_json_ref" : "gs://encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR889WQX/ENCSR889WQX_subsampled_chr19_only_qc.json",
     "atac.pipeline_type" : "atac",
     "atac.genome_tsv" : "gs://encode-pipeline-genome-data/mm10_chr19_chrM_google.tsv",
     "atac.fastqs" : [

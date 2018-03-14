@@ -14,39 +14,7 @@ ENCODE ATAC-seq pipeline
 
 See [Usage](https://github.com/encode-dcc/wdl-pipelines/blob/master/USAGE.md).
 
-# Input JSON for DNANexus (`atac_dx.wdl`)
-
-On DNANexus, you can start a pipeline with FASTQs only and number of replicates are limited to 1 or 2. Therefore, parameters for `atac_dx.wdl` are slightly different from that of `atac.wdl`. All parameters in 1) and 2) and some parameters in 3), 4), 10) and 11) are not used.
-
-1) Reference genome
-    See [Usage](https://github.com/kundajelab/wdl_pipelines/blob/master/USAGE.md) to generate genome data files for each species.
-
-    * `"atac.bowtie2_idx_tar"` : Bowtie2 index TAR file (must be `dx://file-...`).
-    * `"atac.blacklist"` : BED file for blacklisted regions (must be `dx://file-...`).
-    * `"atac.chrsz"` : Chromosome sizes file (must be `dx://file-...`).
-    * `"atac.gensz"` : Genome size (`hs` for human, `mm` for mouse or sum of 2nd column in a chromosome sizes file).
-
-2) Input genome data files
-    * `"atac.fastqs_rep1_R1"` : Array of FASTQ file to be merged for rep1-R1.
-    * `"atac.fastqs_rep1_R2"`? : Array of FASTQ file to be merged for rep1-R2. Do not define this for single ended dataset.
-    * `"atac.fastqs_rep2_R1"`? : Array of FASTQ file to be merged for rep2-R1. Do not define this for dataset with a single replicate.
-    * `"atac.fastqs_rep2_R2"`? : Array of FASTQ file to be merged for rep2-R2. Do not define this for single ended dataset.
-
-3) Pipeline settings
-    Do not define `"atac.paired_end"` since it is automatically detected by the pipeline. `"atac.align_only"`,  `"atac.true_rep_only"` and `"atac.disable_xcor` are not supported.
-
-4) Adapter trimmer settings
-    Do not define any of the followings if you don't have information about adapter or adapters are already trimmed. These adapter strings must have the same dimension as FASTQs defined in item 2).
-
-    * `"atac.adapters_rep1_R1"`? : Array of adapter string of each FASTQ for rep1-R1.
-    * `"atac.adapters_rep1_R2"`? : Array of adapter string of each FASTQ for rep1-R1. Do not define this for single ended dataset.
-    * `"atac.adapters_rep2_R1"`? : Array of adapter string of each FASTQ for rep1-R1. Do not define this for dataset with a single replicate.
-    * `"atac.adapters_rep2_R2"`? : Array of adapter string of each FASTQ for rep1-R1. Do not define this for single ended dataset.
-
-10) IDR settings.
-    `"atac.enable_idr"` is not supported.
-
-# Input JSON for other platforms (`atac.wdl`)
+# Input JSON for `atac.wdl`
 
 Optional parameters and flags are marked with `?`.
 
@@ -64,23 +32,32 @@ Optional parameters and flags are marked with `?`.
     * `"atac.genome_tsv"` : TSV file path/URI.
 
 2) Input genome data files
-    Choose any genome data type you want to start with and do not define others.
 
-    * `"atac.fastqs"` : 3-dimensional array with FASTQ file path/URI.
+    Choose any genome data type you want to start with and do not define others. For FASTQs and their adapters, we provide two ways to define them since DNANexus website UI only supports 1-dim array as inputs. Choose between `fastqs` or `fastqs_rep[REP_ID]_R[READ_END_ID]` for your preference. The pipeline supports up to 4 replicates.
+
+    * `"atac.fastqs"`? : 3-dimensional array with FASTQ file path/URI.
         - 1st dimension: replicate ID
         - 2nd dimension: merge ID (this dimension will be reduced after merging FASTQs)
         - 3rd dimension: endedness ID (0 for SE and 0,1 for PE)
-    * `"atac.bams"` : Array of raw (unfiltered) BAM file path/URI.
+    * `"atac.fastqs_rep1_R1"`? : Array of FASTQ file to be merged for rep1-R1.
+    * `"atac.fastqs_rep1_R2"`? : Array of FASTQ file to be merged for rep1-R2. Do not define if your FASTQ is single ended.
+    * `"atac.fastqs_rep2_R1"`? : Array of FASTQ file to be merged for rep2-R1. Do not define if you don't have replicate 2.
+    * `"atac.fastqs_rep2_R2"`? : Array of FASTQ file to be merged for rep2-R2. Do not define if you don't have replicate 2.
+    * `"atac.fastqs_rep3_R1"`? : Array of FASTQ file to be merged for rep3-R1. Do not define if you don't have replicate 3.
+    * `"atac.fastqs_rep3_R2"`? : Array of FASTQ file to be merged for rep3-R2. Do not define if you don't have replicate 3.
+    * `"atac.fastqs_rep4_R1"`? : Array of FASTQ file to be merged for rep4-R1. Do not define if you don't have replicate 4.
+    * `"atac.fastqs_rep4_R2"`? : Array of FASTQ file to be merged for rep4-R2. Do not define if you don't have replicate 4.
+    * `"atac.bams"`? : Array of raw (unfiltered) BAM file path/URI.
         - 1st dimension: replicate ID
-    * `"atac.nodup_bams"` : Array of filtered (deduped) BAM file path/URI.
+    * `"atac.nodup_bams"`? : Array of filtered (deduped) BAM file path/URI.
         - 1st dimension: replicate ID
-    * `"atac.tas"` : Array of TAG-ALIGN file path/URI.
+    * `"atac.tas"`? : Array of TAG-ALIGN file path/URI.
         - 1st dimension: replicate ID
-    * `"atac.peaks"` : Array of NARROWPEAK file path/URI.
+    * `"atac.peaks"`? : Array of NARROWPEAK file path/URI.
         - 1st dimension: replicate ID
-    * `"atac.peaks_pr1"` : Array of NARROWPEAK file path/URI for 1st self pseudo replicate of replicate ID.
+    * `"atac.peaks_pr1"`? : Array of NARROWPEAK file path/URI for 1st self pseudo replicate of replicate ID.
         - 1st dimension: replicate ID
-    * `"atac.peaks_pr2"` : Array of NARROWPEAK file path/URI for 2nd self pseudo replicate of replicate ID.
+    * `"atac.peaks_pr2"`? : Array of NARROWPEAK file path/URI for 2nd self pseudo replicate of replicate ID.
         - 1st dimension: replicate ID
     * `"atac.peak_ppr1"`? : NARROWPEAK file path/URI for pooled 1st pseudo replicates.
     * `"atac.peak_ppr2"`? : NARROWPEAK file path/URI for pooled 2nd pseudo replicates.

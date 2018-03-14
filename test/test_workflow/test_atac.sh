@@ -5,15 +5,14 @@ CROMWELL_SVR_URL=35.185.235.240:8000
 DOCKER_IMAGE=quay.io/encode-dcc/atac-seq-pipeline:latest
 WDL=../../atac.wdl
 
-if [ $# -lt 2 ]; then
-  echo "Usage: ./test.atac.sh [INPUT_JSON] [QC_JSON_TO_COMPARE] [DOCKER_IMAGE](optional)"
+if [ $# -lt 1 ]; then
+  echo "Usage: ./test.atac.sh [INPUT_JSON] [DOCKER_IMAGE](optional)"
   exit 1
 fi
-if [ $# -gt 2 ]; then
-  DOCKER_IMAGE=$3
+if [ $# -gt 1 ]; then
+  DOCKER_IMAGE=$2
 fi
 INPUT=$1
-QC_JSON_TO_COMPARE=$2
 PREFIX=$(basename $INPUT .json)
 
 # Write workflow option JSON file
@@ -77,7 +76,6 @@ done
 set -x #why are we exiting with 1??
 # Get output of workflow
 curl -X GET --header "Accept: application/json" -v "$CROMWELL_SVR_URL/api/workflows/v1/$WF_ID/outputs" > $PREFIX.result.json
-cat $PREFIX.result.json | python -c "import json,sys;obj=json.load(sys.stdin);print(obj['outputs']['atac.qc_report.qc_json_str'])" > $PREFIX.result.qc.json
+cat $PREFIX.result.json | python -c "import json,sys;obj=json.load(sys.stdin);print(obj['outputs']['atac.qc_report.qc_json_match'])" > $PREFIX.result.qc_json_match.txt
 
 echo "Done testing successfully."
-diff $PREFIX.result.qc.json $QC_JSON_TO_COMPARE > $PREFIX.qc_json_diff.txt

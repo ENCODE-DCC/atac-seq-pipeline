@@ -1,9 +1,6 @@
 {
     "atac.pipeline_type" : "atac",
-    "atac.bowtie2_idx_tar" : "dx://file-FB3F66007vbQ4xgqJYyPj9Gy",
-    "atac.blacklist" : "dx://file-FB3F98Q07jZVZ47x6vYzqK2V",
-    "atac.chrsz" : "dx://file-FB3F8100BFGJPyJY1502vypX",
-    "atac.gensz" : "hs",
+    "atac.genome_tsv" : "dx://file-FB7qY9j0Qyx6QxbF3ZYGP1Gz",
     "atac.fastqs_rep1_R1" : [
         "dx://file-FB2KKXj0bJ1qqxbg2pFvzJJ2",
         "dx://file-FB2KKVQ02zvPk1X414vbxJX0"
@@ -28,9 +25,11 @@
         "dx://file-FB2P9yj0YByKkBZg165F1VQF",
         "dx://file-FB2PB1Q05B95vVFZJYF37v2k"
     ],
+    "atac.paired_end" : true,
     "atac.multimapping" : 4,
     "atac.trim_adapter.auto_detect_adapter" : true,
 
+    "atac.enable_idr" : true,
     "atac.smooth_win" : 73,
     "atac.idr_thresh" : 0.05,
 

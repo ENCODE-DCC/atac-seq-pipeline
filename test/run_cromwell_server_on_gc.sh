@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# make sure that chmod +x cromwell-30.1 and it's in $PATH
-CROMWELL_JAR=$(which cromwell-30.1.jar)
+# make sure that chmod +x cromwell-30.2 and it's in $PATH
+CROMWELL_JAR=$(which cromwell-30.2.jar)
 BACKEND_CONF=../backends/backend_with_db.conf
 BACKEND=google
 GC_PROJ=encode-dcc-1016

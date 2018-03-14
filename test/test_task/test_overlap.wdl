@@ -13,6 +13,7 @@ workflow test_overlap {
 	String ref_se_overlap_frip_qc
 
 	String se_blacklist
+	String se_chrsz
 
 	call atac.overlap as se_overlap { input :
 		prefix = "rep1-rep2",
@@ -21,7 +22,8 @@ workflow test_overlap {
 		peak_pooled = se_peak_pooled,
 		peak_type = 'narrowPeak',
 		blacklist = se_blacklist,
-		ta = se_ta_pooled,
+		chrsz = se_chrsz,
+		ta = [se_ta_pooled],
 	}
 
 	call atac.compare_md5sum { input :

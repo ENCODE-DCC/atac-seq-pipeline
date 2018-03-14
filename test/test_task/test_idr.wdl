@@ -15,6 +15,7 @@ workflow test_idr {
 	String ref_se_idr_frip_qc
 
 	String se_blacklist
+	String se_chrsz
 
 	call atac.idr as se_idr { input : 
 		prefix = "rep1-rep2",
@@ -25,7 +26,8 @@ workflow test_idr {
 		peak_type = 'narrowPeak',
 		rank = 'p.value',
 		blacklist = se_blacklist,
-		ta = se_ta_pooled,
+		chrsz = se_chrsz,
+		ta = [se_ta_pooled],
 	}
 
 	call atac.compare_md5sum { input :

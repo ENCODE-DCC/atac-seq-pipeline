@@ -103,8 +103,8 @@ pipeline {
                     steps{
                         echo "Disabled for now"
                         //sh """cd test/test_workflow
-                          //    ./test_atac.sh ENCSR889WQX_subsampled_chr19_only.json ref_output/ENCSR889WQX_subsampled_chr19_only_qc.json $TAG
-                          //    ./test_atac.sh ENCSR356KRQ_subsampled_chr19_only.json ref_output/ENCSR356KRQ_subsampled_chr19_only_qc.json $TAG
+                          //    ./test_atac.sh ENCSR889WQX_subsampled_chr19_only.json $TAG
+                          //    ./test_atac.sh ENCSR356KRQ_subsampled_chr19_only.json $TAG
                            //"""
                     }
                 }

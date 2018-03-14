@@ -1,4 +1,5 @@
 *qc_json_diff.txt
+*qc_json_match.txt
 *.result.json
 *.result.qc.json
 *.status.json

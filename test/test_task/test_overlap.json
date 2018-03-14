@@ -1,5 +1,6 @@
 {
     "test_overlap.se_blacklist" : "atac-seq-pipeline-test-data/genome_data/mm10_chr19_chrM/mm10.blacklist.bed.gz",
+    "test_overlap.se_chrsz" : "atac-seq-pipeline-test-data/genome_data/mm10_chr19_chrM/mm10_chr19_chrM.chrom.sizes",
 
     "test_overlap.se_peak_rep1" : "atac-seq-pipeline-test-data/input/se/peaks/rep1/ENCFF439VSY.subsampled.400.trim.merged.nodup.tn5.pval0.01.300K.narrowPeak.gz",
     "test_overlap.se_peak_rep2" : "atac-seq-pipeline-test-data/input/se/peaks/rep2/ENCFF463QCX.subsampled.400.trim.merged.nodup.tn5.pval0.01.300K.narrowPeak.gz",

@@ -60,18 +60,32 @@ def parse_arguments():
                         help='List of IDR plot files per replicate.')
     parser.add_argument('--idr-plot-ppr', type=str, nargs='*',
                         help='IDR plot file for pooled pseudo replicate.')
-    parser.add_argument('--frip-qcs', type=str, nargs='*',
-                        help='List of FRiP score files per replicate.')
-    parser.add_argument('--frip-qcs-pr1', type=str, nargs='*',
-                        help='List of FRiP score files for 1st pseudo replicates per replicate.')
-    parser.add_argument('--frip-qcs-pr2', type=str, nargs='*',
-                        help='List of FRiP score files for 2nd pseudo replicates per replicate.')
-    parser.add_argument('--frip-qc-pooled', type=str, nargs='*',
-                        help='FRiP score file for pooled replicates.')
-    parser.add_argument('--frip-qc-ppr1', type=str, nargs='*',
-                        help='FRiP score file for 1st pooled pseudo replicates.')
-    parser.add_argument('--frip-qc-ppr2', type=str, nargs='*',
-                        help='FRiP score file for 2nd pooled pseudo replicates.')
+
+    parser.add_argument('--frip-macs2-qcs', type=str, nargs='*',
+                        help='List of macs2 FRiP score files per replicate.')
+    parser.add_argument('--frip-macs2-qcs-pr1', type=str, nargs='*',
+                        help='List of macs2 FRiP score files for 1st pseudo replicates per replicate.')
+    parser.add_argument('--frip-macs2-qcs-pr2', type=str, nargs='*',
+                        help='List of macs2 FRiP score files for 2nd pseudo replicates per replicate.')
+    parser.add_argument('--frip-macs2-qc-pooled', type=str, nargs='*',
+                        help='macs2 FRiP score file for pooled replicates.')
+    parser.add_argument('--frip-macs2-qc-ppr1', type=str, nargs='*',
+                        help='macs2 FRiP score file for 1st pooled pseudo replicates.')
+    parser.add_argument('--frip-macs2-qc-ppr2', type=str, nargs='*',
+                        help='macs2 FRiP score file for 2nd pooled pseudo replicates.')
+    parser.add_argument('--frip-spp-qcs', type=str, nargs='*',
+                        help='List of spp FRiP score files per replicate.')
+    parser.add_argument('--frip-spp-qcs-pr1', type=str, nargs='*',
+                        help='List of spp FRiP score files for 1st pseudo replicates per replicate.')
+    parser.add_argument('--frip-spp-qcs-pr2', type=str, nargs='*',
+                        help='List of spp FRiP score files for 2nd pseudo replicates per replicate.')
+    parser.add_argument('--frip-spp-qc-pooled', type=str, nargs='*',
+                        help='spp FRiP score file for pooled replicates.')
+    parser.add_argument('--frip-spp-qc-ppr1', type=str, nargs='*',
+                        help='spp FRiP score file for 1st pooled pseudo replicates.')
+    parser.add_argument('--frip-spp-qc-ppr2', type=str, nargs='*',
+                        help='spp FRiP score file for 2nd pooled pseudo replicates.')
+
     parser.add_argument('--frip-idr-qcs', type=str, nargs='*',
                         help='List of IDR FRiP score files per a pair of two replicates.')
     parser.add_argument('--frip-idr-qcs-pr', type=str, nargs='*',
@@ -228,42 +242,82 @@ def main():
         html += html_embedded_png(args.jsd_plot[0], '', 40)
         json_all['jsd_qc'] = json_objs
 
-    # frip (Enrichment QC) for raw peaks
-    if args.frip_qcs or args.frip_qcs_pr1 or args.frip_qcs_pr2 \
-        or args.frip_qc_pooled or args.frip_qc_ppr1 or args.frip_qc_ppr2:
+    # frip (Enrichment QC) for MACS2 raw peaks
+    if args.frip_macs2_qcs or args.frip_macs2_qcs_pr1 or args.frip_macs2_qcs_pr2 \
+        or args.frip_macs2_qc_pooled or args.frip_macs2_qc_ppr1 or args.frip_macs2_qc_ppr2:
         html += html_heading(2, 'Enrichment QC (Fraction of reads in {} raw peaks)'.format(
             args.peak_caller.upper()))
         json_objs_frip = []
         row_header_frip = []
-        true_rep_labels = ['rep{}'.format(i+1) for i, qc in enumerate(args.frip_qcs)]
-        rep_pr1_labels = ['rep{}-pr1'.format(i+1) for i, qc in enumerate(args.frip_qcs_pr1)]
-        rep_pr2_labels = ['rep{}-pr2'.format(i+1) for i, qc in enumerate(args.frip_qcs_pr2)]
+        true_rep_labels = ['rep{}'.format(i+1) for i, qc in enumerate(args.frip_macs2_qcs)]
+        rep_pr1_labels = ['rep{}-pr1'.format(i+1) for i, qc in enumerate(args.frip_macs2_qcs_pr1)]
+        rep_pr2_labels = ['rep{}-pr2'.format(i+1) for i, qc in enumerate(args.frip_macs2_qcs_pr2)]
 
-        if args.frip_qcs:
-            json_objs = [parse_frip_qc(qc) for qc in args.frip_qcs]
+        if args.frip_macs2_qcs:
+            json_objs = [parse_frip_qc(qc) for qc in args.frip_macs2_qcs]
             json_objs_frip.extend(json_objs)
             row_header_frip.extend(true_rep_labels)
-        if args.frip_qcs_pr1:
-            json_objs = [parse_frip_qc(qc) for qc in args.frip_qcs_pr1]
+        if args.frip_macs2_qcs_pr1:
+            json_objs = [parse_frip_qc(qc) for qc in args.frip_macs2_qcs_pr1]
             json_objs_frip.extend(json_objs)
             row_header_frip.extend(rep_pr1_labels)
-        if args.frip_qcs_pr2:
-            json_objs = [parse_frip_qc(qc) for qc in args.frip_qcs_pr2]
+        if args.frip_macs2_qcs_pr2:
+            json_objs = [parse_frip_qc(qc) for qc in args.frip_macs2_qcs_pr2]
             json_objs_frip.extend(json_objs)
             row_header_frip.extend(rep_pr2_labels)
-        if args.frip_qc_pooled:
-            json_obj = parse_frip_qc(args.frip_qc_pooled[0])
+        if args.frip_macs2_qc_pooled:
+            json_obj = parse_frip_qc(args.frip_macs2_qc_pooled[0])
             json_objs_frip.append(json_obj)
             row_header_frip.append('pooled')
-        if args.frip_qc_ppr1:
-            json_obj = parse_frip_qc(args.frip_qc_ppr1[0])
+        if args.frip_macs2_qc_ppr1:
+            json_obj = parse_frip_qc(args.frip_macs2_qc_ppr1[0])
             json_objs_frip.append(json_obj)
             row_header_frip.append('ppr1')
-        if args.frip_qc_ppr2:
-            json_obj = parse_frip_qc(args.frip_qc_ppr2[0])
+        if args.frip_macs2_qc_ppr2:
+            json_obj = parse_frip_qc(args.frip_macs2_qc_ppr2[0])
             json_objs_frip.append(json_obj)
             row_header_frip.append('ppr2')
-        json_all['frip_qc'] = OrderedDict(
+        json_all['frip_macs2_qc'] = OrderedDict(
+            zip(row_header_frip,json_objs_frip))
+        html += html_vert_table_multi_rep(json_objs_frip,args.paired_end,row_header_frip)
+        html += html_help_FRiP(args.peak_caller)
+
+    # frip (Enrichment QC) for SPP raw peaks
+    if args.frip_spp_qcs or args.frip_spp_qcs_pr1 or args.frip_spp_qcs_pr2 \
+        or args.frip_spp_qc_pooled or args.frip_spp_qc_ppr1 or args.frip_spp_qc_ppr2:
+        html += html_heading(2, 'Enrichment QC (Fraction of reads in {} raw peaks)'.format(
+            args.peak_caller.upper()))
+        json_objs_frip = []
+        row_header_frip = []
+        true_rep_labels = ['rep{}'.format(i+1) for i, qc in enumerate(args.frip_spp_qcs)]
+        rep_pr1_labels = ['rep{}-pr1'.format(i+1) for i, qc in enumerate(args.frip_spp_qcs_pr1)]
+        rep_pr2_labels = ['rep{}-pr2'.format(i+1) for i, qc in enumerate(args.frip_spp_qcs_pr2)]
+
+        if args.frip_spp_qcs:
+            json_objs = [parse_frip_qc(qc) for qc in args.frip_spp_qcs]
+            json_objs_frip.extend(json_objs)
+            row_header_frip.extend(true_rep_labels)
+        if args.frip_spp_qcs_pr1:
+            json_objs = [parse_frip_qc(qc) for qc in args.frip_spp_qcs_pr1]
+            json_objs_frip.extend(json_objs)
+            row_header_frip.extend(rep_pr1_labels)
+        if args.frip_spp_qcs_pr2:
+            json_objs = [parse_frip_qc(qc) for qc in args.frip_spp_qcs_pr2]
+            json_objs_frip.extend(json_objs)
+            row_header_frip.extend(rep_pr2_labels)
+        if args.frip_spp_qc_pooled:
+            json_obj = parse_frip_qc(args.frip_spp_qc_pooled[0])
+            json_objs_frip.append(json_obj)
+            row_header_frip.append('pooled')
+        if args.frip_spp_qc_ppr1:
+            json_obj = parse_frip_qc(args.frip_spp_qc_ppr1[0])
+            json_objs_frip.append(json_obj)
+            row_header_frip.append('ppr1')
+        if args.frip_spp_qc_ppr2:
+            json_obj = parse_frip_qc(args.frip_spp_qc_ppr2[0])
+            json_objs_frip.append(json_obj)
+            row_header_frip.append('ppr2')
+        json_all['frip_spp_qc'] = OrderedDict(
             zip(row_header_frip,json_objs_frip))
         html += html_vert_table_multi_rep(json_objs_frip,args.paired_end,row_header_frip)
         html += html_help_FRiP(args.peak_caller)

@@ -3,7 +3,7 @@ ENCODE ATAC-seq pipeline test
 
 # Task level test (local)
 
-This test requires `atac-seq-pipeline-test-data` directory in `test_task/`. Git glone [a data repo](https://github.com/leepc12/atac-seq-pipeline-test-data) on `test_task/`. This repo has 1/400 subsampled test samples and chr19-chrM only bowtie2 indices and other genome data for hg38 and mm10. Make sure that you have `cromwell-30.1.jar` in your `$PATH` as an executable (`chmod +x`) and `Docker` installed on your system.
+This test requires `atac-seq-pipeline-test-data` directory in `test_task/`. Git glone [a data repo](https://github.com/leepc12/atac-seq-pipeline-test-data) on `test_task/`. This repo has 1/400 subsampled test samples and chr19-chrM only bowtie2 indices and other genome data for hg38 and mm10. Make sure that you have `cromwell-30.2.jar` in your `$PATH` as an executable (`chmod +x`) and `Docker` installed on your system.
 ```
 $ cd test_task/
 $ git clone https://github.com/encode-dcc/atac-seq-pipeline-test-data
@@ -63,7 +63,7 @@ $ sudo usermod -aG docker $USER
 4) Install cromwell.
 ```
 $ cd
-$ wget https://github.com/broadinstitute/cromwell/releases/download/30.1/cromwell-30.1.jar
+$ wget https://github.com/broadinstitute/cromwell/releases/download/30.1/cromwell-30.2.jar
 $ chmod +x cromwell*.jar
 $ echo "export PATH=\$PATH:\$HOME">> ~/.bashrc
 $ source ~/.bashrc
