@@ -1,6 +1,6 @@
 {
     "atac.pipeline_type" : "atac",
-    "atac.genome_tsv" : "/users/leepc12/code/atac-seq-pipeline/genome/mm10_klab.tsv",
+    "atac.genome_tsv" : "/users/leepc12/code/atac-seq-pipeline/genome/klab/mm10_klab.tsv",
     "atac.fastqs" : [
         [
             ["/mnt/data/pipeline_test_samples/encode-atac-seq-pipeline/ENCSR889WQX/fastq/rep1/ENCFF439VSY.fastq.gz"],

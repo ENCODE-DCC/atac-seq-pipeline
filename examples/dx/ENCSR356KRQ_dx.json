@@ -1,0 +1,38 @@
+{
+    "atac.pipeline_type" : "atac",
+    "atac.genome_tsv" : "dx://file-FB7qY9j0Qyx6QxbF3ZYGP1Gz",
+    "atac.fastqs_rep1_R1" : [
+        "dx://file-FB2KKXj0bJ1qqxbg2pFvzJJ2",
+        "dx://file-FB2KKVQ02zvPk1X414vbxJX0"
+    ],
+    "atac.fastqs_rep1_R2" : [
+        "dx://file-FB2Kkf00gFp7Z61jJYbJzyzg",
+        "dx://file-FB2KkX80VQk6P4k02p80zG76"
+    ],
+    "atac.fastqs_rep2_R1" : [
+        "dx://file-FB2P0fj0fKk8Xv2FJY6q45Jg",
+        "dx://file-FB2P0Z003zK2bZ8F6xQyx940",
+        "dx://file-FB2P0j801j4157j8JZQG08GY",
+        "dx://file-FB2P0vj071gZZF172pfbpQy1",
+        "dx://file-FB2P0vQ0bP02bZ8F6xQyx9jB",
+        "dx://file-FB2P0pQ0KXVjfKvY2qKPbqQ8"
+    ],
+    "atac.fastqs_rep2_R2" : [
+        "dx://file-FB2PB0j0VJg7Z61jJYbK0g8G",
+        "dx://file-FB2PB1j05ZV8Xv2FJY6q4PVF",
+        "dx://file-FB2PB1j0BQbzBkY26vgF5GFv",
+        "dx://file-FB2P9xQ08Z2x7yp3153YPzB7",
+        "dx://file-FB2P9yj0YByKkBZg165F1VQF",
+        "dx://file-FB2PB1Q05B95vVFZJYF37v2k"
+    ],
+    "atac.paired_end" : true,
+    "atac.multimapping" : 4,
+    "atac.trim_adapter.auto_detect_adapter" : true,
+
+    "atac.enable_idr" : true,
+    "atac.smooth_win" : 73,
+    "atac.idr_thresh" : 0.05,
+
+    "atac.qc_report.name" : "ENCSR356KRQ",
+    "atac.qc_report.desc" : "ATAC-seq on primary keratinocytes in day 0.0 of differentiation"
+}

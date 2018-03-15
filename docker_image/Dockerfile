@@ -49,7 +49,7 @@ ENV PATH="/software:${PATH}"
 # to have the same result as of Conda's non-MKL openblas 0.2.19
 # setting TARGET=HASWELL will give you different result.
 # so let's stick to TARGET=NEHALEM
-RUN git clone --branch v0.2.19 https://github.com/xianyi/OpenBLAS
+RUN git clone --branch v0.2.19 --single-branch https://github.com/xianyi/OpenBLAS
 RUN cd OpenBLAS && make FC=gfortran TARGET=NEHALEM USE_THREAD=0 && make PREFIX=/opt/openblas install
 ENV LD_LIBRARY_PATH="/opt/openblas/lib:${LD_LIBRARY_PATH}"
 
@@ -68,18 +68,17 @@ RUN pip install common python-dateutil cython
 RUN pip3 install common python-dateutil cython
 
 # Install numpy 1.11.3 (python2/3)
-RUN git clone --branch v1.11.3 https://github.com/numpy/numpy
-COPY /docker_images/pipeline/site.cfg numpy/
-RUN cd numpy && python setup.py install
-RUN cd numpy && python3 setup.py install
+RUN wget https://github.com/ottojolanki/numpy/archive/numpy_1.11.3_release.zip && unzip numpy_1.11.3_release.zip 
+RUN cd numpy-numpy_1.11.3_release && python setup.py install
+RUN cd numpy-numpy_1.11.3_release && python3 setup.py install
 
 # Install scipy 1.0.0 (python2/3)
-RUN git clone --branch v1.0.0 https://github.com/scipy/scipy
+RUN git clone --branch v1.0.0 --single-branch https://github.com/scipy/scipy
 RUN cd scipy && python setup.py install
 RUN cd scipy && python3 setup.py install
 
 # Install matplotlib 1.5.1 (python2/3)
-RUN git clone --branch v1.5.1 https://github.com/matplotlib/matplotlib
+RUN git clone --branch v1.5.1 --single-branch https://github.com/matplotlib/matplotlib
 RUN cd matplotlib && python setup.py install
 RUN cd matplotlib && python3 setup.py install
 
@@ -87,7 +86,7 @@ RUN cd matplotlib && python3 setup.py install
 RUN pip install --no-dependencies macs2==2.1.1.20160309
 
 # Install IDR 2.0.4.1 (python3)
-RUN git clone --branch 2.0.4.1 https://github.com/kundajelab/idr
+RUN git clone --branch 2.0.4.1 --single-branch https://github.com/kundajelab/idr
 RUN cd idr && python3 setup.py install
 
 # Install UCSC tools (Kent utils) latest
@@ -97,12 +96,12 @@ RUN wget http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/bedGraphToBigWig
 RUN chmod +x bedGraphToBigWig
 
 # Install samtools 1.2
-RUN git clone --branch 1.2 https://github.com/samtools/samtools.git
-RUN git clone --branch 1.2 git://github.com/samtools/htslib.git
+RUN git clone --branch 1.2 --single-branch https://github.com/samtools/samtools.git
+RUN git clone --branch 1.2 --single-branch git://github.com/samtools/htslib.git
 RUN cd samtools && make && make install
 
 # Install bedtools 2.26.0
-RUN git clone --branch v2.26.0 https://github.com/arq5x/bedtools2.git
+RUN git clone --branch v2.26.0 --single-branch https://github.com/arq5x/bedtools2.git
 RUN cd bedtools2 && make && make install
 
 # Install Picard 2.10.6
@@ -142,8 +141,8 @@ ENV PATH="/software/bowtie2-2.2.6:${PATH}"
 # and it gets whatever is checked out plus local modifications
 # so the buildling command should:
 # cd [GIT_REPO_DIR] && docker build -f docker_images/pipeline/Dockerfile .
-RUN mkdir atac-seq-pipeline
-COPY / atac-seq-pipeline
+RUN mkdir -p atac-seq-pipeline/src
+COPY /src atac-seq-pipeline/src
 ENV PATH="/software/atac-seq-pipeline/src:${PATH}"
 
 ENTRYPOINT ["/bin/bash","-c"]
