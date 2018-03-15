@@ -6,7 +6,7 @@ DOCKER_IMAGE=quay.io/encode-dcc/atac-seq-pipeline:latest
 WDL=../../atac.wdl
 
 if [ $# -lt 1 ]; then
-  echo "Usage: ./test.atac.sh [INPUT_JSON] [DOCKER_IMAGE](optional)"
+  echo "Usage: ./test_atac.sh [INPUT_JSON] [DOCKER_IMAGE](optional)"
   exit 1
 fi
 if [ $# -gt 1 ]; then
