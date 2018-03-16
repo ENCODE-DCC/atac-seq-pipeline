@@ -3,5 +3,6 @@
 *.result.json
 *.result.qc.json
 *.status.json
+*.metadata.json
 *.submit.json
 *.test_atac_wf_opt.json

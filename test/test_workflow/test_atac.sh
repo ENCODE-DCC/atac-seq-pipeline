@@ -58,16 +58,16 @@ while true; do
   rm -f $PREFIX.status.json
   echo "Workflow status: $WF_STATUS, Iter: $ITER"
   if [ $WF_STATUS == Succeeded ]; then
-  	echo "Workflow has been done successfully."
+    echo "Workflow has been done successfully."
     break
   elif [ $WF_STATUS == Failed ]; then
     echo "Workflow has failed. Check out $PREFIX.status.json."
-    cat $PREFIX.status.json
+    curl -X GET --header "Accept: application/json" -v "$CROMWELL_SVR_URL/api/workflows/v1/$WF_ID/metadata" > $PREFIX.metadata.json
     exit 2
   fi
   if [ $ITER -gt $ITER_MAX ]; then
-  	echo "Iteration reached limit ($ITER_MAX). Failed."
-  	exit 3
+    echo "Iteration reached limit ($ITER_MAX). Failed."
+    exit 3
     break
   fi
   sleep 300
