@@ -1,6 +1,6 @@
 {
     "atac.pipeline_type" : "atac",
-    "atac.genome_tsv" : "/oak/stanford/groups/akundaje/leepc12/code/atac-seq-pipeline/genome/mm10_sherlock.tsv",
+    "atac.genome_tsv" : "/scratch/users/leepc12/pipeline_genome_data/mm10_sherlock.tsv",
     "atac.fastqs" : [
         [
             ["/oak/stanford/groups/akundaje/leepc12/run/ATAC_ENCODE3/ENCODE3/data/DNA+accessibility/ATAC-seq/Mus+musculus/ENCSR889WQX/rep1/ENCFF439VSY.fastq.gz"],

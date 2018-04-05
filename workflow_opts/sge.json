@@ -1,0 +1,6 @@
+{
+    "default_runtime_attributes" : {
+        "sge_pe" : "shm",
+        "sge_queue" : "q"
+    }
+}

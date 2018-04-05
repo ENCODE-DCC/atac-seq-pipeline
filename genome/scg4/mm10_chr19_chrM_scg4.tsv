@@ -1,0 +1,6 @@
+ref_fa	/ifs/scratch/leepc12/pipeline_genome_data/mm10_chr19_chrM/mm10_no_alt_analysis_set_ENCODE.chr19_chrM.fasta
+bowtie2_idx_tar	/ifs/scratch/leepc12/pipeline_genome_data/mm10_chr19_chrM/bowtie2_index/mm10_no_alt_analysis_set_ENCODE.chr19_chrM.fasta.tar
+bwa_idx_tar	/ifs/scratch/leepc12/pipeline_genome_data/mm10_chr19_chrM/bwa_index/mm10_no_alt_analysis_set_ENCODE.chr19_chrM.fasta.tar
+chrsz	/ifs/scratch/leepc12/pipeline_genome_data/mm10_chr19_chrM/mm10_chr19_chrM.chrom.sizes
+blacklist	/ifs/scratch/leepc12/pipeline_genome_data/mm10_chr19_chrM/mm10.blacklist.bed.gz
+gensz	mm
