@@ -35,7 +35,7 @@ def spr_se(ta, out_dir):
     tmp_pr2 = '{}.01'.format(prefix)
     ta_pr1 = '{}.pr1.tagAlign.gz'.format(prefix)
     ta_pr2 = '{}.pr2.tagAlign.gz'.format(prefix)
-    nlines = (get_num_lines(ta)+1)/2
+    nlines = int((get_num_lines(ta)+1)/2)
     
     cmd1 = 'zcat {} | shuf --random-source={} | '
     cmd1 += 'split -d -l {} - {}.'
@@ -68,7 +68,7 @@ def spr_pe(ta, out_dir):
     tmp_pr2 = '{}.01'.format(prefix)
     ta_pr1 = '{}.pr1.tagAlign.gz'.format(prefix)
     ta_pr2 = '{}.pr2.tagAlign.gz'.format(prefix)
-    nlines = (get_num_lines(ta)/2+1)/2
+    nlines = int((get_num_lines(ta)/2+1)/2)
 
     cmd1 = 'zcat -f {} | sed \'N;s/\\n/\\t/\' | '
     cmd1 += 'shuf --random-source={} | '
@@ -96,7 +96,7 @@ def spr_pe(ta, out_dir):
     cmd3 += '{{printf "%s\\t%s\\t%s\\t%s\\t%s\\t%s\\n'
     cmd3 += '%s\\t%s\\t%s\\t%s\\t%s\\t%s\\n",'
     cmd3 += '$1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12}}\' | '
-    cmd3 += 'gzip -nc > {}'
+    cmd3 += 'gzip -nc > {}'1aaaaa
     cmd3 = cmd3.format(
         tmp_pr2,
         ta_pr2)
