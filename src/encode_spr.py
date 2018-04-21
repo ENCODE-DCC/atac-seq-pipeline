@@ -96,7 +96,7 @@ def spr_pe(ta, out_dir):
     cmd3 += '{{printf "%s\\t%s\\t%s\\t%s\\t%s\\t%s\\n'
     cmd3 += '%s\\t%s\\t%s\\t%s\\t%s\\t%s\\n",'
     cmd3 += '$1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12}}\' | '
-    cmd3 += 'gzip -nc > {}'1aaaaa
+    cmd3 += 'gzip -nc > {}'
     cmd3 = cmd3.format(
         tmp_pr2,
         ta_pr2)
