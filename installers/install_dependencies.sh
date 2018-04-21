@@ -15,10 +15,10 @@ echo "=== Installing additional packages for python3 env..."
   CONDA_BIN=$(dirname $(which bedtools))
   cd $CONDA_BIN
 
-  # uninstall IDR 2.0.3 and install the latest one
+  # uninstall IDR 2.0.4 and install the latest one
   conda uninstall idr -y
   rm -rf idr_tmp
-  git clone --branch 2.0.4.1 https://github.com/kundajelab/idr idr_tmp
+  git clone --branch 2.0.4.2 https://github.com/kundajelab/idr idr_tmp
   cd idr_tmp
   $CONDA_BIN/python setup.py install
   cd $CONDA_BIN
