@@ -646,6 +646,7 @@ task spr { # make two self pseudo replicates
 		#@docker : "quay.io/encode-dcc/atac-seq-pipeline:v1"
 		cpu : 1
 		memory : "${select_first([mem_mb,'12000'])} MB"
+		time : 1
 		disks : "local-disk 50 HDD"
 	}
 }
@@ -665,6 +666,7 @@ task pool_ta {
 		#@docker : "quay.io/encode-dcc/atac-seq-pipeline:v1"
 		cpu : 1
 		memory : "4000 MB"
+		time : 1
 		disks : "local-disk 50 HDD"
 	}
 }
@@ -796,6 +798,7 @@ task idr {
 		#@docker : "quay.io/encode-dcc/atac-seq-pipeline:v1"
 		cpu : 1
 		memory : "4000 MB"
+		time : 1
 		disks : "local-disk 50 HDD"
 	}	
 }
@@ -835,6 +838,7 @@ task overlap {
 		#@docker : "quay.io/encode-dcc/atac-seq-pipeline:v1"
 		cpu : 1
 		memory : "4000 MB"
+		time : 1
 		disks : "local-disk 50 HDD"
 	}	
 }
@@ -863,6 +867,7 @@ task reproducibility {
 		#@docker : "quay.io/encode-dcc/atac-seq-pipeline:v1"
 		cpu : 1
 		memory : "4000 MB"
+		time : 1
 		disks : "local-disk 50 HDD"
 	}
 }
@@ -953,6 +958,7 @@ task qc_report {
 		#@docker : "quay.io/encode-dcc/atac-seq-pipeline:v1"
 		cpu : 1
 		memory : "4000 MB"
+		time : 1
 		disks : "local-disk 50 HDD"		
 	}
 }
@@ -968,6 +974,7 @@ task read_genome_tsv {
 	runtime {
 		cpu : 1
 		memory : "4000 MB"
+		time : 1
 		disks : "local-disk 50 HDD"		
 	}
 }
@@ -1060,6 +1067,7 @@ task compare_md5sum {
 	runtime {
 		cpu : 1
 		memory : "4000 MB"
+		time : 1
 		disks : "local-disk 50 HDD"		
 	}
 }
