@@ -47,6 +47,10 @@ source activate encode-atac-seq-pipeline
 
   # # install R-spp 1.4
   # Rscript -e "install.packages('phantompeakqualtools-1.2/spp_1.14.tar.gz')"
+
+  # decompress MACS2 python egg
+  cd $CONDA_LIB/python2.7/site-packages
+  unzip -o MACS2-2.1.1.20160309-py2.7-linux-x86_64.egg
   
   # install picard 2.10.6
   wget -N -c https://github.com/broadinstitute/picard/releases/download/2.10.6/picard.jar
