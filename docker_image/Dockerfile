@@ -116,6 +116,9 @@ RUN pip install --no-cache-dir --no-dependencies cutadapt==1.9.1
 RUN wget https://github.com/BenLangmead/bowtie2/releases/download/v2.2.6/bowtie2-2.2.6-linux-x86_64.zip && \
     unzip bowtie2-2.2.6-linux-x86_64.zip && mv bowtie2*/bowtie2* . && rm -rf bowtie2-2.2.6*
 
+# Install pyfaidx (for building genome data)
+RUN pip install --no-cache-dir pyfaidx==0.4.7.1
+
 # Get ENCODE atac-seq-pipeline container repository
 # This COPY assumes the build context is the root of the atac-seq-pipeline repo
 # and it gets whatever is checked out plus local modifications

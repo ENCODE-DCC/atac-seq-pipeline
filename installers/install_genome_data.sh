@@ -16,7 +16,6 @@ if [[ "$#" -lt 2 ]]; then
 fi
 
 # pipeline specific params
-CONDA_ENV="encode-atac-seq-pipeline"
 BUILD_BWT2_IDX=1
 BUILD_BWA_IDX=0
 
@@ -62,8 +61,6 @@ fi
 echo "=== Downloading files..."
 wget -c -O $(basename ${REF_FA}) ${REF_FA}
 if [[ $BLACKLIST != "" ]]; then wget -N -c $BLACKLIST; fi
-
-source activate ${CONDA_ENV}
 
 echo "=== Processing reference fasta file..."
 if [[ ${REF_FA} == *.gz ]]; then 
