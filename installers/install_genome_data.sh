@@ -5,7 +5,7 @@ set -e
 if [[ "$#" -lt 2 ]]; then
   echo
   echo "This script installs data for genome [GENOME] on a directory [DEST_DIR]."
-  echo "A TSV file [DEST_DIR]/[GENOME]_local.conf will be generated. Use it for pipeline."
+  echo "A TSV file [DEST_DIR]/[GENOME].tsv will be generated. Use it for pipeline."
   echo
   echo "Supported genomes: hg19, mm9, hg38 and mm10"
   echo
@@ -16,14 +16,13 @@ if [[ "$#" -lt 2 ]]; then
 fi
 
 # pipeline specific params
-CONDA_ENV="encode-atac-seq-pipeline"
 BUILD_BWT2_IDX=1
 BUILD_BWA_IDX=0
 
 GENOME=$1
 #DEST_DIR=$(readlink -f $2)
 DEST_DIR=$(cd $(dirname $2) && pwd -P)/$(basename $2)
-TSV=${DEST_DIR}/${GENOME}_local.tsv
+TSV=${DEST_DIR}/${GENOME}.tsv
 
 echo "=== Creating destination directory and TSV file..."
 mkdir -p ${DEST_DIR}
@@ -63,8 +62,6 @@ echo "=== Downloading files..."
 wget -c -O $(basename ${REF_FA}) ${REF_FA}
 if [[ $BLACKLIST != "" ]]; then wget -N -c $BLACKLIST; fi
 
-source activate ${CONDA_ENV}
-
 echo "=== Processing reference fasta file..."
 if [[ ${REF_FA} == *.gz ]]; then 
   REF_FA_PREFIX=$(basename ${REF_FA} .gz)
@@ -78,6 +75,7 @@ elif [[ ${REF_FA} == *.2bit ]]; then
 else
   REF_FA_PREFIX=$(basename ${REF_FA})  
 fi
+gzip -nc ${REF_FA_PREFIX} > ${REF_FA_PREFIX}.gz
 
 echo "=== Generating fasta index and chrom.sizes file..."
 cd ${DEST_DIR}
@@ -145,6 +143,6 @@ if [[ ${BUILD_BWA_IDX} == 1 ]]; then
 else
   echo -e "bwa_idx_tar\t/dev/null" >> ${TSV}
 fi
-echo -e "ref_fa\t${DEST_DIR}/${REF_FA_PREFIX}" >> ${TSV}
+echo -e "ref_fa\t${DEST_DIR}/${REF_FA_PREFIX}.gz" >> ${TSV}
 
 echo "=== All done."
