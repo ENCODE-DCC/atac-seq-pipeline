@@ -125,7 +125,8 @@ RUN pip install --no-cache-dir pyfaidx==0.4.7.1
 # so the buildling command should:
 # cd [GIT_REPO_DIR] && docker build -f docker_images/pipeline/Dockerfile .
 RUN mkdir -p atac-seq-pipeline/src
-COPY /src atac-seq-pipeline/src
-ENV PATH="/software/atac-seq-pipeline/src:${PATH}"
+COPY src atac-seq-pipeline/src/
+COPY atac.wdl atac-seq-pipeline/
+ENV PATH="/software/atac-seq-pipeline:/software/atac-seq-pipeline/src:${PATH}"
 
 ENTRYPOINT ["/bin/bash","-c"]

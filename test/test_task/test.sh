@@ -3,7 +3,7 @@ set -e # exit on error
 
 if [ $# -lt 2 ]; then
   echo "Usage: ./test.sh [WDL] [INPUT_JSON] [DOCKER_IMAGE](optional)"
-  echo "Make sure to have cromwell-30.2.jar in your \$PATH as an executable (chmod +x)."
+  echo "Make sure to have cromwell-31.jar in your \$PATH as an executable (chmod +x)."
   exit 1
 fi
 
@@ -14,7 +14,7 @@ if [ $# -gt 2 ]; then
 else
   DOCKER_IMAGE=quay.io/encode-dcc/atac-seq-pipeline:latest
 fi
-CROMWELL_JAR=$(which cromwell-30.2.jar)
+CROMWELL_JAR=$(which cromwell-31.jar)
 BACKEND_CONF=../../backends/backend.conf
 BACKEND=Local
 PREFIX=$(basename ${WDL} .wdl)
