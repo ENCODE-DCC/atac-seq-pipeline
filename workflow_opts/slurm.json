@@ -1,0 +1,6 @@
+{
+    "default_runtime_attributes" : {
+        "slurm_partition" : "akundaje",
+        "slurm_account" : "akundaje"
+    }
+}

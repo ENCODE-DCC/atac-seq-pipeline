@@ -1,9 +1,0 @@
-{
-    "default_runtime_attributes" : {
-        "cpu": "1",
-        "memory": "4 GB",
-        "sge_pe" : "shm",
-        "sge_queue" : "q",
-        "slurm_partition" : "akundaje"
-    }
-}

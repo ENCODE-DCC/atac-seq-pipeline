@@ -71,8 +71,8 @@ RUN git clone --branch v1.5.1 --single-branch https://github.com/matplotlib/matp
 # Install MACS2 2.1.1.20160309 (python2)
 RUN pip install --no-cache-dir --no-dependencies macs2==2.1.1.20160309
 
-# Install IDR 2.0.4.1 (python3)
-RUN git clone --branch 2.0.4.1 --single-branch https://github.com/kundajelab/idr && \
+# Install IDR 2.0.4.2 (python3)
+RUN git clone --branch 2.0.4.2 --single-branch https://github.com/kundajelab/idr && \
     cd idr && python3 setup.py install && cd ../ && rm -rf idr*
 
 # Install UCSC tools (Kent utils) latest
@@ -91,8 +91,8 @@ RUN git clone --branch v2.26.0 --single-branch https://github.com/arq5x/bedtools
 # Install Picard 2.10.6
 RUN wget https://github.com/broadinstitute/picard/releases/download/2.10.6/picard.jar && chmod +x picard.jar
 
-# Install sambamba 0.6.5
-RUN wget https://github.com/lomereiter/sambamba/releases/download/v0.6.5/sambamba_v0.6.5_linux.tar.bz2 && tar -xvjf sambamba_v0.6.5_linux.tar.bz2 && mv sambamba_v0.6.5 sambamba && rm -rf sambamba_*
+# Install sambamba 0.6.6
+RUN wget https://github.com/lomereiter/sambamba/releases/download/v0.6.6/sambamba_v0.6.6_linux.tar.bz2 && tar -xvjf sambamba_v0.6.6_linux.tar.bz2 && mv sambamba_v0.6.6 sambamba && rm -rf sambamba_*
 
 # Install R packages
 RUN echo "r <- getOption('repos'); r['CRAN'] <- 'http://cran.us.r-project.org'; options(repos = r);" > ~/.Rprofile && \
@@ -116,13 +116,17 @@ RUN pip install --no-cache-dir --no-dependencies cutadapt==1.9.1
 RUN wget https://github.com/BenLangmead/bowtie2/releases/download/v2.2.6/bowtie2-2.2.6-linux-x86_64.zip && \
     unzip bowtie2-2.2.6-linux-x86_64.zip && mv bowtie2*/bowtie2* . && rm -rf bowtie2-2.2.6*
 
+# Install pyfaidx (for building genome data)
+RUN pip install --no-cache-dir pyfaidx==0.4.7.1
+
 # Get ENCODE atac-seq-pipeline container repository
 # This COPY assumes the build context is the root of the atac-seq-pipeline repo
 # and it gets whatever is checked out plus local modifications
 # so the buildling command should:
 # cd [GIT_REPO_DIR] && docker build -f docker_images/pipeline/Dockerfile .
 RUN mkdir -p atac-seq-pipeline/src
-COPY /src atac-seq-pipeline/src
-ENV PATH="/software/atac-seq-pipeline/src:${PATH}"
+COPY src atac-seq-pipeline/src/
+COPY atac.wdl atac-seq-pipeline/
+ENV PATH="/software/atac-seq-pipeline:/software/atac-seq-pipeline/src:${PATH}"
 
 ENTRYPOINT ["/bin/bash","-c"]
