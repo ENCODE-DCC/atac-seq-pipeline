@@ -42,7 +42,7 @@ def xcor(ta, speak, nth, out_dir):
     xcor_score = '{}.cc.qc'.format(prefix)
     fraglen_txt = '{}.cc.fraglen.txt'.format(prefix)
 
-    cmd1 = 'Rscript $(which run_spp.R) -rf -c={} -p={} '
+    cmd1 = 'Rscript --max-ppsize=500000 $(which run_spp.R) -rf -c={} -p={} '
     cmd1 += '-filtchr=chrM -savp={} -out={} {}'
     cmd1 = cmd1.format(
         ta,
