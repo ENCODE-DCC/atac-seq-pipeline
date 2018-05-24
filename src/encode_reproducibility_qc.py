@@ -98,6 +98,10 @@ def main():
     if rescue_ratio>2.0 and self_consistency_ratio>2.0:
         reproducibility = 'fail'
 
+    log.info('Writing optimal/conservative peak files...')
+    copy_f_to_f(optimal_peak, os.path.join(args.out_dir, 'optimal_peak.gz'))
+    copy_f_to_f(conservative_peak, os.path.join(args.out_dir, 'conservative_peak.gz'))
+
     log.info('Writing reproducibility QC log...')
     if args.prefix:
         reproducibility_qc = '{}.reproducibility.qc'.format(args.prefix)

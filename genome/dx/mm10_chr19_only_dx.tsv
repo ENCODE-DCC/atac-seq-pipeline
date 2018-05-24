@@ -4,3 +4,10 @@ bwa_idx_tar	dx://file-FBG6KBQ05x64Q8PX7jzP8z1j
 chrsz	dx://file-FBG6K480z1f8K6vb6jGz3V6z
 blacklist	dx://file-FBG6K2Q05B92vj3Z71PQQKK6
 gensz	mm
+tss_enrich	dx://file-FG2B6g80bY00kjPG4b7y7Y03
+dnase	dx://file-FG2B6g80bY00kjPG4b7y7Y03
+prom	dx://file-FG2B6g80bY00kjPG4b7y7Y03
+enh	dx://file-FG2B6g80bY00kjPG4b7y7Y03
+reg2map	dx://file-FG2B6g80bY00kjPG4b7y7Y03
+reg2map_bed	dx://file-FG2B6g80bY00kjPG4b7y7Y03
+roadmap_meta	dx://file-FG2B6g80bY00kjPG4b7y7Y03

@@ -1,0 +1,13 @@
+blacklist	gs://encode-pipeline-genome-data/mm10_chr19_chrM/mm10.blacklist.bed.gz
+chrsz	gs://encode-pipeline-genome-data/mm10_chr19_chrM/mm10_chr19_chrM.chrom.sizes
+gensz	mm
+bowtie2_idx_tar	gs://encode-pipeline-genome-data/mm10_chr19_chrM/bowtie2_index/mm10_no_alt_analysis_set_ENCODE.chr19_chrM.fasta.tar
+bwa_idx_tar	gs://encode-pipeline-genome-data/mm10_chr19_chrM/bwa_index/mm10_no_alt_analysis_set_ENCODE.chr19_chrM.fasta.tar
+ref_fa	gs://encode-pipeline-genome-data/mm10_chr19_chrM/mm10_no_alt_analysis_set_ENCODE.chr19_chrM.fasta
+tss_enrich	gs://encode-pipeline-genome-data/mm10_chr19_chrM/ataqc/null
+dnase	gs://encode-pipeline-genome-data/mm10_chr19_chrM/ataqc/null
+prom	gs://encode-pipeline-genome-data/mm10_chr19_chrM/ataqc/null
+enh	gs://encode-pipeline-genome-data/mm10_chr19_chrM/ataqc/null
+reg2map	gs://encode-pipeline-genome-data/mm10_chr19_chrM/ataqc/null
+reg2map_bed	gs://encode-pipeline-genome-data/mm10_chr19_chrM/ataqc/null
+roadmap_meta	gs://encode-pipeline-genome-data/mm10_chr19_chrM/ataqc/null
