@@ -7,9 +7,9 @@
     "test_idr.se_peak_pooled" : "atac-seq-pipeline-test-data/input/se/peaks/pooled_rep/ENCFF439VSY.subsampled.400.trim.merged.nodup.tn5.pooled.pval0.01.300K.narrowPeak.gz",
     "test_idr.se_ta_pooled" : "atac-seq-pipeline-test-data/input/se/tas/pooled_rep/ENCFF439VSY.subsampled.400.trim.merged.nodup.tn5.pooled.tagAlign.gz",
 
-    "test_idr.ref_se_idr_peak" : "ref_output/test_idr/rep1-rep2.idr0.05.narrowPeak.gz",
-    "test_idr.ref_se_idr_bfilt_peak" : "ref_output/test_idr/rep1-rep2.idr0.05.bfilt.narrowPeak.gz",
-    "test_idr.ref_se_idr_frip_qc" : "ref_output/test_idr/rep1-rep2.idr0.05.bfilt.frip.qc",
+    "test_idr.ref_se_idr_peak" : "atac-seq-pipeline-test-data/ref_output/test_idr/rep1-rep2.idr0.05.narrowPeak.gz",
+    "test_idr.ref_se_idr_bfilt_peak" : "atac-seq-pipeline-test-data/ref_output/test_idr/rep1-rep2.idr0.05.bfilt.narrowPeak.gz",
+    "test_idr.ref_se_idr_frip_qc" : "atac-seq-pipeline-test-data/ref_output/test_idr/rep1-rep2.idr0.05.bfilt.frip.qc",
 
     "test_idr.idr_thresh" : 0.05
 }

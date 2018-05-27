@@ -24,10 +24,10 @@
         ["atac-seq-pipeline-test-data/input/se/fastqs/rep1/ENCFF744CHW.subsampled.400.fastq.gz"]
     ],
     "test_trim_adapter.ref_pe_trimmed_fastqs" : [
-        "ref_output/test_trim_adapter/pe/merge_fastqs_R1_ENCFF341MYG.subsampled.400.trim.merged.fastq.gz",
-        "ref_output/test_trim_adapter/pe/merge_fastqs_R2_ENCFF248EJF.subsampled.400.trim.merged.fastq.gz"
+        "atac-seq-pipeline-test-data/ref_output/test_trim_adapter/pe/merge_fastqs_R1_ENCFF341MYG.subsampled.400.trim.merged.fastq.gz",
+        "atac-seq-pipeline-test-data/ref_output/test_trim_adapter/pe/merge_fastqs_R2_ENCFF248EJF.subsampled.400.trim.merged.fastq.gz"
     ],
     "test_trim_adapter.ref_se_trimmed_fastqs" : [
-        "ref_output/test_trim_adapter/se/merge_fastqs_R1_ENCFF439VSY.subsampled.400.trim.merged.fastq.gz"
+        "atac-seq-pipeline-test-data/ref_output/test_trim_adapter/se/merge_fastqs_R1_ENCFF439VSY.subsampled.400.trim.merged.fastq.gz"
     ]
 }

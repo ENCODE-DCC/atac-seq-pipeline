@@ -9,10 +9,10 @@
     "test_bowtie2.se_trimmed_fastqs" : [
         "atac-seq-pipeline-test-data/input/se/trimmed_fastqs/rep1/merge_fastqs_R1_ENCFF439VSY.subsampled.400.trim.merged.fastq.gz"
     ],
-    "test_bowtie2.ref_pe_flagstat" : "ref_output/test_bowtie2/pe/multimapping/ENCFF341MYG.subsampled.400.trim.merged.flagstat.qc",
-    "test_bowtie2.ref_pe_flagstat_no_multimapping" : "ref_output/test_bowtie2/pe/no_multimapping/ENCFF341MYG.subsampled.400.trim.merged.flagstat.qc",
-    "test_bowtie2.ref_se_flagstat" : "ref_output/test_bowtie2/se/multimapping/ENCFF439VSY.subsampled.400.trim.merged.flagstat.qc",
-    "test_bowtie2.ref_se_flagstat_no_multimapping" : "ref_output/test_bowtie2/se/no_multimapping/ENCFF439VSY.subsampled.400.trim.merged.flagstat.qc",
+    "test_bowtie2.ref_pe_flagstat" : "atac-seq-pipeline-test-data/ref_output/test_bowtie2/pe/multimapping/ENCFF341MYG.subsampled.400.trim.merged.flagstat.qc",
+    "test_bowtie2.ref_pe_flagstat_no_multimapping" : "atac-seq-pipeline-test-data/ref_output/test_bowtie2/pe/no_multimapping/ENCFF341MYG.subsampled.400.trim.merged.flagstat.qc",
+    "test_bowtie2.ref_se_flagstat" : "atac-seq-pipeline-test-data/ref_output/test_bowtie2/se/multimapping/ENCFF439VSY.subsampled.400.trim.merged.flagstat.qc",
+    "test_bowtie2.ref_se_flagstat_no_multimapping" : "atac-seq-pipeline-test-data/ref_output/test_bowtie2/se/no_multimapping/ENCFF439VSY.subsampled.400.trim.merged.flagstat.qc",
     
     "test_bowtie2.multimapping" : 4
 }
