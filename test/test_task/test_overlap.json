@@ -7,7 +7,7 @@
     "test_overlap.se_peak_pooled" : "atac-seq-pipeline-test-data/input/se/peaks/pooled_rep/ENCFF439VSY.subsampled.400.trim.merged.nodup.tn5.pooled.pval0.01.300K.narrowPeak.gz",
     "test_overlap.se_ta_pooled" : "atac-seq-pipeline-test-data/input/se/tas/pooled_rep/ENCFF439VSY.subsampled.400.trim.merged.nodup.tn5.pooled.tagAlign.gz",
 
-    "test_overlap.ref_se_overlap_peak" : "atac-seq-pipeline-test-data/ref_output/test_overlap/rep1-rep2.overlap.narrowPeak.gz",
-    "test_overlap.ref_se_overlap_bfilt_peak" : "atac-seq-pipeline-test-data/ref_output/test_overlap/rep1-rep2.overlap.bfilt.narrowPeak.gz",
-    "test_overlap.ref_se_overlap_frip_qc" : "atac-seq-pipeline-test-data/ref_output/test_overlap/rep1-rep2.overlap.bfilt.frip.qc"
+    "test_overlap.ref_se_overlap_peak" : "ref_output/test_overlap/rep1-rep2.overlap.narrowPeak.gz",
+    "test_overlap.ref_se_overlap_bfilt_peak" : "ref_output/test_overlap/rep1-rep2.overlap.bfilt.narrowPeak.gz",
+    "test_overlap.ref_se_overlap_frip_qc" : "ref_output/test_overlap/rep1-rep2.overlap.bfilt.frip.qc"
 }

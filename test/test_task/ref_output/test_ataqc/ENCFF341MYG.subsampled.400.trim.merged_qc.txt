@@ -1,0 +1,50 @@
+Sample	
+Genome	GRCh38_no_alt_analysis_set_GCA_000001405.15.fasta.gz
+Paired/Single-ended	Paired-ended
+Read length	76
+Read count from sequencer	1286827
+Read count successfully aligned	1281533
+Read count after filtering for mapping quality	888079
+Read count after removing duplicate reads	887397
+Read count after removing mitochondrial reads (final read count)	440280
+Mapping quality > q30 (out of total)	888079	0.690130841209
+Duplicates (after filtering)	682	0.003088
+Mitochondrial reads (out of total)	48934	0.0381839562462
+Duplicates that are mitochondrial (out of all dups)	886	0.649560117302
+Final reads (after all filters)	440280	0.342143893468
+NRF	0.996873 - OK
+PBC1	0.997833 - OK
+PBC2	585.498599 - OK
+picard_est_library_size	51268130
+Fraction of reads in NFR	0.194369567086 out of range [0.4, inf]
+NFR / mono-nuc reads	1.37730649413 out of range [2.5, inf]
+Presence of NFR peak	OK
+Presence of Mono-Nuc peak	OK
+Presence of Di-Nuc peak	OK
+Raw peaks	115 out of range [10000, inf]
+Naive overlap peaks	33061 - OK
+IDR peaks	571 out of range [10000, inf]
+Min size	85.0
+25 percentile	121.5
+50 percentile (median)	197.0
+75 percentile	403.0
+Max size	627.0
+Mean	261.939130435
+Min size	73.0
+25 percentile	142.0
+50 percentile (median)	209.0
+75 percentile	292.0
+Max size	1206.0
+Mean	231.367381507
+Min size	73.0
+25 percentile	165.5
+50 percentile (median)	326.0
+75 percentile	444.0
+Max size	830.0
+Mean	324.316987741
+TSS_enrichment	20.3977388654
+Fraction of reads in universal DHS regions	207705	0.494783105839
+Fraction of reads in blacklist regions	8	1.90571476214e-05
+Fraction of reads in promoter regions	69869	0.166437980895
+Fraction of reads in enhancer regions	170294	0.40566473713
+Fraction of reads in called peak regions	2647	0.00630553371924

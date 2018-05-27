@@ -149,107 +149,107 @@
         {
             "num_reads": 25000000, 
             "est_frag_len": 0, 
-            "corr_est_frag_len": 0.394338019974059, 
+            "corr_est_frag_len": 0.394074945839069, 
             "phantom_peak": 75, 
-            "corr_phantom_peak": 0.3367201, 
+            "corr_phantom_peak": 0.3368846, 
             "argmin_corr": 1500, 
-            "min_corr": 0.1905916, 
-            "NSC": 2.069021, 
-            "RSC": 1.394296
+            "min_corr": 0.1907317, 
+            "NSC": 2.066122, 
+            "RSC": 1.391305
         }, 
         {
             "num_reads": 25000000, 
             "est_frag_len": 0, 
-            "corr_est_frag_len": 0.377478949149253, 
-            "phantom_peak": 75, 
-            "corr_phantom_peak": 0.3302951, 
+            "corr_est_frag_len": 0.377563704457927, 
+            "phantom_peak": 70, 
+            "corr_phantom_peak": 0.3299829, 
             "argmin_corr": 1500, 
-            "min_corr": 0.2006695, 
-            "NSC": 1.881098, 
-            "RSC": 1.364001
+            "min_corr": 0.2007699, 
+            "NSC": 1.880579, 
+            "RSC": 1.368235
         }
     ], 
     "frip_macs2_qc": {
         "rep1": {
-            "FRiP": 0.383726277148
+            "FRiP": 0.38494058153
         }, 
         "rep2": {
-            "FRiP": 0.344822494064
+            "FRiP": 0.352136636204
         }, 
         "rep1-pr1": {
-            "FRiP": 0.381121762846
+            "FRiP": 0.381963300989
         }, 
         "rep2-pr1": {
-            "FRiP": 0.346475637403
+            "FRiP": 0.345366787658
         }, 
         "rep1-pr2": {
-            "FRiP": 0.382908062129
+            "FRiP": 0.38164361334
         }, 
         "rep2-pr2": {
-            "FRiP": 0.344376450725
+            "FRiP": 0.346604548575
         }, 
         "pooled": {
-            "FRiP": 0.367829943892
+            "FRiP": 0.369201077428
         }, 
         "ppr1": {
-            "FRiP": 0.365386115185
+            "FRiP": 0.366524841191
         }, 
         "ppr2": {
-            "FRiP": 0.367442375532
+            "FRiP": 0.365921638814
         }
     }, 
     "overlap_reproducibility_qc": {
-        "Nt": 270213, 
-        "N1": 261381, 
-        "N2": 261505, 
-        "Np": 275934, 
-        "N_opt": 275934, 
-        "N_consv": 270213, 
+        "Nt": 271192, 
+        "N1": 261791, 
+        "N2": 265543, 
+        "Np": 276203, 
+        "N_opt": 276203, 
+        "N_consv": 271192, 
         "opt_set": "ppr", 
         "consv_set": "rep1-rep2", 
-        "rescue_ratio": 1.02117218639, 
-        "self_consistency_ratio": 1.00047440327, 
+        "rescue_ratio": 1.01847768371, 
+        "self_consistency_ratio": 1.0143320435, 
         "reproducibility": "pass"
     }, 
     "idr_reproducibility_qc": {
-        "Nt": 192469, 
-        "N1": 172356, 
-        "N2": 171161, 
-        "Np": 197242, 
-        "N_opt": 197242, 
-        "N_consv": 192469, 
+        "Nt": 194475, 
+        "N1": 174221, 
+        "N2": 184650, 
+        "Np": 198674, 
+        "N_opt": 198674, 
+        "N_consv": 194475, 
         "opt_set": "ppr", 
         "consv_set": "rep1-rep2", 
-        "rescue_ratio": 1.02479879877, 
-        "self_consistency_ratio": 1.00698173065, 
+        "rescue_ratio": 1.0215914642, 
+        "self_consistency_ratio": 1.05986075157, 
         "reproducibility": "pass"
     }, 
     "overlap_frip_qc": {
         "rep1-rep2": {
-            "FRiP": 0.35600727765
+            "FRiP": 0.357628110185
         }, 
         "rep1-pr": {
-            "FRiP": 0.368158029996
+            "FRiP": 0.36939330905
         }, 
         "rep2-pr": {
-            "FRiP": 0.33111829872
+            "FRiP": 0.339288596219
         }, 
         "ppr": {
-            "FRiP": 0.358464168202
+            "FRiP": 0.359864986
         }
     }, 
     "idr_frip_qc": {
         "rep1-rep2": {
-            "FRiP": 0.313887140323
+            "FRiP": 0.315840345262
         }, 
         "rep1-pr": {
-            "FRiP": 0.316569591742
+            "FRiP": 0.318365303511
         }, 
         "rep2-pr": {
-            "FRiP": 0.284043297963
+            "FRiP": 0.295646514218
         }, 
         "ppr": {
-            "FRiP": 0.317637215105
+            "FRiP": 0.319264856788
         }
     }
 }

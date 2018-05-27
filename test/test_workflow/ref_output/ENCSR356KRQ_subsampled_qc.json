@@ -1,5 +1,5 @@
 {
-    "name": "ENCSR356KRQ (subsampled 1/400 reads)", 
+    "name": "ENCSR356KRQ", 
     "desc": "ATAC-seq on primary keratinocytes in day 0.0 of differentiation", 
     "flagstat_qc": [
         {
@@ -177,51 +177,51 @@
             "FRiP": 0.978581315573
         }, 
         "rep1-pr1": {
-            "FRiP": 0.996898464001
+            "FRiP": 0.996717421961
         }, 
         "rep2-pr1": {
-            "FRiP": 0.996264734439
+            "FRiP": 0.995931730098
         }, 
         "rep1-pr2": {
-            "FRiP": 0.996903198757
+            "FRiP": 0.996707862064
         }, 
         "rep2-pr2": {
-            "FRiP": 0.995899600392
+            "FRiP": 0.996609747878
         }, 
         "pooled": {
             "FRiP": 0.684160604609
         }, 
         "ppr1": {
-            "FRiP": 0.989208131689
+            "FRiP": 0.98916457218
         }, 
         "ppr2": {
-            "FRiP": 0.988937966363
+            "FRiP": 0.989639280565
         }
     }, 
     "overlap_reproducibility_qc": {
         "Nt": 32588, 
-        "N1": 14652, 
-        "N2": 16083, 
-        "Np": 33061, 
-        "N_opt": 33061, 
+        "N1": 14546, 
+        "N2": 16009, 
+        "Np": 32823, 
+        "N_opt": 32823, 
         "N_consv": 32588, 
         "opt_set": "ppr", 
         "consv_set": "rep1-rep2", 
-        "rescue_ratio": 1.01451454523, 
-        "self_consistency_ratio": 1.09766584767, 
+        "rescue_ratio": 1.0072112434, 
+        "self_consistency_ratio": 1.10057747834, 
         "reproducibility": "pass"
     }, 
     "idr_reproducibility_qc": {
         "Nt": 499, 
-        "N1": 115, 
-        "N2": 181, 
-        "Np": 571, 
-        "N_opt": 571, 
+        "N1": 132, 
+        "N2": 157, 
+        "Np": 639, 
+        "N_opt": 639, 
         "N_consv": 499, 
         "opt_set": "ppr", 
         "consv_set": "rep1-rep2", 
-        "rescue_ratio": 1.14428857715, 
-        "self_consistency_ratio": 1.57391304348, 
+        "rescue_ratio": 1.28056112224, 
+        "self_consistency_ratio": 1.18939393939, 
         "reproducibility": "pass"
     }, 
     "overlap_frip_qc": {
@@ -229,13 +229,13 @@
             "FRiP": 0.212792394477
         }, 
         "rep1-pr": {
-            "FRiP": 0.16461325901
+            "FRiP": 0.163567498035
         }, 
         "rep2-pr": {
-            "FRiP": 0.159604004092
+            "FRiP": 0.159447531545
         }, 
         "ppr": {
-            "FRiP": 0.215080367644
+            "FRiP": 0.214356187655
         }
     }, 
     "idr_frip_qc": {
@@ -243,13 +243,13 @@
             "FRiP": 0.0147896066559
         }, 
         "rep1-pr": {
-            "FRiP": 0.00630553371924
+            "FRiP": 0.00646751947402
         }, 
         "rep2-pr": {
-            "FRiP": 0.00937431041746
+            "FRiP": 0.00797006961022
         }, 
         "ppr": {
-            "FRiP": 0.0156989153635
+            "FRiP": 0.0168412684584
         }
     }
 }

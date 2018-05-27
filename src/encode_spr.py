@@ -37,8 +37,8 @@ def spr_se(ta, out_dir):
     ta_pr2 = '{}.pr2.tagAlign.gz'.format(prefix)
     nlines = int((get_num_lines(ta)+1)/2)
     
-    cmd1 = 'zcat {} | shuf --random-source={} | '
-    cmd1 += 'split -d -l {} - {}.'
+    cmd1 = 'bash -c "zcat {} | shuf --random-source=<(openssl enc -aes-256-ctr -pass pass:$(zcat -f {} | wc -c) -nosalt </dev/zero 2>/dev/null) | '
+    cmd1 += 'split -d -l {} - {}."'
     cmd1 = cmd1.format(
         ta,
         ta,
@@ -70,9 +70,9 @@ def spr_pe(ta, out_dir):
     ta_pr2 = '{}.pr2.tagAlign.gz'.format(prefix)
     nlines = int((get_num_lines(ta)/2+1)/2)
 
-    cmd1 = 'zcat -f {} | sed \'N;s/\\n/\\t/\' | '
-    cmd1 += 'shuf --random-source={} | '
-    cmd1 += 'split -d -l {} - {}.'
+    cmd1 = 'bash -c "zcat -f {} | sed \'N;s/\\n/\\t/\' | '
+    cmd1 += 'shuf --random-source=<(openssl enc -aes-256-ctr -pass pass:$(zcat -f {} | wc -c) -nosalt </dev/zero 2>/dev/null) | '
+    cmd1 += 'split -d -l {} - {}."'
     cmd1 = cmd1.format(
         ta,
         ta,

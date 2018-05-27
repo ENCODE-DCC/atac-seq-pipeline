@@ -743,6 +743,7 @@ task macs2 {
 	output {
 		File npeak = glob("*[!.][!b][!f][!i][!l][!t].narrowPeak.gz")[0]
 		File bfilt_npeak = glob("*.bfilt.narrowPeak.gz")[0]
+		File bfilt_npeak_bb = glob("*.bfilt.narrowPeak.bb")[0]
 		File sig_pval = if select_first([make_signal,false]) then glob("*.pval.signal.bigwig")[0] else glob("null")[0]
 		File sig_fc = if select_first([make_signal,false]) then glob("*.fc.signal.bigwig")[0] else glob("null")[0]
 		File frip_qc = glob("*.frip.qc")[0]
@@ -789,6 +790,7 @@ task idr {
 	output {
 		File idr_peak = glob("*[!.][!b][!f][!i][!l][!t]."+peak_type+".gz")[0]
 		File bfilt_idr_peak = glob("*.bfilt."+peak_type+".gz")[0]
+		File bfilt_idr_peak_bb = glob("*.bfilt."+peak_type+".bb")[0]
 		File idr_plot = glob("*.txt.png")[0]
 		File idr_unthresholded_peak = glob("*.txt.gz")[0]
 		File idr_log = glob("*.log")[0]
@@ -832,6 +834,7 @@ task overlap {
 	output {
 		File overlap_peak = glob("*[!.][!b][!f][!i][!l][!t]."+peak_type+".gz")[0]
 		File bfilt_overlap_peak = glob("*.bfilt."+peak_type+".gz")[0]
+		File bfilt_overlap_peak_bb = glob("*.bfilt."+peak_type+".bb")[0]
 		File frip_qc = if length(ta)>0 then glob("*.frip.qc")[0] else glob("null")[0]
 	}
 	runtime {

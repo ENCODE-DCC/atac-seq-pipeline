@@ -4,5 +4,5 @@
     "test_reproducibility.se_overlap_peak_rep2_pr" : "atac-seq-pipeline-test-data/input/se/overlap_peaks/rep2-pr.overlap.bfilt.narrowPeak.gz",
     "test_reproducibility.se_overlap_peak_ppr" : "atac-seq-pipeline-test-data/input/se/overlap_peaks/ppr.overlap.bfilt.narrowPeak.gz",
 
-    "test_reproducibility.ref_se_reproducibility_qc" : "atac-seq-pipeline-test-data/ref_output/test_reproducibility/overlap.reproducibility.qc"
+    "test_reproducibility.ref_se_reproducibility_qc" : "ref_output/test_reproducibility/overlap.reproducibility.qc"
 }
