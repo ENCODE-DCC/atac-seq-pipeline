@@ -618,7 +618,7 @@ task filter {
 			${if select_first([no_dup_removal,false]) then "--no-dup-removal" else ""} \
 			${"--nth " + cpu}
 		# ugly part to deal with optional outputs with Google JES backend
-		${if select_first([no_dup_removal,false]) then "touch null.dup.qc null.pbc.qc; " else ""}
+		${if select_first([no_dup_removal,false]) then "touch null.dup.qc null.pbc.qc null.mito_dup.txt; " else ""}
 		touch null
 	}
 	output {
@@ -627,7 +627,7 @@ task filter {
 		File flagstat_qc = glob("*.flagstat.qc")[0]
 		File dup_qc = if select_first([no_dup_removal,false]) then glob("null")[0] else glob("*.dup.qc")[0]
 		File pbc_qc = if select_first([no_dup_removal,false]) then glob("null")[0] else glob("*.pbc.qc")[0]
-		File mito_dup_log = glob("*.mito_dup.txt")[0] # mito_dups, fract_dups_from_mito
+		File mito_dup_log = if select_first([no_dup_removal,false]) then glob("null")[0] else glob("*.mito_dup.txt")[0] # mito_dups, fract_dups_from_mito
 	}
 	runtime {
 		#@docker : "quay.io/encode-dcc/atac-seq-pipeline:v1"
