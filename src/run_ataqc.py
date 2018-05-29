@@ -292,7 +292,7 @@ def run_preseq(bam_w_dups, prefix):
     preseq_data = '{0}.preseq.dat'.format(prefix)
     preseq_log = '{0}.preseq.log'.format(prefix)
     preseq = ('preseq lc_extrap '
-              '-P -B -o {0} {1}.sorted.bam -v 2> {2}').format(preseq_data,
+              '-P -B -o {0} {1}.sorted.bam -seed 1 -v 2> {2}').format(preseq_data,
                                                               prefix,
                                                               preseq_log)
     logging.info(preseq)
@@ -972,7 +972,7 @@ def compare_to_roadmap(bw_file, regions_file, reg2map_file,
 
     # Plot results
     pos = np.array(range(ncol)) + 0.5
-    fig = plt.figure()
+    fig = plt.figure(figsize=(5,int(ncol/4)))
     plt.barh(pos, sorted_results['corr'], align='center', height=1.0)
     plt.yticks(pos, sorted_results['mnemonic'].tolist(), fontsize=7)
     plt.xlabel('Spearmans correlation')
