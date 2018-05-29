@@ -1,7 +1,10 @@
 #!/bin/bash
 
-# make sure that chmod +x cromwell-30.2 and it's in $PATH
-wget -N -c https://github.com/broadinstitute/cromwell/releases/download/32/cromwell-32.jar
+if [ -f "cromwell-32.jar" ]; then
+  echo "Skip downloading cromwell."
+else
+  wget -N -c https://github.com/broadinstitute/cromwell/releases/download/32/cromwell-32.jar
+fi
 CROMWELL_JAR=cromwell-32.jar
 BACKEND_CONF=../backends/backend_with_db.conf
 BACKEND=google
