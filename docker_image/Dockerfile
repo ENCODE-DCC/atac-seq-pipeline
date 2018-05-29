@@ -131,8 +131,8 @@ RUN pip install --no-cache-dir pysam==0.8.2.1 pybedtools==0.6.9 pandas==0.21.1 m
 RUN wget http://gnu.mirror.vexxhost.com/gsl/gsl-1.16.tar.gz && tar -zxvf gsl-1.16.tar.gz && cd gsl-1.16 && ./configure && make && make install && cd .. && rm -rf gsl-1.16 gsl-1.16.tar.gz
 ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib
 
-# Install preseq 2.0.2 for ATAQC
-RUN wget http://smithlabresearch.org/downloads/preseq_linux_v2.0.tar.bz2 && tar -jxvf preseq_linux_v2.0.tar.bz2 && mv preseq_v2.0/preseq . && rm -rf preseq_linux_v2.0.tar.bz2 preseq_v2.0
+# Install preseq 2.0.3 for ATAQC (build from source)
+RUN git clone --branch v2.0.3 --single-branch --recursive https://github.com/smithlabcode/preseq preseq_2.0.3 && cd preseq_2.0.3 && make && cd ../ && mv preseq_2.0.3/preseq . && rm -rf preseq_2.0.3
 
 # Install UCSC tools (Kent utils) for ATAQC
 RUN wget http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/bigWigAverageOverBed && chmod +x bigWigAverageOverBed
