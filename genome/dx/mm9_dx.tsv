@@ -3,4 +3,11 @@ bowtie2_idx_tar	dx://file-FB7qJF00F1vQQX4x15Bz61PP
 bwa_idx_tar	dx://file-FB7qJ9Q0q2JY8JfQ6vyBg89b
 chrsz	dx://file-FB7qF4Q0vQx32G1G6x6pFv2K
 blacklist	dx://file-FB7q91Q0p3q157j8JZQ27bQ0
-gensz	hs
+gensz	mm
+tss_enrich	dx://file-FG29Yz80v8zF5fk34Z8JyVGg
+dnase	dx://file-FG29YzQ0Yfzf0Q5V0jpk0kY7
+prom	dx://file-FG29Z080V23Bg3bg4jQK7qfJ
+enh	dx://file-FG29Yy003jq60Q5V0jpk0kVk
+reg2map	dx://file-FG29Yz80Z5KKGz08GBZkJbZ1
+reg2map_bed	dx://file-FG29Z2j02qgx1B2k4k8zB0FP
+roadmap_meta	dx://file-FG29YzQ02gF264p64jpgJXf5

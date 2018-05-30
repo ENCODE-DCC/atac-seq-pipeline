@@ -4,3 +4,10 @@ bwa_idx_tar	/mnt/data/pipeline_genome_data/hg19/bwa_index/male.hg19.fa.tar
 chrsz	/mnt/data/pipeline_genome_data/hg19/hg19.chrom.sizes
 blacklist	/mnt/data/pipeline_genome_data/hg19/wgEncodeDacMapabilityConsensusExcludable.bed.gz
 gensz	hs
+tss_enrich	/mnt/data/pipeline_genome_data/hg19/ataqc/hg19_gencode_tss_unique.bed.gz
+dnase	/mnt/data/pipeline_genome_data/hg19/ataqc/reg2map_honeybadger2_dnase_all_p10_ucsc.bed.gz
+prom	/mnt/data/pipeline_genome_data/hg19/ataqc/reg2map_honeybadger2_dnase_prom_p2.bed.gz
+enh	/mnt/data/pipeline_genome_data/hg19/ataqc/reg2map_honeybadger2_dnase_enh_p2.bed.gz
+reg2map	/mnt/data/pipeline_genome_data/hg19/ataqc/dnase_avgs_reg2map_p10_merged_named.pvals.gz
+reg2map_bed	/mnt/data/pipeline_genome_data/hg19/ataqc/null
+roadmap_meta	/mnt/data/pipeline_genome_data/hg19/ataqc/eid_to_mnemonic.txt

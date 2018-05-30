@@ -33,7 +33,6 @@
     "atac.trim_adapter.auto_detect_adapter" : true,
 
     "atac.smooth_win" : 73,
-    "atac.enable_idr" : true,
     "atac.idr_thresh" : 0.05,
 
     "atac.qc_report.name" : "ENCSR356KRQ (1/400 subsampled)",

@@ -71,6 +71,7 @@ pipeline {
                         steps{
                                 sh "cd test/test_task && git clone https://github.com/ENCODE-DCC/atac-seq-pipeline-test-data"
                                 sh """cd test/test_task
+                                      ./download_hg38_fasta_for_test_ataqc.sh
                                       ./test.sh test_bam2ta.wdl test_bam2ta.json $TAG
                                       python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'match_overall']))" < test_bam2ta.result.json
                                       ./test.sh test_bowtie2.wdl test_bowtie2.json $TAG
@@ -93,6 +94,8 @@ pipeline {
                                       python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'match_overall']))" < test_trim_adapter.result.json
                                       ./test.sh test_xcor.wdl test_xcor.json $TAG
                                       python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'match_overall']))" < test_xcor.result.json
+                                      ./test.sh test_ataqc.wdl test_ataqc.json $TAG
+                                      python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'match_overall']))" < test_ataqc.result.json
                                    """
                         }
                 }

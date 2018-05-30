@@ -3,3 +3,6 @@ atac-seq-pipeline-test-data
 *.metadata.json
 *wf_opt.json
 cromwell*.jar
+*.fasta
+*.fa
+*.gz
