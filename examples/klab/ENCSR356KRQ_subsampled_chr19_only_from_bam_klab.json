@@ -1,6 +1,6 @@
 {
     "atac.pipeline_type" : "atac",
-    "atac.genome_tsv" : "/mnt/data/pipeline_genome_data/hg38_chr19_chrM/hg38_chr19_chrM_local.tsv",
+    "atac.genome_tsv" : "/mnt/data/pipeline_genome_data/hg38_chr19_chrM/hg38_chr19_chrM_klab.tsv",
     "atac.bams" : [
         "test/test_task/atac-seq-pipeline-test-data/input/pe/bams/rep1/ENCFF341MYG.subsampled.400.trim.merged.bam"
     ],

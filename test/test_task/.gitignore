@@ -2,3 +2,6 @@ atac-seq-pipeline-test-data
 *.result.json
 *.metadata.json
 *wf_opt.json
+*.fasta
+*.fa
+*.gz

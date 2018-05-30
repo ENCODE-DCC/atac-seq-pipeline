@@ -4,3 +4,10 @@ bwa_idx_tar	/ifs/scratch/leepc12/pipeline_genome_data/hg38/bwa_index/GRCh38_no_a
 chrsz	/ifs/scratch/leepc12/pipeline_genome_data/hg38/hg38.chrom.sizes
 blacklist	/ifs/scratch/leepc12/pipeline_genome_data/hg38/hg38.blacklist.bed.gz
 gensz	hs
+tss_enrich	/ifs/scratch/leepc12/pipeline_genome_data/hg38/ataqc/hg38_gencode_tss_unique.bed.gz
+dnase	/ifs/scratch/leepc12/pipeline_genome_data/hg38/ataqc/reg2map_honeybadger2_dnase_all_p10_ucsc.hg19_to_hg38.bed.gz
+prom	/ifs/scratch/leepc12/pipeline_genome_data/hg38/ataqc/reg2map_honeybadger2_dnase_prom_p2.hg19_to_hg38.bed.gz
+enh	/ifs/scratch/leepc12/pipeline_genome_data/hg38/ataqc/reg2map_honeybadger2_dnase_enh_p2.hg19_to_hg38.bed.gz
+reg2map	/ifs/scratch/leepc12/pipeline_genome_data/hg38/ataqc/hg38_dnase_avg_fseq_signal_formatted.txt.gz
+reg2map_bed	/ifs/scratch/leepc12/pipeline_genome_data/hg38/ataqc/hg38_celltype_compare_subsample.bed.gz
+roadmap_meta	/ifs/scratch/leepc12/pipeline_genome_data/hg38/ataqc/hg38_dnase_avg_fseq_signal_metadata.txt

@@ -65,6 +65,7 @@ workflow atac {
 									# overlap and idr will also be disabled
 	Boolean disable_xcor = false 	# disable cross-correlation analysis
 	Int multimapping = 0			# for multimapping reads
+	Boolean disable_ataqc = false
 
 	### task-specific variables but defined in workflow level (limit of WDL)
 	## optional for MACS2 
@@ -91,6 +92,17 @@ workflow atac {
 	File blacklist = read_genome_tsv.genome['blacklist']
 	File chrsz = read_genome_tsv.genome['chrsz']
 	String gensz = read_genome_tsv.genome['gensz']
+	File ref_fa = read_genome_tsv.genome['ref_fa']
+	# genome data for ATAQC
+	File tss_enrich = read_genome_tsv.genome['tss_enrich']
+	File dnase = read_genome_tsv.genome['dnase']
+	File prom = read_genome_tsv.genome['prom']
+	File enh = read_genome_tsv.genome['enh']
+	File reg2map = read_genome_tsv.genome['reg2map']
+	File reg2map_bed = read_genome_tsv.genome['reg2map_bed']
+	File roadmap_meta = read_genome_tsv.genome['roadmap_meta']
+	Boolean has_ataqc_genome_data = basename(tss_enrich)!='null'
+
     #@call dummy { input: f = blacklist } # dummy due to dxWDL 60.1 bug
 
 	### pipeline starts here
@@ -448,6 +460,42 @@ workflow atac {
 		idr_reproducibility_qc = reproducibility_idr.reproducibility_qc,
 		overlap_reproducibility_qc = reproducibility_overlap.reproducibility_qc,
 	}
+
+	# ATAQC is available only when pipeline starts from fastqs, take fastqs[] as base array for ataqc
+	Boolean can_do_ataqc = has_ataqc_genome_data && !disable_ataqc && !align_only && !true_rep_only
+	Array[Array[Array[File]]] fastqs_ataqc = if !can_do_ataqc then [] else fastqs_
+	# not actually a double array but due to dxWDL limit
+	Array[Array[File]] idr_peaks_ataqc = if !enable_idr then [[],[],[],[]] else transpose([idr_pr.bfilt_idr_peak])
+
+	scatter( i in range(length(fastqs_ataqc)) ) {
+		call ataqc { input : 
+			paired_end = paired_end,
+			read_len_log = bowtie2.read_len_log[i],
+			flagstat_log = bowtie2.flagstat_qc[i],
+			bowtie2_log = bowtie2.align_log[i],
+			pbc_log = filter.pbc_qc[i],
+			dup_log = filter.dup_qc[i],
+			bam = bams_[i],
+			nodup_flagstat_log = filter.flagstat_qc[i],
+			mito_dup_log = filter.mito_dup_log[i],
+			nodup_bam = nodup_bams_[i],
+			ta = tas_[i],
+			peak = idr_peaks_ataqc[i], #if enable_idr then idr_pr.bfilt_idr_peak[i] else reproducibility_overlap.optimal_peak,
+			idr_peak = reproducibility_idr.optimal_peak, #idr_peaks_ataqc[i],
+			overlap_peak= select_first([reproducibility_overlap.optimal_peak]), #overlap_peaks_ataqc[i],
+			bigwig = macs2.sig_pval[i],
+			ref_fa = ref_fa,
+			chrsz = chrsz,
+			tss_enrich = tss_enrich,
+			blacklist = blacklist,
+			dnase = dnase,
+			prom = prom,
+			enh = enh,
+			reg2map_bed = reg2map_bed,
+			reg2map = reg2map,
+			roadmap_meta = roadmap_meta,
+		}
+	}	
 }
 
 #@task dummy {
@@ -530,6 +578,7 @@ task bowtie2 {
 		File bai = glob("*.bai")[0]
 		File align_log = glob("*.align.log")[0]
 		File flagstat_qc = glob("*.flagstat.qc")[0]
+		File read_len_log = glob("*.read_length.txt")[0] # read_len
 	}
 	runtime {
 		#@docker : "quay.io/encode-dcc/atac-seq-pipeline:v1"
@@ -569,7 +618,7 @@ task filter {
 			${if select_first([no_dup_removal,false]) then "--no-dup-removal" else ""} \
 			${"--nth " + cpu}
 		# ugly part to deal with optional outputs with Google JES backend
-		${if select_first([no_dup_removal,false]) then "touch null.dup.qc null.pbc.qc; " else ""}
+		${if select_first([no_dup_removal,false]) then "touch null.dup.qc null.pbc.qc null.mito_dup.txt; " else ""}
 		touch null
 	}
 	output {
@@ -578,6 +627,7 @@ task filter {
 		File flagstat_qc = glob("*.flagstat.qc")[0]
 		File dup_qc = if select_first([no_dup_removal,false]) then glob("null")[0] else glob("*.dup.qc")[0]
 		File pbc_qc = if select_first([no_dup_removal,false]) then glob("null")[0] else glob("*.pbc.qc")[0]
+		File mito_dup_log = if select_first([no_dup_removal,false]) then glob("null")[0] else glob("*.mito_dup.txt")[0] # mito_dups, fract_dups_from_mito
 	}
 	runtime {
 		#@docker : "quay.io/encode-dcc/atac-seq-pipeline:v1"
@@ -750,7 +800,7 @@ task macs2 {
 	runtime {
 		#@docker : "quay.io/encode-dcc/atac-seq-pipeline:v1"
 		cpu : 1
-		memory : "${select_first([mem_mb,'16000'])} MB"
+		memory : "${select_first([mem_mb,'20000'])} MB"
 		time : select_first([time_hr,24])
 		disks : select_first([disks,"local-disk 100 HDD"])
 	}
@@ -840,7 +890,7 @@ task overlap {
 		memory : "4000 MB"
 		time : 1
 		disks : "local-disk 50 HDD"
-	}	
+	}
 }
 
 task reproducibility {
@@ -861,6 +911,8 @@ task reproducibility {
 			--prefix ${prefix}
 	}
 	output {
+		File optimal_peak = glob("optimal_peak.gz")[0]
+		File conservative_peak = glob("conservative_peak.gz")[0]
 		File reproducibility_qc = glob("*reproducibility.qc")[0]
 	}
 	runtime {
@@ -869,6 +921,104 @@ task reproducibility {
 		memory : "4000 MB"
 		time : 1
 		disks : "local-disk 50 HDD"
+	}
+}
+
+task ataqc { # generate ATAQC report
+	Boolean paired_end
+	File read_len_log
+	File flagstat_log
+	File bowtie2_log
+	File bam
+	File nodup_flagstat_log
+	File mito_dup_log
+	File dup_log
+	File pbc_log
+	File nodup_bam
+	File ta
+	Array[File] peak # not an array but to make it optional
+	File? idr_peak 
+	File overlap_peak
+	File bigwig
+	# from genome database
+	File ref_fa
+	File chrsz
+	File tss_enrich
+	File blacklist
+	File dnase
+	File prom
+	File enh
+	File reg2map_bed
+	File reg2map
+	File roadmap_meta
+	# resource
+	Int? mem_mb
+	Int? time_hr
+	String? disks
+
+	command {
+		export PICARDROOT=$(dirname $(which picard.jar))
+		export _JAVA_OPTIONS="-Xms256M -Xmx${select_first([mem_mb,'16000'])}M -XX:ParallelGCThreads=1"
+
+		python $(which encode_ataqc.py) \
+			${if paired_end then "--paired-end" else ""} \
+			--read-len-log ${read_len_log} \
+			--flagstat-log ${flagstat_log} \
+			--bowtie2-log ${bowtie2_log} \
+			--bam ${bam} \
+			--nodup-flagstat-log ${nodup_flagstat_log} \
+			--mito-dup-log ${mito_dup_log} \
+			--dup-log ${dup_log} \
+			--pbc-log ${pbc_log} \
+			--nodup-bam ${nodup_bam} \
+			--ta ${ta} \
+			--bigwig ${bigwig} \
+			${if length(peak)>0 then "--peak " + peak[0] else ""} \
+			${"--idr-peak " + idr_peak} \
+			--overlap-peak ${overlap_peak} \
+			--ref-fa ${ref_fa} \
+			--blacklist ${blacklist} \
+			--chrsz ${chrsz} \
+			--dnase ${dnase} \
+			--tss-enrich ${tss_enrich} \
+			--prom ${prom} \
+			--enh ${enh} \
+			--reg2map-bed ${reg2map_bed} \
+			--reg2map ${reg2map} \
+			--roadmap-meta ${roadmap_meta}
+
+		# ugly part to deal with optional outputs with Google backend
+		#${if defined(tss_enrich) then "" else "touch null_tss-enrich.png null_large_tss-enrich.png"}
+		#${if defined(idr_peak) then "" else "touch null.idr_peak_summ.tsv null.idr_peak_dist.png"}
+		#${if defined(overlap_peak) then "" else "touch null.naive_peak_summ.tsv null.naive_peak_dist.png"}
+		#touch null 
+	}
+	output {
+	    #File raw_peak_summ = glob("*.raw_peak_summ.tsv")[0]
+	    #File raw_peak_dist = glob("*.raw_peak_dist.png")[0]
+	    #File naive_peak_summ =  if defined(overlap_peak) then glob("*.naive_peak_summ.tsv")[0] else glob("null")[0]
+	    #File naive_peak_dist = if defined(overlap_peak) then glob("*.naive_peak_dist.png")[0] else glob("null")[0]
+	    #File idr_peak_summ = if defined(idr_peak) then glob("*.idr_peak_summ.tsv")[0] else glob("null")[0]
+	    #File idr_peak_dist = if defined(idr_peak) then glob("*.idr_peak_dist.png")[0] else glob("null")[0]
+		#File preseq_data = glob("*.preseq.data")[0]
+		#File preseq_log = glob("*.preseq.log")[0]
+		#File gc_plot = glob("*_gcPlot.pdf")[0]
+		#File gc_out = glob("*_gc.txt")[0]
+		#File gc_summary = glob("*_gcSummary.txt")[0]
+		# optional
+		#File tss_plot_file = if defined(tss_enrich) then glob("*_tss-enrich.png")[0] else glob("null")[0]
+		#File tss_plot_large_file = if defined(tss_enrich) then glob("*_large_tss-enrich.png")[0] else glob("null")[0]
+		#File roadmap_compare_plot = glob("*.signal")[0]
+		#File tar = glob("*.tar.gz")[0]
+		File html = glob("*_qc.html")[0]
+		File txt = glob("*_qc.txt")[0]
+	}
+	runtime {
+		#@docker : "quay.io/encode-dcc/atac-seq-pipeline:v1"
+		cpu : 1
+		memory : "${select_first([mem_mb,'16000'])} MB"
+		time : select_first([time_hr,24])
+		disks : select_first([disks,"local-disk 100 HDD"])
 	}
 }
 

@@ -37,7 +37,7 @@ r-spp ==1.13
 pyfaidx ==0.4.7.1
 
 cutadapt ==1.9.1
-preseq ==2.0.2 
+preseq ==2.0.3
 trim-galore ==0.4.1 # for old trimmer
 python-levenshtein # for old trimmer (trimAdapter.py)
 
