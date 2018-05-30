@@ -215,8 +215,9 @@ def run_shell_cmd(cmd):
             if line=='' and p.poll() is not None:
                 break
             # log.debug('PID={}: {}'.format(pid,line.strip('\n')))
-            print('PID={}: {}'.format(pid,line.strip('\n')))
-            ret += line
+            if line:
+                print('PID={}: {}'.format(pid,line.strip('\n')))
+                ret += line
         p.communicate() # wait here
         if p.returncode > 0:
             raise subprocess.CalledProcessError(

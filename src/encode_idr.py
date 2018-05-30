@@ -8,6 +8,7 @@ import os
 import argparse
 import math
 from encode_common import *
+from encode_common_genomic import peak_to_bigbed
 from encode_blacklist_filter import blacklist_filter
 from encode_frip import frip, frip_shifted
 
@@ -133,12 +134,12 @@ def main():
         args.peak1, args.peak2, args.peak_pooled, args.peak_type,
         args.idr_thresh, args.idr_rank, args.out_dir)
 
-    if args.blacklist:
-        log.info('Blacklist-filtering peaks...')
-        bfilt_idr_peak = blacklist_filter(
-                idr_peak, args.blacklist, False, args.out_dir)
-    else:        
-        bfilt_idr_peak = idr_peak
+    log.info('Blacklist-filtering peaks...')
+    bfilt_idr_peak = blacklist_filter(
+            idr_peak, args.blacklist, False, args.out_dir)
+
+    log.info('Converting peak to bigbed...')
+    peak_to_bigbed(bfilt_idr_peak, args.peak_type, args.chrsz, args.out_dir)
 
     if args.ta: # if TAG-ALIGN is given
         if args.fraglen: # chip-seq

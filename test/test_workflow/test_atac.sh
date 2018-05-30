@@ -2,7 +2,6 @@
 set -e # exit on error
 
 CROMWELL_SVR_URL=35.185.235.240:8000
-DOCKER_IMAGE=quay.io/encode-dcc/atac-seq-pipeline:latest
 WDL=../../atac.wdl
 
 if [ $# -lt 1 ]; then
@@ -11,6 +10,8 @@ if [ $# -lt 1 ]; then
 fi
 if [ $# -gt 1 ]; then
   DOCKER_IMAGE=$2
+else
+  DOCKER_IMAGE=quay.io/encode-dcc/atac-seq-pipeline:v1  
 fi
 INPUT=$1
 PREFIX=$(basename $INPUT .json)
@@ -61,7 +62,7 @@ while true; do
     echo "Workflow has been done successfully."
     break
   elif [ $WF_STATUS == Failed ]; then
-    echo "Workflow has failed. Check out $PREFIX.status.json."
+    echo "Workflow has failed. Check out $PREFIX.metadata.json."
     curl -X GET --header "Accept: application/json" -v "$CROMWELL_SVR_URL/api/workflows/v1/$WF_ID/metadata" > $PREFIX.metadata.json
     exit 2
   fi

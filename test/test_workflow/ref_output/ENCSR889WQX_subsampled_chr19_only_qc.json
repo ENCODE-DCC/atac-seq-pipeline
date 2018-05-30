@@ -1,5 +1,5 @@
 {
-    "name": "ENCSR889WQX (subsampled 1/400 reads)", 
+    "name": "ENCSR889WQX", 
     "desc": "ATAC-seq on Mus musculus C57BL/6 frontal cortex adult", 
     "flagstat_qc": [
         {
@@ -180,48 +180,48 @@
             "FRiP": 0.997775659358
         }, 
         "rep2-pr1": {
-            "FRiP": 0.997425334706
+            "FRiP": 0.998455200824
         }, 
         "rep1-pr2": {
-            "FRiP": 0.997457896409
+            "FRiP": 0.998728948205
         }, 
         "rep2-pr2": {
-            "FRiP": 0.999484934329
+            "FRiP": 0.998454802987
         }, 
         "pooled": {
             "FRiP": 0.993883792049
         }, 
         "ppr1": {
-            "FRiP": 0.998435499929
+            "FRiP": 0.998719954487
         }, 
         "ppr2": {
-            "FRiP": 0.996301564723
+            "FRiP": 0.997155049787
         }
     }, 
     "overlap_reproducibility_qc": {
         "Nt": 6782, 
-        "N1": 4064, 
-        "N2": 4918, 
-        "Np": 6700, 
+        "N1": 4066, 
+        "N2": 4786, 
+        "Np": 6499, 
         "N_opt": 6782, 
         "N_consv": 6782, 
         "opt_set": "rep1-rep2", 
         "consv_set": "rep1-rep2", 
-        "rescue_ratio": 1.01223880597, 
-        "self_consistency_ratio": 1.21013779528, 
+        "rescue_ratio": 1.04354516079, 
+        "self_consistency_ratio": 1.17707820954, 
         "reproducibility": "pass"
     }, 
     "idr_reproducibility_qc": {
         "Nt": 6, 
         "N1": 1, 
-        "N2": 1, 
-        "Np": 3, 
+        "N2": 2, 
+        "Np": 5, 
         "N_opt": 6, 
         "N_consv": 6, 
         "opt_set": "rep1-rep2", 
         "consv_set": "rep1-rep2", 
-        "rescue_ratio": 2.0, 
-        "self_consistency_ratio": 1.0, 
+        "rescue_ratio": 1.2, 
+        "self_consistency_ratio": 2.0, 
         "reproducibility": "pass"
     }, 
     "overlap_frip_qc": {
@@ -229,13 +229,13 @@
             "FRiP": 0.576772633525
         }, 
         "rep1-pr": {
-            "FRiP": 0.814426437877
+            "FRiP": 0.814108674929
         }, 
         "rep2-pr": {
-            "FRiP": 0.751770310287
+            "FRiP": 0.734775331531
         }, 
         "ppr": {
-            "FRiP": 0.570087475997
+            "FRiP": 0.552592276509
         }
     }, 
     "idr_frip_qc": {
@@ -246,10 +246,10 @@
             "FRiP": 0.013981569749
         }, 
         "rep2-pr": {
-            "FRiP": 0.00875498905626
+            "FRiP": 0.00952748809064
         }, 
         "ppr": {
-            "FRiP": 0.0118768224166
+            "FRiP": 0.0131569589645
         }
     }
 }

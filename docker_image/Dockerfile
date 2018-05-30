@@ -137,6 +137,9 @@ RUN git clone --branch v2.0.3 --single-branch --recursive https://github.com/smi
 # Install UCSC tools (Kent utils) for ATAQC
 RUN wget http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/bigWigAverageOverBed && chmod +x bigWigAverageOverBed
 
+# Install UCSC tools (Kent utils) latest for peak2bigbed conversion
+RUN wget http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/bedToBigBed && chmod +x bedToBigBed
+
 # Get ENCODE atac-seq-pipeline container repository
 # This COPY assumes the build context is the root of the atac-seq-pipeline repo
 # and it gets whatever is checked out plus local modifications

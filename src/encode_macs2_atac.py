@@ -7,6 +7,7 @@ import sys
 import os
 import argparse
 from encode_common import *
+from encode_common_genomic import peak_to_bigbed
 from encode_blacklist_filter import blacklist_filter
 from encode_frip import frip
 
@@ -187,12 +188,12 @@ def main():
     log.info('Checking if output is empty...')
     assert_file_not_empty(npeak)
 
-    if args.blacklist:
-        log.info('Blacklist-filtering peaks...')
-        bfilt_npeak = blacklist_filter(
-                npeak, args.blacklist, False, args.out_dir)
-    else:
-        bfilt_npeak = npeak
+    log.info('Blacklist-filtering peaks...')
+    bfilt_npeak = blacklist_filter(
+            npeak, args.blacklist, False, args.out_dir)
+
+    log.info('Converting peak to bigbed...')
+    peak_to_bigbed(bfilt_npeak, 'narrowPeak', args.chrsz, args.out_dir)
 
     if args.ta: # if TAG-ALIGN is given
         log.info('FRiP without fragment length...')

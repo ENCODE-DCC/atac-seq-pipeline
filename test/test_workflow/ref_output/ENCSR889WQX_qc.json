@@ -149,79 +149,79 @@
         {
             "num_reads": 25000000, 
             "est_frag_len": 0, 
-            "corr_est_frag_len": 0.377409277196743, 
+            "corr_est_frag_len": 0.377266901214234, 
             "phantom_peak": 45, 
-            "corr_phantom_peak": 0.3482922, 
+            "corr_phantom_peak": 0.3481357, 
             "argmin_corr": 1500, 
-            "min_corr": 0.280595, 
-            "NSC": 1.345032, 
-            "RSC": 1.430109
+            "min_corr": 0.2804898, 
+            "NSC": 1.345029, 
+            "RSC": 1.430643
         }, 
         {
             "num_reads": 25000000, 
             "est_frag_len": 0, 
-            "corr_est_frag_len": 0.380862108266423, 
+            "corr_est_frag_len": 0.380719933195802, 
             "phantom_peak": 45, 
-            "corr_phantom_peak": 0.3506794, 
+            "corr_phantom_peak": 0.350552, 
             "argmin_corr": 1500, 
-            "min_corr": 0.2865996, 
-            "NSC": 1.3289, 
-            "RSC": 1.471016
+            "min_corr": 0.2865114, 
+            "NSC": 1.328812, 
+            "RSC": 1.471074
         }
     ], 
     "frip_macs2_qc": {
         "rep1": {
-            "FRiP": 0.27546882816
+            "FRiP": 0.275468961911
         }, 
         "rep2": {
             "FRiP": 0.279349387412
         }, 
         "rep1-pr1": {
-            "FRiP": 0.276924064617
+            "FRiP": 0.2780963858
         }, 
         "rep2-pr1": {
-            "FRiP": 0.279242825489
+            "FRiP": 0.280574979843
         }, 
         "rep1-pr2": {
-            "FRiP": 0.280832314602
+            "FRiP": 0.273888000193
         }, 
         "rep2-pr2": {
-            "FRiP": 0.280544914546
+            "FRiP": 0.279871239297
         }, 
         "pooled": {
             "FRiP": 0.285776581603
         }, 
         "ppr1": {
-            "FRiP": 0.275711175812
+            "FRiP": 0.276928429095
         }, 
         "ppr2": {
-            "FRiP": 0.279243097417
+            "FRiP": 0.273568113301
         }
     }, 
     "overlap_reproducibility_qc": {
         "Nt": 248249, 
-        "N1": 214523, 
-        "N2": 230959, 
-        "Np": 254672, 
-        "N_opt": 254672, 
+        "N1": 213469, 
+        "N2": 231341, 
+        "Np": 254200, 
+        "N_opt": 254200, 
         "N_consv": 248249, 
         "opt_set": "ppr", 
         "consv_set": "rep1-rep2", 
-        "rescue_ratio": 1.025873216, 
-        "self_consistency_ratio": 1.07661649334, 
+        "rescue_ratio": 1.02397189918, 
+        "self_consistency_ratio": 1.08372175819, 
         "reproducibility": "pass"
     }, 
     "idr_reproducibility_qc": {
         "Nt": 122878, 
-        "N1": 100730, 
-        "N2": 102199, 
-        "Np": 134231, 
-        "N_opt": 134231, 
+        "N1": 100429, 
+        "N2": 101843, 
+        "Np": 135019, 
+        "N_opt": 135019, 
         "N_consv": 122878, 
         "opt_set": "ppr", 
         "consv_set": "rep1-rep2", 
-        "rescue_ratio": 1.0923924543, 
-        "self_consistency_ratio": 1.01458354016, 
+        "rescue_ratio": 1.0988053191, 
+        "self_consistency_ratio": 1.01407959852, 
         "reproducibility": "pass"
     }, 
     "overlap_frip_qc": {
@@ -229,13 +229,13 @@
             "FRiP": 0.259934108468
         }, 
         "rep1-pr": {
-            "FRiP": 0.240704155086
+            "FRiP": 0.240030689001
         }, 
         "rep2-pr": {
-            "FRiP": 0.246878787716
+            "FRiP": 0.247021224881
         }, 
         "ppr": {
-            "FRiP": 0.263962118815
+            "FRiP": 0.263751633968
         }
     }, 
     "idr_frip_qc": {
@@ -243,13 +243,13 @@
             "FRiP": 0.169180239225
         }, 
         "rep1-pr": {
-            "FRiP": 0.153136611196
+            "FRiP": 0.152927559512
         }, 
         "rep2-pr": {
-            "FRiP": 0.147863074325
+            "FRiP": 0.147487023555
         }, 
         "ppr": {
-            "FRiP": 0.179083358101
+            "FRiP": 0.180044734176
         }
     }
 }

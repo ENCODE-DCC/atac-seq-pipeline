@@ -12,9 +12,14 @@ INPUT=$2
 if [ $# -gt 2 ]; then
   DOCKER_IMAGE=$3
 else
-  DOCKER_IMAGE=quay.io/encode-dcc/atac-seq-pipeline:latest
+  DOCKER_IMAGE=quay.io/encode-dcc/atac-seq-pipeline:v1
 fi
-CROMWELL_JAR=$(which cromwell-31.jar)
+if [ -f "cromwell-32.jar" ]; then
+  echo "Skip downloading cromwell."
+else
+  wget -N -c https://github.com/broadinstitute/cromwell/releases/download/32/cromwell-32.jar
+fi
+CROMWELL_JAR=cromwell-32.jar
 BACKEND_CONF=../../backends/backend.conf
 BACKEND=Local
 PREFIX=$(basename ${WDL} .wdl)

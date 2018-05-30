@@ -7,6 +7,7 @@ import sys
 import os
 import argparse
 from encode_common import *
+from encode_common_genomic import peak_to_bigbed
 from encode_blacklist_filter import blacklist_filter
 from encode_frip import frip, frip_shifted
 
@@ -107,12 +108,12 @@ def main():
         args.prefix, args.peak1, args.peak2, args.peak_pooled, 
         args.peak_type, args.nonamecheck, args.out_dir)
 
-    if args.blacklist:    
-        log.info('Blacklist-filtering peaks...')
-        bfilt_overlap_peak = blacklist_filter(
-                overlap_peak, args.blacklist, False, args.out_dir)
-    else:
-        bfilt_overlap_peak = overlap_peak        
+    log.info('Blacklist-filtering peaks...')
+    bfilt_overlap_peak = blacklist_filter(
+            overlap_peak, args.blacklist, False, args.out_dir)
+
+    log.info('Converting peak to bigbed...')
+    peak_to_bigbed(bfilt_overlap_peak, args.peak_type, args.chrsz, args.out_dir)
 
     if args.ta: # if TAG-ALIGN is given
         if args.fraglen: # chip-seq
