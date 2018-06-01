@@ -104,11 +104,11 @@ pipeline {
                     agent {label 'master-builder'}
                     when {not {branch 'master'}}
                     steps{
-                        echo "running subsampled/chr19_only/paired_end workflow level tests when there is an event on master branch"
-                        sh """cd test/test_workflow
-                              ./test_atac.sh ENCSR356KRQ_subsampled_chr19_only.json $TAG
-                              python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'outputs'][u'atac.qc_report.qc_json_match']))" < ENCSR356KRQ_subsampled_chr19_only.result.json
-                           """
+                        //echo "running subsampled/chr19_only/paired_end workflow level tests when there is an event on master branch"
+                        //sh """cd test/test_workflow
+                        //      ./test_atac.sh ENCSR356KRQ_subsampled_chr19_only.json $TAG
+                        //      python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'outputs'][u'atac.qc_report.qc_json_match']))" < ENCSR356KRQ_subsampled_chr19_only.result.json
+                        //   """
                     }
                 }
 
