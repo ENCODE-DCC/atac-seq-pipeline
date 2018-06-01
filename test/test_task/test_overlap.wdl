@@ -23,7 +23,7 @@ workflow test_overlap {
 		peak_type = 'narrowPeak',
 		blacklist = se_blacklist,
 		chrsz = se_chrsz,
-		ta = [se_ta_pooled],
+		ta = se_ta_pooled,
 	}
 
 	call atac.compare_md5sum { input :

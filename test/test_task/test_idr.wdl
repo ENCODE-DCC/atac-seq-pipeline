@@ -27,7 +27,7 @@ workflow test_idr {
 		rank = 'p.value',
 		blacklist = se_blacklist,
 		chrsz = se_chrsz,
-		ta = [se_ta_pooled],
+		ta = se_ta_pooled,
 	}
 
 	call atac.compare_md5sum { input :

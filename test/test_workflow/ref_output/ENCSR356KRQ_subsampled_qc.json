@@ -1,5 +1,5 @@
 {
-    "name": "ENCSR356KRQ", 
+    "name": "ENCSR356KRQ (subsampled 1/400 reads)", 
     "desc": "ATAC-seq on primary keratinocytes in day 0.0 of differentiation", 
     "flagstat_qc": [
         {
