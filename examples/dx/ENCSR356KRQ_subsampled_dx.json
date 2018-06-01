@@ -1,6 +1,6 @@
 {
     "atac.pipeline_type" : "atac",
-    "atac.genome_tsv" : "dx://project-BKpvFg00VBPV975PgJ6Q03v6:pipeline-genome-data/hg38_chr19_only_dx.tsv",
+    "atac.genome_tsv" : "dx://project-BKpvFg00VBPV975PgJ6Q03v6:pipeline-genome-data/hg38_dx.tsv",
     "atac.fastqs_rep1_R1" : [
         "dx://project-BKpvFg00VBPV975PgJ6Q03v6:pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ/fastq_subsampled/rep1/pair1/ENCFF341MYG.subsampled.400.fastq.gz",
         "dx://project-BKpvFg00VBPV975PgJ6Q03v6:pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ/fastq_subsampled/rep1/pair1/ENCFF106QGY.subsampled.400.fastq.gz"
@@ -26,7 +26,6 @@
          "dx://project-BKpvFg00VBPV975PgJ6Q03v6:pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ/fastq_subsampled/rep2/pair2/ENCFF573UXK.subsampled.400.fastq.gz"
     ],
     "atac.paired_end" : true,
-    "atac.align_only" : true,
     "atac.multimapping" : 4,
     "trim_adapter.auto_detect_adapter" : true,
 

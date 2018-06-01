@@ -158,9 +158,8 @@ if [[ $BLACKLIST != "" ]]; then
   echo -e "blacklist\t${DEST_DIR}/$(basename $BLACKLIST)" >> ${TSV};
 else
   # make empty blacklist
-  touch null.blacklist
-  gzip -f null.blacklist
-  echo -e "blacklist\t${DEST_DIR}/null.blacklist.gz" >> ${TSV};
+  touch null
+  echo -e "blacklist\t${DEST_DIR}/null" >> ${TSV};
 fi
 echo -e "chrsz\t${DEST_DIR}/$(basename $CHRSZ)" >> ${TSV}
 echo -e "gensz\t$GENSZ" >> ${TSV}
