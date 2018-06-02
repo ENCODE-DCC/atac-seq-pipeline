@@ -113,7 +113,7 @@ pipeline {
                 }
 
                 stage('Run-Workflow-Level-Full-Tests'){
-                    agent {label 'master-builder'}
+                    agent {label 'slave-w-docker-cromwell-60GB-ebs'}
                     when { branch 'master'}
                     steps {
                         echo "running subsampled/paired_end workflow level tests when there is an event on master branch"
