@@ -272,6 +272,21 @@ def pbc_qc_pe(bam, nth, out_dir):
 # Cromwell/WDL wants to have a empty file 
 # for output { File pbc_qc, File dup_qc }
 
+def make_mito_dup_log(dupmark_bam, out_dir):
+    prefix = os.path.join(out_dir, os.path.basename(strip_ext_bam(dupmark_bam)))    
+    mito_dup_log = '{}.mito_dup.txt'.format(prefix)
+    
+    # Get the mitochondrial reads that are marked duplicates
+    # cmd1 = 'echo -e "mito_dups\\t$(samtools view -f 1024 -c {} chrM)" > {}'.format(dupmark_bam, mito_dup_log)
+    cmd1 = 'printf "mito_dups\\t$(samtools view -f 1024 -c {} chrM)\\n" > {}'.format(dupmark_bam, mito_dup_log)
+    run_shell_cmd(cmd1)
+
+    # cmd2 = 'echo -e "total_dups\\t$(samtools view -f 1024 -c {})" >> {}'.format(dupmark_bam, mito_dup_log)
+    cmd2 = 'printf "total_dups\\t$(samtools view -f 1024 -c {})\\n" >> {}'.format(dupmark_bam, mito_dup_log)
+    run_shell_cmd(cmd2)
+
+    return mito_dup_log
+
 def main():
     # filt_bam - dupmark_bam - nodup_bam
     #          \ dup_qc      \ pbc_qc
@@ -317,7 +332,9 @@ def main():
         else:
             nodup_bam = rm_dup_se(
                         dupmark_bam, args.nth, args.out_dir)
+        samtools_index(dupmark_bam)
         temp_files.append(dupmark_bam)
+        temp_files.append(dupmark_bam+'.bai')
 
     # initialize multithreading
     log.info('Initializing multi-threading...')
@@ -352,8 +369,12 @@ def main():
     # gather
     nodup_bai = ret_val_1.get(BIG_INT)
     nodup_flagstat_qc = ret_val_2.get(BIG_INT)
+
     if not args.no_dup_removal:
         pbc_qc = ret_val_3.get(BIG_INT)
+
+        log.info('Making mito dup log...')
+        mito_dup_log = make_mito_dup_log(dupmark_bam, args.out_dir)
 
     log.info('Closing multi-threading...')
     pool.close()

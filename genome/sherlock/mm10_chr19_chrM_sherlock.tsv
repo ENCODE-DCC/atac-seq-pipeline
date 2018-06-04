@@ -1,0 +1,13 @@
+ref_fa	/scratch/users/leepc12/pipeline_genome_data/mm10_chr19_chrM/mm10_no_alt_analysis_set_ENCODE.chr19_chrM.fasta
+bowtie2_idx_tar	/scratch/users/leepc12/pipeline_genome_data/mm10_chr19_chrM/bowtie2_index/mm10_no_alt_analysis_set_ENCODE.chr19_chrM.fasta.tar
+bwa_idx_tar	/scratch/users/leepc12/pipeline_genome_data/mm10_chr19_chrM/bwa_index/mm10_no_alt_analysis_set_ENCODE.chr19_chrM.fasta.tar
+chrsz	/scratch/users/leepc12/pipeline_genome_data/mm10_chr19_chrM/mm10_chr19_chrM.chrom.sizes
+blacklist	/scratch/users/leepc12/pipeline_genome_data/mm10_chr19_chrM/mm10.blacklist.bed.gz
+gensz	mm
+tss_enrich	/scratch/users/leepc12/pipeline_genome_data/mm10_chr19_chrM/ataqc/null
+dnase	/scratch/users/leepc12/pipeline_genome_data/mm10_chr19_chrM/ataqc/null
+prom	/scratch/users/leepc12/pipeline_genome_data/mm10_chr19_chrM/ataqc/null
+enh	/scratch/users/leepc12/pipeline_genome_data/mm10_chr19_chrM/ataqc/null
+reg2map	/scratch/users/leepc12/pipeline_genome_data/mm10_chr19_chrM/ataqc/null
+reg2map_bed	/scratch/users/leepc12/pipeline_genome_data/mm10_chr19_chrM/ataqc/null
+roadmap_meta	/scratch/users/leepc12/pipeline_genome_data/mm10_chr19_chrM/ataqc/null

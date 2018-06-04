@@ -1,0 +1,13 @@
+ref_fa	gs://encode-pipeline-genome-data/mm9/mm9.fa
+bowtie2_idx_tar	gs://encode-pipeline-genome-data/mm9/bowtie2_index/mm9.fa.tar
+bwa_idx_tar	gs://encode-pipeline-genome-data/mm9/bwa_index/mm9.fa.tar
+chrsz	gs://encode-pipeline-genome-data/mm9/mm9.chrom.sizes
+blacklist	gs://encode-pipeline-genome-data/mm9/mm9-blacklist.bed.gz
+gensz	mm
+tss_enrich	gs://encode-pipeline-genome-data/mm9/ataqc/mm9_gencode_tss_unique.bed.gz
+dnase	gs://encode-pipeline-genome-data/mm9/ataqc/mm9_univ_dhs_ucsc.from_mm10.bed.gz
+prom	gs://encode-pipeline-genome-data/mm9/ataqc/tss_mm9_master.from_mm10.bed.gz
+enh	gs://encode-pipeline-genome-data/mm9/ataqc/mm9_enh_dhs_ucsc.from_mm10.bed.gz
+reg2map	gs://encode-pipeline-genome-data/mm9/ataqc/dnase_avgs_merged_named.fseq.vals.gz
+reg2map_bed	gs://encode-pipeline-genome-data/mm9/ataqc/null
+roadmap_meta	gs://encode-pipeline-genome-data/mm9/ataqc/accession_to_name.txt

@@ -1,0 +1,13 @@
+ref_fa	/ifs/scratch/leepc12/pipeline_genome_data/mm10/mm10_no_alt_analysis_set_ENCODE.fasta
+bowtie2_idx_tar	/ifs/scratch/leepc12/pipeline_genome_data/mm10/bowtie2_index/mm10_no_alt_analysis_set_ENCODE.fasta.tar
+bwa_idx_tar	/ifs/scratch/leepc12/pipeline_genome_data/mm10/bwa_index/mm10_no_alt_analysis_set_ENCODE.fasta.tar
+chrsz	/ifs/scratch/leepc12/pipeline_genome_data/mm10/mm10.chrom.sizes
+blacklist	/ifs/scratch/leepc12/pipeline_genome_data/mm10/mm10.blacklist.bed.gz
+gensz	mm
+tss_enrich	/ifs/scratch/leepc12/pipeline_genome_data/mm10/ataqc/mm10_gencode_tss_unique.bed.gz
+dnase	/ifs/scratch/leepc12/pipeline_genome_data/mm10/ataqc/mm10_univ_dhs_ucsc.bed.gz
+prom	/ifs/scratch/leepc12/pipeline_genome_data/mm10/ataqc/tss_mm10_master.bed.gz
+enh	/ifs/scratch/leepc12/pipeline_genome_data/mm10/ataqc/mm10_enh_dhs_ucsc.bed.gz
+reg2map	/ifs/scratch/leepc12/pipeline_genome_data/mm10/ataqc/mm10_dnase_avg_fseq_signal_formatted.txt.gz
+reg2map_bed	/ifs/scratch/leepc12/pipeline_genome_data/mm10/ataqc/mm10_celltype_compare_subsample.bed.gz
+roadmap_meta	/ifs/scratch/leepc12/pipeline_genome_data/mm10/ataqc/mm10_dnase_avg_fseq_signal_metadata.txt

@@ -15,10 +15,10 @@ echo "=== Installing additional packages for python3 env..."
   CONDA_BIN=$(dirname $(which bedtools))
   cd $CONDA_BIN
 
-  # uninstall IDR 2.0.3 and install the latest one
+  # uninstall IDR 2.0.4 and install the latest one
   conda uninstall idr -y
   rm -rf idr_tmp
-  git clone --branch 2.0.4.1 https://github.com/kundajelab/idr idr_tmp
+  git clone --branch 2.0.4.2 git://github.com/kundajelab/idr idr_tmp  
   cd idr_tmp
   $CONDA_BIN/python setup.py install
   cd $CONDA_BIN
@@ -47,6 +47,10 @@ source activate encode-atac-seq-pipeline
 
   # # install R-spp 1.4
   # Rscript -e "install.packages('phantompeakqualtools-1.2/spp_1.14.tar.gz')"
+
+  # decompress MACS2 python egg
+  cd $CONDA_LIB/python2.7/site-packages
+  unzip -o MACS2-2.1.1.20160309-py2.7-linux-x86_64.egg
   
   # install picard 2.10.6
   wget -N -c https://github.com/broadinstitute/picard/releases/download/2.10.6/picard.jar

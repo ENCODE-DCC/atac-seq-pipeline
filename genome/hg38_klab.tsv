@@ -1,6 +1,0 @@
-ref_fa	/mnt/data/pipeline_genome_data/hg38/GRCh38_no_alt_analysis_set_GCA_000001405.15.fasta.gz
-bowtie2_idx_tar	/mnt/data/pipeline_genome_data/hg38/bowtie2_index/GRCh38_no_alt_analysis_set_GCA_000001405.15.fasta.tar
-bwa_idx_tar	/mnt/data/pipeline_genome_data/hg38/bwa_index/GRCh38_no_alt_analysis_set_GCA_000001405.15.fasta.tar
-chrsz	/mnt/data/pipeline_genome_data/hg38/hg38.chrom.sizes
-blacklist	/mnt/data/pipeline_genome_data/hg38/hg38.blacklist.bed.gz
-gensz	hs

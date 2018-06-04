@@ -1,6 +1,0 @@
-ref_fa	/mnt/data/pipeline_genome_data/mm10/mm10_no_alt_analysis_set_ENCODE.fasta.gz
-bowtie2_idx_tar	/mnt/data/pipeline_genome_data/mm10/bowtie2_index/mm10_no_alt_analysis_set_ENCODE.fasta.tar
-bwa_idx_tar	/mnt/data/pipeline_genome_data/mm10/bwa_index/mm10_no_alt_analysis_set_ENCODE.fasta.tar
-chrsz	/mnt/data/pipeline_genome_data/mm10/mm10.chrom.sizes
-blacklist	/mnt/data/pipeline_genome_data/mm10/mm10.blacklist.bed.gz
-gensz	mm

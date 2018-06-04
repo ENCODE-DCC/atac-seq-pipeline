@@ -1,0 +1,255 @@
+{
+    "name": "ENCSR889WQX", 
+    "desc": "ATAC-seq on Mus musculus C57BL/6 frontal cortex adult", 
+    "flagstat_qc": [
+        {
+            "total": 141785320, 
+            "total_qc_failed": 0, 
+            "duplicates": 0, 
+            "duplicates_qc_failed": 0, 
+            "mapped": 129935211, 
+            "mapped_qc_failed": 0, 
+            "mapped_pct": 91.64, 
+            "paired": 0, 
+            "paired_qc_failed": 0, 
+            "read1": 0, 
+            "read1_qc_failed": 0, 
+            "read2": 0, 
+            "read2_qc_failed": 0, 
+            "paired_properly": 0, 
+            "paired_properly_qc_failed": 0, 
+            "paired_properly_pct": 0.0, 
+            "with_itself": 0, 
+            "with_itself_qc_failed": 0, 
+            "singletons": 0, 
+            "singletons_qc_failed": 0, 
+            "singletons_pct": 0.0, 
+            "diff_chroms": 0, 
+            "diff_chroms_qc_failed": 0
+        }, 
+        {
+            "total": 120504492, 
+            "total_qc_failed": 0, 
+            "duplicates": 0, 
+            "duplicates_qc_failed": 0, 
+            "mapped": 119273855, 
+            "mapped_qc_failed": 0, 
+            "mapped_pct": 98.98, 
+            "paired": 0, 
+            "paired_qc_failed": 0, 
+            "read1": 0, 
+            "read1_qc_failed": 0, 
+            "read2": 0, 
+            "read2_qc_failed": 0, 
+            "paired_properly": 0, 
+            "paired_properly_qc_failed": 0, 
+            "paired_properly_pct": 0.0, 
+            "with_itself": 0, 
+            "with_itself_qc_failed": 0, 
+            "singletons": 0, 
+            "singletons_qc_failed": 0, 
+            "singletons_pct": 0.0, 
+            "diff_chroms": 0, 
+            "diff_chroms_qc_failed": 0
+        }
+    ], 
+    "nodup_flagstat_qc": [
+        {
+            "total": 29937474, 
+            "total_qc_failed": 0, 
+            "duplicates": 0, 
+            "duplicates_qc_failed": 0, 
+            "mapped": 29937474, 
+            "mapped_qc_failed": 0, 
+            "mapped_pct": 100.0, 
+            "paired": 0, 
+            "paired_qc_failed": 0, 
+            "read1": 0, 
+            "read1_qc_failed": 0, 
+            "read2": 0, 
+            "read2_qc_failed": 0, 
+            "paired_properly": 0, 
+            "paired_properly_qc_failed": 0, 
+            "paired_properly_pct": 0.0, 
+            "with_itself": 0, 
+            "with_itself_qc_failed": 0, 
+            "singletons": 0, 
+            "singletons_qc_failed": 0, 
+            "singletons_pct": 0.0, 
+            "diff_chroms": 0, 
+            "diff_chroms_qc_failed": 0
+        }, 
+        {
+            "total": 38460126, 
+            "total_qc_failed": 0, 
+            "duplicates": 0, 
+            "duplicates_qc_failed": 0, 
+            "mapped": 38460126, 
+            "mapped_qc_failed": 0, 
+            "mapped_pct": 100.0, 
+            "paired": 0, 
+            "paired_qc_failed": 0, 
+            "read1": 0, 
+            "read1_qc_failed": 0, 
+            "read2": 0, 
+            "read2_qc_failed": 0, 
+            "paired_properly": 0, 
+            "paired_properly_qc_failed": 0, 
+            "paired_properly_pct": 0.0, 
+            "with_itself": 0, 
+            "with_itself_qc_failed": 0, 
+            "singletons": 0, 
+            "singletons_qc_failed": 0, 
+            "singletons_pct": 0.0, 
+            "diff_chroms": 0, 
+            "diff_chroms_qc_failed": 0
+        }
+    ], 
+    "dup_qc": [
+        {
+            "unpaired_reads": 55527625, 
+            "paired_reads": 0, 
+            "unmapped_reads": 0, 
+            "unpaired_dupes": 25590151, 
+            "paired_dupes": 0, 
+            "paired_opt_dupes": 0, 
+            "dupes_pct": 0.460854
+        }, 
+        {
+            "unpaired_reads": 53570813, 
+            "paired_reads": 0, 
+            "unmapped_reads": 0, 
+            "unpaired_dupes": 15110687, 
+            "paired_dupes": 0, 
+            "paired_opt_dupes": 0, 
+            "dupes_pct": 0.282069
+        }
+    ], 
+    "pbc_qc": [
+        {
+            "total_read_pairs": 38074482, 
+            "distinct_read_pairs": 32217704, 
+            "one_read_pair": 30277193, 
+            "two_read_pair": 1547993, 
+            "NRF": 0.846176, 
+            "PBC1": 0.939769, 
+            "PBC2": 19.558999
+        }, 
+        {
+            "total_read_pairs": 47500660, 
+            "distinct_read_pairs": 40037045, 
+            "one_read_pair": 35874186, 
+            "two_read_pair": 3134862, 
+            "NRF": 0.842873, 
+            "PBC1": 0.896025, 
+            "PBC2": 11.443625
+        }
+    ], 
+    "xcor_score": [
+        {
+            "num_reads": 25000000, 
+            "est_frag_len": 0, 
+            "corr_est_frag_len": 0.377266901214234, 
+            "phantom_peak": 45, 
+            "corr_phantom_peak": 0.3481357, 
+            "argmin_corr": 1500, 
+            "min_corr": 0.2804898, 
+            "NSC": 1.345029, 
+            "RSC": 1.430643
+        }, 
+        {
+            "num_reads": 25000000, 
+            "est_frag_len": 0, 
+            "corr_est_frag_len": 0.380719933195802, 
+            "phantom_peak": 45, 
+            "corr_phantom_peak": 0.350552, 
+            "argmin_corr": 1500, 
+            "min_corr": 0.2865114, 
+            "NSC": 1.328812, 
+            "RSC": 1.471074
+        }
+    ], 
+    "frip_macs2_qc": {
+        "rep1": {
+            "FRiP": 0.275468961911
+        }, 
+        "rep2": {
+            "FRiP": 0.279349387412
+        }, 
+        "rep1-pr1": {
+            "FRiP": 0.2780963858
+        }, 
+        "rep2-pr1": {
+            "FRiP": 0.280574979843
+        }, 
+        "rep1-pr2": {
+            "FRiP": 0.273888000193
+        }, 
+        "rep2-pr2": {
+            "FRiP": 0.279871239297
+        }, 
+        "pooled": {
+            "FRiP": 0.285776581603
+        }, 
+        "ppr1": {
+            "FRiP": 0.276928429095
+        }, 
+        "ppr2": {
+            "FRiP": 0.273568113301
+        }
+    }, 
+    "overlap_reproducibility_qc": {
+        "Nt": 248249, 
+        "N1": 213469, 
+        "N2": 231341, 
+        "Np": 254200, 
+        "N_opt": 254200, 
+        "N_consv": 248249, 
+        "opt_set": "ppr", 
+        "consv_set": "rep1-rep2", 
+        "rescue_ratio": 1.02397189918, 
+        "self_consistency_ratio": 1.08372175819, 
+        "reproducibility": "pass"
+    }, 
+    "idr_reproducibility_qc": {
+        "Nt": 122878, 
+        "N1": 100429, 
+        "N2": 101843, 
+        "Np": 135019, 
+        "N_opt": 135019, 
+        "N_consv": 122878, 
+        "opt_set": "ppr", 
+        "consv_set": "rep1-rep2", 
+        "rescue_ratio": 1.0988053191, 
+        "self_consistency_ratio": 1.01407959852, 
+        "reproducibility": "pass"
+    }, 
+    "overlap_frip_qc": {
+        "rep1-rep2": {
+            "FRiP": 0.259934108468
+        }, 
+        "rep1-pr": {
+            "FRiP": 0.240030689001
+        }, 
+        "rep2-pr": {
+            "FRiP": 0.247021224881
+        }, 
+        "ppr": {
+            "FRiP": 0.263751633968
+        }
+    }, 
+    "idr_frip_qc": {
+        "rep1-rep2": {
+            "FRiP": 0.169180239225
+        }, 
+        "rep1-pr": {
+            "FRiP": 0.152927559512
+        }, 
+        "rep2-pr": {
+            "FRiP": 0.147487023555
+        }, 
+        "ppr": {
+            "FRiP": 0.180044734176
+        }
+    }
+}

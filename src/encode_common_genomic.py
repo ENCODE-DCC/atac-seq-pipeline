@@ -10,7 +10,8 @@ def samtools_index(bam, out_dir=''):
     bai = '{}.bai'.format(bam)
     cmd = 'samtools index {}'.format(bam)
     run_shell_cmd(cmd)
-    if os.path.abspath(out_dir)!=os.getcwd():
+    if os.path.abspath(out_dir)!= \
+        os.path.abspath(os.path.dirname(bam)):
         cmd2 = 'mv {} {}'.format(bai, out_dir)
         return os.path.join(out_dir, os.path.basename(bai))
     else:
@@ -20,7 +21,8 @@ def sambamba_index(bam, nth, out_dir=''):
     bai = '{}.bai'.format(bam)
     cmd = 'sambamba index {} -t {}'.format(bam, nth)
     run_shell_cmd(cmd)
-    if os.path.abspath(out_dir)!=os.getcwd():
+    if os.path.abspath(out_dir)!= \
+        os.path.abspath(os.path.dirname(bam)):
         cmd2 = 'mv {} {}'.format(bai, out_dir)
         return os.path.join(out_dir, os.path.basename(bai))
     else:
@@ -102,14 +104,17 @@ def sambamba_name_sort(bam, nth, out_dir):
 def subsample_ta_se(ta, subsample, non_mito, out_dir):
     prefix = os.path.join(out_dir,
         os.path.basename(strip_ext_ta(ta)))
-    ta_subsampled = '{}.{}.tagAlign.gz'.format(
-        prefix, human_readable_number(subsample))
+    ta_subsampled = '{}.{}{}.tagAlign.gz'.format(
+        prefix,
+        'no_chrM.' if non_mito else '',
+        human_readable_number(subsample))
 
-    cmd = 'zcat -f {} | '
+    # use bash
+    cmd = 'bash -c "zcat -f {} | '
     if non_mito:
-        cmd += 'grep -v "chrM" | '
-    cmd += 'shuf -n {} --random-source={} | '
-    cmd += 'gzip -nc > {}'
+        cmd += 'grep -v chrM | '
+    cmd += 'shuf -n {} --random-source=<(openssl enc -aes-256-ctr -pass pass:$(zcat -f {} | wc -c) -nosalt </dev/zero 2>/dev/null) | '
+    cmd += 'gzip -nc > {}"'
     cmd = cmd.format(
         ta,
         subsample,
@@ -126,12 +131,21 @@ def subsample_ta_pe(ta, subsample, non_mito, r1_only, out_dir):
         'no_chrM.' if non_mito else '',
         'R1.' if r1_only else '',
         human_readable_number(subsample))
+    ta_tmp = '{}.tagAlign.tmp'.format(prefix)
 
-    cmd = 'zcat -f {} | '
+    cmd0 = 'bash -c "zcat -f {} | '
     if non_mito:
-        cmd += 'grep -v "chrM" | '
-    cmd += 'sed \'N;s/\\n/\\t/\' | '
-    cmd += 'shuf -n {} --random-source={} | '
+        cmd0 += 'grep -v chrM | '
+    cmd0 += 'sed \'N;s/\\n/\\t/\' | '
+    cmd0 += 'shuf -n {} --random-source=<(openssl enc -aes-256-ctr -pass pass:$(zcat -f {} | wc -c) -nosalt </dev/zero 2>/dev/null) > {}"'
+    cmd0 = cmd0.format(
+        ta,
+        subsample,
+        ta,
+        ta_tmp)
+    run_shell_cmd(cmd0)
+
+    cmd = 'cat {} | '
     cmd += 'awk \'BEGIN{{OFS="\\t"}} '
     if r1_only:
         cmd += '{{printf "%s\\t%s\\t%s\\t%s\\t%s\\t%s\\n'
@@ -142,12 +156,95 @@ def subsample_ta_pe(ta, subsample, non_mito, r1_only, out_dir):
         cmd += '$1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12}}\' | '
     cmd += 'gzip -nc > {}'
     cmd = cmd.format(
-        ta,
-        subsample,
-        ta,
+        ta_tmp,
         ta_subsampled)
     run_shell_cmd(cmd)
+    rm_f(ta_tmp)    
     return ta_subsampled
+
+def peak_to_bigbed(peak, peak_type, chrsz, out_dir):
+    prefix = os.path.join(out_dir,
+        os.path.basename(strip_ext(peak)))
+    bigbed = '{}.{}.bb'.format(prefix, peak_type)
+    as_file = '{}.as'.format(prefix)
+    chrsz_tmp = '{}.chrsz.tmp'.format(prefix)
+    bigbed_tmp = '{}.bb.tmp'.format(prefix)
+    bigbed_tmp2 = '{}.bb.tmp2'.format(prefix)
+
+    if peak_type.lower()=='narrowpeak' or peak_type.lower()=='regionpeak':
+        as_file_contents='''table narrowPeak
+"BED6+4 Peaks of signal enrichment based on pooled, normalized (interpreted) data."
+(
+    string chrom;        "Reference sequence chromosome or scaffold"
+    uint   chromStart;   "Start position in chromosome"
+    uint   chromEnd;     "End position in chromosome"
+    string name;     "Name given to a region (preferably unique). Use . if no name is assigned"
+    uint   score;        "Indicates how dark the peak will be displayed in the browser (0-1000) "
+    char[1]  strand;     "+ or - or . for unknown"
+    float  signalValue;  "Measurement of average enrichment for the region"
+    float  pValue;       "Statistical significance of signal value (-log10). Set to -1 if not used."
+    float  qValue;       "Statistical significance with multiple-test correction applied (FDR -log10). Set to -1 if not used."
+    int   peak;         "Point-source called for this peak; 0-based offset from chromStart. Set to -1 if no point-source called."
+)
+'''
+        bed_param = '-type=bed6+4 -as={}'.format(as_file)
+    elif peak_type.lower()=='broadpeak':
+        as_file_contents='''table broadPeak
+"BED6+3 Peaks of signal enrichment based on pooled, normalized (interpreted) data."
+(
+    string chrom;        "Reference sequence chromosome or scaffold"
+    uint   chromStart;   "Start position in chromosome"
+    uint   chromEnd;     "End position in chromosome"
+    string name;     "Name given to a region (preferably unique). Use . if no name is assigned."
+    uint   score;        "Indicates how dark the peak will be displayed in the browser (0-1000)"
+    char[1]   strand;     "+ or - or . for unknown"
+    float  signalValue;  "Measurement of average enrichment for the region"
+    float  pValue;       "Statistical significance of signal value (-log10). Set to -1 if not used."
+    float  qValue;       "Statistical significance with multiple-test correction applied (FDR -log10). Set to -1 if not used."
+)
+'''
+        bed_param = '-type=bed6+3 -as={}'.format(as_file)
+    elif peak_type.lower()=='gappedpeak':
+        as_file_contents='''table gappedPeak
+"This format is used to provide called regions of signal enrichment based on pooled, normalized (interpreted) data where the regions may be spliced or incorporate gaps in the genomic sequence. It is a BED12+3 format."
+    (
+    string chrom;   "Reference sequence chromosome or scaffold"
+    uint chromStart;    "Pseudogene alignment start position"
+    uint chromEnd;      "Pseudogene alignment end position"
+    string name;        "Name of pseudogene"
+    uint score;          "Score of pseudogene with gene (0-1000)"
+    char[1] strand;     "+ or - or . for unknown"
+    uint thickStart;    "Start of where display should be thick (start codon)"
+    uint thickEnd;      "End of where display should be thick (stop codon)"
+    uint reserved;      "Always zero for now"
+    int blockCount;     "Number of blocks"
+    int[blockCount] blockSizes; "Comma separated list of block sizes"
+    int[blockCount] chromStarts; "Start positions relative to chromStart"
+    float  signalValue;  "Measurement of average enrichment for the region"
+    float  pValue;       "Statistical significance of signal value (-log10). Set to -1 if not used."
+    float  qValue;       "Statistical significance with multiple-test correction applied (FDR). Set to -1 if not used."
+)
+'''
+        bed_param = '-type=bed12+3 -as={}'.format(as_file)
+    else:
+        raise Exception('Unsupported peak file type {}!'.format(peak_type))
+
+    # create temporary .as file
+    with open(as_file,'w') as fp: fp.write(as_file_contents)
+
+    cmd1 = "cat {} | grep -P 'chr[\dXY]+[ \\t]' > {}".format(chrsz, chrsz_tmp)
+    run_shell_cmd(cmd1)
+    cmd2 = "zcat -f {} | sort -k1,1 -k2,2n > {}".format(peak, bigbed_tmp)
+    run_shell_cmd(cmd2)
+    cmd3 = "bedClip {} {} {}".format(bigbed_tmp, chrsz_tmp, bigbed_tmp2)
+    run_shell_cmd(cmd3)
+    cmd4 = "bedToBigBed {} {} {} {}".format(bed_param, bigbed_tmp2, chrsz_tmp, bigbed)
+    run_shell_cmd(cmd4)
+
+    # remove temporary files
+    rm_f([as_file, chrsz_tmp, bigbed_tmp, bigbed_tmp2])
+               
+    return bigbed
 
 def get_read_length(fastq):
     # code extracted from Daniel Kim's ATAQC module

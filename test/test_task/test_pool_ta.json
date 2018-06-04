@@ -1,0 +1,6 @@
+{
+    "test_pool_ta.se_ta_rep1" : "atac-seq-pipeline-test-data/input/se/tas/rep1/ENCFF439VSY.subsampled.400.trim.merged.nodup.tn5.tagAlign.gz",
+    "test_pool_ta.se_ta_rep2" : "atac-seq-pipeline-test-data/input/se/tas/rep2/ENCFF463QCX.subsampled.400.trim.merged.nodup.tn5.tagAlign.gz",
+
+    "test_pool_ta.ref_se_pooled_ta" : "atac-seq-pipeline-test-data/ref_output/test_pool_ta/ENCFF439VSY.subsampled.400.trim.merged.nodup.tn5.pooled.tagAlign.gz"
+}

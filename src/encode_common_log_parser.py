@@ -188,7 +188,10 @@ def parse_dup_qc(txt):
         unpaired_dupes = m['UNPAIRED_READ_DUPLICATES']
         paired_dupes = m['READ_PAIR_DUPLICATES']
         paired_opt_dupes = m['READ_PAIR_OPTICAL_DUPLICATES']
-        dupes_pct = m['PERCENT_DUPLICATION']
+        if 'PERCENT_DUPLICATION' in m:
+            dupes_pct = m['PERCENT_DUPLICATION']
+        else:
+            dupes_pct = '0'
     else:
         # sambamba markdup
         with open(txt, 'r') as f:

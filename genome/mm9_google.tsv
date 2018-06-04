@@ -1,6 +1,0 @@
-ref_fa	gs://encode-pipeline-genome-data/mm9/mm9.fa
-bowtie2_idx_tar	gs://encode-pipeline-genome-data/mm9/bowtie2_index/mm9.fa.tar
-bwa_idx_tar	gs://encode-pipeline-genome-data/mm9/bwa_index/mm9.fa.tar
-chrsz	gs://encode-pipeline-genome-data/mm9/mm9.chrom.sizes
-blacklist	gs://encode-pipeline-genome-data/mm9/mm9-blacklist.bed.gz
-gensz	hs
