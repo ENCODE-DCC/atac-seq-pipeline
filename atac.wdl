@@ -553,7 +553,7 @@ task trim_adapter { # trim adapters and merge trimmed fastqs
 	}
 	runtime {
 		cpu : select_first([cpu,2])
-		memory : "${select_first([mem_mb,'10000'])} MB"
+		memory : "${select_first([mem_mb,'12000'])} MB"
 		time : select_first([time_hr,24])
 		disks : select_first([disks,"local-disk 100 HDD"])
 	}
@@ -701,7 +701,7 @@ task spr { # make two self pseudo replicates
 	}
 	runtime {
 		cpu : 1
-		memory : "${select_first([mem_mb,'12000'])} MB"
+		memory : "${select_first([mem_mb,'16000'])} MB"
 		time : 1
 		disks : "local-disk 50 HDD"
 	}
@@ -756,7 +756,7 @@ task xcor {
 	}
 	runtime {
 		cpu : select_first([cpu,2])
-		memory : "${select_first([mem_mb,'10000'])} MB"
+		memory : "${select_first([mem_mb,'16000'])} MB"
 		time : select_first([time_hr,6])
 		disks : select_first([disks,"local-disk 100 HDD"])
 	}
@@ -850,7 +850,7 @@ task idr {
 	}
 	runtime {
 		cpu : 1
-		memory : "4000 MB"
+		memory : "8000 MB"
 		time : 1
 		disks : "local-disk 50 HDD"
 	}	
@@ -1009,7 +1009,7 @@ task ataqc { # generate ATAQC report
 	}
 	runtime {
 		cpu : 1
-		memory : "${select_first([mem_mb,'16000'])} MB"
+		memory : "${select_first([mem_mb,'20000'])} MB"
 		time : select_first([time_hr,24])
 		disks : select_first([disks,"local-disk 100 HDD"])
 	}
