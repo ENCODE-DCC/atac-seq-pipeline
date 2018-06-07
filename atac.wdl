@@ -24,6 +24,10 @@ workflow atac {
 	Array[File] fastqs_rep3_R2 = []	# do not define _R2 array if your sample is not paired end
 	Array[File] fastqs_rep4_R1 = [] # do not define if you have <=3 replicates
 	Array[File] fastqs_rep4_R2 = []	# do not define _R2 array if your sample is not paired end
+	Array[File] fastqs_rep5_R1 = [] # do not define if you have <=4 replicates
+	Array[File] fastqs_rep5_R2 = []	# do not define _R2 array if your sample is not paired end
+	Array[File] fastqs_rep6_R1 = [] # do not define if you have <=5 replicates
+	Array[File] fastqs_rep6_R2 = []	# do not define _R2 array if your sample is not paired end
 	Array[String] adapters_rep1_R1 = [] # [merge_id]
 	Array[String] adapters_rep1_R2 = [] 
 	Array[String] adapters_rep2_R1 = []
@@ -32,6 +36,10 @@ workflow atac {
 	Array[String] adapters_rep3_R2 = []
 	Array[String] adapters_rep4_R1 = []
 	Array[String] adapters_rep4_R2 = []
+	Array[String] adapters_rep5_R1 = []
+	Array[String] adapters_rep5_R2 = []
+	Array[String] adapters_rep6_R1 = []
+	Array[String] adapters_rep6_R2 = []
  	## default style fastq/adapter definition
  		# [read_end_id] is for fastq R1 or fastq R2
 	Array[Array[Array[File]]] fastqs = [] 	# [rep_id][merge_id][read_end_id]
@@ -100,26 +108,47 @@ workflow atac {
 	File roadmap_meta = read_genome_tsv.genome['roadmap_meta']
 
 	### pipeline starts here
-	# temporary 2-dim arrays for DNANexus style fastqs and adapters
-	Array[Array[File]] fastqs_rep1 = transpose([fastqs_rep1_R1,fastqs_rep1_R2])
-	Array[Array[File]] fastqs_rep2 = transpose([fastqs_rep2_R1,fastqs_rep2_R2])
-	Array[Array[File]] fastqs_rep3 = transpose([fastqs_rep3_R1,fastqs_rep3_R2])
-	Array[Array[File]] fastqs_rep4 = transpose([fastqs_rep4_R1,fastqs_rep4_R2])
-	Array[Array[String]] adapters_rep1 = transpose([adapters_rep1_R1,adapters_rep1_R2])
-	Array[Array[String]] adapters_rep2 = transpose([adapters_rep2_R1,adapters_rep2_R2])
-	Array[Array[String]] adapters_rep3 = transpose([adapters_rep3_R1,adapters_rep3_R2])
-	Array[Array[String]] adapters_rep4 = transpose([adapters_rep4_R1,adapters_rep4_R2])
+	# temporary 2-dim arrays for DNANexus style fastqs and adapters	
+	Array[Array[File]] fastqs_rep1 = if length(fastqs_rep1_R2)>0 then transpose([fastqs_rep1_R1,fastqs_rep1_R2])
+									else transpose([fastqs_rep1_R1])
+	Array[Array[File]] fastqs_rep2 = if length(fastqs_rep2_R2)>0 then transpose([fastqs_rep2_R1,fastqs_rep2_R2])
+									else transpose([fastqs_rep2_R1])
+	Array[Array[File]] fastqs_rep3 = if length(fastqs_rep3_R2)>0 then transpose([fastqs_rep3_R1,fastqs_rep3_R2])
+									else transpose([fastqs_rep3_R1])
+	Array[Array[File]] fastqs_rep4 = if length(fastqs_rep4_R2)>0 then transpose([fastqs_rep4_R1,fastqs_rep4_R2])
+									else transpose([fastqs_rep4_R1])
+	Array[Array[File]] fastqs_rep5 = if length(fastqs_rep5_R2)>0 then transpose([fastqs_rep5_R1,fastqs_rep5_R2])
+									else transpose([fastqs_rep5_R1])
+	Array[Array[File]] fastqs_rep6 = if length(fastqs_rep6_R2)>0 then transpose([fastqs_rep6_R1,fastqs_rep6_R2])
+									else transpose([fastqs_rep6_R1])
+	Array[Array[String]] adapters_rep1 = if length(adapters_rep1_R2)>0 then transpose([adapters_rep1_R1,adapters_rep1_R2])
+									else transpose([adapters_rep1_R1])
+	Array[Array[String]] adapters_rep2 = if length(adapters_rep2_R2)>0 then transpose([adapters_rep2_R1,adapters_rep2_R2])
+									else transpose([adapters_rep2_R1])
+	Array[Array[String]] adapters_rep3 = if length(adapters_rep3_R2)>0 then transpose([adapters_rep3_R1,adapters_rep3_R2])
+									else transpose([adapters_rep3_R1])
+	Array[Array[String]] adapters_rep4 = if length(adapters_rep4_R2)>0 then transpose([adapters_rep4_R1,adapters_rep4_R2])
+									else transpose([adapters_rep4_R1])
+	Array[Array[String]] adapters_rep5 = if length(adapters_rep5_R2)>0 then transpose([adapters_rep5_R1,adapters_rep5_R2])
+									else transpose([adapters_rep5_R1])
+	Array[Array[String]] adapters_rep6 = if length(adapters_rep6_R2)>0 then transpose([adapters_rep6_R1,adapters_rep6_R2])
+									else transpose([adapters_rep6_R1])
 
 	Array[Array[Array[File]]] fastqs_ = if length(fastqs_rep1)<1 then fastqs
 		else if length(fastqs_rep2)<1 then [fastqs_rep1]
 		else if length(fastqs_rep3)<1 then [fastqs_rep1,fastqs_rep2]
 		else if length(fastqs_rep4)<1 then [fastqs_rep1,fastqs_rep2,fastqs_rep3]
-		else [fastqs_rep1,fastqs_rep2,fastqs_rep3,fastqs_rep4]
+		else if length(fastqs_rep5)<1 then [fastqs_rep1,fastqs_rep2,fastqs_rep3,fastqs_rep4]
+		else if length(fastqs_rep6)<1 then [fastqs_rep1,fastqs_rep2,fastqs_rep3,fastqs_rep4,fastqs_rep5]
+		else [fastqs_rep1,fastqs_rep2,fastqs_rep3,fastqs_rep4,fastqs_rep5,fastqs_rep6]
 	Array[Array[Array[String]]] adapters_ = if length(adapters_rep1)<1 then adapters
 		else if length(adapters_rep2)<1 then [adapters_rep1]
 		else if length(adapters_rep3)<1 then [adapters_rep1,adapters_rep2]
 		else if length(adapters_rep4)<1 then [adapters_rep1,adapters_rep2,adapters_rep3]
-		else [adapters_rep1,adapters_rep2,adapters_rep3,adapters_rep4]	
+		else if length(adapters_rep5)<1 then [adapters_rep1,adapters_rep2,adapters_rep3,adapters_rep4]
+		else if length(adapters_rep6)<1 then [adapters_rep1,adapters_rep2,adapters_rep3,adapters_rep4,adapters_rep5]
+		else [adapters_rep1,adapters_rep2,adapters_rep3,adapters_rep4,adapters_rep5,adapters_rep6]
+
 	scatter( i in range(length(fastqs_)) ) {
 		# trim adapters and merge trimmed fastqs
 		call trim_adapter { input :
@@ -868,11 +897,11 @@ task overlap {
 task reproducibility {
 	# parameters from workflow
 	String prefix
-	Array[File] peaks # peak files from pair of true replicates
+	Array[File]? peaks # peak files from pair of true replicates
 						# in a sorted order. for example of 4 replicates,
 						# 1,2 1,3 1,4 2,3 2,4 3,4.
                         # x,y means peak file from rep-x vs rep-y
-	Array[File] peaks_pr	# peak files from pseudo replicates
+	Array[File]? peaks_pr	# peak files from pseudo replicates
 	File? peak_ppr			# Peak file from pooled pseudo replicate.
 
 	command {
