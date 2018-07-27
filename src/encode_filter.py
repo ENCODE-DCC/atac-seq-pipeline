@@ -164,7 +164,8 @@ def mark_dup_picard(bam, out_dir): # shared by both se and pe
     dupmark_bam = '{}.dupmark.bam'.format(prefix)
     dup_qc = '{}.dup.qc'.format(prefix)
 
-    cmd = 'java -Xmx4G -jar $(which picard.jar) MarkDuplicates '
+    cmd = 'java -Xmx4G -jar $(which picard.jar || ls $(readlink -f $(which picard)).jar )'
+    cmd += ' MarkDuplicates '
     # cmd = 'picard MarkDuplicates '
     cmd += 'INPUT={} OUTPUT={} '
     cmd += 'METRICS_FILE={} VALIDATION_STRINGENCY=LENIENT '
