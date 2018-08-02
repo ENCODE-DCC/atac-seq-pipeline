@@ -184,9 +184,9 @@ touch null
 
 if [[ ${TSS_ENRICH} != "" ]]; then
   wget -N -c ${TSS_ENRICH}
-  echo -e "tss\t${DEST_DIR}/ataqc/$(basename ${TSS_ENRICH})" >> ${TSV}
+  echo -e "tss_enrich\t${DEST_DIR}/ataqc/$(basename ${TSS_ENRICH})" >> ${TSV}
 else
-  echo -e "tss\t${DEST_DIR}/ataqc/null" >> ${TSV}
+  echo -e "tss_enrich\t${DEST_DIR}/ataqc/null" >> ${TSV}
 fi
 if [[ ${DNASE} != "" ]]; then
   wget -N -c ${DNASE}
