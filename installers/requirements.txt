@@ -4,7 +4,7 @@ nomkl
 samtools ==1.2
 htslib ==1.4 # 1.5 in bioconda needed libbz2.so.1.0
 bedtools ==2.26.0 #2.22 # 2.21.0
-#picard ==1.126 # wanted 1.129 here but doesn't exist. instead 1.139 has backward compatibility issue, so take 1.126
+picard ==2.10.6 #==1.126 # wanted 1.129 here but doesn't exist. instead 1.139 has backward compatibility issue, so take 1.126
 ucsc-fetchchromsizes
 ucsc-wigtobigwig
 ucsc-bedgraphtobigwig
@@ -50,5 +50,7 @@ pandas #==0.18.0 #==0.16.1 # ataqc
 metaseq #==0.5.6 # ataqc
 jinja2 # ataqc
 gsl # for preseq
-pysam==0.8.2.1 # 0.8.3, 0.9 from bioconda has an issue with ATAQC (segmentation fault), need to use -c bcbio
+pysam==0.8.4 # 0.8.3, 0.9 from bioconda has an issue with ATAQC (segmentation fault), need to use -c bcbio
 pybedtools==0.6.9 # same issue as in pysam
+cromwell
+phantompeakqualtools ==1.2
