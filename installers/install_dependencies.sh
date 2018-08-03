@@ -25,7 +25,6 @@ source activate encode-atac-seq-pipeline
   # decompress MACS2 python egg to ensure functionality on Sherlock
   cd $CONDA_LIB/python2.7/site-packages
   unzip -o MACS2-2.1.1.20160309-py2.7-linux-x86_64.egg
-  
 
   # resolve permission issue for python libraries
 #  if [[ $(find $CONDA_LIB -name '*egg-info*' -not -perm -o+r | wc -l ) > 0 ]]; then
