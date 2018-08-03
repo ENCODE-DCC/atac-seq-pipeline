@@ -957,7 +957,6 @@ task ataqc { # generate ATAQC report
 	String? disks
 
 	command {
-		#export PICARDROOT=$(dirname $(which picard.jar || readlink -f $(which picard)))
 		export _JAVA_OPTIONS="-Xms256M -Xmx${select_first([mem_mb,'16000'])}M -XX:ParallelGCThreads=1"
 
 		python $(which encode_ataqc.py) \
