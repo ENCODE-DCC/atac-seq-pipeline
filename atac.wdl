@@ -512,7 +512,12 @@ workflow atac {
 			reg2map = reg2map,
 			roadmap_meta = roadmap_meta,
 		}
-	}	
+	}
+
+	output {
+		File report = qc_report.report
+		File qc_json = qc_report.qc_json
+	}
 }
 
 task trim_adapter { # trim adapters and merge trimmed fastqs

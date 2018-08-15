@@ -1,16 +1,20 @@
 ENCODE ATAC-seq pipeline
 ===================================================
 
-# Directories
-* `backends/` : Backend configuration files (`.conf`)
-* `workflow_opts/` : Workflow option files (`.json`)
-* `examples/` : input JSON examples (SE and PE)
-* `genome/` : genome data TSV files for each platform
-* `src/` : Python script for each task in WDL
-* `installers/` : dependency/genome data installers
-* `docker_image/` : Dockerfile and MySQL DB initialization script
-* `test/` : test scripts for developers
+# Tutorial
 
-# Installation and usage
+* [Google Cloud Platform](docs/tutorial_google.md)
+* [Stanford SCG](docs/tutorial_scg.md)
+* [Stanford Sherlock 2.0](docs/tutorial_sherlock.md)
+* [SLURM](docs/tutorial_slurm.md)
+* [Sun GridEngine (SGE)](docs/tutorial_sge.md)
+* [Local system with docker](docs/tutorial_local_docker.md)
+* [Local system without docker](docs/tutorial_local_conda.md)
 
-See [here](https://encode-dcc.github.io/wdl-pipelines/).
+# Input JSON
+
+See [here](docs/input.md) for details.
+
+# Output
+
+See [here](docs/output.md) for details.

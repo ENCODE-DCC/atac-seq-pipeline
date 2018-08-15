@@ -1,4 +1,5 @@
-nomkl
+#nomkl ==1.0
+#mkl ==2018.0.3
 python ==3.5.0
 numpy ==1.11.3
 idr ==2.0.4.2

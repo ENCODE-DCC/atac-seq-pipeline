@@ -1,6 +1,7 @@
 # channels : defaults, r, bioconda
 
-nomkl
+#nomkl ==1.0
+#mkl ==2018.0.3
 samtools ==1.2
 htslib ==1.4 # 1.5 in bioconda needed libbz2.so.1.0
 bedtools ==2.26.0 #2.22 # 2.21.0
@@ -52,5 +53,5 @@ jinja2 # ataqc
 gsl # for preseq
 pysam==0.8.4 # 0.8.3, 0.9 from bioconda has an issue with ATAQC (segmentation fault), need to use -c bcbio
 pybedtools==0.6.9 # same issue as in pysam
-cromwell
+cromwell==0.34
 phantompeakqualtools ==1.2
