@@ -1,0 +1,52 @@
+Tutorial for DNANexus Platform (CLI)
+====================================
+
+All test samples and genome data are shared on our public DNANexus project. You don't have to download any data for testing our pipeline on DNANexus platform.
+
+There are two methods to run our pipeline on DNANexus.
+
+1) Building your own DX workflow from `atac.wdl` with dxWDL (CLI)
+2) [Using a pre-built DX workflow on our public DX project (Web UI)](tutorial_dx_web.md)
+
+This document describes instruction for the item 1).
+
+1. Sign up for a [DNANexus account](https://platform.dnanexus.com/register).
+
+2. Create a new [DX project](https://platform.dnanexus.com/projects) with name `[YOUR_PROJECT_NAME]` by clicking on "+New Project" on the top left.
+
+3. Git clone this pipeline.
+    ```
+      $ git clone https://github.com/ENCODE-DCC/atac-seq-pipeline
+    ```
+
+4. Move to pipeline's directory.
+    ```
+      $ cd atac-seq-pipeline
+    ```
+
+5. Download dxWDL.
+    ```
+      $ wget https://github.com/dnanexus/dxWDL/releases/download/0.75/dxWDL-0.75.jar
+      $ chmod +rx dxWDL-0.75.jar
+    ```
+
+6. Compile `atac.wdl` with an input JSON for the SUBSAMPLED (1/400) paired-end sample of [ENCSR356KRQ](https://www.encodeproject.org/experiments/ENCSR356KRQ/).
+    ```
+      $ PROJECT=[YOUR_PROJECT_NAME]
+      $ OUT_FOLDER=/test_sample_atac_ENCSR356KRQ
+      $ INPUT=examples/dx/ENCSR356KRQ_subsampled_dx.json
+
+      $ java -jar dxWDL-0.75.jar compile atac.wdl -f -folder ${OUT_FOLDER} -defaults ${INPUT} -extras workflow_opts/docker.json
+    ```
+
+7. Go to DNANexus web page and move to the directory `/test_sample_atac_ENCSR356KRQ`
+
+8. You will find a DX workflow `atac` with all parameters pre-defined. Click on it. 
+
+9. Specify an output directory by clicking "Workflow Actions" on the top right. Click on "Set output folder" and choose an output folder.
+
+10. Click on "Run as Analysis..." and you will be automatically redirected to the "Monitor" tab.
+
+11. It will take about an hour. You will be able to find all outputs on your output folder. Final QC report (`qc.html`)/JSON (`qc.json`) will be found on it.
+
+11. See full specification for [input JSON file](input.md).
