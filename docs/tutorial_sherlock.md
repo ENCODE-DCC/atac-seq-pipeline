@@ -27,6 +27,7 @@ All test samples and genome data are shared on Stanford Sherlock cluster. You do
 
 5. Install Conda dependencies.
     ```
+      $ bash installers/uninstall_dependencies.sh  # to remove any existing pipeline env
       $ bash installers/install_dependencies.sh
     ```
 

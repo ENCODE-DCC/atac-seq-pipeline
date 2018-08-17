@@ -1111,10 +1111,10 @@ task qc_report {
 task read_genome_tsv {
 	File genome_tsv
 	command {
-		echo "Reading genome_tsv ${genome_tsv} ..."
+		cat ${genome_tsv}
 	}
 	output {
-		Map[String,String] genome = read_map(genome_tsv)
+		Map[String,String] genome = read_map(stdout())
 	}
 	runtime {
 		cpu : 1

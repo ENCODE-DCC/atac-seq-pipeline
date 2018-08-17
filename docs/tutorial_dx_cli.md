@@ -33,20 +33,22 @@ This document describes instruction for the item 1).
 6. Compile `atac.wdl` with an input JSON for the SUBSAMPLED (1/400) paired-end sample of [ENCSR356KRQ](https://www.encodeproject.org/experiments/ENCSR356KRQ/).
     ```
       $ PROJECT=[YOUR_PROJECT_NAME]
-      $ OUT_FOLDER=/test_sample_atac_ENCSR356KRQ
+      $ OUT_FOLDER=/test_sample_atac_ENCSR356KRQ_subsampled
       $ INPUT=examples/dx/ENCSR356KRQ_subsampled_dx.json
 
-      $ java -jar dxWDL-0.75.jar compile atac.wdl -f -folder ${OUT_FOLDER} -defaults ${INPUT} -extras workflow_opts/docker.json
+      $ java -jar dxWDL-0.75.jar compile atac.wdl -project ${PROJECT} -f -folder ${OUT_FOLDER} -defaults ${INPUT} -extras workflow_opts/docker.json
     ```
 
-7. Go to DNANexus web page and move to the directory `/test_sample_atac_ENCSR356KRQ`
+7. Go to DNANexus [project page](https://platform.dnanexus.com/projects) and click on your project.
 
-8. You will find a DX workflow `atac` with all parameters pre-defined. Click on it. 
+8. Move to the directory `/test_sample_atac_ENCSR356KRQ_subsampled`.
 
-9. Specify an output directory by clicking "Workflow Actions" on the top right. Click on "Set output folder" and choose an output folder.
+9. You will find a DX workflow `atac` with all parameters pre-defined. Click on it. 
 
-10. Click on "Run as Analysis..." and you will be automatically redirected to the "Monitor" tab.
+10. Specify an output directory by clicking "Workflow Actions" on the top right. Click on "Set output folder" and choose an output folder.
 
-11. It will take about an hour. You will be able to find all outputs on your output folder. Final QC report (`qc.html`)/JSON (`qc.json`) will be found on it.
+11. Click on "Run as Analysis..." and you will be automatically redirected to the "Monitor" tab.
 
-11. See full specification for [input JSON file](input.md).
+12. It will take about an hour. You will be able to find all outputs on your output folder. Final QC report (`qc.html`)/JSON (`qc.json`) will be found on it.
+
+13. See full specification for [input JSON file](input.md).

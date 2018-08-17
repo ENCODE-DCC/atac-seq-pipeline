@@ -19,13 +19,13 @@ Tutorial for general UNIX computers with docker
 
 4. Download a SUBSAMPLED (1/400) paired-end sample of [ENCSR356KRQ](https://www.encodeproject.org/experiments/ENCSR356KRQ/).
     ```
-      $ wget https://storage.cloud.google.com/encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ/ENCSR356KRQ_fastq_subsampled.tar
+      $ wget https://storage.googleapis.com/encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ/ENCSR356KRQ_fastq_subsampled.tar
       $ tar xvf ENCSR356KRQ_fastq_subsampled.tar
     ```
 
 5. Download pre-built genome database for hg38.
     ```
-      $ wget https://storage.cloud.google.com/encode-pipeline-genome-data/test_genome_database_hg38_atac.tar
+      $ wget https://storage.googleapis.com/encode-pipeline-genome-data/test_genome_database_hg38_atac.tar
       $ tar xvf test_genome_database_hg38_atac.tar
     ```
 

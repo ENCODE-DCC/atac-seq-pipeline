@@ -15,6 +15,7 @@ Tutorial for general UNIX computers without docker
 
 4. Install Conda dependencies.
     ```
+      $ bash installers/uninstall_dependencies.sh  # to remove any existing pipeline env
       $ bash installers/install_dependencies.sh
     ```
 
@@ -26,13 +27,13 @@ Tutorial for general UNIX computers without docker
 
 6. Download a SUBSAMPLED (1/400) paired-end sample of [ENCSR356KRQ](https://www.encodeproject.org/experiments/ENCSR356KRQ/).
     ```
-      $ wget https://storage.cloud.google.com/encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ/ENCSR356KRQ_fastq_subsampled.tar
+      $ wget https://storage.googleapis.com/encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ/ENCSR356KRQ_fastq_subsampled.tar
       $ tar xvf ENCSR356KRQ_fastq_subsampled.tar
     ```
 
 7. Download pre-built genome database for hg38.
     ```
-      $ wget https://storage.cloud.google.com/encode-pipeline-genome-data/test_genome_database_hg38_atac.tar
+      $ wget https://storage.googleapis.com/encode-pipeline-genome-data/test_genome_database_hg38_atac.tar
       $ tar xvf test_genome_database_hg38_atac.tar
     ```
 

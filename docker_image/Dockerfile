@@ -44,24 +44,11 @@ RUN mkdir /software
 WORKDIR /software
 ENV PATH="/software:${PATH}"
 
-# Install OpenBLAS 0.2.19 (NEHALEM architecture, single-threaded)
-# to have the same result as of Conda's non-MKL openblas 0.2.19
-# setting TARGET=HASWELL will give you different result.
-# so let's stick to TARGET=NEHALEM
-#    cd OpenBLAS && make FC=gfortran TARGET=NEHALEM USE_THREAD=0 && make PREFIX=/opt/openblas install && \
-#RUN git clone --branch v0.2.19 --single-branch https://github.com/xianyi/OpenBLAS && \
-#    cd OpenBLAS && make FC=gfortran TARGET=HASWELL USE_THREAD=0 && make PREFIX=/opt/openblas install && \
-#    cd ../ && rm -rf OpenBLAS*
+# Install OpenBLAS 0.2.19
 RUN git clone --branch v0.2.19 --single-branch https://github.com/xianyi/OpenBLAS && \
     cd OpenBLAS && make DYNAMIC_ARCH=0 NO_LAPACK=0 NO_AFFINITY=1 USE_THREAD=1 NUM_THREADS=128 && make PREFIX=/opt/openblas install && \
     cd ../ && rm -rf OpenBLAS*
 ENV LD_LIBRARY_PATH="/opt/openblas/lib:${LD_LIBRARY_PATH}"
-
-# Add Intel MKL repo to apt
-#RUN wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB
-#RUN sh -c 'echo deb https://apt.repos.intel.com/mkl all main > /etc/apt/sources.list.d/intel-mkl.list'
-#RUN apt-get update && apt-get install -y intel-mkl-2018.0-033 && rm -rf /var/lib/apt/lists/*
-#ENV LD_LIBRARY_PATH="/opt/intel/lib/intel64:/opt/intel/mkl/lib/intel64:${LD_LIBRARY_PATH}"
 
 # Install basic python2/3 packages
 RUN pip install --no-cache-dir common python-dateutil cython==0.27.3 && \
@@ -70,8 +57,6 @@ RUN pip install --no-cache-dir common python-dateutil cython==0.27.3 && \
 # Install numpy 1.11.3 (python2/3)
 RUN wget https://github.com/ottojolanki/numpy/archive/numpy_1.11.3_release.zip && unzip numpy_1.11.3_release.zip && \
     cd numpy-numpy_1.11.3_release && python setup.py install && python3 setup.py install && cd ../ && rm -rf numpy*
-#RUN git clone --branch v1.11.3 --single-branch https://github.com/numpy/numpy && \
-#    cd numpy && python setup.py install && python3 setup.py install && cd ../ && rm -rf numpy*
 
 # Install scipy 1.0.0 (python2/3)
 RUN git clone --branch v1.0.0 --single-branch https://github.com/scipy/scipy && \
