@@ -45,10 +45,31 @@ WORKDIR /software
 ENV PATH="/software:${PATH}"
 
 # Install OpenBLAS 0.2.19
-RUN git clone --branch v0.2.19 --single-branch https://github.com/xianyi/OpenBLAS && \
-    cd OpenBLAS && make DYNAMIC_ARCH=0 NO_LAPACK=0 NO_AFFINITY=1 USE_THREAD=1 NUM_THREADS=128 && make PREFIX=/opt/openblas install && \
-    cd ../ && rm -rf OpenBLAS*
+
+# Failed on DX: Instruction error
+#RUN git clone --branch v0.2.19 --single-branch https://github.com/xianyi/OpenBLAS && \
+#    cd OpenBLAS && make DYNAMIC_ARCH=0 NO_LAPACK=0 NO_AFFINITY=1 USE_THREAD=0 && make PREFIX=/opt/openblas install && cd ../ && rm -rf OpenBLAS*
+
+# Worked DX:499, KLAB:500
+#RUN git clone --branch v0.2.19 --single-branch https://github.com/xianyi/OpenBLAS && \
+#    cd OpenBLAS && make FC=gfortran TARGET=NEHALEM USE_THREAD=0 && make PREFIX=/opt/openblas install && cd ../ && rm -rf OpenBLAS*
+
+# Failed on DX: Instruction error
+#RUN git clone --branch v0.2.19 --single-branch https://github.com/xianyi/OpenBLAS && \
+#    cd OpenBLAS && make USE_THREAD=0 && make PREFIX=/opt/openblas install && cd ../ && rm -rf OpenBLAS*
+
+# Failed on DX: Instruction error
+#RUN git clone --branch v0.2.19 --single-branch https://github.com/xianyi/OpenBLAS && \
+#    cd OpenBLAS && make FC=gfortran DYNAMIC_ARCH=0 NO_LAPACK=0 NO_AFFINITY=1 USE_THREAD=0 && make PREFIX=/opt/openblas install && cd ../ && rm -rf OpenBLAS*
+
+# Failed on DX: Instruction error
+#RUN git clone --branch v0.2.19 --single-branch https://github.com/xianyi/OpenBLAS && \
+#    cd OpenBLAS && make FC=gfortran NO_AFFINITY=1 USE_THREAD=0 && make PREFIX=/opt/openblas install && cd ../ && rm -rf OpenBLAS*
+
+RUN git clone --branch v0.2.20 --single-branch https://github.com/xianyi/OpenBLAS && \
+    cd OpenBLAS && make FC=gfortran DYNAMIC_ARCH=1 NO_AFFINITY=1 USE_THREAD=0 NUM_THREADS=1 && make PREFIX=/opt/openblas install && cd ../ && rm -rf OpenBLAS*
 ENV LD_LIBRARY_PATH="/opt/openblas/lib:${LD_LIBRARY_PATH}"
+ENV OPENBLAS_NUM_THREADS=1
 
 # Install basic python2/3 packages
 RUN pip install --no-cache-dir common python-dateutil cython==0.27.3 && \
@@ -57,6 +78,10 @@ RUN pip install --no-cache-dir common python-dateutil cython==0.27.3 && \
 # Install numpy 1.11.3 (python2/3)
 RUN wget https://github.com/ottojolanki/numpy/archive/numpy_1.11.3_release.zip && unzip numpy_1.11.3_release.zip && \
     cd numpy-numpy_1.11.3_release && python setup.py install && python3 setup.py install && cd ../ && rm -rf numpy*
+
+# Install numpy 1.11.3 (python2/3) no BLAS (worked, result:500)
+#RUN git clone --branch v1.11.3 https://github.com/numpy/numpy && \
+#    cd numpy && python setup.py install && python3 setup.py install && cd ../ && rm -rf numpy*
 
 # Install scipy 1.0.0 (python2/3)
 RUN git clone --branch v1.0.0 --single-branch https://github.com/scipy/scipy && \

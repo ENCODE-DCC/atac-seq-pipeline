@@ -40,7 +40,7 @@ All test samples and genome data are shared on Stanford Sherlock cluster. You do
 7. Run a pipeline for a SUBSAMPLED (1/400) paired-end sample of [ENCSR356KRQ](https://www.encodeproject.org/experiments/ENCSR356KRQ/).
     ```
       $ source activate encode-atac-seq-pipeline # IMPORTANT!
-      $ INPUT=examples/sherlock/ENCSR356KRQ_subsampled.json
+      $ INPUT=examples/sherlock/ENCSR356KRQ_subsampled_sherlock.json
       $ java -jar -Dconfig.file=backends/backend.conf -Dbackend.default=slurm cromwell-34.jar run atac.wdl -i ${INPUT} -o workflow_opts/sherlock.json
     ```
 

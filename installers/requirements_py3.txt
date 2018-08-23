@@ -1,5 +1,6 @@
-#nomkl ==1.0
-#mkl ==2018.0.3
+# repos: biconda, conda-forge, defaults, r
+
+openblas ==0.2.20
 python ==3.5.0
 numpy ==1.11.3
 idr ==2.0.4.2

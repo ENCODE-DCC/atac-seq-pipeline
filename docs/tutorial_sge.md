@@ -11,7 +11,7 @@ Tutorial for Sun GridEngine (SGE) clusters
       $ cd atac-seq-pipeline
     ```
 
-3. Set your parallel environment (PE) and queue in `workflow_opts/sge.json`. If your SGE cluster does not have any PE, ask your admin to add one for our pipeline. If you don't want specify a queue then remove `, "sge_queue" : "YOUR_SGE_QUEUE"` from the file.
+3. Set your parallel environment (PE) and queue in `workflow_opts/sge.json`. If your SGE cluster does not have any PE, ask your admin to add one for our pipeline. If you don't want to specify any queue then remove `, "sge_queue" : "YOUR_SGE_QUEUE"` from the file.
     ```
       {
           "default_runtime_attributes" : {
@@ -25,6 +25,7 @@ Tutorial for Sun GridEngine (SGE) clusters
 
 5. Install Conda dependencies.
     ```
+      $ bash installers/uninstall_dependencies.sh  # to remove any existing pipeline env
       $ bash installers/install_dependencies.sh
     ```
 

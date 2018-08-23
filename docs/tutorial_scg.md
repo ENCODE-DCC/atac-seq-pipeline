@@ -27,6 +27,7 @@ All test samples and genome data are shared on Stanford SCG cluster based on SLU
 
 5. Install Conda dependencies.
     ```
+      $ bash installers/uninstall_dependencies.sh  # to remove any existing pipeline env
       $ bash installers/install_dependencies.sh
     ```
 
@@ -39,7 +40,7 @@ All test samples and genome data are shared on Stanford SCG cluster based on SLU
 7. Run a pipeline for a SUBSAMPLED (1/400) paired-end sample of [ENCSR356KRQ](https://www.encodeproject.org/experiments/ENCSR356KRQ/).
     ```
       $ source activate encode-atac-seq-pipeline # IMPORTANT!
-      $ INPUT=examples/scg/ENCSR356KRQ_subsampled.json
+      $ INPUT=examples/scg/ENCSR356KRQ_subsampled_scg.json
       $ java -jar -Dconfig.file=backends/backend.conf -Dbackend.default=slurm cromwell-34.jar run atac.wdl -i ${INPUT} -o workflow_opts/scg.json
     ```
 

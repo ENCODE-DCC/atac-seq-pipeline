@@ -38,20 +38,32 @@ conda create -n ${CONDA_ENV} --file ${REQ_TXT} -y -c bioconda -c conda-forge -c 
 
 echo "=== Installing additional packages for python2 env..."
 source activate ${CONDA_ENV}
-  CONDA_BIN=$(dirname $(which bedtools))
-  CONDA_SHARE="${CONDA_BIN}/../share"
+  CONDA_LIB="${CONDA_PREFIX}/lib"
+  CONDA_PY3_LIB="${CONDA_PREFIX}/../${CONDA_ENV_PY3}/lib"
+  CONDA_ACTIVATE_D="${CONDA_PREFIX}/etc/conda/activate.d"
+  CONDA_DEACTIVATE_D="${CONDA_PREFIX}/etc/conda/deactivate.d"
+  CONDA_ACTIVATE_SH="${CONDA_ACTIVATE_D}/env_vars.sh"
+  CONDA_DEACTIVATE_SH="${CONDA_DEACTIVATE_D}/env_vars.sh"
+  mkdir -p ${CONDA_ACTIVATE_D}
+  mkdir -p ${CONDA_DEACTIVATE_D}
+  # init script for activation
+  echo "export OPENBLAS_NUM_THREADS=1" > ${CONDA_ACTIVATE_SH}
+  echo "export MKL_NUM_THREADS=1" >> ${CONDA_ACTIVATE_SH}
+  echo "export PYTHONPATH=${CONDA_LIB}/python2.7/site-packages:${CONDA_PY3_LIB}/python3.5/site-packages" >> ${CONDA_ACTIVATE_SH}
+  # init script for deactivation
+  echo "unset OPENBLAS_NUM_THREADS MKL_NUM_THREADS PYTHONPATH" > ${CONDA_DEACTIVATE_SH}
 
-  #hack around the need for both python2 and python3 
-  #in the same environment
+  #hack around the need for both python2 and python3 in the same environment
+  CONDA_BIN="${CONDA_PREFIX}/bin"
   cd ${CONDA_BIN}
   rm -f idr
   ln -s ../../${CONDA_ENV_PY3}/bin/idr
 
   # make an executable symlink for cromwell.jar on conda bin dir
+  CONDA_SHARE="${CONDA_PREFIX}/share"
   chmod +rx ${CONDA_SHARE}/cromwell/cromwell.jar
   cd ${CONDA_BIN}
   ln -s ../share/cromwell/cromwell.jar
-
 source deactivate
 
 # update pipeline's python scripts (src/*.py) on conda environment

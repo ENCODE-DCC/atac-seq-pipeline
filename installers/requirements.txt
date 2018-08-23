@@ -1,7 +1,5 @@
-# channels : defaults, r, bioconda
+# repos: biconda, conda-forge, defaults, r
 
-#nomkl ==1.0
-#mkl ==2018.0.3
 samtools ==1.2
 htslib ==1.4 # 1.5 in bioconda needed libbz2.so.1.0
 bedtools ==2.26.0 #2.22 # 2.21.0
@@ -15,9 +13,12 @@ ucsc-bedtobigbed
 ucsc-twobittofa
 macs2 ==2.1.1.20160309 #2.1.0 (no binaries for OSX)
 boost ==1.57.0
-openblas ==0.2.19
-numpy ==1.11.3 #1.13.3 #1.10.2 (no binaries for OSX) #1.9.0, 1.8.2 conflicts with ATAQC
+openblas ==0.2.20
+
+# PIP-357
+numpy ==1.11.3 #1.10.2 (no binaries for OSX) #1.9.0, 1.8.2 conflicts with ATAQC
 matplotlib ==1.5.1
+
 six==1.11.0 # to fix (ImportError: cannot import name _thread)
 python-dateutil==2.6.1
 libgfortran==3.0
