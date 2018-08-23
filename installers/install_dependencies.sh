@@ -49,7 +49,7 @@ source activate ${CONDA_ENV}
   # init script for activation
   echo "export OPENBLAS_NUM_THREADS=1" > ${CONDA_ACTIVATE_SH}
   echo "export MKL_NUM_THREADS=1" >> ${CONDA_ACTIVATE_SH}
-  echo "export PYTHONPATH=${CONDA_PY3_LIB}/python3.5/site-packages:${CONDA_LIB}/python2.7/site-packages" >> ${CONDA_ACTIVATE_SH}
+  echo "export PYTHONPATH=${CONDA_LIB}/python2.7/site-packages:${CONDA_PY3_LIB}/python3.5/site-packages" >> ${CONDA_ACTIVATE_SH}
   # init script for deactivation
   echo "unset OPENBLAS_NUM_THREADS MKL_NUM_THREADS PYTHONPATH" > ${CONDA_DEACTIVATE_SH}
 

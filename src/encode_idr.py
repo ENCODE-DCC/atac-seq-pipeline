@@ -77,7 +77,7 @@ def idr(basename_prefix, peak1, peak2, peak_pooled, peak_type,
     idr_12col_bed = '{}.12-col.bed.gz'.format(peak_type)
     idr_out = '{}.unthresholded-peaks.txt'.format(prefix)
 
-    cmd1 = 'idr --samples {} {} --peak-list {} --input-file-type narrowPeak '
+    cmd1 = 'PYTHONPATH= idr --samples {} {} --peak-list {} --input-file-type narrowPeak '
     cmd1 += '--output-file {} --rank {} --soft-idr-threshold {} '
     cmd1 += '--plot --use-best-multisummit-IDR --log-output-file {}'
     cmd1 = cmd1.format(
