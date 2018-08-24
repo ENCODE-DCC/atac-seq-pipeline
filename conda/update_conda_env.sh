@@ -24,7 +24,8 @@ fi
 
 echo "=== Updating pipeline's source code on Conda env (${CONDA_ENV})..."
 source activate ${CONDA_ENV}
-  CONDA_BIN=$(dirname $(which bedtools))
+  CONDA_BIN="${CONDA_PREFIX}/bin"
+  cd ${CONDA_BIN}
 
   # copy all python scripts in /src into conda env bin dir
   cp -f ${SH_SCRIPT_DIR}/../src/*.py ${CONDA_BIN}/

@@ -126,7 +126,7 @@ else:
 
 6. Cross correlation analysis settings (remove a prefix `atac.` for DNANexus CLI).
 
-    * `"atac.xcor.subsample"` : (optional) Number of reads to subsample TAGALIGN. Only one end (R1) will be used for cross correlation analysis. This will not affect downstream analysis.
+    * `"atac.xcor.subsample"` : (optional) Number of reads to subsample TAGALIGN.
 
 7. MACS2 settings
 
@@ -153,34 +153,34 @@ else:
 
 CPU (`cpu`), memory (`mem_mb`) settings are used for submitting jobs to cluster engines (SGE and SLURM) and Cloud platforms (Google Cloud Platform, AWS, ...). VM instance type on cloud platforms will be automatically chosen according to each task's `cpu` and `mem_mb`. Number of cores for tasks without `cpu` parameter is fixed at 1.
 
-* `"atac.trim_adapter.cpu"`? : Number of cores for `trim_adapter` (default: 2).
-* `"atac.bowtie2.cpu"`? : Number of cores for `bowtie2` (default: 4).
-* `"atac.filter.cpu"`? : Number of cores for `filter` (default: 2).
-* `"atac.bam2ta.cpu"`? : Number of cores for `bam2ta` (default: 2).
-* `"atac.xcor.cpu"`? : Number of cores for `xcor` (default: 2).
-* `"atac.trim_adapter.mem_mb"`? : Max. memory limit in MB for `trim_adapter` (default: 10000).
-* `"atac.bowtie2.mem_mb"`? : Max. memory limit in MB for `bowtie2` (default: 20000).
-* `"atac.filter.mem_mb"`? : Max. memory limit in MB for `filter` (default: 20000).
-* `"atac.bam2ta.mem_mb"`? : Max. memory limit in MB for `bam2ta` (default: 10000).
-* `"atac.spr.mem_mb"`? : Max. memory limit in MB for `spr` (default: 12000).
-* `"atac.xcor.mem_mb"`? : Max. memory limit in MB for `xcor` (default: 10000).
-* `"atac.macs2_mem_mb"`? : Max. memory limit in MB for `macs2` (default: 16000).
+* `"atac.trim_adapter.cpu"` : (optional) Number of cores for `trim_adapter` (default: 2).
+* `"atac.bowtie2.cpu"` : (optional) Number of cores for `bowtie2` (default: 4).
+* `"atac.filter.cpu"` : (optional) Number of cores for `filter` (default: 2).
+* `"atac.bam2ta.cpu"` : (optional) Number of cores for `bam2ta` (default: 2).
+* `"atac.xcor.cpu"` : (optional) Number of cores for `xcor` (default: 2).
+* `"atac.trim_adapter.mem_mb"` : (optional) Max. memory limit in MB for `trim_adapter` (default: 10000).
+* `"atac.bowtie2.mem_mb"` : (optional) Max. memory limit in MB for `bowtie2` (default: 20000).
+* `"atac.filter.mem_mb"` : (optional) Max. memory limit in MB for `filter` (default: 20000).
+* `"atac.bam2ta.mem_mb"` : (optional) Max. memory limit in MB for `bam2ta` (default: 10000).
+* `"atac.spr.mem_mb"` : (optional) Max. memory limit in MB for `spr` (default: 12000).
+* `"atac.xcor.mem_mb"` : (optional) Max. memory limit in MB for `xcor` (default: 10000).
+* `"atac.macs2_mem_mb"` : (optional) Max. memory limit in MB for `macs2` (default: 16000).
 
 Disks (`disks`) is used for Cloud platforms (Google Cloud Platforms, AWS, ...).
 
-* `"atac.trim_adapter.disks"`? : Disks for `trim_adapter` (default: "local-disk 100 HDD").
-* `"atac.bowtie2.disks"`? : Disks for `bowtie2` (default: "local-disk 100 HDD").
-* `"atac.filter.disks"`? : Disks for `filter` (default: "local-disk 100 HDD").
-* `"atac.bam2ta.disks"`? : Disks for `bam2ta` (default: "local-disk 100 HDD").
-* `"atac.xcor.disks"`? : Disks for `xcor` (default: "local-disk 100 HDD").
-* `"atac.macs2_disks"`? : Disks for `macs2` (default: "local-disk 100 HDD").
+* `"atac.trim_adapter.disks"` : (optional) Disks for `trim_adapter` (default: "local-disk 100 HDD").
+* `"atac.bowtie2.disks"` : (optional) Disks for `bowtie2` (default: "local-disk 100 HDD").
+* `"atac.filter.disks"` : (optional) Disks for `filter` (default: "local-disk 100 HDD").
+* `"atac.bam2ta.disks"` : (optional) Disks for `bam2ta` (default: "local-disk 100 HDD").
+* `"atac.xcor.disks"` : (optional) Disks for `xcor` (default: "local-disk 100 HDD").
+* `"atac.macs2_disks"` : (optional) Disks for `macs2` (default: "local-disk 100 HDD").
 
 Walltime (`time`) settings (for SGE and SLURM only).
 
-* `"atac.trim_adapter.time_hr"`? : Walltime for `trim_adapter` (default: 24).
-* `"atac.bowtie2.time_hr"`? : Walltime for `bowtie2` (default: 48).
-* `"atac.filter.time_hr"`? : Walltime for `filter` (default: 24).
-* `"atac.bam2ta.time_hr"`? : Walltime for `bam2ta` (default: 6).
-* `"atac.xcor.time_hr"`? : Walltime for `xcor` (default: 6).
-* `"atac.macs2_time_hr"`? : Walltime for `macs2` (default: 24).
+* `"atac.trim_adapter.time_hr"` : (optional) Walltime for `trim_adapter` (default: 24).
+* `"atac.bowtie2.time_hr"` : (optional) Walltime for `bowtie2` (default: 48).
+* `"atac.filter.time_hr"` : (optional) Walltime for `filter` (default: 24).
+* `"atac.bam2ta.time_hr"` : (optional) Walltime for `bam2ta` (default: 6).
+* `"atac.xcor.time_hr"` : (optional) Walltime for `xcor` (default: 6).
+* `"atac.macs2_time_hr"` : (optional) Walltime for `macs2` (default: 24).
 
