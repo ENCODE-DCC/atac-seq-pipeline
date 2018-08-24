@@ -3,17 +3,22 @@ Tutorial for Stanford Sherlock 2.0 cluster
 
 All test samples and genome data are shared on Stanford Sherlock cluster. You don't have to download any data for testing our pipeline on it.
 
-1. Git clone this pipeline.
+1. SSH to Sherlock's login node.
+    ```
+      $ ssh login.sherlock.stanford.edu
+    ```
+
+2. Git clone this pipeline.
     ```
       $ git clone https://github.com/ENCODE-DCC/atac-seq-pipeline
     ```
 
-2. Move to pipeline's directory.
+3. Move to pipeline's directory.
     ```
       $ cd atac-seq-pipeline
     ```
 
-3. Set your partition in `workflow_opts/sherlock.json`.
+4. Set your partition in `workflow_opts/sherlock.json`.
 
     ```
       {
@@ -23,30 +28,30 @@ All test samples and genome data are shared on Stanford Sherlock cluster. You do
       }
     ```
 
-4. [Install Conda](https://conda.io/miniconda.html)
+5. [Install Conda](https://conda.io/miniconda.html)
 
-5. Install Conda dependencies.
+6. Install Conda dependencies.
     ```
-      $ bash installers/uninstall_dependencies.sh  # to remove any existing pipeline env
-      $ bash installers/install_dependencies.sh
+      $ bash conda/uninstall_dependencies.sh  # to remove any existing pipeline env
+      $ bash conda/install_dependencies.sh
     ```
 
-6. Download cromwell.
+7. Download cromwell.
     ```
       $ wget https://github.com/broadinstitute/cromwell/releases/download/34/cromwell-34.jar
       $ chmod +rx cromwell-34.jar
     ```
 
-7. Run a pipeline for a SUBSAMPLED (1/400) paired-end sample of [ENCSR356KRQ](https://www.encodeproject.org/experiments/ENCSR356KRQ/).
+8. Run a pipeline for a SUBSAMPLED (1/400) paired-end sample of [ENCSR356KRQ](https://www.encodeproject.org/experiments/ENCSR356KRQ/).
     ```
       $ source activate encode-atac-seq-pipeline # IMPORTANT!
       $ INPUT=examples/sherlock/ENCSR356KRQ_subsampled_sherlock.json
       $ java -jar -Dconfig.file=backends/backend.conf -Dbackend.default=slurm cromwell-34.jar run atac.wdl -i ${INPUT} -o workflow_opts/sherlock.json
     ```
 
-8. It will take about an hour. You will be able to find all outputs on `cromwell-executions/atac/[RANDOM_HASH_STRING]/`. See [output directory structure](output.md) for details.
+9. It will take about an hour. You will be able to find all outputs on `cromwell-executions/atac/[RANDOM_HASH_STRING]/`. See [output directory structure](output.md) for details.
 
-9. See full specification for [input JSON file](input.md).
+10. See full specification for [input JSON file](input.md).
 
 ## Extras for advanced users
 

@@ -38,6 +38,8 @@ conda create -n ${CONDA_ENV} --file ${REQ_TXT} -y -c bioconda -c conda-forge -c 
 
 echo "=== Installing additional packages for python2 env..."
 source activate ${CONDA_ENV}
+  conda install numpy==1.11.3 -c defaults -y
+
   CONDA_LIB="${CONDA_PREFIX}/lib"
   CONDA_PY3_LIB="${CONDA_PREFIX}/../${CONDA_ENV_PY3}/lib"
   CONDA_ACTIVATE_D="${CONDA_PREFIX}/etc/conda/activate.d"

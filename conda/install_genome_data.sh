@@ -103,6 +103,10 @@ elif [[ $GENOME == "hg38_chr19_chrM" ]]; then
 elif [[ $GENOME == "mm10_chr19_chrM" ]]; then
   REF_FA="http://mitra.stanford.edu/kundaje/genome_data/mm10_chr19_chrM/mm10_no_alt_analysis_set_ENCODE.chr19_chrM.fasta.gz"
   BLACKLIST="http://mitra.stanford.edu/kundaje/genome_data/mm10/mm10.blacklist.bed.gz"
+
+elif [[ $GENOME == "YOUR_OWN_GENOME" ]]; then
+  REF_FA="URL_FOR_YOUR_FASTA_OR_2BIT"
+  BLACKLIST= # leave it empty if you don't have it
 fi
 
 if [[ ${REF_FA} == "" ]]; then

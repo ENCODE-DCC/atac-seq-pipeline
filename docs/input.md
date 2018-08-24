@@ -14,7 +14,7 @@ dxWDL (DNANexus CLI for WDL) does not support definition of task level variables
 
 ## Reference genome
 
-We currently support 4 genomes. You can also [build a genome database for your own genome](NULL).
+We currently support 4 genomes. You can also [build a genome database for your own genome](build_genome_database.md).
 
 |genome|source|built from|
 |-|-|-|
@@ -32,7 +32,7 @@ Choose one TSV file for `"atac.genome_tsv"` in your input JSON. `[GENOME]` shoul
 |DNANExus (Web)|Choose `[GENOME]_dx.tsv` from [here](https://platform.dnanexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/pipeline-genome-data)|
 |Stanford Sherlock|`genome/scg/[GENOME]_scg.tsv`|
 |Stanford SCG|`genome/sherlock/[GENOME]_sherlock.tsv`|
-|Local/SLURM/SGE|You need to [build a genome database](NULL). |
+|Local/SLURM/SGE|You need to [build a genome database](build_genome_database.md). |
 
 ## Input data file
 

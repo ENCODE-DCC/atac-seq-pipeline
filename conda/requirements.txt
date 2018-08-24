@@ -17,7 +17,7 @@ openblas ==0.2.20
 
 # PIP-357
 numpy ==1.11.3 #1.10.2 (no binaries for OSX) #1.9.0, 1.8.2 conflicts with ATAQC
-matplotlib ==1.5.1
+matplotlib #==1.5.1
 
 six==1.11.0 # to fix (ImportError: cannot import name _thread)
 python-dateutil==2.6.1
