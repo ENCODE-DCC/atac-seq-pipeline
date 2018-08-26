@@ -77,6 +77,6 @@ done
 set -x #why are we exiting with 1??
 # Get output of workflow
 curl -X GET --header "Accept: application/json" -v "$CROMWELL_SVR_URL/api/workflows/v1/$WF_ID/outputs" > $PREFIX.result.json
-cat $PREFIX.result.json | python -c "import json,sys;obj=json.load(sys.stdin);print(obj['outputs']['atac.qc_report.qc_json_match'])" > $PREFIX.result.qc_json_match.txt
+cat $PREFIX.result.json | python -c "import json,sys;obj=json.load(sys.stdin);print(obj['outputs']['atac.qc_json_match'])" > $PREFIX.result.qc_json_match.txt
 
 echo "Done testing successfully."

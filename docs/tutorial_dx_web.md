@@ -37,7 +37,7 @@ This document describes instruction for the item 2).
 
 1. DNANexus allows only one copy of a workflow per project. The example workflow in the previous section is pre-built for the subsampled test sample [ENCSR356KRQ](https://www.encodeproject.org/experiments/ENCSR356KRQ/) with all parameters defined already.
 
-2. To run pipelines for your own samples, try to copy a DX workflow `atac` on [general workflow](https://platform.dnanexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/ATAC-seq/workflows/general) instead of [test workflow](https://platform.dnanexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/ATAC-seq/workflows/test_ENCSR356KRQ_subsampled).
+2. To run pipelines for your own samples, try to copy a DX workflow `atac` on [general workflow](https://platform.dnanexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/ATAC-seq/workflows/v1.1/general) instead of [test workflow](https://platform.dnanexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/ATAC-seq/workflows/v1.1/test_ENCSR356KRQ_subsampled).
 
 3. Click on the DX workflow `atac`.
 

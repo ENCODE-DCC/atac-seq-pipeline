@@ -517,6 +517,7 @@ workflow atac {
 	output {
 		File report = qc_report.report
 		File qc_json = qc_report.qc_json
+		Boolean qc_json_match = qc_report.qc_json_match
 	}
 }
 

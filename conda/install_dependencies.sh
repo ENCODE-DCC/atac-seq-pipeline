@@ -43,7 +43,7 @@ source activate ${CONDA_ENV}
   # according to cpu arch, num threads.
   # so we need to keep using numpy with MKL in the defaults repo
   # until this issue is fixed.
-  conda install numpy==1.11.3 -c defaults -y 
+  conda install numpy==1.11.3 -c defaults -y   
 
   # init script for activation/deactivation.
   # limiting number of threads for BLAS is important to ensure the same output for MACS2
