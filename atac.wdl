@@ -512,7 +512,13 @@ workflow atac {
 			reg2map = reg2map,
 			roadmap_meta = roadmap_meta,
 		}
-	}	
+	}
+
+	output {
+		File report = qc_report.report
+		File qc_json = qc_report.qc_json
+		Boolean qc_json_match = qc_report.qc_json_match
+	}
 }
 
 task trim_adapter { # trim adapters and merge trimmed fastqs
@@ -957,7 +963,6 @@ task ataqc { # generate ATAQC report
 	String? disks
 
 	command {
-		export PICARDROOT=$(dirname $(which picard.jar))
 		export _JAVA_OPTIONS="-Xms256M -Xmx${select_first([mem_mb,'16000'])}M -XX:ParallelGCThreads=1"
 
 		python $(which encode_ataqc.py) \
@@ -1107,10 +1112,10 @@ task qc_report {
 task read_genome_tsv {
 	File genome_tsv
 	command {
-		echo "Reading genome_tsv ${genome_tsv} ..."
+		cat ${genome_tsv}
 	}
 	output {
-		Map[String,String] genome = read_map(genome_tsv)
+		Map[String,String] genome = read_map(stdout())
 	}
 	runtime {
 		cpu : 1

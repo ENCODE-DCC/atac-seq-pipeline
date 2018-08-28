@@ -12,8 +12,29 @@ if [[ "$#" -lt 2 ]]; then
   echo "Usage: ./install_genome_data.sh [GENOME] [DEST_DIR]"
   echo "  Example: ./install_genome_data.sh hg38 /your/genome/data/path/hg38"
   echo
+  exit 2
+fi
+
+CONDA_ENV=encode-atac-seq-pipeline
+CONDA_ENV_PY3=encode-atac-seq-pipeline-python3
+
+if which conda; then
+  echo "=== Found Conda ($(conda --version))."
+else
+  echo "=== Conda does not exist on your system. Please install Conda first."
+  echo "=== https://conda.io/docs/user-guide/install/index.html#regular-installation"
   exit 1
 fi
+
+if conda env list | grep -wq ${CONDA_ENV}; then
+  echo "=== Found Pipeline's Conda env (${CONDA_ENV})."
+else
+  echo "=== Pipeline's Conda env (${CONDA_ENV}) does not exist. Please install it first."
+  echo "=== Run install_dependencies.sh"
+  exit 2
+fi
+
+source activate ${CONDA_ENV}
 
 # pipeline specific params
 BUILD_BWT2_IDX=1
@@ -82,6 +103,10 @@ elif [[ $GENOME == "hg38_chr19_chrM" ]]; then
 elif [[ $GENOME == "mm10_chr19_chrM" ]]; then
   REF_FA="http://mitra.stanford.edu/kundaje/genome_data/mm10_chr19_chrM/mm10_no_alt_analysis_set_ENCODE.chr19_chrM.fasta.gz"
   BLACKLIST="http://mitra.stanford.edu/kundaje/genome_data/mm10/mm10.blacklist.bed.gz"
+
+elif [[ $GENOME == "YOUR_OWN_GENOME" ]]; then
+  REF_FA="URL_FOR_YOUR_FASTA_OR_2BIT"
+  BLACKLIST= # leave it empty if you don't have it
 fi
 
 if [[ ${REF_FA} == "" ]]; then
@@ -224,5 +249,7 @@ if [[ ${ROADMAP_META} != "" ]]; then
 else
   echo -e "roadmap_meta\t${DEST_DIR}/ataqc/null" >> ${TSV}
 fi
+
+source deactivate
 
 echo "=== All done."

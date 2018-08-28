@@ -113,3 +113,6 @@ cromwell*.jar
 output_*.json
 test/*_standalone.wdl
 .DS_Store
+test_genome*
+test_sample
+*.tar
