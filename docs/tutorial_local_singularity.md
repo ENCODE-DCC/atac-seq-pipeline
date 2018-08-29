@@ -1,4 +1,4 @@
-Tutorial for general UNIX computers with docker
+Tutorial for general UNIX computers with singularity
 ===============================================
 
 1. Git clone this pipeline.
@@ -44,15 +44,20 @@ Tutorial for general UNIX computers with docker
 
 9. See full specification for [input JSON file](input.md).
 
-## Extras for advanced users
+10. Please read through the next section. It's VERY IMPORTANT
 
-1. To make singularity have access to input files on a different file system (e.g. NFS mounted), you need to specify `"singularity_command_options"` as "--bind ROOT_DIR_FOR_YOUR_DATA". All subdirectories/files under`ROOT_DIR_FOR_YOUR_DATA` will be bound recursively. You can also specify multiple directories (comma-separated) to be bound inside a container.
+## Binding directories for singularity
 
+1. Singularity automatically binds two directories (your `$HOME` and your current working directory `$PWD`) RECURSIVELY. So it has access to any physical/hard-linked data under these directories. See item 2) for soft-linked (linked with `ln -s`) data.
+
+2. However, if your input data live on a different location you need to manually bind it for singularity. For example, you git cloned our pipeline on your `$HOME/code/atac-seq-pipeline` and run pipelines. You want to use `/scratch/fastq.gz` as an input (which is outside of your `$HOME` and `$PWD`) then singularity will not be able find it. Even if your input is `$HOME/fastq.gz` but it's a soft link to `/scratch2/any/sub-dir/fastq.gz` then singularity cannot find it either.
+
+3. Therefore, you need to modify `workflow_opts/singularity.json` to specify such bindings (`"singularity_command_options"` as `"--bind ROOT_DIR_FOR_YOUR_DATA"`). All subdirectories/files under `ROOT_DIR_FOR_YOUR_DATA` will be bound RECURSIVELY. You can also specify multiple directories (comma-separated). For the example of the item 2) see the following JSON:
     ```
       {
           "default_runtime_attributes" : {
               "singularity_container" : "~/.singularity/atac-seq-pipeline-v1.1.img",
-              "singularity_command_options" : "--bind ROOT_DIR_FOR_YOUR_DATA,DIR2,DIR3,..."
+              "singularity_command_options" : "--bind /scratch,/scratch2"
           }
       }
     ```
