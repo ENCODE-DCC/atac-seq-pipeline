@@ -12,6 +12,7 @@ ENCODE ATAC-seq pipeline
 * [Sun GridEngine (SGE)](docs/tutorial_sge.md)
 * [Local system with docker](docs/tutorial_local_docker.md)
 * [Local system without docker](docs/tutorial_local_conda.md)
+* [Local system with singularity](docs/tutorial_local_singularity.md)
 
 # [Input JSON](docs/input.md)
 
