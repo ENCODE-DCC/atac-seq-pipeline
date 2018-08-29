@@ -44,13 +44,13 @@ Tutorial for general UNIX computers with singularity
 
 9. See full specification for [input JSON file](input.md).
 
-10. Please read through the next section. It's VERY IMPORTANT
+10. Please read through the next section. It's VERY IMPORTANT.
 
 ## Binding directories for singularity
 
 1. Singularity automatically binds two directories (your `$HOME` and your current working directory `$PWD`) RECURSIVELY. So it has access to any physical/hard-linked data under these directories. See item 2) for soft-linked (linked with `ln -s`) data.
 
-2. However, if your input data live on a different location you need to manually bind it for singularity. For example, you git cloned our pipeline on your `$HOME/code/atac-seq-pipeline` and run pipelines. You want to use `/scratch/fastq.gz` as an input (which is outside of your `$HOME` and `$PWD`) then singularity will not be able find it. Even if your input is `$HOME/fastq.gz` but it's a soft link to `/scratch2/any/sub-dir/fastq.gz` then singularity cannot find it either.
+2. However, if your input data live on a different location then you need to manually bind them for singularity. For example, you git cloned our pipeline on your `$HOME/code/atac-seq-pipeline` and run pipelines. You want to use `/scratch/fastq.gz` as an input (which is outside of your `$HOME` and `$PWD`) then singularity will not be able find it. Even if your input is `$HOME/fastq.gz` but it's a soft link to `/scratch2/any/sub-dir/fastq.gz` then singularity cannot find it either.
 
 3. Therefore, you need to modify `workflow_opts/singularity.json` to specify such bindings (`"singularity_command_options"` as `"--bind ROOT_DIR_FOR_YOUR_DATA"`). All subdirectories/files under `ROOT_DIR_FOR_YOUR_DATA` will be bound RECURSIVELY. You can also specify multiple directories (comma-separated). For the example of the item 2) see the following JSON:
     ```
