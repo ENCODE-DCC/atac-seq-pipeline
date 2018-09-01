@@ -1,6 +1,8 @@
 {
     "default_runtime_attributes" : {
         "slurm_partition" : "akundaje",
-        "slurm_account" : "akundaje"
+        "slurm_account" : "akundaje",
+        "singularity_container" : "~/.singularity/atac-seq-pipeline-v1.1.simg",
+        "singularity_command_options" : "--bind /mnt/data"
     }
 }

@@ -1,37 +1,43 @@
 Tutorial for general UNIX computers with singularity
-===============================================
+====================================================
 
-1. Git clone this pipeline.
+1. Git clone this pipeline and move into it.
     ```
       $ git clone https://github.com/ENCODE-DCC/atac-seq-pipeline
-    ```
-
-2. Move to pipeline's directory.
-    ```
       $ cd atac-seq-pipeline
     ```
 
-3. Download cromwell.
+2. Download [cromwell](https://github.com/broadinstitute/cromwell).
     ```
       $ wget https://github.com/broadinstitute/cromwell/releases/download/34/cromwell-34.jar
       $ chmod +rx cromwell-34.jar
     ```
 
-4. Download a SUBSAMPLED (1/400) paired-end sample of [ENCSR356KRQ](https://www.encodeproject.org/experiments/ENCSR356KRQ/).
+3. Download a SUBSAMPLED (1/400) paired-end sample of [ENCSR356KRQ](https://www.encodeproject.org/experiments/ENCSR356KRQ/).
     ```
       $ wget https://storage.googleapis.com/encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ/ENCSR356KRQ_fastq_subsampled.tar
       $ tar xvf ENCSR356KRQ_fastq_subsampled.tar
     ```
 
-5. Download pre-built genome database for hg38.
+4. Download pre-built genome database for hg38.
     ```
       $ wget https://storage.googleapis.com/encode-pipeline-genome-data/test_genome_database_hg38_atac.tar
       $ tar xvf test_genome_database_hg38_atac.tar
     ```
 
-6. Pull a singularity container for the pipeline. This will pull pipeline's docker container first and build a singularity one on `~/.singularity`.
+5. Pull a singularity container for the pipeline. This will pull pipeline's docker container first and build a singularity one on `~/.singularity`.
     ```
       $ SINGULARITY_PULLFOLDER=~/.singularity singularity pull docker://quay.io/encode-dcc/atac-seq-pipeline:v1.1
+    ```
+
+6. **DO NOT SKIP THIS STEP OR PIPEPILE WILL FAIL.** Look for `--bind` in `singularity_command_options`. If you want to run pipelines with your own input data and genome database then you may need to add their directdories to `--bind`. It's comma-separated and all sub-directories under these directories will be bound recursively to singularity. Therefore, pick a root directory (e.g. your scratch folder `/scratch/users/$USER`) for your data.
+    ```
+      {
+          "default_runtime_attributes" : {
+              "singularity_container" : "~/.singularity/atac-seq-pipeline-v1.1.simg",
+              "singularity_command_options" : "--bind YOUR_WORK_DIR"
+          }
+      }
     ```
 
 7. Run a pipeline for the test sample.
