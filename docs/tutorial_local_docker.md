@@ -31,6 +31,6 @@ Tutorial for general UNIX computers with docker
       $ java -jar -Dconfig.file=backends/backend.conf cromwell-34.jar run atac.wdl -i ${INPUT} -o workflow_opts/docker.json
     ```
 
-7. It will take about an hour. You will be able to find all outputs on `cromwell-executions/atac/[RANDOM_HASH_STRING]/`. See [output directory structure](output.md) for details.
+6. It will take about an hour. You will be able to find all outputs on `cromwell-executions/atac/[RANDOM_HASH_STRING]/`. See [output directory structure](output.md) for details.
 
-8. See full specification for [input JSON file](input.md).
+7. See full specification for [input JSON file](input.md).

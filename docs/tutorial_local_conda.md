@@ -40,6 +40,6 @@ Tutorial for general UNIX computers without docker
       $ java -jar -Dconfig.file=backends/backend.conf cromwell-34.jar run atac.wdl -i ${INPUT}
     ```
 
-9. It will take about an hour. You will be able to find all outputs on `cromwell-executions/atac/[RANDOM_HASH_STRING]/`. See [output directory structure](output.md) for details.
+8. It will take about an hour. You will be able to find all outputs on `cromwell-executions/atac/[RANDOM_HASH_STRING]/`. See [output directory structure](output.md) for details.
 
-10. See full specification for [input JSON file](input.md).
+9. See full specification for [input JSON file](input.md).

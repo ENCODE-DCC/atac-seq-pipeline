@@ -70,7 +70,7 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
 8. Run a pipeline for the test sample.
     ```
       $ INPUT=examples/local/ENCSR356KRQ_subsampled.json
-      $ java -jar -Dconfig.file=backends/backend.conf -Dbackend.default=slurm_singularity cromwell-34.jar run atac.wdl -i ${INPUT} -o workflow_opts/slurm.json
+      $ java -jar -Dconfig.file=backends/backend.conf -Dbackend.default=sge_singularity cromwell-34.jar run atac.wdl -i ${INPUT} -o workflow_opts/sge.json
     ```
 
 9. It will take about an hour. You will be able to find all outputs on `cromwell-executions/atac/[RANDOM_HASH_STRING]/`. See [output directory structure](output.md) for details.
