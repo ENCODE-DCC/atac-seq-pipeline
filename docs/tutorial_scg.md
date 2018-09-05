@@ -20,26 +20,26 @@ All test samples and genome data are shared on Stanford SCG cluster based on SLU
       $ chmod +rx cromwell-34.jar
     ```
 
-Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](https://singularity.lbl.gov/).
-
-## For Conda users
-
-4. [Install Conda](https://conda.io/miniconda.html)
-
-5. Install Conda dependencies.
-    ```
-      $ bash conda/uninstall_dependencies.sh  # to remove any existing pipeline env
-      $ bash conda/install_dependencies.sh
-    ```
-
-6. Set your account in `workflow_opts/scg.json`. Ignore other runtime attributes for singularity.
+4. Set your account in `workflow_opts/scg.json`. Ignore other runtime attributes for singularity.
 
     ```
       {
           "default_runtime_attributes" : {
-              "slurm_partition" : "YOUR_SLURM_ACCOUNT"
+              "slurm_account" : "YOUR_SLURM_ACCOUNT"
           }
       }
+    ```
+
+Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](https://singularity.lbl.gov/).
+
+## For Conda users
+
+5. [Install Conda](https://conda.io/miniconda.html)
+
+6. Install Conda dependencies.
+    ```
+      $ bash conda/uninstall_dependencies.sh  # to remove any existing pipeline env
+      $ bash conda/install_dependencies.sh
     ```
 
 7. Run a pipeline for a SUBSAMPLED (1/400) paired-end sample of [ENCSR356KRQ](https://www.encodeproject.org/experiments/ENCSR356KRQ/).
@@ -55,31 +55,22 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
 
 ## For singularity users
 
-4. Pull a singularity container for the pipeline. This will pull pipeline's docker container first and build a singularity one on `~/.singularity`.
+5. Pull a singularity container for the pipeline. This will pull pipeline's docker container first and build a singularity one on `~/.singularity`.
     ```
       $ SINGULARITY_PULLFOLDER=~/.singularity singularity pull docker://quay.io/encode-dcc/atac-seq-pipeline:v1.1
     ```
 
-5. **DO NOT SKIP THIS STEP OR PIPEPILE WILL FAIL.** Set your account in `workflow_opts/scg.json`. Look for `--bind` in `singularity_command_options`. You will find that two directories are already defined there for binding pre-built genome database and test input data. However, if you want to run pipelines with your own input data and genome database then you may need to add their directories to `--bind`. It's comma-separated and all sub-directories under these directories will be bound recursively to singularity. Therefore, pick a root directory (e.g. your scratch folder `/ifs/scratch/$USER`) for your data.
-    ```
-      {
-          "default_runtime_attributes" : {
-              "slurm_account" : "YOUR_SLURM_ACCOUNT"
-              "singularity_container" : "~/.singularity/atac-seq-pipeline-v1.1.simg",
-              "singularity_command_options" : "--bind /ifs/scratch/leepc12/pipeline_genome_data,/ifs/scratch/leepc12/pipeline_test_samples"
-          }
-      }
-    ```
+6. [Bind your input/genome data directories to singularity](singularity.md). You can skip this step for this example. However, if you want to use your own input data and genome database then you may need to read through it very carefully.
 
-6. Run a pipeline for a SUBSAMPLED (1/400) paired-end sample of [ENCSR356KRQ](https://www.encodeproject.org/experiments/ENCSR356KRQ/).
+7. Run a pipeline for a SUBSAMPLED (1/400) paired-end sample of [ENCSR356KRQ](https://www.encodeproject.org/experiments/ENCSR356KRQ/).
     ```
       $ INPUT=examples/scg/ENCSR356KRQ_subsampled_scg.json
       $ java -jar -Dconfig.file=backends/backend.conf -Dbackend.default=slurm_singularity cromwell-34.jar run atac.wdl -i ${INPUT} -o workflow_opts/scg.json
     ```
 
-7. It will take about an hour. You will be able to find all outputs on `cromwell-executions/atac/[RANDOM_HASH_STRING]/`. See [output directory structure](output.md) for details.
+8. It will take about an hour. You will be able to find all outputs on `cromwell-executions/atac/[RANDOM_HASH_STRING]/`. See [output directory structure](output.md) for details.
 
-8. See full specification for [input JSON file](input.md).
+9. See full specification for [input JSON file](input.md).
 
 ## Running multiple pipelines with cromwell server mode
 

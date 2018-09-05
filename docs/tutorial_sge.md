@@ -65,15 +65,7 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
       $ SINGULARITY_PULLFOLDER=~/.singularity singularity pull docker://quay.io/encode-dcc/atac-seq-pipeline:v1.1
     ```
 
-7. **DO NOT SKIP THIS STEP OR PIPEPILE WILL FAIL.** Look for `--bind` in `singularity_command_options`. If you want to run pipelines with your own input data and genome database then you may need to add their directories to `--bind`. It's comma-separated and all sub-directories under these directories will be bound recursively to singularity. Therefore, pick a root directory (e.g. your scratch folder `/scratch/users/$USER`) for your data.
-    ```
-      {
-          "default_runtime_attributes" : {
-              "singularity_container" : "~/.singularity/atac-seq-pipeline-v1.1.simg",
-              "singularity_command_options" : "--bind YOUR_WORK_DIR"
-          }
-      }
-    ```
+7. [Bind your input/genome data directories to singularity](singularity.md). You can skip this step for this example. However, if you want to use your own input data and genome database then you may need to read through it very carefully and ADD YOUR DIRECTORIES TO `workflow_opts/sge.json`.
 
 8. Run a pipeline for the test sample.
     ```
