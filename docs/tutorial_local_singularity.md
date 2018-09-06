@@ -25,12 +25,15 @@ Tutorial for general UNIX computers with singularity
       $ tar xvf test_genome_database_hg38_atac.tar
     ```
 
-5. Pull a singularity container for the pipeline. This will pull pipeline's docker container first and build a singularity one on `~/.singularity`.
+5. CHECK YOUR SINGULARITY VERSION FIRST AND UPGRADE IT TO A VERSION `>=2.5.2` OR PIPELINE WILL NOT WORK CORRECTLY.
+    ```
+      $ singularty --version
+    ```
+
+6. Pull a singularity container for the pipeline. This will pull pipeline's docker container first and build a singularity one on `~/.singularity`.
     ```
       $ SINGULARITY_PULLFOLDER=~/.singularity singularity pull docker://quay.io/encode-dcc/atac-seq-pipeline:v1.1
     ```
-
-6. [Bind your input/genome data directories to singularity](singularity.md). You can skip this step for this example. However, if you want to use your own input data and genome database then you may need to read through it very carefully and ADD YOUR DIRECTORIES TO `workflow_opts/singularity.json`.
 
 7. Run a pipeline for the test sample.
     ```
@@ -42,4 +45,12 @@ Tutorial for general UNIX computers with singularity
 
 9. See full specification for [input JSON file](input.md).
 
-10. Please read through the next section. It's VERY IMPORTANT.
+10. IF YOU WANT TO RUN PIPELINES WITH YOUR OWN INPUT DATA/GENOME DATABASE, PLEASE ADD THEIR DIRECTORIES TO `workflow_opts/singularity.json`. For example, you have input FASTQs on `/your/input/fastqs/` and genome database installed on `/your/genome/database/` then add `/your/` to `--bind` in `singularity_command_options`. You can also define multiple directories there. It's comma-separated.
+    ```
+      {
+          "default_runtime_attributes" : {
+              "singularity_container" : "~/.singularity/chip-seq-pipeline-v1.1.simg",
+              "singularity_command_options" : "--bind /your/,YOUR_OWN_DATA_DIR1,YOUR_OWN_DATA_DIR1,..."
+          }
+      }
+    ```

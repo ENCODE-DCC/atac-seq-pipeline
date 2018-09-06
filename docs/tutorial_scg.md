@@ -60,17 +60,25 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
       $ SINGULARITY_PULLFOLDER=~/.singularity singularity pull docker://quay.io/encode-dcc/atac-seq-pipeline:v1.1
     ```
 
-6. [Bind your input/genome data directories to singularity](singularity.md). You can skip this step for this example. However, if you want to use your own input data and genome database then you may need to read through it very carefully.
-
-7. Run a pipeline for a SUBSAMPLED (1/400) paired-end sample of [ENCSR356KRQ](https://www.encodeproject.org/experiments/ENCSR356KRQ/).
+6. Run a pipeline for a SUBSAMPLED (1/400) paired-end sample of [ENCSR356KRQ](https://www.encodeproject.org/experiments/ENCSR356KRQ/).
     ```
       $ INPUT=examples/scg/ENCSR356KRQ_subsampled_scg.json
       $ java -jar -Dconfig.file=backends/backend.conf -Dbackend.default=slurm_singularity cromwell-34.jar run atac.wdl -i ${INPUT} -o workflow_opts/scg.json
     ```
 
-8. It will take about an hour. You will be able to find all outputs on `cromwell-executions/atac/[RANDOM_HASH_STRING]/`. See [output directory structure](output.md) for details.
+7. It will take about an hour. You will be able to find all outputs on `cromwell-executions/atac/[RANDOM_HASH_STRING]/`. See [output directory structure](output.md) for details.
 
-9. See full specification for [input JSON file](input.md).
+8. See full specification for [input JSON file](input.md).
+
+9. IF YOU WANT TO RUN PIPELINES WITH YOUR OWN INPUT DATA/GENOME DATABASE, PLEASE ADD THEIR DIRECTORIES TO `workflow_opts/scg.json`. For example, you have input FASTQs on `/your/input/fastqs/` and genome database installed on `/your/genome/database/` then add `/your/` to `--bind` in `singularity_command_options`. You can also define multiple directories there. It's comma-separated.
+    ```
+      {
+          "default_runtime_attributes" : {
+              "singularity_container" : "~/.singularity/chip-seq-pipeline-v1.1.simg",
+              "singularity_command_options" : "--bind /ifs/scratch,/srv/gsfs0,/your/,YOUR_OWN_DATA_DIR1,YOUR_OWN_DATA_DIR1,..."
+          }
+      }
+    ```
 
 ## Running multiple pipelines with cromwell server mode
 

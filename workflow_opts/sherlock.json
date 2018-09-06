@@ -2,6 +2,6 @@
     "default_runtime_attributes" : {
         "slurm_partition" : "akundaje",
         "singularity_container" : "~/.singularity/atac-seq-pipeline-v1.1.simg",
-        "singularity_command_options" : "--bind /scratch/users/leepc12/pipeline_genome_data,/scratch/users/leepc12/pipeline_test_samples"
+        "singularity_command_options" : "--bind /scratch,/oak/stanford"
     }
 }

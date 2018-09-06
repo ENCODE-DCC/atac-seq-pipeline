@@ -65,17 +65,26 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
       $ SINGULARITY_PULLFOLDER=~/.singularity singularity pull docker://quay.io/encode-dcc/atac-seq-pipeline:v1.1
     ```
 
-7. [Bind your input/genome data directories to singularity](singularity.md). You can skip this step for this example. However, if you want to use your own input data and genome database then you may need to read through it very carefully and ADD YOUR DIRECTORIES TO `workflow_opts/slurm.json`.
-
-8. Run a pipeline for the test sample.
+7. Run a pipeline for the test sample.
     ```
       $ INPUT=examples/local/ENCSR356KRQ_subsampled.json
       $ java -jar -Dconfig.file=backends/backend.conf -Dbackend.default=slurm_singularity cromwell-34.jar run atac.wdl -i ${INPUT} -o workflow_opts/slurm.json
     ```
 
-9. It will take about an hour. You will be able to find all outputs on `cromwell-executions/atac/[RANDOM_HASH_STRING]/`. See [output directory structure](output.md) for details.
+8. It will take about an hour. You will be able to find all outputs on `cromwell-executions/atac/[RANDOM_HASH_STRING]/`. See [output directory structure](output.md) for details.
 
-10. See full specification for [input JSON file](input.md).
+9. See full specification for [input JSON file](input.md).
+
+10. IF YOU WANT TO RUN PIPELINES WITH YOUR OWN INPUT DATA/GENOME DATABASE, PLEASE ADD THEIR DIRECTORIES TO `workflow_opts/slurm.json`. For example, you have input FASTQs on `/your/input/fastqs/` and genome database installed on `/your/genome/database/` then add `/your/` to `--bind` in `singularity_command_options`. You can also define multiple directories there. It's comma-separated.
+    ```
+      {
+          "default_runtime_attributes" : {
+              "singularity_container" : "~/.singularity/chip-seq-pipeline-v1.1.simg",
+              "singularity_command_options" : "--bind /your/,YOUR_OWN_DATA_DIR1,YOUR_OWN_DATA_DIR1,..."
+          }
+      }
+    ```
+
 
 ## Running multiple pipelines with cromwell server mode
 

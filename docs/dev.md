@@ -17,4 +17,7 @@ java -jar ~/dxWDL-0.75.jar compile atac.wdl -project "ENCODE Uniform Processing 
 
 # mm9
 java -jar ~/dxWDL-0.75.jar compile atac.wdl -project "ENCODE Uniform Processing Pipelines" -extras workflow_opts/docker.json -f -folder /ATAC-seq/workflows/v1.1/mm9 -defaults examples/dx/template_mm9.json
+
+# test sample
+java -jar ~/dxWDL-0.75.jar compile atac.wdl -project "ENCODE Uniform Processing Pipelines" -extras workflow_opts/docker.json -f -folder /ATAC-seq/workflows/v1.1/test_ENCSR356KRQ_subsampled -defaults examples/dx/ENCSR356KRQ_subsampled_dx.json
 ```
