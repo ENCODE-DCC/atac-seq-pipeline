@@ -33,6 +33,7 @@ from scipy.signal import find_peaks_cwt
 from jinja2 import Template
 from matplotlib import pyplot as plt
 from matplotlib import mlab
+from encode_common_genomic import *
 
 
 # utils
@@ -227,7 +228,7 @@ def get_gc(qsorted_bam_file, reference_fasta, prefix):
     plot_file = '{0}_gcPlot.pdf'.format(prefix)
     summary_file = '{0}_gcSummary.txt'.format(prefix)
     get_gc_metrics = ('java -Xmx4G -jar '
-                      '{5}/picard.jar '
+                      '{5} '
                       'CollectGcBiasMetrics R={0} I={1} O={2} '
                       'VERBOSITY=ERROR QUIET=TRUE '
                       'ASSUME_SORTED=FALSE '
@@ -236,7 +237,7 @@ def get_gc(qsorted_bam_file, reference_fasta, prefix):
                                                 output_file,
                                                 plot_file,
                                                 summary_file,
-                                                os.environ['PICARDROOT'])
+                                                locate_picard())
     logging.info(get_gc_metrics)
     os.system(get_gc_metrics)
     return output_file, plot_file, summary_file
@@ -357,12 +358,12 @@ def get_picard_complexity_metrics(aligned_bam, prefix):
     '''
     out_file = '{0}.picardcomplexity.qc'.format(prefix)
     get_gc_metrics = ('java -Xmx4G -jar '
-                      '{2}/picard.jar '
+                      '{2} '
                       'EstimateLibraryComplexity INPUT={0} OUTPUT={1} '
                       'VERBOSITY=ERROR '
                       'QUIET=TRUE').format(aligned_bam,
                                            out_file,
-                                           os.environ['PICARDROOT'])
+                                           locate_picard())
     os.system(get_gc_metrics)
 
     # Extract the actual estimated library size
@@ -564,14 +565,14 @@ def get_mito_dups(sorted_bam, prefix, endedness='Paired-ended', use_sambamba=Fal
 
     # Run Picard MarkDuplicates
     mark_duplicates = ('java -Xmx4G -jar '
-                       '{0}/picard.jar '
+                       '{0} '
                        'MarkDuplicates INPUT={1} OUTPUT={2} '
                        'METRICS_FILE={3} '
                        'VALIDATION_STRINGENCY=LENIENT '
                        'ASSUME_SORTED=TRUE '
                        'REMOVE_DUPLICATES=FALSE '
                        'VERBOSITY=ERROR '
-                       'QUIET=TRUE').format(os.environ['PICARDROOT'],
+                       'QUIET=TRUE').format(locate_picard(),
                                             tmp_filtered_bam,
                                             out_file,
                                             metrics_file)
@@ -670,14 +671,14 @@ def get_insert_distribution(final_bam, prefix):
     insert_data = '{0}.inserts.hist_data.log'.format(prefix)
     insert_plot = '{0}.inserts.hist_graph.pdf'.format(prefix)
     graph_insert_dist = ('java -Xmx4G -jar '
-                         '{3}/picard.jar '
+                         '{3} '
                          'CollectInsertSizeMetrics '
                          'INPUT={0} OUTPUT={1} H={2} '
                          'VERBOSITY=ERROR QUIET=TRUE '
                          'W=1000 STOP_AFTER=5000000').format(final_bam,
                                                              insert_data,
                                                              insert_plot,
-                                                             os.environ['PICARDROOT'])
+                                                             locate_picard())
     logging.info(graph_insert_dist)
     os.system(graph_insert_dist)
     return insert_data, insert_plot

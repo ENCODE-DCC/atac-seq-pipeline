@@ -1,7 +1,9 @@
-nomkl
+# repos: biconda, conda-forge, defaults, r
+
+openblas ==0.2.20
 python ==3.5.0
 numpy ==1.11.3
-idr ==2.0.3
+idr ==2.0.4.2
 bedtools ==2.26.0
 java-jdk ==8.0.92
 # to resolve 'CXXABI_1.3.9' not found issue

@@ -1,10 +1,9 @@
-# channels : defaults, r, bioconda
+# repos: biconda, conda-forge, defaults, r
 
-nomkl
 samtools ==1.2
 htslib ==1.4 # 1.5 in bioconda needed libbz2.so.1.0
 bedtools ==2.26.0 #2.22 # 2.21.0
-#picard ==1.126 # wanted 1.129 here but doesn't exist. instead 1.139 has backward compatibility issue, so take 1.126
+picard ==2.10.6 #==1.126 # wanted 1.129 here but doesn't exist. instead 1.139 has backward compatibility issue, so take 1.126
 ucsc-fetchchromsizes
 ucsc-wigtobigwig
 ucsc-bedgraphtobigwig
@@ -14,9 +13,9 @@ ucsc-bedtobigbed
 ucsc-twobittofa
 macs2 ==2.1.1.20160309 #2.1.0 (no binaries for OSX)
 boost ==1.57.0
-openblas ==0.2.19
-numpy ==1.11.3 #1.13.3 #1.10.2 (no binaries for OSX) #1.9.0, 1.8.2 conflicts with ATAQC
-matplotlib ==1.5.1
+openblas ==0.2.20
+numpy ==1.11.3 #1.10.2 (no binaries for OSX) #1.9.0, 1.8.2 conflicts with ATAQC
+matplotlib #==1.5.1
 six==1.11.0 # to fix (ImportError: cannot import name _thread)
 python-dateutil==2.6.1
 libgfortran==3.0
@@ -50,5 +49,7 @@ pandas #==0.18.0 #==0.16.1 # ataqc
 metaseq #==0.5.6 # ataqc
 jinja2 # ataqc
 gsl # for preseq
-pysam==0.8.2.1 # 0.8.3, 0.9 from bioconda has an issue with ATAQC (segmentation fault), need to use -c bcbio
+pysam==0.8.4 # 0.8.3, 0.9 from bioconda has an issue with ATAQC (segmentation fault), need to use -c bcbio
 pybedtools==0.6.9 # same issue as in pysam
+cromwell==0.34
+phantompeakqualtools ==1.2
