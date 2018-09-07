@@ -1,6 +1,7 @@
 {
     "default_runtime_attributes" : {
         "sge_pe" : "shm",
-        "sge_queue" : "q"
+        "sge_queue" : "q@kadru",
+        "singularity_container" : "~/.singularity/atac-seq-pipeline-v1.1.simg"
     }
 }

@@ -14,7 +14,7 @@ This document describes instruction for the item 2).
 
 2. Create a new [DX project](https://platform.dnanexus.com/projects) by clicking on "+New Project" on the top left.
 
-3. Move to our official [test workflow](https://platform.dnanexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/ATAC-seq/workflows/test_ENCSR356KRQ_subsampled) for the pipeline. This DX workflow is pre-built with all parameters defined.
+3. Move to our official [test workflow](https://platform.dnanexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/ATAC-seq/workflows/v1.1/test_ENCSR356KRQ_subsampled) for the pipeline. This DX workflow is pre-built with all parameters defined.
 
 4. Copy it to your project by right-clicking on the DX workflow `atac` and choose "Copy". 
 
