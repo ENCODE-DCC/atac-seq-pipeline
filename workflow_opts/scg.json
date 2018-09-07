@@ -1,5 +1,7 @@
 {
     "default_runtime_attributes" : {
-        "slurm_account" : "akundaje"
+        "slurm_account" : "akundaje",
+        "singularity_container" : "~/.singularity/atac-seq-pipeline-v1.1.simg",
+        "singularity_command_options" : "--bind /ifs/scratch,/srv/gsfs0"
     }
 }

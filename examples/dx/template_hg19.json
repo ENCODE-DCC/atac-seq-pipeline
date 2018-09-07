@@ -1,0 +1,4 @@
+{
+    "atac.pipeline_type" : "atac",
+    "atac.genome_tsv" : "dx://project-BKpvFg00VBPV975PgJ6Q03v6:pipeline-genome-data/hg19_dx.tsv"
+}

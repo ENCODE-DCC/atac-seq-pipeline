@@ -8,17 +8,19 @@ All test samples and genome data are shared on Stanford Sherlock cluster. You do
       $ ssh login.sherlock.stanford.edu
     ```
 
-2. Git clone this pipeline.
+2. Git clone this pipeline and move into it.
     ```
       $ git clone https://github.com/ENCODE-DCC/atac-seq-pipeline
-    ```
-
-3. Move to pipeline's directory.
-    ```
       $ cd atac-seq-pipeline
     ```
 
-4. Set your partition in `workflow_opts/sherlock.json`.
+3. Download [cromwell](https://github.com/broadinstitute/cromwell).
+    ```
+      $ wget https://github.com/broadinstitute/cromwell/releases/download/34/cromwell-34.jar
+      $ chmod +rx cromwell-34.jar
+    ```
+
+4. Set your partition in `workflow_opts/sherlock.json`. Ignore other runtime attributes for singularity.
 
     ```
       {
@@ -28,6 +30,10 @@ All test samples and genome data are shared on Stanford Sherlock cluster. You do
       }
     ```
 
+Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](https://singularity.lbl.gov/).
+
+## For Conda users
+
 5. [Install Conda](https://conda.io/miniconda.html)
 
 6. Install Conda dependencies.
@@ -36,36 +42,71 @@ All test samples and genome data are shared on Stanford Sherlock cluster. You do
       $ bash conda/install_dependencies.sh
     ```
 
-7. Download cromwell.
-    ```
-      $ wget https://github.com/broadinstitute/cromwell/releases/download/34/cromwell-34.jar
-      $ chmod +rx cromwell-34.jar
-    ```
-
-8. Run a pipeline for a SUBSAMPLED (1/400) paired-end sample of [ENCSR356KRQ](https://www.encodeproject.org/experiments/ENCSR356KRQ/).
+7. Run a pipeline for a SUBSAMPLED (1/400) paired-end sample of [ENCSR356KRQ](https://www.encodeproject.org/experiments/ENCSR356KRQ/).
     ```
       $ source activate encode-atac-seq-pipeline # IMPORTANT!
       $ INPUT=examples/sherlock/ENCSR356KRQ_subsampled_sherlock.json
       $ java -jar -Dconfig.file=backends/backend.conf -Dbackend.default=slurm cromwell-34.jar run atac.wdl -i ${INPUT} -o workflow_opts/sherlock.json
     ```
 
-9. It will take about an hour. You will be able to find all outputs on `cromwell-executions/atac/[RANDOM_HASH_STRING]/`. See [output directory structure](output.md) for details.
+8. It will take about an hour. You will be able to find all outputs on `cromwell-executions/atac/[RANDOM_HASH_STRING]/`. See [output directory structure](output.md) for details.
 
-10. See full specification for [input JSON file](input.md).
+9. See full specification for [input JSON file](input.md).
 
-## Extras for advanced users
+## For singularity users
+
+5. Add the following line to your BASH startup script (`~/.bashrc` or `~/.bash_profile`).
+    ```
+      module load system singularity
+    ```
+
+6. Pull a singularity container for the pipeline. This will pull pipeline's docker container first and build a singularity one on `~/.singularity`. Stanford Sherlock does not allow building a container on login nodes. Wait until you get a command prompt after `sdev`.
+    ```
+      $ sdev    # sherlock cluster does not allow building a container on login node
+      $ SINGULARITY_PULLFOLDER=~/.singularity singularity pull docker://quay.io/encode-dcc/atac-seq-pipeline:v1.1
+      $ exit    # exit from an interactive node
+    ```
+
+7. Run a pipeline for a SUBSAMPLED (1/400) paired-end sample of [ENCSR356KRQ](https://www.encodeproject.org/experiments/ENCSR356KRQ/).
+    ```
+      $ INPUT=examples/sherlock/ENCSR356KRQ_subsampled_sherlock.json
+      $ java -jar -Dconfig.file=backends/backend.conf -Dbackend.default=slurm_singularity cromwell-34.jar run atac.wdl -i ${INPUT} -o workflow_opts/sherlock.json
+    ```
+
+8. It will take about an hour. You will be able to find all outputs on `cromwell-executions/atac/[RANDOM_HASH_STRING]/`. See [output directory structure](output.md) for details.
+
+9. See full specification for [input JSON file](input.md).
+
+10. IF YOU WANT TO RUN PIPELINES WITH YOUR OWN INPUT DATA/GENOME DATABASE, PLEASE ADD THEIR DIRECTORIES TO `workflow_opts/sherlock.json`. For example, you have input FASTQs on `/your/input/fastqs/` and genome database installed on `/your/genome/database/` then add `/your/` to `--bind` in `singularity_command_options`. You can also define multiple directories there. It's comma-separated.
+    ```
+      {
+          "default_runtime_attributes" : {
+              "singularity_container" : "~/.singularity/chip-seq-pipeline-v1.1.simg",
+              "singularity_command_options" : "--bind /scratch,/oak/stanford,/your/,YOUR_OWN_DATA_DIR1,YOUR_OWN_DATA_DIR1,..."
+          }
+      }
+    ```
+
+## Running multiple pipelines with cromwell server mode
 
 1. If you want to run multiple (>10) pipelines, then run a cromwell server on an interactive node. We recommend to use `screen` or `tmux` to keep your session alive and note that all running pipelines will be killed after walltime. Run a Cromwell server with the following commands.
 
     ```
       $ srun -n 2 --mem 5G -t 3-0 --qos normal -p [YOUR_SLURM_PARTITION] --pty /bin/bash -i -l    # 2 CPU, 5 GB RAM and 3 day walltime
       $ hostname -f    # to get [CROMWELL_SVR_IP]
+    ```
 
+    For Conda users,
+    ```
       $ source activate encode-atac-seq-pipeline
       $ _JAVA_OPTIONS="-Xmx5G" java -jar -Dconfig.file=backends/backend/conf -Dbackend.default=slurm cromwell-34.jar server
     ```
+    For singularity users,
+    ```
+      $ _JAVA_OPTIONS="-Xmx5G" java -jar -Dconfig.file=backends/backend/conf -Dbackend.default=slurm_singularity cromwell-34.jar server
+    ```
 
-2. You can modify `backend.providers.slurm.concurrent-job-limit` in `backends/backend.conf` to increase maximum concurrent jobs. This limit is **not per sample**. It's for all sub-tasks of all submitted samples.
+2. You can modify `backend.providers.slurm.concurrent-job-limit` or `backend.providers.slurm_singularity.concurrent-job-limit` in `backends/backend.conf` to increase maximum concurrent jobs. This limit is **not per sample**. It's for all sub-tasks of all submitted samples.
 
 3. On a login node, submit jobs to the cromwell server. You will get `[WORKFLOW_ID]` as a return value. Keep these workflow IDs for monitoring pipelines and finding outputs for a specific sample later.  
     ```  

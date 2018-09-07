@@ -30,17 +30,13 @@ All test samples and genome data are shared on our public Google Cloud buckets. 
       $ gcloud config set project [YOUR_PROJECT_NAME]
     ```
 
-8. Git clone this pipeline.
+8. Git clone this pipeline and move into it.
     ```
       $ git clone https://github.com/ENCODE-DCC/atac-seq-pipeline
-    ```
-
-9. Move to pipeline's directory.
-    ```
       $ cd atac-seq-pipeline
     ```
 
-9. Download cromwell.
+9. Download [cromwell](https://github.com/broadinstitute/cromwell).
     ```
       $ wget https://github.com/broadinstitute/cromwell/releases/download/34/cromwell-34.jar
       $ chmod +rx cromwell-34.jar
