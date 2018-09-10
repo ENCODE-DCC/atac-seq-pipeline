@@ -104,8 +104,8 @@ else:
     Structure/dimension of `"atac.adapters` must match with that of `"atac.fastqs"`. If no adapters are given then do not define `"atac.adapters"` in `input.json`. If some adapters are known then define them in `"atac.adapters"` and leave other entries empty (`""`) while keeping the same structure/dimension as in `"atac.fastqs"`. All undefined/non-empty adapters will be trimmed without auto detection.
     
     * `"atac.trim_adapter.auto_detect_adapter"` : (optional) Set it as `true` to automatically detect/trim adapters for empty entries in `"atac.adapters"`. There will be no auto detection for non-empty entries it. If `"atac.adapters"` is not defined then all adapters will be detected/trimmed for all fastqs.
-    * `"atac.trim_adapter.min_trim_len"` : (optional) Minimum trim length for `cutadapt -m`.
-    * `"atac.trim_adapter.err_rate"` : (optional) Maximum allowed adapter error rate for `cutadapt -e`.
+    * `"atac.trim_adapter.min_trim_len"` : (optional) Minimum trim length for `cutadapt -m` (default: 5).
+    * `"atac.trim_adapter.err_rate"` : (optional) Maximum allowed adapter error rate for `cutadapt -e` (default: 0.1).
 
 3. Bowtie2 settings (remove a prefix `atac.` for DNANexus CLI).
 
@@ -114,7 +114,7 @@ else:
 4. Filter/dedup (post-alignment) settings (remove a prefix `atac.` for DNANexus CLI).
 
     * `"atac.filter.dup_marker"` : (optional) Dup marker. Choose between `picard` (default) and `sambamba`.
-    * `"atac.filter.mapq_thresh"` : (optional) Threshold for low MAPQ reads removal.
+    * `"atac.filter.mapq_thresh"` : (optional) Threshold for low MAPQ reads removal (default: 30).
     * `"atac.filter.no_dup_removal"` : (optional) No dup reads removal when filtering BAM.
 
 5. BAM-2-TAGALIGN settings (remove a prefix `atac.` for DNANexus CLI).
@@ -133,15 +133,15 @@ else:
     **DO NOT DEFINE MACS2 PARAMETERS IN `"atac.macs2"` SCOPE**. All MACS2 parameters must be defined in `"atac"` scope.
 
     * `"atac.cap_num_peak"` : (optional) Cap number of raw peaks called from MACS2.
-    * `"atac.pval_thresh"` : (optional) P-value threshold.
-    * `"atac.smooth_win"` : (optional) Size of smoothing window.
+    * `"atac.pval_thresh"` : (optional) P-value threshold  (default: 0.01).
+    * `"atac.smooth_win"` : (optional) Size of smoothing window (default: 150).
 
 8. IDR settings
 
     **DO NOT DEFINE IDR PARAMETERS IN `"atac.idr"` SCOPE**. All IDR parameters must be defined in `"atac"` scope.
 
     * `"atac.enable_idr"` : (optional) Set it as `true` to enable IDR on raw peaks.
-    * `"atac.idr_thresh"` : (optional) IDR threshold.
+    * `"atac.idr_thresh"` : (optional) IDR threshold (default: 0.05).
 
 9. ATAQC (annotation based analysis) settings
 
