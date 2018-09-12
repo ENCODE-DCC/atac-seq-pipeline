@@ -60,27 +60,32 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
 
 ## For singularity users,
 
-6. Pull a singularity container for the pipeline. This will pull pipeline's docker container first and build a singularity one on `~/.singularity`.
+6. CHECK YOUR SINGULARITY VERSION FIRST AND UPGRADE IT TO A VERSION `>=2.5.2` OR PIPELINE WILL NOT WORK CORRECTLY.
+    ```
+      $ singularity --version
+    ```
+
+7. Pull a singularity container for the pipeline. This will pull pipeline's docker container first and build a singularity one on `~/.singularity`.
     ```
       $ SINGULARITY_PULLFOLDER=~/.singularity singularity pull docker://quay.io/encode-dcc/atac-seq-pipeline:v1.1
     ```
 
-7. Run a pipeline for the test sample.
+8. Run a pipeline for the test sample.
     ```
       $ INPUT=examples/local/ENCSR356KRQ_subsampled.json
       $ java -jar -Dconfig.file=backends/backend.conf -Dbackend.default=sge_singularity cromwell-34.jar run atac.wdl -i ${INPUT} -o workflow_opts/sge.json
     ```
 
-8. It will take about an hour. You will be able to find all outputs on `cromwell-executions/atac/[RANDOM_HASH_STRING]/`. See [output directory structure](output.md) for details.
+9. It will take about an hour. You will be able to find all outputs on `cromwell-executions/atac/[RANDOM_HASH_STRING]/`. See [output directory structure](output.md) for details.
 
-9. See full specification for [input JSON file](input.md).
+10. See full specification for [input JSON file](input.md).
 
-10. IF YOU WANT TO RUN PIPELINES WITH YOUR OWN INPUT DATA/GENOME DATABASE, PLEASE ADD THEIR DIRECTORIES TO `workflow_opts/sge.json`. For example, you have input FASTQs on `/your/input/fastqs/` and genome database installed on `/your/genome/database/` then add `/your/` to `--bind` in `singularity_command_options`. You can also define multiple directories there. It's comma-separated.
+11. IF YOU WANT TO RUN PIPELINES WITH YOUR OWN INPUT DATA/GENOME DATABASE, PLEASE ADD THEIR DIRECTORIES TO `workflow_opts/sge.json`. For example, you have input FASTQs on `/your/input/fastqs/` and genome database installed on `/your/genome/database/` then add `/your/` to `--bind` in `singularity_command_options`. You can also define multiple directories there. It's comma-separated.
     ```
       {
           "default_runtime_attributes" : {
               "singularity_container" : "~/.singularity/chip-seq-pipeline-v1.1.simg",
-              "singularity_command_options" : "--bind /your/,YOUR_OWN_DATA_DIR1,YOUR_OWN_DATA_DIR1,..."
+              "singularity_command_options" : "--bind /your/,YOUR_OWN_DATA_DIR1,YOUR_OWN_DATA_DIR2,..."
           }
       }
     ```
