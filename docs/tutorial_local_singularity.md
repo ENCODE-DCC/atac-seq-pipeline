@@ -27,7 +27,7 @@ Tutorial for general UNIX computers with singularity
 
 5. CHECK YOUR SINGULARITY VERSION FIRST AND UPGRADE IT TO A VERSION `>=2.5.2` OR PIPELINE WILL NOT WORK CORRECTLY.
     ```
-      $ singularty --version
+      $ singularity --version
     ```
 
 6. Pull a singularity container for the pipeline. This will pull pipeline's docker container first and build a singularity one on `~/.singularity`.

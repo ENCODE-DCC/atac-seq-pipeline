@@ -7,8 +7,6 @@ This pipeline is designed for automated end-to-end quality control and processin
 
 The ATAC-seq pipeline specification is also the official pipeline specification of the Encyclopedia of DNA Elements (ENCODE) consortium. The ATAC-seq pipeline protocol definition is [here](https://docs.google.com/document/d/1f0Cm4vRyDQDu0bMehHD7P7KOMxTOP-HiNoIvL1VcBt8/edit?usp=sharing). Some parts of the ATAC-seq pipeline were developed in collaboration with Jason Buenrostro, Alicia Schep and Will Greenleaf at Stanford.
 
-The DNase-seq pipeline specification is [here](https://docs.google.com/document/d/1e3cCormg0SnQW6zr7VYBWvXC1GiPc5GSy80qlKBPwlA/edit?usp=sharing). Note that this is NOT the same as the official ENCODE DNase-seq pipeline.
-
 # Installation / Tutorial
 
 * [Google Cloud Platform](docs/tutorial_google.md)
