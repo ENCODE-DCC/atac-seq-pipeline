@@ -20,8 +20,7 @@ All test samples and genome data are shared on Stanford Sherlock cluster. You do
       $ chmod +rx cromwell-34.jar
     ```
 
-4. Set your partition in `workflow_opts/sherlock.json`. Ignore other runtime attributes for singularity.
-
+4. Set your partition in `workflow_opts/sherlock.json`. PIPELINE WILL NOT WORK WITHOUT A PAID SLURM PARTITION DUE TO LIMITED RESOURCE SETTINGS FOR FREE USERS. Ignore other runtime attributes for singularity. 
     ```
       {
         "default_runtime_attributes" : {

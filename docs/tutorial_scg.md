@@ -20,8 +20,7 @@ All test samples and genome data are shared on Stanford SCG cluster based on SLU
       $ chmod +rx cromwell-34.jar
     ```
 
-4. Set your account in `workflow_opts/scg.json`. Ignore other runtime attributes for singularity.
-
+4. Set your account in `workflow_opts/scg.json`. [PIPELINE WILL NOT WORK WITHOUT A SLURM ACCOUNT](https://web.stanford.edu/group/scgpm/cgi-bin/informatics/wiki/index.php/Getting_A_Cluster_Account). Ignore other runtime attributes for singularity.
     ```
       {
           "default_runtime_attributes" : {
