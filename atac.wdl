@@ -435,6 +435,8 @@ workflow atac {
 			peaks = overlap.bfilt_overlap_peak,
 			peaks_pr = overlap_pr.bfilt_overlap_peak,
 			peak_ppr = overlap_ppr.bfilt_overlap_peak,
+			peak_type = peak_type,
+			chrsz = chrsz,
 		}
 	}
 	if ( !align_only && !true_rep_only && enable_idr ) {
@@ -444,6 +446,8 @@ workflow atac {
 			peaks = idr.bfilt_idr_peak,
 			peaks_pr = idr_pr.bfilt_idr_peak,
 			peak_ppr = idr_ppr.bfilt_idr_peak,
+			peak_type = peak_type,
+			chrsz = chrsz,
 		}
 	}
 	# Generate final QC report and JSON		
@@ -909,17 +913,23 @@ task reproducibility {
                         # x,y means peak file from rep-x vs rep-y
 	Array[File]? peaks_pr	# peak files from pseudo replicates
 	File? peak_ppr			# Peak file from pooled pseudo replicate.
+	String peak_type
+	File chrsz			# 2-col chromosome sizes file
 
 	command {
 		python $(which encode_reproducibility_qc.py) \
 			${sep=' ' peaks} \
 			--peaks-pr ${sep=' ' peaks_pr} \
 			${"--peak-ppr "+ peak_ppr} \
-			--prefix ${prefix}
+			--prefix ${prefix} \
+			${"--peak-type " + peak_type} \
+			${"--chrsz " + chrsz}
 	}
 	output {
 		File optimal_peak = glob("optimal_peak.gz")[0]
 		File conservative_peak = glob("conservative_peak.gz")[0]
+		File optimal_peak_bb = glob("optimal_peak.*.bb")[0]
+		File conservative_peak_bb = glob("conservative_peak.*.bb")[0]
 		File reproducibility_qc = glob("*reproducibility.qc")[0]
 	}
 	runtime {
