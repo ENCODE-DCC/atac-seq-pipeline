@@ -41,7 +41,7 @@ trim-galore ==0.4.1 # for old trimmer
 python-levenshtein # for old trimmer (trimAdapter.py)
 
 bowtie2 ==2.2.6
-ncurses
+ncurses ==6.1
 ucsc-bigWigAverageOverBed
 gnuplot #==5.0.3
 scipy # ==0.17.0: to fix 'undefined symbol: PyUnicodeUCS2_DecodeUTF8'
