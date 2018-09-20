@@ -93,7 +93,7 @@ def ataqc():
     BLACKLIST = args.blacklist
     PROM = args.prom
     ENH = args.enh
-    REG2MAP_BED = args.reg2map_bed if os.path.basename(args.reg2map_bed)!='null' else ''
+    REG2MAP_BED = args.reg2map_bed if os.path.basename(args.reg2map_bed)!='null' else DNASE
     REG2MAP = args.reg2map
     ROADMAP_META = args.roadmap_meta
 
