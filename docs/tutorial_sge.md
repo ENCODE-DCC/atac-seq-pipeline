@@ -43,8 +43,8 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
 
 7. Install Conda dependencies.
     ```
-      $ bash installers/uninstall_dependencies.sh  # to remove any existing pipeline env
-      $ bash installers/install_dependencies.sh
+      $ bash conda/uninstall_dependencies.sh  # to remove any existing pipeline env
+      $ bash conda/install_dependencies.sh
     ```
 
 8. Run a pipeline for the test sample.
