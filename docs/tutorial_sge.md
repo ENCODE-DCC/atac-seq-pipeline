@@ -25,7 +25,7 @@ Tutorial for Sun GridEngine (SGE) clusters
       $ tar xvf test_genome_database_hg38_atac.tar
     ```
 
-5. Set your parallel environment (PE) and queue in `workflow_opts/sge.json`. If your SGE cluster does not have any PE, ask your admin to add one for our pipeline. If you don't want to specify any queue then remove `, "sge_queue" : "YOUR_SGE_QUEUE"` from the file.
+5. Set your parallel environment (PE) and queue in `workflow_opts/sge.json`. If your SGE cluster does not have any PE, ask your admin to add one for our pipeline. If you don't want to specify any queue then remove `, "sge_queue" : "YOUR_SGE_QUEUE"` from the file. See [here](how_to_config_sge.md) to find details about how to configure SGE for the pipeline.
     ```
       {
           "default_runtime_attributes" : {
