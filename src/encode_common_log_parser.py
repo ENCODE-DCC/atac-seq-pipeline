@@ -173,7 +173,7 @@ def parse_dup_qc(txt):
         content = ''
         for line in f:
             if header:
-                content = line
+                content = line.replace(',','.')
                 picard_log_found = True
                 break
             if 'UNPAIRED_READS_EXAMINED' in line:
