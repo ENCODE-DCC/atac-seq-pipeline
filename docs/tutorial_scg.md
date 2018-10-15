@@ -74,7 +74,7 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
       {
           "default_runtime_attributes" : {
               "singularity_container" : "~/.singularity/chip-seq-pipeline-v1.1.simg",
-              "singularity_command_options" : "--bind /ifs/scratch,/srv/gsfs0,/your/,YOUR_OWN_DATA_DIR1,YOUR_OWN_DATA_DIR1,..."
+              "singularity_command_options" : "--bind /scratch/users,/srv/gsfs0,/your/,YOUR_OWN_DATA_DIR1,YOUR_OWN_DATA_DIR1,..."
           }
       }
     ```
