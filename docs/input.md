@@ -165,6 +165,7 @@ CPU (`cpu`), memory (`mem_mb`) settings are used for submitting jobs to cluster 
 * `"atac.spr.mem_mb"` : (optional) Max. memory limit in MB for `spr` (default: 12000).
 * `"atac.xcor.mem_mb"` : (optional) Max. memory limit in MB for `xcor` (default: 10000).
 * `"atac.macs2_mem_mb"` : (optional) Max. memory limit in MB for `macs2` (default: 16000).
+* `"atac.ataqc.mem_mb"` : (optional) Max. memory limit in MB for `ATAQC` (default: 16000).
 
 Disks (`disks`) is used for Cloud platforms (Google Cloud Platforms, AWS, ...).
 
@@ -183,4 +184,5 @@ Walltime (`time`) settings (for SGE and SLURM only).
 * `"atac.bam2ta.time_hr"` : (optional) Walltime for `bam2ta` (default: 6).
 * `"atac.xcor.time_hr"` : (optional) Walltime for `xcor` (default: 6).
 * `"atac.macs2_time_hr"` : (optional) Walltime for `macs2` (default: 24).
+* `"atac.ataqc.time_hr"` : (optional) Walltime for `ATAQC` (default: 24).
 

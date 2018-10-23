@@ -25,7 +25,7 @@ Tutorial for Sun GridEngine (SGE) clusters
       $ tar xvf test_genome_database_hg38_atac.tar
     ```
 
-5. Set your parallel environment (PE) and queue in `workflow_opts/sge.json`. If your SGE cluster does not have any PE, ask your admin to add one for our pipeline. If you don't want to specify any queue then remove `, "sge_queue" : "YOUR_SGE_QUEUE"` from the file.
+5. Set your parallel environment (PE) and queue in `workflow_opts/sge.json`. If your SGE cluster does not have any PE, ask your admin to add one for our pipeline. If you don't want to specify any queue then remove `, "sge_queue" : "YOUR_SGE_QUEUE"` from the file. See [here](how_to_config_sge.md) to find details about how to configure SGE for the pipeline.
     ```
       {
           "default_runtime_attributes" : {
@@ -101,11 +101,11 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
     For Conda users,
     ```
       $ source activate encode-atac-seq-pipeline
-      $ _JAVA_OPTIONS="-Xmx5G" java -jar -Dconfig.file=backends/backend/conf -Dbackend.default=sge cromwell-34.jar server
+      $ _JAVA_OPTIONS="-Xmx5G" java -jar -Dconfig.file=backends/backend.conf -Dbackend.default=sge cromwell-34.jar server
     ```
     For singularity users,
     ```
-      $ _JAVA_OPTIONS="-Xmx5G" java -jar -Dconfig.file=backends/backend/conf -Dbackend.default=sge_singularity cromwell-34.jar server
+      $ _JAVA_OPTIONS="-Xmx5G" java -jar -Dconfig.file=backends/backend.conf -Dbackend.default=sge_singularity cromwell-34.jar server
     ```
 
 2. You can modify `backend.providers.sge.concurrent-job-limit` or `backend.providers.sge_singularity.concurrent-job-limit` in `backends/backend.conf` to increase maximum concurrent jobs. This limit is **not per sample**. It's for all sub-tasks of all submitted samples.

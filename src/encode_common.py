@@ -142,9 +142,11 @@ def get_num_lines(f):
     cmd = 'zcat -f {} | wc -l'.format(f)
     return int(run_shell_cmd(cmd))
 
-def assert_file_not_empty(f):
-    if get_num_lines(f)==0:
-        raise Exception('File is empty. {}'.format(f))
+def assert_file_not_empty(f,help=''):
+    if not os.path.exists(f):
+        raise Exception('File does not exist ({}). Help: {}'.format(f,help))
+    elif get_num_lines(f)==0:
+        raise Exception('File is empty ({}). Help: {}'.format(f,help))
 
 def write_txt(f,s):
     with open(f,'w') as fp:
@@ -225,11 +227,12 @@ def run_shell_cmd(cmd):
         return ret.strip('\n')
     except:
         # kill all child processes
-        log.exception('Unknown exception caught. '+ \
-            'Killing process group {}...'.format(pgid))
-        os.killpg(pgid, signal.SIGKILL)
-        p.terminate()
-        raise Exception('Unknown exception caught. PID={}'.format(pid))
+        try:
+            os.killpg(pgid, signal.SIGKILL)
+            p.terminate()
+        except:
+            pass
+        raise Exception('Exception caught. Killed PID={}, PGID={}'.format(pid,pgid))
 
 # math
 

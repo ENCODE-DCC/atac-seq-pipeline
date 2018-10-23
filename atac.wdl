@@ -814,7 +814,7 @@ task macs2 {
 	}
 	runtime {
 		cpu : 1
-		memory : "${select_first([mem_mb,'20000'])} MB"
+		memory : "${select_first([mem_mb,'16000'])} MB"
 		time : select_first([time_hr,24])
 		disks : select_first([disks,"local-disk 100 HDD"])
 	}
@@ -1024,7 +1024,7 @@ task ataqc { # generate ATAQC report
 	}
 	runtime {
 		cpu : 1
-		memory : "${select_first([mem_mb,'20000'])} MB"
+		memory : "${select_first([mem_mb,'16000'])} MB"
 		time : select_first([time_hr,24])
 		disks : select_first([disks,"local-disk 100 HDD"])
 	}

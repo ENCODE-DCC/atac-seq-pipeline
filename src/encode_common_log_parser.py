@@ -173,7 +173,7 @@ def parse_dup_qc(txt):
         content = ''
         for line in f:
             if header:
-                content = line
+                content = line.replace(',','.')
                 picard_log_found = True
                 break
             if 'UNPAIRED_READS_EXAMINED' in line:
@@ -275,9 +275,9 @@ def parse_jsd_qc(txt):
     result['syn_auc'] = float(arr[5])
     result['syn_elbow_pt'] = float(arr[6])
     result['syn_jsd'] = float(arr[7])
-    result['syn_x_intcpt'] = float(arr[8])
-    result['x_intcpt'] = float(arr[9])
-    result['diff_enrich'] = float(arr[10])
+    # result['syn_x_intcpt'] = float(arr[8])
+    # result['x_intcpt'] = float(arr[9])
+    # result['diff_enrich'] = float(arr[10])
     return result
 
 def parse_reproducibility_qc(txt):
