@@ -115,7 +115,10 @@ def parse_flagstat_qc(txt):
     if mapped_qc_failed:
         result['mapped_qc_failed'] = int(mapped_qc_failed)
     if mapped_pct:
-        result['mapped_pct'] = float(mapped_pct)
+        if mapped_pct!='N/A' and not 'nan' in mapped_pct:
+            result['mapped_pct'] = float(mapped_pct)
+        else:
+            result['mapped_pct'] = 0.0
     if paired:
         result['paired'] = int(paired)
     if paired_qc_failed:
@@ -214,7 +217,7 @@ def parse_dup_qc(txt):
                 if paired_reads == '0': # SE
                     dupes_pct = '{0:.2f}'.format(
                                 float(unpaired_dupes)/float(unpaired_reads))
-                else:
+                elif paired_reads:
                     dupes_pct = '{0:.2f}'.format(
                                 float(paired_dupes)/float(paired_reads))
     if unpaired_reads:
@@ -309,7 +312,7 @@ def parse_multi_col_txt(txt): # to read ATAQC log
         line = line.strip().replace(' reads; of these:','')
         arr = line.split('\t')
         for j in range(1,len(arr)):
-            header = arr[0] 
+            header = arr[0].lower()
             header += '' if len(arr)==2 else '-{}'.format(j)
             content = arr[j]
             result[header] = content
@@ -404,4 +407,4 @@ def get_long_keyname(key, paired_end=False):
         return short_to_long_pe[key]
     if not paired_end and key in short_to_long_se:
         return short_to_long_se[key]
-    return key
+    return key.replace('_',' ').capitalize()

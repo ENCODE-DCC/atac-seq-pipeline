@@ -1072,8 +1072,8 @@ task qc_report {
 
 	command {
 		python $(which encode_qc_report.py) \
-			${"--name '" + name + "'"} \
-			${"--desc '" + desc + "'"} \
+			${"--name '" + sub(select_first([name,""]),"'","_") + "'"} \
+			${"--desc '" + sub(select_first([desc,""]),"'","_") + "'"} \
 			${if paired_end then "--paired-end" else ""} \
 			--pipeline-type ${pipeline_type} \
 			--peak-caller ${peak_caller} \
