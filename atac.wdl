@@ -969,11 +969,12 @@ task ataqc { # generate ATAQC report
 	File roadmap_meta
 	# resource
 	Int? mem_mb
+	Int? mem_java_mb
 	Int? time_hr
 	String? disks
 
 	command {
-		export _JAVA_OPTIONS="-Xms256M -Xmx${select_first([mem_mb,'16000'])}M -XX:ParallelGCThreads=1"
+		export _JAVA_OPTIONS="-Xms256M -Xmx${select_first([mem_java_mb,mem_mb,'16000'])}M -XX:ParallelGCThreads=1"
 
 		python $(which encode_ataqc.py) \
 			${if paired_end then "--paired-end" else ""} \
