@@ -21,7 +21,7 @@ def html_embedded_png(png, caption, size_pct=100):
       <figcaption style="text-align:center">{caption}</figcaption>
     </figure>
     '''
-    encoded = base64.b64encode(open(png, 'rb').read()).encode('ascii')
+    encoded = base64.b64encode(open(png, 'rb').read()).decode("utf-8")
     return html.format(size_pct=size_pct, encoded=encoded, caption=caption)
 
 def html_vert_table_multi_rep(json_objs, paired_end=False, row_header=[]): # json_objs=list of OrderedDict
