@@ -32,7 +32,7 @@ Tutorial for general UNIX computers with singularity
 
 6. Pull a singularity container for the pipeline. This will pull pipeline's docker container first and build a singularity one on `~/.singularity`.
     ```
-      $ SINGULARITY_PULLFOLDER=~/.singularity singularity pull docker://quay.io/encode-dcc/atac-seq-pipeline:v1.1
+      $ SINGULARITY_CACHEDIR=~/.singularity SINGULARITY_PULLFOLDER=~/.singularity singularity pull docker://quay.io/encode-dcc/atac-seq-pipeline:v1.1
     ```
 
 7. Run a pipeline for the test sample.
