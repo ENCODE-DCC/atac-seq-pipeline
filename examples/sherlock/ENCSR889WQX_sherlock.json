@@ -1,16 +1,16 @@
 {
     "atac.pipeline_type" : "atac",
-    "atac.genome_tsv" : "/scratch/users/leepc12/pipeline_genome_data/mm10_sherlock.tsv",
+    "atac.genome_tsv" : "/home/groups/cherry/encode/pipeline_genome_data/mm10_sherlock.tsv",
     "atac.fastqs" : [
         [
-            ["/oak/stanford/groups/akundaje/leepc12/run/ATAC_ENCODE3/ENCODE3/data/DNA+accessibility/ATAC-seq/Mus+musculus/ENCSR889WQX/rep1/ENCFF439VSY.fastq.gz"],
-            ["/oak/stanford/groups/akundaje/leepc12/run/ATAC_ENCODE3/ENCODE3/data/DNA+accessibility/ATAC-seq/Mus+musculus/ENCSR889WQX/rep1/ENCFF325FCQ.fastq.gz"],
-            ["/oak/stanford/groups/akundaje/leepc12/run/ATAC_ENCODE3/ENCODE3/data/DNA+accessibility/ATAC-seq/Mus+musculus/ENCSR889WQX/rep1/ENCFF683IQS.fastq.gz"],
-            ["/oak/stanford/groups/akundaje/leepc12/run/ATAC_ENCODE3/ENCODE3/data/DNA+accessibility/ATAC-seq/Mus+musculus/ENCSR889WQX/rep1/ENCFF744CHW.fastq.gz"]
+            ["/home/groups/cherry/encode/pipeline_test_samples/encode-atac-seq-pipeline/ENCSR889WQX/fastq/rep1/ENCFF439VSY.fastq.gz"],
+            ["/home/groups/cherry/encode/pipeline_test_samples/encode-atac-seq-pipeline/ENCSR889WQX/fastq/rep1/ENCFF325FCQ.fastq.gz"],
+            ["/home/groups/cherry/encode/pipeline_test_samples/encode-atac-seq-pipeline/ENCSR889WQX/fastq/rep1/ENCFF683IQS.fastq.gz"],
+            ["/home/groups/cherry/encode/pipeline_test_samples/encode-atac-seq-pipeline/ENCSR889WQX/fastq/rep1/ENCFF744CHW.fastq.gz"]
         ],
         [
-            ["/oak/stanford/groups/akundaje/leepc12/run/ATAC_ENCODE3/ENCODE3/data/DNA+accessibility/ATAC-seq/Mus+musculus/ENCSR889WQX/rep2/ENCFF463QCX.fastq.gz"],
-            ["/oak/stanford/groups/akundaje/leepc12/run/ATAC_ENCODE3/ENCODE3/data/DNA+accessibility/ATAC-seq/Mus+musculus/ENCSR889WQX/rep2/ENCFF992TSA.fastq.gz"]
+            ["/home/groups/cherry/encode/pipeline_test_samples/encode-atac-seq-pipeline/ENCSR889WQX/fastq/rep2/ENCFF463QCX.fastq.gz"],
+            ["/home/groups/cherry/encode/pipeline_test_samples/encode-atac-seq-pipeline/ENCSR889WQX/fastq/rep2/ENCFF992TSA.fastq.gz"]
         ]
     ],
 
