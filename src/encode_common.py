@@ -46,7 +46,7 @@ def strip_ext_npeak(npeak):
 
 def strip_ext_rpeak(rpeak):
     return re.sub(r'\.(regionPeak|RegionPeak)\.gz$','',
-                    str(npeak))
+                    str(rpeak))
 
 def strip_ext_gpeak(gpeak):
     return re.sub(r'\.(gappedPeak|GappedPeak)\.gz$','',
