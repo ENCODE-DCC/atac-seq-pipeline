@@ -450,38 +450,6 @@ workflow atac {
 			chrsz = chrsz,
 		}
 	}
-	# Generate final QC report and JSON		
-	call qc_report { input :
-		paired_end = paired_end,
-		pipeline_type = pipeline_type,
-		peak_caller = 'macs2',
-		idr_thresh = idr_thresh,
-		flagstat_qcs = bowtie2.flagstat_qc,
-		nodup_flagstat_qcs = filter.flagstat_qc,
-		dup_qcs = filter.dup_qc,
-		pbc_qcs = filter.pbc_qc,
-		xcor_plots = xcor.plot_png,
-		xcor_scores = xcor.score,
-
-		frip_macs2_qcs = macs2.frip_qc,
-		frip_macs2_qcs_pr1 = macs2_pr1.frip_qc,
-		frip_macs2_qcs_pr2 = macs2_pr2.frip_qc,
-		frip_macs2_qc_pooled = macs2_pooled.frip_qc,
-		frip_macs2_qc_ppr1 = macs2_ppr1.frip_qc,
-		frip_macs2_qc_ppr2 = macs2_ppr2.frip_qc,
-
-		idr_plots = idr.idr_plot,
-		idr_plots_pr = idr_pr.idr_plot,
-		idr_plot_ppr = idr_ppr.idr_plot,
-		frip_idr_qcs = idr.frip_qc,
-		frip_idr_qcs_pr = idr_pr.frip_qc,
-		frip_idr_qc_ppr = idr_ppr.frip_qc,
-		frip_overlap_qcs = overlap.frip_qc,
-		frip_overlap_qcs_pr = overlap_pr.frip_qc,
-		frip_overlap_qc_ppr = overlap_ppr.frip_qc,
-		idr_reproducibility_qc = reproducibility_idr.reproducibility_qc,
-		overlap_reproducibility_qc = reproducibility_overlap.reproducibility_qc,
-	}
 
 	# ATAQC is available only when pipeline starts from fastqs, take fastqs[] as base array for ataqc
 	Array[Array[Array[File]]] fastqs_ataqc = 
@@ -516,6 +484,41 @@ workflow atac {
 			reg2map = reg2map,
 			roadmap_meta = roadmap_meta,
 		}
+	}
+
+	# Generate final QC report and JSON		
+	call qc_report { input :
+		paired_end = paired_end,
+		pipeline_type = pipeline_type,
+		peak_caller = 'macs2',
+		idr_thresh = idr_thresh,
+		flagstat_qcs = bowtie2.flagstat_qc,
+		nodup_flagstat_qcs = filter.flagstat_qc,
+		dup_qcs = filter.dup_qc,
+		pbc_qcs = filter.pbc_qc,
+		xcor_plots = xcor.plot_png,
+		xcor_scores = xcor.score,
+
+		frip_macs2_qcs = macs2.frip_qc,
+		frip_macs2_qcs_pr1 = macs2_pr1.frip_qc,
+		frip_macs2_qcs_pr2 = macs2_pr2.frip_qc,
+		frip_macs2_qc_pooled = macs2_pooled.frip_qc,
+		frip_macs2_qc_ppr1 = macs2_ppr1.frip_qc,
+		frip_macs2_qc_ppr2 = macs2_ppr2.frip_qc,
+
+		idr_plots = idr.idr_plot,
+		idr_plots_pr = idr_pr.idr_plot,
+		idr_plot_ppr = idr_ppr.idr_plot,
+		frip_idr_qcs = idr.frip_qc,
+		frip_idr_qcs_pr = idr_pr.frip_qc,
+		frip_idr_qc_ppr = idr_ppr.frip_qc,
+		frip_overlap_qcs = overlap.frip_qc,
+		frip_overlap_qcs_pr = overlap_pr.frip_qc,
+		frip_overlap_qc_ppr = overlap_ppr.frip_qc,
+		idr_reproducibility_qc = reproducibility_idr.reproducibility_qc,
+		overlap_reproducibility_qc = reproducibility_overlap.reproducibility_qc,
+		ataqc_txts = ataqc.txt,
+		ataqc_htmls = ataqc.html,
 	}
 
 	output {
@@ -1068,6 +1071,8 @@ task qc_report {
 	File? frip_overlap_qc_ppr
 	File? idr_reproducibility_qc
 	File? overlap_reproducibility_qc
+	Array[File]? ataqc_txts
+	Array[File]? ataqc_htmls
 
 	File? qc_json_ref
 
@@ -1102,6 +1107,8 @@ task qc_report {
 			${"--frip-overlap-qc-ppr " + frip_overlap_qc_ppr} \
 			${"--idr-reproducibility-qc " + idr_reproducibility_qc} \
 			${"--overlap-reproducibility-qc " + overlap_reproducibility_qc} \
+			--ataqc-txts ${sep=' ' ataqc_txts} \
+			--ataqc-htmls ${sep=' ' ataqc_htmls} \
 			--out-qc-html qc.html \
 			--out-qc-json qc.json
 		

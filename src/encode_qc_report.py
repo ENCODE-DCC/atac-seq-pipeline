@@ -13,6 +13,46 @@ from encode_common_log_parser import *
 from encode_common_html import *
 from collections import OrderedDict
 
+ATAQC_HTML_HEAD = \
+'''
+<head>
+<title>QC report</title>
+<style>
+  .qc_table {
+      font-family:"Lucida Sans Unicode", "Lucida Grande", Sans-Serif;
+      font-size:12px;
+      width:480px;
+      text-align:left;
+      border-collapse:collapse;
+      margin:20px;
+  }
+
+  .qc_table th{
+      font-size:14px;
+      font-weight:normal;
+      background:#8c1515;
+      border-top:4px solid #700000;
+      border-bottom:1px solid #fff;
+      color:white;
+      padding:8px;
+  }
+
+  .qc_table td{
+      background:#f2f1eb;
+      border-bottom:1px solid #fff;
+      color:black;
+      border-top:1px solid transparent;
+      padding:8px;
+  }
+
+  .qc_table .fail{
+      color:#ff0000;
+      font-weight:bold;
+  }
+  </style>
+</head>
+'''
+
 def parse_arguments():
     parser = argparse.ArgumentParser(
                         prog='ENCODE DCC generate HTML report and QC JSON.',
@@ -105,8 +145,10 @@ def parse_arguments():
                         help='IDR reproducibility QC file.')
     parser.add_argument('--overlap-reproducibility-qc', type=str, nargs='*',
                         help='Overlapping peak reproducibility QC file.')
-    parser.add_argument('--ataqc-log', type=str, nargs='*',
-                        help='ATAQC *_qc.txt.')
+    parser.add_argument('--ataqc-txts', type=str, nargs='*',
+                        help='ATAQC QC metrics JSON files *_qc.txt.')
+    parser.add_argument('--ataqc-htmls', type=str, nargs='*',
+                        help='ATAQC HTML reports *_qc.html.')
     parser.add_argument('--out-qc-html', default='qc.html', type=str,
                         help='Output QC report HTML file.')
     parser.add_argument('--out-qc-json', default='qc.json', type=str,
@@ -143,7 +185,8 @@ def main():
     args = parse_arguments()
 
     log.info('Initializing...')
-    html = ''
+    html = ATAQC_HTML_HEAD
+
     json_all = OrderedDict()
     json_all['name']=args.name
     json_all['desc']=args.desc
@@ -418,6 +461,17 @@ def main():
         if args.idr_plot_ppr:
             png = args.idr_plot_ppr[0]
             html += html_embedded_png(png, 'ppr')
+
+    # ATAQC
+    if args.ataqc_txts and args.ataqc_htmls:
+        json_objs = [parse_ataqc_txt(txt) for txt in args.ataqc_txts]
+        json_all['ataqc'] = json_objs
+        html += html_heading(2, 'ATAQC summary table')
+        html += html_vert_table_multi_rep(json_objs)
+        for i, ataqc_html in enumerate(args.ataqc_htmls):
+            html += html_heading(2, 'ATAQC for replicate {}'.format(i+1))
+            html += html_parse_body_from_file(ataqc_html).replace('<h2>ATAqC</h2>','')
+            html += '\n<br>'
 
     if html:
         log.info('Creating HTML report...')

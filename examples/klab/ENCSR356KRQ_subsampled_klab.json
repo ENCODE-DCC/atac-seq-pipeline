@@ -37,5 +37,19 @@
     "atac.idr_thresh" : 0.05,
 
     "atac.qc_report.name" : "ENCSR356KRQ (1/400 subsampled)",
-    "atac.qc_report.desc" : "ATAC-seq on primary keratinocytes in day 0.0 of differentiation"
+    "atac.qc_report.desc" : "ATAC-seq on primary keratinocytes in day 0.0 of differentiation",
+
+    "atac.trim_adapter.cpu" : 1,
+    "atac.trim_adapter.mem_mb" : 4000,
+    "atac.trim_adapter.time_hr" : 1,
+    "atac.bowtie2.cpu" : 1,
+    "atac.bowtie2.mem_mb" : 4000,
+    "atac.bowtie2.time_hr" : 1,
+    "atac.filter.cpu" : 1,
+    "atac.filter.mem_mb" : 4000,
+    "atac.filter.time_hr" : 1,
+    "atac.macs2_mem_mb" : 4000,
+    "atac.macs2_time_hr" : 1,
+    "atac.ataqc.mem_mb" : 4000,
+    "atac.ataqc.time_hr" : 1    
 }

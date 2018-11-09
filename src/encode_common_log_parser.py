@@ -304,18 +304,46 @@ def parse_frip_qc(txt):
     result['FRiP'] = float(frip)
     return result
 
-def parse_multi_col_txt(txt): # to read ATAQC log
+def parse_multi_col_txt(txt):
     result = OrderedDict()
     with open(txt, 'r') as f:
         lines = f.readlines()    
     for line in lines:
         line = line.strip().replace(' reads; of these:','')
         arr = line.split('\t')
-        for j in range(1,len(arr)):
-            header = arr[0].lower()
-            header += '' if len(arr)==2 else '-{}'.format(j)
-            content = arr[j]
-            result[header] = content
+        header = arr[0]
+        if len(arr)==2:
+            result[header] = arr[1]
+        elif len(arr)>2:
+            result[header] = arr[1:]
+    return result
+
+def parse_ataqc_txt(txt): # to read ATAQC log
+    def num(s): # try to parse a number string (int->float->string)
+        try:
+            # not implemented
+            if '.' in s:
+                return float(s.strip())
+            else:
+                return int(s.strip())
+        except ValueError:
+            return s.strip()            
+    pre_parsed = parse_multi_col_txt(txt)
+    result = OrderedDict()
+    for key in pre_parsed:
+        val = pre_parsed[key]
+        if type(val)==list:
+            result[key] = [num(x) for x in val]
+        elif '- OK' in val:    
+            delim = '- OK'
+            arr = val.split(delim)
+            result[key] = [num(arr[0]), 'OK']
+        elif 'out of range' in val:
+            delim = 'out of range'
+            arr = val.split(delim)
+            result[key] = [num(arr[0]), '{}{}'.format(delim,arr[1])]
+        else:
+            result[key] = num(val)
     return result
 
 def get_long_keyname(key, paired_end=False):

@@ -4,6 +4,7 @@
 # Author: Jin Lee (leepc12@gmail.com)
 
 import base64
+import re
 from encode_common_log_parser import get_long_keyname
 
 def html_heading(lvl, label):
@@ -23,6 +24,17 @@ def html_embedded_png(png, caption, size_pct=100):
     '''
     encoded = base64.b64encode(open(png, 'rb').read()).decode("utf-8")
     return html.format(size_pct=size_pct, encoded=encoded, caption=caption)
+
+def html_parse_body_from_file(f):
+    with open(f,'r') as fp:
+        # p = re.compile('<body[^>]*>((.|[\n\r])*)<\/body>')
+        # return p.search(fp.read()).group()
+        p = re.compile('<body[^>]*>((.|[\n\r])*)<\/body>')
+        s = p.search(fp.read())
+        if s:
+            return s.group()
+        else:
+            return ''
 
 def html_vert_table_multi_rep(json_objs, paired_end=False, row_header=[]): # json_objs=list of OrderedDict
     if len(json_objs)==0: return ''
@@ -154,7 +166,10 @@ def html_help_overlap_FRiP():
     return html
 
 # for float, limit it to 4 decimal points
+# join if list is given
 def str_float_4_dec_pts(num):
+    if type(num)==list:
+        return ', '.join([str(n) for n in num])
     if type(num)==int:
         return str(num)
     elif type(num)==float:
