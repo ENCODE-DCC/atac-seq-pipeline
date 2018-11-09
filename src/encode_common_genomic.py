@@ -217,7 +217,6 @@ def peak_to_hammock(peak, out_dir):
 
                 if peak_type=='narrowPeak':
                     fout.write('{0[0]}\t{0[1]}\t{0[2]}\tscorelst:[{0[6]},{0[7]},{0[8]}],id:{1},'.format(lst,id))
-                    id+=1
                     if len(lst[3])>1:
                             fout.write('name:"'+lst[3]+'",')
                     if lst[5]!='.':
@@ -226,7 +225,6 @@ def peak_to_hammock(peak, out_dir):
                             fout.write('sbstroke:['+lst[9]+']')
                 elif peak_type=='gappedPeak':
                     fout.write('{0[0]}\t{0[1]}\t{0[2]}\tscorelst:[{0[12]},{0[13]},{0[14]}],id:{1},struct:{{thin:[[{0[1]},{0[2]}]],thick:['.format(lst,id))
-                    id+=1
                     a=int(lst[1])
                     sizes=lst[10].split(',')
                     starts=lst[11].split(',')
@@ -240,21 +238,21 @@ def peak_to_hammock(peak, out_dir):
                             fout.write('strand:"'+lst[5]+'",')
                 elif peak_type=='broadPeak':
                     fout.write('{0[0]}\t{0[1]}\t{0[2]}\tscorelst:[{0[6]},{0[7]}],id:{1},'.format(lst,id))
-                    id+=1
                     if len(lst[3])>1:
                             fout.write('name:"'+lst[3]+'",')
                     if lst[5]!='.':
                             fout.write('strand:"'+lst[5]+'",')
                 else:
                     raise Exception("Unsupported peak_type {}".format(peak))
+                id+=1
 
                 fout.write('\n')
 
-            cmd2 = 'zcat -f {} | sort -k1,1 -k2,2n | bgzip -cf > {}'
-            cmd2 = cmd2.format(hammock_tmp2, hammock_gz)
-            run_shell_cmd(cmd2)
-            cmd3 = 'tabix -f -p bed {}'.format(hammock_gz)
-            run_shell_cmd(cmd3)
+        cmd2 = 'zcat -f {} | sort -k1,1 -k2,2n | bgzip -cf > {}'
+        cmd2 = cmd2.format(hammock_tmp2, hammock_gz)
+        run_shell_cmd(cmd2)
+        cmd3 = 'tabix -f -p bed {}'.format(hammock_gz)
+        run_shell_cmd(cmd3)
 
         rm_f([hammock, hammock_tmp, hammock_tmp2])
     return (hammock_gz, hammock_gz_tbi)

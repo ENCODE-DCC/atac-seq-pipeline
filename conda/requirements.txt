@@ -53,3 +53,4 @@ pysam==0.8.4 # 0.8.3, 0.9 from bioconda has an issue with ATAQC (segmentation fa
 pybedtools==0.6.9 # same issue as in pysam
 cromwell==0.34
 phantompeakqualtools ==1.2
+tabix==0.2.6
