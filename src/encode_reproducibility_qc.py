@@ -8,7 +8,7 @@ import os
 import argparse
 import multiprocessing
 from encode_common import *
-from encode_common_genomic import peak_to_bigbed
+from encode_common_genomic import peak_to_bigbed, peak_to_hammock
 
 def parse_arguments():
     parser = argparse.ArgumentParser(prog='ENCODE DCC reproducibility QC.',
@@ -104,15 +104,19 @@ def main():
         reproducibility = 'fail'
 
     log.info('Writing optimal/conservative peak files...')
-    optimal_peak_file = os.path.join(args.out_dir, 'optimal_peak.gz')
-    conservative_peak_file = os.path.join(args.out_dir, 'conservative_peak.gz')
+    optimal_peak_file = os.path.join(args.out_dir, 'optimal_peak.{}.gz'.format(args.peak_type))
+    conservative_peak_file = os.path.join(args.out_dir, 'conservative_peak.{}.gz'.format(args.peak_type))
     copy_f_to_f(optimal_peak, optimal_peak_file)
     copy_f_to_f(conservative_peak, conservative_peak_file)
 
-    log.info('Converting peak to bigbed...')
     if args.chrsz:
+        log.info('Converting peak to bigbed...')
         peak_to_bigbed(optimal_peak_file, args.peak_type, args.chrsz, args.out_dir)
         peak_to_bigbed(conservative_peak_file, args.peak_type, args.chrsz, args.out_dir)
+
+        log.info('Converting peak to hammock...')
+        peak_to_hammock(optimal_peak_file, args.out_dir)
+        peak_to_hammock(conservative_peak_file, args.out_dir)
 
     log.info('Writing reproducibility QC log...')
     if args.prefix:
