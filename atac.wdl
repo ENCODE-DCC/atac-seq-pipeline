@@ -71,7 +71,7 @@ workflow atac {
 	Boolean align_only = false		# disable all post-align analysis (peak-calling, overlap, idr, ...)
 	Boolean true_rep_only = false 	# disable all analyses for pseudo replicates
 									# overlap and idr will also be disabled
-	Boolean disable_xcor = false 	# disable cross-correlation analysis
+	Boolean enable_xcor = false 	# enable cross-correlation analysis
 	Int multimapping = 0			# for multimapping reads
 	Boolean disable_ataqc = false
 
@@ -224,7 +224,7 @@ workflow atac {
 			time_hr = macs2_time_hr,
 		}
 	}
-	if ( !disable_xcor ) {
+	if ( enable_xcor ) {
 		scatter( ta in tas_ ) {
 			# subsample tagalign (non-mito) and cross-correlation analysis
 			call xcor { input :

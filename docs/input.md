@@ -94,7 +94,7 @@ else:
     * `"atac.align_only"` : (optional) Disable all downstream analysis (peak calling, ...) after mapping.
     * `"atac.multimapping"` : (optional) Multimapping reads.
     * `"atac.true_rep_only"` : (optional) Set it as `true` to disable all analyses (including IDR, naive-overlap and reproducibility QC) related to pseudo replicates. This flag suppresses `"atac.enable_idr"`.
-    * `"atac.disable_xcor` : (optional) Disable cross-correlation analysis.
+    * `"atac.enable_xcor` : (optional) Enable cross-correlation analysis.
 
     * `"atac.qc_report.name"` : (optional) Name of sample.
     * `"atac.qc_report.desc"` : (optional) Description for sample.
