@@ -215,7 +215,7 @@ def peak_to_hammock(peak, out_dir):
             for line in fin:
                 lst=line.rstrip().split('\t')
 
-                if peak_type=='narrowPeak':
+                if peak_type=='narrowPeak' or peak_type=='regionPeak':
                     fout.write('{0[0]}\t{0[1]}\t{0[2]}\tscorelst:[{0[6]},{0[7]},{0[8]}],id:{1},'.format(lst,id))
                     if len(lst[3])>1:
                             fout.write('name:"'+lst[3]+'",')
