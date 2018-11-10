@@ -33,6 +33,8 @@
     "atac.smooth_win" : 73,
     "atac.idr_thresh" : 0.05,
 
+    "atac.enable_xcor" : true,
+
     "qc_report.name" : "ENCSR356KRQ (subsampled 1/400)",
     "qc_report.desc" : "ATAC-seq on primary keratinocytes in day 0.0 of differentiation"
 }
