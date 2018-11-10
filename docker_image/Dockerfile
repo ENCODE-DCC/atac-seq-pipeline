@@ -37,6 +37,7 @@ RUN apt-get update && apt-get install -y \
     r-base-core \
     default-jre \
     apt-transport-https \
+    tabix \
 && rm -rf /var/lib/apt/lists/*
 
 # Make directory for all softwares
@@ -92,7 +93,7 @@ RUN wget https://github.com/broadinstitute/picard/releases/download/2.10.6/picar
 RUN wget https://github.com/lomereiter/sambamba/releases/download/v0.6.6/sambamba_v0.6.6_linux.tar.bz2 && tar -xvjf sambamba_v0.6.6_linux.tar.bz2 && mv sambamba_v0.6.6 sambamba && rm -rf sambamba_*
 
 # Install R packages
-RUN echo "r <- getOption('repos'); r['CRAN'] <- 'http://cran.us.r-project.org'; options(repos = r);" > ~/.Rprofile && \
+RUN echo "r <- getOption('repos'); r['CRAN'] <- 'http://cran.r-project.org'; options(repos = r);" > ~/.Rprofile && \
     Rscript -e "install.packages('snow')" && \
     Rscript -e "install.packages('snowfall')" && \
     Rscript -e "install.packages('bitops')" && \
