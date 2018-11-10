@@ -488,9 +488,11 @@ workflow atac {
 
 	# Generate final QC report and JSON		
 	call qc_report { input :
+		multimapping = multimapping,
 		paired_end = paired_end,
 		pipeline_type = pipeline_type,
 		peak_caller = 'macs2',
+		macs2_cap_num_peak = cap_num_peak,
 		idr_thresh = idr_thresh,
 		flagstat_qcs = bowtie2.flagstat_qc,
 		nodup_flagstat_qcs = filter.flagstat_qc,
@@ -1048,9 +1050,12 @@ task qc_report {
 	String? desc # description for sample
 	#String? encode_accession_id	# ENCODE accession ID of sample
 	# workflow params
+	Int? multimapping
 	Boolean paired_end
 	String pipeline_type
 	String peak_caller
+	Int? macs2_cap_num_peak
+	Int? spp_cap_num_peak
 	Float idr_thresh
 	# QCs
 	Array[File]? flagstat_qcs
@@ -1085,9 +1090,12 @@ task qc_report {
 		python $(which encode_qc_report.py) \
 			${"--name '" + sub(select_first([name,""]),"'","_") + "'"} \
 			${"--desc '" + sub(select_first([desc,""]),"'","_") + "'"} \
+			${"--multimapping " + multimapping} \
 			${if paired_end then "--paired-end" else ""} \
 			--pipeline-type ${pipeline_type} \
 			--peak-caller ${peak_caller} \
+			${"--macs2-cap-num-peak " + macs2_cap_num_peak} \
+			${"--spp-cap-num-peak " + spp_cap_num_peak} \
 			--idr-thresh ${idr_thresh} \
 			--flagstat-qcs ${sep=' ' flagstat_qcs} \
 			--nodup-flagstat-qcs ${sep=' ' nodup_flagstat_qcs} \

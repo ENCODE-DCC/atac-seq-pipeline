@@ -6,6 +6,7 @@
 import base64
 import re
 from encode_common_log_parser import get_long_keyname
+from encode_common import *
 
 def html_heading(lvl, label):
     html = '<h{lvl}>{label}</h{lvl}>\n'
@@ -70,9 +71,28 @@ def html_horz_table(json_obj, paired_end=False):
         '</td><td>'.join([str_float_4_dec_pts(json_obj[col]) for col in json_obj])+'</td></tr>\n'
     return html.format(header=header, content=content)
 
+def html_help_filter(multimapping, paired_end):
+    html = """
+    <div id='help-filter'>
+    Filtered out (samtools view -F 1804):
+    <ul>
+    <li>read unmapped (0x4)</li>
+    """
+    if paired_end:
+        html += "<li>mate unmapped (0x8)</li>"
+    html += """    
+    <li>not primary alignment (0x100)</li>
+    <li>read fails platform/vendor quality checks (0x200)</li>
+    <li>read is PCR or optical duplicate (0x400)</li>
+    </ul></p></div><br>
+    """
+    return html
+
 def html_help_pbc():
     html = """
-    <div id='help-pbc'><p>NRF (non redundant fraction) <br>
+    <div id='help-pbc'>
+    Mitochondrial reads are filtered out.
+    <p>NRF (non redundant fraction) <br>
     PBC1 (PCR Bottleneck coefficient 1) <br>
     PBC2 (PCR Bottleneck coefficient 2) <br>
     PBC1 is the primary measure. Provisionally <br>
@@ -110,6 +130,22 @@ def html_help_FRiP(peak_caller):
     </ul></p></div><br>
     """.format(peak_caller=peak_caller.upper())
     return html
+
+def html_help_macs2(cap_num_peak):
+    html = """
+    <div id='help-macs2'><p>
+    The number of peaks is capped at {} for peak-caller MACS2
+    </p></div><br>
+    """.format(human_readable_number(cap_num_peak))
+    return html if cap_num_peak else ""
+
+def html_help_spp(cap_num_peak):
+    html = """
+    <div id='help-spp'><p>
+    The number of peaks is capped at {} for peak-caller SPP
+    </p></div><br>
+    """.format(human_readable_number(cap_num_peak))
+    return html if cap_num_peak else ""
 
 def html_help_idr(idr_thresh):
     html = """
