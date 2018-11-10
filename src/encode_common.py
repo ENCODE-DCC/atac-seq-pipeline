@@ -259,7 +259,8 @@ def run_shell_cmd(cmd):
             p.terminate()
         except:
             pass
-        raise Exception('Exception caught. Killed PID={}, PGID={}'.format(pid,pgid))
+        raise Exception('Killed PID={}, PGID={}\nCMD={}\nSTDOUT={}'.format(
+            pid, pgid, cmd, ret))
 
 # math
 
