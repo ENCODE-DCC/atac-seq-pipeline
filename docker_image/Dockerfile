@@ -39,11 +39,6 @@ RUN apt-get update && apt-get install -y \
     apt-transport-https \
 && rm -rf /var/lib/apt/lists/*
 
-# Make directory for all softwares
-RUN mkdir /software
-WORKDIR /software
-ENV PATH="/software:${PATH}"
-
 # Install Intel MKL for BLAS
 RUN wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && rm -rf GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && sh -c 'echo deb https://apt.repos.intel.com/mkl all main > /etc/apt/sources.list.d/intel-mkl.list' && apt-get update && apt-get install intel-mkl-64bit-2018.0-033 -y && rm -rf /var/lib/apt/lists/*
 ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/opt/intel/compilers_and_libraries_2018.0.128/linux/mkl/lib/intel64_lin
@@ -52,10 +47,14 @@ ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/opt/intel/compilers_and_libraries_2018.0
 RUN pip install --no-cache-dir common python-dateutil cython==0.27.3 && \
     pip3 install --no-cache-dir common python-dateutil cython==0.27.3
 
+# Make directory for all softwares
+RUN mkdir /software
+WORKDIR /software
+ENV PATH="/software:${PATH}"
+
 # Install numpy 1.11.3 (python2/3, linked with MKL)
-COPY docker_image/numpy/site.cfg .
-RUN git clone --branch v1.11.3 https://github.com/numpy/numpy && \
-    cd numpy && cp ../site.cfg . && python setup.py install && python3 setup.py install && cd ../ && rm -rf numpy*
+RUN git clone --branch v1.11.3 https://github.com/numpy/numpy && cd numpy && \
+    /bin/bash -c 'echo -e "[mkl]\nlibrary_dirs = /opt/intel/compilers_and_libraries_2018/linux/mkl/lib/intel64\ninclude_dirs = /opt/intel/compilers_and_libraries_2018/linux/mkl/include\nmkl_libs = mkl_rt\nlapack_libs =" > site.cfg' && python setup.py install && python3 setup.py install && cd ../ && rm -rf numpy*
 
 # Install scipy 1.0.0 (python2/3)
 RUN git clone --branch v1.0.0 --single-branch https://github.com/scipy/scipy && \
