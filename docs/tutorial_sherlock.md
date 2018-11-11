@@ -76,12 +76,12 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
 
 9. See full specification for [input JSON file](input.md).
 
-10. IF YOU WANT TO RUN PIPELINES WITH YOUR OWN INPUT DATA/GENOME DATABASE, PLEASE ADD THEIR DIRECTORIES TO `workflow_opts/sherlock.json`. For example, you have input FASTQs on `/your/input/fastqs/` and genome database installed on `/your/genome/database/` then add `/your/` to `--bind` in `singularity_command_options`. You can also define multiple directories there. It's comma-separated.
+10. IF YOU WANT TO RUN PIPELINES WITH YOUR OWN INPUT DATA/GENOME DATABASE, PLEASE ADD THEIR DIRECTORIES TO `workflow_opts/sherlock.json`. For example, you have input FASTQs on `/your/input/fastqs/` and genome database installed on `/your/genome/database/` then add `/your/` to `singularity_bindpath`. You can also define multiple directories there. It's comma-separated.
     ```
       {
           "default_runtime_attributes" : {
               "singularity_container" : "~/.singularity/chip-seq-pipeline-v1.1.1.simg",
-              "singularity_command_options" : "--bind /scratch,/oak/stanford,/your/,YOUR_OWN_DATA_DIR1,YOUR_OWN_DATA_DIR1,..."
+              "singularity_bindpath" : "/scratch,/oak/stanford,/your/,YOUR_OWN_DATA_DIR1,YOUR_OWN_DATA_DIR1,..."
           }
       }
     ```

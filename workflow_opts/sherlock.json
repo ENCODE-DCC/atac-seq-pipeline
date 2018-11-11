@@ -2,6 +2,6 @@
     "default_runtime_attributes" : {
         "slurm_partition" : "YOUR_SLURM_PARTITION",
         "singularity_container" : "~/.singularity/atac-seq-pipeline-v1.1.1.simg",
-        "singularity_command_options" : "--bind /scratch,/lscratch,/oak/stanford"
+        "singularity_bindpath" : "/scratch,/lscratch,/oak/stanford"
     }
 }

@@ -2,6 +2,6 @@
     "default_runtime_attributes" : {
         "slurm_account" : "YOUR_SLURM_ACCOUNT",
         "singularity_container" : "~/.singularity/atac-seq-pipeline-v1.1.1.simg",
-        "singularity_command_options" : "--bind /reference/ENCODE,/scratch,/srv/gsfs0"
+        "singularity_bindpath" : "/reference/ENCODE,/scratch,/srv/gsfs0"
     }
 }
