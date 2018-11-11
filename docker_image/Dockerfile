@@ -37,6 +37,7 @@ RUN apt-get update && apt-get install -y \
     r-base-core \
     default-jre \
     apt-transport-https \
+    tabix \
 && rm -rf /var/lib/apt/lists/*
 
 # Install Intel MKL for BLAS
@@ -137,7 +138,7 @@ RUN wget http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/bigWigAverageOver
 RUN wget http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/bedToBigBed && chmod +x bedToBigBed
 
 # Install bgzip/tabix for Wash U browser track (hammock type)
-RUN apt-get update && apt-get install -y tabix && rm -rf /var/lib/apt/lists/*
+#RUN apt-get update && apt-get install -y tabix && rm -rf /var/lib/apt/lists/*
 
 # Prevent conflict with locally installed python outside of singularity container
 ENV PYTHONNOUSERSITE=True
