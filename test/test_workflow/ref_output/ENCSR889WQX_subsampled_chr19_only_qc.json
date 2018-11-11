@@ -1,5 +1,5 @@
 {
-    "name": "ENCSR889WQX", 
+    "name": "ENCSR889WQX (subsampled 1/400 reads)", 
     "desc": "ATAC-seq on Mus musculus C57BL/6 frontal cortex adult", 
     "flagstat_qc": [
         {
@@ -35,58 +35,6 @@
             "mapped": 86974, 
             "mapped_qc_failed": 0, 
             "mapped_pct": 40.69, 
-            "paired": 0, 
-            "paired_qc_failed": 0, 
-            "read1": 0, 
-            "read1_qc_failed": 0, 
-            "read2": 0, 
-            "read2_qc_failed": 0, 
-            "paired_properly": 0, 
-            "paired_properly_qc_failed": 0, 
-            "paired_properly_pct": 0.0, 
-            "with_itself": 0, 
-            "with_itself_qc_failed": 0, 
-            "singletons": 0, 
-            "singletons_qc_failed": 0, 
-            "singletons_pct": 0.0, 
-            "diff_chroms": 0, 
-            "diff_chroms_qc_failed": 0
-        }
-    ], 
-    "nodup_flagstat_qc": [
-        {
-            "total": 21090, 
-            "total_qc_failed": 0, 
-            "duplicates": 0, 
-            "duplicates_qc_failed": 0, 
-            "mapped": 21090, 
-            "mapped_qc_failed": 0, 
-            "mapped_pct": 100.0, 
-            "paired": 0, 
-            "paired_qc_failed": 0, 
-            "read1": 0, 
-            "read1_qc_failed": 0, 
-            "read2": 0, 
-            "read2_qc_failed": 0, 
-            "paired_properly": 0, 
-            "paired_properly_qc_failed": 0, 
-            "paired_properly_pct": 0.0, 
-            "with_itself": 0, 
-            "with_itself_qc_failed": 0, 
-            "singletons": 0, 
-            "singletons_qc_failed": 0, 
-            "singletons_pct": 0.0, 
-            "diff_chroms": 0, 
-            "diff_chroms_qc_failed": 0
-        }, 
-        {
-            "total": 16974, 
-            "total_qc_failed": 0, 
-            "duplicates": 0, 
-            "duplicates_qc_failed": 0, 
-            "mapped": 16974, 
-            "mapped_qc_failed": 0, 
-            "mapped_pct": 100.0, 
             "paired": 0, 
             "paired_qc_failed": 0, 
             "read1": 0, 
@@ -145,6 +93,84 @@
             "PBC2": 250.290323
         }
     ], 
+    "nodup_flagstat_qc": [
+        {
+            "total": 21090, 
+            "total_qc_failed": 0, 
+            "duplicates": 0, 
+            "duplicates_qc_failed": 0, 
+            "mapped": 21090, 
+            "mapped_qc_failed": 0, 
+            "mapped_pct": 100.0, 
+            "paired": 0, 
+            "paired_qc_failed": 0, 
+            "read1": 0, 
+            "read1_qc_failed": 0, 
+            "read2": 0, 
+            "read2_qc_failed": 0, 
+            "paired_properly": 0, 
+            "paired_properly_qc_failed": 0, 
+            "paired_properly_pct": 0.0, 
+            "with_itself": 0, 
+            "with_itself_qc_failed": 0, 
+            "singletons": 0, 
+            "singletons_qc_failed": 0, 
+            "singletons_pct": 0.0, 
+            "diff_chroms": 0, 
+            "diff_chroms_qc_failed": 0
+        }, 
+        {
+            "total": 16974, 
+            "total_qc_failed": 0, 
+            "duplicates": 0, 
+            "duplicates_qc_failed": 0, 
+            "mapped": 16974, 
+            "mapped_qc_failed": 0, 
+            "mapped_pct": 100.0, 
+            "paired": 0, 
+            "paired_qc_failed": 0, 
+            "read1": 0, 
+            "read1_qc_failed": 0, 
+            "read2": 0, 
+            "read2_qc_failed": 0, 
+            "paired_properly": 0, 
+            "paired_properly_qc_failed": 0, 
+            "paired_properly_pct": 0.0, 
+            "with_itself": 0, 
+            "with_itself_qc_failed": 0, 
+            "singletons": 0, 
+            "singletons_qc_failed": 0, 
+            "singletons_pct": 0.0, 
+            "diff_chroms": 0, 
+            "diff_chroms_qc_failed": 0
+        }
+    ], 
+    "overlap_reproducibility_qc": {
+        "Nt": 6782, 
+        "N1": 4066, 
+        "N2": 4786, 
+        "Np": 6499, 
+        "N_opt": 6782, 
+        "N_consv": 6782, 
+        "opt_set": "rep1-rep2", 
+        "consv_set": "rep1-rep2", 
+        "rescue_ratio": 1.04354516079, 
+        "self_consistency_ratio": 1.17707820954, 
+        "reproducibility": "pass"
+    }, 
+    "idr_reproducibility_qc": {
+        "Nt": 6, 
+        "N1": 1, 
+        "N2": 2, 
+        "Np": 5, 
+        "N_opt": 6, 
+        "N_consv": 6, 
+        "opt_set": "rep1-rep2", 
+        "consv_set": "rep1-rep2", 
+        "rescue_ratio": 1.2, 
+        "self_consistency_ratio": 2.0, 
+        "reproducibility": "pass"
+    }, 
     "xcor_score": [
         {
             "num_reads": 6294, 
@@ -197,32 +223,6 @@
         "ppr2": {
             "FRiP": 0.997155049787
         }
-    }, 
-    "overlap_reproducibility_qc": {
-        "Nt": 6782, 
-        "N1": 4066, 
-        "N2": 4786, 
-        "Np": 6499, 
-        "N_opt": 6782, 
-        "N_consv": 6782, 
-        "opt_set": "rep1-rep2", 
-        "consv_set": "rep1-rep2", 
-        "rescue_ratio": 1.04354516079, 
-        "self_consistency_ratio": 1.17707820954, 
-        "reproducibility": "pass"
-    }, 
-    "idr_reproducibility_qc": {
-        "Nt": 6, 
-        "N1": 1, 
-        "N2": 2, 
-        "Np": 5, 
-        "N_opt": 6, 
-        "N_consv": 6, 
-        "opt_set": "rep1-rep2", 
-        "consv_set": "rep1-rep2", 
-        "rescue_ratio": 1.2, 
-        "self_consistency_ratio": 2.0, 
-        "reproducibility": "pass"
     }, 
     "overlap_frip_qc": {
         "rep1-rep2": {

@@ -69,7 +69,7 @@ pipeline {
                 stage('Run-Task-Level-Tests-Non-Master'){
                         agent {label 'slave-w-docker-cromwell-60GB-ebs'} 
                         steps{
-                                sh "cd test/test_task && git clone https://github.com/ENCODE-DCC/atac-seq-pipeline-test-data"
+                                sh "cd test/test_task && rm -rf atac-seq-pipeline-test-data && git clone https://github.com/ENCODE-DCC/atac-seq-pipeline-test-data"
                                 sh """cd test/test_task
                                       ./download_hg38_fasta_for_test_ataqc.sh
                                       ./test.sh test_bam2ta.wdl test_bam2ta.json $TAG

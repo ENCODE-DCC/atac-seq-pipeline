@@ -53,6 +53,46 @@
             "diff_chroms_qc_failed": 0
         }
     ], 
+    "dup_qc": [
+        {
+            "unpaired_reads": 0, 
+            "paired_reads": 32733, 
+            "unmapped_reads": 0, 
+            "unpaired_dupes": 0, 
+            "paired_dupes": 968, 
+            "paired_opt_dupes": 1, 
+            "dupes_pct": 0.029573
+        }, 
+        {
+            "unpaired_reads": 0, 
+            "paired_reads": 45283, 
+            "unmapped_reads": 0, 
+            "unpaired_dupes": 0, 
+            "paired_dupes": 2076, 
+            "paired_opt_dupes": 0, 
+            "dupes_pct": 0.045845
+        }
+    ], 
+    "pbc_qc": [
+        {
+            "total_read_pairs": 11363, 
+            "distinct_read_pairs": 11309, 
+            "one_read_pair": 11273, 
+            "two_read_pair": 29, 
+            "NRF": 0.995248, 
+            "PBC1": 0.996817, 
+            "PBC2": 388.724138
+        }, 
+        {
+            "total_read_pairs": 14660, 
+            "distinct_read_pairs": 14585, 
+            "one_read_pair": 14543, 
+            "two_read_pair": 32, 
+            "NRF": 0.994884, 
+            "PBC1": 0.99712, 
+            "PBC2": 454.46875
+        }
+    ], 
     "nodup_flagstat_qc": [
         {
             "total": 63530, 
@@ -105,46 +145,32 @@
             "diff_chroms_qc_failed": 0
         }
     ], 
-    "dup_qc": [
-        {
-            "unpaired_reads": 0, 
-            "paired_reads": 32733, 
-            "unmapped_reads": 0, 
-            "unpaired_dupes": 0, 
-            "paired_dupes": 968, 
-            "paired_opt_dupes": 1, 
-            "dupes_pct": 0.029573
-        }, 
-        {
-            "unpaired_reads": 0, 
-            "paired_reads": 45283, 
-            "unmapped_reads": 0, 
-            "unpaired_dupes": 0, 
-            "paired_dupes": 2076, 
-            "paired_opt_dupes": 0, 
-            "dupes_pct": 0.045845
-        }
-    ], 
-    "pbc_qc": [
-        {
-            "total_read_pairs": 11363, 
-            "distinct_read_pairs": 11309, 
-            "one_read_pair": 11273, 
-            "two_read_pair": 29, 
-            "NRF": 0.995248, 
-            "PBC1": 0.996817, 
-            "PBC2": 388.724138
-        }, 
-        {
-            "total_read_pairs": 14660, 
-            "distinct_read_pairs": 14585, 
-            "one_read_pair": 14543, 
-            "two_read_pair": 32, 
-            "NRF": 0.994884, 
-            "PBC1": 0.99712, 
-            "PBC2": 454.46875
-        }
-    ], 
+    "overlap_reproducibility_qc": {
+        "Nt": 2344, 
+        "N1": 880, 
+        "N2": 1117, 
+        "Np": 2370, 
+        "N_opt": 2370, 
+        "N_consv": 2344, 
+        "opt_set": "ppr", 
+        "consv_set": "rep1-rep2", 
+        "rescue_ratio": 1.01109215017, 
+        "self_consistency_ratio": 1.26931818182, 
+        "reproducibility": "pass"
+    }, 
+    "idr_reproducibility_qc": {
+        "Nt": 60, 
+        "N1": 10, 
+        "N2": 16, 
+        "Np": 72, 
+        "N_opt": 72, 
+        "N_consv": 60, 
+        "opt_set": "ppr", 
+        "consv_set": "rep1-rep2", 
+        "rescue_ratio": 1.2, 
+        "self_consistency_ratio": 1.6, 
+        "reproducibility": "pass"
+    }, 
     "xcor_score": [
         {
             "num_reads": 11350, 
@@ -197,32 +223,6 @@
         "ppr2": {
             "FRiP": 0.950311514499
         }
-    }, 
-    "overlap_reproducibility_qc": {
-        "Nt": 2344, 
-        "N1": 880, 
-        "N2": 1117, 
-        "Np": 2370, 
-        "N_opt": 2370, 
-        "N_consv": 2344, 
-        "opt_set": "ppr", 
-        "consv_set": "rep1-rep2", 
-        "rescue_ratio": 1.01109215017, 
-        "self_consistency_ratio": 1.26931818182, 
-        "reproducibility": "pass"
-    }, 
-    "idr_reproducibility_qc": {
-        "Nt": 60, 
-        "N1": 10, 
-        "N2": 16, 
-        "Np": 72, 
-        "N_opt": 72, 
-        "N_consv": 60, 
-        "opt_set": "ppr", 
-        "consv_set": "rep1-rep2", 
-        "rescue_ratio": 1.2, 
-        "self_consistency_ratio": 1.6, 
-        "reproducibility": "pass"
     }, 
     "overlap_frip_qc": {
         "rep1-rep2": {
