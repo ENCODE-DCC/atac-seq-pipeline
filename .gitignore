@@ -116,3 +116,4 @@ test/*_standalone.wdl
 test_genome*
 test_sample
 *.tar
+tmp

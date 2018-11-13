@@ -71,7 +71,7 @@ workflow atac {
 	Boolean align_only = false		# disable all post-align analysis (peak-calling, overlap, idr, ...)
 	Boolean true_rep_only = false 	# disable all analyses for pseudo replicates
 									# overlap and idr will also be disabled
-	Boolean disable_xcor = false 	# disable cross-correlation analysis
+	Boolean enable_xcor = false 	# enable cross-correlation analysis
 	Int multimapping = 0			# for multimapping reads
 	Boolean disable_ataqc = false
 
@@ -224,7 +224,7 @@ workflow atac {
 			time_hr = macs2_time_hr,
 		}
 	}
-	if ( !disable_xcor ) {
+	if ( enable_xcor ) {
 		scatter( ta in tas_ ) {
 			# subsample tagalign (non-mito) and cross-correlation analysis
 			call xcor { input :
@@ -450,38 +450,6 @@ workflow atac {
 			chrsz = chrsz,
 		}
 	}
-	# Generate final QC report and JSON		
-	call qc_report { input :
-		paired_end = paired_end,
-		pipeline_type = pipeline_type,
-		peak_caller = 'macs2',
-		idr_thresh = idr_thresh,
-		flagstat_qcs = bowtie2.flagstat_qc,
-		nodup_flagstat_qcs = filter.flagstat_qc,
-		dup_qcs = filter.dup_qc,
-		pbc_qcs = filter.pbc_qc,
-		xcor_plots = xcor.plot_png,
-		xcor_scores = xcor.score,
-
-		frip_macs2_qcs = macs2.frip_qc,
-		frip_macs2_qcs_pr1 = macs2_pr1.frip_qc,
-		frip_macs2_qcs_pr2 = macs2_pr2.frip_qc,
-		frip_macs2_qc_pooled = macs2_pooled.frip_qc,
-		frip_macs2_qc_ppr1 = macs2_ppr1.frip_qc,
-		frip_macs2_qc_ppr2 = macs2_ppr2.frip_qc,
-
-		idr_plots = idr.idr_plot,
-		idr_plots_pr = idr_pr.idr_plot,
-		idr_plot_ppr = idr_ppr.idr_plot,
-		frip_idr_qcs = idr.frip_qc,
-		frip_idr_qcs_pr = idr_pr.frip_qc,
-		frip_idr_qc_ppr = idr_ppr.frip_qc,
-		frip_overlap_qcs = overlap.frip_qc,
-		frip_overlap_qcs_pr = overlap_pr.frip_qc,
-		frip_overlap_qc_ppr = overlap_ppr.frip_qc,
-		idr_reproducibility_qc = reproducibility_idr.reproducibility_qc,
-		overlap_reproducibility_qc = reproducibility_overlap.reproducibility_qc,
-	}
 
 	# ATAQC is available only when pipeline starts from fastqs, take fastqs[] as base array for ataqc
 	Array[Array[Array[File]]] fastqs_ataqc = 
@@ -516,6 +484,43 @@ workflow atac {
 			reg2map = reg2map,
 			roadmap_meta = roadmap_meta,
 		}
+	}
+
+	# Generate final QC report and JSON		
+	call qc_report { input :
+		multimapping = multimapping,
+		paired_end = paired_end,
+		pipeline_type = pipeline_type,
+		peak_caller = 'macs2',
+		macs2_cap_num_peak = cap_num_peak,
+		idr_thresh = idr_thresh,
+		flagstat_qcs = bowtie2.flagstat_qc,
+		nodup_flagstat_qcs = filter.flagstat_qc,
+		dup_qcs = filter.dup_qc,
+		pbc_qcs = filter.pbc_qc,
+		xcor_plots = xcor.plot_png,
+		xcor_scores = xcor.score,
+
+		frip_macs2_qcs = macs2.frip_qc,
+		frip_macs2_qcs_pr1 = macs2_pr1.frip_qc,
+		frip_macs2_qcs_pr2 = macs2_pr2.frip_qc,
+		frip_macs2_qc_pooled = macs2_pooled.frip_qc,
+		frip_macs2_qc_ppr1 = macs2_ppr1.frip_qc,
+		frip_macs2_qc_ppr2 = macs2_ppr2.frip_qc,
+
+		idr_plots = idr.idr_plot,
+		idr_plots_pr = idr_pr.idr_plot,
+		idr_plot_ppr = idr_ppr.idr_plot,
+		frip_idr_qcs = idr.frip_qc,
+		frip_idr_qcs_pr = idr_pr.frip_qc,
+		frip_idr_qc_ppr = idr_ppr.frip_qc,
+		frip_overlap_qcs = overlap.frip_qc,
+		frip_overlap_qcs_pr = overlap_pr.frip_qc,
+		frip_overlap_qc_ppr = overlap_ppr.frip_qc,
+		idr_reproducibility_qc = reproducibility_idr.reproducibility_qc,
+		overlap_reproducibility_qc = reproducibility_overlap.reproducibility_qc,
+		ataqc_txts = ataqc.txt,
+		ataqc_htmls = ataqc.html,
 	}
 
 	output {
@@ -808,6 +813,7 @@ task macs2 {
 		File npeak = glob("*[!.][!b][!f][!i][!l][!t].narrowPeak.gz")[0]
 		File bfilt_npeak = glob("*.bfilt.narrowPeak.gz")[0]
 		File bfilt_npeak_bb = glob("*.bfilt.narrowPeak.bb")[0]
+		Array[File] bfilt_npeak_hammock = glob("*.bfilt.narrowPeak.hammock.gz*")
 		File sig_pval = if select_first([make_signal,false]) then glob("*.pval.signal.bigwig")[0] else glob("null")[0]
 		File sig_fc = if select_first([make_signal,false]) then glob("*.fc.signal.bigwig")[0] else glob("null")[0]
 		File frip_qc = glob("*.frip.qc")[0]
@@ -853,6 +859,7 @@ task idr {
 		File idr_peak = glob("*[!.][!b][!f][!i][!l][!t]."+peak_type+".gz")[0]
 		File bfilt_idr_peak = glob("*.bfilt."+peak_type+".gz")[0]
 		File bfilt_idr_peak_bb = glob("*.bfilt."+peak_type+".bb")[0]
+		Array[File] bfilt_idr_peak_hammock = glob("*.bfilt."+peak_type+".hammock.gz*")
 		File idr_plot = glob("*.txt.png")[0]
 		File idr_unthresholded_peak = glob("*.txt.gz")[0]
 		File idr_log = glob("*.log")[0]
@@ -894,6 +901,7 @@ task overlap {
 		File overlap_peak = glob("*[!.][!b][!f][!i][!l][!t]."+peak_type+".gz")[0]
 		File bfilt_overlap_peak = glob("*.bfilt."+peak_type+".gz")[0]
 		File bfilt_overlap_peak_bb = glob("*.bfilt."+peak_type+".bb")[0]
+		Array[File] bfilt_overlap_peak_hammock = glob("*.bfilt."+peak_type+".hammock.gz*")
 		File frip_qc = if defined(ta) then glob("*.frip.qc")[0] else glob("null")[0]
 	}
 	runtime {
@@ -926,10 +934,12 @@ task reproducibility {
 			${"--chrsz " + chrsz}
 	}
 	output {
-		File optimal_peak = glob("optimal_peak.gz")[0]
-		File conservative_peak = glob("conservative_peak.gz")[0]
+		File optimal_peak = glob("optimal_peak.*.gz")[0]
+		File conservative_peak = glob("conservative_peak.*.gz")[0]
 		File optimal_peak_bb = glob("optimal_peak.*.bb")[0]
 		File conservative_peak_bb = glob("conservative_peak.*.bb")[0]
+		Array[File] optimal_peak_hammock = glob("optimal_peak.*.hammock.gz*")
+		Array[File] conservative_peak_hammock = glob("conservative_peak.*.hammock_gz*")
 		File reproducibility_qc = glob("*reproducibility.qc")[0]
 	}
 	runtime {
@@ -969,11 +979,12 @@ task ataqc { # generate ATAQC report
 	File roadmap_meta
 	# resource
 	Int? mem_mb
+	Int? mem_java_mb
 	Int? time_hr
 	String? disks
 
 	command {
-		export _JAVA_OPTIONS="-Xms256M -Xmx${select_first([mem_mb,'16000'])}M -XX:ParallelGCThreads=1"
+		export _JAVA_OPTIONS="-Xms256M -Xmx${select_first([mem_java_mb,mem_mb,'16000'])}M -XX:ParallelGCThreads=1"
 
 		python $(which encode_ataqc.py) \
 			${if paired_end then "--paired-end" else ""} \
@@ -1039,9 +1050,12 @@ task qc_report {
 	String? desc # description for sample
 	#String? encode_accession_id	# ENCODE accession ID of sample
 	# workflow params
+	Int? multimapping
 	Boolean paired_end
 	String pipeline_type
 	String peak_caller
+	Int? macs2_cap_num_peak
+	Int? spp_cap_num_peak
 	Float idr_thresh
 	# QCs
 	Array[File]? flagstat_qcs
@@ -1067,16 +1081,21 @@ task qc_report {
 	File? frip_overlap_qc_ppr
 	File? idr_reproducibility_qc
 	File? overlap_reproducibility_qc
+	Array[File]? ataqc_txts
+	Array[File]? ataqc_htmls
 
 	File? qc_json_ref
 
 	command {
 		python $(which encode_qc_report.py) \
-			${"--name '" + name + "'"} \
-			${"--desc '" + desc + "'"} \
+			${"--name '" + sub(select_first([name,""]),"'","_") + "'"} \
+			${"--desc '" + sub(select_first([desc,""]),"'","_") + "'"} \
+			${"--multimapping " + multimapping} \
 			${if paired_end then "--paired-end" else ""} \
 			--pipeline-type ${pipeline_type} \
 			--peak-caller ${peak_caller} \
+			${"--macs2-cap-num-peak " + macs2_cap_num_peak} \
+			${"--spp-cap-num-peak " + spp_cap_num_peak} \
 			--idr-thresh ${idr_thresh} \
 			--flagstat-qcs ${sep=' ' flagstat_qcs} \
 			--nodup-flagstat-qcs ${sep=' ' nodup_flagstat_qcs} \
@@ -1101,6 +1120,8 @@ task qc_report {
 			${"--frip-overlap-qc-ppr " + frip_overlap_qc_ppr} \
 			${"--idr-reproducibility-qc " + idr_reproducibility_qc} \
 			${"--overlap-reproducibility-qc " + overlap_reproducibility_qc} \
+			--ataqc-txts ${sep=' ' ataqc_txts} \
+			--ataqc-htmls ${sep=' ' ataqc_htmls} \
 			--out-qc-html qc.html \
 			--out-qc-json qc.json
 		

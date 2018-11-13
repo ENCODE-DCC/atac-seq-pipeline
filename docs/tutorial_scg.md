@@ -56,7 +56,7 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
 
 5. Pull a singularity container for the pipeline. This will pull pipeline's docker container first and build a singularity one on `~/.singularity`.
     ```
-      $ SINGULARITY_PULLFOLDER=~/.singularity singularity pull docker://quay.io/encode-dcc/atac-seq-pipeline:v1.1
+      $ SINGULARITY_CACHEDIR=~/.singularity SINGULARITY_PULLFOLDER=~/.singularity singularity pull -F docker://quay.io/encode-dcc/atac-seq-pipeline:v1.1.1
     ```
 
 6. Run a pipeline for a SUBSAMPLED (1/400) paired-end sample of [ENCSR356KRQ](https://www.encodeproject.org/experiments/ENCSR356KRQ/).
@@ -69,12 +69,12 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
 
 8. See full specification for [input JSON file](input.md).
 
-9. IF YOU WANT TO RUN PIPELINES WITH YOUR OWN INPUT DATA/GENOME DATABASE, PLEASE ADD THEIR DIRECTORIES TO `workflow_opts/scg.json`. For example, you have input FASTQs on `/your/input/fastqs/` and genome database installed on `/your/genome/database/` then add `/your/` to `--bind` in `singularity_command_options`. You can also define multiple directories there. It's comma-separated.
+9. IF YOU WANT TO RUN PIPELINES WITH YOUR OWN INPUT DATA/GENOME DATABASE, PLEASE ADD THEIR DIRECTORIES TO `workflow_opts/scg.json`. For example, you have input FASTQs on `/your/input/fastqs/` and genome database installed on `/your/genome/database/` then add `/your/` to `singularity_bindpath`. You can also define multiple directories there. It's comma-separated.
     ```
       {
           "default_runtime_attributes" : {
-              "singularity_container" : "~/.singularity/chip-seq-pipeline-v1.1.simg",
-              "singularity_command_options" : "--bind /scratch/users,/srv/gsfs0,/your/,YOUR_OWN_DATA_DIR1,YOUR_OWN_DATA_DIR1,..."
+              "singularity_container" : "~/.singularity/chip-seq-pipeline-v1.1.1.simg",
+              "singularity_bindpath" : "/scratch/users,/srv/gsfs0,/your/,YOUR_OWN_DATA_DIR1,YOUR_OWN_DATA_DIR1,..."
           }
       }
     ```

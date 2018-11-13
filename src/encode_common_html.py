@@ -4,7 +4,9 @@
 # Author: Jin Lee (leepc12@gmail.com)
 
 import base64
+import re
 from encode_common_log_parser import get_long_keyname
+from encode_common import *
 
 def html_heading(lvl, label):
     html = '<h{lvl}>{label}</h{lvl}>\n'
@@ -21,8 +23,19 @@ def html_embedded_png(png, caption, size_pct=100):
       <figcaption style="text-align:center">{caption}</figcaption>
     </figure>
     '''
-    encoded = base64.b64encode(open(png, 'rb').read()).encode('ascii')
+    encoded = base64.b64encode(open(png, 'rb').read()).decode("utf-8")
     return html.format(size_pct=size_pct, encoded=encoded, caption=caption)
+
+def html_parse_body_from_file(f):
+    with open(f,'r') as fp:
+        # p = re.compile('<body[^>]*>((.|[\n\r])*)<\/body>')
+        # return p.search(fp.read()).group()
+        p = re.compile('<body[^>]*>((.|[\n\r])*)<\/body>')
+        s = p.search(fp.read())
+        if s:
+            return s.group()
+        else:
+            return ''
 
 def html_vert_table_multi_rep(json_objs, paired_end=False, row_header=[]): # json_objs=list of OrderedDict
     if len(json_objs)==0: return ''
@@ -58,9 +71,28 @@ def html_horz_table(json_obj, paired_end=False):
         '</td><td>'.join([str_float_4_dec_pts(json_obj[col]) for col in json_obj])+'</td></tr>\n'
     return html.format(header=header, content=content)
 
+def html_help_filter(multimapping, paired_end):
+    html = """
+    <div id='help-filter'>
+    Filtered out (samtools view -F 1804):
+    <ul>
+    <li>read unmapped (0x4)</li>
+    """
+    if paired_end:
+        html += "<li>mate unmapped (0x8)</li>"
+    html += """    
+    <li>not primary alignment (0x100)</li>
+    <li>read fails platform/vendor quality checks (0x200)</li>
+    <li>read is PCR or optical duplicate (0x400)</li>
+    </ul></p></div><br>
+    """
+    return html
+
 def html_help_pbc():
     html = """
-    <div id='help-pbc'><p>NRF (non redundant fraction) <br>
+    <div id='help-pbc'>
+    Mitochondrial reads are filtered out.
+    <p>NRF (non redundant fraction) <br>
     PBC1 (PCR Bottleneck coefficient 1) <br>
     PBC2 (PCR Bottleneck coefficient 2) <br>
     PBC1 is the primary measure. Provisionally <br>
@@ -98,6 +130,22 @@ def html_help_FRiP(peak_caller):
     </ul></p></div><br>
     """.format(peak_caller=peak_caller.upper())
     return html
+
+def html_help_macs2(cap_num_peak):
+    html = """
+    <div id='help-macs2'><p>
+    The number of peaks is capped at {} for peak-caller MACS2
+    </p></div><br>
+    """.format(human_readable_number(cap_num_peak))
+    return html if cap_num_peak else ""
+
+def html_help_spp(cap_num_peak):
+    html = """
+    <div id='help-spp'><p>
+    The number of peaks is capped at {} for peak-caller SPP
+    </p></div><br>
+    """.format(human_readable_number(cap_num_peak))
+    return html if cap_num_peak else ""
 
 def html_help_idr(idr_thresh):
     html = """
@@ -154,7 +202,10 @@ def html_help_overlap_FRiP():
     return html
 
 # for float, limit it to 4 decimal points
+# join if list is given
 def str_float_4_dec_pts(num):
+    if type(num)==list:
+        return ', '.join([str(n) for n in num])
     if type(num)==int:
         return str(num)
     elif type(num)==float:

@@ -115,7 +115,10 @@ def parse_flagstat_qc(txt):
     if mapped_qc_failed:
         result['mapped_qc_failed'] = int(mapped_qc_failed)
     if mapped_pct:
-        result['mapped_pct'] = float(mapped_pct)
+        if mapped_pct!='N/A' and not 'nan' in mapped_pct:
+            result['mapped_pct'] = float(mapped_pct)
+        else:
+            result['mapped_pct'] = 0.0
     if paired:
         result['paired'] = int(paired)
     if paired_qc_failed:
@@ -214,7 +217,7 @@ def parse_dup_qc(txt):
                 if paired_reads == '0': # SE
                     dupes_pct = '{0:.2f}'.format(
                                 float(unpaired_dupes)/float(unpaired_reads))
-                else:
+                elif paired_reads:
                     dupes_pct = '{0:.2f}'.format(
                                 float(paired_dupes)/float(paired_reads))
     if unpaired_reads:
@@ -301,18 +304,46 @@ def parse_frip_qc(txt):
     result['FRiP'] = float(frip)
     return result
 
-def parse_multi_col_txt(txt): # to read ATAQC log
+def parse_multi_col_txt(txt):
     result = OrderedDict()
     with open(txt, 'r') as f:
         lines = f.readlines()    
     for line in lines:
         line = line.strip().replace(' reads; of these:','')
         arr = line.split('\t')
-        for j in range(1,len(arr)):
-            header = arr[0] 
-            header += '' if len(arr)==2 else '-{}'.format(j)
-            content = arr[j]
-            result[header] = content
+        header = arr[0]
+        if len(arr)==2:
+            result[header] = arr[1]
+        elif len(arr)>2:
+            result[header] = arr[1:]
+    return result
+
+def parse_ataqc_txt(txt): # to read ATAQC log
+    def num(s): # try to parse a number string (int->float->string)
+        try:
+            # not implemented
+            if '.' in s:
+                return float(s.strip())
+            else:
+                return int(s.strip())
+        except ValueError:
+            return s.strip()            
+    pre_parsed = parse_multi_col_txt(txt)
+    result = OrderedDict()
+    for key in pre_parsed:
+        val = pre_parsed[key]
+        if type(val)==list:
+            result[key] = [num(x) for x in val]
+        elif '- OK' in val:    
+            delim = '- OK'
+            arr = val.split(delim)
+            result[key] = [num(arr[0]), 'OK']
+        elif 'out of range' in val:
+            delim = 'out of range'
+            arr = val.split(delim)
+            result[key] = [num(arr[0]), '{}{}'.format(delim,arr[1])]
+        else:
+            result[key] = num(val)
     return result
 
 def get_long_keyname(key, paired_end=False):
@@ -404,4 +435,4 @@ def get_long_keyname(key, paired_end=False):
         return short_to_long_pe[key]
     if not paired_end and key in short_to_long_se:
         return short_to_long_se[key]
-    return key
+    return key.replace('_',' ').capitalize()

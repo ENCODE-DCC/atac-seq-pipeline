@@ -239,9 +239,9 @@ def pbc_qc_se(bam, out_dir):
     cmd2 += 'grep -v "chrM" | sort | uniq -c | '
     cmd2 += 'awk \'BEGIN{{mt=0;m0=0;m1=0;m2=0}} ($1==1){{m1=m1+1}} '
     cmd2 += '($1==2){{m2=m2+1}} {{m0=m0+1}} {{mt=mt+$1}} END{{m1_m2=-1.0; '
-    cmd2 += 'if(m2>0) m1_m2=m1/m2; '
+    cmd2 += 'if(m2>0) m1_m2=m1/m2; m0_mt=0; if (mt>0) m0_mt=m0/mt; m1_m0=0; if (m0>0) m1_m0=m1/m0; '
     cmd2 += 'printf "%d\\t%d\\t%d\\t%d\\t%f\\t%f\\t%f\\n",'
-    cmd2 += 'mt,m0,m1,m2,m0/mt,m1/m0,m1_m2}}\' > {}'
+    cmd2 += 'mt,m0,m1,m2,m0_mt,m1_m0,m1_m2}}\' > {}'
     cmd2 = cmd2.format(
         bam,
         pbc_qc)
@@ -260,9 +260,9 @@ def pbc_qc_pe(bam, nth, out_dir):
     cmd3 += 'grep -v "chrM" | sort | uniq -c | '
     cmd3 += 'awk \'BEGIN{{mt=0;m0=0;m1=0;m2=0}} ($1==1){{m1=m1+1}} '
     cmd3 += '($1==2){{m2=m2+1}} {{m0=m0+1}} {{mt=mt+$1}} END{{m1_m2=-1.0; '
-    cmd3 += 'if(m2>0) m1_m2=m1/m2; '
+    cmd3 += 'if(m2>0) m1_m2=m1/m2; m0_mt=0; if (mt>0) m0_mt=m0/mt; m1_m0=0; if (m0>0) m1_m0=m1/m0; '
     cmd3 += 'printf "%d\\t%d\\t%d\\t%d\\t%f\\t%f\\t%f\\n"'
-    cmd3 += ',mt,m0,m1,m2,m0/mt,m1/m0,m1_m2}}\' > {}'
+    cmd3 += ',mt,m0,m1,m2,m0_mt,m1_m0,m1_m2}}\' > {}'
     cmd3 = cmd3.format(
         nmsrt_bam,
         pbc_qc)

@@ -46,7 +46,7 @@ def strip_ext_npeak(npeak):
 
 def strip_ext_rpeak(rpeak):
     return re.sub(r'\.(regionPeak|RegionPeak)\.gz$','',
-                    str(npeak))
+                    str(rpeak))
 
 def strip_ext_gpeak(gpeak):
     return re.sub(r'\.(gappedPeak|GappedPeak)\.gz$','',
@@ -56,9 +56,36 @@ def strip_ext_bpeak(bpeak):
     return re.sub(r'\.(broadPeak|BroadPeak)\.gz$','',
                     str(npeak))
 
+def get_peak_type(peak):
+    if strip_ext_npeak(peak)!=peak:
+        return 'narrowPeak'
+    elif strip_ext_rpeak(peak)!=peak:
+        return 'regionPeak'
+    elif strip_ext_bpeak(peak)!=peak:
+        return 'broadPeak'
+    elif strip_ext_gpeak(peak)!=peak:
+        return 'gappedPeak'
+    else:
+        raise Exception('Unsupported peak type for stripping extension {}'.format(peak))
+
+def strip_ext_peak(peak): # returns a tuple (peak_type, stripped_filename)
+    peak_type = get_peak_type(peak)
+    if peak_type=='narrowPeak':
+        return strip_ext_npeak(peak)
+    elif peak_type=='regionPeak':
+        return strip_ext_rpeak(peak)
+    elif peak_type=='broadPeak':
+        return strip_ext_bpeak(peak)
+    elif peak_type=='gappedPeak':
+        return strip_ext_gpeak(peak)
+    else:
+        raise Exception('Unsupported peak type for stripping extension {}'.format(
+            peak))
+
 def strip_ext_bigwig(bw):
     return re.sub(r'\.(bigwig|bw)$','',
                     str(bw))
+
 
 def strip_ext_gz(f):
     return re.sub(r'\.gz$','',str(f))
@@ -232,7 +259,8 @@ def run_shell_cmd(cmd):
             p.terminate()
         except:
             pass
-        raise Exception('Exception caught. Killed PID={}, PGID={}'.format(pid,pgid))
+        raise Exception('Killed PID={}, PGID={}\nCMD={}\nSTDOUT={}'.format(
+            pid, pgid, cmd, ret))
 
 # math
 

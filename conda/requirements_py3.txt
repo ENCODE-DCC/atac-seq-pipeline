@@ -10,3 +10,4 @@ java-jdk ==8.0.92
 libgcc==5.2.0 # this does not work with MacOS...
 matplotlib ==1.5.1
 ncurses ==6.1
+tabix==0.2.6

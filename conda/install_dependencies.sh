@@ -64,6 +64,11 @@ source activate ${CONDA_ENV}
   echo "export PYTHONNOUSERSITE=True" >> ${CONDA_ACTIVATE_SH}
   echo "unset OPENBLAS_NUM_THREADS MKL_NUM_THREADS PYTHONNOUSERSITE" > ${CONDA_DEACTIVATE_SH}
 
+  # to prevent conflict between Conda's R and global(local) R
+  echo "export R_HOME=${CONDA_LIB}/R" >> ${CONDA_ACTIVATE_SH}
+  echo "export R_LIBS=${CONDA_LIB}/R/library" >> ${CONDA_ACTIVATE_SH}
+  echo "unset R_HOME R_LIBS" > ${CONDA_DEACTIVATE_SH}
+  
   # hack around the need for both python2 and python3 in the same environment
   CONDA_BIN="${CONDA_PREFIX}/bin"
   cd ${CONDA_BIN}

@@ -190,6 +190,73 @@ def subsample_ta_pe(ta, subsample, non_mito, r1_only, out_dir):
     rm_f(ta_tmp)    
     return ta_subsampled
 
+# convert encode peak file to hammock (for Wash U browser track)
+def peak_to_hammock(peak, out_dir):
+    peak_type = get_peak_type(peak)
+    prefix = os.path.join(out_dir, os.path.basename(
+        strip_ext_peak(peak)))
+    hammock = '{}.{}.hammock'.format(prefix,peak_type)
+    hammock_tmp = '{}.tmp'.format(hammock)
+    hammock_tmp2 = '{}.tmp2'.format(hammock)
+    hammock_gz = '{}.gz'.format(hammock)
+    hammock_gz_tbi = '{}.gz.tbi'.format(hammock)
+
+    if get_num_lines(peak)==0:
+        cmd = 'zcat -f {} | gzip -nc > {}'.format(peak, hammock_gz)
+        run_shell_cmd(cmd)
+        cmd2 = 'touch {}'.format(hammock_gz_tbi)
+    else:
+        cmd = "zcat -f {} | sed '/^\(chr\)/!d' | sort -k1,1V -k2,2n > {}"
+        cmd = cmd.format(peak, hammock_tmp)
+        run_shell_cmd(cmd)
+
+        with open(hammock_tmp, 'r') as fin, open(hammock_tmp2, 'w') as fout:
+            id=1
+            for line in fin:
+                lst=line.rstrip().split('\t')
+
+                if peak_type=='narrowPeak' or peak_type=='regionPeak':
+                    fout.write('{0[0]}\t{0[1]}\t{0[2]}\tscorelst:[{0[6]},{0[7]},{0[8]}],id:{1},'.format(lst,id))
+                    if len(lst[3])>1:
+                            fout.write('name:"'+lst[3]+'",')
+                    if lst[5]!='.':
+                            fout.write('strand:"'+lst[5]+'",')
+                    if lst[9]!='-1':
+                            fout.write('sbstroke:['+lst[9]+']')
+                elif peak_type=='gappedPeak':
+                    fout.write('{0[0]}\t{0[1]}\t{0[2]}\tscorelst:[{0[12]},{0[13]},{0[14]}],id:{1},struct:{{thin:[[{0[1]},{0[2]}]],thick:['.format(lst,id))
+                    a=int(lst[1])
+                    sizes=lst[10].split(',')
+                    starts=lst[11].split(',')
+                    for i in range(len(sizes)):
+                            fout.write('[{0},{1}],'.format(a+int(starts[i]),a+int(starts[i])+int(sizes[i])))
+                    fout.write(']},')
+
+                    if len(lst[3])>1:
+                            fout.write('name:"'+lst[3]+'",')
+                    if lst[5]!='.':
+                            fout.write('strand:"'+lst[5]+'",')
+                elif peak_type=='broadPeak':
+                    fout.write('{0[0]}\t{0[1]}\t{0[2]}\tscorelst:[{0[6]},{0[7]}],id:{1},'.format(lst,id))
+                    if len(lst[3])>1:
+                            fout.write('name:"'+lst[3]+'",')
+                    if lst[5]!='.':
+                            fout.write('strand:"'+lst[5]+'",')
+                else:
+                    raise Exception("Unsupported peak_type {}".format(peak))
+                id+=1
+
+                fout.write('\n')
+
+        cmd2 = 'zcat -f {} | sort -k1,1 -k2,2n | bgzip -cf > {}'
+        cmd2 = cmd2.format(hammock_tmp2, hammock_gz)
+        run_shell_cmd(cmd2)
+        cmd3 = 'tabix -f -p bed {}'.format(hammock_gz)
+        run_shell_cmd(cmd3)
+
+        rm_f([hammock, hammock_tmp, hammock_tmp2])
+    return (hammock_gz, hammock_gz_tbi)
+
 def peak_to_bigbed(peak, peak_type, chrsz, out_dir):
     prefix = os.path.join(out_dir,
         os.path.basename(strip_ext(peak)))
