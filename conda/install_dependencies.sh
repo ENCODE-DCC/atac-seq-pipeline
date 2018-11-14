@@ -80,6 +80,14 @@ source activate ${CONDA_ENV}
   chmod +rx ${CONDA_SHARE}/cromwell/cromwell.jar
   cd ${CONDA_BIN}
   ln -s ../share/cromwell/cromwell.jar
+
+  # make a soft link for picard.jar
+  if [ -f ${CONDA_PREFIX}/bin/picard ]; then
+    PICARD_JAR=../share/picard*/picard.jar
+    chmod +rx ${PICARD_JAR}
+    cd ${CONDA_PREFIX}/bin && ln -s ${PICARD_JAR}
+  fi
+  
 source deactivate
 
 # transfer pipeline's python scripts (src/*.py) to conda env's bin directory
