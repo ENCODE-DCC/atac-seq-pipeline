@@ -153,4 +153,7 @@ COPY src atac-seq-pipeline/src/
 COPY atac.wdl atac-seq-pipeline/
 ENV PATH="/software/atac-seq-pipeline:/software/atac-seq-pipeline/src:${PATH}"
 
+# make some temporary directories
+RUN for i in $(seq 0 9); do mkdir -p /mnt/ext_$i; done
+
 ENTRYPOINT ["/bin/bash","-c"]
