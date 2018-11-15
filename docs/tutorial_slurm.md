@@ -67,7 +67,7 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
 
 7. Pull a singularity container for the pipeline. This will pull pipeline's docker container first and build a singularity one on `~/.singularity`.
     ```
-      $ SINGULARITY_CACHEDIR=~/.singularity SINGULARITY_PULLFOLDER=~/.singularity singularity pull -F docker://quay.io/encode-dcc/atac-seq-pipeline:v1.1.1
+      $ SINGULARITY_CACHEDIR=~/.singularity SINGULARITY_PULLFOLDER=~/.singularity singularity pull -F docker://quay.io/encode-dcc/atac-seq-pipeline:v1.1.2
     ```
 
 8. Run a pipeline for the test sample.
@@ -84,7 +84,7 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
     ```
       {
           "default_runtime_attributes" : {
-              "singularity_container" : "~/.singularity/chip-seq-pipeline-v1.1.1.simg",
+              "singularity_container" : "~/.singularity/chip-seq-pipeline-v1.1.2.simg",
               "singularity_bindpath" : "/your/,YOUR_OWN_DATA_DIR1,YOUR_OWN_DATA_DIR2,..."
           }
       }
