@@ -11,7 +11,7 @@ How to build genome database
 
 3. Choose `[GENOME]` from `hg19`, `hg38`, `mm9` and `mm10` and specify a destination directory. This will take several hours. We recommend not to run this installer on a login node of your cluster. It will take >8GB memory and >2h time.
     ```
-      $ bash conda/install_genome_data.sh [GENOME] [DESTINATION_DIR]
+      $ bash conda/build_genome_data.sh [GENOME] [DESTINATION_DIR]
     ```
 
 4. Find a TSV file on the destination directory and use it for `"atac.genome_tsv"` in your input JSON.
@@ -30,7 +30,7 @@ How to build genome database
 
 3. Get a URL for a gzipped blacklist BED file for your genome. If you don't have one then skip this step. An example blacklist for hg38 is [here](http://mitra.stanford.edu/kundaje/genome_data/hg38/hg38.blacklist.bed.gz).
 
-4. Find the following lines in `conda/install_genome_data.sh` and modify it. Give a good name `[YOUR_OWN_GENOME]` for your genome.
+4. Find the following lines in `conda/build_genome_data.sh` and modify it. Give a good name `[YOUR_OWN_GENOME]` for your genome.
     ```
       ...
 
@@ -43,7 +43,7 @@ How to build genome database
 
 5. Specify a destination directory for your genome database and run the installer. This will take several hours.
     ```
-      $ bash conda/install_genome_data.sh [YOUR_OWN_GENOME] [DESTINATION_DIR]
+      $ bash conda/build_genome_data.sh [YOUR_OWN_GENOME] [DESTINATION_DIR]
     ```
 
 6. Find a TSV file in the destination directory and use it for `"atac.genome_tsv"` in your input JSON.

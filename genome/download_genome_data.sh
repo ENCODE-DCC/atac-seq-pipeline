@@ -4,44 +4,18 @@ set -e
 
 if [[ "$#" -lt 2 ]]; then
   echo
-  echo "This script installs data for genome [GENOME] on a directory [DEST_DIR]."
+  echo "This script downloads/installs data for genome [GENOME] on a directory [DEST_DIR]."
   echo "A TSV file [DEST_DIR]/[GENOME].tsv will be generated. Use it for pipeline."
   echo
   echo "Supported genomes: hg19, mm9, hg38 and mm10"
   echo
-  echo "Usage: ./build_genome_data.sh [GENOME] [DEST_DIR]"
-  echo "  Example: ./build_genome_data.sh hg38 /your/genome/data/path/hg38"
+  echo "Usage: ./download_genome_data.sh [GENOME] [DEST_DIR]"
+  echo "  Example: ./download_genome_data.sh hg38 /your/genome/data/path/hg38"
   echo
   exit 2
 fi
 
-CONDA_ENV=encode-atac-seq-pipeline
-CONDA_ENV_PY3=encode-atac-seq-pipeline-python3
-
-if which conda; then
-  echo "=== Found Conda ($(conda --version))."
-else
-  echo "=== Conda does not exist on your system. Please install Conda first."
-  echo "=== https://conda.io/docs/user-guide/install/index.html#regular-installation"
-  exit 1
-fi
-
-if conda env list | grep -wq ${CONDA_ENV}; then
-  echo "=== Found Pipeline's Conda env (${CONDA_ENV})."
-else
-  echo "=== Pipeline's Conda env (${CONDA_ENV}) does not exist. Please install it first."
-  echo "=== Run install_dependencies.sh"
-  exit 2
-fi
-
-source activate ${CONDA_ENV}
-
-# pipeline specific params
-BUILD_BWT2_IDX=1
-BUILD_BWA_IDX=0
-
 GENOME=$1
-#DEST_DIR=$(readlink -f $2)
 DEST_DIR=$(cd $(dirname $2) && pwd -P)/$(basename $2)
 TSV=${DEST_DIR}/${GENOME}.tsv
 
@@ -51,7 +25,10 @@ cd ${DEST_DIR}
 
 if [[ $GENOME == "hg19" ]]; then
   REF_FA="http://hgdownload.cse.ucsc.edu/goldenpath/hg19/encodeDCC/referenceSequences/male.hg19.fa.gz"
-  BLACKLIST="http://hgdownload.cse.ucsc.edu/goldenpath/hg19/encodeDCC/wgEncodeMapability/wgEncodeDacMapabilityConsensusExcludable.bed.gz"
+  CHRSZ="https://storage.googleapis.com/encode-pipeline-genome-data/hg19/hg19.chrom.sizes"
+  BWT2_IDX="https://storage.googleapis.com/encode-pipeline-genome-data/hg19/bowtie2_index/male.hg19.fa.tar"
+  BWA_IDX="https://storage.googleapis.com/encode-pipeline-genome-data/hg19/bwa_index/male.hg19.fa.tar"
+  BLACKLIST="https://storage.googleapis.com/encode-pipeline-genome-data/hg19/wgEncodeDacMapabilityConsensusExcludable.bed.gz"
   # data for ATAQC
   TSS_ENRICH="https://storage.googleapis.com/encode-pipeline-genome-data/hg19/ataqc/hg19_gencode_tss_unique.bed.gz"
   DNASE="https://storage.googleapis.com/encode-pipeline-genome-data/hg19/ataqc/reg2map_honeybadger2_dnase_all_p10_ucsc.bed.gz"
@@ -61,7 +38,10 @@ if [[ $GENOME == "hg19" ]]; then
   ROADMAP_META="https://storage.googleapis.com/encode-pipeline-genome-data/hg19/ataqc/eid_to_mnemonic.txt"
 
 elif [[ $GENOME == "mm9" ]]; then
-  REF_FA="http://hgdownload.cse.ucsc.edu/goldenPath/mm9/bigZips/mm9.2bit"
+  REF_FA="https://storage.googleapis.com/encode-pipeline-genome-data/mm9/mm9.fa.gz"
+  CHRSZ="https://storage.googleapis.com/encode-pipeline-genome-data/mm9/mm9.chrom.sizes"
+  BWT2_IDX="https://storage.googleapis.com/encode-pipeline-genome-data/mm9/bowtie2_index/mm9.fa.tar"
+  BWA_IDX="https://storage.googleapis.com/encode-pipeline-genome-data/mm9/bwa_index/mm9.fa.tar"
   BLACKLIST="https://storage.googleapis.com/encode-pipeline-genome-data/mm9/mm9-blacklist.bed.gz"
   # data for ATAQC
   TSS_ENRICH="https://storage.googleapis.com/encode-pipeline-genome-data/mm9/ataqc/mm9_gencode_tss_unique.bed.gz"
@@ -74,6 +54,9 @@ elif [[ $GENOME == "mm9" ]]; then
 
 elif [[ $GENOME == "hg38" ]]; then
   REF_FA="https://www.encodeproject.org/files/GRCh38_no_alt_analysis_set_GCA_000001405.15/@@download/GRCh38_no_alt_analysis_set_GCA_000001405.15.fasta.gz"
+  CHRSZ="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/hg38.chrom.sizes"
+  BWT2_IDX="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/bowtie2_index/GRCh38_no_alt_analysis_set_GCA_000001405.15.fasta.tar"
+  BWA_IDX="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/bwa_index/GRCh38_no_alt_analysis_set_GCA_000001405.15.fasta.tar"
   BLACKLIST="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/hg38.blacklist.bed.gz"
   # data for ATAQC
   TSS_ENRICH="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/ataqc/hg38_gencode_tss_unique.bed.gz"
@@ -86,6 +69,9 @@ elif [[ $GENOME == "hg38" ]]; then
 
 elif [[ $GENOME == "mm10" ]]; then
   REF_FA="https://www.encodeproject.org/files/mm10_no_alt_analysis_set_ENCODE/@@download/mm10_no_alt_analysis_set_ENCODE.fasta.gz"
+  CHRSZ="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/mm10.chrom.sizes"
+  BWT2_IDX="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/bowtie2_index/mm10_no_alt_analysis_set_ENCODE.fasta.tar"
+  BWA_IDX="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/bwa_index/mm10_no_alt_analysis_set_ENCODE.fasta.tar"
   BLACKLIST="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/mm10.blacklist.bed.gz"
   # data for ATAQC
   TSS_ENRICH="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/ataqc/mm10_gencode_tss_unique.bed.gz"
@@ -98,15 +84,17 @@ elif [[ $GENOME == "mm10" ]]; then
 
 elif [[ $GENOME == "hg38_chr19_chrM" ]]; then
   REF_FA="https://storage.googleapis.com/encode-pipeline-genome-data/hg38_chr19_chrM/GRCh38_no_alt_analysis_set_GCA_000001405.15.chr19_chrM.fasta.gz"
+  CHRSZ="https://storage.googleapis.com/encode-pipeline-genome-data/hg38_chr19_chrM/hg38_chr19_chrM.chrom.sizes"
+  BWT2_IDX="https://storage.googleapis.com/encode-pipeline-genome-data/hg38_chr19_chrM/bowtie2_index/GRCh38_no_alt_analysis_set_GCA_000001405.15.chr19_chrM.fasta.tar"
+  BWA_IDX="https://storage.googleapis.com/encode-pipeline-genome-data/hg38_chr19_chrM/bwa_index/GRCh38_no_alt_analysis_set_GCA_000001405.15.chr19_chrM.fasta.tar"
   BLACKLIST="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/hg38.blacklist.bed.gz"
 
 elif [[ $GENOME == "mm10_chr19_chrM" ]]; then
   REF_FA="https://storage.googleapis.com/encode-pipeline-genome-data/mm10_chr19_chrM/mm10_no_alt_analysis_set_ENCODE.chr19_chrM.fasta.gz"
+  CHRSZ="https://storage.googleapis.com/encode-pipeline-genome-data/mm10_chr19_chrM/mm10_chr19_chrM.chrom.sizes"
+  BWT2_IDX="https://storage.googleapis.com/encode-pipeline-genome-data/mm10_chr19_chrM/bowtie2_index/mm10_no_alt_analysis_set_ENCODE.chr19_chrM.fasta.tar"
+  BWA_IDX="https://storage.googleapis.com/encode-pipeline-genome-data/mm10_chr19_chrM/bwa_index/mm10_no_alt_analysis_set_ENCODE.chr19_chrM.fasta.tar"
   BLACKLIST="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/mm10.blacklist.bed.gz"
-
-elif [[ $GENOME == "YOUR_OWN_GENOME" ]]; then
-  REF_FA="URL_FOR_YOUR_FASTA_OR_2BIT"
-  BLACKLIST= # leave it empty if you don't have it
 fi
 
 if [[ ${REF_FA} == "" ]]; then
@@ -119,30 +107,12 @@ wget -c -O $(basename ${REF_FA}) ${REF_FA}
 if [[ $BLACKLIST != "" ]]; then wget -N -c $BLACKLIST; fi
 
 echo "=== Processing reference fasta file..."
-if [[ ${REF_FA} == *.gz ]]; then 
-  REF_FA_PREFIX=$(basename ${REF_FA} .gz)
-  gzip -d -f -c ${REF_FA_PREFIX}.gz > ${REF_FA_PREFIX}
-elif [[ ${REF_FA} == *.bz2 ]]; then
-  REF_FA_PREFIX=$(basename ${REF_FA} .bz2)
-  bzip2 -d -f -c ${REF_FA_PREFIX}.bz2 > ${REF_FA_PREFIX}
-elif [[ ${REF_FA} == *.2bit ]]; then
-  REF_FA_PREFIX=$(basename ${REF_FA} .2bit).fa
-  twoBitToFa $(basename ${REF_FA}) ${REF_FA_PREFIX}
-else
-  REF_FA_PREFIX=$(basename ${REF_FA})  
-fi
-gzip -nc ${REF_FA_PREFIX} > ${REF_FA_PREFIX}.gz
+REF_FA_PREFIX=$(basename ${REF_FA})
 
 echo "=== Generating fasta index and chrom.sizes file..."
 cd ${DEST_DIR}
-mkdir -p seq
-cd seq
-rm -f ${REF_FA_PREFIX}
-ln -s ../${REF_FA_PREFIX} ${REF_FA_PREFIX}
-faidx -x ${REF_FA_PREFIX}
-cp -f *.fai ../
-CHRSZ=$GENOME.chrom.sizes
-cut -f1,2 ${REF_FA_PREFIX}.fai > ../$CHRSZ
+wget -c -O $(basename ${CHRSZ}) ${CHRSZ}
+CHRSZ=$(basename ${CHRSZ})
 
 echo "=== Determinig gensz..."
 cd ${DEST_DIR}
@@ -150,29 +120,15 @@ GENSZ=$(cat $CHRSZ | awk '{sum+=$2} END{print sum}')
 if [[ $GENOME == hg* ]]; then GENSZ=hs; fi
 if [[ $GENOME == mm* ]]; then GENSZ=mm; fi
 
-if [[ ${BUILD_BWT2_IDX} == 1 ]]; then
-  echo "=== Building bowtie2 index..."
-  mkdir -p ${DEST_DIR}/bowtie2_index
-  cd ${DEST_DIR}/bowtie2_index
-  rm -f ${REF_FA_PREFIX}
-  ln -s ../${REF_FA_PREFIX} ${REF_FA_PREFIX}
-  if [[ ! -f ${REF_FA_PREFIX}.rev.1.bt2 ]]; then
-    bowtie2-build ${REF_FA_PREFIX} ${REF_FA_PREFIX}
-    tar cvf ${REF_FA_PREFIX}.tar ${REF_FA_PREFIX}.*.bt2
-  fi
-fi
+echo "=== Downloading bowtie2 index..."
+mkdir -p ${DEST_DIR}/bowtie2_index
+cd ${DEST_DIR}/bowtie2_index
+wget -c ${BWT2_IDX}
 
-if [[ ${BUILD_BWA_IDX} == 1 ]]; then
-  echo "=== Building bwa index..."
-  mkdir -p ${DEST_DIR}/bwa_index
-  cd ${DEST_DIR}/bwa_index
-  rm -f ${REF_FA_PREFIX}
-  ln -s ../${REF_FA_PREFIX} ${REF_FA_PREFIX}
-  if [[ ! -f ${REF_FA_PREFIX}.sa ]]; then
-    bwa index ${REF_FA_PREFIX}
-    tar cvf ${REF_FA_PREFIX}.tar ${REF_FA_PREFIX}.*
-  fi
-fi
+echo "=== Downloading bwa index..."
+mkdir -p ${DEST_DIR}/bwa_index
+cd ${DEST_DIR}/bwa_index
+wget -c ${BWA_IDX}
 
 echo "=== Creating TSV file... (${TSV})"
 cd ${DEST_DIR}
@@ -188,17 +144,9 @@ else
 fi
 echo -e "chrsz\t${DEST_DIR}/$(basename $CHRSZ)" >> ${TSV}
 echo -e "gensz\t$GENSZ" >> ${TSV}
-if [[ ${BUILD_BWT2_IDX} == 1 ]]; then
-  echo -e "bowtie2_idx_tar\t${DEST_DIR}/bowtie2_index/${REF_FA_PREFIX}.tar" >> ${TSV}
-else
-  echo -e "bowtie2_idx_tar\t/dev/null" >> ${TSV}
-fi
-if [[ ${BUILD_BWA_IDX} == 1 ]]; then
-  echo -e "bwa_idx_tar\t${DEST_DIR}/bwa_index/${REF_FA_PREFIX}.tar" >> ${TSV}
-else
-  echo -e "bwa_idx_tar\t/dev/null" >> ${TSV}
-fi
-echo -e "ref_fa\t${DEST_DIR}/${REF_FA_PREFIX}.gz" >> ${TSV}
+echo -e "bowtie2_idx_tar\t${DEST_DIR}/bowtie2_index/$(basename $BWT2_IDX)" >> ${TSV}
+echo -e "bwa_idx_tar\t${DEST_DIR}/bwa_index/$(basename $BWA_IDX)" >> ${TSV}
+echo -e "ref_fa\t${DEST_DIR}/$(basename $REF_FA_PREFIX)" >> ${TSV}
 
 echo "=== Downloading ATAQC file... (${TSV})"
 cd ${DEST_DIR}
@@ -249,7 +197,5 @@ if [[ ${ROADMAP_META} != "" ]]; then
 else
   echo -e "roadmap_meta\t${DEST_DIR}/ataqc/null" >> ${TSV}
 fi
-
-source deactivate
 
 echo "=== All done."
