@@ -74,17 +74,14 @@ def main():
     # declare temp arrays
     temp_files = [] # files to deleted later at the end
 
-    if args.subsample:
-        log.info('Subsampling TAGALIGN for xcor...')
-        if args.paired_end:
-            ta_subsampled = subsample_ta_pe(
-                args.ta, args.subsample, True, True, args.out_dir)
-        else:
-            ta_subsampled = subsample_ta_se(
-                args.ta, args.subsample, True, args.out_dir)
-        temp_files.append(ta_subsampled)
+    log.info('Subsampling TAGALIGN for xcor...')
+    if args.paired_end:
+        ta_subsampled = subsample_ta_pe(
+            args.ta, args.subsample, True, True, args.out_dir)
     else:
-        ta_subsampled = args.ta
+        ta_subsampled = subsample_ta_se(
+            args.ta, args.subsample, True, args.out_dir)
+    temp_files.append(ta_subsampled)
 
     log.info('Cross-correlation analysis...')
     xcor_plot_pdf, xcor_plot_png, xcor_score, fraglen_txt = xcor(

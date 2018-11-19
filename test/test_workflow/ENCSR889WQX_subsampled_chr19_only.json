@@ -18,7 +18,7 @@
     "atac.paired_end" : false,
     "atac.multimapping" : 4,    
 
-    "atac.trim_adapter.auto_detect_adapter" : true,
+    "atac.auto_detect_adapter" : true,
 
     "atac.smooth_win" : 73,
     "atac.enable_idr" : true,
@@ -26,6 +26,6 @@
 
     "atac.enable_xcor" : true,
 
-    "atac.qc_report.name" : "ENCSR889WQX (subsampled 1/400 reads)",
-    "atac.qc_report.desc" : "ATAC-seq on Mus musculus C57BL/6 frontal cortex adult"
+    "atac.title" : "ENCSR889WQX (subsampled 1/400 reads)",
+    "atac.description" : "ATAC-seq on Mus musculus C57BL/6 frontal cortex adult"
 }

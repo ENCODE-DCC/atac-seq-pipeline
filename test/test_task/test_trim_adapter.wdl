@@ -3,6 +3,9 @@
 import "../../atac.wdl" as atac
 
 workflow test_trim_adapter {
+	Int cutadapt_min_trim_len = 5	# minimum trim length for cutadapt -m
+	Float cutadapt_err_rate = 0.1	# Maximum allowed adapter error rate for cutadapt -e	
+	
 	Array[Array[String]] pe_adapters
 	Array[Array[String]] pe_fastqs
 	Array[Array[String]] se_adapters
@@ -11,13 +14,24 @@ workflow test_trim_adapter {
 	Array[String] ref_pe_trimmed_fastqs
 	Array[String] ref_se_trimmed_fastqs
 
+	Int trim_adapter_cpu = 1
+	Int trim_adapter_mem_mb = 12000
+	Int trim_adapter_time_hr = 24
+	String trim_adapter_disks = "local-disk 100 HDD"
+
 	# pe: with adapters input, w/o auto detection
 	call atac.trim_adapter as pe_trim_adapter { input :
 		fastqs = pe_fastqs,
 		adapters = pe_adapters,
 		auto_detect_adapter = false,
 		paired_end = true,
-		cpu = 1,
+		min_trim_len = cutadapt_min_trim_len,
+		err_rate = cutadapt_err_rate,
+
+		cpu = trim_adapter_cpu,
+		mem_mb = trim_adapter_mem_mb,
+		time_hr = trim_adapter_time_hr,
+		disks = trim_adapter_disks,
 	}
 	# pe: w/o adapters input, with auto detection
 	call atac.trim_adapter as pe_trim_adapter_auto { input :
@@ -25,7 +39,13 @@ workflow test_trim_adapter {
 		adapters = [],
 		auto_detect_adapter = true,
 		paired_end = true,
-		cpu = 1,
+		min_trim_len = cutadapt_min_trim_len,
+		err_rate = cutadapt_err_rate,
+
+		cpu = trim_adapter_cpu,
+		mem_mb = trim_adapter_mem_mb,
+		time_hr = trim_adapter_time_hr,
+		disks = trim_adapter_disks,
 	}
 	# se: with adapters input, w/o auto detection
 	call atac.trim_adapter as se_trim_adapter { input :
@@ -33,7 +53,13 @@ workflow test_trim_adapter {
 		adapters = se_adapters,
 		auto_detect_adapter = false,
 		paired_end = false,
-		cpu = 1,
+		min_trim_len = cutadapt_min_trim_len,
+		err_rate = cutadapt_err_rate,
+
+		cpu = trim_adapter_cpu,
+		mem_mb = trim_adapter_mem_mb,
+		time_hr = trim_adapter_time_hr,
+		disks = trim_adapter_disks,
 	}
 	# se: w/o adapters input, with auto detection
 	call atac.trim_adapter as se_trim_adapter_auto { input :
@@ -41,7 +67,13 @@ workflow test_trim_adapter {
 		adapters = [],
 		auto_detect_adapter = true,
 		paired_end = false,
-		cpu = 1,
+		min_trim_len = cutadapt_min_trim_len,
+		err_rate = cutadapt_err_rate,
+
+		cpu = trim_adapter_cpu,
+		mem_mb = trim_adapter_mem_mb,
+		time_hr = trim_adapter_time_hr,
+		disks = trim_adapter_disks,
 	}
 
 	call atac.compare_md5sum { input :

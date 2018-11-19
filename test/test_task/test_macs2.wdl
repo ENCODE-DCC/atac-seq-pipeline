@@ -19,6 +19,10 @@ workflow test_macs2 {
 	String se_chrsz
 	String se_gensz
 
+	Int macs2_mem_mb = 16000
+	Int macs2_time_hr = 24
+	String macs2_disks = "local-disk 100 HDD"
+
 	call atac.macs2 as se_macs2 { input :
 		ta = se_ta,
 		gensz = se_gensz,
@@ -28,6 +32,10 @@ workflow test_macs2 {
 		smooth_win = smooth_win,
 		make_signal = true,
 		blacklist = se_blacklist,
+
+		mem_mb = macs2_mem_mb,
+		time_hr = macs2_time_hr,
+		disks = macs2_disks,
 	}
 
 	call atac.compare_md5sum { input :
