@@ -140,6 +140,9 @@ def main():
     bfilt_idr_peak = blacklist_filter(
             idr_peak, args.blacklist, args.keep_irregular_chr, args.out_dir)
 
+    log.info('Checking if output is empty...')
+    assert_file_not_empty(bfilt_idr_peak)
+
     log.info('Converting peak to bigbed...')
     peak_to_bigbed(bfilt_idr_peak, args.peak_type, args.chrsz, args.keep_irregular_chr, args.out_dir)
 

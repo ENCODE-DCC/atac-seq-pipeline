@@ -114,6 +114,9 @@ def main():
     bfilt_overlap_peak = blacklist_filter(
             overlap_peak, args.blacklist, args.keep_irregular_chr, args.out_dir)
 
+    log.info('Checking if output is empty...')
+    assert_file_not_empty(bfilt_overlap_peak)
+
     log.info('Converting peak to bigbed...')
     peak_to_bigbed(bfilt_overlap_peak, args.peak_type, args.chrsz, args.keep_irregular_chr, args.out_dir)
 
