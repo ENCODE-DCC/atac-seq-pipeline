@@ -22,6 +22,7 @@ workflow test_overlap {
 		peak_pooled = se_peak_pooled,
 		peak_type = 'narrowPeak',
 		blacklist = se_blacklist,
+		keep_irregular_chr_in_bfilt_peak = false,
 		chrsz = se_chrsz,
 		ta = se_ta_pooled,
 	}

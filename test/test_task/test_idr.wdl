@@ -27,6 +27,7 @@ workflow test_idr {
 		rank = 'p.value',
 		blacklist = se_blacklist,
 		chrsz = se_chrsz,
+		keep_irregular_chr_in_bfilt_peak = false,
 		ta = se_ta_pooled,
 	}
 
