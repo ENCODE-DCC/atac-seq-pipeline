@@ -271,7 +271,7 @@ def peak_to_hammock(peak, out_dir):
         rm_f([hammock, hammock_tmp, hammock_tmp2])
     return (hammock_gz, hammock_gz_tbi)
 
-def peak_to_bigbed(peak, peak_type, chrsz, out_dir):
+def peak_to_bigbed(peak, peak_type, chrsz, keep_irregular_chr, out_dir):
     prefix = os.path.join(out_dir,
         os.path.basename(strip_ext(peak)))
     bigbed = '{}.{}.bb'.format(prefix, peak_type)
@@ -341,7 +341,10 @@ def peak_to_bigbed(peak, peak_type, chrsz, out_dir):
     # create temporary .as file
     with open(as_file,'w') as fp: fp.write(as_file_contents)
 
-    cmd1 = "cat {} | grep -P 'chr[\dXY]+[ \\t]' > {}".format(chrsz, chrsz_tmp)
+    if not keep_irregular_chr:
+        cmd1 = "cat {} | grep -P 'chr[\dXY]+[ \\t]' > {}".format(chrsz, chrsz_tmp)
+    else:
+        cmd1 = "cat {} > {}".format(chrsz, chrsz_tmp)
     run_shell_cmd(cmd1)
     cmd2 = "zcat -f {} | sort -k1,1 -k2,2n > {}".format(peak, bigbed_tmp)
     run_shell_cmd(cmd2)

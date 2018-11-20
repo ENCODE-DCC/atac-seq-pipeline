@@ -46,7 +46,7 @@ def blacklist_filter(peak, blacklist, keep_irregular_chr, out_dir):
         tmp1 = gunzip(peak, 'tmp1', out_dir)
         tmp2 = gunzip(blacklist, 'tmp2', out_dir)
 
-        cmd = 'bedtools intersect -v -a {} -b {} | '
+        cmd = 'bedtools intersect -nonamecheck -v -a {} -b {} | '
         cmd += 'awk \'BEGIN{{OFS="\\t"}} '
         cmd += '{{if ($5>1000) $5=1000; print $0}}\' | '
         if not keep_irregular_chr:

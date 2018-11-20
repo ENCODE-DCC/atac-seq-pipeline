@@ -36,21 +36,30 @@
 
     "atac.cutadapt_min_trim_len" : 5,
     "atac.cutadapt_err_rate" : 0.1,
+
     "atac.multimapping" : 0,
 
     "atac.bowtie2_score_min" : "",
+
     "atac.dup_marker" : "picard",
     "atac.mapq_thresh" : 30,
     "atac.no_dup_removal" : false,
+
     "atac.regex_filter_reads" : "chrM",
     "atac.subsample_reads" : 0,
+
     "atac.enable_xcor" : false,
     "atac.xcor_subsample_reads" : 25000000,
+
+    "atac.keep_irregular_chr_in_bfilt_peak" : false,        
+
     "atac.cap_num_peak" : 300000,
     "atac.pval_thresh" : 0.01,
     "atac.smooth_win" : 150,
+
     "atac.enable_idr" : false,
     "atac.idr_thresh" : 0.1,
+
     "atac.disable_ataqc" : false,
 
     "atac.trim_adapter_cpu" : 2,

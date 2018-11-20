@@ -31,6 +31,8 @@ def parse_arguments():
                         naming convenction warnings/errors).')
     parser.add_argument('--blacklist', type=str, required=True,
                         help='Blacklist BED file.')
+    parser.add_argument('--keep-irregular-chr', action="store_true",
+                        help='Keep reads with non-canonical chromosome names.')    
     parser.add_argument('--ta', type=str,
                         help='TAGALIGN file for FRiP.')
     parser.add_argument('--chrsz', type=str,
@@ -110,10 +112,10 @@ def main():
 
     log.info('Blacklist-filtering peaks...')
     bfilt_overlap_peak = blacklist_filter(
-            overlap_peak, args.blacklist, False, args.out_dir)
+            overlap_peak, args.blacklist, args.keep_irregular_chr, args.out_dir)
 
     log.info('Converting peak to bigbed...')
-    peak_to_bigbed(bfilt_overlap_peak, args.peak_type, args.chrsz, args.out_dir)
+    peak_to_bigbed(bfilt_overlap_peak, args.peak_type, args.chrsz, args.keep_irregular_chr, args.out_dir)
 
     log.info('Converting peak to hammock...')
     peak_to_hammock(bfilt_overlap_peak, args.out_dir)

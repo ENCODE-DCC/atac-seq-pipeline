@@ -31,6 +31,8 @@ def parse_arguments():
                         help='Generate signal tracks for P-Value and fold enrichment.')
     parser.add_argument('--blacklist', type=str, required=True,
                         help='Blacklist BED file.')
+    parser.add_argument('--keep-irregular-chr', action="store_true",
+                        help='Keep reads with non-canonical chromosome names.')    
     parser.add_argument('--out-dir', default='', type=str,
                         help='Output directory.')
     parser.add_argument('--log-level', default='INFO', 
@@ -190,10 +192,10 @@ def main():
 
     log.info('Blacklist-filtering peaks...')
     bfilt_npeak = blacklist_filter(
-            npeak, args.blacklist, False, args.out_dir)
+            npeak, args.blacklist, args.keep_irregular_chr, args.out_dir)
 
     log.info('Converting peak to bigbed...')
-    peak_to_bigbed(bfilt_npeak, 'narrowPeak', args.chrsz, args.out_dir)
+    peak_to_bigbed(bfilt_npeak, 'narrowPeak', args.chrsz, args.keep_irregular_chr, args.out_dir)
 
     log.info('Converting peak to hammock...')
     peak_to_hammock(bfilt_npeak, args.out_dir)

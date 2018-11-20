@@ -45,7 +45,7 @@ def frip(ta, peak, out_dir):
         tmp1 = gunzip(ta, 'tmp1', out_dir)
         tmp2 = gunzip(peak, 'tmp2', out_dir)    
 
-        cmd = 'bedtools intersect -a {} -b {} -wa -u | wc -l'
+        cmd = 'bedtools intersect -nonamecheck -a {} -b {} -wa -u | wc -l'
         cmd = cmd.format(
             tmp1, # ta
             tmp2) # peak
@@ -70,7 +70,7 @@ def frip_shifted(ta, peak, chrsz, fraglen, out_dir):
         cmd = 'bedtools slop -i {} -g {} '
         cmd += '-s -l {} -r {} | '
         cmd += 'awk \'{{if ($2>=0 && $3>=0 && $2<=$3) print $0}}\' | '
-        cmd += 'bedtools intersect -a stdin -b {} '
+        cmd += 'bedtools intersect -nonamecheck -a stdin -b {} '
         cmd += '-wa -u | wc -l'
         cmd = cmd.format(
             ta,

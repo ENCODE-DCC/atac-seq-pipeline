@@ -43,6 +43,11 @@ workflow atac {
 								# this will be used for xcor only
 								# will not affect any downstream analysis
 
+	Boolean keep_irregular_chr_in_bfilt_peak = false # when filtering with blacklist
+								# do not filter peaks with irregular chr name
+								# and just keep them in bfilt_peak file
+								# (e.g. keep chr1_AABBCC, AABR07024382.1, ...)
+								# reg-ex pattern for regular chr names: /chr[\dXY]+[ \t]/
 	Int cap_num_peak = 300000	# cap number of raw peaks called from MACS2
 	Float pval_thresh = 0.01	# p.value threshold for MACS2
 	Int smooth_win = 150		# size of smoothing window
@@ -284,6 +289,7 @@ workflow atac {
 			smooth_win = smooth_win,
 			make_signal = true,
 			blacklist = blacklist,
+			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 
 			mem_mb = macs2_mem_mb,
 			disks = macs2_disks,
@@ -305,6 +311,7 @@ workflow atac {
 			smooth_win = smooth_win,
 			make_signal = true,
 			blacklist = blacklist,
+			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 
 			mem_mb = macs2_mem_mb,
 			disks = macs2_disks,
@@ -345,6 +352,7 @@ workflow atac {
 				smooth_win = smooth_win,
 				blacklist = blacklist,
 				make_signal = false,
+				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 
 				mem_mb = macs2_mem_mb,
 				disks = macs2_disks,
@@ -360,6 +368,7 @@ workflow atac {
 				smooth_win = smooth_win,
 				blacklist = blacklist,
 				make_signal = false,
+				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 
 				mem_mb = macs2_mem_mb,
 				disks = macs2_disks,
@@ -386,6 +395,7 @@ workflow atac {
 			smooth_win = smooth_win,
 			blacklist = blacklist,
 			make_signal = false,
+			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 
 			mem_mb = macs2_mem_mb,
 			disks = macs2_disks,
@@ -401,6 +411,7 @@ workflow atac {
 			smooth_win = smooth_win,
 			blacklist = blacklist,
 			make_signal = false,
+			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 
 			mem_mb = macs2_mem_mb,
 			disks = macs2_disks,
@@ -444,6 +455,7 @@ workflow atac {
 			peak_type = peak_type,
 			blacklist = blacklist,
 			chrsz = chrsz,
+			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 			ta = pool_ta.ta_pooled,
 		}
 	}
@@ -460,6 +472,7 @@ workflow atac {
 				rank = idr_rank,
 				blacklist = blacklist,
 				chrsz = chrsz,
+				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 				ta = pool_ta.ta_pooled,
 			}
 		}
@@ -478,6 +491,7 @@ workflow atac {
 			peak_type = peak_type,
 			blacklist = blacklist,
 			chrsz = chrsz,
+			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 			ta = if length(tas_)>0 then tas_[i] else pool_ta.ta_pooled,
 		}
 	}
@@ -494,6 +508,7 @@ workflow atac {
 				rank = idr_rank,
 				blacklist = blacklist,
 				chrsz = chrsz,
+				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 				ta = if length(tas_)>0 then tas_[i] else pool_ta.ta_pooled,
 			}
 		}
@@ -508,6 +523,7 @@ workflow atac {
 			peak_type = peak_type,
 			blacklist = blacklist,
 			chrsz = chrsz,
+			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 			ta = pool_ta.ta_pooled,
 		}
 	}
@@ -523,6 +539,7 @@ workflow atac {
 			rank = idr_rank,
 			blacklist = blacklist,
 			chrsz = chrsz,
+			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 			ta = pool_ta.ta_pooled,
 		}
 	}
@@ -535,6 +552,7 @@ workflow atac {
 			peak_ppr = overlap_ppr.bfilt_overlap_peak,
 			peak_type = peak_type,
 			chrsz = chrsz,
+			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 		}
 	}
 	if ( !align_only && !true_rep_only && enable_idr ) {
@@ -546,6 +564,7 @@ workflow atac {
 			peak_ppr = idr_ppr.bfilt_idr_peak,
 			peak_type = peak_type,
 			chrsz = chrsz,
+			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 		}
 	}
 
@@ -876,6 +895,7 @@ task macs2 {
 	Int smooth_win 		# size of smoothing window
 	Boolean make_signal
 	File blacklist 		# blacklist BED to filter raw peaks
+	Boolean	keep_irregular_chr_in_bfilt_peak
 	
 	Int mem_mb
 	Int time_hr
@@ -890,6 +910,7 @@ task macs2 {
 			${"--pval-thresh "+ pval_thresh} \
 			${"--smooth-win "+ smooth_win} \
 			${if make_signal then "--make-signal" else ""} \
+			${if keep_irregular_chr_in_bfilt_peak then "--keep-irregular-chr" else ""} \
 			${"--blacklist "+ blacklist}
 		
 		# ugly part to deal with optional outputs with Google JES backend
@@ -921,6 +942,7 @@ task idr {
 	File peak_pooled
 	Float idr_thresh
 	File blacklist 	# blacklist BED to filter raw peaks
+	Boolean	keep_irregular_chr_in_bfilt_peak
 	# parameters to compute FRiP
 	File? ta		# to calculate FRiP
 	File chrsz			# 2-col chromosome sizes file
@@ -936,6 +958,7 @@ task idr {
 			--idr-rank ${rank} \
 			${"--chrsz " + chrsz} \
 			${"--blacklist "+ blacklist} \
+			${if keep_irregular_chr_in_bfilt_peak then "--keep-irregular-chr" else ""} \
 			${"--ta " + ta}
 
 		# ugly part to deal with optional outputs with Google backend
@@ -966,6 +989,7 @@ task overlap {
 	File peak2
 	File peak_pooled
 	File blacklist 	# blacklist BED to filter raw peaks
+	Boolean	keep_irregular_chr_in_bfilt_peak
 	File? ta		# to calculate FRiP
 	File chrsz			# 2-col chromosome sizes file
 	String peak_type
@@ -977,6 +1001,8 @@ task overlap {
 			${"--peak-type " + peak_type} \
 			${"--chrsz " + chrsz} \
 			${"--blacklist "+ blacklist} \
+			--nonamecheck \
+			${if keep_irregular_chr_in_bfilt_peak then "--keep-irregular-chr" else ""} \
 			${"--ta " + ta}
 
 		# ugly part to deal with optional outputs with Google backend
@@ -1008,6 +1034,7 @@ task reproducibility {
 	File? peak_ppr			# Peak file from pooled pseudo replicate.
 	String peak_type
 	File chrsz			# 2-col chromosome sizes file
+	Boolean	keep_irregular_chr_in_bfilt_peak
 
 	command {
 		python $(which encode_reproducibility_qc.py) \
@@ -1016,6 +1043,7 @@ task reproducibility {
 			${"--peak-ppr "+ peak_ppr} \
 			--prefix ${prefix} \
 			${"--peak-type " + peak_type} \
+			${if keep_irregular_chr_in_bfilt_peak then "--keep-irregular-chr" else ""} \
 			${"--chrsz " + chrsz}
 	}
 	output {

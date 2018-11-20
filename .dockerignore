@@ -2,3 +2,5 @@
 .editorconfig
 .git
 .gitignore
+cromwell-executions
+cromwell-workflow-logs
