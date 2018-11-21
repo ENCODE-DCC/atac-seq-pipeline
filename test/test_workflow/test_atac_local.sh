@@ -36,7 +36,7 @@ RESULT=${PREFIX}.result.json # output
 
 cp $GCLOUD_SERVICE_ACCOUNT_SECRET_JSON_FILE tmp_secret_key.json
 
-java -Dconfig.file="../../backends/backend.conf" \
+java -Dconfig.file=backend_gcp_service_account.conf \
 -Dbackend.default=google \
 -Dbackend.providers.google.config.project=encode-dcc-1016 \
 -Dbackend.providers.google.config.root="gs://encode-pipeline-test-runs/circleci" \
@@ -45,6 +45,8 @@ java -Dconfig.file="../../backends/backend.conf" \
 -jar ${CROMWELL_JAR} run \
 ../../atac.wdl \
 -i ${INPUT} -o ${TMP_WF_OPT} -m ${METADATA}
+ 
+rm -f tmp_secret_key
 
 # parse output metadata json
 cat ${METADATA} | python -c "import json,sys;obj=json.load(sys.stdin);print(obj['outputs']['${PREFIX}.compare_md5sum.json_str'])" > ${RESULT}
