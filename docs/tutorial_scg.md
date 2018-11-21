@@ -45,7 +45,7 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
     ```
       $ source activate encode-atac-seq-pipeline # IMPORTANT!
       $ INPUT=examples/scg/ENCSR356KRQ_subsampled_scg.json
-      $ java -jar -Dconfig.file=backends/backend.conf -Dbackend.default=slurm cromwell-34.jar run atac.wdl -i ${INPUT} -o workflow_opts/scg.json
+      $ java -jar -Xmx1G -Dconfig.file=backends/backend.conf -Dbackend.default=slurm cromwell-34.jar run atac.wdl -i ${INPUT} -o workflow_opts/scg.json
     ```
 
 8. It will take about an hour. You will be able to find all outputs on `cromwell-executions/atac/[RANDOM_HASH_STRING]/`. See [output directory structure](output.md) for details.
@@ -56,13 +56,13 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
 
 5. Pull a singularity container for the pipeline. This will pull pipeline's docker container first and build a singularity one on `~/.singularity`.
     ```
-      $ SINGULARITY_CACHEDIR=~/.singularity SINGULARITY_PULLFOLDER=~/.singularity singularity pull -F docker://quay.io/encode-dcc/atac-seq-pipeline:v1.1.2
+      $ mkdir -p ~/.singularity && cd ~/.singularity && SINGULARITY_CACHEDIR=~/.singularity SINGULARITY_PULLFOLDER=~/.singularity singularity pull --name atac-seq-pipeline-v1.1.2.simg -F docker://quay.io/encode-dcc/atac-seq-pipeline:v1.1.2
     ```
 
 6. Run a pipeline for a SUBSAMPLED (1/400) paired-end sample of [ENCSR356KRQ](https://www.encodeproject.org/experiments/ENCSR356KRQ/).
     ```
       $ INPUT=examples/scg/ENCSR356KRQ_subsampled_scg.json
-      $ java -jar -Dconfig.file=backends/backend.conf -Dbackend.default=slurm_singularity cromwell-34.jar run atac.wdl -i ${INPUT} -o workflow_opts/scg.json
+      $ java -jar -Xmx1G -Dconfig.file=backends/backend.conf -Dbackend.default=slurm_singularity cromwell-34.jar run atac.wdl -i ${INPUT} -o workflow_opts/scg.json
     ```
 
 7. It will take about an hour. You will be able to find all outputs on `cromwell-executions/atac/[RANDOM_HASH_STRING]/`. See [output directory structure](output.md) for details.
