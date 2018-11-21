@@ -66,7 +66,6 @@ jobs:
       - run: *make_tag
       - run:
           command: |
-            pyenv global 3.5.2
             source ${BASH_ENV}
             cd test/test_task/
             rm -rf atac-seq-pipeline-test-data
@@ -88,7 +87,6 @@ jobs:
       - run: *make_tag
       - run:
           command: |
-            pyenv global 3.5.2
             source ${BASH_ENV}
             echo ${GCLOUD_SERVICE_KEY} | gcloud auth activate-service-account --key-file=-
             unset GOOGLE_APPLICATION_CREDENTIALS
