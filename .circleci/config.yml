@@ -71,6 +71,7 @@ jobs:
             cd test/test_task/
             rm -rf atac-seq-pipeline-test-data
             git clone https://github.com/ENCODE-DCC/atac-seq-pipeline-test-data
+            ./download_hg38_fasta_for_test_ataqc.sh
             for wdl in test_*.wdl
             do
               json=${wdl%.*}.json
@@ -89,9 +90,9 @@ jobs:
           command: |
             pyenv global 3.5.2
             source ${BASH_ENV}
-            echo ${GCLOUD_SERVICE_KEY} | base64 --decode | sudo gcloud auth activate-service-account --key-file=-
+            echo ${GCLOUD_SERVICE_KEY} | gcloud auth activate-service-account --key-file=-
             unset GOOGLE_APPLICATION_CREDENTIALS
-            sudo gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
+            gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
             cd test/test_workflow/
             ./test_atac_local.sh ENCSR889WQX_subsampled.json ${TAG}
             python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'outputs'][u'atac.qc_report.qc_json_match']))" < ENCSR356KRQ_subsampled.result.json
