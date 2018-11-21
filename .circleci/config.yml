@@ -97,7 +97,6 @@ jobs:
             ./test_atac_local.sh ENCSR356KRQ_subsampled.json ${TAG}
             python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'outputs'][u'atac.qc_report.qc_json_match']))" < ENCSR356KRQ_subsampled.result.json
 
-
 # Define workflow here
 workflows:
   version: 2

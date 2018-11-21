@@ -13,7 +13,8 @@ fi
 INPUT=$1
 PREFIX=$(basename $INPUT .json)
 
-if [ -f "cromwell-34.jar" ]; then
+CROMWELL_JAR="cromwell-34.jar"
+if [ -f ${CROMWELL_JAR} ]; then
   echo "Skip downloading cromwell."
 else
   wget -N -c https://github.com/broadinstitute/cromwell/releases/download/34/cromwell-34.jar
@@ -29,16 +30,20 @@ cat > $TMP_WF_OPT << EOM
 }
 EOM
 
+WDL=../../atac.wdl
 BACKEND_CONF=../../backends/backend.conf
-BACKEND=Local
-EXTRA_PARAM="-Dbackend.providers.Local.config.concurrent-job-limit=1"
+BACKEND=google
 PROJECT="encode-dcc-1016"
 BUCKET="gs://encode-pipeline-test-runs/circleci"
-PREFIX=$(basename ${WDL} .wdl)
+PREFIX=$(basename ${INPUT} .json)
 METADATA=${PREFIX}.metadata.json # metadata
 RESULT=${PREFIX}.result.json # output
 
-java -Dconfig.file=${BACKEND_CONF} -Dbackend.default=${BACKEND} ${EXTRA_PARAM} --jar ${CROMWELL_JAR} run ${WDL} -i ${INPUT} -o ${TMP_WF_OPT} -m ${METADATA}
+java -Dconfig.file=${BACKEND_CONF} -Dbackend.default=${BACKEND} \
+-Dbackend.providers.google.config.project=${PROJECT} \
+-Dbackend.providers.google.config.root=${BUCKET} \
+-jar ${CROMWELL_JAR} run ${WDL} \
+-i ${INPUT} -o ${TMP_WF_OPT} -m ${METADATA}
 
 # parse output metadata json
 cat ${METADATA} | python -c "import json,sys;obj=json.load(sys.stdin);print(obj['outputs']['${PREFIX}.compare_md5sum.json_str'])" > ${RESULT}
