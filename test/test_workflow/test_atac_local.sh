@@ -32,7 +32,7 @@ cat > $TMP_WF_OPT << EOM
 EOM
 
 METADATA=${PREFIX}.metadata.json # metadata
-RESULT=${PREFIX}.result.json # output
+RESULT=${PREFIX}.result.txt # output
 
 cp $GCLOUD_SERVICE_ACCOUNT_SECRET_JSON_FILE tmp_secret_key.json
 
@@ -46,10 +46,4 @@ java -Dconfig.file=backend_gcp_service_account.conf \
 ../../atac.wdl \
 -i ${INPUT} -o ${TMP_WF_OPT} -m ${METADATA}
  
-rm -f tmp_secret_key
-
-# parse output metadata json
-cat ${METADATA} | python -c "import json,sys;obj=json.load(sys.stdin);print(obj['outputs']['${PREFIX}.compare_md5sum.json_str'])" > ${RESULT}
-cat ${RESULT}
-
-rm -f ${METADATA} ${TMP_WF_OPT}
+rm -f tmp_secret_key ${TMP_WF_OPT}
