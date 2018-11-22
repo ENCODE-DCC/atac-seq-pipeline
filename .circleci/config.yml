@@ -65,6 +65,7 @@ jobs:
       - checkout
       - run: *make_tag
       - run:
+          no_output_timeout: 30m
           command: |
             source ${BASH_ENV}
             cd test/test_task/
@@ -86,6 +87,7 @@ jobs:
       - checkout
       - run: *make_tag
       - run:
+          no_output_timeout: 30m
           command: |
             source ${BASH_ENV}
             gcloud --quiet config set project ${GOOGLE_PROJECT_ID}

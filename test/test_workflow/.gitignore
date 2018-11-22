@@ -7,3 +7,4 @@
 *.submit.json
 *.test_atac_wf_opt.json
 cromwell*.jar
+tmp_secret_key.json
