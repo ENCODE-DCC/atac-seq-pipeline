@@ -28,6 +28,8 @@ def parse_arguments():
                         help='Peak file type.')
     parser.add_argument('--chrsz', type=str,
                         help='2-col chromosome sizes file.')
+    parser.add_argument('--keep-irregular-chr', action="store_true",
+                        help='Keep reads with non-canonical chromosome names.')    
     parser.add_argument('--prefix', type=str,
                         help='Basename prefix for reproducibility QC file.')
     parser.add_argument('--out-dir', default='', type=str,
@@ -111,8 +113,8 @@ def main():
 
     if args.chrsz:
         log.info('Converting peak to bigbed...')
-        peak_to_bigbed(optimal_peak_file, args.peak_type, args.chrsz, args.out_dir)
-        peak_to_bigbed(conservative_peak_file, args.peak_type, args.chrsz, args.out_dir)
+        peak_to_bigbed(optimal_peak_file, args.peak_type, args.chrsz, args.keep_irregular_chr, args.out_dir)
+        peak_to_bigbed(conservative_peak_file, args.peak_type, args.chrsz, args.keep_irregular_chr, args.out_dir)
 
         log.info('Converting peak to hammock...')
         peak_to_hammock(optimal_peak_file, args.out_dir)

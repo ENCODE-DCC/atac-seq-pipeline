@@ -29,8 +29,8 @@ Tutorial for general UNIX computers without docker
 
 6. Install Conda dependencies.
     ```
-      $ bash installers/uninstall_dependencies.sh  # to remove any existing pipeline env
-      $ bash installers/install_dependencies.sh
+      $ bash conda/uninstall_dependencies.sh  # to remove any existing pipeline env
+      $ bash conda/install_dependencies.sh
     ```
     
 7. Run a pipeline for the test sample.

@@ -4,6 +4,7 @@ import "../../atac.wdl" as atac
 
 workflow test_xcor {
 	Int xcor_subsample
+	Int xcor_subsample_default = 25000000
 
 	String pe_ta
 	String se_ta
@@ -13,23 +14,50 @@ workflow test_xcor {
 	String ref_se_xcor_log
 	String ref_se_xcor_log_subsample
 
+	Int xcor_cpu = 1
+	Int xcor_mem_mb = 16000
+	Int xcor_time_hr = 6
+	String xcor_disks = "local-disk 100 HDD"
+
 	call atac.xcor as pe_xcor { input :
 		ta = pe_ta,
+		subsample = xcor_subsample_default,
 		paired_end = true,
+
+		cpu = xcor_cpu,
+		mem_mb = xcor_mem_mb,
+		time_hr = xcor_time_hr,
+		disks = xcor_disks,
 	}
 	call atac.xcor as pe_xcor_subsample { input :
 		ta = pe_ta,
 		subsample = xcor_subsample,
 		paired_end = true,
+
+		cpu = xcor_cpu,
+		mem_mb = xcor_mem_mb,
+		time_hr = xcor_time_hr,
+		disks = xcor_disks,
 	}
 	call atac.xcor as se_xcor { input :
 		ta = se_ta,
+		subsample = xcor_subsample_default,
 		paired_end = false,
+
+		cpu = xcor_cpu,
+		mem_mb = xcor_mem_mb,
+		time_hr = xcor_time_hr,
+		disks = xcor_disks,
 	}
 	call atac.xcor as se_xcor_subsample { input :
 		ta = se_ta,
 		subsample = xcor_subsample,
 		paired_end = false,
+
+		cpu = xcor_cpu,
+		mem_mb = xcor_mem_mb,
+		time_hr = xcor_time_hr,
+		disks = xcor_disks,
 	}
 
 	call atac.compare_md5sum { input :

@@ -12,7 +12,7 @@ INPUT=$2
 if [ $# -gt 2 ]; then
   DOCKER_IMAGE=$3
 else
-  DOCKER_IMAGE=quay.io/encode-dcc/atac-seq-pipeline:v1.1.1
+  DOCKER_IMAGE=quay.io/encode-dcc/atac-seq-pipeline:v1.1.2
 fi
 if [ -f "cromwell-34.jar" ]; then
   echo "Skip downloading cromwell."

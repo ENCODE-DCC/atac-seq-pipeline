@@ -8,10 +8,6 @@ An input JSON file includes all input parameters and metadata for running pipeli
 3) Pipeline parameters.
 4) Resource for instances/jobs.
 
-## For DNANexus CLI users
-
-dxWDL (DNANexus CLI for WDL) does not support definition of task level variables with a prefix `atac.` in an input JSON file. Therefore, `atac.[TASK_NAME].[VAR_NAME]` should be replaced with `[TASK_NAME].[VAR_NAME]`. Simply remove a prefix `atac.` for task level variables. BUT DO NOT REMOVE it for workflow level variables. For example, `atac.qc_report.name` is a task (task `qc_report` in a workflow `atac`) level variable so it should be replaced with `qc_report.name`. But `atac.genome_tsv` is a workflow (`atac`) level variable, so you need to keep it the same. This is the only difference between DNANexus CLI and other platforms.
-
 ## Reference genome
 
 We currently support 4 genomes. You can also [build a genome database for your own genome](build_genome_database.md).
@@ -29,7 +25,9 @@ Choose one TSV file for `"atac.genome_tsv"` in your input JSON. `[GENOME]` shoul
 |-|-|
 |Google Cloud Platform|`gs://encode-pipeline-genome-data/[GENOME]_google.tsv`|
 |DNANexus (CLI)|`dx://project-BKpvFg00VBPV975PgJ6Q03v6:data/pipeline-genome-data/[GENOME]_dx.tsv`|
+|DNANexus (CLI, Azure)|`dx://project-XXXXXXXXXXXXXX:data/pipeline-genome-data/[GENOME]_dx.tsv`|
 |DNANExus (Web)|Choose `[GENOME]_dx.tsv` from [here](https://platform.dnanexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/pipeline-genome-data)|
+|DNANExus (Web, Azure)|Choose `[GENOME]_dx.tsv` from [here](https://platform.dnanexus.com/projects/XXXXXXXXXXXXXX/data/pipeline-genome-data)|
 |Stanford Sherlock|`genome/scg/[GENOME]_scg.tsv`|
 |Stanford SCG|`genome/sherlock/[GENOME]_sherlock.tsv`|
 |Local/SLURM/SGE|You need to [build a genome database](build_genome_database.md). |
@@ -103,9 +101,9 @@ else:
 
     Structure/dimension of `"atac.adapters` must match with that of `"atac.fastqs"`. If no adapters are given then do not define `"atac.adapters"` in `input.json`. If some adapters are known then define them in `"atac.adapters"` and leave other entries empty (`""`) while keeping the same structure/dimension as in `"atac.fastqs"`. All undefined/non-empty adapters will be trimmed without auto detection.
     
-    * `"atac.trim_adapter.auto_detect_adapter"` : (optional) Set it as `true` to automatically detect/trim adapters for empty entries in `"atac.adapters"`. There will be no auto detection for non-empty entries it. If `"atac.adapters"` is not defined then all adapters will be detected/trimmed for all fastqs.
-    * `"atac.trim_adapter.min_trim_len"` : (optional) Minimum trim length for `cutadapt -m` (default: 5).
-    * `"atac.trim_adapter.err_rate"` : (optional) Maximum allowed adapter error rate for `cutadapt -e` (default: 0.1).
+    * `"atac.auto_detect_adapter"` : (optional) Set it as `true` to automatically detect/trim adapters for empty entries in `"atac.adapters"`. There will be no auto detection for non-empty entries it. If `"atac.adapters"` is not defined then all adapters will be detected/trimmed for all fastqs.
+    * `"atac.cutadapt_min_trim_len"` : (optional) Minimum trim length for `cutadapt -m` (default: 5).
+    * `"atac.cutadapt_err_rate"` : (optional) Maximum allowed adapter error rate for `cutadapt -e` (default: 0.1).
 
 3. Bowtie2 settings (remove a prefix `atac.` for DNANexus CLI).
 
@@ -153,36 +151,37 @@ else:
 
 CPU (`cpu`), memory (`mem_mb`) settings are used for submitting jobs to cluster engines (SGE and SLURM) and Cloud platforms (Google Cloud Platform, AWS, ...). VM instance type on cloud platforms will be automatically chosen according to each task's `cpu` and `mem_mb`. Number of cores for tasks without `cpu` parameter is fixed at 1.
 
-* `"atac.trim_adapter.cpu"` : (optional) Number of cores for `trim_adapter` (default: 2).
-* `"atac.bowtie2.cpu"` : (optional) Number of cores for `bowtie2` (default: 4).
-* `"atac.filter.cpu"` : (optional) Number of cores for `filter` (default: 2).
-* `"atac.bam2ta.cpu"` : (optional) Number of cores for `bam2ta` (default: 2).
-* `"atac.xcor.cpu"` : (optional) Number of cores for `xcor` (default: 2).
-* `"atac.trim_adapter.mem_mb"` : (optional) Max. memory limit in MB for `trim_adapter` (default: 10000).
-* `"atac.bowtie2.mem_mb"` : (optional) Max. memory limit in MB for `bowtie2` (default: 20000).
-* `"atac.filter.mem_mb"` : (optional) Max. memory limit in MB for `filter` (default: 20000).
-* `"atac.bam2ta.mem_mb"` : (optional) Max. memory limit in MB for `bam2ta` (default: 10000).
-* `"atac.spr.mem_mb"` : (optional) Max. memory limit in MB for `spr` (default: 12000).
-* `"atac.xcor.mem_mb"` : (optional) Max. memory limit in MB for `xcor` (default: 10000).
+* `"atac.trim_adapter_cpu"` : (optional) Number of cores for `trim_adapter` (default: 2).
+* `"atac.bowtie2_cpu"` : (optional) Number of cores for `bowtie2` (default: 4).
+* `"atac.filter_cpu"` : (optional) Number of cores for `filter` (default: 2).
+* `"atac.bam2ta_cpu"` : (optional) Number of cores for `bam2ta` (default: 2).
+* `"atac.xcor_cpu"` : (optional) Number of cores for `xcor` (default: 2).
+* `"atac.trim_adapter_mem_mb"` : (optional) Max. memory limit in MB for `trim_adapter` (default: 10000).
+* `"atac.bowtie2_mem_mb"` : (optional) Max. memory limit in MB for `bowtie2` (default: 20000).
+* `"atac.filter_mem_mb"` : (optional) Max. memory limit in MB for `filter` (default: 20000).
+* `"atac.bam2ta_mem_mb"` : (optional) Max. memory limit in MB for `bam2ta` (default: 10000).
+* `"atac.spr_mem_mb"` : (optional) Max. memory limit in MB for `spr` (default: 12000).
+* `"atac.xcor_mem_mb"` : (optional) Max. memory limit in MB for `xcor` (default: 10000).
 * `"atac.macs2_mem_mb"` : (optional) Max. memory limit in MB for `macs2` (default: 16000).
-* `"atac.ataqc.mem_mb"` : (optional) Max. memory limit in MB for `ATAQC` (default: 16000).
+* `"atac.ataqc_mem_mb"` : (optional) Max. memory limit in MB for `ATAQC` (default: 16000).
+* `"atac.ataqc_mem_java_mb"` : (optional) Max. JAVA heap limit in MB for `ATAQC` (default: 16000).
 
 Disks (`disks`) is used for Cloud platforms (Google Cloud Platforms, AWS, ...).
 
-* `"atac.trim_adapter.disks"` : (optional) Disks for `trim_adapter` (default: "local-disk 100 HDD").
-* `"atac.bowtie2.disks"` : (optional) Disks for `bowtie2` (default: "local-disk 100 HDD").
-* `"atac.filter.disks"` : (optional) Disks for `filter` (default: "local-disk 100 HDD").
-* `"atac.bam2ta.disks"` : (optional) Disks for `bam2ta` (default: "local-disk 100 HDD").
-* `"atac.xcor.disks"` : (optional) Disks for `xcor` (default: "local-disk 100 HDD").
+* `"atac.trim_adapter_disks"` : (optional) Disks for `trim_adapter` (default: "local-disk 100 HDD").
+* `"atac.bowtie2_disks"` : (optional) Disks for `bowtie2` (default: "local-disk 100 HDD").
+* `"atac.filter_disks"` : (optional) Disks for `filter` (default: "local-disk 100 HDD").
+* `"atac.bam2ta_disks"` : (optional) Disks for `bam2ta` (default: "local-disk 100 HDD").
+* `"atac.xcor_disks"` : (optional) Disks for `xcor` (default: "local-disk 100 HDD").
 * `"atac.macs2_disks"` : (optional) Disks for `macs2` (default: "local-disk 100 HDD").
 
 Walltime (`time`) settings (for SGE and SLURM only).
 
-* `"atac.trim_adapter.time_hr"` : (optional) Walltime for `trim_adapter` (default: 24).
-* `"atac.bowtie2.time_hr"` : (optional) Walltime for `bowtie2` (default: 48).
-* `"atac.filter.time_hr"` : (optional) Walltime for `filter` (default: 24).
-* `"atac.bam2ta.time_hr"` : (optional) Walltime for `bam2ta` (default: 6).
-* `"atac.xcor.time_hr"` : (optional) Walltime for `xcor` (default: 6).
+* `"atac.trim_adapter_time_hr"` : (optional) Walltime for `trim_adapter` (default: 24).
+* `"atac.bowtie2_time_hr"` : (optional) Walltime for `bowtie2` (default: 48).
+* `"atac.filter_time_hr"` : (optional) Walltime for `filter` (default: 24).
+* `"atac.bam2ta_time_hr"` : (optional) Walltime for `bam2ta` (default: 6).
+* `"atac.xcor_time_hr"` : (optional) Walltime for `xcor` (default: 6).
 * `"atac.macs2_time_hr"` : (optional) Walltime for `macs2` (default: 24).
-* `"atac.ataqc.time_hr"` : (optional) Walltime for `ATAQC` (default: 24).
+* `"atac.ataqc_time_hr"` : (optional) Walltime for `ATAQC` (default: 24).
 

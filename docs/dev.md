@@ -9,7 +9,7 @@ Run the following command line locally to build out DX workflows for this pipeli
 
 ```
 # version
-VER=v1.1.1
+VER=v1.1.2
 
 # general
 java -jar ~/dxWDL-0.77.jar compile atac.wdl -project "ENCODE Uniform Processing Pipelines" -extras workflow_opts/docker.json -f -folder /ATAC-seq/workflows/$VER/general -defaults examples/dx/template_general.json
@@ -33,7 +33,7 @@ java -jar ~/dxWDL-0.77.jar compile atac.wdl -project "ENCODE Uniform Processing 
 ## DX Azure
 ```
 # version
-VER=v1.1.1
+VER=v1.1.2
 
 # general
 java -jar ~/dxWDL-0.77.jar compile atac.wdl -project "ENCODE Uniform Processing Pipelines Azure" -extras workflow_opts/docker.json -f -folder /ATAC-seq/workflows/$VER/general -defaults examples/dx_azure/template_general.json

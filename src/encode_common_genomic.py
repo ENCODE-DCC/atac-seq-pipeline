@@ -141,13 +141,20 @@ def subsample_ta_se(ta, subsample, non_mito, out_dir):
     cmd = 'bash -c "zcat -f {} | '
     if non_mito:
         cmd += 'grep -v chrM | '
-    cmd += 'shuf -n {} --random-source=<(openssl enc -aes-256-ctr -pass pass:$(zcat -f {} | wc -c) -nosalt </dev/zero 2>/dev/null) | '
-    cmd += 'gzip -nc > {}"'
-    cmd = cmd.format(
-        ta,
-        subsample,
-        ta,
-        ta_subsampled)
+    if subsample>0:
+        cmd += 'shuf -n {} --random-source=<(openssl enc -aes-256-ctr -pass pass:$(zcat -f {} | wc -c) -nosalt </dev/zero 2>/dev/null) | '
+        cmd += 'gzip -nc > {}"'
+        cmd = cmd.format(
+            ta,
+            subsample,
+            ta,
+            ta_subsampled)
+    else:
+        cmd += 'gzip -nc > {}"'
+        cmd = cmd.format(
+            ta,
+            ta_subsampled)
+
     run_shell_cmd(cmd)
     return ta_subsampled
 
@@ -164,13 +171,20 @@ def subsample_ta_pe(ta, subsample, non_mito, r1_only, out_dir):
     cmd0 = 'bash -c "zcat -f {} | '
     if non_mito:
         cmd0 += 'grep -v chrM | '
-    cmd0 += 'sed \'N;s/\\n/\\t/\' | '
-    cmd0 += 'shuf -n {} --random-source=<(openssl enc -aes-256-ctr -pass pass:$(zcat -f {} | wc -c) -nosalt </dev/zero 2>/dev/null) > {}"'
-    cmd0 = cmd0.format(
-        ta,
-        subsample,
-        ta,
-        ta_tmp)
+    cmd0 += 'sed \'N;s/\\n/\\t/\' '
+    if subsample>0:
+        cmd0 += '| shuf -n {} --random-source=<(openssl enc -aes-256-ctr -pass pass:$(zcat -f {} | wc -c) -nosalt </dev/zero 2>/dev/null) > {}"'
+        cmd0 = cmd0.format(
+            ta,
+            subsample,
+            ta,
+            ta_tmp)
+    else:
+        cmd0 += '> {}"'
+        cmd0 = cmd0.format(
+            ta,
+            ta_tmp)
+
     run_shell_cmd(cmd0)
 
     cmd = 'cat {} | '
@@ -257,7 +271,7 @@ def peak_to_hammock(peak, out_dir):
         rm_f([hammock, hammock_tmp, hammock_tmp2])
     return (hammock_gz, hammock_gz_tbi)
 
-def peak_to_bigbed(peak, peak_type, chrsz, out_dir):
+def peak_to_bigbed(peak, peak_type, chrsz, keep_irregular_chr, out_dir):
     prefix = os.path.join(out_dir,
         os.path.basename(strip_ext(peak)))
     bigbed = '{}.{}.bb'.format(prefix, peak_type)
@@ -327,7 +341,10 @@ def peak_to_bigbed(peak, peak_type, chrsz, out_dir):
     # create temporary .as file
     with open(as_file,'w') as fp: fp.write(as_file_contents)
 
-    cmd1 = "cat {} | grep -P 'chr[\dXY]+[ \\t]' > {}".format(chrsz, chrsz_tmp)
+    if not keep_irregular_chr:
+        cmd1 = "cat {} | grep -P 'chr[\dXY]+[ \\t]' > {}".format(chrsz, chrsz_tmp)
+    else:
+        cmd1 = "cat {} > {}".format(chrsz, chrsz_tmp)
     run_shell_cmd(cmd1)
     cmd2 = "zcat -f {} | sort -k1,1 -k2,2n > {}".format(peak, bigbed_tmp)
     run_shell_cmd(cmd2)

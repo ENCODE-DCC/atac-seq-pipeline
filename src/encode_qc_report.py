@@ -348,9 +348,9 @@ def main():
     # frip (Enrichment QC) for MACS2 raw peaks
     if args.frip_macs2_qcs or args.frip_macs2_qcs_pr1 or args.frip_macs2_qcs_pr2 \
         or args.frip_macs2_qc_pooled or args.frip_macs2_qc_ppr1 or args.frip_macs2_qc_ppr2:
-        html_enrich += html_heading(2, 'Fraction of reads in {} raw peaks'.format(
-            args.peak_caller.upper()))
-        html_enrich += html_help_macs2(args.macs2_cap_num_peak)
+        # html_enrich += html_heading(2, 'Fraction of reads in {} raw peaks'.format(
+        #     args.peak_caller.upper()))
+        # html_enrich += html_help_macs2(args.macs2_cap_num_peak)
         json_objs_frip = []
         row_header_frip = []
         true_rep_labels = ['rep{}'.format(i+1) for i, qc in enumerate(args.frip_macs2_qcs)]
@@ -383,15 +383,15 @@ def main():
             row_header_frip.append('ppr2')
         json_all['frip_macs2_qc'] = OrderedDict(
             zip(row_header_frip,json_objs_frip))
-        html_enrich += html_vert_table_multi_rep(json_objs_frip,args.paired_end,row_header_frip)
-        html_enrich += html_help_FRiP(args.peak_caller)
+        # html_enrich += html_vert_table_multi_rep(json_objs_frip,args.paired_end,row_header_frip)
+        # html_enrich += html_help_FRiP(args.peak_caller)
 
     # frip (Enrichment QC) for SPP raw peaks
     if args.frip_spp_qcs or args.frip_spp_qcs_pr1 or args.frip_spp_qcs_pr2 \
         or args.frip_spp_qc_pooled or args.frip_spp_qc_ppr1 or args.frip_spp_qc_ppr2:
-        html_enrich += html_heading(2, 'Fraction of reads in {} raw peaks'.format(
-            args.peak_caller.upper()))
-        html_peakcall += html_help_spp(args.spp_cap_num_peak)
+        # html_enrich += html_heading(2, 'Fraction of reads in {} raw peaks'.format(
+        #     args.peak_caller.upper()))
+        # html_peakcall += html_help_spp(args.spp_cap_num_peak)
         json_objs_frip = []
         row_header_frip = []
         true_rep_labels = ['rep{}'.format(i+1) for i, qc in enumerate(args.frip_spp_qcs)]
@@ -424,8 +424,8 @@ def main():
             row_header_frip.append('ppr2')
         json_all['frip_spp_qc'] = OrderedDict(
             zip(row_header_frip,json_objs_frip))
-        html_enrich += html_vert_table_multi_rep(json_objs_frip,args.paired_end,row_header_frip)
-        html_enrich += html_help_FRiP(args.peak_caller)
+        # html_enrich += html_vert_table_multi_rep(json_objs_frip,args.paired_end,row_header_frip)
+        # html_enrich += html_help_FRiP(args.peak_caller)
 
     # frip (Enrichment QC) for overlap
     if args.frip_overlap_qcs or args.frip_overlap_qcs_pr or args.frip_overlap_qc_ppr:

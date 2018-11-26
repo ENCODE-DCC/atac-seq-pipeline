@@ -35,6 +35,11 @@ workflow test_ataqc {
 	#File ref_qc_html
 	File ref_qc_txt
 
+	Int ataqc_mem_mb = 8000
+	Int ataqc_mem_java_mb = 7000
+	Int ataqc_time_hr = 24
+	String ataqc_disks = "local-disk 100 HDD"
+
 	call atac.ataqc { input : 
 		paired_end = paired_end,
 		read_len_log = read_len_log,
@@ -61,6 +66,11 @@ workflow test_ataqc {
 		reg2map_bed = reg2map_bed,
 		reg2map = reg2map,
 		roadmap_meta = roadmap_meta,
+
+		mem_mb = ataqc_mem_mb,
+		mem_java_mb = ataqc_mem_java_mb,
+		time_hr = ataqc_time_hr,
+		disks = ataqc_disks,
 	}
 
 	call atac.compare_md5sum { input :

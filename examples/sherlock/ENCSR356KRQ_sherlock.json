@@ -27,15 +27,15 @@
     "atac.paired_end" : true,
     "atac.multimapping" : 4,
 
-    "atac.trim_adapter.auto_detect_adapter" : true,
+    "atac.auto_detect_adapter" : true,
 
-    "atac.bowtie2.cpu" : 6,
-    "atac.bowtie2.mem_mb" : 16000,
-    "atac.bowtie2.time_hr" : 36,
+    "atac.bowtie2_cpu" : 6,
+    "atac.bowtie2_mem_mb" : 16000,
+    "atac.bowtie2_time_hr" : 36,
 
-    "atac.filter.cpu" : 2,
-    "atac.filter.mem_mb" : 12000,
-    "atac.filter.time_hr" : 23,
+    "atac.filter_cpu" : 2,
+    "atac.filter_mem_mb" : 12000,
+    "atac.filter_time_hr" : 23,
 
     "atac.macs2_mem_mb" : 16000,
 
@@ -45,6 +45,6 @@
 
     "atac.enable_xcor" : true,
 
-    "atac.qc_report.name" : "ENCSR356KRQ",
-    "atac.qc_report.desc" : "ATAC-seq on primary keratinocytes in day 0.0 of differentiation"
+    "atac.title" : "ENCSR356KRQ",
+    "atac.description" : "ATAC-seq on primary keratinocytes in day 0.0 of differentiation"
 }

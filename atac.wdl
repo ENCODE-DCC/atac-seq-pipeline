@@ -2,6 +2,98 @@
 # Author: Jin Lee (leepc12@gmail.com)
 
 workflow atac {
+	### sample name, description
+	String title = 'Untitled'
+	String description = 'No description'
+
+	### pipeline type
+	String pipeline_type = 'atac'	# ATAC-Seq (atac) or DNase-Seq (dnase)
+									# the only difference is that tn5 shiting is enabled for atac
+	### mandatory genome param
+	File genome_tsv 		# reference genome data TSV file including
+							# all important genome specific data file paths and parameters
+	Boolean paired_end
+
+	### optional but important
+	Boolean align_only = false		# disable all post-align analysis (peak-calling, overlap, idr, ...)
+	Boolean true_rep_only = false 	# disable all analyses for pseudo replicates
+									# overlap and idr will also be disabled
+
+	Boolean auto_detect_adapter = false	# automatically detect/trim adapters
+	Int cutadapt_min_trim_len = 5	# minimum trim length for cutadapt -m
+	Float cutadapt_err_rate = 0.1	# Maximum allowed adapter error rate for cutadapt -e	
+
+	Int multimapping = 0			# for multimapping reads
+
+	String bowtie2_score_min = ''	# min acceptable alignment score func w.r.t read length
+
+	String dup_marker = 'picard'	# picard MarkDuplicates (picard) or sambamba markdup (sambamba)
+	Int mapq_thresh = 30			# threshold for low MAPQ reads removal
+	Boolean no_dup_removal = false 	# no dupe reads removal when filtering BAM
+									# dup.qc and pbc.qc will be empty files
+									# and nodup_bam in the output is filtered bam with dupes	
+
+	String regex_filter_reads = 'chrM' 	# Perl-style regular expression pattern for chr name to filter out reads
+                        		# to remove matching reads from TAGALIGN
+	Int subsample_reads = 0		# number of reads to subsample TAGALIGN
+								# 0 for no subsampling. this affects all downstream analysis
+
+	Boolean enable_xcor = false 	# enable cross-correlation analysis
+	Int xcor_subsample_reads = 25000000	# number of reads to subsample TAGALIGN
+								# this will be used for xcor only
+								# will not affect any downstream analysis
+
+	Boolean keep_irregular_chr_in_bfilt_peak = false # when filtering with blacklist
+								# do not filter peaks with irregular chr name
+								# and just keep them in bfilt_peak file
+								# (e.g. keep chr1_AABBCC, AABR07024382.1, ...)
+								# reg-ex pattern for regular chr names: /chr[\dXY]+[ \t]/
+	Int cap_num_peak = 300000	# cap number of raw peaks called from MACS2
+	Float pval_thresh = 0.01	# p.value threshold for MACS2
+	Int smooth_win = 150		# size of smoothing window
+
+	Boolean enable_idr = false 	# enable IDR analysis on raw peaks
+	Float idr_thresh = 0.1		# IDR threshold
+
+	Boolean disable_ataqc = false
+
+	### resources (disks: for cloud platforms)
+	Int trim_adapter_cpu = 2
+	Int trim_adapter_mem_mb = 12000
+	Int trim_adapter_time_hr = 24
+	String trim_adapter_disks = "local-disk 100 HDD"
+
+	Int bowtie2_cpu = 4
+	Int bowtie2_mem_mb = 20000
+	Int bowtie2_time_hr = 48
+	String bowtie2_disks = "local-disk 100 HDD"
+
+	Int filter_cpu = 2
+	Int filter_mem_mb = 20000
+	Int filter_time_hr = 24
+	String filter_disks = "local-disk 100 HDD"
+
+	Int bam2ta_cpu = 2
+	Int bam2ta_mem_mb = 10000
+	Int bam2ta_time_hr = 6
+	String bam2ta_disks = "local-disk 100 HDD"
+
+	Int spr_mem_mb = 16000
+
+	Int xcor_cpu = 2
+	Int xcor_mem_mb = 16000
+	Int xcor_time_hr = 6
+	String xcor_disks = "local-disk 100 HDD"
+
+	Int macs2_mem_mb = 16000
+	Int macs2_time_hr = 24
+	String macs2_disks = "local-disk 100 HDD"
+
+	Int ataqc_mem_mb = 16000
+	Int ataqc_mem_java_mb = 16000
+	Int ataqc_time_hr = 24
+	String ataqc_disks = "local-disk 100 HDD"
+
 	#### input file definition
 		# pipeline can start from any type of inputs and then leave all other types undefined
 		# supported types: fastq, bam, nodup_bam (filtered bam), ta (tagAlign), peak
@@ -57,35 +149,6 @@ workflow atac {
 	File? peak_ppr1				# do not define if you have a single replicate or true_rep=true
 	File? peak_ppr2				# do not define if you have a single replicate or true_rep=true
 	File? peak_pooled			# do not define if you have a single replicate or true_rep=true
-
-	### pipeline type
-	String pipeline_type  	# ATAC-Seq (atac) or DNase-Seq (dnase)
-							# the only difference is that tn5 shiting is enabled for atac
-
-	### mandatory genome param
-	File genome_tsv 		# reference genome data TSV file including
-							# all important genome specific data file paths and parameters
-	Boolean paired_end
-
-	### optional but important
-	Boolean align_only = false		# disable all post-align analysis (peak-calling, overlap, idr, ...)
-	Boolean true_rep_only = false 	# disable all analyses for pseudo replicates
-									# overlap and idr will also be disabled
-	Boolean enable_xcor = false 	# enable cross-correlation analysis
-	Int multimapping = 0			# for multimapping reads
-	Boolean disable_ataqc = false
-
-	### task-specific variables but defined in workflow level (limit of WDL)
-	## optional for MACS2 
-	Int cap_num_peak = 300000	# cap number of raw peaks called from MACS2
-	Float pval_thresh = 0.01	# p.value threshold
-	Int smooth_win = 150		# size of smoothing window
-	Int? macs2_mem_mb 			# resource (memory in MB)
-	Int? macs2_time_hr			# resource (walltime in hour)
-	String? macs2_disks 		# resource disks for cloud platforms
-	## optional for IDR
-	Boolean enable_idr = false 	# enable IDR analysis on raw peaks
-	Float idr_thresh = 0.1		# IDR threshold
 
 	### temp vars (do not define these)
 	String peak_type = 'narrowPeak' # peak type for IDR and overlap
@@ -154,14 +217,28 @@ workflow atac {
 		call trim_adapter { input :
 			fastqs = fastqs_[i],
 			adapters = if length(adapters_)>0 then adapters_[i] else [],
+			auto_detect_adapter = auto_detect_adapter,
 			paired_end = paired_end,
+			min_trim_len = cutadapt_min_trim_len,
+			err_rate = cutadapt_err_rate,
+
+			cpu = trim_adapter_cpu,
+			mem_mb = trim_adapter_mem_mb,
+			time_hr = trim_adapter_time_hr,
+			disks = trim_adapter_disks,
 		}
 		# align trimmed/merged fastqs with bowtie2s
 		call bowtie2 { input :
 			idx_tar = bowtie2_idx_tar,
 			fastqs = trim_adapter.trimmed_merged_fastqs, #[R1,R2]
+			score_min = bowtie2_score_min,
 			paired_end = paired_end,
 			multimapping = multimapping,
+
+			cpu = bowtie2_cpu,
+			mem_mb = bowtie2_mem_mb,
+			time_hr = bowtie2_time_hr,
+			disks = bowtie2_disks,
 		}
 	}
 
@@ -171,7 +248,15 @@ workflow atac {
 		call filter { input :
 			bam = bam,
 			paired_end = paired_end,
+			dup_marker = dup_marker,
+			mapq_thresh = mapq_thresh,
+			no_dup_removal = no_dup_removal,
 			multimapping = multimapping,
+
+			cpu = filter_cpu,
+			mem_mb = filter_mem_mb,
+			time_hr = filter_time_hr,
+			disks = filter_disks,
 		}
 	}
 
@@ -181,7 +266,14 @@ workflow atac {
 		call bam2ta { input :
 			bam = bam,
 			disable_tn5_shift = if pipeline_type=='atac' then false else true,
+			regex_grep_v_ta = regex_filter_reads,
+			subsample = subsample_reads,
 			paired_end = paired_end,
+
+			cpu = bam2ta_cpu,
+			mem_mb = bam2ta_mem_mb,
+			time_hr = bam2ta_time_hr,
+			disks = bam2ta_disks,			
 		}
 	}
 
@@ -197,7 +289,8 @@ workflow atac {
 			smooth_win = smooth_win,
 			make_signal = true,
 			blacklist = blacklist,
-			# resource
+			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
+
 			mem_mb = macs2_mem_mb,
 			disks = macs2_disks,
 			time_hr = macs2_time_hr,
@@ -218,7 +311,8 @@ workflow atac {
 			smooth_win = smooth_win,
 			make_signal = true,
 			blacklist = blacklist,
-			# resource
+			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
+
 			mem_mb = macs2_mem_mb,
 			disks = macs2_disks,
 			time_hr = macs2_time_hr,
@@ -229,7 +323,13 @@ workflow atac {
 			# subsample tagalign (non-mito) and cross-correlation analysis
 			call xcor { input :
 				ta = ta,
+				subsample = xcor_subsample_reads,
 				paired_end = paired_end,
+
+				cpu = xcor_cpu,
+				mem_mb = xcor_mem_mb,
+				time_hr = xcor_time_hr,
+				disks = xcor_disks,				
 			}
 		}
 	}
@@ -240,6 +340,7 @@ workflow atac {
 			call spr { input :
 				ta = ta,
 				paired_end = paired_end,
+				mem_mb = spr_mem_mb,
 			}
 			# call peaks on 1st pseudo replicated tagalign 
 			call macs2 as macs2_pr1 { input :
@@ -250,7 +351,9 @@ workflow atac {
 				pval_thresh = pval_thresh,
 				smooth_win = smooth_win,
 				blacklist = blacklist,
-				# resource
+				make_signal = false,
+				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
+
 				mem_mb = macs2_mem_mb,
 				disks = macs2_disks,
 				time_hr = macs2_time_hr,
@@ -264,7 +367,9 @@ workflow atac {
 				pval_thresh = pval_thresh,
 				smooth_win = smooth_win,
 				blacklist = blacklist,
-				# resource
+				make_signal = false,
+				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
+
 				mem_mb = macs2_mem_mb,
 				disks = macs2_disks,
 				time_hr = macs2_time_hr,
@@ -289,7 +394,9 @@ workflow atac {
 			pval_thresh = pval_thresh,
 			smooth_win = smooth_win,
 			blacklist = blacklist,
-			# resource
+			make_signal = false,
+			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
+
 			mem_mb = macs2_mem_mb,
 			disks = macs2_disks,
 			time_hr = macs2_time_hr,
@@ -303,7 +410,9 @@ workflow atac {
 			pval_thresh = pval_thresh,
 			smooth_win = smooth_win,
 			blacklist = blacklist,
-			# resource
+			make_signal = false,
+			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
+
 			mem_mb = macs2_mem_mb,
 			disks = macs2_disks,
 			time_hr = macs2_time_hr,
@@ -346,6 +455,7 @@ workflow atac {
 			peak_type = peak_type,
 			blacklist = blacklist,
 			chrsz = chrsz,
+			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 			ta = pool_ta.ta_pooled,
 		}
 	}
@@ -362,6 +472,7 @@ workflow atac {
 				rank = idr_rank,
 				blacklist = blacklist,
 				chrsz = chrsz,
+				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 				ta = pool_ta.ta_pooled,
 			}
 		}
@@ -380,6 +491,7 @@ workflow atac {
 			peak_type = peak_type,
 			blacklist = blacklist,
 			chrsz = chrsz,
+			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 			ta = if length(tas_)>0 then tas_[i] else pool_ta.ta_pooled,
 		}
 	}
@@ -396,6 +508,7 @@ workflow atac {
 				rank = idr_rank,
 				blacklist = blacklist,
 				chrsz = chrsz,
+				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 				ta = if length(tas_)>0 then tas_[i] else pool_ta.ta_pooled,
 			}
 		}
@@ -410,6 +523,7 @@ workflow atac {
 			peak_type = peak_type,
 			blacklist = blacklist,
 			chrsz = chrsz,
+			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 			ta = pool_ta.ta_pooled,
 		}
 	}
@@ -425,6 +539,7 @@ workflow atac {
 			rank = idr_rank,
 			blacklist = blacklist,
 			chrsz = chrsz,
+			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 			ta = pool_ta.ta_pooled,
 		}
 	}
@@ -437,6 +552,7 @@ workflow atac {
 			peak_ppr = overlap_ppr.bfilt_overlap_peak,
 			peak_type = peak_type,
 			chrsz = chrsz,
+			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 		}
 	}
 	if ( !align_only && !true_rep_only && enable_idr ) {
@@ -448,6 +564,7 @@ workflow atac {
 			peak_ppr = idr_ppr.bfilt_idr_peak,
 			peak_type = peak_type,
 			chrsz = chrsz,
+			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 		}
 	}
 
@@ -483,11 +600,18 @@ workflow atac {
 			reg2map_bed = reg2map_bed,
 			reg2map = reg2map,
 			roadmap_meta = roadmap_meta,
+
+			mem_mb = ataqc_mem_mb,
+			mem_java_mb = ataqc_mem_java_mb,
+			time_hr = ataqc_time_hr,
+			disks = ataqc_disks,
 		}
 	}
 
 	# Generate final QC report and JSON		
 	call qc_report { input :
+		title = title,
+		description = description,
 		multimapping = multimapping,
 		paired_end = paired_end,
 		pipeline_type = pipeline_type,
@@ -531,31 +655,29 @@ workflow atac {
 }
 
 task trim_adapter { # trim adapters and merge trimmed fastqs
-	# parameters from workflow
 	Array[Array[File]] fastqs 		# [merge_id][read_end_id]
 	Array[Array[String]] adapters 	# [merge_id][read_end_id]
 	Boolean paired_end
 	# mandatory
-	Boolean? auto_detect_adapter	# automatically detect/trim adapters
+	Boolean auto_detect_adapter	# automatically detect/trim adapters
 	# optional
-	Int? min_trim_len 		# minimum trim length for cutadapt -m
-	Float? err_rate			# Maximum allowed adapter error rate 
+	Int min_trim_len 		# minimum trim length for cutadapt -m
+	Float err_rate			# Maximum allowed adapter error rate 
 							# for cutadapt -e	
-	# resource
-	Int? cpu
-	Int? mem_mb
-	Int? time_hr
-	String? disks
+	Int cpu
+	Int mem_mb
+	Int time_hr
+	String disks
 
 	command {
 		python $(which encode_trim_adapter.py) \
 			${write_tsv(fastqs)} \
 			--adapters ${write_tsv(adapters)} \
 			${if paired_end then "--paired-end" else ""} \
-			${if select_first([auto_detect_adapter,false]) then "--auto-detect-adapter" else ""} \
-			${"--min-trim-len " + select_first([min_trim_len,5])} \
-			${"--err-rate " + select_first([err_rate,'0.1'])} \
-			${"--nth " + select_first([cpu,2])}
+			${if auto_detect_adapter then "--auto-detect-adapter" else ""} \
+			${"--min-trim-len " + min_trim_len} \
+			${"--err-rate " + err_rate} \
+			${"--nth " + cpu}
 	}
 	output {
 		# WDL glob() globs in an alphabetical order
@@ -567,27 +689,24 @@ task trim_adapter { # trim adapters and merge trimmed fastqs
 		Array[File] trimmed_merged_fastqs = glob("merge_fastqs_R?_*.fastq.gz")
 	}
 	runtime {
-		cpu : select_first([cpu,2])
-		memory : "${select_first([mem_mb,'12000'])} MB"
-		time : select_first([time_hr,24])
-		disks : select_first([disks,"local-disk 100 HDD"])
+		cpu : cpu
+		memory : "${mem_mb} MB"
+		time : time_hr
+		disks : disks
 	}
 }
 
 task bowtie2 {
-	# parameters from workflow
 	File idx_tar 		# reference bowtie2 index tar
 	Array[File] fastqs 	# [read_end_id]
 	Boolean paired_end
-	Int? multimapping
-	# optional
-	String? score_min 	# min acceptable alignment score func
+	Int multimapping
+	String score_min 	# min acceptable alignment score func
 						# w.r.t read length
-	# resource
-	Int? cpu
-	Int? mem_mb
-	Int? time_hr
-	String? disks
+	Int cpu
+	Int mem_mb
+	Int time_hr
+	String disks
 
 	command {
 		python $(which encode_bowtie2.py) \
@@ -595,8 +714,8 @@ task bowtie2 {
 			${sep=' ' fastqs} \
 			${if paired_end then "--paired-end" else ""} \
 			${"--multimapping " + multimapping} \
-			${"--score-min " + score_min} \
-			${"--nth " + select_first([cpu,4])}
+			${if score_min!="" then "--score-min " + score_min else ""} \
+			${"--nth " + cpu}
 	}
 	output {
 		File bam = glob("*.bam")[0]
@@ -606,104 +725,97 @@ task bowtie2 {
 		File read_len_log = glob("*.read_length.txt")[0] # read_len
 	}
 	runtime {
-		cpu : select_first([cpu,4])
-		memory : "${select_first([mem_mb,'20000'])} MB"
-		time : select_first([time_hr,48])
-		disks : select_first([disks,"local-disk 100 HDD"])
+		cpu : cpu
+		memory : "${mem_mb} MB"
+		time : time_hr
+		disks : disks
 		preemptible: 0
 	}
 }
 
 task filter {
-	# parameters from workflow
 	File bam
 	Boolean paired_end
-	Int? multimapping
-	# optional
-	String? dup_marker 				# picard.jar MarkDuplicates (picard) or 
-									# sambamba markdup (sambamba)
-	Int? mapq_thresh				# threshold for low MAPQ reads removal
-	Boolean? no_dup_removal 		# no dupe reads removal when filtering BAM
-									# dup.qc and pbc.qc will be empty files
-									# and nodup_bam in the output is 
-	# resource						# filtered bam with dupes	
-	Int? cpu
-	Int? mem_mb
-	Int? time_hr
-	String? disks
+	Int multimapping
+	String dup_marker 			# picard.jar MarkDuplicates (picard) or 
+								# sambamba markdup (sambamba)
+	Int mapq_thresh				# threshold for low MAPQ reads removal
+	Boolean no_dup_removal 		# no dupe reads removal when filtering BAM
+								# dup.qc and pbc.qc will be empty files
+								# and nodup_bam in the output is 
+								# filtered bam with dupes	
+	Int cpu
+	Int mem_mb
+	Int time_hr
+	String disks
 
 	command {
 		python $(which encode_filter.py) \
 			${bam} \
 			${if paired_end then "--paired-end" else ""} \
 			${"--multimapping " + multimapping} \
-			${"--dup-marker " + select_first([dup_marker,'picard'])} \
-			${"--mapq-thresh " + select_first([mapq_thresh,30])} \
-			${if select_first([no_dup_removal,false]) then "--no-dup-removal" else ""} \
+			${"--dup-marker " + dup_marker} \
+			${"--mapq-thresh " + mapq_thresh} \
+			${if no_dup_removal then "--no-dup-removal" else ""} \
 			${"--nth " + cpu}
 		# ugly part to deal with optional outputs with Google JES backend
-		${if select_first([no_dup_removal,false]) then "touch null.dup.qc null.pbc.qc null.mito_dup.txt; " else ""}
+		${if no_dup_removal then "touch null.dup.qc null.pbc.qc null.mito_dup.txt; " else ""}
 		touch null
 	}
 	output {
 		File nodup_bam = glob("*.bam")[0]
 		File nodup_bai = glob("*.bai")[0]
 		File flagstat_qc = glob("*.flagstat.qc")[0]
-		File dup_qc = if select_first([no_dup_removal,false]) then glob("null")[0] else glob("*.dup.qc")[0]
-		File pbc_qc = if select_first([no_dup_removal,false]) then glob("null")[0] else glob("*.pbc.qc")[0]
-		File mito_dup_log = if select_first([no_dup_removal,false]) then glob("null")[0] else glob("*.mito_dup.txt")[0] # mito_dups, fract_dups_from_mito
+		File dup_qc = if no_dup_removal then glob("null")[0] else glob("*.dup.qc")[0]
+		File pbc_qc = if no_dup_removal then glob("null")[0] else glob("*.pbc.qc")[0]
+		File mito_dup_log = if no_dup_removal then glob("null")[0] else glob("*.mito_dup.txt")[0] # mito_dups, fract_dups_from_mito
 	}
 	runtime {
-		cpu : select_first([cpu,2])
-		memory : "${select_first([mem_mb,'20000'])} MB"
-		time : select_first([time_hr,24])
-		disks : select_first([disks,"local-disk 100 HDD"])
+		cpu : cpu
+		memory : "${mem_mb} MB"
+		time : time_hr
+		disks : disks
 	}
 }
 
 task bam2ta {
-	# parameters from workflow
 	File bam
 	Boolean paired_end
 	Boolean disable_tn5_shift 	# no tn5 shifting (it's for dnase-seq)
-	# optional
-	String? regex_grep_v_ta   	# Perl-style regular expression pattern 
+	String regex_grep_v_ta   	# Perl-style regular expression pattern 
                         		# to remove matching reads from TAGALIGN
-	Int? subsample 				# number of reads to subsample TAGALIGN
+	Int subsample 				# number of reads to subsample TAGALIGN
 								# this affects all downstream analysis
-	# resource
-	Int? cpu
-	Int? mem_mb
-	Int? time_hr
-	String? disks
+	Int cpu
+	Int mem_mb
+	Int time_hr
+	String disks
 
 	command {
 		python $(which encode_bam2ta.py) \
 			${bam} \
 			${if paired_end then "--paired-end" else ""} \
 			${if disable_tn5_shift then "--disable-tn5-shift" else ""} \
-			${"--regex-grep-v-ta " +"'"+select_first([regex_grep_v_ta,'chrM'])+"'"} \
-			${"--subsample " + select_first([subsample,0])} \
+			${if regex_grep_v_ta!="" then "--regex-grep-v-ta '"+regex_grep_v_ta+"'" else ""} \
+			${"--subsample " + subsample} \
 			${"--nth " + cpu}
 	}
 	output {
 		File ta = glob("*.tagAlign.gz")[0]
 	}
 	runtime {
-		cpu : select_first([cpu,2])
-		memory : "${select_first([mem_mb,'10000'])} MB"
-		time : select_first([time_hr,6])
-		disks : select_first([disks,"local-disk 100 HDD"])
+		cpu : cpu
+		memory : "${mem_mb} MB"
+		time : time_hr
+		disks : disks
 	}
 }
 
 task spr { # make two self pseudo replicates
-	# parameters from workflow
 	File ta
 	Boolean paired_end
 
-	# resource
-	Int? mem_mb
+	Int mem_mb
 
 	command {
 		python $(which encode_spr.py) \
@@ -716,14 +828,13 @@ task spr { # make two self pseudo replicates
 	}
 	runtime {
 		cpu : 1
-		memory : "${select_first([mem_mb,'16000'])} MB"
+		memory : "${mem_mb} MB"
 		time : 1
 		disks : "local-disk 50 HDD"
 	}
 }
 
 task pool_ta {
-	# parameters from workflow
 	Array[File] tas
 
 	command {
@@ -742,26 +853,23 @@ task pool_ta {
 }
 
 task xcor {
-	# parameters from workflow
 	File ta
 	Boolean paired_end
-	# optional
-	Int? subsample  # number of reads to subsample TAGALIGN
-					# this will be used for xcor only
-					# will not affect any downstream analysis
-	# resource
-	Int? cpu
-	Int? mem_mb	
-	Int? time_hr
-	String? disks
+	Int subsample  # number of reads to subsample TAGALIGN
+				# this will be used for xcor only
+				# will not affect any downstream analysis
+	Int cpu
+	Int mem_mb	
+	Int time_hr
+	String disks
 
 	command {
 		python $(which encode_xcor.py) \
 			${ta} \
 			${if paired_end then "--paired-end" else ""} \
-			${"--subsample " + select_first([subsample,25000000])} \
+			${"--subsample " + subsample} \
 			--speak=0 \
-			${"--nth " + select_first([cpu,2])}
+			${"--nth " + cpu}
 	}
 	output {
 		File plot_pdf = glob("*.cc.plot.pdf")[0]
@@ -770,42 +878,43 @@ task xcor {
 		Int fraglen = read_int(glob("*.cc.fraglen.txt")[0])
 	}
 	runtime {
-		cpu : select_first([cpu,2])
-		memory : "${select_first([mem_mb,'16000'])} MB"
-		time : select_first([time_hr,6])
-		disks : select_first([disks,"local-disk 100 HDD"])
+		cpu : cpu
+		memory : "${mem_mb} MB"
+		time : time_hr
+		disks : disks
 	}
 }
 
 task macs2 {
-	# parameters from workflow
 	File ta
 	String gensz		# Genome size (sum of entries in 2nd column of 
                         # chr. sizes file, or hs for human, ms for mouse)
 	File chrsz			# 2-col chromosome sizes file
-	Int? cap_num_peak	# cap number of raw peaks called from MACS2
-	Float? pval_thresh  # p.value threshold
-	Int? smooth_win 	# size of smoothing window
-	Boolean? make_signal
+	Int cap_num_peak	# cap number of raw peaks called from MACS2
+	Float pval_thresh  	# p.value threshold
+	Int smooth_win 		# size of smoothing window
+	Boolean make_signal
 	File blacklist 		# blacklist BED to filter raw peaks
-	# resource
-	Int? mem_mb
-	Int? time_hr
-	String? disks
+	Boolean	keep_irregular_chr_in_bfilt_peak
+	
+	Int mem_mb
+	Int time_hr
+	String disks
 
 	command {
 		python $(which encode_macs2_atac.py) \
 			${ta} \
 			${"--gensz "+ gensz} \
 			${"--chrsz " + chrsz} \
-			${"--cap-num-peak " + select_first([cap_num_peak,300000])} \
-			${"--pval-thresh "+ select_first([pval_thresh,'0.01'])} \
-			${"--smooth-win "+ select_first([smooth_win,150])} \
-			${if select_first([make_signal,false]) then "--make-signal" else ""} \
+			${"--cap-num-peak " + cap_num_peak} \
+			${"--pval-thresh "+ pval_thresh} \
+			${"--smooth-win "+ smooth_win} \
+			${if make_signal then "--make-signal" else ""} \
+			${if keep_irregular_chr_in_bfilt_peak then "--keep-irregular-chr" else ""} \
 			${"--blacklist "+ blacklist}
 		
 		# ugly part to deal with optional outputs with Google JES backend
-		${if select_first([make_signal,false]) then "" 
+		${if make_signal then "" 
 			else "touch null.pval.signal.bigwig null.fc.signal.bigwig"}
 		touch null 
 	}
@@ -814,26 +923,26 @@ task macs2 {
 		File bfilt_npeak = glob("*.bfilt.narrowPeak.gz")[0]
 		File bfilt_npeak_bb = glob("*.bfilt.narrowPeak.bb")[0]
 		Array[File] bfilt_npeak_hammock = glob("*.bfilt.narrowPeak.hammock.gz*")
-		File sig_pval = if select_first([make_signal,false]) then glob("*.pval.signal.bigwig")[0] else glob("null")[0]
-		File sig_fc = if select_first([make_signal,false]) then glob("*.fc.signal.bigwig")[0] else glob("null")[0]
+		File sig_pval = if make_signal then glob("*.pval.signal.bigwig")[0] else glob("null")[0]
+		File sig_fc = if make_signal then glob("*.fc.signal.bigwig")[0] else glob("null")[0]
 		File frip_qc = glob("*.frip.qc")[0]
 	}
 	runtime {
 		cpu : 1
-		memory : "${select_first([mem_mb,'16000'])} MB"
-		time : select_first([time_hr,24])
-		disks : select_first([disks,"local-disk 100 HDD"])
+		memory : "${mem_mb} MB"
+		time : time_hr
+		disks : disks
 	}
 }
 
 task idr {
-	# parameters from workflow
-	String? prefix 		# prefix for IDR output file
+	String prefix 		# prefix for IDR output file
 	File peak1 			
 	File peak2
 	File peak_pooled
-	Float? idr_thresh
+	Float idr_thresh
 	File blacklist 	# blacklist BED to filter raw peaks
+	Boolean	keep_irregular_chr_in_bfilt_peak
 	# parameters to compute FRiP
 	File? ta		# to calculate FRiP
 	File chrsz			# 2-col chromosome sizes file
@@ -844,11 +953,12 @@ task idr {
 		python $(which encode_idr.py) \
 			${peak1} ${peak2} ${peak_pooled} \
 			${"--prefix " + prefix} \
-			${"--idr-thresh " + select_first([idr_thresh,'0.1'])} \
+			${"--idr-thresh " + idr_thresh} \
 			${"--peak-type " + peak_type} \
 			--idr-rank ${rank} \
 			${"--chrsz " + chrsz} \
 			${"--blacklist "+ blacklist} \
+			${if keep_irregular_chr_in_bfilt_peak then "--keep-irregular-chr" else ""} \
 			${"--ta " + ta}
 
 		# ugly part to deal with optional outputs with Google backend
@@ -874,12 +984,12 @@ task idr {
 }
 
 task overlap {
-	# parameters from workflow
 	String prefix 		# prefix for IDR output file
 	File peak1
 	File peak2
 	File peak_pooled
 	File blacklist 	# blacklist BED to filter raw peaks
+	Boolean	keep_irregular_chr_in_bfilt_peak
 	File? ta		# to calculate FRiP
 	File chrsz			# 2-col chromosome sizes file
 	String peak_type
@@ -891,6 +1001,8 @@ task overlap {
 			${"--peak-type " + peak_type} \
 			${"--chrsz " + chrsz} \
 			${"--blacklist "+ blacklist} \
+			--nonamecheck \
+			${if keep_irregular_chr_in_bfilt_peak then "--keep-irregular-chr" else ""} \
 			${"--ta " + ta}
 
 		# ugly part to deal with optional outputs with Google backend
@@ -913,7 +1025,6 @@ task overlap {
 }
 
 task reproducibility {
-	# parameters from workflow
 	String prefix
 	Array[File]? peaks # peak files from pair of true replicates
 						# in a sorted order. for example of 4 replicates,
@@ -923,6 +1034,7 @@ task reproducibility {
 	File? peak_ppr			# Peak file from pooled pseudo replicate.
 	String peak_type
 	File chrsz			# 2-col chromosome sizes file
+	Boolean	keep_irregular_chr_in_bfilt_peak
 
 	command {
 		python $(which encode_reproducibility_qc.py) \
@@ -931,6 +1043,7 @@ task reproducibility {
 			${"--peak-ppr "+ peak_ppr} \
 			--prefix ${prefix} \
 			${"--peak-type " + peak_type} \
+			${if keep_irregular_chr_in_bfilt_peak then "--keep-irregular-chr" else ""} \
 			${"--chrsz " + chrsz}
 	}
 	output {
@@ -977,14 +1090,14 @@ task ataqc { # generate ATAQC report
 	File reg2map_bed
 	File reg2map
 	File roadmap_meta
-	# resource
-	Int? mem_mb
-	Int? mem_java_mb
-	Int? time_hr
-	String? disks
+
+	Int mem_mb
+	Int mem_java_mb
+	Int time_hr
+	String disks
 
 	command {
-		export _JAVA_OPTIONS="-Xms256M -Xmx${select_first([mem_java_mb,mem_mb,'16000'])}M -XX:ParallelGCThreads=1"
+		export _JAVA_OPTIONS="-Xms256M -Xmx${mem_java_mb}M -XX:ParallelGCThreads=1"
 
 		python $(which encode_ataqc.py) \
 			${if paired_end then "--paired-end" else ""} \
@@ -1014,30 +1127,14 @@ task ataqc { # generate ATAQC report
 			--roadmap-meta ${roadmap_meta}
 	}
 	output {
-	    #File raw_peak_summ = glob("*.raw_peak_summ.tsv")[0]
-	    #File raw_peak_dist = glob("*.raw_peak_dist.png")[0]
-	    #File naive_peak_summ =  if defined(overlap_peak) then glob("*.naive_peak_summ.tsv")[0] else glob("null")[0]
-	    #File naive_peak_dist = if defined(overlap_peak) then glob("*.naive_peak_dist.png")[0] else glob("null")[0]
-	    #File idr_peak_summ = if defined(idr_peak) then glob("*.idr_peak_summ.tsv")[0] else glob("null")[0]
-	    #File idr_peak_dist = if defined(idr_peak) then glob("*.idr_peak_dist.png")[0] else glob("null")[0]
-		#File preseq_data = glob("*.preseq.data")[0]
-		#File preseq_log = glob("*.preseq.log")[0]
-		#File gc_plot = glob("*_gcPlot.pdf")[0]
-		#File gc_out = glob("*_gc.txt")[0]
-		#File gc_summary = glob("*_gcSummary.txt")[0]
-		# optional
-		#File tss_plot_file = if defined(tss_enrich) then glob("*_tss-enrich.png")[0] else glob("null")[0]
-		#File tss_plot_large_file = if defined(tss_enrich) then glob("*_large_tss-enrich.png")[0] else glob("null")[0]
-		#File roadmap_compare_plot = glob("*.signal")[0]
-		#File tar = glob("*.tar.gz")[0]
 		File html = glob("*_qc.html")[0]
 		File txt = glob("*_qc.txt")[0]
 	}
 	runtime {
 		cpu : 1
-		memory : "${select_first([mem_mb,'16000'])} MB"
-		time : select_first([time_hr,24])
-		disks : select_first([disks,"local-disk 100 HDD"])
+		memory : "${mem_mb} MB"
+		time : time_hr
+		disks : disks
 	}
 }
 
@@ -1046,11 +1143,11 @@ task ataqc { # generate ATAQC report
 # - qc.json		: all QCs
 task qc_report {
 	# optional metadata
- 	String? name # name of sample
-	String? desc # description for sample
+ 	String title # name of sample
+	String description # description for sample
 	#String? encode_accession_id	# ENCODE accession ID of sample
 	# workflow params
-	Int? multimapping
+	Int multimapping
 	Boolean paired_end
 	String pipeline_type
 	String peak_caller
@@ -1088,8 +1185,8 @@ task qc_report {
 
 	command {
 		python $(which encode_qc_report.py) \
-			${"--name '" + sub(select_first([name,""]),"'","_") + "'"} \
-			${"--desc '" + sub(select_first([desc,""]),"'","_") + "'"} \
+			${"--name '" + sub(title,"'","_") + "'"} \
+			${"--desc '" + sub(description,"'","_") + "'"} \
 			${"--multimapping " + multimapping} \
 			${if paired_end then "--paired-end" else ""} \
 			--pipeline-type ${pipeline_type} \

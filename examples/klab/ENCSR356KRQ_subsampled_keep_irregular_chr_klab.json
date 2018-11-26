@@ -32,6 +32,8 @@
 
     "atac.auto_detect_adapter" : true,
 
+    "atac.keep_irregular_chr_in_bfilt_peak" : true,
+
     "atac.smooth_win" : 73,
     "atac.enable_idr" : true,
     "atac.idr_thresh" : 0.05,

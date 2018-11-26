@@ -41,11 +41,11 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
       $ bash conda/install_dependencies.sh
     ```
 
-7. Run a pipeline for a SUBSAMPLED (1/400) paired-end sample of [ENCSR356KRQ](https://www.encodeproject.org/experiments/ENCSR356KRQ/).
+7. Run a pipeline for a SUBSAMPLED (1/400) paired-end sample of [ENCSR356KRQ](https://www.encodeproject.org/experiments/ENCSR356KRQ/). DO NOT SBATCH THIS COMMAND LINE! RUN IT DIRECTLY ON A LOGIN NODE! FREE USERS ON SHERLOCK SHOULD KEEP `-Dbackend.providers.slurm.config.concurrent-job-limit=1` IN THE COMMAND LINE. USERS WITH A PAID PARTITON CAN INCREASE IT TO >=30 AND ALSO INCREASE RESOURCES DEFINED IN THE INPUT JSON FILE.
     ```
       $ source activate encode-atac-seq-pipeline # IMPORTANT!
       $ INPUT=examples/sherlock/ENCSR356KRQ_subsampled_sherlock.json
-      $ java -jar -Dconfig.file=backends/backend.conf -Dbackend.default=slurm cromwell-34.jar run atac.wdl -i ${INPUT} -o workflow_opts/sherlock.json
+      $ java -jar -Xmx1G -Dconfig.file=backends/backend.conf -Dbackend.default=slurm -Dbackend.providers.slurm.config.concurrent-job-limit=1 cromwell-34.jar run atac.wdl -i ${INPUT} -o workflow_opts/sherlock.json
     ```
 
 8. It will take about an hour. You will be able to find all outputs on `cromwell-executions/atac/[RANDOM_HASH_STRING]/`. See [output directory structure](output.md) for details.
@@ -62,14 +62,14 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
 6. Pull a singularity container for the pipeline. This will pull pipeline's docker container first and build a singularity one on `~/.singularity`. Stanford Sherlock does not allow building a container on login nodes. Wait until you get a command prompt after `sdev`.
     ```
       $ sdev    # sherlock cluster does not allow building a container on login node
-      $ SINGULARITY_CACHEDIR=~/.singularity SINGULARITY_PULLFOLDER=~/.singularity singularity pull -F docker://quay.io/encode-dcc/atac-seq-pipeline:v1.1.1
+      $ mkdir -p ~/.singularity && cd ~/.singularity && SINGULARITY_CACHEDIR=~/.singularity SINGULARITY_PULLFOLDER=~/.singularity singularity pull --name atac-seq-pipeline-v1.1.2.simg -F docker://quay.io/encode-dcc/atac-seq-pipeline:v1.1.2
       $ exit    # exit from an interactive node
     ```
 
-7. Run a pipeline for a SUBSAMPLED (1/400) paired-end sample of [ENCSR356KRQ](https://www.encodeproject.org/experiments/ENCSR356KRQ/).
+7. Run a pipeline for a SUBSAMPLED (1/400) paired-end sample of [ENCSR356KRQ](https://www.encodeproject.org/experiments/ENCSR356KRQ/). DO NOT SBATCH THIS COMMAND LINE! RUN IT DIRECTLY ON A LOGIN NODE! FREE USERS ON SHERLOCK SHOULD KEEP `-Dbackend.providers.slurm_singularity.config.concurrent-job-limit=1` IN THE COMMAND LINE. USERS WITH A PAID PARTITON CAN INCREASE IT TO >=30 AND ALSO INCREASE RESOURCES DEFINED IN THE INPUT JSON FILE.
     ```
       $ INPUT=examples/sherlock/ENCSR356KRQ_subsampled_sherlock.json
-      $ java -jar -Dconfig.file=backends/backend.conf -Dbackend.default=slurm_singularity cromwell-34.jar run atac.wdl -i ${INPUT} -o workflow_opts/sherlock.json
+      $ java -jar -Xmx1G -Dconfig.file=backends/backend.conf -Dbackend.default=slurm_singularity -Dbackend.providers.slurm_singularity.config.concurrent-job-limit=1 cromwell-34.jar run atac.wdl -i ${INPUT} -o workflow_opts/sherlock.json
     ```
 
 8. It will take about an hour. You will be able to find all outputs on `cromwell-executions/atac/[RANDOM_HASH_STRING]/`. See [output directory structure](output.md) for details.
@@ -80,7 +80,7 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
     ```
       {
           "default_runtime_attributes" : {
-              "singularity_container" : "~/.singularity/chip-seq-pipeline-v1.1.1.simg",
+              "singularity_container" : "~/.singularity/chip-seq-pipeline-v1.1.2.simg",
               "singularity_bindpath" : "/scratch,/oak/stanford,/your/,YOUR_OWN_DATA_DIR1,YOUR_OWN_DATA_DIR1,..."
           }
       }
