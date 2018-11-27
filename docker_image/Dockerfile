@@ -85,8 +85,8 @@ RUN git clone --branch 1.2 --single-branch https://github.com/samtools/samtools.
 RUN git clone --branch v2.26.0 --single-branch https://github.com/arq5x/bedtools2.git && \
     cd bedtools2 && make && make install && cd ../ && rm -rf bedtools2*
 
-# Install Picard 2.18.16
-RUN wget https://github.com/broadinstitute/picard/releases/download/2.18.16/picard.jar && chmod +x picard.jar
+# Install Picard 2.10.6
+RUN wget https://github.com/broadinstitute/picard/releases/download/2.10.6/picard.jar && chmod +x picard.jar
 
 # Install sambamba 0.6.6
 RUN wget https://github.com/lomereiter/sambamba/releases/download/v0.6.6/sambamba_v0.6.6_linux.tar.bz2 && tar -xvjf sambamba_v0.6.6_linux.tar.bz2 && mv sambamba_v0.6.6 sambamba && rm -rf sambamba_*
