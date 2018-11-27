@@ -1240,10 +1240,10 @@ task qc_report {
 task read_genome_tsv {
 	File genome_tsv
 	command {
-		cat ${genome_tsv}
+		cat ${genome_tsv} > 'tmp.tsv'
 	}
 	output {
-		Map[String,String] genome = read_map(stdout())
+		Map[String,String] genome = read_map('tmp.tsv')
 	}
 	runtime {
 		cpu : 1
