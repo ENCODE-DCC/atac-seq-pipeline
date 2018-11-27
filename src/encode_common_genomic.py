@@ -220,7 +220,7 @@ def peak_to_hammock(peak, out_dir):
         run_shell_cmd(cmd)
         cmd2 = 'touch {}'.format(hammock_gz_tbi)
     else:
-        cmd = "zcat -f {} | sed '/^\(chr\)/!d' | sort -k1,1V -k2,2n > {}"
+        cmd = "LC_COLLATE=C && zcat -f {} | sed '/^\(chr\)/!d' | sort -k1,1V -k2,2n > {}"
         cmd = cmd.format(peak, hammock_tmp)
         run_shell_cmd(cmd)
 
@@ -346,7 +346,7 @@ def peak_to_bigbed(peak, peak_type, chrsz, keep_irregular_chr, out_dir):
     else:
         cmd1 = "cat {} > {}".format(chrsz, chrsz_tmp)
     run_shell_cmd(cmd1)
-    cmd2 = "zcat -f {} | sort -k1,1 -k2,2n > {}".format(peak, bigbed_tmp)
+    cmd2 = "LC_COLLATE=C && zcat -f {} | sort -k1,1 -k2,2n > {}".format(peak, bigbed_tmp)
     run_shell_cmd(cmd2)
     cmd3 = "bedClip {} {} {}".format(bigbed_tmp, chrsz_tmp, bigbed_tmp2)
     run_shell_cmd(cmd3)
