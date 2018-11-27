@@ -3,6 +3,7 @@
 set -e
 
 CONDA_ENV=encode-atac-seq-pipeline
+CONDA_ENV_PY3=encode-atac-seq-pipeline-python3
 
 SH_SCRIPT_DIR=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)
 
@@ -31,5 +32,20 @@ source activate ${CONDA_ENV}
   cp -f ${SH_SCRIPT_DIR}/../src/*.py ${CONDA_BIN}/
   chmod +rx ${CONDA_BIN}/*.py
 source deactivate
+
+if conda env list | grep -wq ${CONDA_ENV_PY3}; then
+  echo "=== Found Pipeline's Conda Python 3 env (${CONDA_ENV_PY3})."
+  echo "=== Updating pipeline's source code on Conda env (${CONDA_ENV_PY3})..."
+  source activate ${CONDA_ENV_PY3}
+    CONDA_BIN="${CONDA_PREFIX}/bin"
+    cd ${CONDA_BIN}
+
+    # copy all python scripts in /src into conda env bin dir
+    cp -f ${SH_SCRIPT_DIR}/../src/*.py ${CONDA_BIN}/
+    chmod +rx ${CONDA_BIN}/*.py
+  source deactivate
+else
+  echo "=== Pipeline's Conda env (${CONDA_ENV_PY3}) does not exist. Skipping..."
+fi
 
 echo "=== All done."
