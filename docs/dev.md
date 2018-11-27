@@ -5,7 +5,7 @@ Dev
 ```
 PREV_VER=v1.1.2
 NEW_VER=v1.1.3
-for f in $(grep -rl ${PREV_VER} --include=*.{json,md,sh})
+for f in $(grep -rl ${PREV_VER} --include=*.{json,md,sh,yml})
 do
   sed -i "s/${PREV_VER}/${NEW_VER}/g" ${f}
 done
