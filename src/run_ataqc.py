@@ -227,7 +227,7 @@ def get_gc(qsorted_bam_file, reference_fasta, prefix):
     output_file = '{0}_gc.txt'.format(prefix)
     plot_file = '{0}_gcPlot.pdf'.format(prefix)
     summary_file = '{0}_gcSummary.txt'.format(prefix)
-    get_gc_metrics = ('java -Xmx4G -jar '
+    get_gc_metrics = ('java -Xmx4G -XX:ParallelGCThreads=1 -jar '
                       '{5} '
                       'CollectGcBiasMetrics R={0} I={1} O={2} '
                       'VERBOSITY=ERROR QUIET=TRUE '
