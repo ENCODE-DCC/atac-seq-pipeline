@@ -32,7 +32,7 @@ Tutorial for general UNIX computers with singularity
 
 6. Pull a singularity container for the pipeline. This will pull pipeline's docker container first and build a singularity one on `~/.singularity`.
     ```
-      $ mkdir -p ~/.singularity && cd ~/.singularity && SINGULARITY_CACHEDIR=~/.singularity SINGULARITY_PULLFOLDER=~/.singularity singularity pull --name atac-seq-pipeline-v1.1.2.simg -F docker://quay.io/encode-dcc/atac-seq-pipeline:v1.1.2
+      $ mkdir -p ~/.singularity && cd ~/.singularity && SINGULARITY_CACHEDIR=~/.singularity SINGULARITY_PULLFOLDER=~/.singularity singularity pull --name atac-seq-pipeline-v1.1.3.simg -F docker://quay.io/encode-dcc/atac-seq-pipeline:v1.1.3
     ```
 
 7. Run a pipeline for the test sample.
@@ -49,7 +49,7 @@ Tutorial for general UNIX computers with singularity
     ```
       {
           "default_runtime_attributes" : {
-              "singularity_container" : "~/.singularity/chip-seq-pipeline-v1.1.2.simg",
+              "singularity_container" : "~/.singularity/chip-seq-pipeline-v1.1.3.simg",
               "singularity_bindpath" : "/your/,YOUR_OWN_DATA_DIR1,YOUR_OWN_DATA_DIR1,..."
           }
       }
