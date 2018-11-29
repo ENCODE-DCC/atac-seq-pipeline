@@ -56,7 +56,9 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
 
 5. Pull a singularity container for the pipeline. This will pull pipeline's docker container first and build a singularity one on `~/.singularity`.
     ```
+      $ sdev    # SCG cluster does not allow building a container on login node
       $ mkdir -p ~/.singularity && cd ~/.singularity && SINGULARITY_CACHEDIR=~/.singularity SINGULARITY_PULLFOLDER=~/.singularity singularity pull --name atac-seq-pipeline-v1.1.3.simg -F docker://quay.io/encode-dcc/atac-seq-pipeline:v1.1.3
+      $ exit
     ```
 
 6. Run a pipeline for a SUBSAMPLED (1/400) paired-end sample of [ENCSR356KRQ](https://www.encodeproject.org/experiments/ENCSR356KRQ/).
