@@ -230,6 +230,7 @@ def get_gc(qsorted_bam_file, reference_fasta, prefix):
     get_gc_metrics = ('java -Xmx4G -XX:ParallelGCThreads=1 -jar '
                       '{5} '
                       'CollectGcBiasMetrics R={0} I={1} O={2} '
+                      'USE_JDK_DEFLATER=TRUE USE_JDK_INFLATER=TRUE '
                       'VERBOSITY=ERROR QUIET=TRUE '
                       'ASSUME_SORTED=FALSE '
                       'CHART={3} S={4}').format(reference_fasta,
@@ -357,9 +358,10 @@ def get_picard_complexity_metrics(aligned_bam, prefix):
     Picard EsimateLibraryComplexity
     '''
     out_file = '{0}.picardcomplexity.qc'.format(prefix)
-    get_gc_metrics = ('java -Xmx4G -jar '
+    get_gc_metrics = ('java -Xmx4G -XX:ParallelGCThreads=1 -jar '
                       '{2} '
                       'EstimateLibraryComplexity INPUT={0} OUTPUT={1} '
+                      'USE_JDK_DEFLATER=TRUE USE_JDK_INFLATER=TRUE '
                       'VERBOSITY=ERROR '
                       'QUIET=TRUE').format(aligned_bam,
                                            out_file,
@@ -564,7 +566,7 @@ def get_mito_dups(sorted_bam, prefix, endedness='Paired-ended', use_sambamba=Fal
     os.system(filter_bam)
 
     # Run Picard MarkDuplicates
-    mark_duplicates = ('java -Xmx4G -jar '
+    mark_duplicates = ('java -Xmx4G -XX:ParallelGCThreads=1 -jar '
                        '{0} '
                        'MarkDuplicates INPUT={1} OUTPUT={2} '
                        'METRICS_FILE={3} '
@@ -572,6 +574,7 @@ def get_mito_dups(sorted_bam, prefix, endedness='Paired-ended', use_sambamba=Fal
                        'ASSUME_SORTED=TRUE '
                        'REMOVE_DUPLICATES=FALSE '
                        'VERBOSITY=ERROR '
+                       'USE_JDK_DEFLATER=TRUE USE_JDK_INFLATER=TRUE '
                        'QUIET=TRUE').format(locate_picard(),
                                             tmp_filtered_bam,
                                             out_file,
@@ -670,11 +673,12 @@ def get_insert_distribution(final_bam, prefix):
     logging.info('insert size distribution...')
     insert_data = '{0}.inserts.hist_data.log'.format(prefix)
     insert_plot = '{0}.inserts.hist_graph.pdf'.format(prefix)
-    graph_insert_dist = ('java -Xmx4G -jar '
+    graph_insert_dist = ('java -Xmx4G -XX:ParallelGCThreads=1 -jar '
                          '{3} '
                          'CollectInsertSizeMetrics '
                          'INPUT={0} OUTPUT={1} H={2} '
                          'VERBOSITY=ERROR QUIET=TRUE '
+                         'USE_JDK_DEFLATER=TRUE USE_JDK_INFLATER=TRUE '
                          'W=1000 STOP_AFTER=5000000').format(final_bam,
                                                              insert_data,
                                                              insert_plot,
