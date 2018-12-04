@@ -1,7 +1,7 @@
 {
     "default_runtime_attributes" : {
         "slurm_partition" : "normal",
-        "singularity_container" : "~/.singularity/atac-seq-pipeline-v1.1.2.simg",
+        "singularity_container" : "~/.singularity/atac-seq-pipeline-v1.1.3.simg",
         "singularity_bindpath" : "/scratch,/lscratch,/oak/stanford,/home/groups/cherry/encode"
     }
 }

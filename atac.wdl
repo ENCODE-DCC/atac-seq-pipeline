@@ -92,7 +92,7 @@ workflow atac {
 	Int ataqc_mem_mb = 16000
 	Int ataqc_mem_java_mb = 16000
 	Int ataqc_time_hr = 24
-	String ataqc_disks = "local-disk 100 HDD"
+	String ataqc_disks = "local-disk 200 HDD"
 
 	#### input file definition
 		# pipeline can start from any type of inputs and then leave all other types undefined
@@ -1240,10 +1240,10 @@ task qc_report {
 task read_genome_tsv {
 	File genome_tsv
 	command {
-		cat ${genome_tsv}
+		cat ${genome_tsv} > 'tmp.tsv'
 	}
 	output {
-		Map[String,String] genome = read_map(stdout())
+		Map[String,String] genome = read_map('tmp.tsv')
 	}
 	runtime {
 		cpu : 1

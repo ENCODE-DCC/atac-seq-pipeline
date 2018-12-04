@@ -164,12 +164,13 @@ def mark_dup_picard(bam, out_dir): # shared by both se and pe
     dupmark_bam = '{}.dupmark.bam'.format(prefix)
     dup_qc = '{}.dup.qc'.format(prefix)
 
-    cmd = 'java -Xmx4G -jar '
+    cmd = 'java -Xmx4G -XX:ParallelGCThreads=1 -jar '
     cmd += locate_picard()
     cmd += ' MarkDuplicates '
     # cmd = 'picard MarkDuplicates '
     cmd += 'INPUT={} OUTPUT={} '
     cmd += 'METRICS_FILE={} VALIDATION_STRINGENCY=LENIENT '
+    cmd += 'USE_JDK_DEFLATER=TRUE USE_JDK_INFLATER=TRUE '
     cmd += 'ASSUME_SORTED=true REMOVE_DUPLICATES=false'
     cmd = cmd.format(
         bam,
