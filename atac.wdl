@@ -750,6 +750,8 @@ task filter {
 	String disks
 
 	command {
+		${if no_dup_removal then "touch null.dup.qc null.pbc.qc null.mito_dup.txt; " else ""}
+		touch null
 		python $(which encode_filter.py) \
 			${bam} \
 			${if paired_end then "--paired-end" else ""} \
@@ -758,9 +760,6 @@ task filter {
 			${"--mapq-thresh " + mapq_thresh} \
 			${if no_dup_removal then "--no-dup-removal" else ""} \
 			${"--nth " + cpu}
-		# ugly part to deal with optional outputs with Google JES backend
-		${if no_dup_removal then "touch null.dup.qc null.pbc.qc null.mito_dup.txt; " else ""}
-		touch null
 	}
 	output {
 		File nodup_bam = glob("*.bam")[0]
@@ -902,6 +901,9 @@ task macs2 {
 	String disks
 
 	command {
+		${if make_signal then "" 
+			else "touch null.pval.signal.bigwig null.fc.signal.bigwig"}
+		touch null 
 		python $(which encode_macs2_atac.py) \
 			${ta} \
 			${"--gensz "+ gensz} \
@@ -912,11 +914,6 @@ task macs2 {
 			${if make_signal then "--make-signal" else ""} \
 			${if keep_irregular_chr_in_bfilt_peak then "--keep-irregular-chr" else ""} \
 			${"--blacklist "+ blacklist}
-		
-		# ugly part to deal with optional outputs with Google JES backend
-		${if make_signal then "" 
-			else "touch null.pval.signal.bigwig null.fc.signal.bigwig"}
-		touch null 
 	}
 	output {
 		File npeak = glob("*[!.][!b][!f][!i][!l][!t].narrowPeak.gz")[0]
@@ -950,6 +947,8 @@ task idr {
 	String rank
 
 	command {
+		${if defined(ta) then "" else "touch null.frip.qc"}
+		touch null 
 		python $(which encode_idr.py) \
 			${peak1} ${peak2} ${peak_pooled} \
 			${"--prefix " + prefix} \
@@ -960,10 +959,6 @@ task idr {
 			${"--blacklist "+ blacklist} \
 			${if keep_irregular_chr_in_bfilt_peak then "--keep-irregular-chr" else ""} \
 			${"--ta " + ta}
-
-		# ugly part to deal with optional outputs with Google backend
-		${if defined(ta) then "" else "touch null.frip.qc"}
-		touch null 
 	}
 	output {
 		File idr_peak = glob("*[!.][!b][!f][!i][!l][!t]."+peak_type+".gz")[0]
@@ -995,6 +990,8 @@ task overlap {
 	String peak_type
 
 	command {
+		${if defined(ta) then "" else "touch null.frip.qc"}
+		touch null 
 		python $(which encode_naive_overlap.py) \
 			${peak1} ${peak2} ${peak_pooled} \
 			${"--prefix " + prefix} \
@@ -1004,10 +1001,6 @@ task overlap {
 			--nonamecheck \
 			${if keep_irregular_chr_in_bfilt_peak then "--keep-irregular-chr" else ""} \
 			${"--ta " + ta}
-
-		# ugly part to deal with optional outputs with Google backend
-		${if defined(ta) then "" else "touch null.frip.qc"}
-		touch null 
 	}
 	output {
 		File overlap_peak = glob("*[!.][!b][!f][!i][!l][!t]."+peak_type+".gz")[0]

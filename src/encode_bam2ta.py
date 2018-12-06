@@ -139,6 +139,9 @@ def main():
         shifted_ta = tn5_shift_ta(subsampled_ta, args.out_dir)
         temp_files.append(subsampled_ta)
 
+    log.info('Checking if output is empty...')
+    assert_file_not_empty(shifted_ta)
+
     log.info('Removing temporary files...')
     rm_f(temp_files)
 
