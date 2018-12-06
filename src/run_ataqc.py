@@ -207,12 +207,16 @@ def get_chr_m(sorted_bam_file):
     logging.info('Getting mitochondrial chromosome fraction...')
     chrom_list = pysam.idxstats(sorted_bam_file, split_lines=True)
     tot_reads = 0
+    chr_m_reads = 0
     for chrom in chrom_list:
         chrom_stats = chrom.split('\t')
         if chrom_stats[0] == 'chrM':
             chr_m_reads = int(chrom_stats[2])
         tot_reads += int(chrom_stats[2])
-    fract_chr_m = float(chr_m_reads) / tot_reads
+    if tot_reads==0:
+        fract_chr_m = 0
+    else
+        fract_chr_m = float(chr_m_reads) / tot_reads
 
     return chr_m_reads, fract_chr_m
 
