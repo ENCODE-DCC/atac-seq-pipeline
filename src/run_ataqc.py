@@ -215,7 +215,7 @@ def get_chr_m(sorted_bam_file):
         tot_reads += int(chrom_stats[2])
     if tot_reads==0:
         fract_chr_m = 0
-    else
+    else:
         fract_chr_m = float(chr_m_reads) / tot_reads
 
     return chr_m_reads, fract_chr_m
