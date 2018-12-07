@@ -15,33 +15,33 @@ This document describes instruction for the item 1).
 2. Create a new [DX project](https://platform.dnanexus.com/projects) with name `[YOUR_PROJECT_NAME]` by clicking on "+New Project" on the top left.
 
 3. Git clone this pipeline.
-    ```
+    ```bash
       $ git clone https://github.com/ENCODE-DCC/atac-seq-pipeline
     ```
 
 4. Move to pipeline's directory.
-    ```
+    ```bash
       $ cd atac-seq-pipeline
     ```
 
 5. Download dxWDL.
-    ```
+    ```bash
       $ wget https://github.com/dnanexus/dxWDL/releases/download/0.77/dxWDL-0.77.jar
       $ chmod +rx dxWDL-0.77.jar
     ```
 
 6. Choose an appropriate input for your project (AWS or Azure):
     * AWS
-      ```
+      ```bash
         $ INPUT=examples/dx/ENCSR356KRQ_subsampled_dx.json
       ```
     * Azure
-      ```
+      ```bash
         $ INPUT=examples/dx_azure/ENCSR356KRQ_subsampled_dx_azure.json
       ```
 
 7. Compile `atac.wdl` with an input JSON for the SUBSAMPLED (1/400) paired-end sample of [ENCSR356KRQ](https://www.encodeproject.org/experiments/ENCSR356KRQ/).
-    ```
+    ```bash
       $ PROJECT=[YOUR_PROJECT_NAME]
       $ OUT_FOLDER=/test_sample_atac_ENCSR356KRQ_subsampled
 

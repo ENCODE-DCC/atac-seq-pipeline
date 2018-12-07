@@ -2,7 +2,7 @@ Dev
 ===
 
 ## Command line for version change
-```
+```bash
 PREV_VER=v1.1.3
 NEW_VER=v1.1.4
 for f in $(grep -rl ${PREV_VER} --include=*.{json,md,sh,yml})
@@ -17,7 +17,7 @@ Make sure that you have [`dxWDL-0.77.jar`](https://github.com/dnanexus/dxWDL/rel
 
 Run the following command line locally to build out DX workflows for this pipeline on our official one. This will overwrite (`-f` parameter does it).
 
-```
+```bash
 # version
 VER=v1.1.4
 
