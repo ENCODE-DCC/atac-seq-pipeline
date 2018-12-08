@@ -1,4 +1,7 @@
 {
+    "atac.genome_tsv" : "/path_to_genome_data/hg38/hg38.tsv",
+    "atac.paired_end" : false,
+
     "atac.fastqs_rep1_R1" : [ "rep1_L1.fastq.gz", "rep1_L2.fastq.gz", "rep1_L3.fastq.gz" ],
     "atac.fastqs_rep2_R1" : [ "rep2_L1.fastq.gz", "rep2_L2.fastq.gz" ],
     "atac.adapters_rep1_R1" : [ "AATTCCGG", "AATTCCGG", "AATTCCGG" ],
@@ -24,8 +27,6 @@
     "atac.description" : "This is a template input JSON for single ended sample.",
 
     "atac.pipeline_type" : "atac",
-    "atac.genome_tsv" : "/path_to_genome_data/hg38/hg38.tsv",
-    "atac.paired_end" : false,
 
     "atac.align_only" : false,
     "atac.true_rep_only" : false,

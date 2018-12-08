@@ -26,7 +26,7 @@ Tutorial for Sun GridEngine (SGE) clusters
     ```
 
 5. Set your parallel environment (PE) and queue in `workflow_opts/sge.json`. If your SGE cluster does not have any PE, ask your admin to add one for our pipeline. If you don't want to specify any queue then remove `, "sge_queue" : "YOUR_SGE_QUEUE"` from the file. See [here](how_to_config_sge.md) to find details about how to configure SGE for the pipeline.
-    ```json
+    ```javascript
       {
           "default_runtime_attributes" : {
               "sge_pe" : "YOUR_SGE_PE",
@@ -81,7 +81,7 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
 10. See full specification for [input JSON file](input.md).
 
 11. IF YOU WANT TO RUN PIPELINES WITH YOUR OWN INPUT DATA/GENOME DATABASE, PLEASE ADD THEIR DIRECTORIES TO `workflow_opts/sge.json`. For example, you have input FASTQs on `/your/input/fastqs/` and genome database installed on `/your/genome/database/` then add `/your/` to `singularity_bindpath`. You can also define multiple directories there. It's comma-separated.
-    ```json
+    ```javascript
       {
           "default_runtime_attributes" : {
               "singularity_container" : "~/.singularity/chip-seq-pipeline-v1.1.simg",

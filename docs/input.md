@@ -1,12 +1,191 @@
 Input JSON
 ==========
 
-An input JSON file includes all input parameters and metadata for running pipelines:
+We provide two template JSON files for both single ended and paired-end samples. We recommend to use one of these input JSON files instead of that used in the tutorial section. These template JSON files include all parameters of the pipeline with default values defined.
 
-1) Reference genome (hg38, mm10, hg19, ...) and genome specific parameters (indices, ...).
-2) Input data file paths/URIs (FASTQs, BAMs, TAG-ALIGNs, ...).
+* [template](../examples/template_se.json) for single ended sample
+* [template](../examples/template_pe.json) for paired-end sample
+
+An input JSON file includes all input parameters and metadata for running pipelines. 3) and 4) are optional so that our pipeline will use default values if they are not defined. However, 1) and 2) are mandatory.
+
+1)<sup>*</sup> Reference genome (hg38, mm10, hg19, ...).
+2)<sup>*</sup> Input data file paths/URIs.
 3) Pipeline parameters.
-4) Resource for instances/jobs.
+4) Resource settings for jobs.
+
+Let us take a quick look at the following template JSON. A JSON file does not allow comments in it but we added some to help you understand each parameter.
+```javascript
+{
+    ////////// 1) Reference genome //////////
+
+    // Download or build reference genome database and pick a TSV from it.
+    "atac.genome_tsv" : "/path_to_genome_data/hg38/hg38.tsv",
+
+    ////////// 2) Input data files paths/URIs //////////
+
+    // sample's endedness
+    "atac.paired_end" : true,
+
+    // If you start from FASTQs then define these, otherwise remove from this file.
+    // You can define up to 6 replicates.
+    // FASTQs in an array will be merged after trimming adapters.
+    // For example, 
+    // "rep1_R1_L1.fastq.gz", "rep1_R1_L2.fastq.gz" and "rep1_R1_L3.fastq.gz" will be merged together.
+    "atac.fastqs_rep1_R1" : [ "rep1_R1_L1.fastq.gz", "rep1_R1_L2.fastq.gz", "rep1_R1_L3.fastq.gz" ],
+    "atac.fastqs_rep1_R2" : [ "rep1_R2_L1.fastq.gz", "rep1_R2_L2.fastq.gz", "rep1_R2_L3.fastq.gz" ],
+    "atac.fastqs_rep2_R1" : [ "rep2_R1_L1.fastq.gz", "rep2_R1_L2.fastq.gz" ],
+    "atac.fastqs_rep2_R2" : [ "rep2_R2_L1.fastq.gz", "rep2_R2_L2.fastq.gz" ],
+
+    // If you start from BAMs then define these, otherwise remove from this file.
+    // You can define up to 6 replicates. The following example array has two replicates.
+    "atac.bams" : [
+        "raw_rep1.bam",
+        "raw_rep2.bam"
+    ],
+
+    // If you start from filtered/deduped BAMs then define these, otherwise remove from this file.
+    // You can define up to 6 replicates. The following example array has two replicates.
+    "atac.nodup_bams" : [
+        "nodup_rep1.bam",
+        "nodup_rep2.bam"
+    ],
+
+    // If you start from TAG-ALIGNs then define these, otherwise remove from this file.
+    // You can define up to 6 replicates. The following example array has two replicates.
+    "atac.tas" : [
+        "rep1.tagAlign.gz",
+        "rep2.tagAlign.gz"
+    ],
+
+    // You can use auto-detection for adapters.
+    // List of adapters can be detected:
+    //   AGATCGGAAGAGC (Illumina), CTGTCTCTTATA (Nextera) and TGGAATTCTCGG (smallRNA)
+    "atac.auto_detect_adapter" : false,
+
+    // If you don't start from FASTQs, remove these adapter arrays from this file.
+    // else if you chooose to use auto-detection for adapters, then remove adapter arrays from this file.
+    // Otherwise define adapters for each FASTQ.
+    // Adapters should have the same dimension as FASTQs.
+    "atac.adapters_rep1_R1" : [ "AATTCCGG", "AATTCCGG", "AATTCCGG" ],
+    "atac.adapters_rep2_R2" : [ "AATTCCGG", "AATTCCGG" ],
+    "atac.adapters_rep1_R1" : [ "AATTCCGG", "AATTCCGG", "AATTCCGG" ],
+    "atac.adapters_rep2_R2" : [ "AATTCCGG", "AATTCCGG" ],
+
+    ////////// 3) Pipeline parameters //////////
+
+    // Pipeline title and description
+    "atac.title" : "Example (paired end)",
+    "atac.description" : "This is a template input JSON for paired ended sample.",
+
+    // Pipeline type (atac or dnase). DNase-Seq pipeline is not an official ENCODE pipeline yet.
+    "atac.pipeline_type" : "atac",
+
+    // Pipeline will not proceed to post alignment steps (peak-calling, ...).
+    // You will get QC report for alignment only.
+    "atac.align_only" : false,
+
+    // Pipeline will not generate pseudo replicates and will skip all analyses related to them.
+    "atac.true_rep_only" : false,
+
+    // cutadapt (trim_adapter) parameters
+    "atac.cutadapt_min_trim_len" : 5,
+    "atac.cutadapt_err_rate" : 0.1,
+
+    // multimapping reads
+    "atac.multimapping" : 0,
+
+    // bowtie2 parameters
+    "atac.bowtie2_score_min" : "",
+
+    // Choose a dup marker between picard and sambamba
+    // picard is recommended, use sambamba only when picard fails.
+    "atac.dup_marker" : "picard",
+
+    // Threshold for mapped reads quality (samtools view -q)
+    "atac.mapq_thresh" : 30,
+
+    // Skip dup removal in a BAM filtering stage.
+    "atac.no_dup_removal" : false,
+
+    // Regular expression to filter out reads
+    // Any read that matches with this reg-ex pattern will be removed from outputs
+    "atac.regex_filter_reads" : "chrM",
+
+    // Subsample reads
+    // Subsampled reads will be used for all downsteam analyses including peak-calling
+    "atac.subsample_reads" : 0,
+
+    // Cross-correlation analysis
+    "atac.enable_xcor" : false,
+
+    // Subsample reads for cross-corr. analysis only
+    // Subsampled reads will be used for cross-corr. analysis only
+    "atac.xcor_subsample_reads" : 25000000,
+
+    // Keep irregular chromosome names
+    // Use this for custom genomes without canonical chromosome names (chr1, chrX, ...)
+    "atac.keep_irregular_chr_in_bfilt_peak" : false,        
+
+    // Cap number of peaks called from a peak-caller (MACS2)
+    "atac.cap_num_peak" : 300000,
+    // P-value threshold for MACS2 (macs2 callpeak -p)
+    "atac.pval_thresh" : 0.01,
+    // Smoothing window for MACS2 (macs2 callpeak --shift -smooth_win/2 --extsize smooth_win)
+    "atac.smooth_win" : 150,
+
+    // IDR (irreproducible discovery rate)
+    "atac.enable_idr" : false,
+    // Threshold for IDR
+    "atac.idr_thresh" : 0.1,
+
+    // ATAqC (annotation-based analysis which include TSS enrichment and etc.)
+    "atac.disable_ataqc" : false,
+
+    ////////// 4) Resource settings //////////
+
+    // Set of resources defined here is PER REPLICATE.
+    // Therefore, total number of cores used will "atac.bowtie2_cpu" x [NUMBER_OF_REPLICATES]
+    // because bowtie2 is a bottlenecking job of the pipeline.
+    // Use this total number of cores if you manually qsub or sbatch your job (using local mode of our pipeline).
+    // "disks" is used for Google Cloud and DNANexus only.
+
+    "atac.trim_adapter_cpu" : 2,
+    "atac.trim_adapter_mem_mb" : 12000,
+    "atac.trim_adapter_time_hr" : 24,
+    "atac.trim_adapter_disks" : "local-disk 100 HDD",
+
+    "atac.bowtie2_cpu" : 4,
+    "atac.bowtie2_mem_mb" : 20000,
+    "atac.bowtie2_time_hr" : 48,
+    "atac.bowtie2_disks" : "local-disk 100 HDD",
+
+    "atac.filter_cpu" : 2,
+    "atac.filter_mem_mb" : 20000,
+    "atac.filter_time_hr" : 24,
+    "atac.filter_disks" : "local-disk 100 HDD",
+
+    "atac.bam2ta_cpu" : 2,
+    "atac.bam2ta_mem_mb" : 10000,
+    "atac.bam2ta_time_hr" : 6,
+    "atac.bam2ta_disks" : "local-disk 100 HDD",
+
+    "atac.spr_mem_mb" : 16000,
+
+    "atac.xcor_cpu" : 2,
+    "atac.xcor_mem_mb" : 16000,
+    "atac.xcor_time_hr" : 6,
+    "atac.xcor_disks" : "local-disk 100 HDD",
+
+    "atac.macs2_mem_mb" : 16000,
+    "atac.macs2_time_hr" : 24,
+    "atac.macs2_disks" : "local-disk 100 HDD",
+
+    "atac.ataqc_mem_mb" : 16000,
+    "atac.ataqc_mem_java_mb" : 16000,
+    "atac.ataqc_time_hr" : 24,
+    "atac.ataqc_disks" : "local-disk 100 HDD"
+}
+```
 
 ## Reference genome
 

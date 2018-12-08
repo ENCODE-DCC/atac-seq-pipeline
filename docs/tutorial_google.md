@@ -65,7 +65,7 @@ All test samples and genome data are shared on our public Google Cloud buckets. 
     * Networks
 
 2. Set `default_runtime_attributes.zones` in `workflow_opts/docker.json` as your preferred Google Cloud zone.
-    ```json
+    ```javascript
       {
         "default_runtime_attributes" : {
           ...
@@ -75,7 +75,7 @@ All test samples and genome data are shared on our public Google Cloud buckets. 
     ```
 
 3. Set `default_runtime_attributes.preemptible` as `"0"` to disable preemptible instances. This value means a number of retrial for failures in a preemtible instance. Pipeline defaults not to use [preemptible instances](https://cloud.google.com/compute/docs/instances/preemptible). If all retrial fails then the instance will be upgraded to a regular one. **Disabling preemtible instances will cost you significantly more** but you can get your samples processed much faster and stabler. Preemptible instance is disabled by default. Some hard tasks like `bowtie2`, `bwa` and `spp` will not be executed on preemtible instances since they can take longer than the limit (24 hours) of preemptible instances.
-    ```json
+    ```javascript
       {
         "default_runtime_attributes" : {
           ...

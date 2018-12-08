@@ -21,7 +21,7 @@ All test samples and genome data are shared on Stanford Sherlock cluster. You do
     ```
 
 4. Set your partition in `workflow_opts/sherlock.json`. PIPELINE WILL NOT WORK WITHOUT A PAID SLURM PARTITION DUE TO LIMITED RESOURCE SETTINGS FOR FREE USERS. Ignore other runtime attributes for singularity. 
-    ```json
+    ```javascript
       {
         "default_runtime_attributes" : {
           "slurm_partition": "YOUR_SLURM_PARTITON"
@@ -77,7 +77,7 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
 9. See full specification for [input JSON file](input.md).
 
 10. IF YOU WANT TO RUN PIPELINES WITH YOUR OWN INPUT DATA/GENOME DATABASE, PLEASE ADD THEIR DIRECTORIES TO `workflow_opts/sherlock.json`. For example, you have input FASTQs on `/your/input/fastqs/` and genome database installed on `/your/genome/database/` then add `/your/` to `singularity_bindpath`. You can also define multiple directories there. It's comma-separated.
-    ```json
+    ```javascript
       {
           "default_runtime_attributes" : {
               "singularity_container" : "~/.singularity/chip-seq-pipeline-v1.1.4.simg",

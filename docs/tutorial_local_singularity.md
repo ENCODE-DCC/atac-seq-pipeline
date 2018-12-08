@@ -46,7 +46,7 @@ Tutorial for general UNIX computers with singularity
 9. See full specification for [input JSON file](input.md).
 
 10. IF YOU WANT TO RUN PIPELINES WITH YOUR OWN INPUT DATA/GENOME DATABASE, PLEASE ADD THEIR DIRECTORIES TO `workflow_opts/singularity.json`. For example, you have input FASTQs on `/your/input/fastqs/` and genome database installed on `/your/genome/database/` then add `/your/` to `singularity_bindpath`. You can also define multiple directories there. It's comma-separated.
-    ```json
+    ```javascript
       {
           "default_runtime_attributes" : {
               "singularity_container" : "~/.singularity/chip-seq-pipeline-v1.1.4.simg",

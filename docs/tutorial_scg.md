@@ -21,7 +21,7 @@ All test samples and genome data are shared on Stanford SCG cluster based on SLU
     ```
 
 4. Set your account in `workflow_opts/scg.json`. [PIPELINE WILL NOT WORK WITHOUT A SLURM ACCOUNT](https://web.stanford.edu/group/scgpm/cgi-bin/informatics/wiki/index.php/Getting_A_Cluster_Account). Ignore other runtime attributes for singularity.
-    ```json
+    ```javascript
       {
           "default_runtime_attributes" : {
               "slurm_account" : "YOUR_SLURM_ACCOUNT"
@@ -72,7 +72,7 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
 8. See full specification for [input JSON file](input.md).
 
 9. IF YOU WANT TO RUN PIPELINES WITH YOUR OWN INPUT DATA/GENOME DATABASE, PLEASE ADD THEIR DIRECTORIES TO `workflow_opts/scg.json`. For example, you have input FASTQs on `/your/input/fastqs/` and genome database installed on `/your/genome/database/` then add `/your/` to `singularity_bindpath`. You can also define multiple directories there. It's comma-separated.
-    ```json
+    ```javascript
       {
           "default_runtime_attributes" : {
               "singularity_container" : "~/.singularity/chip-seq-pipeline-v1.1.4.simg",
