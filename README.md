@@ -13,7 +13,7 @@ The ATAC-seq pipeline specification is also the official pipeline specification 
 * **Flexibility**: Support for `docker`, `singularity` and `Conda`.
 * **Portability**: Support for many cloud platforms (Google/DNANexus) and cluster engines (SLURM/SGE/PBS).
 * **Beatiful HTML report**: tabulated quality metrics including alignment/peak statistics and FRiP along with many useful plots (IDR/cross-correlation measures).
-  - Examples: [HTML](docs/example_output/qc.html), [JSON](docs/example_output/qc.json)
+  - Examples: [HTML](https://storage.googleapis.com/encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR889WQX/example_output/qc.html), [JSON](docs/example_output/qc.json)
 * **ATAqC**: Annotation-based analysis including TSS enrichment and comparison to Roadmap DNase.
 * **Genomes**: Pre-built database for GRCh38, hg19, mm10, mm9 and additional support for custom genomes.
 
@@ -45,4 +45,3 @@ This pipeline supports many cloud platforms and cluster engines. It also support
 ## Output directories
 
 [Output directory specification](docs/output.md)
-
