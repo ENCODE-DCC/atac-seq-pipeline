@@ -135,7 +135,7 @@ def subsample_ta_se(ta, subsample, non_mito, out_dir):
     ta_subsampled = '{}.{}{}.tagAlign.gz'.format(
         prefix,
         'no_chrM' if non_mito else '',
-        '.{}'.format(human_readable_number(subsample)) if subasmple>0 else ''
+        '.{}'.format(human_readable_number(subsample)) if subsample>0 else ''
         )
 
     # use bash
@@ -166,7 +166,7 @@ def subsample_ta_pe(ta, subsample, non_mito, r1_only, out_dir):
         prefix,
         'no_chrM.' if non_mito else '',
         'R1' if r1_only else '',
-        '.{}'.format(human_readable_number(subsample)) if subasmple>0 else ''
+        '.{}'.format(human_readable_number(subsample)) if subsample>0 else ''
         )
     ta_tmp = '{}.tagAlign.tmp'.format(prefix)
 
