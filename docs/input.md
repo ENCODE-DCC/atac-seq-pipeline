@@ -121,14 +121,14 @@ Let us take a quick look at the following template JSON. A JSON file does not al
     // Any read that matches with this reg-ex pattern will be removed from outputs
     "atac.regex_filter_reads" : "chrM",
 
-    // Subsample reads
+    // Subsample reads (0: no subsampling)
     // Subsampled reads will be used for all downsteam analyses including peak-calling
     "atac.subsample_reads" : 0,
 
     // Cross-correlation analysis
     "atac.enable_xcor" : false,
 
-    // Subsample reads for cross-corr. analysis only
+    // Subsample reads for cross-corr. analysis only (0: no subsampling)
     // Subsampled reads will be used for cross-corr. analysis only
     "atac.xcor_subsample_reads" : 25000000,
 
