@@ -10,14 +10,14 @@ An input JSON file includes all input parameters and metadata for running pipeli
 
 * Mandatory
 
-    1. Reference genome.
-    2. Input data file paths/URIs.
-    3. Adapters to be trimmed.
+1. Reference genome.
+2. Input data file paths/URIs.
+3. Adapters to be trimmed.
 
 * Optional
 
-    4. Pipeline parameters.
-    5. Resource settings for jobs.
+4. Pipeline parameters.
+5. Resource settings for jobs.
 
 Let us take a quick look at the following template JSON. A JSON file does not allow comments in it but we added some to help you understand each parameter.
 ```javascript
@@ -65,7 +65,7 @@ Let us take a quick look at the following template JSON. A JSON file does not al
         "rep2.tagAlign.gz"
     ],
 
-    ////////// 4) Pipeline parameters //////////
+    ////////// 3) Adapters to be trimmed //////////
 
     // You can use auto-detection for adapters.
     // List of adapters can be detected:
@@ -81,7 +81,7 @@ Let us take a quick look at the following template JSON. A JSON file does not al
     "atac.adapters_rep1_R1" : [ "AATTCCGG", "AATTCCGG", "AATTCCGG" ],
     "atac.adapters_rep2_R2" : [ "AATTCCGG", "AATTCCGG" ],
 
-    ////////// 5) Pipeline parameters //////////
+    ////////// 4) Pipeline parameters //////////
 
     // Pipeline title and description
     "atac.title" : "Example (paired end)",
@@ -151,7 +151,7 @@ Let us take a quick look at the following template JSON. A JSON file does not al
     // ATAqC (annotation-based analysis which include TSS enrichment and etc.)
     "atac.disable_ataqc" : false,
 
-    ////////// 6) Resource settings //////////
+    ////////// 5) Resource settings //////////
 
     // Set of resources defined here is PER REPLICATE.
     // Therefore, total number of cores used will "atac.bowtie2_cpu" x [NUMBER_OF_REPLICATES]
