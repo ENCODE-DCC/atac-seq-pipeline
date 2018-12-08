@@ -9,12 +9,15 @@ We provide two template JSON files for both single ended and paired-end samples.
 An input JSON file includes all input parameters and metadata for running pipelines. 3) and 4) are optional so that our pipeline will use default values if they are not defined. However, 1), 2) and 3) are mandatory.
 
 * Mandatory
-  1) Reference genome.
-  2) Input data file paths/URIs.
-  3) Adapters to be trimmed.
+
+    1) Reference genome.
+    2) Input data file paths/URIs.
+    3) Adapters to be trimmed.
+
 * Optional
-  4) Pipeline parameters.
-  5) Resource settings for jobs.
+
+    4) Pipeline parameters.
+    5) Resource settings for jobs.
 
 Let us take a quick look at the following template JSON. A JSON file does not allow comments in it but we added some to help you understand each parameter.
 ```javascript
