@@ -1,10 +1,4 @@
-Input JSON
-==========
-
-We provide two template JSON files for both single ended and paired-end samples. We recommend to use one of these input JSON files instead of that used in the tutorial section. These template JSON files include all parameters of the pipeline with default values defined.
-
-* [template](../examples/template_se.json) for single ended sample
-* [template](../examples/template_pe.json) for paired-end sample
+# Input JSON
 
 An input JSON file includes all input parameters and metadata for running pipelines. Items 1), 2) and 3) are mandatory. Items 4) and 5) are optional so that our pipeline will use default values if they are not defined. However, 
 
@@ -19,14 +13,30 @@ An input JSON file includes all input parameters and metadata for running pipeli
 4. Pipeline parameters.
 5. Resource settings for jobs.
 
-Let us take a quick look at the following template JSON. A JSON file does not allow comments in it but we added some to help you understand each parameter.
+## Templates
+
+We provide two template JSON files for both single ended and paired-end samples. We recommend to use one of these input JSON files instead of that used in the tutorial section. These template JSON files include all parameters of the pipeline with default values defined.
+
+* [template](../examples/template_se.json) for single ended sample
+* [template](../examples/template_pe.json) for paired-end sample
+
+Let us take a close look at the following template JSON. Comments are not allowed in a JSON file but we added some comments to help you understand each parameter.
 ```javascript
 {
     ////////// 1) Reference genome //////////
+    // Stanford servers: [GENOME]=hg38,hg19,mm10,mm9
+    //   Sherlock: /home/groups/cherry/encode/pipeline_genome_data/[GENOME]_sherlock.tsv
+    //   SCG4: /reference/ENCODE/pipeline_genome_data/[GENOME]_scg.tsv
 
-    // Download or build reference genome database and pick a TSV from it.
-    // Download: /genome/download_genome_data.sh
-    // Builder: /conda/build_genome_data.sh (Conda required)
+    // Cloud platforms (Google Cloud, DNANexus): [GENOME]=hg38,hg19,mm10,mm9
+    //   Google Cloud: gs://encode-pipeline-genome-data/[GENOME]_google.tsv
+    //   DNANexus: dx://project-BKpvFg00VBPV975PgJ6Q03v6:data/pipeline-genome-data/[GENOME]_dx.tsv
+    //   DNANexus(Azure): dx://project-F6K911Q9xyfgJ36JFzv03Z5J:data/pipeline-genome-data/[GENOME]_dx_azure.tsv
+
+    // On other computers download or build reference genome database and pick a TSV from [DEST_DIR].
+    //   Downloader: ./genome/download_genome_data.sh [GENOME] [DEST_DIR]
+    //   Builder (Conda required): ./conda/build_genome_data.sh [GENOME] [DEST_DIR]
+
     "atac.genome_tsv" : "/path_to_genome_data/hg38/hg38.tsv",
 
     ////////// 2) Input data files paths/URIs //////////
@@ -153,9 +163,9 @@ Let us take a quick look at the following template JSON. A JSON file does not al
 
     ////////// 5) Resource settings //////////
 
-    // Set of resources defined here is PER REPLICATE.
-    // Therefore, total number of cores used will "atac.bowtie2_cpu" x [NUMBER_OF_REPLICATES]
-    // because bowtie2 is a bottlenecking job of the pipeline.
+    // Resources defined here are PER REPLICATE.
+    // Therefore, total number of cores will be "atac.bowtie2_cpu" x [NUMBER_OF_REPLICATES]
+    // because bowtie2 is a bottlenecking task of the pipeline.
     // Use this total number of cores if you manually qsub or sbatch your job (using local mode of our pipeline).
     // "disks" is used for Google Cloud and DNANexus only.
 
@@ -214,9 +224,9 @@ Choose one TSV file for `"atac.genome_tsv"` in your input JSON. `[GENOME]` shoul
 |-|-|
 |Google Cloud Platform|`gs://encode-pipeline-genome-data/[GENOME]_google.tsv`|
 |DNANexus (CLI)|`dx://project-BKpvFg00VBPV975PgJ6Q03v6:data/pipeline-genome-data/[GENOME]_dx.tsv`|
-|DNANexus (CLI, Azure)|`dx://project-XXXXXXXXXXXXXX:data/pipeline-genome-data/[GENOME]_dx.tsv`|
+|DNANexus (CLI, Azure)|`dx://project-XXXXXXXXXXXXXX:data/pipeline-genome-data/[GENOME]_dx_azure.tsv`|
 |DNANExus (Web)|Choose `[GENOME]_dx.tsv` from [here](https://platform.dnanexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/pipeline-genome-data)|
 |DNANExus (Web, Azure)|Choose `[GENOME]_dx.tsv` from [here](https://platform.dnanexus.com/projects/XXXXXXXXXXXXXX/data/pipeline-genome-data)|
-|Stanford Sherlock|`genome/scg/[GENOME]_scg.tsv`|
-|Stanford SCG|`genome/sherlock/[GENOME]_sherlock.tsv`|
+|Stanford Sherlock|`/home/groups/cherry/encode/pipeline_genome_data/[GENOME]_sherlock.tsv`|
+|Stanford SCG|`/reference/ENCODE/pipeline_genome_data/[GENOME]_scg.tsv`|
 |Local/SLURM/SGE/PBS|You need to [download](../genome/download_genome_data.sh) or [build a genome database](build_genome_database.md). |
