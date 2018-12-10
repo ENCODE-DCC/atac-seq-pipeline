@@ -349,7 +349,7 @@ def peak_to_bigbed(peak, peak_type, chrsz, keep_irregular_chr, out_dir):
         cmd1 = "cat {} > {}".format(chrsz, chrsz_tmp)
     run_shell_cmd(cmd1)
     cmd2 = "zcat -f {} | LC_COLLATE=C sort -k1,1 -k2,2n | "
-    cmd2 += 'awk \'BEGIN{{OFS="\\t"}} {{if ($5>1000) $5=1000; if ($5<0) $5=0; print $0}} > {}'
+    cmd2 += 'awk \'BEGIN{{OFS="\\t"}} {{if ($5>1000) $5=1000; if ($5<0) $5=0; print $0}}\' > {}'
     cmd2 = cmd2.format(peak, bigbed_tmp)
     run_shell_cmd(cmd2)
     cmd3 = "bedClip {} {} {}".format(bigbed_tmp, chrsz_tmp, bigbed_tmp2)
