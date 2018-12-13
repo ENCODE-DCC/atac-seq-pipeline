@@ -55,26 +55,31 @@ def ataqc():
     if args.bam:
         prefix = strip_ext_bam(args.bam)
     elif args.nodup_bam:
-        prefix = strip_ext_bam(args.bam)
+        prefix = strip_ext_bam(args.nodup_bam)
     elif args.ta:
         prefix = strip_ext_ta(args.ta)
     elif args.peak:
         prefix = strip_ext(args.peak)
+    elif args.overlap_peak:
+        prefix = strip_ext(args.overlap_peak)
+    elif args.idr_peak:
+        prefix = strip_ext(args.idr_peak)
     elif args.bigwig:
         prefix = strip_ext_bigwig(args.bigwig)
     else:
         prefix = ''
     OUTPUT_PREFIX = os.path.join(args.out_dir, os.path.basename(prefix))
-    # make index for bam and nodup_bam
-    samtools_index(args.bam)
-    samtools_index(args.nodup_bam)
     # experiment data files
     ALIGNMENT_LOG = args.bowtie2_log
     ALIGNED_BAM = args.bam
     COORDSORT_BAM = args.bam
+    if ALIGNED_BAM or COORDSORT_BAM:
+        samtools_index(ALIGNED_BAM)
     PBC_LOG = args.pbc_log
     DUP_LOG = args.dup_log
     FINAL_BAM = args.nodup_bam
+    if FINAL_BAM:
+        samtools_index(FINAL_BAM) # make index
     FINAL_BED = args.ta
     if args.idr_peak:
         PEAKS = args.peak
@@ -88,14 +93,15 @@ def ataqc():
     NAME = ''
     REF = args.ref_fa
     CHROMSIZES = args.chrsz
-    TSS = args.tss_enrich
-    DNASE = args.dnase
-    BLACKLIST = args.blacklist
-    PROM = args.prom
-    ENH = args.enh
-    REG2MAP_BED = args.reg2map_bed if os.path.basename(args.reg2map_bed)!='null' else DNASE
-    REG2MAP = args.reg2map
-    ROADMAP_META = args.roadmap_meta
+
+    TSS = args.tss_enrich if args.tss_enrich and os.path.basename(args.tss_enrich)!='null' else ''
+    DNASE = args.dnase if args.dnase and os.path.basename(args.dnase)!='null' else ''
+    BLACKLIST = args.blacklist if args.blacklist and os.path.basename(args.blacklist)!='null' else ''
+    PROM = args.prom if args.prom and os.path.basename(args.prom)!='null' else ''
+    ENH = args.enh if args.enh and os.path.basename(args.enh)!='null' else ''
+    REG2MAP_BED = args.reg2map_bed if args.reg2map_bed and os.path.basename(args.reg2map_bed)!='null' else DNASE
+    REG2MAP = args.reg2map if args.reg2map and os.path.basename(args.reg2map)!='null' else ''
+    ROADMAP_META = args.roadmap_meta if args.roadmap_meta and os.path.basename(args.roadmap_meta)!='null' else ''
 
     log.info('Initializing and making output directory...')
     mkdir_p(args.out_dir)
@@ -114,199 +120,282 @@ def ataqc():
         with open(args.read_len_log,'r') as fp:
             read_len = int(fp.read().strip())
     else:
-        read_len = 0
+        read_len = None
 
     # Sequencing metrics: Bowtie1/2 alignment log, chrM, GC bias
-    BOWTIE_STATS = get_bowtie_stats(ALIGNMENT_LOG)
-
-    chr_m_reads, fraction_chr_m = get_chr_m(COORDSORT_BAM)
-
-    gc_out, gc_plot, gc_summary = get_gc(FINAL_BAM,
-                                         REF,
-                                         OUTPUT_PREFIX)
-
-    # Library complexity: Preseq results, NRF, PBC1, PBC2
-    picard_est_library_size = get_picard_complexity_metrics(ALIGNED_BAM,
-                                                            OUTPUT_PREFIX)
-    preseq_data, preseq_log = run_preseq(ALIGNED_BAM, OUTPUT_PREFIX) # SORTED BAM
-    #preseq_data = '/srv/scratch/dskim89/ataqc/results/2016-03-27.ENCODE_Hardison_Wold/wold/forebrain_e14-5.b1/forebrain_e14-5.b1.preseq.dat'
-    #preseq_log = '/srv/scratch/dskim89/ataqc/results/2016-03-27.ENCODE_Hardison_Wold/wold/forebrain_e14-5.b1/forebrain_e14-5.b1.preseq.log'
-
-    encode_lib_metrics = get_encode_complexity_measures(PBC_LOG)
-
-    # Filtering metrics: duplicates, map quality
-    num_mapq, fract_mapq = get_fract_mapq(ALIGNED_BAM)
-
-    # if USE_SAMBAMBA_MARKDUP:
-    #     read_dups, percent_dup = get_sambamba_dup_stats(DUP_LOG, paired_status)
-    # else:    
-    #     read_dups, percent_dup = get_picard_dup_stats(DUP_LOG, paired_status)
-    dup_map = parse_dup_qc(DUP_LOG)
-    if args.paired_end:
-        read_dups = dup_map['paired_dupes']
+    if ALIGNMENT_LOG:
+        BOWTIE_STATS = get_bowtie_stats(ALIGNMENT_LOG)
     else:
-        read_dups = dup_map['unpaired_dupes']
-    percent_dup = dup_map['dupes_pct']
+        BOWTIE_STATS = None
 
-    # mito_dups, fract_dups_from_mito = get_mito_dups(ALIGNED_BAM,
-    #                                                 OUTPUT_PREFIX,
-    #                                                 paired_status,
-    #                                                 use_sambamba=USE_SAMBAMBA_MARKDUP)
-    with open(args.mito_dup_log,'r') as fp:
-        # read mito_dup_log (TSV -> dict)
-        mito_dup_map = {k: v for k,v in (map(str, line.split('\t')) for line in fp)}
-        mito_dups = int(mito_dup_map['mito_dups'])
-        total_dups = int(mito_dup_map['total_dups'])
-        fract_dups_from_mito = mito_dups/float(total_dups)
+    if COORDSORT_BAM:
+        chr_m_reads, fraction_chr_m = get_chr_m(COORDSORT_BAM)
+    else:
+        chr_m_reads, fraction_chr_m = (None, None)
 
-    # [flagstat, mapped_count] = get_samtools_flagstat(ALIGNED_BAM)
-    flagstat_map = parse_flagstat_qc(args.flagstat_log)
-    with open(args.flagstat_log,'r') as fp:
-        flagstat = fp.read()
-    mapped_count = flagstat_map['mapped']
+    if FINAL_BAM:
+        gc_out, gc_plot, gc_summary = get_gc(FINAL_BAM,
+                                             REF,
+                                             OUTPUT_PREFIX)
+    else:
+        gc_out, gc_plot, gc_summary = (None, None, None)
 
-    # Final read statistics
-    first_read_count, final_read_count, \
-        fract_reads_left = get_final_read_count(ALIGNED_BAM,
-                                                FINAL_BAM)
+    if ALIGNED_BAM:
+        # Library complexity: Preseq results, NRF, PBC1, PBC2    
+        picard_est_library_size = get_picard_complexity_metrics(ALIGNED_BAM,
+                                                                OUTPUT_PREFIX)
+        preseq_data, preseq_log = run_preseq(ALIGNED_BAM, OUTPUT_PREFIX) # SORTED BAM
+
+        # Filtering metrics: duplicates, map quality
+        num_mapq, fract_mapq = get_fract_mapq(ALIGNED_BAM)
+    else:
+        picard_est_library_size = None
+        preseq_data, preseq_log = (None, None)
+        num_mapq, fract_mapq = (None, None)
+
+    if PBC_LOG:
+        encode_lib_metrics = get_encode_complexity_measures(PBC_LOG)
+    else:
+        encode_lib_metrics = None
+
+    if DUP_LOG:
+        # if USE_SAMBAMBA_MARKDUP:
+        #     read_dups, percent_dup = get_sambamba_dup_stats(DUP_LOG, paired_status)
+        # else:    
+        #     read_dups, percent_dup = get_picard_dup_stats(DUP_LOG, paired_status)
+        dup_map = parse_dup_qc(DUP_LOG)
+        if args.paired_end:
+            read_dups = dup_map['paired_dupes']
+        else:
+            read_dups = dup_map['unpaired_dupes']
+        percent_dup = dup_map['dupes_pct']
+    else:
+        read_dups = None
+        percent_dup = None
+
+    if args.mito_dup_log:
+        # mito_dups, fract_dups_from_mito = get_mito_dups(ALIGNED_BAM,
+        #                                                 OUTPUT_PREFIX,
+        #                                                 paired_status,
+        #                                                 use_sambamba=USE_SAMBAMBA_MARKDUP)
+        with open(args.mito_dup_log,'r') as fp:
+            # read mito_dup_log (TSV -> dict)
+            mito_dup_map = {k: v for k,v in (map(str, line.split('\t')) for line in fp)}
+            mito_dups = int(mito_dup_map['mito_dups'])
+            total_dups = int(mito_dup_map['total_dups'])
+            fract_dups_from_mito = mito_dups/float(total_dups)
+    else:
+        mito_dups = None
+        total_dups = None
+        fract_dups_from_mito = None
+
+    if args.flagstat_log:
+        # [flagstat, mapped_count] = get_samtools_flagstat(ALIGNED_BAM)
+        flagstat_map = parse_flagstat_qc(args.flagstat_log)
+        with open(args.flagstat_log,'r') as fp:
+            flagstat = fp.read()
+        mapped_count = flagstat_map['mapped']
+    else:
+        flagstat = None
+        mapped_count = None
+
+    if ALIGNED_BAM and FINAL_BAM:
+        # Final read statistics
+        first_read_count, final_read_count, \
+            fract_reads_left = get_final_read_count(ALIGNED_BAM,
+                                                    FINAL_BAM)
+    else:
+        first_read_count, final_read_count, \
+            fract_reads_left = (None, None, None)
 
     # Insert size distribution - CAN'T GET THIS FOR SE FILES
-    if paired_status == "Paired-ended":
+    if FINAL_BAM and paired_status == "Paired-ended":
         insert_data, insert_plot = get_insert_distribution(FINAL_BAM,
                                                            OUTPUT_PREFIX)
+        # Also need to run n-nucleosome estimation
+        if paired_status == 'Paired-ended':
+            nucleosomal_qc = fragment_length_qc(read_picard_histogram(insert_data))
+        else:
+            nucleosomal_qc = ''
     else:
-        insert_data = ''
-        insert_plot = ''
+        insert_data = None
+        insert_plot = None
+        nucleosomal_qc = None
 
     # Enrichments: V plot for enrichment
-    tss_plot_file, tss_plot_large_file, tss_point_val = make_tss_plot(FINAL_BAM, # Use final to avoid duplicates
-                                                                      TSS,
-                                                                      OUTPUT_PREFIX,
-                                                                      CHROMSIZES,
-                                                                      read_len)
-
-    # Signal to noise: reads in DHS regions vs not, reads falling
-    # into blacklist regions
-    reads_dnase, fract_dnase, reads_blacklist, fract_blacklist, \
-        reads_prom, fract_prom, reads_enh, fract_enh, \
-        reads_peaks, fract_peaks = get_signal_to_noise(FINAL_BED,
-                                                       DNASE,
-                                                       BLACKLIST,
-                                                       PROM,
-                                                       ENH,
-                                                       PEAKS)
-
-    # Also need to run n-nucleosome estimation
-    if paired_status == 'Paired-ended':
-        nucleosomal_qc = fragment_length_qc(read_picard_histogram(insert_data))
+    if FINAL_BAM and TSS and CHROMSIZES and read_len:
+        tss_plot_file, tss_plot_large_file, tss_point_val = make_tss_plot(FINAL_BAM, # Use final to avoid duplicates
+                                                                          TSS,
+                                                                          OUTPUT_PREFIX,
+                                                                          CHROMSIZES,
+                                                                          read_len)
     else:
-        nucleosomal_qc = ''
+        tss_plot_file, tss_plot_large_file, tss_point_val = (None, None, None)
 
-    # Peak metrics
-    peak_counts = get_peak_counts(PEAKS, NAIVE_OVERLAP_PEAKS, IDR_PEAKS)
-    raw_peak_summ, raw_peak_dist = get_region_size_metrics(PEAKS)
-    naive_peak_summ, naive_peak_dist = get_region_size_metrics(NAIVE_OVERLAP_PEAKS)
-    idr_peak_summ, idr_peak_dist = get_region_size_metrics(IDR_PEAKS)
+    if FINAL_BED and DNASE and BLACKLIST and PROM and ENH and PEAKS:
+        # Signal to noise: reads in DHS regions vs not, reads falling
+        # into blacklist regions
+        reads_dnase, fract_dnase, reads_blacklist, fract_blacklist, \
+            reads_prom, fract_prom, reads_enh, fract_enh, \
+            reads_peaks, fract_peaks = get_signal_to_noise(FINAL_BED,
+                                                           DNASE,
+                                                           BLACKLIST,
+                                                           PROM,
+                                                           ENH,
+                                                           PEAKS)
+    else:
+        reads_dnase, fract_dnase, reads_blacklist, fract_blacklist, \
+            reads_prom, fract_prom, reads_enh, fract_enh, \
+            reads_peaks, fract_peaks = (None,None,None,None,None,None,None,None,None,None)
 
-    # Compare to roadmap
-    roadmap_compare_plot = compare_to_roadmap(BIGWIG, REG2MAP_BED, REG2MAP,
-                                              ROADMAP_META, OUTPUT_PREFIX)
+    # Peak metrics    
+    if PEAKS and NAIVE_OVERLAP_PEAKS:
+        peak_counts = get_peak_counts(PEAKS, NAIVE_OVERLAP_PEAKS, IDR_PEAKS)
+    else:
+        peak_counts = None
+    if PEAKS:
+        raw_peak_summ, raw_peak_dist = get_region_size_metrics(PEAKS)
+    else:
+        raw_peak_summ, raw_peak_dist = (None, None)
+    if NAIVE_OVERLAP_PEAKS:
+        naive_peak_summ, naive_peak_dist = get_region_size_metrics(NAIVE_OVERLAP_PEAKS)
+    else:
+        naive_peak_summ, naive_peak_dist = (None, None)
+    if IDR_PEAKS:
+        idr_peak_summ, idr_peak_dist = get_region_size_metrics(IDR_PEAKS)
+    else:
+        idr_peak_summ, idr_peak_dist = (None, None)
+
+    if BIGWIG and REG2MAP_BED and REG2MAP and ROADMAP_META:
+        # Compare to roadmap
+        roadmap_compare_plot = compare_to_roadmap(BIGWIG, REG2MAP_BED, REG2MAP,
+                                                  ROADMAP_META, OUTPUT_PREFIX)
+    else:
+        roadmap_compare_plot = None
 
     # Finally output the bar chart of reads
-    read_count_data = [first_read_count, first_read_count*fract_mapq,
-                       first_read_count*fract_mapq*(1-float(percent_dup)),
-                       final_read_count]
-    read_count_labels = ['Start', 'q>30', 'dups removed',
-                         'chrM removed (final)']
-    read_tracker_plot = track_reads(read_count_data, read_count_labels)
+    if first_read_count and fract_mapq and percent_dup:
+        read_count_data = [first_read_count, first_read_count*fract_mapq,
+                           first_read_count*fract_mapq*(1-float(percent_dup)),
+                           final_read_count]
+        read_count_labels = ['Start', 'q>30', 'dups removed',
+                             'chrM removed (final)']
+        read_tracker_plot = track_reads(read_count_data, read_count_labels)
+    else:
+        read_count_data = None
+        read_count_labels = None
+        read_tracker_plot = None
+
+    # Gather all information to make a final report
+    SAMPLE = OrderedDict()
+    SAMPLE['Name'] = NAME
 
     # Take all this info and render the html file
     SAMPLE_INFO = OrderedDict([
         ('Sample', NAME),
         ('Genome', GENOME),
         ('Paired/Single-ended', paired_status),
-        ('Read length', read_len),
+        ('Read length', read_len if read_len else 'N/A'),
     ])
+    SAMPLE['basic_info'] = SAMPLE_INFO
 
-    SUMMARY_STATS = OrderedDict([
-        ('Read count from sequencer', first_read_count),
-        ('Read count successfully aligned', mapped_count),
-        ('Read count after filtering for mapping quality', num_mapq),
-        ('Read count after removing duplicate reads',
-            int(num_mapq - read_dups)),
-        ('Read count after removing mitochondrial reads (final read count)',
-            final_read_count),
-    ])
+    # Summary
+    if first_read_count and mapped_count and num_mapq and read_dups and final_read_count:
+        SUMMARY_STATS = OrderedDict([
+            ('Read count from sequencer', first_read_count),
+            ('Read count successfully aligned', mapped_count),
+            ('Read count after filtering for mapping quality', num_mapq),
+            ('Read count after removing duplicate reads',
+                int(num_mapq - read_dups)),
+            ('Read count after removing mitochondrial reads (final read count)',
+                final_read_count),
+        ])
+        SAMPLE['summary_stats'] = SUMMARY_STATS
 
-    FILTERING_STATS = OrderedDict([
-        ('Mapping quality > q30 (out of total)', (num_mapq, fract_mapq)),
-        ('Duplicates (after filtering)', (read_dups, percent_dup)),
-        ('Mitochondrial reads (out of total)', (chr_m_reads, fraction_chr_m)),
-        ('Duplicates that are mitochondrial (out of all dups)',
-            (mito_dups, fract_dups_from_mito)),
-        ('Final reads (after all filters)', (final_read_count,
-                                             fract_reads_left)),
-    ])
+    if read_tracker_plot:
+        SAMPLE['read_tracker'] = read_tracker_plot
 
-    ENRICHMENT_PLOTS = {
-        'tss': b64encode(open(tss_plot_large_file, 'rb').read())
-    }
+    # Alignment statistics
+    if BOWTIE_STATS:
+        SAMPLE['bowtie_stats'] = BOWTIE_STATS
+    if flagstat: 
+        SAMPLE['samtools_flagstat'] = flagstat
 
-    ANNOT_ENRICHMENTS = OrderedDict([
-        ('Fraction of reads in universal DHS regions', (reads_dnase,
-                                                        fract_dnase)),
-        ('Fraction of reads in blacklist regions', (reads_blacklist,
-                                                    fract_blacklist)),
-        ('Fraction of reads in promoter regions', (reads_prom, fract_prom)),
-        ('Fraction of reads in enhancer regions', (reads_enh, fract_enh)),
-        ('Fraction of reads in called peak regions', (reads_peaks,
-                                                      fract_peaks)),
-    ])
+    # Filtering statistics
+    if num_mapq and fract_mapq and read_dups and percent_dup and chr_m_reads \
+        and fraction_chr_m and fraction_chr_m and mito_dups and fract_dups_from_mito \
+        and final_read_count and fract_reads_left:
+        FILTERING_STATS = OrderedDict([
+            ('Mapping quality > q30 (out of total)', (num_mapq, fract_mapq)),
+            ('Duplicates (after filtering)', (read_dups, percent_dup)),
+            ('Mitochondrial reads (out of total)', (chr_m_reads, fraction_chr_m)),
+            ('Duplicates that are mitochondrial (out of all dups)',
+                (mito_dups, fract_dups_from_mito)),
+            ('Final reads (after all filters)', (final_read_count,
+                                                 fract_reads_left)),
+        ])    
+        SAMPLE['filtering_stats'] = FILTERING_STATS
 
-    SAMPLE = OrderedDict([
-        ('Name', NAME),
-        ('basic_info', SAMPLE_INFO),
+    # Library complexity statistics
+    if encode_lib_metrics:
+        SAMPLE['encode_lib_complexity'] = encode_lib_metrics
+    if picard_est_library_size:
+        SAMPLE['picard_est_library_size'] = picard_est_library_size
+    if preseq_data:
+        SAMPLE['yield_prediction'] = preseq_plot(preseq_data)
 
-        # Summary
-        ('summary_stats', SUMMARY_STATS),
-        ('read_tracker', read_tracker_plot),
+    # Fragment length statistics
+    if insert_data:
+        SAMPLE['fraglen_dist'] = fragment_length_plot(insert_data)
+    if nucleosomal_qc:
+        SAMPLE['nucleosomal'] = nucleosomal_qc
 
-        # Alignment statistics
-        ('bowtie_stats', BOWTIE_STATS),
-        ('samtools_flagstat', flagstat),
+    # Peak metrics
+    if peak_counts:
+        SAMPLE['peak_counts'] = peak_counts
+    if raw_peak_summ:
+        SAMPLE['raw_peak_summ'] = raw_peak_summ
+    if naive_peak_summ:
+        SAMPLE['naive_peak_summ'] = naive_peak_summ
+    if idr_peak_summ:
+        SAMPLE['idr_peak_summ'] = idr_peak_summ
+    if raw_peak_dist:
+        SAMPLE['raw_peak_dist'] = raw_peak_dist
+    if naive_peak_dist:
+        SAMPLE['naive_peak_dist'] = naive_peak_dist
+    if idr_peak_dist:
+        SAMPLE['idr_peak_dist'] = idr_peak_dist
 
-        # Filtering statistics
-        ('filtering_stats', FILTERING_STATS),
+    # GC
+    if gc_out:
+        SAMPLE['gc_bias'] = plot_gc(gc_out)
 
-        # Library complexity statistics
-        ('encode_lib_complexity', encode_lib_metrics),
-        ('picard_est_library_size', picard_est_library_size),
-        ('yield_prediction', preseq_plot(preseq_data)),
+    # Annotation based statistics
+    if tss_plot_large_file:
+        ENRICHMENT_PLOTS = {
+            'tss': b64encode(open(tss_plot_large_file, 'rb').read())
+        }
+        SAMPLE['enrichment_plots'] = ENRICHMENT_PLOTS
+    if tss_point_val:
+        SAMPLE['TSS_enrichment'] = tss_point_val
+    if reads_dnase and fract_dnase and reads_blacklist and fract_blacklist \
+        and reads_prom and fract_prom and reads_enh and fract_enh \
+        and reads_peaks and fract_peaks:
+        ANNOT_ENRICHMENTS = OrderedDict([
+            ('Fraction of reads in universal DHS regions', (reads_dnase,
+                                                            fract_dnase)),
+            ('Fraction of reads in blacklist regions', (reads_blacklist,
+                                                        fract_blacklist)),
+            ('Fraction of reads in promoter regions', (reads_prom, fract_prom)),
+            ('Fraction of reads in enhancer regions', (reads_enh, fract_enh)),
+            ('Fraction of reads in called peak regions', (reads_peaks,
+                                                          fract_peaks)),
+        ])
+        SAMPLE['annot_enrichments'] = ANNOT_ENRICHMENTS
 
-        # Fragment length statistics
-        ('fraglen_dist', fragment_length_plot(insert_data)),
-        ('nucleosomal', nucleosomal_qc),
-
-        # Peak metrics
-        ('peak_counts', peak_counts),
-        ('raw_peak_summ', raw_peak_summ),
-        ('naive_peak_summ', naive_peak_summ),
-        ('idr_peak_summ', idr_peak_summ),
-        ('raw_peak_dist', raw_peak_dist),
-        ('naive_peak_dist', naive_peak_dist),
-        ('idr_peak_dist', idr_peak_dist),
-
-        # GC
-        ('gc_bias', plot_gc(gc_out)),
-
-        # Annotation based statistics
-        ('enrichment_plots', ENRICHMENT_PLOTS),
-        ('TSS_enrichment', tss_point_val),
-        ('annot_enrichments', ANNOT_ENRICHMENTS),
-
-        # Roadmap plot
-        ('roadmap_plot', roadmap_compare_plot),
-    ])
+    # Roadmap plot
+    if roadmap_compare_plot:
+        SAMPLE['roadmap_plot'] = roadmap_compare_plot
 
     results = open('{0}_qc.html'.format(OUTPUT_PREFIX), 'w')
     results.write(html_template.render(sample=SAMPLE))

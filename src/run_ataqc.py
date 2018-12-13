@@ -1071,7 +1071,7 @@ html_template = Template("""
 <body>
   <h2>ATAqC</h2>
 
-
+{% if 'basic_info' in sample %}
   <h2>Sample Information</h2>
   <table class='qc_table'>
     <tbody>
@@ -1083,8 +1083,9 @@ html_template = Template("""
       {% endfor %}
     </tbody>
   </table>
+{% endif %}
 
-
+{% if 'summary_stats' in sample %}
   <h2>Summary</h2>
   <table class='qc_table'>
     <tbody>
@@ -1103,7 +1104,9 @@ end read. In other words, if your file is paired end, then you should divide
 these counts by two. Each step follows the previous step; for example, the
 duplicate reads were removed after reads were removed for low mapping quality.
 </pre>
+{% endif %}
 
+{% if 'read_tracker' in sample %}
   {{ inline_img(sample['read_tracker']) }}
 <pre>
 This bar chart also shows the filtering process and where the reads were lost
@@ -1114,20 +1117,24 @@ determined using 'samtools view' - as such, these are all reads found in
 the file, whether one end of a pair or a single end read. In other words,
 if your file is paired end, then you should divide these counts by two.
 </pre>
+{% endif %}
 
-
+{% if 'bowtie_stats' in sample %}
   <h2>Alignment statistics</h2>
   <h3>Bowtie alignment log</h3>
   <pre>
 {{ sample['bowtie_stats'] }}
   </pre>
+{% endif %}
 
+{% if 'samtools_flagstat' in sample %}
   <h3>Samtools flagstat</h3>
   <pre>
 {{ sample['samtools_flagstat'] }}
   </pre>
+{% endif %}
 
-
+{% if 'filtering_stats' in sample %}
   <h2>Filtering statistics</h2>
   <table class='qc_table'>
     <tbody>
@@ -1150,8 +1157,9 @@ assays because the mitochondrial genome is very open. A high mitochondrial
 fraction is an indication of poor libraries. Based on prior experience, a
 final read fraction above 0.70 is a good library.
   </pre>
+{% endif %}
 
-
+{% if 'encode_lib_complexity' in sample %}
   <h2>Library complexity statistics</h2>
   <h3>ENCODE library complexity metrics</h3>
   {{ qc_table(sample['encode_lib_complexity']) }}
@@ -1168,11 +1176,14 @@ the ratio of genomic locations with EXACTLY one read pair over the genomic
 locations with EXACTLY two read pairs. The PBC2 should be significantly
 greater than 1.
 </pre>
+{% endif %}
 
+{% if 'picard_est_library_size' in sample %}
   <h3>Picard EstimateLibraryComplexity</h3>
   {{ '{0:,}'.format(sample['picard_est_library_size']) }}
+{% endif %}
 
-
+{% if 'yield_prediction' in sample %}
   <h3>Yield prediction</h3>
   {% if sample['yield_prediction'] == 'Tm9uZQ==' %}
     {{ 'Preseq did not converge (or failed in some other way)'}}
@@ -1185,8 +1196,9 @@ number of distinct reads, and then extrapolating out to see where the
 expected number of distinct reads no longer increases. The confidence interval
 gives a gauge as to the validity of the yield predictions.
 </pre>
+{% endif %}
 
-
+{% if 'fraglen_dist' in sample and 'nucleosomal' in sample %}
   <h2>Fragment length statistics</h2>
   {{ inline_img(sample['fraglen_dist']) }}
   {{ qc_table(sample['nucleosomal']) }}
@@ -1198,9 +1210,15 @@ fragment lengths will arise. Good libraries will show these peaks in a
 fragment length distribution and will show specific peak ratios.
 </pre>
 
-  <h2>Peak statistics</h2>
-  {{ qc_table(sample['peak_counts']) }}
+{% endif %}
 
+  <h2>Peak statistics</h2>
+
+{% if 'peak_counts' in sample %}
+  {{ qc_table(sample['peak_counts']) }}
+{% endif %}
+
+{% if 'raw_peak_summ' in sample %}
   <h3>Raw peak file statistics</h3>
   <table class='qc_table'>
     <tbody>
@@ -1212,9 +1230,13 @@ fragment length distribution and will show specific peak ratios.
       {% endfor %}
     </tbody>
   </table>
+{% endif %}
 
+{% if 'raw_peak_dist' in sample %}
   {{ inline_img(sample['raw_peak_dist']) }}
+{% endif %}
 
+{% if 'naive_peak_summ' in sample %}
   <h3>Naive overlap peak file statistics</h3>
 
   <table class='qc_table'>
@@ -1227,9 +1249,13 @@ fragment length distribution and will show specific peak ratios.
       {% endfor %}
     </tbody>
   </table>
+{% endif %}
 
+{% if 'naive_peak_dist' in sample %}
   {{ inline_img(sample['naive_peak_dist']) }}
+{% endif %}
 
+{% if 'idr_peak_summ' in sample %}
   <h3>IDR peak file statistics</h3>
 
   <table class='qc_table'>
@@ -1242,15 +1268,19 @@ fragment length distribution and will show specific peak ratios.
       {% endfor %}
     </tbody>
   </table>
+{% endif %}
 
+{% if 'idr_peak_dist' in sample %}
   {{ inline_img(sample['idr_peak_dist']) }}
 
 <pre>
 For a good ATAC-seq experiment in human, you expect to get 100k-200k peaks
 for a specific cell type.
 </pre>
+{% endif %}
 
 
+{% if 'gc_bias' in sample %}
   <h2>Sequence quality metrics</h2>
   <h3>GC bias</h3>
   {{ inline_img(sample['gc_bias']) }}
@@ -1258,10 +1288,13 @@ for a specific cell type.
 Open chromatin assays are known to have significant GC bias. Please take this
 into consideration as necessary.
 </pre>
+{% endif %}
 
-
+{% if 'enrichment_plots' in sample or 'annot_enrichments' in sample %}
   <h2>Annotation-based quality metrics</h2>
+{% endif %}
 
+{% if 'enrichment_plots' in sample %}
   <h3>Enrichment plots (TSS)</h3>
   {{ inline_img(sample['enrichment_plots']['tss']) }}
   <pre>
@@ -1269,7 +1302,9 @@ Open chromatin assays should show enrichment in open chromatin sites, such as
 TSS's. An average TSS enrichment is above 6-7. A strong TSS enrichment is
 above 10.
   </pre>
+{% endif %}
 
+{% if 'annot_enrichments' in sample %}
   <h3>Annotated genomic region enrichments</h3>
   <table class='qc_table'>
     <tbody>
@@ -1291,8 +1326,9 @@ fall into the promoter regions. A high set (though not all) should fall into
 the enhancer regions. The promoter regions should not take up all reads, as
 it is known that there is a bias for promoters in open chromatin assays.
 </pre>
+{% endif %}
 
-
+{% if 'roadmap_plot' in sample %}
   <h2>Comparison to Roadmap DNase</h2>
   {{ inline_img(sample['roadmap_plot']) }}
 <pre>
@@ -1301,6 +1337,7 @@ your sample, when the signal in the universal DNase peak region sets are
 compared. The closer the sample is in signal distribution in the regions
 to your sample, the higher the correlation.
 </pre>
+{% endif %}
 
 
 </body>

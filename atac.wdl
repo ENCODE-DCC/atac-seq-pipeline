@@ -569,10 +569,13 @@ workflow atac {
 	}
 
 	# ATAQC is available only when pipeline starts from fastqs, take fastqs[] as base array for ataqc
-	Array[Array[Array[File]]] fastqs_ataqc = 
-		if basename(tss_enrich)=='null' || disable_ataqc || align_only || true_rep_only then [] else fastqs_
+	Int num_rep = if length(fastqs_)>0 then length(fastqs_)
+		else if length(bams_)>0 then length(bams_)
+		else if length(tas_)>0 then length(tas_)
+		else if length(peaks_pr1)>0 then length(peaks_pr1)
+		else 0
 
-	scatter( i in range(length(fastqs_ataqc)) ) {
+	scatter( i in range(num_rep) ) {
 		call ataqc { input : 
 			paired_end = paired_end,
 			read_len_log = bowtie2.read_len_log[i],
@@ -1058,31 +1061,31 @@ task reproducibility {
 
 task ataqc { # generate ATAQC report
 	Boolean paired_end
-	File read_len_log
-	File flagstat_log
-	File bowtie2_log
-	File bam
-	File nodup_flagstat_log
-	File mito_dup_log
-	File dup_log
-	File pbc_log
-	File nodup_bam
-	File ta
+	File? read_len_log
+	File? flagstat_log
+	File? bowtie2_log
+	File? bam
+	File? nodup_flagstat_log
+	File? mito_dup_log
+	File? dup_log
+	File? pbc_log
+	File? nodup_bam
+	File? ta
 	File? peak
 	File? idr_peak 
 	File? overlap_peak
-	File bigwig
+	File? bigwig
 	# from genome database
-	File ref_fa
-	File chrsz
-	File tss_enrich
-	File blacklist
-	File dnase
-	File prom
-	File enh
-	File reg2map_bed
-	File reg2map
-	File roadmap_meta
+	File? ref_fa
+	File? chrsz
+	File? tss_enrich
+	File? blacklist
+	File? dnase
+	File? prom
+	File? enh
+	File? reg2map_bed
+	File? reg2map
+	File? roadmap_meta
 
 	Int mem_mb
 	Int mem_java_mb
@@ -1094,30 +1097,31 @@ task ataqc { # generate ATAQC report
 
 		python $(which encode_ataqc.py) \
 			${if paired_end then "--paired-end" else ""} \
-			--read-len-log ${read_len_log} \
-			--flagstat-log ${flagstat_log} \
-			--bowtie2-log ${bowtie2_log} \
-			--bam ${bam} \
-			--nodup-flagstat-log ${nodup_flagstat_log} \
-			--mito-dup-log ${mito_dup_log} \
-			--dup-log ${dup_log} \
-			--pbc-log ${pbc_log} \
-			--nodup-bam ${nodup_bam} \
-			--ta ${ta} \
-			--bigwig ${bigwig} \
+			${"--read-len-log " + read_len_log} \
+			${"--flagstat-log " + flagstat_log} \
+			${"--bowtie2-log " + bowtie2_log} \
+			${"--bam " + bam} \
+			${"--nodup-flagstat-log " + nodup_flagstat_log} \
+			${"--mito-dup-log " + mito_dup_log} \
+			${"--dup-log " + dup_log} \
+			${"--pbc-log " + pbc_log} \
+			${"--nodup-bam " + nodup_bam} \
+			${"--ta " + ta} \
+			${"--bigwig " + bigwig} \
 			${"--peak " + peak} \
 			${"--idr-peak " + idr_peak} \
 			${"--overlap-peak " + overlap_peak} \
-			--ref-fa ${ref_fa} \
-			--blacklist ${blacklist} \
-			--chrsz ${chrsz} \
-			--dnase ${dnase} \
-			--tss-enrich ${tss_enrich} \
-			--prom ${prom} \
-			--enh ${enh} \
-			--reg2map-bed ${reg2map_bed} \
-			--reg2map ${reg2map} \
-			--roadmap-meta ${roadmap_meta}
+			${"--ref-fa " + ref_fa} \
+			${"--blacklist " + blacklist} \
+			${"--chrsz " + chrsz} \
+			${"--dnase " + dnase} \
+			${"--tss-enrich " + tss_enrich} \
+			${"--prom " + prom} \
+			${"--enh " + enh} \
+			${"--reg2map-bed " + reg2map_bed} \
+			${"--reg2map " + reg2map} \
+			${"--roadmap-meta " + roadmap_meta}
+
 	}
 	output {
 		File html = glob("*_qc.html")[0]
