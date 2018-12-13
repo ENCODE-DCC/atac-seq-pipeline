@@ -1045,7 +1045,7 @@ task reproducibility {
 		File optimal_peak_bb = glob("optimal_peak.*.bb")[0]
 		File conservative_peak_bb = glob("conservative_peak.*.bb")[0]
 		Array[File] optimal_peak_hammock = glob("optimal_peak.*.hammock.gz*")
-		Array[File] conservative_peak_hammock = glob("conservative_peak.*.hammock_gz*")
+		Array[File] conservative_peak_hammock = glob("conservative_peak.*.hammock.gz*")
 		File reproducibility_qc = glob("*reproducibility.qc")[0]
 	}
 	runtime {
