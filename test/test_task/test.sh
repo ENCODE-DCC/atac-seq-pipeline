@@ -23,6 +23,7 @@ fi
 CROMWELL_JAR=cromwell-34.jar
 BACKEND_CONF=../../backends/backend.conf
 BACKEND=Local
+EXTRA_PARAM="-Dbackend.providers.Local.config.concurrent-job-limit=2"
 PREFIX=$(basename ${WDL} .wdl)
 METADATA=${PREFIX}.metadata.json # metadata
 RESULT=${PREFIX}.result.json # output
@@ -41,7 +42,7 @@ if [ $DOCKER_IMAGE == 'conda' ]; then
 else
   WF_OPT="-o ${TMP_WF_OPT}"
 fi
-java -Dconfig.file=${BACKEND_CONF} -Dbackend.default=${BACKEND} -jar ${CROMWELL_JAR} run ${WDL} -i ${INPUT} ${WF_OPT} -m ${METADATA}
+java -Dconfig.file=${BACKEND_CONF} -Dbackend.default=${BACKEND} ${EXTRA_PARAM} -jar ${CROMWELL_JAR} run ${WDL} -i ${INPUT} ${WF_OPT} -m ${METADATA}
 
 # parse output metadata json
 cat ${METADATA} | python -c "import json,sys;obj=json.load(sys.stdin);print(obj['outputs']['${PREFIX}.compare_md5sum.json_str'])" > ${RESULT}
