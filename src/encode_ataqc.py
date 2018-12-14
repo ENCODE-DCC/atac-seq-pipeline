@@ -312,13 +312,13 @@ def ataqc():
         ])
         SAMPLE['summary_stats'] = SUMMARY_STATS
 
-    if read_tracker_plot:
+    if read_tracker_plot!=None:
         SAMPLE['read_tracker'] = read_tracker_plot
 
     # Alignment statistics
-    if BOWTIE_STATS:
+    if BOWTIE_STATS!=None:
         SAMPLE['bowtie_stats'] = BOWTIE_STATS
-    if flagstat: 
+    if flagstat!=None:
         SAMPLE['samtools_flagstat'] = flagstat
 
     # Filtering statistics
@@ -337,46 +337,46 @@ def ataqc():
         SAMPLE['filtering_stats'] = FILTERING_STATS
 
     # Library complexity statistics
-    if encode_lib_metrics:
+    if encode_lib_metrics!=None:
         SAMPLE['encode_lib_complexity'] = encode_lib_metrics
-    if picard_est_library_size:
+    if picard_est_library_size!=None:
         SAMPLE['picard_est_library_size'] = picard_est_library_size
-    if preseq_data:
+    if preseq_data!=None:
         SAMPLE['yield_prediction'] = preseq_plot(preseq_data)
 
     # Fragment length statistics
-    if insert_data:
+    if insert_data!=None:
         SAMPLE['fraglen_dist'] = fragment_length_plot(insert_data)
-    if nucleosomal_qc:
+    if nucleosomal_qc!=None:
         SAMPLE['nucleosomal'] = nucleosomal_qc
 
     # Peak metrics
-    if peak_counts:
+    if peak_counts!=None:
         SAMPLE['peak_counts'] = peak_counts
-    if raw_peak_summ:
+    if raw_peak_summ!=None:
         SAMPLE['raw_peak_summ'] = raw_peak_summ
-    if naive_peak_summ:
+    if naive_peak_summ!=None:
         SAMPLE['naive_peak_summ'] = naive_peak_summ
-    if idr_peak_summ:
+    if idr_peak_summ!=None:
         SAMPLE['idr_peak_summ'] = idr_peak_summ
-    if raw_peak_dist:
+    if raw_peak_dist!=None:
         SAMPLE['raw_peak_dist'] = raw_peak_dist
-    if naive_peak_dist:
+    if naive_peak_dist!=None:
         SAMPLE['naive_peak_dist'] = naive_peak_dist
-    if idr_peak_dist:
+    if idr_peak_dist!=None:
         SAMPLE['idr_peak_dist'] = idr_peak_dist
 
     # GC
-    if gc_out:
+    if gc_out!=None:
         SAMPLE['gc_bias'] = plot_gc(gc_out)
 
     # Annotation based statistics
-    if tss_plot_large_file:
+    if tss_plot_large_file!=None:
         ENRICHMENT_PLOTS = {
             'tss': b64encode(open(tss_plot_large_file, 'rb').read())
         }
         SAMPLE['enrichment_plots'] = ENRICHMENT_PLOTS
-    if tss_point_val:
+    if tss_point_val!=None:
         SAMPLE['TSS_enrichment'] = tss_point_val
     if reads_dnase and fract_dnase and reads_blacklist and fract_blacklist \
         and reads_prom and fract_prom and reads_enh and fract_enh \
@@ -394,7 +394,7 @@ def ataqc():
         SAMPLE['annot_enrichments'] = ANNOT_ENRICHMENTS
 
     # Roadmap plot
-    if roadmap_compare_plot:
+    if roadmap_compare_plot!=None:
         SAMPLE['roadmap_plot'] = roadmap_compare_plot
 
     results = open('{0}_qc.html'.format(OUTPUT_PREFIX), 'w')
