@@ -17,7 +17,7 @@ fi
 if [ $# -gt 3 ]; then
   NUM_TASK=$4
 else
-  NUM_TASK=4
+  NUM_TASK=1
 fi
 
 if [ -f "cromwell-34.jar" ]; then
