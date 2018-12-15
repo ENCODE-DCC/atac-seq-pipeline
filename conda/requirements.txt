@@ -54,3 +54,4 @@ pybedtools==0.6.9 # same issue as in pysam
 cromwell==0.34
 phantompeakqualtools ==1.2
 tabix==0.2.6
+openssl==1.0.2p

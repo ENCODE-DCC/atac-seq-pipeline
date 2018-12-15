@@ -15,35 +15,35 @@ All test samples and genome data are shared on our public Google Cloud buckets. 
     * Genomics API
 
 7. Install [Google Cloud Platform SDK](https://cloud.google.com/sdk/downloads) and authenticate through it. You will be asked to enter verification keys. Get keys from the URLs they provide.
-    ```
+    ```bash
       $ gcloud auth login --no-launch-browser
       $ gcloud auth application-default login --no-launch-browser
     ```
 
 8. If you see permission errors at runtime, then unset environment variable `GOOGLE_APPLICATION_CREDENTIALS` or add it to your BASH startup scripts (`$HOME/.bashrc` or `$HOME/.bash_profile`).
-    ```
+    ```bash
       unset GOOGLE_APPLICATION_CREDENTIALS
     ```
 
 7. Set your default Google Cloud Project. Pipeline will provision instances on this project.
-    ```
+    ```bash
       $ gcloud config set project [YOUR_PROJECT_NAME]
     ```
 
 8. Git clone this pipeline and move into it.
-    ```
+    ```bash
       $ git clone https://github.com/ENCODE-DCC/atac-seq-pipeline
       $ cd atac-seq-pipeline
     ```
 
 9. Download [cromwell](https://github.com/broadinstitute/cromwell).
-    ```
+    ```bash
       $ wget https://github.com/broadinstitute/cromwell/releases/download/34/cromwell-34.jar
       $ chmod +rx cromwell-34.jar
     ```
 
 10. Run a pipeline for a SUBSAMPLED (1/400) paired-end sample of [ENCSR356KRQ](https://www.encodeproject.org/experiments/ENCSR356KRQ/).
-    ```
+    ```bash
       $ PROJECT=[YOUR_PROJECT_NAME]
       $ BUCKET=gs://[YOUR_BUCKET_NAME]/ENCSR356KRQ_subsampled
       $ INPUT=examples/google/ENCSR356KRQ_subsampled.json
@@ -65,7 +65,7 @@ All test samples and genome data are shared on our public Google Cloud buckets. 
     * Networks
 
 2. Set `default_runtime_attributes.zones` in `workflow_opts/docker.json` as your preferred Google Cloud zone.
-    ```
+    ```javascript
       {
         "default_runtime_attributes" : {
           ...
@@ -75,7 +75,7 @@ All test samples and genome data are shared on our public Google Cloud buckets. 
     ```
 
 3. Set `default_runtime_attributes.preemptible` as `"0"` to disable preemptible instances. This value means a number of retrial for failures in a preemtible instance. Pipeline defaults not to use [preemptible instances](https://cloud.google.com/compute/docs/instances/preemptible). If all retrial fails then the instance will be upgraded to a regular one. **Disabling preemtible instances will cost you significantly more** but you can get your samples processed much faster and stabler. Preemptible instance is disabled by default. Some hard tasks like `bowtie2`, `bwa` and `spp` will not be executed on preemtible instances since they can take longer than the limit (24 hours) of preemptible instances.
-    ```
+    ```javascript
       {
         "default_runtime_attributes" : {
           ...

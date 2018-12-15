@@ -2,9 +2,9 @@ Dev
 ===
 
 ## Command line for version change
-```
-PREV_VER=v1.1.2
-NEW_VER=v1.1.3
+```bash
+PREV_VER=v1.1.3
+NEW_VER=v1.1.4
 for f in $(grep -rl ${PREV_VER} --include=*.{json,md,sh,yml})
 do
   sed -i "s/${PREV_VER}/${NEW_VER}/g" ${f}
@@ -13,13 +13,13 @@ done
 
 ## Building templates on DX for each genome
 
-Make sure that you have [`dxWDL-0.77.jar`](https://github.com/dnanexus/dxWDL/releases/download/0.77/dxWDL-0.77.jar) on your `$HOME`. Install [DNANexus Platform SDK](https://wiki.dnanexus.com/downloads) with `pip install dxpy`. Log-in on DNANexus with `dx login` and choose "ENCODE Uniform Processing Pipelines" (name of our official DNANexus project for pipelines).
+Make sure that you have [`dxWDL-0.77.jar`](https://github.com/DNAnexus/dxWDL/releases/download/0.77/dxWDL-0.77.jar) on your `$HOME`. Install [DNAnexus Platform SDK](https://wiki.DNAnexus.com/downloads) with `pip install dxpy`. Log-in on DNAnexus with `dx login` and choose "ENCODE Uniform Processing Pipelines" (name of our official DNAnexus project for pipelines).
 
 Run the following command line locally to build out DX workflows for this pipeline on our official one. This will overwrite (`-f` parameter does it).
 
-```
+```bash
 # version
-VER=v1.1.3
+VER=v1.1.4
 
 # general
 java -jar ~/dxWDL-0.77.jar compile atac.wdl -project "ENCODE Uniform Processing Pipelines" -extras workflow_opts/docker.json -f -folder /ATAC-seq/workflows/$VER/general -defaults examples/dx/template_general.json
@@ -38,12 +38,8 @@ java -jar ~/dxWDL-0.77.jar compile atac.wdl -project "ENCODE Uniform Processing 
 
 # test sample
 java -jar ~/dxWDL-0.77.jar compile atac.wdl -project "ENCODE Uniform Processing Pipelines" -extras workflow_opts/docker.json -f -folder /ATAC-seq/workflows/$VER/test_ENCSR356KRQ_subsampled -defaults examples/dx/ENCSR356KRQ_subsampled_dx.json
-```
 
 ## DX Azure
-```
-# version
-VER=v1.1.3
 
 # general
 java -jar ~/dxWDL-0.77.jar compile atac.wdl -project "ENCODE Uniform Processing Pipelines Azure" -extras workflow_opts/docker.json -f -folder /ATAC-seq/workflows/$VER/general -defaults examples/dx_azure/template_general.json

@@ -11,7 +11,7 @@ fi
 if [ $# -gt 1 ]; then
   DOCKER_IMAGE=$2
 else
-  DOCKER_IMAGE=quay.io/encode-dcc/atac-seq-pipeline:v1.1.3
+  DOCKER_IMAGE=quay.io/encode-dcc/atac-seq-pipeline:v1.1.4
 fi
 INPUT=$1
 PREFIX=$(basename $INPUT .json)

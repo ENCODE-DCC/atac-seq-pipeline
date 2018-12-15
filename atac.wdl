@@ -569,10 +569,13 @@ workflow atac {
 	}
 
 	# ATAQC is available only when pipeline starts from fastqs, take fastqs[] as base array for ataqc
-	Array[Array[Array[File]]] fastqs_ataqc = 
-		if basename(tss_enrich)=='null' || disable_ataqc || align_only || true_rep_only then [] else fastqs_
+	Int num_rep = if length(fastqs_)>0 then length(fastqs_)
+		else if length(bams_)>0 then length(bams_)
+		else if length(tas_)>0 then length(tas_)
+		else if length(peaks_pr1)>0 then length(peaks_pr1)
+		else 0
 
-	scatter( i in range(length(fastqs_ataqc)) ) {
+	scatter( i in range(num_rep) ) {
 		call ataqc { input : 
 			paired_end = paired_end,
 			read_len_log = bowtie2.read_len_log[i],
@@ -750,6 +753,8 @@ task filter {
 	String disks
 
 	command {
+		${if no_dup_removal then "touch null.dup.qc null.pbc.qc null.mito_dup.txt; " else ""}
+		touch null
 		python $(which encode_filter.py) \
 			${bam} \
 			${if paired_end then "--paired-end" else ""} \
@@ -758,9 +763,6 @@ task filter {
 			${"--mapq-thresh " + mapq_thresh} \
 			${if no_dup_removal then "--no-dup-removal" else ""} \
 			${"--nth " + cpu}
-		# ugly part to deal with optional outputs with Google JES backend
-		${if no_dup_removal then "touch null.dup.qc null.pbc.qc null.mito_dup.txt; " else ""}
-		touch null
 	}
 	output {
 		File nodup_bam = glob("*.bam")[0]
@@ -902,6 +904,9 @@ task macs2 {
 	String disks
 
 	command {
+		${if make_signal then "" 
+			else "touch null.pval.signal.bigwig null.fc.signal.bigwig"}
+		touch null 
 		python $(which encode_macs2_atac.py) \
 			${ta} \
 			${"--gensz "+ gensz} \
@@ -912,11 +917,6 @@ task macs2 {
 			${if make_signal then "--make-signal" else ""} \
 			${if keep_irregular_chr_in_bfilt_peak then "--keep-irregular-chr" else ""} \
 			${"--blacklist "+ blacklist}
-		
-		# ugly part to deal with optional outputs with Google JES backend
-		${if make_signal then "" 
-			else "touch null.pval.signal.bigwig null.fc.signal.bigwig"}
-		touch null 
 	}
 	output {
 		File npeak = glob("*[!.][!b][!f][!i][!l][!t].narrowPeak.gz")[0]
@@ -950,6 +950,8 @@ task idr {
 	String rank
 
 	command {
+		${if defined(ta) then "" else "touch null.frip.qc"}
+		touch null 
 		python $(which encode_idr.py) \
 			${peak1} ${peak2} ${peak_pooled} \
 			${"--prefix " + prefix} \
@@ -960,10 +962,6 @@ task idr {
 			${"--blacklist "+ blacklist} \
 			${if keep_irregular_chr_in_bfilt_peak then "--keep-irregular-chr" else ""} \
 			${"--ta " + ta}
-
-		# ugly part to deal with optional outputs with Google backend
-		${if defined(ta) then "" else "touch null.frip.qc"}
-		touch null 
 	}
 	output {
 		File idr_peak = glob("*[!.][!b][!f][!i][!l][!t]."+peak_type+".gz")[0]
@@ -995,6 +993,8 @@ task overlap {
 	String peak_type
 
 	command {
+		${if defined(ta) then "" else "touch null.frip.qc"}
+		touch null 
 		python $(which encode_naive_overlap.py) \
 			${peak1} ${peak2} ${peak_pooled} \
 			${"--prefix " + prefix} \
@@ -1004,10 +1004,6 @@ task overlap {
 			--nonamecheck \
 			${if keep_irregular_chr_in_bfilt_peak then "--keep-irregular-chr" else ""} \
 			${"--ta " + ta}
-
-		# ugly part to deal with optional outputs with Google backend
-		${if defined(ta) then "" else "touch null.frip.qc"}
-		touch null 
 	}
 	output {
 		File overlap_peak = glob("*[!.][!b][!f][!i][!l][!t]."+peak_type+".gz")[0]
@@ -1052,7 +1048,7 @@ task reproducibility {
 		File optimal_peak_bb = glob("optimal_peak.*.bb")[0]
 		File conservative_peak_bb = glob("conservative_peak.*.bb")[0]
 		Array[File] optimal_peak_hammock = glob("optimal_peak.*.hammock.gz*")
-		Array[File] conservative_peak_hammock = glob("conservative_peak.*.hammock_gz*")
+		Array[File] conservative_peak_hammock = glob("conservative_peak.*.hammock.gz*")
 		File reproducibility_qc = glob("*reproducibility.qc")[0]
 	}
 	runtime {
@@ -1065,31 +1061,31 @@ task reproducibility {
 
 task ataqc { # generate ATAQC report
 	Boolean paired_end
-	File read_len_log
-	File flagstat_log
-	File bowtie2_log
-	File bam
-	File nodup_flagstat_log
-	File mito_dup_log
-	File dup_log
-	File pbc_log
-	File nodup_bam
-	File ta
+	File? read_len_log
+	File? flagstat_log
+	File? bowtie2_log
+	File? bam
+	File? nodup_flagstat_log
+	File? mito_dup_log
+	File? dup_log
+	File? pbc_log
+	File? nodup_bam
+	File? ta
 	File? peak
 	File? idr_peak 
 	File? overlap_peak
-	File bigwig
+	File? bigwig
 	# from genome database
-	File ref_fa
-	File chrsz
-	File tss_enrich
-	File blacklist
-	File dnase
-	File prom
-	File enh
-	File reg2map_bed
-	File reg2map
-	File roadmap_meta
+	File? ref_fa
+	File? chrsz
+	File? tss_enrich
+	File? blacklist
+	File? dnase
+	File? prom
+	File? enh
+	File? reg2map_bed
+	File? reg2map
+	File? roadmap_meta
 
 	Int mem_mb
 	Int mem_java_mb
@@ -1101,30 +1097,31 @@ task ataqc { # generate ATAQC report
 
 		python $(which encode_ataqc.py) \
 			${if paired_end then "--paired-end" else ""} \
-			--read-len-log ${read_len_log} \
-			--flagstat-log ${flagstat_log} \
-			--bowtie2-log ${bowtie2_log} \
-			--bam ${bam} \
-			--nodup-flagstat-log ${nodup_flagstat_log} \
-			--mito-dup-log ${mito_dup_log} \
-			--dup-log ${dup_log} \
-			--pbc-log ${pbc_log} \
-			--nodup-bam ${nodup_bam} \
-			--ta ${ta} \
-			--bigwig ${bigwig} \
+			${"--read-len-log " + read_len_log} \
+			${"--flagstat-log " + flagstat_log} \
+			${"--bowtie2-log " + bowtie2_log} \
+			${"--bam " + bam} \
+			${"--nodup-flagstat-log " + nodup_flagstat_log} \
+			${"--mito-dup-log " + mito_dup_log} \
+			${"--dup-log " + dup_log} \
+			${"--pbc-log " + pbc_log} \
+			${"--nodup-bam " + nodup_bam} \
+			${"--ta " + ta} \
+			${"--bigwig " + bigwig} \
 			${"--peak " + peak} \
 			${"--idr-peak " + idr_peak} \
 			${"--overlap-peak " + overlap_peak} \
-			--ref-fa ${ref_fa} \
-			--blacklist ${blacklist} \
-			--chrsz ${chrsz} \
-			--dnase ${dnase} \
-			--tss-enrich ${tss_enrich} \
-			--prom ${prom} \
-			--enh ${enh} \
-			--reg2map-bed ${reg2map_bed} \
-			--reg2map ${reg2map} \
-			--roadmap-meta ${roadmap_meta}
+			${"--ref-fa " + ref_fa} \
+			${"--blacklist " + blacklist} \
+			${"--chrsz " + chrsz} \
+			${"--dnase " + dnase} \
+			${"--tss-enrich " + tss_enrich} \
+			${"--prom " + prom} \
+			${"--enh " + enh} \
+			${"--reg2map-bed " + reg2map_bed} \
+			${"--reg2map " + reg2map} \
+			${"--roadmap-meta " + roadmap_meta}
+
 	}
 	output {
 		File html = glob("*_qc.html")[0]

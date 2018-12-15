@@ -134,8 +134,9 @@ def subsample_ta_se(ta, subsample, non_mito, out_dir):
         os.path.basename(strip_ext_ta(ta)))
     ta_subsampled = '{}.{}{}.tagAlign.gz'.format(
         prefix,
-        'no_chrM.' if non_mito else '',
-        human_readable_number(subsample))
+        'no_chrM' if non_mito else '',
+        '.{}'.format(human_readable_number(subsample)) if subsample>0 else ''
+        )
 
     # use bash
     cmd = 'bash -c "zcat -f {} | '
@@ -164,8 +165,9 @@ def subsample_ta_pe(ta, subsample, non_mito, r1_only, out_dir):
     ta_subsampled = '{}.{}{}{}.tagAlign.gz'.format(
         prefix,
         'no_chrM.' if non_mito else '',
-        'R1.' if r1_only else '',
-        human_readable_number(subsample))
+        'R1' if r1_only else '',
+        '.{}'.format(human_readable_number(subsample)) if subsample>0 else ''
+        )
     ta_tmp = '{}.tagAlign.tmp'.format(prefix)
 
     cmd0 = 'bash -c "zcat -f {} | '
@@ -220,7 +222,7 @@ def peak_to_hammock(peak, out_dir):
         run_shell_cmd(cmd)
         cmd2 = 'touch {}'.format(hammock_gz_tbi)
     else:
-        cmd = "LC_COLLATE=C && zcat -f {} | sed '/^\(chr\)/!d' | sort -k1,1V -k2,2n > {}"
+        cmd = "zcat -f {} | sed '/^\(chr\)/!d' | LC_COLLATE=C sort -k1,1V -k2,2n > {}"
         cmd = cmd.format(peak, hammock_tmp)
         run_shell_cmd(cmd)
 
@@ -346,7 +348,9 @@ def peak_to_bigbed(peak, peak_type, chrsz, keep_irregular_chr, out_dir):
     else:
         cmd1 = "cat {} > {}".format(chrsz, chrsz_tmp)
     run_shell_cmd(cmd1)
-    cmd2 = "LC_COLLATE=C && zcat -f {} | sort -k1,1 -k2,2n > {}".format(peak, bigbed_tmp)
+    cmd2 = "zcat -f {} | LC_COLLATE=C sort -k1,1 -k2,2n | "
+    cmd2 += 'awk \'BEGIN{{OFS="\\t"}} {{if ($5>1000) $5=1000; if ($5<0) $5=0; print $0}}\' > {}'
+    cmd2 = cmd2.format(peak, bigbed_tmp)
     run_shell_cmd(cmd2)
     cmd3 = "bedClip {} {} {}".format(bigbed_tmp, chrsz_tmp, bigbed_tmp2)
     run_shell_cmd(cmd3)

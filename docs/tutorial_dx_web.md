@@ -1,23 +1,23 @@
-Tutorial for DNANexus Platform (web)
+Tutorial for DNAnexus Platform (web)
 ====================================
 
-All test samples and genome data are shared on our public DNANexus project. You don't have to download any data for testing our pipeline on DNANexus platform.
+All test samples and genome data are shared on our public DNAnexus project. You don't have to download any data for testing our pipeline on DNAnexus platform.
 
-There are two methods to run our pipeline on DNANexus.
+There are two methods to run our pipeline on DNAnexus.
 
 1) [Building your own DX workflow from `atac.wdl` with dxWDL (CLI)](tutorial_dx_cli.md)
 2) Using a pre-built DX workflow on our public DX project (Web UI)
 
 This document describes instruction for the item 2).
 
-1. Sign up for a [DNANexus account](https://platform.dnanexus.com/register).
+1. Sign up for a [DNAnexus account](https://platform.DNAnexus.com/register).
 
-2. Create a new [DX project](https://platform.dnanexus.com/projects) by clicking on "+New Project" on the top left.
+2. Create a new [DX project](https://platform.DNAnexus.com/projects) by clicking on "+New Project" on the top left.
 
 3. Move to one of the following workflow directories according to the platform you have chosen for your project (AWS or Azure). These DX workflows are pre-built with all parameters defined.
 
-* [AWS test workflow](https://platform.dnanexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/ATAC-seq/workflows/v1.1.3/test_ENCSR356KRQ_subsampled)
-* [Azure test workflow](https://platform.dnanexus.com/projects/F6K911Q9xyfgJ36JFzv03Z5J/data/ATAC-seq/workflows/v1.1.3/test_ENCSR356KRQ_subsampled)
+* [AWS test workflow](https://platform.DNAnexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/ATAC-seq/workflows/v1.1.4/test_ENCSR356KRQ_subsampled)
+* [Azure test workflow](https://platform.DNAnexus.com/projects/F6K911Q9xyfgJ36JFzv03Z5J/data/ATAC-seq/workflows/v1.1.4/test_ENCSR356KRQ_subsampled)
 
 4. Copy it to your project by right-clicking on the DX workflow `atac` and choose "Copy". 
 
@@ -38,19 +38,19 @@ This document describes instruction for the item 2).
 
 ## Extras for advanced users
 
-1. DNANexus allows only one copy of a workflow per project. The example workflow in the previous section is pre-built for the subsampled test sample [ENCSR356KRQ](https://www.encodeproject.org/experiments/ENCSR356KRQ/) with all parameters defined already.
+1. DNAnexus allows only one copy of a workflow per project. The example workflow in the previous section is pre-built for the subsampled test sample [ENCSR356KRQ](https://www.encodeproject.org/experiments/ENCSR356KRQ/) with all parameters defined already.
 
 2. Copy one of the following workflows according to the platform you have chosen for your project (AWS or Azure).
-* [AWS general](https://platform.dnanexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/ATAC-seq/workflows/v1.1.3/general) without pre-defined reference genome.
-* [AWS hg38](https://platform.dnanexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/ATAC-seq/workflows/v1.1.3/hg38) with pre-defined hg38 reference genome.
-* [AWS hg19](https://platform.dnanexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/ATAC-seq/workflows/v1.1.3/hg19) with pre-defined hg38 reference genome.
-* [AWS mm10](https://platform.dnanexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/ATAC-seq/workflows/v1.1.3/mm10) with pre-defined mm10 reference genome.
-* [AWS mm9](https://platform.dnanexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/ATAC-seq/workflows/v1.1.3/mm9) with pre-defined mm9 reference genome.
-* [Azure general](https://platform.dnanexus.com/projects/F6K911Q9xyfgJ36JFzv03Z5J/data/ATAC-seq/workflows/v1.1.3/general) without pre-defined reference genome.
-* [Azure hg38](https://platform.dnanexus.com/projects/F6K911Q9xyfgJ36JFzv03Z5J/data/ATAC-seq/workflows/v1.1.3/hg38) with pre-defined hg38 reference genome.
-* [Azure hg19](https://platform.dnanexus.com/projects/F6K911Q9xyfgJ36JFzv03Z5J/data/ATAC-seq/workflows/v1.1.3/hg19) with pre-defined hg38 reference genome.
-* [Azure mm10](https://platform.dnanexus.com/projects/F6K911Q9xyfgJ36JFzv03Z5J/data/ATAC-seq/workflows/v1.1.3/mm10) with pre-defined mm10 reference genome.
-* [Azure mm9](https://platform.dnanexus.com/projects/F6K911Q9xyfgJ36JFzv03Z5J/data/ATAC-seq/workflows/v1.1.3/mm9) with pre-defined mm9 reference genome.
+* [AWS general](https://platform.DNAnexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/ATAC-seq/workflows/v1.1.4/general) without pre-defined reference genome.
+* [AWS hg38](https://platform.DNAnexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/ATAC-seq/workflows/v1.1.4/hg38) with pre-defined hg38 reference genome.
+* [AWS hg19](https://platform.DNAnexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/ATAC-seq/workflows/v1.1.4/hg19) with pre-defined hg38 reference genome.
+* [AWS mm10](https://platform.DNAnexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/ATAC-seq/workflows/v1.1.4/mm10) with pre-defined mm10 reference genome.
+* [AWS mm9](https://platform.DNAnexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/ATAC-seq/workflows/v1.1.4/mm9) with pre-defined mm9 reference genome.
+* [Azure general](https://platform.DNAnexus.com/projects/F6K911Q9xyfgJ36JFzv03Z5J/data/ATAC-seq/workflows/v1.1.4/general) without pre-defined reference genome.
+* [Azure hg38](https://platform.DNAnexus.com/projects/F6K911Q9xyfgJ36JFzv03Z5J/data/ATAC-seq/workflows/v1.1.4/hg38) with pre-defined hg38 reference genome.
+* [Azure hg19](https://platform.DNAnexus.com/projects/F6K911Q9xyfgJ36JFzv03Z5J/data/ATAC-seq/workflows/v1.1.4/hg19) with pre-defined hg38 reference genome.
+* [Azure mm10](https://platform.DNAnexus.com/projects/F6K911Q9xyfgJ36JFzv03Z5J/data/ATAC-seq/workflows/v1.1.4/mm10) with pre-defined mm10 reference genome.
+* [Azure mm9](https://platform.DNAnexus.com/projects/F6K911Q9xyfgJ36JFzv03Z5J/data/ATAC-seq/workflows/v1.1.4/mm9) with pre-defined mm9 reference genome.
 
 3. Click on the DX workflow `atac`.
 
