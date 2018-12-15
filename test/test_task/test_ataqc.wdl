@@ -39,8 +39,8 @@ workflow test_ataqc {
 	File ref_qc_peak_only_txt
 	File ref_qc_tss_enrich_txt
 
-	Int ataqc_mem_mb = 8000
-	Int ataqc_mem_java_mb = 7000
+	Int ataqc_mem_mb = 7000
+	Int ataqc_mem_java_mb = 6000
 	Int ataqc_time_hr = 24
 	String ataqc_disks = "local-disk 100 HDD"
 

@@ -23,7 +23,7 @@ fi
 CROMWELL_JAR=cromwell-34.jar
 BACKEND_CONF=../../backends/backend.conf
 BACKEND=Local
-EXTRA_PARAM="-Dbackend.providers.Local.config.concurrent-job-limit=2"
+EXTRA_PARAM="-Dbackend.providers.Local.config.concurrent-job-limit=1"
 PREFIX=$(basename ${WDL} .wdl)
 METADATA=${PREFIX}.metadata.json # metadata
 RESULT=${PREFIX}.result.json # output
