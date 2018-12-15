@@ -13,7 +13,7 @@ done
 
 ## Building templates on DX for each genome
 
-Make sure that you have [`dxWDL-0.77.jar`](https://github.com/dnanexus/dxWDL/releases/download/0.77/dxWDL-0.77.jar) on your `$HOME`. Install [DNANexus Platform SDK](https://wiki.dnanexus.com/downloads) with `pip install dxpy`. Log-in on DNANexus with `dx login` and choose "ENCODE Uniform Processing Pipelines" (name of our official DNANexus project for pipelines).
+Make sure that you have [`dxWDL-0.77.jar`](https://github.com/DNAnexus/dxWDL/releases/download/0.77/dxWDL-0.77.jar) on your `$HOME`. Install [DNAnexus Platform SDK](https://wiki.DNAnexus.com/downloads) with `pip install dxpy`. Log-in on DNAnexus with `dx login` and choose "ENCODE Uniform Processing Pipelines" (name of our official DNAnexus project for pipelines).
 
 Run the following command line locally to build out DX workflows for this pipeline on our official one. This will overwrite (`-f` parameter does it).
 

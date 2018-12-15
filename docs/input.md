@@ -28,10 +28,10 @@ Let us take a close look at the following template JSON. Comments are not allowe
     //   Sherlock: /home/groups/cherry/encode/pipeline_genome_data/[GENOME]_sherlock.tsv
     //   SCG4: /reference/ENCODE/pipeline_genome_data/[GENOME]_scg.tsv
 
-    // Cloud platforms (Google Cloud, DNANexus): [GENOME]=hg38,hg19,mm10,mm9
+    // Cloud platforms (Google Cloud, DNAnexus): [GENOME]=hg38,hg19,mm10,mm9
     //   Google Cloud: gs://encode-pipeline-genome-data/[GENOME]_google.tsv
-    //   DNANexus: dx://project-BKpvFg00VBPV975PgJ6Q03v6:data/pipeline-genome-data/[GENOME]_dx.tsv
-    //   DNANexus(Azure): dx://project-F6K911Q9xyfgJ36JFzv03Z5J:data/pipeline-genome-data/[GENOME]_dx_azure.tsv
+    //   DNAnexus: dx://project-BKpvFg00VBPV975PgJ6Q03v6:data/pipeline-genome-data/[GENOME]_dx.tsv
+    //   DNAnexus(Azure): dx://project-F6K911Q9xyfgJ36JFzv03Z5J:data/pipeline-genome-data/[GENOME]_dx_azure.tsv
 
     // On other computers download or build reference genome database and pick a TSV from [DEST_DIR].
     //   Downloader: ./genome/download_genome_data.sh [GENOME] [DEST_DIR]
@@ -167,7 +167,7 @@ Let us take a close look at the following template JSON. Comments are not allowe
     // Therefore, total number of cores will be "atac.bowtie2_cpu" x [NUMBER_OF_REPLICATES]
     // because bowtie2 is a bottlenecking task of the pipeline.
     // Use this total number of cores if you manually qsub or sbatch your job (using local mode of our pipeline).
-    // "disks" is used for Google Cloud and DNANexus only.
+    // "disks" is used for Google Cloud and DNAnexus only.
 
     "atac.trim_adapter_cpu" : 2,
     "atac.trim_adapter_mem_mb" : 12000,
@@ -223,10 +223,10 @@ Choose one TSV file for `"atac.genome_tsv"` in your input JSON. `[GENOME]` shoul
 |platform|path/URI|
 |-|-|
 |Google Cloud Platform|`gs://encode-pipeline-genome-data/[GENOME]_google.tsv`|
-|DNANexus (CLI)|`dx://project-BKpvFg00VBPV975PgJ6Q03v6:data/pipeline-genome-data/[GENOME]_dx.tsv`|
-|DNANexus (CLI, Azure)|`dx://project-XXXXXXXXXXXXXX:data/pipeline-genome-data/[GENOME]_dx_azure.tsv`|
-|DNANExus (Web)|Choose `[GENOME]_dx.tsv` from [here](https://platform.dnanexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/pipeline-genome-data)|
-|DNANExus (Web, Azure)|Choose `[GENOME]_dx.tsv` from [here](https://platform.dnanexus.com/projects/XXXXXXXXXXXXXX/data/pipeline-genome-data)|
+|DNAnexus (CLI)|`dx://project-BKpvFg00VBPV975PgJ6Q03v6:data/pipeline-genome-data/[GENOME]_dx.tsv`|
+|DNAnexus (CLI, Azure)|`dx://project-XXXXXXXXXXXXXX:data/pipeline-genome-data/[GENOME]_dx_azure.tsv`|
+|DNAnexus (Web)|Choose `[GENOME]_dx.tsv` from [here](https://platform.DNAnexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/pipeline-genome-data)|
+|DNAnexus (Web, Azure)|Choose `[GENOME]_dx.tsv` from [here](https://platform.DNAnexus.com/projects/XXXXXXXXXXXXXX/data/pipeline-genome-data)|
 |Stanford Sherlock|`/home/groups/cherry/encode/pipeline_genome_data/[GENOME]_sherlock.tsv`|
 |Stanford SCG|`/reference/ENCODE/pipeline_genome_data/[GENOME]_scg.tsv`|
 |Local/SLURM/SGE/PBS|You need to [download](../genome/download_genome_data.sh) or [build a genome database](build_genome_database.md). |

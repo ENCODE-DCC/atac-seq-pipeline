@@ -5,7 +5,7 @@ All output filenames keep prefixes from corresponding input filenames. For examp
 
 Final HTML report (`qc.html`) and QC json (`qc.json`) files do not have any prefix.
 
-1. `DNANexus`: Output will be stored on the specified output directory without any subdirectories.
+1. `DNAnexus`: Output will be stored on the specified output directory without any subdirectories.
 
 2. `Cromwell`: `Cromwell` will store outputs for each task under `cromwell-executions/[WORKFLOW_ID]/call-[TASK_NAME]/shard-[IDX]`. For all tasks except two peak calling tasks `idr` (irreproducible discovery rate) and `overlap` (naive overlapping peaks), `[IDX]` means a zero-based index for each replicate. For two tasks `idr` and `overlap`, `[IDX]` stands for a zero-based index for all possible pair of replicates. For example, you have 3 replicates and all possible combination of two replicates are `[(rep1,rep2), (rep1,rep3), (rep2,rep3)]`. Therefore, `call-idr/shard-2` should be an output directory for the pair of replicate 2 and 3.
 

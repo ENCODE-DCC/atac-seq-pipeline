@@ -1,18 +1,18 @@
-Tutorial for DNANexus Platform (CLI)
+Tutorial for DNAnexus Platform (CLI)
 ====================================
 
-All test samples and genome data are shared on our public DNANexus project. You don't have to download any data for testing our pipeline on DNANexus platform.
+All test samples and genome data are shared on our public DNAnexus project. You don't have to download any data for testing our pipeline on DNAnexus platform.
 
-There are two methods to run our pipeline on DNANexus.
+There are two methods to run our pipeline on DNAnexus.
 
 1) Building your own DX workflow from `atac.wdl` with dxWDL (CLI)
 2) [Using a pre-built DX workflow on our public DX project (Web UI)](tutorial_dx_web.md)
 
 This document describes instruction for the item 1).
 
-1. Sign up for a [DNANexus account](https://platform.dnanexus.com/register).
+1. Sign up for a [DNAnexus account](https://platform.DNAnexus.com/register).
 
-2. Create a new [DX project](https://platform.dnanexus.com/projects) with name `[YOUR_PROJECT_NAME]` by clicking on "+New Project" on the top left.
+2. Create a new [DX project](https://platform.DNAnexus.com/projects) with name `[YOUR_PROJECT_NAME]` by clicking on "+New Project" on the top left.
 
 3. Git clone this pipeline.
     ```bash
@@ -26,7 +26,7 @@ This document describes instruction for the item 1).
 
 5. Download dxWDL.
     ```bash
-      $ wget https://github.com/dnanexus/dxWDL/releases/download/0.77/dxWDL-0.77.jar
+      $ wget https://github.com/DNAnexus/dxWDL/releases/download/0.77/dxWDL-0.77.jar
       $ chmod +rx dxWDL-0.77.jar
     ```
 
@@ -48,7 +48,7 @@ This document describes instruction for the item 1).
       $ java -jar dxWDL-0.77.jar compile atac.wdl -project ${PROJECT} -f -folder ${OUT_FOLDER} -defaults ${INPUT} -extras workflow_opts/docker.json
     ```
 
-8. Go to DNANexus [project page](https://platform.dnanexus.com/projects) and click on your project.
+8. Go to DNAnexus [project page](https://platform.DNAnexus.com/projects) and click on your project.
 
 9. Move to the directory `/test_sample_atac_ENCSR356KRQ_subsampled`.
 
