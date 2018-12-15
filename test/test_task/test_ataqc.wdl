@@ -80,30 +80,30 @@ workflow test_ataqc {
 
 	# test ataqc with limited input data
 	# with some alignment files 1
-	call atac.ataqc as ataqc_align_only_1 { input : 
-		paired_end = paired_end,
-		flagstat_log = flagstat_log,
-		pbc_log = pbc_log,
-		nodup_flagstat_log = nodup_flagstat_log,
-		nodup_bam = nodup_bam,
-		ta = ta,
-
-		ref_fa = ref_fa,
-		chrsz = chrsz,
-		tss_enrich = tss_enrich,
-		blacklist = blacklist,
-		dnase = dnase,
-		prom = prom,
-		enh = enh,
-		reg2map_bed = reg2map_bed,
-		reg2map = reg2map,
-		roadmap_meta = roadmap_meta,
-
-		mem_mb = ataqc_mem_mb,
-		mem_java_mb = ataqc_mem_java_mb,
-		time_hr = ataqc_time_hr,
-		disks = ataqc_disks,
-	}
+	#call atac.ataqc as ataqc_align_only_1 { input : 
+	#	paired_end = paired_end,
+	#	flagstat_log = flagstat_log,
+	#	pbc_log = pbc_log,
+	#	nodup_flagstat_log = nodup_flagstat_log,
+	#	nodup_bam = nodup_bam,
+	#	ta = ta,
+	#
+	#	ref_fa = ref_fa,
+	#	chrsz = chrsz,
+	#	tss_enrich = tss_enrich,
+	#	blacklist = blacklist,
+	#	dnase = dnase,
+	#	prom = prom,
+	#	enh = enh,
+	#	reg2map_bed = reg2map_bed,
+	#	reg2map = reg2map,
+	#	roadmap_meta = roadmap_meta,
+	#
+	#	mem_mb = ataqc_mem_mb,
+	#	mem_java_mb = ataqc_mem_java_mb,
+	#	time_hr = ataqc_time_hr,
+	#	disks = ataqc_disks,
+	#}
 	# with some alignment files 2
 	call atac.ataqc as ataqc_align_only_2 { input : 
 		paired_end = paired_end,
@@ -174,7 +174,7 @@ workflow test_ataqc {
 		labels = [
 			#'ataqc_html',
 			'ataqc_txt',
-			'ataqc_align_only_1_txt',
+			#'ataqc_align_only_1_txt',
 			'ataqc_align_only_2_txt',
 			'ataqc_align_peak_txt',
 			'ataqc_align_tss_enrich_txt',
@@ -182,7 +182,7 @@ workflow test_ataqc {
 		files = [
 			#ataqc.html,
 			ataqc.txt,
-			ataqc_align_only_1.txt,
+			#ataqc_align_only_1.txt,
 			ataqc_align_only_2.txt,
 			ataqc_peak_only.txt,
 			ataqc_tss_enrich.txt,
@@ -190,7 +190,7 @@ workflow test_ataqc {
 		ref_files = [
 			#ref_qc_html,
 			ref_qc_txt,
-			ref_qc_align_only_1_txt,
+			#ref_qc_align_only_1_txt,
 			ref_qc_align_only_2_txt,
 			ref_qc_peak_only_txt,
 			ref_qc_tss_enrich_txt,
