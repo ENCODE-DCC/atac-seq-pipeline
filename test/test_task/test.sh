@@ -2,7 +2,7 @@
 set -e # exit on error
 
 if [ $# -lt 2 ]; then
-  echo "Usage: ./test.sh [WDL] [INPUT_JSON] [DOCKER_IMAGE](optional)"
+  echo "Usage: ./test.sh [WDL] [INPUT_JSON] [DOCKER_IMAGE](optional) [NUM_TASK](optional)"
   echo "Make sure to have cromwell-31.jar in your \$PATH as an executable (chmod +x)."
   exit 1
 fi
@@ -14,6 +14,11 @@ if [ $# -gt 2 ]; then
 else
   DOCKER_IMAGE=quay.io/encode-dcc/atac-seq-pipeline:v1.1.4
 fi
+if [ $# -gt 3 ]; then
+  NUM_TASK=$4
+else
+  NUM_TASK=4
+fi
 
 if [ -f "cromwell-34.jar" ]; then
   echo "Skip downloading cromwell."
@@ -23,7 +28,7 @@ fi
 CROMWELL_JAR=cromwell-34.jar
 BACKEND_CONF=../../backends/backend.conf
 BACKEND=Local
-EXTRA_PARAM="-Dbackend.providers.Local.config.concurrent-job-limit=1"
+EXTRA_PARAM="-Dbackend.providers.Local.config.concurrent-job-limit=${NUM_TASK}"
 PREFIX=$(basename ${WDL} .wdl)
 METADATA=${PREFIX}.metadata.json # metadata
 RESULT=${PREFIX}.result.json # output
