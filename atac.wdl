@@ -2,6 +2,7 @@
 # Author: Jin Lee (leepc12@gmail.com)
 
 workflow atac {
+	String pipeline_ver = 'v1.1.5'
 	### sample name, description
 	String title = 'Untitled'
 	String description = 'No description'
@@ -568,8 +569,9 @@ workflow atac {
 		}
 	}
 
-	# ATAQC is available only when pipeline starts from fastqs, take fastqs[] as base array for ataqc
-	Int num_rep = if length(fastqs_)>0 then length(fastqs_)
+	# count number of replicates for ataqc	
+	Int num_rep = if disable_ataqc then 0
+		else if length(fastqs_)>0 then length(fastqs_)
 		else if length(bams_)>0 then length(bams_)
 		else if length(tas_)>0 then length(tas_)
 		else if length(peaks_pr1)>0 then length(peaks_pr1)
@@ -613,8 +615,10 @@ workflow atac {
 
 	# Generate final QC report and JSON		
 	call qc_report { input :
+		pipeline_ver = pipeline_ver,
 		title = title,
 		description = description,
+		genome = basename(genome_tsv),
 		multimapping = multimapping,
 		paired_end = paired_end,
 		pipeline_type = pipeline_type,
@@ -1140,8 +1144,10 @@ task ataqc { # generate ATAQC report
 # - qc.json		: all QCs
 task qc_report {
 	# optional metadata
+	String pipeline_ver
  	String title # name of sample
 	String description # description for sample
+	String? genome
 	#String? encode_accession_id	# ENCODE accession ID of sample
 	# workflow params
 	Int multimapping
@@ -1182,8 +1188,10 @@ task qc_report {
 
 	command {
 		python $(which encode_qc_report.py) \
-			${"--name '" + sub(title,"'","_") + "'"} \
+			${"--pipeline-ver " + pipeline_ver} \
+			${"--title '" + sub(title,"'","_") + "'"} \
 			${"--desc '" + sub(description,"'","_") + "'"} \
+			${"--genome " + genome} \
 			${"--multimapping " + multimapping} \
 			${if paired_end then "--paired-end" else ""} \
 			--pipeline-type ${pipeline_type} \
@@ -1219,7 +1227,9 @@ task qc_report {
 			--out-qc-html qc.html \
 			--out-qc-json qc.json
 		
-		diff qc.json ${if defined(qc_json_ref) then qc_json_ref else "/dev/null"} | wc -l > qc_json_match.txt
+		diff <(cat qc.json | grep -vE '\"pipeline_ver\"|\"date\"') \
+			<(cat ${if defined(qc_json_ref) then qc_json_ref else "/dev/null"} | grep -vE '\"pipeline_ver\"|\"date\"') \
+			| wc -l > qc_json_match.txt
 	}
 	output {
 		File report = glob('*qc.html')[0]
