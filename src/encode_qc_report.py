@@ -163,11 +163,15 @@ def parse_arguments():
                         help='Output QC report HTML file.')
     parser.add_argument('--out-qc-json', default='qc.json', type=str,
                         help='Output QC JSON file.')
+    parser.add_argument('--qc-json-ref', type=str,
+                        help='Reference QC JSON file to be compared to output QC JSON (developer\'s purpose only).')
     parser.add_argument('--log-level', default='INFO',
                         choices=['NOTSET','DEBUG','INFO',
                             'WARNING','CRITICAL','ERROR','CRITICAL'],
                         help='Log level')
     args = parser.parse_args()
+
+qc_json_ref_match
 
     log.setLevel(args.log_level)
     log.info(sys.argv)
@@ -546,6 +550,20 @@ def main():
     log.info('Write JSON file...')
     write_txt(args.out_qc_json, json.dumps(json_all_new_format, indent=4))
     # b = json.loads(a, object_pairs_hook=OrderedDict)
+
+    log.info('Comparing JSON file with reference...')
+    if args.qc_json_ref:
+        # exclude general section from comparing 
+        #  because it includes metadata like date, pipeline_ver, ...
+        # we just want to compare quality metric values only
+        json_all_new_format.pop("general")
+        with open(args.qc_json_ref,'r') as fp
+            json_ref = json.load(fp, object_pairs_hook=OrderedDict)
+            json_ref.pop("general")
+            match_qc_json_ref = json_all_new_format==json_ref
+    else:
+        match_qc_json_ref = False
+    run_shell_cmd('echo {} > qc_json_ref_match.txt'.format(match_qc_json_ref))
 
     log.info('All done.')
 
