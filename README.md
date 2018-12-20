@@ -33,10 +33,15 @@ This pipeline supports many cloud platforms and cluster engines. It also support
 * Cluster engines (CLI)
   * [SLURM](docs/tutorial_slurm.md)
   * [Sun GridEngine (SGE/PBS)](docs/tutorial_sge.md)
-* Local computers (CLI)
+* Local Linux computers (CLI)
   * [Local system with `singularity`](docs/tutorial_local_singularity.md)
   * [Local system with `docker`](docs/tutorial_local_docker.md)
   * [Local system with `Conda`](docs/tutorial_local_conda.md)
+* Local Windows computers (CLI)
+  * [Windows 10 Pro with `docker`](docs/tutorial_windows_docker.md)
+  * [Windows 10 Pro/Home with `Conda`](docs/tutorial_windows_conda.md)
+
+
 
 ## Input JSON file
 
