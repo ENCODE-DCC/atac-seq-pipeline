@@ -36,6 +36,7 @@
     "atac.idr_thresh" : 0.05,
 
     "atac.enable_xcor" : true,
+    "atac.disable_ataqc" : true,
 
     "atac.title" : "ENCSR889WQX",
     "atac.description" : "ATAC-seq on Mus musculus C57BL/6 frontal cortex adult"
