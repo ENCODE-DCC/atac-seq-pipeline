@@ -114,7 +114,7 @@ def macs2(ta, chrsz, gensz, pval_thresh, smooth_win, cap_num_peak,
             fc_bedgraph)
         run_shell_cmd(cmd4)
       
-        cmd5 = 'LC_COLLATE=C sort -k1,1 -k2,2n {} > {} | awk \'BEGIN{{OFS="\\t"}}{{if (NR>1 && prev_chr==$1 && prev_chr_e<=$2) {{print $0}}; prev_chr=$1; prev_chr_e=$3;}}\''
+        cmd5 = 'LC_COLLATE=C sort -k1,1 -k2,2n {} | awk \'BEGIN{{OFS="\\t"}}{{if (NR>1 && prev_chr==$1 && prev_chr_e<=$2) {{print $0}}; prev_chr=$1; prev_chr_e=$3;}}\' > {}'
         cmd5 = cmd5.format(
             fc_bedgraph,
             fc_bedgraph_srt)
@@ -149,7 +149,7 @@ def macs2(ta, chrsz, gensz, pval_thresh, smooth_win, cap_num_peak,
             pval_bedgraph)
         run_shell_cmd(cmd8)
 
-        cmd9 = 'LC_COLLATE=C sort -k1,1 -k2,2n {} > {} | awk \'BEGIN{{OFS="\\t"}}{{if (NR>1 && prev_chr==$1 && prev_chr_e<=$2) {{print $0}}; prev_chr=$1; prev_chr_e=$3;}}\''
+        cmd9 = 'LC_COLLATE=C sort -k1,1 -k2,2n {} | awk \'BEGIN{{OFS="\\t"}}{{if (NR>1 && prev_chr==$1 && prev_chr_e<=$2) {{print $0}}; prev_chr=$1; prev_chr_e=$3;}}\' > {}'
         cmd9 = cmd9.format(
             pval_bedgraph,
             pval_bedgraph_srt)
