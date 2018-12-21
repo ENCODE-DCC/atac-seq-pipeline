@@ -555,7 +555,7 @@ def main():
         #  because it includes metadata like date, pipeline_ver, ...
         # we just want to compare quality metric values only
         json_all_new_format.pop("general")
-        with open(args.qc_json_ref,'r') as fp
+        with open(args.qc_json_ref,'r') as fp:
             json_ref = json.load(fp, object_pairs_hook=OrderedDict)
             json_ref.pop("general")
             match_qc_json_ref = json_all_new_format==json_ref
