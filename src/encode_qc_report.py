@@ -171,8 +171,6 @@ def parse_arguments():
                         help='Log level')
     args = parser.parse_args()
 
-qc_json_ref_match
-
     log.setLevel(args.log_level)
     log.info(sys.argv)
     return args
