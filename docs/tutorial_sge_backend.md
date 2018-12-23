@@ -84,7 +84,7 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
     ```javascript
       {
           "default_runtime_attributes" : {
-              "singularity_container" : "~/.singularity/atac-seq-pipeline-v1.1.simg",
+              "singularity_container" : "~/.singularity/chip-seq-pipeline-v1.1.simg",
               "singularity_bindpath" : "/your/,YOUR_OWN_DATA_DIR1,YOUR_OWN_DATA_DIR2,..."
           }
       }
