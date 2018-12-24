@@ -1,82 +1,49 @@
 #!/bin/bash
 set -e # exit on error
 
-CROMWELL_SVR_URL=35.185.235.240:8000
-WDL=../../atac.wdl
-
-if [ $# -lt 1 ]; then
-  echo "Usage: ./test_atac.sh [INPUT_JSON] [DOCKER_IMAGE](optional)"
+if [ $# -lt 2 ]; then
+  echo "Usage: ./test_atac.sh [INPUT_JSON] [GCLOUD_SERVICE_ACCOUNT_SECRET_JSON_FILE] [DOCKER_IMAGE](optional)"
   exit 1
 fi
-if [ $# -gt 1 ]; then
-  DOCKER_IMAGE=$2
+if [ $# -gt 2 ]; then
+  DOCKER_IMAGE=$3
 else
   DOCKER_IMAGE=quay.io/encode-dcc/atac-seq-pipeline:v1.1.5
 fi
 INPUT=$1
+GCLOUD_SERVICE_ACCOUNT_SECRET_JSON_FILE=$2
 PREFIX=$(basename $INPUT .json)
+
+CROMWELL_JAR="cromwell-34.jar"
+if [ -f ${CROMWELL_JAR} ]; then
+  echo "Skip downloading cromwell."
+else
+  wget -N -c https://github.com/broadinstitute/cromwell/releases/download/34/cromwell-34.jar
+fi
 
 # Write workflow option JSON file
 TMP_WF_OPT=$PREFIX.test_atac_wf_opt.json
 cat > $TMP_WF_OPT << EOM
 {
     "default_runtime_attributes" : {
-        "docker" : "$DOCKER_IMAGE",
-        "cpu": "1",
-        "memory": "4 GB",
-        "disks": "local-disk 100 HDD",
-        "zones": "us-west1-a us-west1-b us-west1-c us-central1-c us-central1-b",
-        "failOnStderr" : false,
-        "continueOnReturnCode" : 0,
-        "preemptible": "0",
-        "bootDiskSizeGb": "10",
-        "noAddress": "false"
+        "docker" : "$DOCKER_IMAGE"
     }
 }
 EOM
 
-# Submit workflow (POST)
-curl -X POST --header "Accept: application/json" -v "$CROMWELL_SVR_URL/api/workflows/v1" \
--F workflowSource=@$WDL \
--F workflowInputs=@$INPUT \
--F workflowOptions=@$TMP_WF_OPT > $PREFIX.submit.json
-rm -f $TMP_WF_OPT
+METADATA=${PREFIX}.metadata.json # metadata
+RESULT=${PREFIX}.result.txt # output
 
-# Get workflow-id
-WF_ID=$(cat $PREFIX.submit.json | python -c 'import json,sys;obj=json.load(sys.stdin);print(obj["id"])')
-rm -f $PREFIX.submit.json
-echo "Workflow ID: $WF_ID"
-sleep 30
+cp $GCLOUD_SERVICE_ACCOUNT_SECRET_JSON_FILE tmp_secret_key.json
 
-# Check status of running job every 300 second
-ITER=0
-ITER_MAX=1000
-while true; do
-  ITER=$(($ITER+1))
-  # Get status (GET)
-  curl -X GET --header "Accept: application/json" -v "$CROMWELL_SVR_URL/api/workflows/v1/$WF_ID/status" > $PREFIX.status.json
-  WF_STATUS=$(cat $PREFIX.status.json | python -c 'import json,sys;obj=json.load(sys.stdin);print(obj["status"])')
-  rm -f $PREFIX.status.json
-  echo "Workflow status: $WF_STATUS, Iter: $ITER"
-  if [ $WF_STATUS == Succeeded ]; then
-    echo "Workflow has been done successfully."
-    break
-  elif [ $WF_STATUS == Failed ]; then
-    echo "Workflow has failed. Check out $PREFIX.metadata.json."
-    curl -X GET --header "Accept: application/json" -v "$CROMWELL_SVR_URL/api/workflows/v1/$WF_ID/metadata" > $PREFIX.metadata.json
-    exit 2
-  fi
-  if [ $ITER -gt $ITER_MAX ]; then
-    echo "Iteration reached limit ($ITER_MAX). Failed."
-    exit 3
-    break
-  fi
-  sleep 300
-done 
-
-set -x #why are we exiting with 1??
-# Get output of workflow
-curl -X GET --header "Accept: application/json" -v "$CROMWELL_SVR_URL/api/workflows/v1/$WF_ID/outputs" > $PREFIX.result.json
-cat $PREFIX.result.json | python -c "import json,sys;obj=json.load(sys.stdin);print(obj['outputs']['atac.qc_json_match'])" > $PREFIX.result.qc_json_match.txt
-
-echo "Done testing successfully."
+java -Dconfig.file=backend_gcp_service_account.conf \
+-Dbackend.default=google \
+-Dbackend.providers.google.config.project=encode-dcc-1016 \
+-Dbackend.providers.google.config.root="gs://encode-pipeline-test-runs/circleci" \
+-Dbackend.providers.google.config.genomics.auth=service-account \
+-Dbackend.providers.google.config.filesystems.gcs.auth=service-account \
+-jar ${CROMWELL_JAR} run \
+../../atac.wdl \
+-i ${INPUT} -o ${TMP_WF_OPT} -m ${METADATA}
+ 
+rm -f tmp_secret_key ${TMP_WF_OPT}
