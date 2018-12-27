@@ -1,17 +1,20 @@
-How to build genome database
-============================
+# How to build genome database
 
-1. [Install Conda](https://conda.io/miniconda.html)
+1. [Install Conda](https://conda.io/miniconda.html). Skip this if you already have equivalent Conda alternatives (Anaconda Python). Download and run the [installer](https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh). Agree to the license term by typing `yes`. It will ask you about the installation location. On Stanford clusters (Sherlock and SCG4), we recommend to install it outside of your `$HOME` directory since its filesystem is slow and has very limited space. At the end of the installation, choose `yes` to add Miniconda's binary to `$PATH` in your BASH startup script.
+    ```bash
+    $ wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+    $ bash Miniconda3-latest-Linux-x86_64.sh
+    ```
 
 2. Install Conda dependencies.
     ```bash
-      $ bash conda/uninstall_dependencies.sh  # to remove any existing pipeline env
-      $ bash conda/install_dependencies.sh
+    $ bash conda/uninstall_dependencies.sh  # to remove any existing pipeline env
+    $ bash conda/install_dependencies.sh
     ```
 
 3. Choose `[GENOME]` from `hg19`, `hg38`, `mm9` and `mm10` and specify a destination directory. This will take several hours. We recommend not to run this installer on a login node of your cluster. It will take >8GB memory and >2h time.
     ```bash
-      $ bash conda/build_genome_data.sh [GENOME] [DESTINATION_DIR]
+    $ bash conda/build_genome_data.sh [GENOME] [DESTINATION_DIR]
     ```
 
 4. Find a TSV file on the destination directory and use it for `"atac.genome_tsv"` in your input JSON.
@@ -32,18 +35,18 @@ How to build genome database
 
 4. Find the following lines in `conda/build_genome_data.sh` and modify it. Give a good name `[YOUR_OWN_GENOME]` for your genome.
     ```bash
-      ...
+    ...
 
-      elif [[ $GENOME == "YOUR_OWN_GENOME" ]]; then
-        REF_FA="URL_FOR_YOUR_FASTA_OR_2BIT"
-        BLACKLIST= # leave it empty if you don't have it
+    elif [[ $GENOME == "YOUR_OWN_GENOME" ]]; then
+      REF_FA="URL_FOR_YOUR_FASTA_OR_2BIT"
+      BLACKLIST= # leave it empty if you don't have it
 
-      ...
+    ...
     ```
 
 5. Specify a destination directory for your genome database and run the installer. This will take several hours.
     ```bash
-      $ bash conda/build_genome_data.sh [YOUR_OWN_GENOME] [DESTINATION_DIR]
+    $ bash conda/build_genome_data.sh [YOUR_OWN_GENOME] [DESTINATION_DIR]
     ```
 
 6. Find a TSV file in the destination directory and use it for `"atac.genome_tsv"` in your input JSON.

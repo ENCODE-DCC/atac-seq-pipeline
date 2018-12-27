@@ -1,5 +1,4 @@
-Tutorial for DNAnexus Platform (web)
-====================================
+# Tutorial for DNAnexus Platform (web)
 
 All test samples and genome data are shared on our public DNAnexus project. You don't have to download any data for testing our pipeline on DNAnexus platform.
 

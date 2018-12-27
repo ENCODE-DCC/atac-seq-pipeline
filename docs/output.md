@@ -1,5 +1,4 @@
-Output specification
-====================
+# Output specification
 
 All output filenames keep prefixes from corresponding input filenames. For example. If you have started from `REP1.fastq.gz` and `REP2.fastq.gz` then corresponding alignment log for each replicate has a filename of `REP1.flagstat.qc` and `REP2.flagstat.qc`, respectively.
 

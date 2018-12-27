@@ -1,20 +1,19 @@
 # Tutorial for Stanford Sherlock cluster
 
-
 This tutorial shows how to run pipelines on Sherlock.
 
 All test samples and genome data are shared on Stanford Sherlock cluster based on SLURM. You don't have to download any data for testing our pipeline on it.
 
-1. Download [cromwell](https://github.com/broadinstitute/cromwell) on your `$HOME` directory.
+1. SSH to Sherlock's login node.
+    ```bash
+    $ ssh login.sherlock.stanford.edu
+    ```
+
+2. Download [cromwell](https://github.com/broadinstitute/cromwell) on your `$HOME` directory.
     ```bash
     $ cd 
     $ wget https://github.com/broadinstitute/cromwell/releases/download/34/cromwell-34.jar
     $ chmod +rx cromwell-34.jar
-    ```
-
-2. SSH to Sherlock's login node.
-    ```bash
-    $ ssh login.sherlock.stanford.edu
     ```
 
 3. Git clone this pipeline and move into its directory.
