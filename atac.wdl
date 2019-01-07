@@ -91,7 +91,7 @@ workflow atac {
 	String macs2_disks = "local-disk 100 HDD"
 
 	Int ataqc_mem_mb = 16000
-	Int ataqc_mem_java_mb = 16000
+	Int ataqc_mem_java_mb = 15000
 	Int ataqc_time_hr = 24
 	String ataqc_disks = "local-disk 400 HDD"
 

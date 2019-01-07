@@ -95,7 +95,7 @@
     "atac.macs2_disks" : "local-disk 100 HDD",
 
     "atac.ataqc_mem_mb" : 16000,
-    "atac.ataqc_mem_java_mb" : 16000,
+    "atac.ataqc_mem_java_mb" : 15000,
     "atac.ataqc_time_hr" : 24,
     "atac.ataqc_disks" : "local-disk 100 HDD"
 }
