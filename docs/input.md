@@ -201,7 +201,8 @@ Let us take a close look at the following template JSON. Comments are not allowe
     "atac.macs2_disks" : "local-disk 100 HDD",
 
     "atac.ataqc_mem_mb" : 16000,
-    "atac.ataqc_mem_java_mb" : 16000,
+    // make sure that ataqc_mem_java_mb < ataqc_mem_mb
+    "atac.ataqc_mem_java_mb" : 15000,
     "atac.ataqc_time_hr" : 24,
     "atac.ataqc_disks" : "local-disk 100 HDD"
 }
