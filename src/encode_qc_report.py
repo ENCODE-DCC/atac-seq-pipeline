@@ -57,10 +57,14 @@ def parse_arguments():
     parser = argparse.ArgumentParser(
                         prog='ENCODE DCC generate HTML report and QC JSON.',
                         description='')
-    parser.add_argument('--name', type=str, default='Untitled',
-                        help='Name of sample.')
+    parser.add_argument('--title', type=str, default='Untitled',
+                        help='Title of sample.')
     parser.add_argument('--desc', type=str, default='No description',
                         help='Description for sample.')
+    parser.add_argument('--genome', type=str,
+                        help='Reference genome.')
+    parser.add_argument('--pipeline-ver', type=str,
+                        help='Pipeline version.')
     parser.add_argument('--multimapping', default=0, type=int,
                         help='Multimapping reads.')
     parser.add_argument('--paired-end', action="store_true",
@@ -159,6 +163,8 @@ def parse_arguments():
                         help='Output QC report HTML file.')
     parser.add_argument('--out-qc-json', default='qc.json', type=str,
                         help='Output QC JSON file.')
+    parser.add_argument('--qc-json-ref', type=str,
+                        help='Reference QC JSON file to be compared to output QC JSON (developer\'s purpose only).')
     parser.add_argument('--log-level', default='INFO',
                         choices=['NOTSET','DEBUG','INFO',
                             'WARNING','CRITICAL','ERROR','CRITICAL'],
@@ -194,13 +200,22 @@ def main():
     html = ATAQC_HTML_HEAD
 
     json_all = OrderedDict()
-    json_all['name']=args.name
-    json_all['desc']=args.desc
-
-    html += html_heading(1, args.name)
+    json_all['general'] = OrderedDict()
+    json_all['general']['date'] = now()
+    json_all['general']['pipeline_ver'] = args.pipeline_ver
+    json_all['general']['peak_caller'] = args.peak_caller
+    json_all['general']['genome'] = args.genome
+    json_all['general']['description'] = args.desc
+    json_all['general']['title'] = args.title
+    json_all['general']['paired_end'] = args.paired_end
+    
+    html += html_heading(1, args.title)
     html += html_paragraph(args.desc)
+    html += html_paragraph('Pipeline version: {}'.format(args.pipeline_ver))
     html += html_paragraph('Report generated at {}'.format(now()))
+    html += html_paragraph('Paired-end: {}'.format(args.paired_end))
     html += html_paragraph('Pipeline type: {}'.format(get_full_name(args.pipeline_type)))
+    html += html_paragraph('Genome: {}'.format(args.genome))
     html += html_paragraph('Peak caller: {}'.format(args.peak_caller.upper()))
 
     # order of each chapter in report
@@ -517,9 +532,37 @@ def main():
     log.info('Creating HTML report...')
     write_txt(args.out_qc_html, html)
 
+    log.info('Converting format of qc.json...')
+    # convert format of json_all
+    # old: [](zero-based array) 0=rep1, 1=rep2, ...
+    # new: obj (.rep1, .rep2, ...)
+    json_all_new_format = OrderedDict()
+    for key in json_all:
+        val = json_all[key]
+        if type(val)==list:
+            json_all_new_format[key] = OrderedDict()
+            for i, rep in enumerate(val):
+                json_all_new_format[key]["rep{}".format(i+1)] = val[i]
+        else:
+            json_all_new_format[key] = json_all[key]
     log.info('Write JSON file...')
-    write_txt(args.out_qc_json, json.dumps(json_all, indent=4))
+    write_txt(args.out_qc_json, json.dumps(json_all_new_format, indent=4))
     # b = json.loads(a, object_pairs_hook=OrderedDict)
+
+    log.info('Comparing JSON file with reference...')
+    if args.qc_json_ref:
+        # exclude general section from comparing 
+        #  because it includes metadata like date, pipeline_ver, ...
+        # we just want to compare quality metric values only
+        json_all_new_format.pop('general')
+        with open(args.qc_json_ref,'r') as fp:
+            json_ref = json.load(fp, object_pairs_hook=OrderedDict)
+            if 'general' in json_ref:
+                json_ref.pop("general")
+            match_qc_json_ref = json_all_new_format==json_ref
+    else:
+        match_qc_json_ref = False
+    run_shell_cmd('echo {} > qc_json_ref_match.txt'.format(match_qc_json_ref))
 
     log.info('All done.')
 

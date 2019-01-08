@@ -13,7 +13,7 @@ The ATAC-seq pipeline specification is also the official pipeline specification 
 * **Flexibility**: Support for `docker`, `singularity` and `Conda`.
 * **Portability**: Support for many cloud platforms (Google/DNAnexus) and cluster engines (SLURM/SGE/PBS).
 * **User-friendly HTML report**: tabulated quality metrics including alignment/peak statistics and FRiP along with many useful plots (IDR/cross-correlation measures).
-  - Examples: [HTML](https://storage.googleapis.com/encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR889WQX/example_output/qc.html), [JSON](docs/example_output/qc.json)
+  - Examples: [HTML](https://storage.googleapis.com/encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR889WQX/example_output/qc.html), [JSON](docs/example_output/v1.1.5/qc.json)
 * **ATAqC**: Annotation-based analysis including TSS enrichment and comparison to Roadmap DNase.
 * **Genomes**: Pre-built database for GRCh38, hg19, mm10, mm9 and additional support for custom genomes.
 
@@ -33,10 +33,13 @@ This pipeline supports many cloud platforms and cluster engines. It also support
 * Cluster engines (CLI)
   * [SLURM](docs/tutorial_slurm.md)
   * [Sun GridEngine (SGE/PBS)](docs/tutorial_sge.md)
-* Local computers (CLI)
+* Local Linux computers (CLI)
   * [Local system with `singularity`](docs/tutorial_local_singularity.md)
   * [Local system with `docker`](docs/tutorial_local_docker.md)
   * [Local system with `Conda`](docs/tutorial_local_conda.md)
+* Local Windows computers (CLI)
+  * [Windows 10 Pro with `docker`](docs/tutorial_windows_docker.md)
+  * [Windows 10 Pro/Home with `Conda`](docs/tutorial_windows_conda.md)
 
 ## Input JSON file
 
@@ -45,3 +48,11 @@ This pipeline supports many cloud platforms and cluster engines. It also support
 ## Output directories
 
 [Output directory specification](docs/output.md)
+
+## Useful tools
+
+There are some useful tools to post-process outputs of the pipeline.
+
+### qc_jsons_to_tsv
+
+[This tool](utils/qc_jsons_to_tsv/README.md) recursively finds and parses all `qc.json` (pipeline's [final output](docs/example_output/v1.1.5/qc.json)) found from a specified root directory. It generates a TSV file that has all quality metrics tabulated in rows for each experiment and replicate. This tool also estimates overall quality of a sample by [a criteria definition JSON file](utils/qc_jsons_to_tsv/criteria.default.json) which can be a good guideline for QC'ing experiments.

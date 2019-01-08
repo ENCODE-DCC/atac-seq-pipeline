@@ -1,0 +1,56 @@
+{
+	"01_No. of mapped nodup non-mito reads" : {
+		"eval" : "qc['flagstat_qc']['rep?']['total']",
+		"condition_se" : { "OK" : ">= 25000000", "FAIL" : "< 25000000" },
+		"condition_pe" : { "OK" : ">= 50000000", "FAIL" : "< 50000000" }
+	},
+	"02_Alignment rate" : {
+		"eval" : "qc['nodup_flagstat_qc']['rep?']['total']/qc['flagstat_qc']['rep?']['total']",
+		"condition" : { "OK" : ">= 0.95", "ACCEPTABLE" : ">= 0.80", "FAIL" : "< 0.80" }
+	},
+	"03_No. of IDR peaks" : {
+		"eval" : "qc['idr_reproducibility_qc']['N_opt']",
+		"condition" : { "OK" : ">= 70000", "FAIL" : "< 70000" }
+	},
+	"04_No. of naive overlap peaks" : {
+		"eval" : "qc['overlap_reproducibility_qc']['N_opt']",
+		"condition" : { "OK" : ">= 150000", "FAIL" : "< 150000" }
+	},
+	"05_IDR FRiP per replicate" : {
+		"eval" : "qc['idr_frip_qc']['rep?-pr']['FRiP']",
+		"condition" : { "OK" : ">= 0.1", "FAIL" : "< 0.1" }
+	},
+	"05_Overlap FRiP per replicate" : {
+		"eval" : "qc['overlap_frip_qc']['rep?-pr']['FRiP']"
+	},
+	"06_IDR FRiP of pooled sample" : {
+		"eval" : "qc['idr_frip_qc']['ppr']['FRiP']",
+		"condition" : { "OK" : ">= 0.1", "FAIL" : "< 0.1" }
+	},
+	"06_Overlap FRiP of pooled sample" : {
+		"eval" : "qc['overlap_frip_qc']['ppr']['FRiP']",
+		"condition" : { "OK" : ">= 0.1", "FAIL" : "< 0.1" }
+	},
+	"07_IDR reproducibility" : {
+		"eval" : "qc['idr_reproducibility_qc']['reproducibility']"
+	},
+	"08_TSS enrichment" : {
+		"eval" : "qc['ataqc']['rep?']['TSS_enrichment']",
+		"condition" : { "OK" : ">= 10.0", "FAIL" : "< 10.0" }
+	},
+	"09_NFR region" : {
+		"eval" : "qc['ataqc']['rep?']['Presence of NFR peak']"
+	},
+	"10_mono-nuc region" : {
+		"eval" : "qc['ataqc']['rep?']['Presence of Mono-Nuc peak']"
+	},
+	"11_NRF" : {
+		"eval" : "qc['pbc_qc']['rep?']['NRF']"
+	},
+	"12_PBC1" : {
+		"eval" : "qc['pbc_qc']['rep?']['PBC1']"
+	},
+	"13_PBC2" : {
+		"eval" : "qc['pbc_qc']['rep?']['PBC2']"
+	}
+}
