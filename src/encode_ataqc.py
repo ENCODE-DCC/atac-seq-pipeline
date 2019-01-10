@@ -415,15 +415,23 @@ def ataqc():
             textfile.write('{0}\t{1}\n'.format(key, value))
         elif isinstance(value, float):
             textfile.write('{0}\t{1}\n'.format(key, value))
-        elif isinstance(value, OrderedDict):
+        elif isinstance(value, OrderedDict):            
+            if key=='idr_peak_summ':
+                key_prefix = 'IDR peak stats: '
+            elif key=='naive_peak_summ':
+                key_prefix = 'Naive peak stats: '
+            elif key=='raw_peak_summ':
+                key_prefix = 'Raw peak stats: '
+            else:
+                key_prefix = ''
             for dict_key, dict_value in value.iteritems():
                 if isinstance(dict_value, tuple):
-                    textfile.write('{0}'.format(dict_key))
+                    textfile.write('{0}{1}'.format(key_prefix, dict_key))
                     for tuple_val in dict_value:
                         textfile.write('\t{0}'.format(tuple_val))
                     textfile.write('\n')
                 else:
-                    textfile.write('{0}\t{1}\n'.format(dict_key, dict_value))
+                    textfile.write('{0}{1}\t{2}\n'.format(key_prefix, dict_key, dict_value))
         # QC tables go here
         elif isinstance(value, list):
             if 'bowtie' in value[0]: # Hack, fix this
