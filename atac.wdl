@@ -576,25 +576,29 @@ workflow atac {
 		else if length(tas_)>0 then length(tas_)
 		else if length(peaks_pr1)>0 then length(peaks_pr1)
 		else 0
+	File? null
 
 	scatter( i in range(num_rep) ) {
 		call ataqc { input : 
 			paired_end = paired_end,
-			read_len_log = bowtie2.read_len_log[i],
-			flagstat_log = bowtie2.flagstat_qc[i],
-			bowtie2_log = bowtie2.align_log[i],
-			pbc_log = filter.pbc_qc[i],
-			dup_log = filter.dup_qc[i],
-			bam = bams_[i],
-			nodup_flagstat_log = filter.flagstat_qc[i],
-			mito_dup_log = filter.mito_dup_log[i],
-			nodup_bam = nodup_bams_[i],
-			ta = tas_[i],
-			peak = if enable_idr then select_first([idr_pr.bfilt_idr_peak])[i]
+			read_len_log = if length(bowtie2.read_len_log)>0 then bowtie2.read_len_log[i] else null,
+			flagstat_log = if length(bowtie2.flagstat_qc)>0 then bowtie2.flagstat_qc[i] else null,
+			bowtie2_log = if length(bowtie2.align_log)>0 then bowtie2.align_log[i] else null,
+			pbc_log = if length(filter.pbc_qc)>0 then filter.pbc_qc[i] else null,
+			dup_log = if length(filter.dup_qc)>0 then filter.dup_qc[i] else null,
+			bam = if length(bams_)>0 then bams_[i] else null,
+			nodup_flagstat_log = if length(filter.flagstat_qc)>0 then filter.flagstat_qc[i] else null,
+			mito_dup_log = if length(filter.mito_dup_log)>0 then filter.mito_dup_log[i] else null,
+			nodup_bam = if length(nodup_bams_)>0 then nodup_bams_[i] else null,
+			ta = if length(tas_)>0 then tas_[i] else null,
+			peak = if align_only then null
+					else if enable_idr then select_first([idr_pr.bfilt_idr_peak])[i]
 					else reproducibility_overlap.optimal_peak,
-			idr_peak = reproducibility_idr.optimal_peak, #idr_peaks_ataqc[i],
-			overlap_peak= reproducibility_overlap.optimal_peak, #overlap_peaks_ataqc[i],
-			bigwig = macs2.sig_pval[i],
+			idr_peak = if align_only || !enable_idr then null
+					else reproducibility_idr.optimal_peak, #idr_peaks_ataqc[i],
+			overlap_peak= if align_only then null
+					else reproducibility_overlap.optimal_peak, #overlap_peaks_ataqc[i],
+			bigwig = if length(macs2.sig_pval)>0 then macs2.sig_pval[i] else null,
 			ref_fa = ref_fa,
 			chrsz = chrsz,
 			tss_enrich = tss_enrich,
