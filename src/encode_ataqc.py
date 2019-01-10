@@ -255,7 +255,8 @@ def ataqc():
         peak_counts = get_peak_counts(PEAKS, NAIVE_OVERLAP_PEAKS, IDR_PEAKS)
     else:
         peak_counts = None
-    if PEAKS:
+    # if PEAKS:
+    if False:
         raw_peak_summ, raw_peak_dist = get_region_size_metrics(PEAKS)
     else:
         raw_peak_summ, raw_peak_dist = (None, None)
