@@ -362,12 +362,12 @@ def get_picard_complexity_metrics(aligned_bam, prefix):
     Picard EsimateLibraryComplexity
     '''
     out_file = '{0}.picardcomplexity.qc'.format(prefix)
-    get_gc_metrics = ('java -Xmx4G -XX:ParallelGCThreads=1 -jar '
+    get_gc_metrics = ('mkdir -p tmp_java && java -Djava.io.tmpdir=$PWD/tmp_java -Xmx4G -XX:ParallelGCThreads=1 -jar '
                       '{2} '
                       'EstimateLibraryComplexity INPUT={0} OUTPUT={1} '
                       'USE_JDK_DEFLATER=TRUE USE_JDK_INFLATER=TRUE '
                       'VERBOSITY=ERROR '
-                      'QUIET=TRUE').format(aligned_bam,
+                      'QUIET=TRUE && rm -rf tmp_java').format(aligned_bam,
                                            out_file,
                                            locate_picard())
     os.system(get_gc_metrics)
