@@ -1,0 +1,55 @@
+{
+    "Array[File]" : {
+        "atac.bowtie2" : {
+            "bam" : "atac.bams",
+            "align_log" : "atac.align_logs",
+            "flagstat_qc" : "atac.flagstat_qcs",
+            "read_len_log" : "atac.read_len_logs"
+        },
+        "atac.filter" : {
+            "nodup_bam" : "atac.nodup_bams",
+            "flagstat_qc" : "atac.nodup_flagstat_qcs",
+            "dup_qc" : "atac.dup_qcs",
+            "pbc_qc" : "atac.pbc_qcs",
+            "mito_dup_log" : "atac.mito_dup_logs"
+        },
+        "atac.bam2ta" : {
+            "ta" : "atac.tas"
+        },
+        "atac.xcor" : {
+            "plot_png" : "atac.xcor_plots",
+            "score" : "atac.xcor_scores"
+        },
+        "atac.macs2" : {
+            "npeak" : "atac.peaks",
+            "frip_qc" : "atac.macs2_frip_qcs",
+            "sig_pval" : "atac.sig_pvals"
+        },
+        "atac.macs2_pr1" : {
+            "npeak" : "atac.peaks_pr1",
+            "frip_qc" : "atac.macs2_pr1_frip_qcs"
+        },
+        "atac.macs2_pr2" : {
+            "npeak" : "atac.peaks_pr2",
+            "frip_qc" : "atac.macs2_pr2_frip_qcs"
+        }
+    },
+    
+    "File" : {
+        "atac.pool_ta" : {
+            "ta_pooled" : "atac.ta_pooled"
+        },
+        "atac.macs2_pooled" : {
+            "npeak" : "atac.peak_pooled",
+            "frip_qc" : "atac.macs2_pooled_frip_qc"
+        },
+        "atac.macs2_ppr1" : {
+            "npeak" : "atac.peak_ppr1",
+            "frip_qc" : "atac.macs2_ppr1_frip_qc"
+        },
+        "atac.macs2_ppr2" : {
+            "npeak" : "atac.peak_ppr2",
+            "frip_qc" : "atac.macs2_ppr2_frip_qc"
+        }
+    }
+}

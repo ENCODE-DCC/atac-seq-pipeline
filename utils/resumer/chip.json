@@ -1,0 +1,97 @@
+{
+    "Array[Object]" : {
+        "chip.bwa" : {
+            "bam" : "chip.bams",
+            "flagstat_qc" : "chip.flagstat_qcs"
+        },
+        "chip.filter" : {
+            "nodup_bam" : "chip.nodup_bams",
+            "flagstat_qc" : "chip.nodup_flagstat_qcs",
+            "dup_qc" : "chip.dup_qcs",
+            "pbc_qc" : "chip.pbc_qcs"
+        },
+        "chip.bam2ta" : {
+            "ta" : "chip.tas"
+        },
+        "chip.bwa_ctl" : {
+            "bam" : "chip.ctl_bams",
+            "flagstat_qc" : "chip.ctl_flagstat_qcs"
+        },
+        "chip.filter_ctl" : {
+            "nodup_bam" : "chip.ctl_nodup_bams",
+            "flagstat_qc" : "chip.ctl_nodup_flagstat_qcs",
+            "dup_qc" : "chip.ctl_dup_qcs",
+            "pbc_qc" : "chip.ctl_pbc_qcs"
+        },
+        "chip.bam2ta_ctl" : {
+            "ta" : "chip.ctl_tas"
+        },
+        "chip.xcor" : {
+            "plot_png" : "chip.xcor_plots",
+            "score" : "chip.xcor_scores",
+            "fraglen" : "chip.fraglen"
+        },
+        "chip.macs2" : {
+            "npeak" : "chip.peaks",
+            "frip_qc" : "chip.macs2_frip_qcs",
+            "sig_pval" : "chip.sig_pvals"
+        },
+        "chip.macs2_pr1" : {
+            "npeak" : "chip.peaks_pr1",
+            "frip_qc" : "chip.macs2_pr1_frip_qcs"
+        },
+        "chip.macs2_pr2" : {
+            "npeak" : "chip.peaks_pr2",
+            "frip_qc" : "chip.macs2_pr2_frip_qcs"
+        },
+        "chip.spp" : {
+            "rpeak" : "chip.peaks",
+            "frip_qc" : "chip.spp_frip_qcs"
+        },
+        "chip.spp_pr1" : {
+            "rpeak" : "chip.peaks_pr1",
+            "frip_qc" : "chip.spp_pr1_frip_qcs"
+        },
+        "chip.spp_pr2" : {
+            "rpeak" : "chip.peaks_pr2",
+            "frip_qc" : "chip.spp_pr2_frip_qcs"
+        }
+    },
+    
+    "Object" : {
+        "chip.pool_ta" : {
+            "ta_pooled" : "chip.ta_pooled"
+        },
+        "chip.pool_ta_ctl" : {
+            "ta_pooled" : "chip.ctl_ta_pooled"
+        },
+        "chip.macs2_pooled" : {
+            "npeak" : "chip.peak_pooled",
+            "frip_qc" : "chip.macs2_pooled_frip_qc"
+        },
+        "chip.macs2_ppr1" : {
+            "npeak" : "chip.peak_ppr1",
+            "frip_qc" : "chip.macs2_ppr1_frip_qc"
+        },
+        "chip.macs2_ppr2" : {
+            "npeak" : "chip.peak_ppr2",
+            "frip_qc" : "chip.macs2_ppr2_frip_qc"
+        },
+        "chip.spp_pooled" : {
+            "rpeak" : "chip.peak_pooled",
+            "frip_qc" : "chip.spp_pooled_frip_qc"
+        },
+        "chip.spp_ppr1" : {
+            "rpeak" : "chip.peak_ppr1",
+            "frip_qc" : "chip.spp_ppr1_frip_qc"
+        },
+        "chip.spp_ppr2" : {
+            "rpeak" : "chip.peak_ppr2",
+            "frip_qc" : "chip.spp_ppr2_frip_qc"
+        },
+        "chip.fingerprint" : {
+            "jsd_qcs" : "chip.jsd_qcs",
+            "plot" : "chip.jsd_plot"
+        }
+    }
+}
