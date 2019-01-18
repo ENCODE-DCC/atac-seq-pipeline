@@ -13,7 +13,7 @@ $ java -jar ... cromwell-34.jar run chip.wdl -i original_input.json ... -m metad
 
 Unfortunately your workflow failed for some reasons but you can fix the problem and want to resume it from where it left off.
 ```bash
-$ python resumer.py metadata.json chip.json # for example of ChIP-Seq pipeline. Use atac.json for ATAC-Seq pipeline
+$ python resumer.py metadata.json
 ```
 
 You will get a new input JSON file `resume.FAILED_WORKFLOW_ID.json` and run cromwell with it instead of the original one `original_input.json`.
@@ -25,8 +25,8 @@ $ java -jar ... cromwell-34.jar run chip.wdl -i resume.FAILED_WORKFLOW_ID.json .
 
 ```bash
 usage: Resumer for ENCODE ATAC/Chip-Seq pipelines [-h]
+                                                  [--output-def-json-file OUTPUT_DEF_JSON_FILE]
                                                   metadata_json_file
-                                                  output_def_json_file
 
 Parse cromwell's metadata JSON file and generate a new input JSON file to
 resume a pipeline from where it left off.
@@ -34,30 +34,31 @@ resume a pipeline from where it left off.
 positional arguments:
   metadata_json_file    Cromwell metadata JSON file from a previous failed
                         run.
-  output_def_json_file  Output definition JSON file for your pipeline. Use
-                        atac.json/chip.json for ATAC-Seq/ChIP-Seq pipelines.
-                        You can also use your own JSON file for your pipeline.
-                        Entries in "Array[Object]" is for Array[Object] in an
-                        input JSON. This is useful to take outputs from a
-                        scatter block. For example, the 1st entry of
-                        "Array[Object]" in chip.json is "chip.bwa" : {"bam" :
-                        "chip.bams", "flagstat_qc" : "chip.flagstat_qcs"}.
-                        chip.flagstat_qcs : [...(taken from an output of
-                        chip.bwa.flagstat_qc)...] will be added to your new
-                        input JSON. For example, the 1st entry of "Object" in
-                        chip.json is "chip.pool_ta" : {"ta_pooled" :
-                        "chip.ta_pooled"}. chip.ta_pooled : "(taken from an
-                        output of chip.pool_ta.ta_pooled)" will be added to
-                        your new input JSON.
 
 optional arguments:
   -h, --help            show this help message and exit
+  --output-def-json-file OUTPUT_DEF_JSON_FILE
+                        Output definition JSON file for your pipeline. If not
+                        specified, it will look for a valid JSON file on
+                        script's directory. You can use your own JSON file for
+                        your pipeline. Entries in "Array[Object]" is for
+                        Array[Object] in an input JSON. This is useful to take
+                        outputs from a scatter block. For example, the 1st
+                        entry of "Array[Object]" in chip.json is "chip.bwa" :
+                        {"bam" : "chip.bams", "flagstat_qc" :
+                        "chip.flagstat_qcs"}. chip.flagstat_qcs : [...(taken
+                        from an output of chip.bwa.flagstat_qc)...] will be
+                        added to your new input JSON. For example, the 1st
+                        entry of "Object" in chip.json is "chip.pool_ta" :
+                        {"ta_pooled" : "chip.ta_pooled"}. chip.ta_pooled :
+                        "(taken from an output of chip.pool_ta.ta_pooled)"
+                        will be added to your new input JSON.
 ```
 
 ## Examples
 
 ```bash
-$ python resumer.py metadata.json atac.json
+$ python resumer.py metadata.json
 ```
 
 ## How it works (for developers)
@@ -136,7 +137,7 @@ $ java -jar cromwell-34.jar run toy_chip.wdl -i org_input.json -m metadata.json
 
 Pipeline fails due to some errors in `call_peak` task. Run `resumer.py` to make a new input JSON file to resume.
 ```bash
-$ python resumer.py metadata.json toy_chip.json
+$ python resumer.py metadata.json --output-def-json-file toy_chip.json
 ```
 
 Then `result.WORKFLOW_ID.json` will be generated.

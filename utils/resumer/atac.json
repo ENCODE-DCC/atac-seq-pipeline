@@ -1,5 +1,5 @@
 {
-    "Array[File]" : {
+    "Array[Object]" : {
         "atac.bowtie2" : {
             "bam" : "atac.bams",
             "align_log" : "atac.align_logs",
@@ -32,10 +32,14 @@
         "atac.macs2_pr2" : {
             "npeak" : "atac.peaks_pr2",
             "frip_qc" : "atac.macs2_pr2_frip_qcs"
+        },
+        "atac.ataqc" : {
+            "html" : "atac.ataqc_htmls",
+            "txt" : "atac.ataqc_txts"
         }
     },
     
-    "File" : {
+    "Object" : {
         "atac.pool_ta" : {
             "ta_pooled" : "atac.ta_pooled"
         },

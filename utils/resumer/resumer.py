@@ -1,7 +1,8 @@
-#!/usr/bin/env python2
+    #!/usr/bin/env python2
 
 # written by Jin Lee, 2016
 
+import os
 import argparse
 import json
 from collections import OrderedDict
@@ -11,15 +12,25 @@ def parse_arguments():
                                         description='Parse cromwell\'s metadata JSON file and generate a new input JSON file '
                                         'to resume a pipeline from where it left off.')
     parser.add_argument('metadata_json_file', type=str, help='Cromwell metadata JSON file from a previous failed run.')
-    parser.add_argument('output_def_json_file', type=str, help='Output definition JSON file for your pipeline. '
-                        'Use atac.json/chip.json for ATAC-Seq/ChIP-Seq pipelines. '
-                        'You can also use your own JSON file for your pipeline. '
+    parser.add_argument('--output-def-json-file', type=str, help='Output definition JSON file for your pipeline. '
+                        'If not specified, it will look for a valid JSON file on script\'s directory. '
+                        'You can use your own JSON file for your pipeline. '
                         'Entries in "Array[Object]" is for Array[Object] in an input JSON. This is useful to take outputs from a scatter block. '
                         'For example, the 1st entry of "Array[Object]" in chip.json is "chip.bwa" : {"bam" : "chip.bams", "flagstat_qc" : "chip.flagstat_qcs"}. '
                         'chip.flagstat_qcs : [...(taken from an output of chip.bwa.flagstat_qc)...] will be added to your new input JSON. '
                         'For example, the 1st entry of "Object" in chip.json is "chip.pool_ta" : {"ta_pooled" : "chip.ta_pooled"}. '
                         'chip.ta_pooled : "(taken from an output of chip.pool_ta.ta_pooled)" will be added to your new input JSON. ')
     args = parser.parse_args()
+
+    # if not specified by user, look into this array on script's directory
+    if not args.output_def_json_file:
+        script_dir = os.path.dirname(os.path.realpath(__file__))        
+        default_output_def_json_files = ['atac.json', 'chip.json', 'rna.json', 'hic.json']
+        for f in default_output_def_json_files:
+            json_file = os.path.join(script_dir, f)
+            if os.path.exists(json_file):
+                args.output_def_json_file = json_file
+                break
     return args
 
 def read_json_file(json_file):

@@ -169,6 +169,8 @@ workflow atac {
 	File? macs2_pooled_frip_qc
 	File? macs2_ppr1_frip_qc
 	File? macs2_ppr2_frip_qc
+	Array[File] ataqc_htmls = []
+	Array[File] ataqc_txts = []
 
 	### read genome data and paths
 	call read_genome_tsv { input:genome_tsv = genome_tsv }
@@ -345,7 +347,7 @@ workflow atac {
 			time_hr = macs2_time_hr,
 		}
 	}
-	if ( enable_xcor ) {
+	if ( enable_xcor && length(xcor_scores)<1 ) {
 		scatter( ta in tas__ ) {
 			# subsample tagalign (non-mito) and cross-correlation analysis
 			call xcor { input :
@@ -551,7 +553,7 @@ workflow atac {
 			blacklist = blacklist,
 			chrsz = chrsz,
 			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
-			ta = pool_ta.ta_pooled,
+			ta = if defined(ta_pooled) then ta_pooled else pool_ta.ta_pooled
 		}
 	}
 	if ( enable_idr && length(peaks_pr1_)>1  ) {
@@ -567,7 +569,7 @@ workflow atac {
 			blacklist = blacklist,
 			chrsz = chrsz,
 			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
-			ta = pool_ta.ta_pooled,
+			ta = if defined(ta_pooled) then ta_pooled else pool_ta.ta_pooled
 		}
 	}
 	if ( !align_only && !true_rep_only ) {
@@ -596,7 +598,7 @@ workflow atac {
 	}
 
 	# count number of replicates for ataqc	
-	Int num_rep = if disable_ataqc then 0
+	Int num_rep = if disable_ataqc || length(ataqc_htmls)>0 then 0
 		else if length(fastqs_)>0 then length(fastqs_)
 		else if length(bams_)>0 then length(bams_)
 		else if length(tas_)>0 then length(tas_)
@@ -694,8 +696,8 @@ workflow atac {
 		frip_overlap_qc_ppr = overlap_ppr.frip_qc,
 		idr_reproducibility_qc = reproducibility_idr.reproducibility_qc,
 		overlap_reproducibility_qc = reproducibility_overlap.reproducibility_qc,
-		ataqc_txts = ataqc.txt,
-		ataqc_htmls = ataqc.html,
+		ataqc_txts = flatten([ataqc.txt, ataqc_txts]),
+		ataqc_htmls = flatten([ataqc.html, ataqc_htmls]),
 	}
 
 	output {
