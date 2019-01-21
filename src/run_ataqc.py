@@ -470,7 +470,10 @@ def make_tss_plot(bam_file, tss, prefix, chromsizes, read_len, bins=400, bp_edge
     tss_point_val = max(bam_array.mean(axis=0))
 
     ax.set_xlabel('Distance from TSS (bp)')
-    ax.set_ylabel('Average read coverage (per million mapped reads)')
+    if greenleaf_norm:
+        ax.set_ylabel('TSS Enrichment')
+    else:
+        ax.set_ylabel('Average read coverage (per million mapped reads)')
     ax.legend(loc='best')
 
     fig.savefig(tss_plot_file)
