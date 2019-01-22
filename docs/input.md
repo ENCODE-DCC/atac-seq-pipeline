@@ -127,8 +127,13 @@ Let us take a close look at the following template JSON. Comments are not allowe
     // Skip dup removal in a BAM filtering stage.
     "atac.no_dup_removal" : false,
 
-    // Regular expression to filter out reads
-    // Any read that matches with this reg-ex pattern will be removed from outputs
+    // Name of mito chromosome. THIS IS NOT A REG-EX! you can define only one chromosome name for mito.
+    "atac.mito_chr_name" : "chrM",
+
+    // Regular expression to filter out reads with given chromosome name (1st column of BED/TAG-ALIGN)
+    // Any read with chr name that matches with this reg-ex pattern will be removed from outputs
+    // If your have changed the above parameter "atac.mito_chr_name" and still want to filter out mito reads,
+    // then make sure that "atac.mito_chr_name" and "atac.regex_filter_reads" are the same.
     "atac.regex_filter_reads" : "chrM",
 
     // Subsample reads (0: no subsampling)
