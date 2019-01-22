@@ -32,10 +32,11 @@ workflow atac {
 	Int mapq_thresh = 30			# threshold for low MAPQ reads removal
 	Boolean no_dup_removal = false 	# no dupe reads removal when filtering BAM
 									# dup.qc and pbc.qc will be empty files
-									# and nodup_bam in the output is filtered bam with dupes	
+									# and nodup_bam in the output is filtered bam with dupes
 
+	String mito_chr_name = 'chrM' 	# name of mito chromosome. THIS IS NOT A REG-EX! you can define only one chromosome name for mito.
 	String regex_filter_reads = 'chrM' 	# Perl-style regular expression pattern for chr name to filter out reads
-                        		# to remove matching reads from TAGALIGN
+									# those reads with this chromosome name (in the 1st column) will be excluded from peak calling
 	Int subsample_reads = 0		# number of reads to subsample TAGALIGN
 								# 0 for no subsampling. this affects all downstream analysis
 
@@ -280,6 +281,7 @@ workflow atac {
 			mapq_thresh = mapq_thresh,
 			no_dup_removal = no_dup_removal,
 			multimapping = multimapping,
+			mito_chr_name = mito_chr_name,
 
 			cpu = filter_cpu,
 			mem_mb = filter_mem_mb,
@@ -297,6 +299,7 @@ workflow atac {
 			regex_grep_v_ta = regex_filter_reads,
 			subsample = subsample_reads,
 			paired_end = paired_end,
+			mito_chr_name = mito_chr_name,
 
 			cpu = bam2ta_cpu,
 			mem_mb = bam2ta_mem_mb,
@@ -354,6 +357,7 @@ workflow atac {
 				ta = ta,
 				subsample = xcor_subsample_reads,
 				paired_end = paired_end,
+				mito_chr_name = mito_chr_name,
 
 				cpu = xcor_cpu,
 				mem_mb = xcor_mem_mb,
@@ -651,6 +655,7 @@ workflow atac {
 			reg2map_bed = reg2map_bed,
 			reg2map = reg2map,
 			roadmap_meta = roadmap_meta,
+			mito_chr_name = mito_chr_name,
 
 			mem_mb = ataqc_mem_mb,
 			mem_java_mb = ataqc_mem_java_mb,
@@ -797,6 +802,7 @@ task filter {
 								# dup.qc and pbc.qc will be empty files
 								# and nodup_bam in the output is 
 								# filtered bam with dupes	
+	String mito_chr_name
 	Int cpu
 	Int mem_mb
 	Int time_hr
@@ -812,6 +818,7 @@ task filter {
 			${"--dup-marker " + dup_marker} \
 			${"--mapq-thresh " + mapq_thresh} \
 			${if no_dup_removal then "--no-dup-removal" else ""} \
+			${"--mito-chr-name " + mito_chr_name} \
 			${"--nth " + cpu}
 	}
 	output {
@@ -836,6 +843,7 @@ task bam2ta {
 	Boolean disable_tn5_shift 	# no tn5 shifting (it's for dnase-seq)
 	String regex_grep_v_ta   	# Perl-style regular expression pattern 
                         		# to remove matching reads from TAGALIGN
+	String mito_chr_name 		# mito chromosome name
 	Int subsample 				# number of reads to subsample TAGALIGN
 								# this affects all downstream analysis
 	Int cpu
@@ -849,6 +857,7 @@ task bam2ta {
 			${if paired_end then "--paired-end" else ""} \
 			${if disable_tn5_shift then "--disable-tn5-shift" else ""} \
 			${if regex_grep_v_ta!="" then "--regex-grep-v-ta '"+regex_grep_v_ta+"'" else ""} \
+			${"--mito-chr-name " + mito_chr_name} \
 			${"--subsample " + subsample} \
 			${"--nth " + cpu}
 	}
@@ -907,6 +916,7 @@ task pool_ta {
 task xcor {
 	File ta
 	Boolean paired_end
+	String mito_chr_name
 	Int subsample  # number of reads to subsample TAGALIGN
 				# this will be used for xcor only
 				# will not affect any downstream analysis
@@ -919,6 +929,7 @@ task xcor {
 		python $(which encode_xcor.py) \
 			${ta} \
 			${if paired_end then "--paired-end" else ""} \
+			${"--mito-chr-name " + mito_chr_name} \
 			${"--subsample " + subsample} \
 			--speak=0 \
 			${"--nth " + cpu}
@@ -1136,6 +1147,7 @@ task ataqc { # generate ATAQC report
 	File? reg2map_bed
 	File? reg2map
 	File? roadmap_meta
+	String mito_chr_name
 
 	Int mem_mb
 	Int mem_java_mb
@@ -1170,7 +1182,8 @@ task ataqc { # generate ATAQC report
 			${"--enh " + enh} \
 			${"--reg2map-bed " + reg2map_bed} \
 			${"--reg2map " + reg2map} \
-			${"--roadmap-meta " + roadmap_meta}
+			${"--roadmap-meta " + roadmap_meta} \
+			${"--mito-chr-name " + mito_chr_name}
 
 	}
 	output {

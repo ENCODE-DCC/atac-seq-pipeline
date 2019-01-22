@@ -15,6 +15,8 @@ def parse_arguments():
                         help='Path for BAM file.')
     parser.add_argument('--disable-tn5-shift', action="store_true",
                         help='Disable TN5 shifting for DNase-Seq.')
+    parser.add_argument('--mito-chr-name', default='chrM',
+                        help='Mito chromosome name.')
     parser.add_argument('--regex-grep-v-ta', default='chrM',
                         help='Perl-style regular expression pattern \
                         to remove matching reads from TAGALIGN.')
@@ -45,7 +47,7 @@ def bam2ta_se(bam, regex_grep_v_ta, out_dir):
     cmd = 'bedtools bamtobed -i {} | '
     cmd += 'awk \'BEGIN{{OFS="\\t"}}{{$4="N";$5="1000";print $0}}\' | '
     if regex_grep_v_ta:
-        cmd += 'grep -P -v \'{}\' | '.format(regex_grep_v_ta)
+        cmd += 'grep -P -v \'^{}\\b\' | '.format(regex_grep_v_ta)
     cmd += 'gzip -nc > {}'
     cmd = cmd.format(
         bam,
@@ -77,7 +79,7 @@ def bam2ta_pe(bam, regex_grep_v_ta, nth, out_dir):
     cmd2 += '%s\\t%s\\t%s\\tN\\t1000\\t%s\\n",'
     cmd2 += '$1,$2,$3,$9,$4,$5,$6,$10}}\' | '
     if regex_grep_v_ta:
-        cmd2 += 'grep -P -v \'{}\' | '.format(regex_grep_v_ta)
+        cmd2 += 'grep -P -v \'^{}\\b\' | '.format(regex_grep_v_ta)
     cmd2 += 'gzip -nc > {}'
     cmd2 = cmd2.format(
         bedpe,
@@ -124,10 +126,10 @@ def main():
         log.info('Subsampling TAGALIGN...')
         if args.paired_end:
             subsampled_ta = subsample_ta_pe(
-                ta, args.subsample, False, False, args.out_dir)
+                ta, args.subsample, False, args.mito_chr_name, False, args.out_dir)
         else:
             subsampled_ta = subsample_ta_se(
-                ta, args.subsample, False, args.out_dir)
+                ta, args.subsample, False, args.mito_chr_name, args.out_dir)
         temp_files.append(ta)
     else:
         subsampled_ta = ta

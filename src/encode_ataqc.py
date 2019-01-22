@@ -41,6 +41,7 @@ def parse_arguments():
     parser.add_argument('--reg2map', type=str, help='Reg2map file.')
     parser.add_argument('--reg2map-bed', type=str, help='Reg2map bed file.')
     parser.add_argument('--roadmap-meta', type=str, help='Roadmap metadata file.')
+    parser.add_argument('--mito-chr-name', default='chrM', type=str, help='Mito chromosome name.')
     parser.add_argument('--out-dir', default='', type=str, help='Output directory.')
     parser.add_argument('--log-level', default='INFO', help='Log level',
                         choices=['NOTSET','DEBUG','INFO','WARNING','CRITICAL','ERROR','CRITICAL'])
@@ -131,7 +132,7 @@ def ataqc():
         BOWTIE_STATS = None
 
     if COORDSORT_BAM:
-        chr_m_reads, fraction_chr_m = get_chr_m(COORDSORT_BAM)
+        chr_m_reads, fraction_chr_m = get_chr_m(COORDSORT_BAM, args.mito_chr_name)
     else:
         chr_m_reads, fraction_chr_m = (None, None)
 
@@ -178,6 +179,7 @@ def ataqc():
     if args.mito_dup_log:
         # mito_dups, fract_dups_from_mito = get_mito_dups(ALIGNED_BAM,
         #                                                 OUTPUT_PREFIX,
+        #                                                 args.mito_chr_name
         #                                                 paired_status,
         #                                                 use_sambamba=USE_SAMBAMBA_MARKDUP)
         with open(args.mito_dup_log,'r') as fp:

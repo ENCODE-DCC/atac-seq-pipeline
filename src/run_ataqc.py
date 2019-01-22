@@ -200,7 +200,7 @@ def get_bowtie_stats(bowtie_alignment_log):
     return bowtie_text
 
 
-def get_chr_m(sorted_bam_file):
+def get_chr_m(sorted_bam_file, mito_chr_name):
     '''
     Get fraction of reads that are mitochondrial (chr M).
     '''
@@ -210,7 +210,7 @@ def get_chr_m(sorted_bam_file):
     chr_m_reads = 0
     for chrom in chrom_list:
         chrom_stats = chrom.split('\t')
-        if chrom_stats[0] == 'chrM':
+        if chrom_stats[0] == mito_chr_name:
             chr_m_reads = int(chrom_stats[2])
         tot_reads += int(chrom_stats[2])
     if tot_reads==0:
@@ -549,7 +549,7 @@ def get_sambamba_dup_stats(sambamba_dup_file, paired_status):
         return ends_marked_dup, prct_dup
 
 
-def get_mito_dups(sorted_bam, prefix, endedness='Paired-ended', use_sambamba=False):
+def get_mito_dups(sorted_bam, prefix, mito_chr_name, endedness='Paired-ended', use_sambamba=False):
     '''
     Marks duplicates in the original aligned bam file and then determines
     how many reads are duplicates AND from chrM
@@ -605,7 +605,7 @@ def get_mito_dups(sorted_bam, prefix, endedness='Paired-ended', use_sambamba=Fal
     # Get the mitochondrial reads that are marked duplicates
     mito_dups = int(subprocess.check_output(['samtools',
                                              'view', '-f', '1024',
-                                             '-c', out_file, 'chrM']).strip())
+                                             '-c', out_file, mito_chr_name]).strip())
 
     total_dups = int(subprocess.check_output(['samtools',
                                               'view', '-f', '1024',
@@ -1476,6 +1476,7 @@ def main():
      ROADMAP_META, GENOME, CHROMSIZES, FASTQ, ALIGNED_BAM, ALIGNMENT_LOG, COORDSORT_BAM,
      DUP_LOG, PBC_LOG, FINAL_BAM, FINAL_BED, BIGWIG, PEAKS,
      NAIVE_OVERLAP_PEAKS, IDR_PEAKS, USE_SAMBAMBA_MARKDUP] = parse_args()
+    MITO_CHR_NAME = 'chrM'
 
     # Set up the log file and timing
     logging.basicConfig(filename='test.log', level=logging.DEBUG)
@@ -1489,7 +1490,7 @@ def main():
 
     # Sequencing metrics: Bowtie1/2 alignment log, chrM, GC bias
     BOWTIE_STATS = get_bowtie_stats(ALIGNMENT_LOG)
-    chr_m_reads, fraction_chr_m = get_chr_m(COORDSORT_BAM)
+    chr_m_reads, fraction_chr_m = get_chr_m(COORDSORT_BAM, MITO_CHR_NAME)
     gc_out, gc_plot, gc_summary = get_gc(FINAL_BAM,
                                          REF,
                                          OUTPUT_PREFIX)
@@ -1513,6 +1514,7 @@ def main():
 
     mito_dups, fract_dups_from_mito = get_mito_dups(ALIGNED_BAM,
                                                     OUTPUT_PREFIX,
+                                                    MITO_CHR_NAME,
                                                     paired_status,
                                                     use_sambamba=USE_SAMBAMBA_MARKDUP)
     [flagstat, mapped_count] = get_samtools_flagstat(ALIGNED_BAM)

@@ -46,6 +46,7 @@
     "atac.mapq_thresh" : 30,
     "atac.no_dup_removal" : false,
 
+    "atac.mito_chr_name" : "chrM",
     "atac.regex_filter_reads" : "chrM",
     "atac.subsample_reads" : 0,
 

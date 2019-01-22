@@ -25,6 +25,8 @@ def parse_arguments():
                         help='Paired-end BAM.')
     parser.add_argument('--multimapping', default=0, type=int,
                         help='Multimapping reads.')
+    parser.add_argument('--mito-chr-name', default='chrM',
+                        help='Mito chromosome name.')
     parser.add_argument('--nth', type=int, default=1,
                         help='Number of threads to parallelize.')
     parser.add_argument('--out-dir', default='', type=str,
@@ -228,7 +230,7 @@ def rm_dup_pe(dupmark_bam, nth, out_dir):
     run_shell_cmd(cmd1)
     return nodup_bam
 
-def pbc_qc_se(bam, out_dir):
+def pbc_qc_se(bam, mito_chr_name, out_dir):
     prefix = os.path.join(out_dir,
         os.path.basename(strip_ext_bam(bam)))
     # strip extension appended in the previous step
@@ -237,7 +239,7 @@ def pbc_qc_se(bam, out_dir):
 
     cmd2 = 'bedtools bamtobed -i {} | '
     cmd2 += 'awk \'BEGIN{{OFS="\\t"}}{{print $1,$2,$3,$6}}\' | '
-    cmd2 += 'grep -v "chrM" | sort | uniq -c | '
+    cmd2 += 'grep -v "^{}\\b" | sort | uniq -c | '
     cmd2 += 'awk \'BEGIN{{mt=0;m0=0;m1=0;m2=0}} ($1==1){{m1=m1+1}} '
     cmd2 += '($1==2){{m2=m2+1}} {{m0=m0+1}} {{mt=mt+$1}} END{{m1_m2=-1.0; '
     cmd2 += 'if(m2>0) m1_m2=m1/m2; m0_mt=0; if (mt>0) m0_mt=m0/mt; m1_m0=0; if (m0>0) m1_m0=m1/m0; '
@@ -245,11 +247,12 @@ def pbc_qc_se(bam, out_dir):
     cmd2 += 'mt,m0,m1,m2,m0_mt,m1_m0,m1_m2}}\' > {}'
     cmd2 = cmd2.format(
         bam,
+        mito_chr_name,
         pbc_qc)
     run_shell_cmd(cmd2)
     return pbc_qc
 
-def pbc_qc_pe(bam, nth, out_dir):
+def pbc_qc_pe(bam, mito_chr_name, nth, out_dir):
     prefix = os.path.join(out_dir,
         os.path.basename(strip_ext_bam(bam)))
     pbc_qc = '{}.pbc.qc'.format(prefix)
@@ -258,7 +261,7 @@ def pbc_qc_pe(bam, nth, out_dir):
     nmsrt_bam = sambamba_name_sort(bam, nth, out_dir)
     cmd3 = 'bedtools bamtobed -bedpe -i {} | '
     cmd3 += 'awk \'BEGIN{{OFS="\\t"}}{{print $1,$2,$4,$6,$9,$10}}\' | '
-    cmd3 += 'grep -v "chrM" | sort | uniq -c | '
+    cmd3 += 'grep -v "^{}\\b" | sort | uniq -c | '
     cmd3 += 'awk \'BEGIN{{mt=0;m0=0;m1=0;m2=0}} ($1==1){{m1=m1+1}} '
     cmd3 += '($1==2){{m2=m2+1}} {{m0=m0+1}} {{mt=mt+$1}} END{{m1_m2=-1.0; '
     cmd3 += 'if(m2>0) m1_m2=m1/m2; m0_mt=0; if (mt>0) m0_mt=m0/mt; m1_m0=0; if (m0>0) m1_m0=m1/m0; '
@@ -266,6 +269,7 @@ def pbc_qc_pe(bam, nth, out_dir):
     cmd3 += ',mt,m0,m1,m2,m0_mt,m1_m0,m1_m2}}\' > {}'
     cmd3 = cmd3.format(
         nmsrt_bam,
+        mito_chr_name,
         pbc_qc)
     run_shell_cmd(cmd3)
     rm_f(nmsrt_bam)
@@ -362,12 +366,12 @@ def main():
     if not args.no_dup_removal:
         if args.paired_end:
             ret_val_3 = pool.apply_async(pbc_qc_pe,
-                            (dupmark_bam,
+                            (dupmark_bam, args.mito_chr_name,
                                 max(1,args.nth-2),
                                 args.out_dir))
         else:
             ret_val_3 = pool.apply_async(pbc_qc_se,
-                            (dupmark_bam, args.out_dir))
+                            (dupmark_bam, args.mito_chr_name, args.out_dir))
             
     # gather
     nodup_bai = ret_val_1.get(BIG_INT)
