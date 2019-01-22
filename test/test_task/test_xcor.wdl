@@ -13,6 +13,7 @@ workflow test_xcor {
 	String ref_pe_xcor_log_subsample
 	String ref_se_xcor_log
 	String ref_se_xcor_log_subsample
+	String mito_chr_name = 'chrM'
 
 	Int xcor_cpu = 1
 	Int xcor_mem_mb = 16000
@@ -23,6 +24,7 @@ workflow test_xcor {
 		ta = pe_ta,
 		subsample = xcor_subsample_default,
 		paired_end = true,
+		mito_chr_name = mito_chr_name,
 
 		cpu = xcor_cpu,
 		mem_mb = xcor_mem_mb,
@@ -33,6 +35,7 @@ workflow test_xcor {
 		ta = pe_ta,
 		subsample = xcor_subsample,
 		paired_end = true,
+		mito_chr_name = mito_chr_name,
 
 		cpu = xcor_cpu,
 		mem_mb = xcor_mem_mb,
@@ -43,6 +46,7 @@ workflow test_xcor {
 		ta = se_ta,
 		subsample = xcor_subsample_default,
 		paired_end = false,
+		mito_chr_name = mito_chr_name,
 
 		cpu = xcor_cpu,
 		mem_mb = xcor_mem_mb,
@@ -53,6 +57,7 @@ workflow test_xcor {
 		ta = se_ta,
 		subsample = xcor_subsample,
 		paired_end = false,
+		mito_chr_name = mito_chr_name,
 
 		cpu = xcor_cpu,
 		mem_mb = xcor_mem_mb,
