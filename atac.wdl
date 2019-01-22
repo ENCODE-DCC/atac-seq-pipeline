@@ -1155,7 +1155,7 @@ task ataqc { # generate ATAQC report
 	String disks
 
 	command {
-		export _JAVA_OPTIONS="-Xms256M -Xmx${mem_java_mb}M -XX:ParallelGCThreads=1"
+		export _JAVA_OPTIONS="-Xms256M -Xmx${mem_java_mb}M -XX:ParallelGCThreads=1 $_JAVA_OPTIONS"
 
 		python $(which encode_ataqc.py) \
 			${if paired_end then "--paired-end" else ""} \
