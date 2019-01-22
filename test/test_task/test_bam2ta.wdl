@@ -27,7 +27,7 @@ workflow test_bam2ta {
 		disable_tn5_shift = false,
 		subsample = 0,
 		paired_end = true,
-		regex_grep_v_ta = regex_filter_reads
+		regex_grep_v_ta = regex_filter_reads,
 		mito_chr_name = mito_chr_name,
 
 		cpu = bam2ta_cpu,
