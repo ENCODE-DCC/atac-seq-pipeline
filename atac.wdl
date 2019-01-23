@@ -167,9 +167,9 @@ workflow atac {
 	Array[File] macs2_frip_qcs = []
 	Array[File] macs2_pr1_frip_qcs = []
 	Array[File] macs2_pr2_frip_qcs = []
-	File? macs2_pooled_frip_qc
-	File? macs2_ppr1_frip_qc
-	File? macs2_ppr2_frip_qc
+	File? macs2_pooled_frip_qc_
+	File? macs2_ppr1_frip_qc_
+	File? macs2_ppr2_frip_qc_
 	Array[File] ataqc_htmls = []
 	Array[File] ataqc_txts = []
 
@@ -686,9 +686,9 @@ workflow atac {
 		frip_macs2_qcs = macs2_frip_qcs_,
 		frip_macs2_qcs_pr1 = macs2_pr1_frip_qcs_,
 		frip_macs2_qcs_pr2 = macs2_pr2_frip_qcs_,
-		frip_macs2_qc_pooled = if defined(macs2_pooled_frip_qc) then macs2_pooled_frip_qc else macs2_pooled.frip_qc,
-		frip_macs2_qc_ppr1 = if defined(macs2_ppr1_frip_qc) then macs2_ppr1_frip_qc else macs2_ppr1.frip_qc,
-		frip_macs2_qc_ppr2 = if defined(macs2_ppr2_frip_qc) then macs2_ppr2_frip_qc else macs2_ppr2.frip_qc,
+		frip_macs2_qc_pooled = if defined(macs2_pooled_frip_qc_) then macs2_pooled_frip_qc_ else macs2_pooled.frip_qc,
+		frip_macs2_qc_ppr1 = if defined(macs2_ppr1_frip_qc_) then macs2_ppr1_frip_qc_ else macs2_ppr1.frip_qc,
+		frip_macs2_qc_ppr2 = if defined(macs2_ppr2_frip_qc_) then macs2_ppr2_frip_qc_ else macs2_ppr2.frip_qc,
 
 		idr_plots = idr.idr_plot,
 		idr_plots_pr = idr_pr.idr_plot,

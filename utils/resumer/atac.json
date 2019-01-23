@@ -45,15 +45,15 @@
         },
         "atac.macs2_pooled" : {
             "npeak" : "atac.peak_pooled",
-            "frip_qc" : "atac.macs2_pooled_frip_qc"
+            "frip_qc" : "atac.macs2_pooled_frip_qc_"
         },
         "atac.macs2_ppr1" : {
             "npeak" : "atac.peak_ppr1",
-            "frip_qc" : "atac.macs2_ppr1_frip_qc"
+            "frip_qc" : "atac.macs2_ppr1_frip_qc_"
         },
         "atac.macs2_ppr2" : {
             "npeak" : "atac.peak_ppr2",
-            "frip_qc" : "atac.macs2_ppr2_frip_qc"
+            "frip_qc" : "atac.macs2_ppr2_frip_qc_"
         }
     }
 }
