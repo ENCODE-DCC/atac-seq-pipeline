@@ -1,6 +1,6 @@
-    #!/usr/bin/env python2
+#!/usr/bin/env python2
 
-# written by Jin Lee, 2016
+# written by Jin Lee, 2019
 
 import os
 import argparse
