@@ -25,7 +25,7 @@ def parse_arguments():
     # if not specified by user, look into this array on script's directory
     if not args.output_def_json_file:
         script_dir = os.path.dirname(os.path.realpath(__file__))        
-        default_output_def_json_files = ['atac.json', 'chip.json', 'rna.json', 'hic.json']
+        default_output_def_json_files = ['default.json']
         for f in default_output_def_json_files:
             json_file = os.path.join(script_dir, f)
             if os.path.exists(json_file):
