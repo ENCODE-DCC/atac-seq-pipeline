@@ -478,21 +478,23 @@ workflow atac {
 			  ('rep3-rep4',[peaks_[2],peaks_[3]]), ('rep3-rep5',[peaks_[2],peaks_[4]]), ('rep3-rep6',[peaks_[2],peaks_[5]]),
 			  ('rep4-rep5',[peaks_[3],peaks_[4]]), ('rep4-rep6',[peaks_[3],peaks_[5]]),
 			  ('rep5-rep6',[peaks_[4],peaks_[5]])]
-	scatter( pair in peak_pairs ) {
-		# Naive overlap on every pair of true replicates
-		call overlap { input :
-			prefix = pair.left,
-			peak1 = pair.right[0],
-			peak2 = pair.right[1],
-			peak_pooled = select_first([macs2_pooled.npeak, peak_pooled]),
-			peak_type = peak_type,
-			blacklist = blacklist,
-			chrsz = chrsz,
-			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
-			ta = if defined(ta_pooled) then ta_pooled else pool_ta.ta_pooled,
+	if ( length(peaks_)>0 ) {
+		scatter( pair in peak_pairs ) {
+			# Naive overlap on every pair of true replicates
+			call overlap { input :
+				prefix = pair.left,
+				peak1 = pair.right[0],
+				peak2 = pair.right[1],
+				peak_pooled = select_first([macs2_pooled.npeak, peak_pooled]),
+				peak_type = peak_type,
+				blacklist = blacklist,
+				chrsz = chrsz,
+				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
+				ta = if defined(ta_pooled) then ta_pooled else pool_ta.ta_pooled,
+			}
 		}
 	}
-	if ( enable_idr ) {
+	if ( length(peaks_)>0 && enable_idr ) {
 		scatter( pair in peak_pairs ) {
 			# IDR on every pair of true replicates
 			call idr { input : 
