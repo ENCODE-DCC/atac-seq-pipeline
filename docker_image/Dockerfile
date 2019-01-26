@@ -9,7 +9,8 @@
 #  then install with --no-dependencies
 
 # Set the base image to Ubuntu 16.04
-FROM ubuntu:16.04
+#FROM ubuntu:16.04
+FROM ubuntu@sha256:e4a134999bea4abb4a27bc437e6118fdddfb172e1b9d683129b74d254af51675
 
 # File Author / Maintainer
 MAINTAINER Jin Lee
@@ -78,7 +79,7 @@ RUN wget http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/bedGraphToBigWig 
 
 # Install samtools 1.2
 RUN git clone --branch 1.2 --single-branch https://github.com/samtools/samtools.git && \
-    git clone --branch 1.2 --single-branch git://github.com/samtools/htslib.git && \
+    git clone --branch 1.2 --single-branch https://github.com/samtools/htslib.git && \
     cd samtools && make && make install && cd ../ && rm -rf samtools* htslib*
 
 # Install bedtools 2.26.0
