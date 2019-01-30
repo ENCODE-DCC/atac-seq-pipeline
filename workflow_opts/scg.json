@@ -1,7 +1,7 @@
 {
     "default_runtime_attributes" : {
         "slurm_account" : "YOUR_SLURM_ACCOUNT",
-        "singularity_container" : "/reference/ENCODE/pipeline_singularity_images/atac-seq-pipeline-v1.1.6.simg",
+        "singularity_container" : "/reference/ENCODE/pipeline_singularity_images/atac-seq-pipeline-v1.1.7.simg",
         "singularity_bindpath" : "/reference/ENCODE,/scratch,/srv/gsfs0"
     }
 }

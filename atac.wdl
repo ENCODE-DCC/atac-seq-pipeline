@@ -2,7 +2,7 @@
 # Author: Jin Lee (leepc12@gmail.com)
 
 workflow atac {
-	String pipeline_ver = 'v1.1.6'
+	String pipeline_ver = 'v1.1.7'
 	### sample name, description
 	String title = 'Untitled'
 	String description = 'No description'
