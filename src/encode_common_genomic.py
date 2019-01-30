@@ -129,19 +129,20 @@ def locate_picard():
             raise Exception(msg)
             
 
-def subsample_ta_se(ta, subsample, non_mito, out_dir):
+def subsample_ta_se(ta, subsample, non_mito, mito_chr_name, out_dir):
     prefix = os.path.join(out_dir,
         os.path.basename(strip_ext_ta(ta)))
-    ta_subsampled = '{}.{}{}.tagAlign.gz'.format(
+    ta_subsampled = '{}.{}{}tagAlign.gz'.format(
         prefix,
-        'no_chrM' if non_mito else '',
-        '.{}'.format(human_readable_number(subsample)) if subsample>0 else ''
+        'no_chrM.' if non_mito else '',
+        '{}.'.format(human_readable_number(subsample)) if subsample>0 else ''
         )
 
     # use bash
     cmd = 'bash -c "zcat -f {} | '
     if non_mito:
-        cmd += 'grep -v chrM | '
+        # cmd += 'awk \'{{if ($1!="'+mito_chr_name+'") print $0}}\' | '
+        cmd += 'grep -v \'^'+mito_chr_name+'\\b\' | '        
     if subsample>0:
         cmd += 'shuf -n {} --random-source=<(openssl enc -aes-256-ctr -pass pass:$(zcat -f {} | wc -c) -nosalt </dev/zero 2>/dev/null) | '
         cmd += 'gzip -nc > {}"'
@@ -159,20 +160,21 @@ def subsample_ta_se(ta, subsample, non_mito, out_dir):
     run_shell_cmd(cmd)
     return ta_subsampled
 
-def subsample_ta_pe(ta, subsample, non_mito, r1_only, out_dir):
+def subsample_ta_pe(ta, subsample, non_mito, mito_chr_name, r1_only, out_dir):
     prefix = os.path.join(out_dir,
         os.path.basename(strip_ext_ta(ta)))
-    ta_subsampled = '{}.{}{}{}.tagAlign.gz'.format(
+    ta_subsampled = '{}.{}{}{}tagAlign.gz'.format(
         prefix,
         'no_chrM.' if non_mito else '',
-        'R1' if r1_only else '',
-        '.{}'.format(human_readable_number(subsample)) if subsample>0 else ''
+        'R1.' if r1_only else '',
+        '{}.'.format(human_readable_number(subsample)) if subsample>0 else ''
         )
     ta_tmp = '{}.tagAlign.tmp'.format(prefix)
 
     cmd0 = 'bash -c "zcat -f {} | '
     if non_mito:
-        cmd0 += 'grep -v chrM | '
+        # cmd0 += 'awk \'{{if ($1!="'+mito_chr_name+'") print $0}}\' | '
+        cmd0 += 'grep -v \'^'+mito_chr_name+'\\b\' | '        
     cmd0 += 'sed \'N;s/\\n/\\t/\' '
     if subsample>0:
         cmd0 += '| shuf -n {} --random-source=<(openssl enc -aes-256-ctr -pass pass:$(zcat -f {} | wc -c) -nosalt </dev/zero 2>/dev/null) > {}"'
@@ -344,7 +346,7 @@ def peak_to_bigbed(peak, peak_type, chrsz, keep_irregular_chr, out_dir):
     with open(as_file,'w') as fp: fp.write(as_file_contents)
 
     if not keep_irregular_chr:
-        cmd1 = "cat {} | grep -P 'chr[\dXY]+[ \\t]' > {}".format(chrsz, chrsz_tmp)
+        cmd1 = "cat {} | grep -P 'chr[\\dXY]+\\b' > {}".format(chrsz, chrsz_tmp)
     else:
         cmd1 = "cat {} > {}".format(chrsz, chrsz_tmp)
     run_shell_cmd(cmd1)

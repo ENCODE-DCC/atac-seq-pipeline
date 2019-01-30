@@ -50,7 +50,7 @@ def blacklist_filter(peak, blacklist, keep_irregular_chr, out_dir):
         cmd += 'awk \'BEGIN{{OFS="\\t"}} '
         cmd += '{{if ($5>1000) $5=1000; print $0}}\' | '
         if not keep_irregular_chr:
-            cmd += 'grep -P \'chr[\\dXY]+[ \\t]\' | '
+            cmd += 'grep -P \'chr[\\dXY]+\\b\' | '
         cmd += 'gzip -nc > {}'
         cmd = cmd.format(
             tmp1, # peak

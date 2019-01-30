@@ -31,6 +31,7 @@ workflow test_ataqc {
 	File reg2map_bed
 	File reg2map
 	File roadmap_meta
+	String mito_chr_name = 'chrM'
 
 	#File ref_qc_html
 	File ref_qc_txt
@@ -76,6 +77,7 @@ workflow test_ataqc {
 		mem_java_mb = ataqc_mem_java_mb,
 		time_hr = ataqc_time_hr,
 		disks = ataqc_disks,
+		mito_chr_name = mito_chr_name,
 	}
 
 	# test ataqc with limited input data
@@ -99,6 +101,7 @@ workflow test_ataqc {
 			reg2map_bed = reg2map_bed,
 			reg2map = reg2map,
 			roadmap_meta = roadmap_meta,
+			mito_chr_name = mito_chr_name,
 		
 			mem_mb = ataqc_mem_mb,
 			mem_java_mb = ataqc_mem_java_mb,
@@ -124,6 +127,7 @@ workflow test_ataqc {
 			reg2map_bed = reg2map_bed,
 			reg2map = reg2map,
 			roadmap_meta = roadmap_meta,
+			mito_chr_name = mito_chr_name,
 
 			mem_mb = ataqc_mem_mb,
 			mem_java_mb = ataqc_mem_java_mb,
@@ -148,6 +152,7 @@ workflow test_ataqc {
 			reg2map_bed = reg2map_bed,
 			reg2map = reg2map,
 			roadmap_meta = roadmap_meta,
+			mito_chr_name = mito_chr_name,
 
 			mem_mb = ataqc_mem_mb,
 			mem_java_mb = ataqc_mem_java_mb,
@@ -165,6 +170,7 @@ workflow test_ataqc {
 		chrsz = chrsz,
 		tss_enrich = tss_enrich,
 		blacklist = blacklist,
+		mito_chr_name = mito_chr_name,
 
 		mem_mb = ataqc_mem_mb,
 		mem_java_mb = ataqc_mem_java_mb,

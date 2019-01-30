@@ -14,6 +14,8 @@ def parse_arguments():
                                         description='')
     parser.add_argument('ta', type=str,
                         help='Path for TAGALIGN file.')
+    parser.add_argument('--mito-chr-name', default='chrM',
+                        help='Mito chromosome name.')
     parser.add_argument('--subsample', type=int, default=0,
                         help='Subsample TAGALIGN.')
     parser.add_argument('--speak', type=int, default=-1,
@@ -35,7 +37,7 @@ def parse_arguments():
     log.info(sys.argv)
     return args
 
-def xcor(ta, speak, nth, out_dir):
+def xcor(ta, speak, mito_chr_name, nth, out_dir):
     prefix = os.path.join(out_dir,
         os.path.basename(strip_ext_ta(ta)))
     xcor_plot_pdf = '{}.cc.plot.pdf'.format(prefix)
@@ -43,10 +45,11 @@ def xcor(ta, speak, nth, out_dir):
     fraglen_txt = '{}.cc.fraglen.txt'.format(prefix)
 
     cmd1 = 'Rscript --max-ppsize=500000 $(which run_spp.R) -rf -c={} -p={} '
-    cmd1 += '-filtchr=chrM -savp={} -out={} {}'
+    cmd1 += '-filtchr="{}" -savp={} -out={} {}'
     cmd1 = cmd1.format(
         ta,
         nth,
+        mito_chr_name,
         xcor_plot_pdf,
         xcor_score,
         '-speak={}'.format(speak) if speak>=0 else '')
@@ -77,15 +80,15 @@ def main():
     log.info('Subsampling TAGALIGN for xcor...')
     if args.paired_end:
         ta_subsampled = subsample_ta_pe(
-            args.ta, args.subsample, True, True, args.out_dir)
+            args.ta, args.subsample, True, args.mito_chr_name, True, args.out_dir)
     else:
         ta_subsampled = subsample_ta_se(
-            args.ta, args.subsample, True, args.out_dir)
+            args.ta, args.subsample, True, args.mito_chr_name, args.out_dir)
     temp_files.append(ta_subsampled)
 
     log.info('Cross-correlation analysis...')
     xcor_plot_pdf, xcor_plot_png, xcor_score, fraglen_txt = xcor(
-        ta_subsampled, args.speak, args.nth, args.out_dir)
+        ta_subsampled, args.speak, args.mito_chr_name, args.nth, args.out_dir)
 
     log.info('Removing temporary files...')
     rm_f(temp_files)

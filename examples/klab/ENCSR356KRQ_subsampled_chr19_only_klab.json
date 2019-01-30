@@ -25,7 +25,6 @@
         "/mnt/data/pipeline_test_samples/encode-atac-seq-pipeline/ENCSR356KRQ/fastq/rep2/pair2/ENCFF886FSC.subsampled.400.fastq.gz",
         "/mnt/data/pipeline_test_samples/encode-atac-seq-pipeline/ENCSR356KRQ/fastq/rep2/pair2/ENCFF573UXK.subsampled.400.fastq.gz"
     ],
-    "atac.qc_report.qc_json_ref" : "/users/leepc12/code/atac-seq-pipeline/test/test_workflow/ref_output/ENCSR356KRQ_subsampled_chr19_only_qc.json",
 
     "atac.paired_end" : true,
     "atac.multimapping" : 4,

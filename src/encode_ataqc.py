@@ -41,6 +41,7 @@ def parse_arguments():
     parser.add_argument('--reg2map', type=str, help='Reg2map file.')
     parser.add_argument('--reg2map-bed', type=str, help='Reg2map bed file.')
     parser.add_argument('--roadmap-meta', type=str, help='Roadmap metadata file.')
+    parser.add_argument('--mito-chr-name', default='chrM', type=str, help='Mito chromosome name.')
     parser.add_argument('--out-dir', default='', type=str, help='Output directory.')
     parser.add_argument('--log-level', default='INFO', help='Log level',
                         choices=['NOTSET','DEBUG','INFO','WARNING','CRITICAL','ERROR','CRITICAL'])
@@ -131,7 +132,7 @@ def ataqc():
         BOWTIE_STATS = None
 
     if COORDSORT_BAM:
-        chr_m_reads, fraction_chr_m = get_chr_m(COORDSORT_BAM)
+        chr_m_reads, fraction_chr_m = get_chr_m(COORDSORT_BAM, args.mito_chr_name)
     else:
         chr_m_reads, fraction_chr_m = (None, None)
 
@@ -178,6 +179,7 @@ def ataqc():
     if args.mito_dup_log:
         # mito_dups, fract_dups_from_mito = get_mito_dups(ALIGNED_BAM,
         #                                                 OUTPUT_PREFIX,
+        #                                                 args.mito_chr_name
         #                                                 paired_status,
         #                                                 use_sambamba=USE_SAMBAMBA_MARKDUP)
         with open(args.mito_dup_log,'r') as fp:
@@ -255,7 +257,8 @@ def ataqc():
         peak_counts = get_peak_counts(PEAKS, NAIVE_OVERLAP_PEAKS, IDR_PEAKS)
     else:
         peak_counts = None
-    if PEAKS:
+    # if PEAKS:
+    if False:
         raw_peak_summ, raw_peak_dist = get_region_size_metrics(PEAKS)
     else:
         raw_peak_summ, raw_peak_dist = (None, None)
@@ -414,15 +417,23 @@ def ataqc():
             textfile.write('{0}\t{1}\n'.format(key, value))
         elif isinstance(value, float):
             textfile.write('{0}\t{1}\n'.format(key, value))
-        elif isinstance(value, OrderedDict):
+        elif isinstance(value, OrderedDict):            
+            if key=='idr_peak_summ':
+                key_prefix = 'IDR peak stats: '
+            elif key=='naive_peak_summ':
+                key_prefix = 'Naive peak stats: '
+            elif key=='raw_peak_summ':
+                key_prefix = 'Raw peak stats: '
+            else:
+                key_prefix = ''
             for dict_key, dict_value in value.iteritems():
                 if isinstance(dict_value, tuple):
-                    textfile.write('{0}'.format(dict_key))
+                    textfile.write('{0}{1}'.format(key_prefix, dict_key))
                     for tuple_val in dict_value:
                         textfile.write('\t{0}'.format(tuple_val))
                     textfile.write('\n')
                 else:
-                    textfile.write('{0}\t{1}\n'.format(dict_key, dict_value))
+                    textfile.write('{0}{1}\t{2}\n'.format(key_prefix, dict_key, dict_value))
         # QC tables go here
         elif isinstance(value, list):
             if 'bowtie' in value[0]: # Hack, fix this

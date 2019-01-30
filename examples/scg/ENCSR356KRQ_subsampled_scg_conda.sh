@@ -46,6 +46,10 @@ source activate encode-atac-seq-pipeline
 #  it's a sample with multimapping reads
 INPUT=examples/scg/ENCSR356KRQ_subsampled_scg.json
 
+# If this pipeline fails, then use this metadata JSON file to resume a failed pipeline from where it left 
+# See details in /utils/resumer/README.md
+PIPELINE_METADATA=metadata.json
+
 # limit number of concurrent tasks
 #  we recommend to use a number of replicates here
 #  so that all replicates are processed in parellel at the same time.
@@ -58,4 +62,4 @@ NUM_CONCURRENT_TASK=2
 #  you can monitor your jobs with "squeue -u $USER"
 java -jar -Dconfig.file=backends/backend.conf \
 -Dbackend.providers.Local.config.concurrent-job-limit=${NUM_CONCURRENT_TASK} \
-$HOME/cromwell-34.jar run atac.wdl -i ${INPUT}
+$HOME/cromwell-34.jar run atac.wdl -i ${INPUT} -m ${PIPELINE_METADATA}
