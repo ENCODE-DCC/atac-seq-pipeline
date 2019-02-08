@@ -69,8 +69,7 @@ def parse_arguments():
                         help='Multimapping reads.')
     parser.add_argument('--paired-end', action="store_true",
                         help='Paired-end sample.')
-    parser.add_argument('--pipeline-type', type=str, required=True,
-                        choices=['atac','dnase','tf','histone'],
+    parser.add_argument('--pipeline-type', type=str, required=True,                        
                         help='Pipeline type.')
     parser.add_argument('--peak-caller', type=str, required=True,
                         help='Description for sample.')

@@ -236,19 +236,31 @@ def parse_dup_qc(txt):
         result['dupes_pct'] = float(dupes_pct)
     return result
 
+def int_or_none(var):
+    try:
+        return int(var)
+    except ValueError:
+        return None
+
+def float_or_none(var):
+    try:
+        return float(var)
+    except ValueError:
+        return None
+
 def parse_pbc_qc(txt):
     result = OrderedDict()
     with open(txt, 'r') as f:
         for line in f:
             arr = line.strip().split('\t')
             break
-    result['total_read_pairs'] = int(arr[0])
-    result['distinct_read_pairs'] = int(arr[1])
-    result['one_read_pair'] = int(arr[2])
-    result['two_read_pair'] = int(arr[3])
-    result['NRF'] = float(arr[4])
-    result['PBC1'] = float(arr[5])
-    result['PBC2'] = float(arr[6])
+    result['total_read_pairs'] = int_or_none(arr[0])
+    result['distinct_read_pairs'] = int_or_none(arr[1])
+    result['one_read_pair'] = int_or_none(arr[2])
+    result['two_read_pair'] = int_or_none(arr[3])
+    result['NRF'] = float_or_none(arr[4])
+    result['PBC1'] = float_or_none(arr[5])
+    result['PBC2'] = float_or_none(arr[6])
     return result
 
 def parse_xcor_score(txt):
