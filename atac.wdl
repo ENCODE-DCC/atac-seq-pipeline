@@ -1033,7 +1033,7 @@ task idr {
 		Array[File] bfilt_idr_peak_hammock = glob("*.bfilt."+peak_type+".hammock.gz*")
 		File idr_plot = glob("*.txt.png")[0]
 		File idr_unthresholded_peak = glob("*.txt.gz")[0]
-		File idr_log = glob("*.log")[0]
+		File idr_log = glob("*.idr*.log")[0]
 		File frip_qc = if defined(ta) then glob("*.frip.qc")[0] else glob("null")[0]
 	}
 	runtime {
