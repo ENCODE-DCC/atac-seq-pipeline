@@ -228,39 +228,31 @@ def pdf2png(pdf, out_dir):
     run_shell_cmd(cmd)
     return png
 
-def run_shell_cmd(cmd): 
-    try:
-        p = subprocess.Popen(cmd, shell=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            universal_newlines=True,
-            preexec_fn=os.setsid)
-        pid = p.pid
-        pgid = os.getpgid(pid)
-        log.info('run_shell_cmd: PID={}, CMD={}'.format(pid, cmd))
-        ret = ''
-        while True:
-            line = p.stdout.readline()
-            if line=='' and p.poll() is not None:
-                break
-            # log.debug('PID={}: {}'.format(pid,line.strip('\n')))
-            if line:
-                print('PID={}: {}'.format(pid,line.strip('\n')))
-                ret += line
-        p.communicate() # wait here
-        if p.returncode > 0:
-            raise subprocess.CalledProcessError(
-                p.returncode, cmd)
-        return ret.strip('\n')
-    except:
+def run_shell_cmd(cmd):
+    p = subprocess.Popen(['/bin/bash','-o','pipefail'], # to catch error in pipe
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        universal_newlines=True,
+        preexec_fn=os.setsid) # to make a new process with a new PGID
+    pid = p.pid
+    pgid = os.getpgid(pid)
+    log.info('run_shell_cmd: PID={}, PGID={}, CMD={}'.format(pid, pgid, cmd))
+    stdout, stderr = p.communicate(cmd)
+    rc = p.returncode
+    err_str = 'PID={}, PGID={}, RC={}\nSTDERR={}\nSTDOUT={}'.format(pid, pgid, rc,
+        stderr.strip(), stdout.strip())
+    if rc:
         # kill all child processes
         try:
             os.killpg(pgid, signal.SIGKILL)
-            p.terminate()
         except:
             pass
-        raise Exception('Killed PID={}, PGID={}\nCMD={}\nSTDOUT={}'.format(
-            pid, pgid, cmd, ret))
+        finally:
+            raise Exception(err_str)
+    else:
+        log.info(err_str)
+    return stdout.strip('\n')
 
 # math
 

@@ -138,21 +138,21 @@ def subsample_ta_se(ta, subsample, non_mito, mito_chr_name, out_dir):
         '{}.'.format(human_readable_number(subsample)) if subsample>0 else ''
         )
 
-    # use bash
-    cmd = 'bash -c "zcat -f {} | '
+    # bash-only
+    cmd = 'zcat -f {} | '
     if non_mito:
         # cmd += 'awk \'{{if ($1!="'+mito_chr_name+'") print $0}}\' | '
         cmd += 'grep -v \'^'+mito_chr_name+'\\b\' | '        
     if subsample>0:
         cmd += 'shuf -n {} --random-source=<(openssl enc -aes-256-ctr -pass pass:$(zcat -f {} | wc -c) -nosalt </dev/zero 2>/dev/null) | '
-        cmd += 'gzip -nc > {}"'
+        cmd += 'gzip -nc > {}'
         cmd = cmd.format(
             ta,
             subsample,
             ta,
             ta_subsampled)
     else:
-        cmd += 'gzip -nc > {}"'
+        cmd += 'gzip -nc > {}'
         cmd = cmd.format(
             ta,
             ta_subsampled)
@@ -171,20 +171,20 @@ def subsample_ta_pe(ta, subsample, non_mito, mito_chr_name, r1_only, out_dir):
         )
     ta_tmp = '{}.tagAlign.tmp'.format(prefix)
 
-    cmd0 = 'bash -c "zcat -f {} | '
+    cmd0 = 'zcat -f {} | '
     if non_mito:
         # cmd0 += 'awk \'{{if ($1!="'+mito_chr_name+'") print $0}}\' | '
         cmd0 += 'grep -v \'^'+mito_chr_name+'\\b\' | '        
     cmd0 += 'sed \'N;s/\\n/\\t/\' '
     if subsample>0:
-        cmd0 += '| shuf -n {} --random-source=<(openssl enc -aes-256-ctr -pass pass:$(zcat -f {} | wc -c) -nosalt </dev/zero 2>/dev/null) > {}"'
+        cmd0 += '| shuf -n {} --random-source=<(openssl enc -aes-256-ctr -pass pass:$(zcat -f {} | wc -c) -nosalt </dev/zero 2>/dev/null) > {}'
         cmd0 = cmd0.format(
             ta,
             subsample,
             ta,
             ta_tmp)
     else:
-        cmd0 += '> {}"'
+        cmd0 += '> {}'
         cmd0 = cmd0.format(
             ta,
             ta_tmp)
