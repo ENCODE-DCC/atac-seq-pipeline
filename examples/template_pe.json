@@ -38,6 +38,8 @@
     "atac.cutadapt_min_trim_len" : 5,
     "atac.cutadapt_err_rate" : 0.1,
 
+    "atac.enable_count_signal_track" : false,
+
     "atac.multimapping" : 0,
 
     "atac.bowtie2_score_min" : "",

@@ -33,6 +33,10 @@
             "npeak" : "atac.peaks_pr2",
             "frip_qc" : "atac.macs2_pr2_frip_qcs"
         },
+        "atac.count_signal_track" : {
+            "pos_bw" : "atac.count_signal_track_pos_bws",
+            "neg_bw" : "atac.count_signal_track_neg_bws"
+        },
         "atac.ataqc" : {
             "html" : "atac.ataqc_htmls",
             "txt" : "atac.ataqc_txts"
@@ -54,6 +58,10 @@
         "atac.macs2_ppr2" : {
             "npeak" : "atac.peak_ppr2",
             "frip_qc" : "atac.macs2_ppr2_frip_qc_"
+        },
+        "atac.count_signal_track_pooled" : {
+            "pos_bw" : "atac.count_signal_track_pooled_pos_bw_",
+            "neg_bw" : "atac.count_signal_track_pooled_neg_bw_"
         }
     }
 }

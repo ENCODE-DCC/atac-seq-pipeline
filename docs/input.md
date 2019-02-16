@@ -111,6 +111,9 @@ Let us take a close look at the following template JSON. Comments are not allowe
     "atac.cutadapt_min_trim_len" : 5,
     "atac.cutadapt_err_rate" : 0.1,
 
+    // Enable count signal track generation
+    "atac.enable_count_signal_track" : false,
+
     // multimapping reads
     "atac.multimapping" : 0,
 

@@ -24,6 +24,8 @@ workflow atac {
 	Int cutadapt_min_trim_len = 5	# minimum trim length for cutadapt -m
 	Float cutadapt_err_rate = 0.1	# Maximum allowed adapter error rate for cutadapt -e	
 
+	Boolean enable_count_signal_track = false 		# generate count signal track
+
 	Int multimapping = 0			# for multimapping reads
 
 	String bowtie2_score_min = ''	# min acceptable alignment score func w.r.t read length
@@ -170,6 +172,10 @@ workflow atac {
 	File? macs2_pooled_frip_qc_
 	File? macs2_ppr1_frip_qc_
 	File? macs2_ppr2_frip_qc_
+	Array[File] count_signal_track_pos_bws = []
+	Array[File] count_signal_track_neg_bws = []
+	File? count_signal_track_pooled_pos_bw_ 
+	File? count_signal_track_pooled_neg_bw_ 
 	Array[File] ataqc_htmls = []
 	Array[File] ataqc_txts = []
 
@@ -364,6 +370,24 @@ workflow atac {
 				time_hr = xcor_time_hr,
 				disks = xcor_disks,				
 			}
+		}
+	}
+
+	# generate count signal track
+	Array[File] tas_count_signal_track = if length(count_signal_track_pos_bws)>0 then []
+		else if enable_count_signal_track then tas_
+		else []
+	scatter(i in range(length(tas_count_signal_track))) {
+		call count_signal_track { input :
+			ta = tas_count_signal_track[i],
+			chrsz = chrsz,
+		}
+	}
+
+	if ( !defined(count_signal_track_pooled_pos_bw_) && enable_count_signal_track && length(tas_)>0 ) {
+		call count_signal_track as count_signal_track_pooled { input :
+			ta = select_first([pool_ta.ta_pooled, ta_pooled]),
+			chrsz = chrsz,
 		}
 	}
 
@@ -947,6 +971,27 @@ task xcor {
 		memory : "${mem_mb} MB"
 		time : time_hr
 		disks : disks
+	}
+}
+
+task count_signal_track {
+	File ta 			# tag-align
+	File chrsz			# 2-col chromosome sizes file
+
+	command {
+		python $(which encode_count_signal_track.py) \
+			${ta} \
+			${"--chrsz " + chrsz}
+	}
+	output {
+		File pos_bw = glob("*.positive.bigwig")[0]
+		File neg_bw = glob("*.negative.bigwig")[0]
+	}
+	runtime {
+		cpu : 1
+		memory : "8000 MB"
+		time : 4
+		disks : "local-disk 50 HDD"
 	}
 }
 
