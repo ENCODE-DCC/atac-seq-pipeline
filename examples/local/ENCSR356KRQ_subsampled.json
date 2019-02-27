@@ -49,7 +49,7 @@
     "atac.filter_time_hr" : 1,
     "atac.macs2_mem_mb" : 4000,
     "atac.macs2_time_hr" : 1,
-    "atac.ataqc.mem_mb" : 5000,
-    "atac.ataqc.mem_java_mb" : 4000,
-    "atac.ataqc.time_hr" : 1
+    "atac.ataqc_mem_mb" : 5000,
+    "atac.ataqc_mem_java_mb" : 4000,
+    "atac.ataqc_time_hr" : 1
 }
