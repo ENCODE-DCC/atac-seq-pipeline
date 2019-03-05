@@ -38,36 +38,33 @@ from encode_common_genomic import *
 
 # utils
 
-def run_shell_cmd(cmd): 
+def run_shell_cmd(cmd):
     """Taken from ENCODE DCC ATAC pipeline
     """
-    print(cmd)
-    try:
-        p = subprocess.Popen(cmd, shell=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            universal_newlines=True,
-            preexec_fn=os.setsid)
-        pid = p.pid
-        pgid = os.getpgid(pid)
-        ret = ''
-        while True:
-            line = p.stdout.readline()
-            if line=='' and p.poll() is not None:
-                break
-            # log.debug('PID={}: {}'.format(pid,line.strip('\n')))
-            #print('PID={}: {}'.format(pid,line.strip('\n')))
-            ret += line
-        p.communicate() # wait here
-        if p.returncode > 0:
-            raise subprocess.CalledProcessError(
-                p.returncode, cmd)
-        return ret.strip('\n')
-    except:
+    p = subprocess.Popen(['/bin/bash','-o','pipefail'], # to catch error in pipe
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        universal_newlines=True,
+        preexec_fn=os.setsid) # to make a new process with a new PGID
+    pid = p.pid
+    pgid = os.getpgid(pid)
+    log.info('run_shell_cmd: PID={}, PGID={}, CMD={}'.format(pid, pgid, cmd))
+    stdout, stderr = p.communicate(cmd)
+    rc = p.returncode
+    err_str = 'PID={}, PGID={}, RC={}\nSTDERR={}\nSTDOUT={}'.format(pid, pgid, rc,
+        stderr.strip(), stdout.strip())
+    if rc:
         # kill all child processes
-        os.killpg(pgid, signal.SIGKILL)
-        p.terminate()
-        raise Exception('Unknown exception caught. PID={}'.format(pid))
+        try:
+            os.killpg(pgid, signal.SIGKILL)
+        except:
+            pass
+        finally:
+            raise Exception(err_str)
+    else:
+        log.info(err_str)
+    return stdout.strip('\n')
 
 def get_num_lines(f):
     """Taken from ENCODE DCC ATAC pipeline
@@ -220,6 +217,18 @@ def get_chr_m(sorted_bam_file, mito_chr_name):
 
     return chr_m_reads, fract_chr_m
 
+def remove_read_group(bam, out_dir='.'):
+    basename = os.path.basename(bam.rsplit('.bam',1)[0])
+    prefix = os.path.join(out_dir, basename)
+    new_bam = '{}.no_rg.bam'.format(prefix)
+
+    cmd = 'samtools view -h {} | '
+    cmd += 'grep -v "^@RG" | sed "s/\\tRG:Z:[^\\t]*//" | '
+    cmd += 'samtools view -bo {} -'
+    cmd = cmd.format(bam, new_bam)
+    run_shell_cmd(cmd)
+
+    return new_bam
 
 def get_gc(qsorted_bam_file, reference_fasta, prefix):
     '''
@@ -227,24 +236,28 @@ def get_gc(qsorted_bam_file, reference_fasta, prefix):
     MUST be the same fasta file that generated the bowtie indices.
     Assumes picard was already loaded into space (module add picard-tools)
     '''
+    # remove redundant (or malformed) info (read group) from bam
+    new_bam = remove_read_group(qsorted_bam_file)
+
     logging.info('Getting GC bias...')
     output_file = '{0}_gc.txt'.format(prefix)
     plot_file = '{0}_gcPlot.pdf'.format(prefix)
     summary_file = '{0}_gcSummary.txt'.format(prefix)
-    get_gc_metrics = ('java -Xmx4G -XX:ParallelGCThreads=1 -jar '
+    get_gc_metrics = ('java -Xmx6G -XX:ParallelGCThreads=1 -jar '
                       '{5} '
                       'CollectGcBiasMetrics R={0} I={1} O={2} '
                       'USE_JDK_DEFLATER=TRUE USE_JDK_INFLATER=TRUE '
                       'VERBOSITY=ERROR QUIET=TRUE '
                       'ASSUME_SORTED=FALSE '
                       'CHART={3} S={4}').format(reference_fasta,
-                                                qsorted_bam_file,
+                                                new_bam,
                                                 output_file,
                                                 plot_file,
                                                 summary_file,
                                                 locate_picard())
     logging.info(get_gc_metrics)
     os.system(get_gc_metrics)
+    os.system('rm -f {}'.format(new_bam))
     return output_file, plot_file, summary_file
 
 
@@ -361,16 +374,20 @@ def get_picard_complexity_metrics(aligned_bam, prefix):
     '''
     Picard EsimateLibraryComplexity
     '''
+    # remove redundant (or malformed) info (read group) from bam
+    new_bam = remove_read_group(aligned_bam)
+
     out_file = '{0}.picardcomplexity.qc'.format(prefix)
-    get_gc_metrics = ('mkdir -p tmp_java && java -Djava.io.tmpdir=$PWD/tmp_java -Xmx4G -XX:ParallelGCThreads=1 -jar '
+    get_gc_metrics = ('mkdir -p tmp_java && java -Djava.io.tmpdir=$PWD/tmp_java -Xmx6G -XX:ParallelGCThreads=1 -jar '
                       '{2} '
                       'EstimateLibraryComplexity INPUT={0} OUTPUT={1} '
                       'USE_JDK_DEFLATER=TRUE USE_JDK_INFLATER=TRUE '
                       'VERBOSITY=ERROR '
-                      'QUIET=TRUE && rm -rf tmp_java').format(aligned_bam,
+                      'QUIET=TRUE && rm -rf tmp_java').format(new_bam,
                                            out_file,
                                            locate_picard())
     os.system(get_gc_metrics)
+    os.system('rm -f {}'.format(new_bam))
 
     # Extract the actual estimated library size
     header_seen = False
@@ -573,7 +590,7 @@ def get_mito_dups(sorted_bam, prefix, mito_chr_name, endedness='Paired-ended', u
     os.system(filter_bam)
 
     # Run Picard MarkDuplicates
-    mark_duplicates = ('java -Xmx4G -XX:ParallelGCThreads=1 -jar '
+    mark_duplicates = ('java -Xmx6G -XX:ParallelGCThreads=1 -jar '
                        '{0} '
                        'MarkDuplicates INPUT={1} OUTPUT={2} '
                        'METRICS_FILE={3} '
@@ -680,7 +697,7 @@ def get_insert_distribution(final_bam, prefix):
     logging.info('insert size distribution...')
     insert_data = '{0}.inserts.hist_data.log'.format(prefix)
     insert_plot = '{0}.inserts.hist_graph.pdf'.format(prefix)
-    graph_insert_dist = ('java -Xmx4G -XX:ParallelGCThreads=1 -jar '
+    graph_insert_dist = ('java -Xmx6G -XX:ParallelGCThreads=1 -jar '
                          '{3} '
                          'CollectInsertSizeMetrics '
                          'INPUT={0} OUTPUT={1} H={2} '
