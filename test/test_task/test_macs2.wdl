@@ -13,7 +13,6 @@ workflow test_macs2 {
 	String ref_se_macs2_npeak # raw narrow-peak
 	String ref_se_macs2_bfilt_npeak # blacklist filtered narrow-peak
 	String ref_se_macs2_frip_qc 
-	String ref_se_macs2_sig_pval # p-val signal
 
 	String se_blacklist
 	String se_chrsz
@@ -30,7 +29,6 @@ workflow test_macs2 {
 		cap_num_peak = cap_num_peak,
 		pval_thresh = pval_thresh,
 		smooth_win = smooth_win,
-		make_signal = true,
 		blacklist = se_blacklist,
 		keep_irregular_chr_in_bfilt_peak = false,
 
@@ -44,19 +42,16 @@ workflow test_macs2 {
 			'se_macs2_npeak',
 			'se_macs2_bfilt_npeak',
 			'se_macs2_frip_qc',
-			'se_macs2_sig_pval',
 		],
-		files = [
+		files = select_all([
 			se_macs2.npeak,
 			se_macs2.bfilt_npeak,
 			se_macs2.frip_qc,
-			se_macs2.sig_pval,
-		],
+		]),
 		ref_files = [
 			ref_se_macs2_npeak,
 			ref_se_macs2_bfilt_npeak,
 			ref_se_macs2_frip_qc,
-			ref_se_macs2_sig_pval,
 		],
 	}
 }

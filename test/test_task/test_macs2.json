@@ -8,8 +8,6 @@
     "test_macs2.ref_se_macs2_npeak" : "atac-seq-pipeline-test-data/ref_output/test_macs2/ENCFF439VSY.subsampled.400.trim.merged.nodup.tn5.pval0.01.300K.narrowPeak.gz",
     "test_macs2.ref_se_macs2_bfilt_npeak" : "atac-seq-pipeline-test-data/ref_output/test_macs2/ENCFF439VSY.subsampled.400.trim.merged.nodup.tn5.pval0.01.300K.bfilt.narrowPeak.gz",
     "test_macs2.ref_se_macs2_frip_qc" : "atac-seq-pipeline-test-data/ref_output/test_macs2/ENCFF439VSY.subsampled.400.trim.merged.nodup.tn5.pval0.01.300K.bfilt.frip.qc",
-    "test_macs2.ref_se_macs2_sig_pval" : "atac-seq-pipeline-test-data/ref_output/test_macs2/ENCFF439VSY.subsampled.400.trim.merged.nodup.tn5.pval.signal.bigwig",
-    "test_macs2.ref_se_macs2_sig_fc" : "atac-seq-pipeline-test-data/ref_output/test_macs2/ENCFF439VSY.subsampled.400.trim.merged.nodup.tn5.fc.signal.bigwig",
     
     "test_macs2.cap_num_peak" : 300000,
     "test_macs2.pval_thresh" : 0.01,
