@@ -4,11 +4,11 @@
     "atac.genome_tsv" : "gs://encode-pipeline-genome-data/hg38_google.tsv",
     "atac.fastqs_rep1_R1" : [
         "gs://encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ/fastq/rep1/pair1/ENCFF341MYG.fastq.gz",
-        "gs://encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ/fastq/rep1/pair1/ENCFF106QGY.fastq.gz",
+        "gs://encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ/fastq/rep1/pair1/ENCFF106QGY.fastq.gz"
     ],
     "atac.fastqs_rep1_R2" : [
         "gs://encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ/fastq/rep1/pair2/ENCFF248EJF.fastq.gz",
-        "gs://encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ/fastq/rep1/pair2/ENCFF368TYI.fastq.gz",
+        "gs://encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ/fastq/rep1/pair2/ENCFF368TYI.fastq.gz"
     ],
     "atac.fastqs_rep2_R1" : [
         "gs://encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ/fastq/rep2/pair1/ENCFF641SFZ.fastq.gz",
