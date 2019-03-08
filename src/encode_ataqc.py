@@ -33,7 +33,7 @@ def parse_arguments():
     parser.add_argument('--idr-peak', type=str, help='IDR NARROWPEAK file (from task idr).')
     parser.add_argument('--ref-fa', type=str, help='Reference fasta file.')
     parser.add_argument('--chrsz', type=str, help='2-col chromosome sizes file.')
-    parser.add_argument('--tss-enrich', type=str, help='TSS enrichment definition bed file.')
+    parser.add_argument('--tss', type=str, help='TSS definition bed file.')
     parser.add_argument('--dnase', type=str, help='DNase definition bed file.')
     parser.add_argument('--blacklist', type=str, help='Blacklist bed file.')
     parser.add_argument('--prom', type=str, help='Promoter definition bed file.')
@@ -97,7 +97,7 @@ def ataqc():
     REF = args.ref_fa
     CHROMSIZES = args.chrsz
 
-    TSS = args.tss_enrich if args.tss_enrich and os.path.basename(args.tss_enrich)!='null' else ''
+    TSS = args.tss if args.tss and os.path.basename(args.tss)!='null' else ''
     DNASE = args.dnase if args.dnase and os.path.basename(args.dnase)!='null' else ''
     BLACKLIST = args.blacklist if args.blacklist and os.path.basename(args.blacklist)!='null' else ''
     PROM = args.prom if args.prom and os.path.basename(args.prom)!='null' else ''

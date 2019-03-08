@@ -7,6 +7,7 @@ from collections import OrderedDict
 
 def parse_flagstat_qc(txt):
     result = OrderedDict()
+    if not txt: return result
     total = ''
     total_qc_failed = ''
     duplicates = ''
@@ -161,6 +162,7 @@ def parse_flagstat_qc(txt):
 
 def parse_dup_qc(txt):
     result = OrderedDict()
+    if not txt: return result
     paired_reads = ''
     unpaired_reads = ''
     unmapped_reads = ''
@@ -250,6 +252,7 @@ def float_or_none(var):
 
 def parse_pbc_qc(txt):
     result = OrderedDict()
+    if not txt: return result
     with open(txt, 'r') as f:
         for line in f:
             arr = line.strip().split('\t')
@@ -265,6 +268,7 @@ def parse_pbc_qc(txt):
 
 def parse_xcor_score(txt):
     result = OrderedDict()
+    if not txt: return result
     with open(txt, 'r') as f:
         arr = f.readlines()[0].strip().split('\t')
     result['num_reads'] = int(arr[1])
@@ -280,6 +284,7 @@ def parse_xcor_score(txt):
 
 def parse_jsd_qc(txt):
     result = OrderedDict()
+    if not txt: return result
     with open(txt, 'r') as f:
         arr = f.readlines()[0].strip().split('\t')
     result['pct_gen_enrich'] = float(arr[0])
@@ -296,6 +301,7 @@ def parse_jsd_qc(txt):
     return result
 
 def parse_reproducibility_qc(txt):
+    if not txt: return OrderedDict()
     with open(txt, 'r') as f:
         lines = f.readlines()
         header = lines[0].strip()
@@ -311,6 +317,7 @@ def parse_reproducibility_qc(txt):
 
 def parse_frip_qc(txt):
     result = OrderedDict()
+    if not txt: return result
     with open(txt, 'r') as f:
         frip = f.readlines()[0].strip()
     result['FRiP'] = float(frip)
@@ -318,6 +325,7 @@ def parse_frip_qc(txt):
 
 def parse_multi_col_txt(txt):
     result = OrderedDict()
+    if not txt: return result
     with open(txt, 'r') as f:
         lines = f.readlines()    
     for line in lines:
@@ -342,6 +350,7 @@ def parse_ataqc_txt(txt): # to read ATAQC log
             return s.strip()            
     pre_parsed = parse_multi_col_txt(txt)
     result = OrderedDict()
+    if not txt: return result
     for key in pre_parsed:
         val = pre_parsed[key]
         if type(val)==list:
@@ -358,7 +367,7 @@ def parse_ataqc_txt(txt): # to read ATAQC log
             result[key] = num(val)
     return result
 
-def get_long_keyname(key, paired_end=False):
+def get_long_keyname(key): #, paired_end=False):
     short_to_long = {
         'total' : 'Total',
         'total_qc_failed' : 'Total(QC-failed)',
@@ -421,30 +430,38 @@ def get_long_keyname(key, paired_end=False):
         'syn_jsd' : 'Synthetic JS Distance',
         'syn_x_intcpt' : 'Synthetic X-intercept',
         'x_intcpt' : 'X-intercept',
-        'diff_enrich' : 'diff. enrichment'}
-
-    short_to_long_se = {
-        'total_read_pairs' : 'Total Reads',
-        'distinct_read_pairs' : 'Distinct Reads',
-        'one_read_pair' : 'One Read',
-        'two_read_pair' : 'Two Reads',
-        'NRF' : 'NRF = Distinct/Total',
-        'PBC1' : 'PBC1 = OneRead/Distinct',
-        'PBC2' : 'PBC2 = OneRead/TwoReads',}
-
-    short_to_long_pe = {
-        'total_read_pairs' : 'Total Read Pairs',
-        'distinct_read_pairs' : 'Distinct Read Pairs',
-        'one_read_pair' : 'One Read Pair',
-        'two_read_pair' : 'Two Read Pairs',
+        'diff_enrich' : 'diff. enrichment',
+        'total_read_pairs' : 'Total Reads (Pairs)',
+        'distinct_read_pairs' : 'Distinct Reads (Pairs)',
+        'one_read_pair' : 'One Read (Pair)',
+        'two_read_pair' : 'Two Reads (Pairs)',
         'NRF' : 'NRF = Distinct/Total',
         'PBC1' : 'PBC1 = OnePair/Distinct',
-        'PBC2' : 'PBC2 = OnePair/TwoPair',}
+        'PBC2' : 'PBC2 = OnePair/TwoPair'
+    }
+
+    # short_to_long_se = {
+    #     'total_read_pairs' : 'Total Reads',
+    #     'distinct_read_pairs' : 'Distinct Reads',
+    #     'one_read_pair' : 'One Read',
+    #     'two_read_pair' : 'Two Reads',
+    #     'NRF' : 'NRF = Distinct/Total',
+    #     'PBC1' : 'PBC1 = OneRead/Distinct',
+    #     'PBC2' : 'PBC2 = OneRead/TwoReads',}
+
+    # short_to_long_pe = {
+    #     'total_read_pairs' : 'Total Read Pairs',
+    #     'distinct_read_pairs' : 'Distinct Read Pairs',
+    #     'one_read_pair' : 'One Read Pair',
+    #     'two_read_pair' : 'Two Read Pairs',
+    #     'NRF' : 'NRF = Distinct/Total',
+    #     'PBC1' : 'PBC1 = OnePair/Distinct',
+    #     'PBC2' : 'PBC2 = OnePair/TwoPair',}
 
     if key in short_to_long:
         return short_to_long[key]
-    if paired_end and key in short_to_long_pe:
-        return short_to_long_pe[key]
-    if not paired_end and key in short_to_long_se:
-        return short_to_long_se[key]
+    # if paired_end and key in short_to_long_pe:
+    #     return short_to_long_pe[key]
+    # if not paired_end and key in short_to_long_se:
+    #     return short_to_long_se[key]
     return key.replace('_',' ').capitalize()

@@ -41,7 +41,7 @@ def parse_arguments():
     args = parser.parse_args()
     if len(args.peaks_pr)!=infer_n_from_nC2(len(args.peaks)):
         raise argparse.ArgumentTypeError(
-            'Invalid number of peak files or --peak-pr.')
+            'Invalid number of peak files or --peaks-pr.')
 
     log.setLevel(args.log_level)
     log.info(sys.argv)

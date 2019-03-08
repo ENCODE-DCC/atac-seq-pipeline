@@ -7,6 +7,7 @@ import base64
 import re
 from encode_common_log_parser import get_long_keyname
 from encode_common import *
+from collections import OrderedDict
 
 def html_heading(lvl, label):
     html = '<h{lvl}>{label}</h{lvl}>\n'
@@ -37,50 +38,45 @@ def html_parse_body_from_file(f):
         else:
             return ''
 
-def html_vert_table_multi_rep(json_objs, paired_end=False, row_header=[]): # json_objs=list of OrderedDict
-    if len(json_objs)==0: return ''
+def html_vert_table_multi_rep(json_objs, row_header=[]): # json_objs=list of OrderedDict
     html = '<table border="1" style="border-collapse:collapse">{header}{content}</table><br>\n'
-    # make row header list
-    if row_header:
-        row_header = [' '] + row_header
-    else:
-        row_header = [' '] + ['rep'+str(i+1) 
-            for i, json_obj in enumerate(json_objs)]
-    # make column header list
-    col_header = json_objs[0].keys()
+
+    valid_row_header = []
+    valid_json_objs = []
+    col_header_dict = OrderedDict()
+    for i, json_obj in enumerate(json_objs):
+        if not json_obj:
+            continue
+        if row_header:
+            valid_row_header.append(row_header[i])
+        else:
+            valid_row_header.append('rep'+str(i+1))
+        valid_json_objs.append(json_obj)
+        # find column header
+        col_header_dict.update(json_obj)
+
+    col_header = col_header_dict.keys()
+    if not col_header:
+        return ''
     # make row header
-    header = '<tr><th bgcolor="#EEEEEE">'+'</th><th bgcolor="#EEEEEE">'.join(row_header)+'</th></tr>\n'
+    header = '<tr><th bgcolor="#EEEEEE">'+'</th><th bgcolor="#EEEEEE">'.join([' ']+valid_row_header)+'</th></tr>\n'
     # contents
     content = ''
     for row in col_header:
         content += '<tr><th bgcolor="#EEEEEE" style="text-align:left">{}</th><td>{}</td></tr>\n'.format(
-            get_long_keyname(row, paired_end),
+            get_long_keyname(row),
             '</td><td>'.join(
-                [str_float_4_dec_pts(json_obj[row]) for json_obj in json_objs]))
+                [str_float_4_dec_pts(json_obj[row]) if row in json_obj else 'N/A'
+                    for json_obj in valid_json_objs]))
     return html.format(header=header, content=content)
 
-def html_horz_table(json_obj, paired_end=False):
-    html = '<table border="1" style="border-collapse:collapse">{header}{content}</table><br>\n'
-
-    # make row header
-    header = '<tr><th bgcolor="#EEEEEE">'+\
-        '</th><th bgcolor="#EEEEEE">'.join(
-            [get_long_keyname(key, paired_end) for key in json_obj])+'</th></tr>\n'
-    # contents
-    content = '<tr><td>'+\
-        '</td><td>'.join([str_float_4_dec_pts(json_obj[col]) for col in json_obj])+'</td></tr>\n'
-    return html.format(header=header, content=content)
-
-def html_help_filter(multimapping, paired_end):
+def html_help_filter(multimapping):
     html = """
     <div id='help-filter'>
     Filtered out (samtools view -F 1804):
     <ul>
     <li>read unmapped (0x4)</li>
-    """
-    if paired_end:
-        html += "<li>mate unmapped (0x8)</li>"
-    html += """    
+    <li>mate unmapped (0x8, for paired-end)</li>"
     <li>not primary alignment (0x100)</li>
     <li>read fails platform/vendor quality checks (0x200)</li>
     <li>read is PCR or optical duplicate (0x400)</li>

@@ -65,7 +65,7 @@ def detect_most_likely_adapter(fname):
 
 def main():
     global VERBOSE
-    VERBOSE = True
+    VERBOSE = False
     best_adapter = detect_most_likely_adapter(sys.argv[1])
     print(best_adapter)
 

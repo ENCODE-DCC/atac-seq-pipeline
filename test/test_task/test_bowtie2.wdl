@@ -4,7 +4,9 @@ import "../../atac.wdl" as atac
 
 workflow test_bowtie2 {
 	Int multimapping
-	String bowtie2_score_min = ''
+	String bowtie2_param_pe
+	String bowtie2_param_se
+
 
 	Array[String] pe_trimmed_fastqs
 	Array[String] se_trimmed_fastqs
@@ -27,10 +29,12 @@ workflow test_bowtie2 {
 
 	call atac.bowtie2 as pe_bowtie2 { input :
 		idx_tar = pe_bowtie2_idx_tar,
-		fastqs = pe_trimmed_fastqs,
+		fastq_R1 = pe_trimmed_fastqs[0],
+		fastq_R2 = pe_trimmed_fastqs[1],
 		multimapping = multimapping,
 		paired_end = true,
-		score_min = bowtie2_score_min,
+		bowtie2_param_pe = bowtie2_param_pe,
+		bowtie2_param_se = bowtie2_param_se,
 
 		cpu = bowtie2_cpu,
 		mem_mb = bowtie2_mem_mb,
@@ -39,10 +43,12 @@ workflow test_bowtie2 {
 	}
 	call atac.bowtie2 as pe_bowtie2_no_multimapping { input :
 		idx_tar = pe_bowtie2_idx_tar,
-		fastqs = pe_trimmed_fastqs,
+		fastq_R1 = pe_trimmed_fastqs[0],
+		fastq_R2 = pe_trimmed_fastqs[1],
 		multimapping = 0,
 		paired_end = true,
-		score_min = bowtie2_score_min,
+		bowtie2_param_pe = bowtie2_param_pe,
+		bowtie2_param_se = bowtie2_param_se,
 
 		cpu = bowtie2_cpu,
 		mem_mb = bowtie2_mem_mb,
@@ -51,10 +57,11 @@ workflow test_bowtie2 {
 	}
 	call atac.bowtie2 as se_bowtie2 { input :
 		idx_tar = se_bowtie2_idx_tar,
-		fastqs = se_trimmed_fastqs,
+		fastq_R1 = se_trimmed_fastqs[0],
 		multimapping = multimapping,
 		paired_end = false,
-		score_min = bowtie2_score_min,
+		bowtie2_param_pe = bowtie2_param_pe,
+		bowtie2_param_se = bowtie2_param_se,
 
 		cpu = bowtie2_cpu,
 		mem_mb = bowtie2_mem_mb,
@@ -63,10 +70,11 @@ workflow test_bowtie2 {
 	}
 	call atac.bowtie2 as se_bowtie2_no_multimapping { input :
 		idx_tar = se_bowtie2_idx_tar,
-		fastqs = se_trimmed_fastqs,
+		fastq_R1 = se_trimmed_fastqs[0],
 		multimapping = 0,
 		paired_end = false,
-		score_min = bowtie2_score_min,
+		bowtie2_param_pe = bowtie2_param_pe,
+		bowtie2_param_se = bowtie2_param_se,
 
 		cpu = bowtie2_cpu,
 		mem_mb = bowtie2_mem_mb,

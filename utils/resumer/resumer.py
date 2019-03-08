@@ -7,13 +7,15 @@ import argparse
 import json
 from collections import OrderedDict
 
+default_output_def_json_files = ['default.json']
+
 def parse_arguments():
     parser = argparse.ArgumentParser(prog='Resumer for ENCODE ATAC/Chip-Seq pipelines',
                                         description='Parse cromwell\'s metadata JSON file and generate a new input JSON file '
                                         'to resume a pipeline from where it left off.')
     parser.add_argument('metadata_json_file', type=str, help='Cromwell metadata JSON file from a previous failed run.')
     parser.add_argument('--output-def-json-file', type=str, help='Output definition JSON file for your pipeline. '
-                        'If not specified, it will look for a valid JSON file on script\'s directory. '
+                        'If not specified, it will use default.json on script\'s directory. '
                         'You can use your own JSON file for your pipeline. '
                         'Entries in "Array[Object]" is for Array[Object] in an input JSON. This is useful to take outputs from a scatter block. '
                         'For example, the 1st entry of "Array[Object]" in chip.json is "chip.bwa" : {"bam" : "chip.bams", "flagstat_qc" : "chip.flagstat_qcs"}. '
@@ -25,7 +27,6 @@ def parse_arguments():
     # if not specified by user, look into this array on script's directory
     if not args.output_def_json_file:
         script_dir = os.path.dirname(os.path.realpath(__file__))        
-        default_output_def_json_files = ['default.json']
         for f in default_output_def_json_files:
             json_file = os.path.join(script_dir, f)
             if os.path.exists(json_file):
@@ -49,34 +50,68 @@ def parse_cromwell_metadata_json_file(json_file):
 def find_output_of_successful_calls(calls, output_def_json):
     result = OrderedDict()
 
-    if 'Array[Object]' in output_def_json:
-        for call_name in output_def_json['Array[Object]']:
-            if call_name in calls:
-                call = calls[call_name] # call is a list of the same task for multiple replicates
-                failed = False
-                for i, c in enumerate(call): # i = 0-based replicate id
-                    if c['executionStatus']!='Done':
-                        failed = True
-                        break
-                if not failed:
-                    for key in output_def_json['Array[Object]'][call_name]:
-                        wdl_var_name = output_def_json['Array[Object]'][call_name][key]
-                        result[wdl_var_name] = [call[i]['outputs'][key] for i, _ in enumerate(call)]
+    # if 'Array[Object]' in output_def_json:
+    #     for call_name in output_def_json['Array[Object]']:
+    #         if call_name in calls:
+    #             call = calls[call_name] # call is a list of the same task for multiple replicates
+    #             # find number of replicates
+    #             num_rep = 0
+    #             for _, c in enumerate(call):
+    #                 rep_id = c['shardIndex']
+    #                 if rep_id>=num_rep: num_rep=rep_id+1
+    #             if num_rep==0: continue
+    #             # for each output in call
+    #             for key in output_def_json['Array[Object]'][call_name]:
+    #                 wdl_var_name = output_def_json['Array[Object]'][call_name][key]
+    #                 # make empty array with length num_rep
+    #                 result[wdl_var_name] = [None]*num_rep
+    #                 for _, c in enumerate(call):
+    #                     if c['executionStatus']!='Done':
+    #                         continue
+    #                     rep_id = c['shardIndex']
+    #                     result[wdl_var_name][rep_id] = c['outputs'][key]
 
-    if 'Object' in output_def_json:
-        for call_name in output_def_json['Object']:
-            if call_name in calls:
-                call = calls[call_name] # call is a list of the same task for multiple replicates
-                failed = False
-                for i, c in enumerate(call): # i = 0-based replicate id
+    # if 'Object' in output_def_json:
+    #     for call_name in output_def_json['Object']:
+    #         if call_name in calls:
+    #             call = calls[call_name] # call is a list of the same task for multiple replicates
+    #             failed = False
+    #             for i, c in enumerate(call): # i = 0-based replicate id
+    #                 if c['executionStatus']!='Done':
+    #                     failed = True
+    #                     break
+    #             if not failed:
+    #                 assert(len(call)==1)
+    #                 for key in output_def_json['Object'][call_name]:
+    #                     wdl_var_name = output_def_json['Object'][call_name][key]
+    #                     result[wdl_var_name] = call[0]['outputs'][key]
+    for call_name in output_def_json:
+        if call_name in calls:
+            call = calls[call_name] # call is a list of the same task for multiple replicates
+            # find number of replicates
+            num_rep = 0
+            for _, c in enumerate(call):
+                rep_id = c['shardIndex']
+                if rep_id==-1: 
+                    num_rep = -1
+                    break
+                if rep_id>=num_rep: num_rep = rep_id+1
+            if num_rep==0: continue
+            # for each output in call
+            for key in output_def_json[call_name]:
+                wdl_var_name = output_def_json[call_name][key]
+                # make empty array with length num_rep
+                if num_rep>0:
+                    result[wdl_var_name] = [None]*num_rep
+                for _, c in enumerate(call):
                     if c['executionStatus']!='Done':
-                        failed = True
-                        break
-                if not failed:
-                    assert(len(call)==1)
-                    for key in output_def_json['Object'][call_name]:
-                        wdl_var_name = output_def_json['Object'][call_name][key]
-                        result[wdl_var_name] = call[0]['outputs'][key]
+                        continue
+                    rep_id = c['shardIndex']
+                    if rep_id==-1:
+                        result[wdl_var_name] = c['outputs'][key]
+                        break                    
+                    else:
+                        result[wdl_var_name][rep_id] = c['outputs'][key]
 
     return result
 

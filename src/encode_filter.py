@@ -317,21 +317,21 @@ def main():
                 args.bam, args.multimapping, args.mapq_thresh, 
                 args.nth, args.out_dir)
 
-    if args.no_dup_removal:
-        nodup_bam = filt_bam        
+    log.info('Marking dupes with {}...'.format(args.dup_marker))
+    if args.dup_marker=='picard':
+        dupmark_bam, dup_qc = mark_dup_picard(
+                            filt_bam, args.out_dir)
+    elif args.dup_marker=='sambamba':
+        dupmark_bam, dup_qc = mark_dup_sambamba(
+                            filt_bam, args.nth, args.out_dir)
     else:
-        log.info('Marking dupes with {}...'.format(args.dup_marker))
-        if args.dup_marker=='picard':
-            dupmark_bam, dup_qc = mark_dup_picard(
-                                filt_bam, args.out_dir)
-        elif args.dup_marker=='sambamba':
-            dupmark_bam, dup_qc = mark_dup_sambamba(
-                                filt_bam, args.nth, args.out_dir)
-        else:
-            raise argparse.ArgumentTypeError(
-            'Unsupported --dup-marker {}'.format(args.dup_marker))
-        temp_files.append(filt_bam)
+        raise argparse.ArgumentTypeError(
+        'Unsupported --dup-marker {}'.format(args.dup_marker))
 
+    if args.no_dup_removal:
+        nodup_bam = filt_bam
+    else:
+        temp_files.append(filt_bam)
         log.info('Removing dupes...')
         if args.paired_end:
             nodup_bam = rm_dup_pe(
@@ -340,8 +340,8 @@ def main():
             nodup_bam = rm_dup_se(
                         dupmark_bam, args.nth, args.out_dir)
         samtools_index(dupmark_bam)
-        temp_files.append(dupmark_bam)
         temp_files.append(dupmark_bam+'.bai')
+    temp_files.append(dupmark_bam)
 
     # initialize multithreading
     log.info('Initializing multi-threading...')
@@ -349,12 +349,6 @@ def main():
     log.info('Number of threads={}.'.format(num_process))
     pool = multiprocessing.Pool(num_process)
 
-    # log.info('samtools index...')
-    # ret_val_1 = pool.apply_async(samtools_index, 
-    #                             (nodup_bam, args.out_dir))
-    # log.info('samtools flagstat...')
-    # ret_val_2 = pool.apply_async(samtools_flagstat,
-    #                             (nodup_bam, args.out_dir))
     log.info('sambamba index...')
     ret_val_1 = pool.apply_async(sambamba_index, 
                                 (nodup_bam, args.nth, args.out_dir))
@@ -363,25 +357,23 @@ def main():
                                 (nodup_bam, args.nth, args.out_dir))
 
     log.info('Generating PBC QC log...')
-    if not args.no_dup_removal:
-        if args.paired_end:
-            ret_val_3 = pool.apply_async(pbc_qc_pe,
-                            (dupmark_bam, args.mito_chr_name,
-                                max(1,args.nth-2),
-                                args.out_dir))
-        else:
-            ret_val_3 = pool.apply_async(pbc_qc_se,
-                            (dupmark_bam, args.mito_chr_name, args.out_dir))
-            
+    if args.paired_end:
+        ret_val_3 = pool.apply_async(pbc_qc_pe,
+                        (dupmark_bam, args.mito_chr_name,
+                            max(1,args.nth-2),
+                            args.out_dir))
+    else:
+        ret_val_3 = pool.apply_async(pbc_qc_se,
+                        (dupmark_bam, args.mito_chr_name, args.out_dir))
+        
     # gather
     nodup_bai = ret_val_1.get(BIG_INT)
     nodup_flagstat_qc = ret_val_2.get(BIG_INT)
 
-    if not args.no_dup_removal:
-        pbc_qc = ret_val_3.get(BIG_INT)
+    pbc_qc = ret_val_3.get(BIG_INT)
 
-        log.info('Making mito dup log...')
-        mito_dup_log = make_mito_dup_log(dupmark_bam, args.out_dir)
+    log.info('Making mito dup log...')
+    mito_dup_log = make_mito_dup_log(dupmark_bam, args.out_dir)
 
     log.info('Closing multi-threading...')
     pool.close()
