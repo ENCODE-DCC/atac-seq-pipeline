@@ -2,17 +2,15 @@
     "atac.qc_report.qc_json_ref" : "gs://encode-pipeline-test-samples/encode-atac-seq-pipeline/ref_output/v1.1.6/ENCSR889WQX_subsampled_chr19_only/qc.json",
     "atac.pipeline_type" : "atac",
     "atac.genome_tsv" : "gs://encode-pipeline-genome-data/mm10_chr19_chrM_google.tsv",
-    "atac.fastqs" : [
-        [
-            ["gs://encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR889WQX/fastq_subsampled/rep1/ENCFF439VSY.subsampled.400.fastq.gz"],
-            ["gs://encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR889WQX/fastq_subsampled/rep1/ENCFF325FCQ.subsampled.400.fastq.gz"],
-            ["gs://encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR889WQX/fastq_subsampled/rep1/ENCFF683IQS.subsampled.400.fastq.gz"],
-            ["gs://encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR889WQX/fastq_subsampled/rep1/ENCFF744CHW.subsampled.400.fastq.gz"]
-        ],
-        [
-            ["gs://encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR889WQX/fastq_subsampled/rep2/ENCFF463QCX.subsampled.400.fastq.gz"],
-            ["gs://encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR889WQX/fastq_subsampled/rep2/ENCFF992TSA.subsampled.400.fastq.gz"]
-        ]
+    "atac.fastqs_rep1_R1" : [
+        "gs://encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR889WQX/fastq_subsampled/rep1/ENCFF439VSY.subsampled.400.fastq.gz",
+        "gs://encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR889WQX/fastq_subsampled/rep1/ENCFF325FCQ.subsampled.400.fastq.gz",
+        "gs://encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR889WQX/fastq_subsampled/rep1/ENCFF683IQS.subsampled.400.fastq.gz",
+        "gs://encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR889WQX/fastq_subsampled/rep1/ENCFF744CHW.subsampled.400.fastq.gz"
+    ],
+    "atac.fastqs_rep2_R1" : [
+        "gs://encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR889WQX/fastq_subsampled/rep2/ENCFF463QCX.subsampled.400.fastq.gz",
+        "gs://encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR889WQX/fastq_subsampled/rep2/ENCFF992TSA.subsampled.400.fastq.gz"
     ],
 
     "atac.paired_end" : false,
