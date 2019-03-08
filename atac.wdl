@@ -1870,6 +1870,11 @@ task read_genome_tsv {
 
 	String? null_s
 	command <<<
+		# create empty files for all entries
+		touch ref_fa bowtie2_idx_tar chrsz gensz blacklist
+		touch tss tss_enrich # for backward compatibility
+		touch dnase prom enh reg2map reg2map_bed roadmap_meta
+
 		python <<CODE
 		import os
 		with open("${genome_tsv}",'r') as fp:
@@ -1879,22 +1884,22 @@ task read_genome_tsv {
 					key, val = arr
 					with open(key,'w') as fp2:
 						fp2.write(val)
-		CODE		
+		CODE
 	>>>
 	output {
-		String? ref_fa = if length(glob('ref_fa'))==0 then null_s else read_string('ref_fa')
-		String? bowtie2_idx_tar = if length(glob('bowtie2_idx_tar'))==0 then null_s else read_string('bowtie2_idx_tar')
-		String? chrsz = if length(glob('chrsz'))==0 then null_s else read_string('chrsz')
-		String? gensz = if length(glob('gensz'))==0 then null_s else read_string('gensz')
-		String? blacklist = if length(glob('blacklist'))==0 then null_s else read_string('blacklist')
-		String? tss = if length(glob('tss'))!=0 then read_string('tss')
-			else if length(glob('tss_enrich'))!=0 then read_string('tss_enrich') else null_s
-		String? dnase = if length(glob('dnase'))==0 then null_s else read_string('dnase')
-		String? prom = if length(glob('prom'))==0 then null_s else read_string('prom')
-		String? enh = if length(glob('enh'))==0 then null_s else read_string('enh')
-		String? reg2map = if length(glob('reg2map'))==0 then null_s else read_string('reg2map')
-		String? reg2map_bed = if length(glob('reg2map_bed'))==0 then null_s else read_string('reg2map_bed')
-		String? roadmap_meta = if length(glob('roadmap_meta'))==0 then null_s else read_string('roadmap_meta')
+		String? ref_fa = if size('ref_fa')==0 then null_s else read_string('ref_fa')
+		String? bowtie2_idx_tar = if size('bowtie2_idx_tar')==0 then null_s else read_string('bowtie2_idx_tar')
+		String? chrsz = if size('chrsz')==0 then null_s else read_string('chrsz')
+		String? gensz = if size('gensz')==0 then null_s else read_string('gensz')
+		String? blacklist = if size('blacklist')==0 then null_s else read_string('blacklist')
+		String? tss = if size('tss')!=0 then read_string('tss')
+			else if size('tss_enrich')!=0 then read_string('tss_enrich') else null_s
+		String? dnase = if size('dnase')==0 then null_s else read_string('dnase')
+		String? prom = if size('prom')==0 then null_s else read_string('prom')
+		String? enh = if size('enh')==0 then null_s else read_string('enh')
+		String? reg2map = if size('reg2map')==0 then null_s else read_string('reg2map')
+		String? reg2map_bed = if size('reg2map_bed')==0 then null_s else read_string('reg2map_bed')
+		String? roadmap_meta = if size('roadmap_meta')==0 then null_s else read_string('roadmap_meta')
 	}
 	runtime {
 		cpu : 1
