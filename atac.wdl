@@ -680,7 +680,8 @@ workflow atac {
 	Boolean has_all_inputs_of_pool_ta = length(select_all(ta_))==num_rep
 	Boolean has_output_of_pool_ta = defined(pool_ta__ta_pooled)
 
-	if ( has_all_inputs_of_pool_ta && !has_output_of_pool_ta ) {
+	if ( has_all_inputs_of_pool_ta && !has_output_of_pool_ta &&
+		num_rep>1 ) {
 		# pool tagaligns from true replicates
 		call pool_ta { input :
 			tas = ta_,
@@ -695,7 +696,7 @@ workflow atac {
 	Boolean has_output_of_pool_ta_pr1 = defined(pool_ta_pr1__ta_pooled)
 
 	if ( has_all_inputs_of_pool_ta_pr1 && !has_output_of_pool_ta_pr1 &&
-		!align_only && !true_rep_only ) {
+		!align_only && !true_rep_only && num_rep>1 ) {
 		# pool tagaligns from pseudo replicate 1
 		call pool_ta as pool_ta_pr1 { input :
 			tas = ta_pr1_,
@@ -710,7 +711,7 @@ workflow atac {
 	Boolean has_output_of_pool_ta_pr2 = defined(pool_ta_pr2__ta_pooled)
 
 	if ( has_all_inputs_of_pool_ta_pr1 && !has_output_of_pool_ta_pr1 &&
-		!align_only && !true_rep_only ) {
+		!align_only && !true_rep_only && num_rep>1 ) {
 		# pool tagaligns from pseudo replicate 2
 		call pool_ta as pool_ta_pr2 { input :
 			tas = ta_pr2_,
@@ -724,7 +725,7 @@ workflow atac {
 	Boolean has_output_of_macs2_pooled = defined(peak_pooled)
 
 	if ( has_input_of_macs2_pooled && !has_output_of_macs2_pooled &&
-		!align_only ) {
+		!align_only && num_rep>1 ) {
 		# call peaks on pooled replicate
 		call macs2 as macs2_pooled { input :
 			ta = ta_pooled_,
@@ -751,7 +752,7 @@ workflow atac {
 	Boolean has_output_of_count_signal_track_pooled = defined(count_signal_track_pooled__pos_bw)
 
 	if ( has_input_of_count_signal_track_pooled && !has_output_of_count_signal_track_pooled &&
-		enable_count_signal_track ) {
+		enable_count_signal_track && num_rep>1 ) {
 		call count_signal_track as count_signal_track_pooled { input :
 			ta = ta_pooled_,
 			chrsz = chrsz_,
@@ -761,7 +762,8 @@ workflow atac {
 	Boolean has_input_of_macs2_signal_track_pooled = has_output_of_pool_ta || defined(pool_ta.ta_pooled)
 	Boolean has_output_of_macs2_signal_track_pooled = defined(macs2_signal_track_pooled__pval_bw)
 
-	if ( has_input_of_macs2_signal_track_pooled && !has_output_of_macs2_signal_track_pooled ) {
+	if ( has_input_of_macs2_signal_track_pooled && !has_output_of_macs2_signal_track_pooled &&
+		num_rep>1 ) {
 		call macs2_signal_track as macs2_signal_track_pooled { input :
 			ta = ta_pooled_,
 			gensz = gensz_,
@@ -779,7 +781,7 @@ workflow atac {
 	Boolean has_output_of_macs2_ppr1 = defined(peak_ppr1)
 
 	if ( has_input_of_macs2_ppr1 && !has_output_of_macs2_ppr1 &&
-		!align_only && !true_rep_only ) {
+		!align_only && !true_rep_only && num_rep>1 ) {
 		# call peaks on 1st pooled pseudo replicates
 		call macs2 as macs2_ppr1 { input :
 			ta = ta_ppr1_,
@@ -806,7 +808,7 @@ workflow atac {
 	Boolean has_output_of_macs2_ppr2 = defined(peak_ppr2)
 
 	if ( has_input_of_macs2_ppr2 && !has_output_of_macs2_ppr2 &&
-		!align_only && !true_rep_only ) {
+		!align_only && !true_rep_only && num_rep>1 ) {
 		# call peaks on 2nd pooled pseudo replicates
 		call macs2 as macs2_ppr2 { input :
 			ta = ta_ppr2_,
@@ -1003,7 +1005,7 @@ workflow atac {
 	Boolean has_output_of_overlap_ppr = defined(overlap_ppr__overlap_peak)
 
 	if ( has_input_of_overlap_ppr && !has_output_of_overlap_ppr &&
-		!align_only && !true_rep_only ) {
+		!align_only && !true_rep_only && num_rep>1 ) {
 		# Naive overlap on pooled pseudo replicates
 		call overlap as overlap_ppr { input :
 			prefix = "ppr",
@@ -1034,7 +1036,7 @@ workflow atac {
 	Boolean has_output_of_idr_ppr = defined(idr_ppr__idr_peak)
 
 	if ( has_input_of_idr_ppr && !has_output_of_idr_ppr &&
-		!align_only && !true_rep_only ) {
+		!align_only && !true_rep_only && num_rep>1 ) {
 		# IDR on pooled pseduo replicates
 		call idr as idr_ppr { input :
 			prefix = "ppr",
