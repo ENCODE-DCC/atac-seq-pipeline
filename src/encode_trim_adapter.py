@@ -45,8 +45,9 @@ def parse_arguments(debug=False):
     args = parser.parse_args()
 
     # parse fastqs command line
-    if args.fastqs[0].endswith('.gz'): # it's fastq
-         args.fastqs = [[f] for f in args.fastqs] # make it a matrix
+    if args.fastqs[0].endswith('.gz') or args.fastqs[0].endswith('.fastq') or \
+        args.fastqs[0].endswith('.fq'): # it's fastq
+        args.fastqs = [[f] for f in args.fastqs] # make it a matrix
     else: # it's TSV
         args.fastqs = read_tsv(args.fastqs[0])
 
