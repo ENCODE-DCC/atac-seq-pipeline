@@ -388,3 +388,16 @@ def get_read_length(fastq):
                 break
             line_num += 1
     return int(max_length)
+
+def remove_read_group(bam, out_dir='.'):
+    basename = os.path.basename(bam.rsplit('.bam',1)[0])
+    prefix = os.path.join(out_dir, basename)
+    new_bam = '{}.no_rg.bam'.format(prefix)
+
+    cmd = 'samtools view -h {} | '
+    cmd += 'grep -v "^@RG" | sed "s/\\tRG:Z:[^\\t]*//" | '
+    cmd += 'samtools view -bo {} -'
+    cmd = cmd.format(bam, new_bam)
+    run_shell_cmd(cmd)
+
+    return new_bam

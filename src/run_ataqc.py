@@ -217,19 +217,6 @@ def get_chr_m(sorted_bam_file, mito_chr_name):
 
     return chr_m_reads, fract_chr_m
 
-def remove_read_group(bam, out_dir='.'):
-    basename = os.path.basename(bam.rsplit('.bam',1)[0])
-    prefix = os.path.join(out_dir, basename)
-    new_bam = '{}.no_rg.bam'.format(prefix)
-
-    cmd = 'samtools view -h {} | '
-    cmd += 'grep -v "^@RG" | sed "s/\\tRG:Z:[^\\t]*//" | '
-    cmd += 'samtools view -bo {} -'
-    cmd = cmd.format(bam, new_bam)
-    run_shell_cmd(cmd)
-
-    return new_bam
-
 def get_gc(qsorted_bam_file, reference_fasta, prefix):
     '''
     Uses picard tools (CollectGcBiasMetrics). Note that the reference
@@ -237,8 +224,6 @@ def get_gc(qsorted_bam_file, reference_fasta, prefix):
     Assumes picard was already loaded into space (module add picard-tools)
     '''
     # remove redundant (or malformed) info (read group) from bam
-    new_bam = remove_read_group(qsorted_bam_file)
-
     logging.info('Getting GC bias...')
     output_file = '{0}_gc.txt'.format(prefix)
     plot_file = '{0}_gcPlot.pdf'.format(prefix)
@@ -250,14 +235,13 @@ def get_gc(qsorted_bam_file, reference_fasta, prefix):
                       'VERBOSITY=ERROR QUIET=TRUE '
                       'ASSUME_SORTED=FALSE '
                       'CHART={3} S={4}').format(reference_fasta,
-                                                new_bam,
+                                                qsorted_bam_file,
                                                 output_file,
                                                 plot_file,
                                                 summary_file,
                                                 locate_picard())
     logging.info(get_gc_metrics)
     os.system(get_gc_metrics)
-    os.system('rm -f {}'.format(new_bam))
     return output_file, plot_file, summary_file
 
 
@@ -375,19 +359,16 @@ def get_picard_complexity_metrics(aligned_bam, prefix):
     Picard EsimateLibraryComplexity
     '''
     # remove redundant (or malformed) info (read group) from bam
-    new_bam = remove_read_group(aligned_bam)
-
     out_file = '{0}.picardcomplexity.qc'.format(prefix)
     get_gc_metrics = ('mkdir -p tmp_java && java -Djava.io.tmpdir=$PWD/tmp_java -Xmx6G -XX:ParallelGCThreads=1 -jar '
                       '{2} '
                       'EstimateLibraryComplexity INPUT={0} OUTPUT={1} '
                       'USE_JDK_DEFLATER=TRUE USE_JDK_INFLATER=TRUE '
                       'VERBOSITY=ERROR '
-                      'QUIET=TRUE && rm -rf tmp_java').format(new_bam,
+                      'QUIET=TRUE && rm -rf tmp_java').format(aligned_bam,
                                            out_file,
                                            locate_picard())
     os.system(get_gc_metrics)
-    os.system('rm -f {}'.format(new_bam))
 
     # Extract the actual estimated library size
     header_seen = False
