@@ -141,6 +141,9 @@ RUN wget http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/bedToBigBed && ch
 # Install bgzip/tabix for Wash U browser track (hammock type)
 #RUN apt-get update && apt-get install -y tabix && rm -rf /var/lib/apt/lists/*
 
+# Install python jsondiff
+RUN pip install --no-cache-dir jsondiff==1.1.1
+
 # Prevent conflict with locally installed python outside of singularity container
 ENV PYTHONNOUSERSITE=True
 

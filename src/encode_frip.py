@@ -37,9 +37,10 @@ def frip(ta, peak, out_dir):
     prefix = os.path.join(out_dir, 
         os.path.basename(strip_ext(peak)))
     frip_qc = '{}.frip.qc'.format(prefix)
-
+    
     if get_num_lines(peak)==0:
         val1 = 0.0
+        tmp_files = []
     else:
         # due to bedtools bug when .gz is given for -a and -b
         tmp1 = gunzip(ta, 'tmp1', out_dir)
@@ -50,9 +51,10 @@ def frip(ta, peak, out_dir):
             tmp1, # ta
             tmp2) # peak
         val1 = run_shell_cmd(cmd)
+        tmp_files = [tmp1, tmp2]
     val2 = get_num_lines(ta)
     write_txt(frip_qc, str(float(val1)/float(val2)))
-    rm_f([tmp1, tmp2])
+    rm_f(tmp_files)
     return frip_qc
 
 def frip_shifted(ta, peak, chrsz, fraglen, out_dir):

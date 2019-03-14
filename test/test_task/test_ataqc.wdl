@@ -6,24 +6,24 @@ workflow test_ataqc {
 	# subsampled paired end dataset aligned with full chromosome bowtie2 index
 	# only full chromosome index works. chr19,chrM-only index fails in metaseq...
 	File read_len_log
-	File flagstat_log
+	File flagstat_qc
 	File bowtie2_log
-	File pbc_log
-	File dup_log
+	File pbc_qc
+	File dup_qc
 	File bam
-	File nodup_flagstat_log
+	File nodup_flagstat_qc
 	File mito_dup_log
 	File nodup_bam
 	File ta
 	File peak
 	File idr_peak
 	File overlap_peak
-	File bigwig
+	File pval_bw
 	Boolean paired_end
 
 	File ref_fa
 	File chrsz
-	File tss_enrich
+	File tss
 	File blacklist
 	File dnase
 	File prom
@@ -48,23 +48,23 @@ workflow test_ataqc {
 	call atac.ataqc { input : 
 		paired_end = paired_end,
 		read_len_log = read_len_log,
-		flagstat_log = flagstat_log,
+		flagstat_qc = flagstat_qc,
 		bowtie2_log = bowtie2_log,
-		pbc_log = pbc_log,
-		dup_log = dup_log,
+		pbc_qc = pbc_qc,
+		dup_qc = dup_qc,
 		bam = bam,
-		nodup_flagstat_log = nodup_flagstat_log,
+		nodup_flagstat_qc = nodup_flagstat_qc,
 		mito_dup_log = mito_dup_log,
 		nodup_bam = nodup_bam,
 		ta = ta,
 		peak = peak,
 		idr_peak = idr_peak,
 		overlap_peak = overlap_peak,
-		bigwig = bigwig,
+		pval_bw = pval_bw,
 
 		ref_fa = ref_fa,
 		chrsz = chrsz,
-		tss_enrich = tss_enrich,
+		tss = tss,
 		blacklist = blacklist,
 		dnase = dnase,
 		prom = prom,
@@ -85,15 +85,15 @@ workflow test_ataqc {
 	if ( false ) {
 		call atac.ataqc as ataqc_align_only_1 { input : 
 			paired_end = paired_end,
-			flagstat_log = flagstat_log,
-			pbc_log = pbc_log,
-			nodup_flagstat_log = nodup_flagstat_log,
+			flagstat_qc = flagstat_qc,
+			pbc_qc = pbc_qc,
+			nodup_flagstat_qc = nodup_flagstat_qc,
 			nodup_bam = nodup_bam,
 			ta = ta,
 		
 			ref_fa = ref_fa,
 			chrsz = chrsz,
-			tss_enrich = tss_enrich,
+			tss = tss,
 			blacklist = blacklist,
 			dnase = dnase,
 			prom = prom,
@@ -113,13 +113,13 @@ workflow test_ataqc {
 			paired_end = paired_end,
 			read_len_log = read_len_log,
 			bowtie2_log = bowtie2_log,
-			dup_log = dup_log,
+			dup_qc = dup_qc,
 			bam = bam,
 			mito_dup_log = mito_dup_log,
 
 			ref_fa = ref_fa,
 			chrsz = chrsz,
-			tss_enrich = tss_enrich,
+			tss = tss,
 			blacklist = blacklist,
 			dnase = dnase,
 			prom = prom,
@@ -140,11 +140,11 @@ workflow test_ataqc {
 			peak = peak,
 			idr_peak = idr_peak,
 			overlap_peak = overlap_peak,
-			bigwig = bigwig,
+			pval_bw = pval_bw,
 
 			ref_fa = ref_fa,
 			chrsz = chrsz,
-			tss_enrich = tss_enrich,
+			tss = tss,
 			blacklist = blacklist,
 			dnase = dnase,
 			prom = prom,
@@ -168,7 +168,7 @@ workflow test_ataqc {
 
 		ref_fa = ref_fa,
 		chrsz = chrsz,
-		tss_enrich = tss_enrich,
+		tss = tss,
 		blacklist = blacklist,
 		mito_chr_name = mito_chr_name,
 

@@ -13,6 +13,8 @@
     "test_bowtie2.ref_pe_flagstat_no_multimapping" : "atac-seq-pipeline-test-data/ref_output/test_bowtie2/pe/no_multimapping/ENCFF341MYG.subsampled.400.trim.merged.flagstat.qc",
     "test_bowtie2.ref_se_flagstat" : "atac-seq-pipeline-test-data/ref_output/test_bowtie2/se/multimapping/ENCFF439VSY.subsampled.400.trim.merged.flagstat.qc",
     "test_bowtie2.ref_se_flagstat_no_multimapping" : "atac-seq-pipeline-test-data/ref_output/test_bowtie2/se/no_multimapping/ENCFF439VSY.subsampled.400.trim.merged.flagstat.qc",
-    
+
+    "test_bowtie2.bowtie2_param_se" : "--local",
+    "test_bowtie2.bowtie2_param_pe" : "-X2000 --mm --local",
     "test_bowtie2.multimapping" : 4
 }

@@ -51,7 +51,7 @@ jobs:
           name: build image
           command: |
             source ${BASH_ENV}
-            export DOCKER_CACHE_TAG=v1.1.6
+            export DOCKER_CACHE_TAG=test-v1.1.7
             echo "pulling ${DOCKER_CACHE_TAG}!"
             docker pull quay.io/encode-dcc/atac-seq-pipeline:${DOCKER_CACHE_TAG}
             docker login -u=${QUAY_ROBOT_USER} -p=${QUAY_ROBOT_USER_TOKEN} quay.io

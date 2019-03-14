@@ -6,6 +6,8 @@
     "atac.fastqs_rep1_R2" : [ "rep1_R2_L1.fastq.gz", "rep1_R2_L2.fastq.gz", "rep1_R2_L3.fastq.gz" ],
     "atac.fastqs_rep2_R1" : [ "rep2_R1_L1.fastq.gz", "rep2_R1_L2.fastq.gz" ],
     "atac.fastqs_rep2_R2" : [ "rep2_R2_L1.fastq.gz", "rep2_R2_L2.fastq.gz" ],
+
+    "atac.adapter" : "AATTCCGG",
     "atac.adapters_rep1_R1" : [ "AATTCCGG", "AATTCCGG", "AATTCCGG" ],
     "atac.adapters_rep2_R2" : [ "AATTCCGG", "AATTCCGG" ],
     "atac.adapters_rep1_R1" : [ "AATTCCGG", "AATTCCGG", "AATTCCGG" ],
@@ -35,12 +37,14 @@
     "atac.align_only" : false,
     "atac.true_rep_only" : false,
 
-    "atac.cutadapt_min_trim_len" : 5,
-    "atac.cutadapt_err_rate" : 0.1,
+    "atac.cutadapt_param" : "-e 0.1 -m 5",
+
+    "atac.enable_count_signal_track" : false,
 
     "atac.multimapping" : 0,
 
-    "atac.bowtie2_score_min" : "",
+    "atac.bowtie2_param_pe" : "-X2000 --mm --local",
+    "atac.bowtie2_param_se" : "--local",
 
     "atac.dup_marker" : "picard",
     "atac.mapq_thresh" : 30,

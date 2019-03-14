@@ -11,6 +11,9 @@ adapters = {
     'smallRNA': b'TGGAATTCTCGG'
 }
 
+def open_gz(fname):
+    return gzip.open(fname) if fname.endswith('.gz') else open(fname,'r')
+
 def detect_adapters_and_cnts(fname, max_n_lines=1000000):
     adapter_cnts = {
         'Illumina': 0,
@@ -18,7 +21,7 @@ def detect_adapters_and_cnts(fname, max_n_lines=1000000):
         'smallRNA': 0
     }
 
-    with gzip.open(fname) as fp:
+    with open_gz(fname) as fp:
         # read the first million sequences or to the end of the while -- whichever
         # comes first, and then use the adapter for trimming which was found to
         # occur most often
@@ -65,7 +68,7 @@ def detect_most_likely_adapter(fname):
 
 def main():
     global VERBOSE
-    VERBOSE = True
+    VERBOSE = False
     best_adapter = detect_most_likely_adapter(sys.argv[1])
     print(best_adapter)
 

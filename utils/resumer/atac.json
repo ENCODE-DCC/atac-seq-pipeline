@@ -1,59 +1,119 @@
 {
-    "Array[Object]" : {
-        "atac.bowtie2" : {
-            "bam" : "atac.bams",
-            "align_log" : "atac.align_logs",
-            "flagstat_qc" : "atac.flagstat_qcs",
-            "read_len_log" : "atac.read_len_logs"
-        },
-        "atac.filter" : {
-            "nodup_bam" : "atac.nodup_bams",
-            "flagstat_qc" : "atac.nodup_flagstat_qcs",
-            "dup_qc" : "atac.dup_qcs",
-            "pbc_qc" : "atac.pbc_qcs",
-            "mito_dup_log" : "atac.mito_dup_logs"
-        },
-        "atac.bam2ta" : {
-            "ta" : "atac.tas"
-        },
-        "atac.xcor" : {
-            "plot_png" : "atac.xcor_plots",
-            "score" : "atac.xcor_scores"
-        },
-        "atac.macs2" : {
-            "npeak" : "atac.peaks",
-            "frip_qc" : "atac.macs2_frip_qcs",
-            "sig_pval" : "atac.sig_pvals"
-        },
-        "atac.macs2_pr1" : {
-            "npeak" : "atac.peaks_pr1",
-            "frip_qc" : "atac.macs2_pr1_frip_qcs"
-        },
-        "atac.macs2_pr2" : {
-            "npeak" : "atac.peaks_pr2",
-            "frip_qc" : "atac.macs2_pr2_frip_qcs"
-        },
-        "atac.ataqc" : {
-            "html" : "atac.ataqc_htmls",
-            "txt" : "atac.ataqc_txts"
-        }
+    "atac.trim_adapter" : {
+        "trim_merged_fastq_R1" : "atac.trim_merged_fastqs_R1",
+        "trim_merged_fastq_R2" : "atac.trim_merged_fastqs_R2"
     },
-    
-    "Object" : {
-        "atac.pool_ta" : {
-            "ta_pooled" : "atac.ta_pooled"
-        },
-        "atac.macs2_pooled" : {
-            "npeak" : "atac.peak_pooled",
-            "frip_qc" : "atac.macs2_pooled_frip_qc_"
-        },
-        "atac.macs2_ppr1" : {
-            "npeak" : "atac.peak_ppr1",
-            "frip_qc" : "atac.macs2_ppr1_frip_qc_"
-        },
-        "atac.macs2_ppr2" : {
-            "npeak" : "atac.peak_ppr2",
-            "frip_qc" : "atac.macs2_ppr2_frip_qc_"
-        }
+    "atac.bowtie2" : {
+        "bam" : "atac.bams",
+        "align_log" : "atac.bowtie2__align_log",
+        "flagstat_qc" : "atac.bowtie2__flagstat_qc",
+        "read_len_log" : "atac.bowtie2__read_len_log"
+    },
+    "atac.filter" : {
+        "nodup_bam" : "atac.nodup_bams",
+        "flagstat_qc" : "atac.filter__flagstat_qc",
+        "dup_qc" : "atac.filter__dup_qc",
+        "pbc_qc" : "atac.filter__pbc_qc",
+        "mito_dup_log" : "atac.filter__mito_dup_log"
+    },
+    "atac.bam2ta" : {
+        "ta" : "atac.tas"
+    },
+    "atac.spr" : {
+        "ta_pr1" : "atac.spr__ta_pr1",
+        "ta_pr2" : "atac.spr__ta_pr2"
+    },
+    "atac.xcor" : {
+        "plot_png" : "atac.xcor__plot_png",
+        "score" : "atac.xcor__score"
+    },
+    "atac.count_signal_track" : {
+        "pos_bw" : "atac.count_signal_track__pos_bw",
+        "neg_bw" : "atac.count_signal_track__neg_bw"
+    },
+    "atac.macs2_signal_track" : {
+        "pval_bw" : "atac.macs2_signal_track__pval_bw",
+        "fc_bw" : "atac.macs2_signal_track__fc_bw"
+    },
+    "atac.macs2" : {
+        "npeak" : "atac.peaks",
+        "frip_qc" : "atac.macs2__frip_qc"
+    },
+    "atac.macs2_pr1" : {
+        "npeak" : "atac.peaks_pr1",
+        "frip_qc" : "atac.macs2_pr1_frip_qcs"
+    },
+    "atac.macs2_pr2" : {
+        "npeak" : "atac.peaks_pr2",
+        "frip_qc" : "atac.macs2_pr2_frip_qcs"
+    },
+    "atac.ataqc" : {
+        "html" : "atac.ataqc__html",
+        "txt" : "atac.ataqc__txt"
+    },
+    "atac.idr" : {
+        "idr_peak" : "atac.idr__idr_peak",
+        "bfilt_idr_peak" : "atac.idr__bfilt_idr_peak",
+        "idr_plot" : "atac.idr__idr_plot",
+        "frip_qc" : "atac.idr__frip_qc"
+    },
+    "atac.idr_pr" : {
+        "idr_peak" : "atac.idr_pr__idr_peak",
+        "bfilt_idr_peak" : "atac.idr_pr__bfilt_idr_peak",
+        "idr_plot" : "atac.idr_pr__idr_plot",
+        "frip_qc" : "atac.idr_pr__frip_qc"
+    },
+    "atac.overlap" : {
+        "overlap_peak" : "atac.overlap__overlap_peak",
+        "bfilt_overlap_peak" : "atac.overlap__bfilt_overlap_peak",
+        "frip_qc" : "atac.overlap__frip_qc"
+    },
+    "atac.overlap_pr" : {
+        "overlap_peak" : "atac.overlap_pr__overlap_peak",
+        "bfilt_overlap_peak" : "atac.overlap_pr__bfilt_overlap_peak",
+        "frip_qc" : "atac.overlap_pr__frip_qc"
+    },
+    "atac.pool_ta" : {
+        "ta_pooled" : "atac.pool_ta__ta_pooled"
+    },
+    "atac.count_signal_track_pooled" : {
+        "pos_bw" : "atac.count_signal_track__pooled_pos_bw",
+        "neg_bw" : "atac.count_signal_track__pooled_neg_bw"
+    },
+    "atac.macs2_signal_track_pooled" : {
+        "pval_bw" : "atac.macs2_signal_track__pooled_pval_bw",
+        "fc_bw" : "atac.macs2_signal_track__pooled_fc_bw"
+    },
+    "atac.macs2_pooled" : {
+        "npeak" : "atac.peak_pooled",
+        "frip_qc" : "atac.macs2_pooled__frip_qc"
+    },
+    "atac.macs2_ppr1" : {
+        "npeak" : "atac.peak_ppr1",
+        "frip_qc" : "atac.macs2_ppr1__frip_qc"
+    },
+    "atac.macs2_ppr2" : {
+        "npeak" : "atac.peak_ppr2",
+        "frip_qc" : "atac.macs2_ppr2__frip_qc"
+    },
+    "atac.idr_ppr" : {
+        "idr_peak" : "atac.idr_ppr__idr_peak",
+        "bfilt_idr_peak" : "atac.idr_ppr__bfilt_idr_peak",
+        "idr_plot" : "atac.idr_ppr__idr_plot",
+        "frip_qc" : "atac.idr_ppr__frip_qc"
+    },
+    "atac.overlap_ppr" : {
+        "overlap_peak" : "atac.overlap_ppr__overlap_peak",
+        "bfilt_overlap_peak" : "atac.overlap_ppr__bfilt_overlap_peak",
+        "frip_qc" : "atac.overlap_ppr__frip_qc"
+    },
+    "atac.reproducibility_idr" : {
+        "optimal_peak" : "atac.reproducibility_idr__optimal_peak",
+        "reproducibility_qc" : "atac.reproducibility_idr__reproducibility_qc"
+    },
+    "atac.reproducibility_overlap" : {
+        "optimal_peak" : "atac.reproducibility_overlap__optimal_peak",
+        "reproducibility_qc" : "atac.reproducibility_overlap__reproducibility_qc"
     }
 }
+

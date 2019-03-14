@@ -33,7 +33,7 @@
 
 6. Pull a singularity container for the pipeline. This will pull pipeline's docker container first and build a singularity one on `~/.singularity`.
     ```bash
-    $ mkdir -p ~/.singularity && cd ~/.singularity && SINGULARITY_CACHEDIR=~/.singularity SINGULARITY_PULLFOLDER=~/.singularity singularity pull --name atac-seq-pipeline-v1.1.6.simg -F docker://quay.io/encode-dcc/atac-seq-pipeline:v1.1.6
+    $ mkdir -p ~/.singularity && cd ~/.singularity && SINGULARITY_CACHEDIR=~/.singularity SINGULARITY_PULLFOLDER=~/.singularity singularity pull --name atac-seq-pipeline-v1.1.7.simg -F docker://quay.io/encode-dcc/atac-seq-pipeline:v1.1.7
     ```
 
 7. Run a pipeline for the test sample.
@@ -53,7 +53,7 @@
     ```javascript
     {
         "default_runtime_attributes" : {
-            "singularity_container" : "~/.singularity/chip-seq-pipeline-v1.1.6.simg",
+            "singularity_container" : "~/.singularity/chip-seq-pipeline-v1.1.7.simg",
             "singularity_bindpath" : "/your/,YOUR_OWN_DATA_DIR1,YOUR_OWN_DATA_DIR1,..."
         }
     }

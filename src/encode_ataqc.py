@@ -33,7 +33,7 @@ def parse_arguments():
     parser.add_argument('--idr-peak', type=str, help='IDR NARROWPEAK file (from task idr).')
     parser.add_argument('--ref-fa', type=str, help='Reference fasta file.')
     parser.add_argument('--chrsz', type=str, help='2-col chromosome sizes file.')
-    parser.add_argument('--tss-enrich', type=str, help='TSS enrichment definition bed file.')
+    parser.add_argument('--tss', type=str, help='TSS definition bed file.')
     parser.add_argument('--dnase', type=str, help='DNase definition bed file.')
     parser.add_argument('--blacklist', type=str, help='Blacklist bed file.')
     parser.add_argument('--prom', type=str, help='Promoter definition bed file.')
@@ -78,11 +78,13 @@ def ataqc():
     COORDSORT_BAM = args.bam
     if ALIGNED_BAM or COORDSORT_BAM:
         samtools_index(ALIGNED_BAM)
+        RG_FREE_ALIGNED_BAM = remove_read_group(ALIGNED_BAM)
     PBC_LOG = args.pbc_log
     DUP_LOG = args.dup_log
     FINAL_BAM = args.nodup_bam
     if FINAL_BAM:
         samtools_index(FINAL_BAM) # make index
+        RG_FREE_FINAL_BAM = remove_read_group(FINAL_BAM)
     FINAL_BED = args.ta
     if args.idr_peak:
         PEAKS = args.peak
@@ -97,7 +99,7 @@ def ataqc():
     REF = args.ref_fa
     CHROMSIZES = args.chrsz
 
-    TSS = args.tss_enrich if args.tss_enrich and os.path.basename(args.tss_enrich)!='null' else ''
+    TSS = args.tss if args.tss and os.path.basename(args.tss)!='null' else ''
     DNASE = args.dnase if args.dnase and os.path.basename(args.dnase)!='null' else ''
     BLACKLIST = args.blacklist if args.blacklist and os.path.basename(args.blacklist)!='null' else ''
     PROM = args.prom if args.prom and os.path.basename(args.prom)!='null' else ''
@@ -137,7 +139,7 @@ def ataqc():
         chr_m_reads, fraction_chr_m = (None, None)
 
     if FINAL_BAM:
-        gc_out, gc_plot, gc_summary = get_gc(FINAL_BAM,
+        gc_out, gc_plot, gc_summary = get_gc(RG_FREE_FINAL_BAM,
                                              REF,
                                              OUTPUT_PREFIX)
     else:
@@ -145,7 +147,7 @@ def ataqc():
 
     if ALIGNED_BAM:
         # Library complexity: Preseq results, NRF, PBC1, PBC2    
-        picard_est_library_size = get_picard_complexity_metrics(ALIGNED_BAM,
+        picard_est_library_size = get_picard_complexity_metrics(RG_FREE_ALIGNED_BAM,
                                                                 OUTPUT_PREFIX)
         preseq_data, preseq_log = run_preseq(ALIGNED_BAM, OUTPUT_PREFIX) # SORTED BAM
 
@@ -177,7 +179,7 @@ def ataqc():
         percent_dup = None
 
     if args.mito_dup_log:
-        # mito_dups, fract_dups_from_mito = get_mito_dups(ALIGNED_BAM,
+        # mito_dups, fract_dups_from_mito = get_mito_dups(RG_FREE_ALIGNED_BAM,
         #                                                 OUTPUT_PREFIX,
         #                                                 args.mito_chr_name
         #                                                 paired_status,
@@ -186,8 +188,8 @@ def ataqc():
             # read mito_dup_log (TSV -> dict)
             mito_dup_map = {k: v for k,v in (map(str, line.split('\t')) for line in fp)}
             mito_dups = int(mito_dup_map['mito_dups'])
-            total_dups = int(mito_dup_map['total_dups'])
-            fract_dups_from_mito = mito_dups/float(total_dups)
+            total_dups = int(mito_dup_map['total_dups'])            
+            fract_dups_from_mito = mito_dups/float(total_dups) if total_dups!=0 else 0.0
     else:
         mito_dups = None
         total_dups = None
@@ -214,7 +216,7 @@ def ataqc():
 
     # Insert size distribution - CAN'T GET THIS FOR SE FILES
     if FINAL_BAM and paired_status == "Paired-ended":
-        insert_data, insert_plot = get_insert_distribution(FINAL_BAM,
+        insert_data, insert_plot = get_insert_distribution(RG_FREE_FINAL_BAM,
                                                            OUTPUT_PREFIX)
         # Also need to run n-nucleosome estimation
         if paired_status == 'Paired-ended':
@@ -444,6 +446,12 @@ def ataqc():
         else:
             pass
     textfile.close()
+
+    # remove temporary files
+    if ALIGNED_BAM or COORDSORT_BAM:
+        rm_f(RG_FREE_ALIGNED_BAM)
+    if FINAL_BAM:
+        rm_f(RG_FREE_FINAL_BAM)
 
     # stop = timeit.default_timer()
     # print("Run time:", str(datetime.timedelta(seconds=int(stop - start))))

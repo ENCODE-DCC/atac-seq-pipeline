@@ -53,6 +53,22 @@ ATAQC_HTML_HEAD = \
 </head>
 '''
 
+def split_entries_and_extend(l, delim='_:_'):
+    result = []
+    for a in l:
+        if type(a)==str:
+            result.extend(a.split(delim))
+        else:
+            result.append(a)
+    test_not_all_empty = [r for r in result if r]
+    # if all empty then return []
+    return result if test_not_all_empty else []
+
+def str2bool(s):
+    if s not in ['false', 'true', 'False', 'True']:
+        raise ValueError('Not a valid boolean string')
+    return s=='True' or s=='true'
+
 def parse_arguments():
     parser = argparse.ArgumentParser(
                         prog='ENCODE DCC generate HTML report and QC JSON.',
@@ -67,10 +83,11 @@ def parse_arguments():
                         help='Pipeline version.')
     parser.add_argument('--multimapping', default=0, type=int,
                         help='Multimapping reads.')
-    parser.add_argument('--paired-end', action="store_true",
-                        help='Paired-end sample.')
-    parser.add_argument('--pipeline-type', type=str, required=True,
-                        choices=['atac','dnase','tf','histone'],
+    parser.add_argument('--paired-ends', type=str2bool, nargs='*',
+                        help='List of true/false for paired endedness of sample.')
+    parser.add_argument('--ctl-paired-ends', type=str2bool, nargs='*',
+                        help='List of true/false for paired endedness of control.')
+    parser.add_argument('--pipeline-type', type=str, required=True,                        
                         help='Pipeline type.')
     parser.add_argument('--peak-caller', type=str, required=True,
                         help='Description for sample.')
@@ -171,6 +188,11 @@ def parse_arguments():
                         help='Log level')
     args = parser.parse_args()
 
+    # _:_
+    for a in vars(args):
+        if type(eval('args.{}'.format(a)))==list:
+            exec('args.{} = split_entries_and_extend(args.{})'.format(a,a))        
+
     log.setLevel(args.log_level)
     log.info(sys.argv)
     return args
@@ -186,11 +208,29 @@ def get_full_name(pipeline_type):
         return 'Histone ChIP-Seq'
     return pipeline_type
 
-def get_rep_labels(arr):
-    return (['rep'+str(i+1) for i, a in enumerate(arr)])
+def get_rep_labels(arr, paired_ends=[]):
+    result = []
+    for i, a in enumerate(arr):
+        s = 'rep'+str(i+1)
+        if paired_ends:
+            if paired_ends[i]:
+                s+= ' (PE)'
+            else:
+                s+= ' (SE)'
+        result.append(s)
+    return result
 
-def get_ctl_labels(arr):
-    return (['ctl'+str(i+1) for i, a in enumerate(arr)])
+def get_ctl_labels(arr, paired_ends=[]):
+    result = []
+    for i, a in enumerate(arr):
+        s = 'ctl'+str(i+1)
+        if paired_ends:
+            if paired_ends[i]:
+                s+= ' (PE)'
+            else:
+                s+= ' (SE)'
+        result.append(s)
+    return result
 
 def main():
     # read params
@@ -207,13 +247,15 @@ def main():
     json_all['general']['genome'] = args.genome
     json_all['general']['description'] = args.desc
     json_all['general']['title'] = args.title
-    json_all['general']['paired_end'] = args.paired_end
+    json_all['general']['paired_end'] = args.paired_ends
+    if args.ctl_paired_ends:
+        json_all['general']['ctl_paired_end'] = args.ctl_paired_ends
     
     html += html_heading(1, args.title)
     html += html_paragraph(args.desc)
     html += html_paragraph('Pipeline version: {}'.format(args.pipeline_ver))
     html += html_paragraph('Report generated at {}'.format(now()))
-    html += html_paragraph('Paired-end: {}'.format(args.paired_end))
+    html += html_paragraph('Paired-end: {}'.format(args.paired_ends))
     html += html_paragraph('Pipeline type: {}'.format(get_full_name(args.pipeline_type)))
     html += html_paragraph('Genome: {}'.format(args.genome))
     html += html_paragraph('Peak caller: {}'.format(args.peak_caller.upper()))
@@ -235,19 +277,19 @@ def main():
             json_objs = [parse_flagstat_qc(qc) for qc in args.flagstat_qcs]
             json_all['flagstat_qc'] = json_objs
             json_objs_all.extend(json_objs)
-            row_header.extend(get_rep_labels(json_objs))
+            row_header.extend(get_rep_labels(json_objs, args.paired_ends))
         if args.ctl_flagstat_qcs:
             json_objs = [parse_flagstat_qc(qc) for qc in args.ctl_flagstat_qcs]
             json_all['ctl_flagstat_qc'] = json_objs
             json_objs_all.extend(json_objs)
-            row_header.extend(get_ctl_labels(json_objs))
+            row_header.extend(get_ctl_labels(json_objs, args.ctl_paired_ends))
 
-        html_align += html_vert_table_multi_rep(json_objs_all, args.paired_end, row_header)
+        html_align += html_vert_table_multi_rep(json_objs_all, row_header)
 
     if args.dup_qcs and get_num_lines(args.dup_qcs[0]) \
         or args.ctl_dup_qcs and get_num_lines(args.ctl_dup_qcs[0]):
         html_align += html_heading(2, 'Marking duplicates (filtered BAM)')
-        html_align += html_help_filter(args.multimapping, args.paired_end)
+        html_align += html_help_filter(args.multimapping)
         # check if file is empty (when filter.no_dup_removal is on)
         # if empty then skip
         json_objs_all = []
@@ -256,13 +298,13 @@ def main():
             json_objs = [parse_dup_qc(qc) for qc in args.dup_qcs]
             json_all['dup_qc'] = json_objs
             json_objs_all.extend(json_objs)
-            row_header.extend(get_rep_labels(json_objs))
+            row_header.extend(get_rep_labels(json_objs, args.paired_ends))
         if args.ctl_dup_qcs and get_num_lines(args.ctl_dup_qcs[0]):
             json_objs = [parse_dup_qc(qc) for qc in args.ctl_dup_qcs]
             json_all['ctl_dup_qc'] = json_objs
             json_objs_all.extend(json_objs)
-            row_header.extend(get_ctl_labels(json_objs))
-        html_align += html_vert_table_multi_rep(json_objs_all, args.paired_end, row_header)
+            row_header.extend(get_ctl_labels(json_objs, args.ctl_paired_ends))
+        html_align += html_vert_table_multi_rep(json_objs_all, row_header)
 
     if args.pbc_qcs and get_num_lines(args.pbc_qcs[0]) \
         or args.ctl_pbc_qcs and get_num_lines(args.ctl_pbc_qcs[0]):
@@ -275,13 +317,13 @@ def main():
             json_objs = [parse_pbc_qc(qc) for qc in args.pbc_qcs]
             json_all['pbc_qc'] = json_objs
             json_objs_all.extend(json_objs)
-            row_header.extend(get_rep_labels(json_objs))
+            row_header.extend(get_rep_labels(json_objs, args.paired_ends))
         if args.ctl_pbc_qcs and get_num_lines(args.ctl_pbc_qcs[0]):
             json_objs = [parse_pbc_qc(qc) for qc in args.ctl_pbc_qcs]
             json_all['ctl_pbc_qc'] = json_objs
             json_objs_all.extend(json_objs)
-            row_header.extend(get_ctl_labels(json_objs))
-        html_align += html_vert_table_multi_rep(json_objs_all, args.paired_end, row_header)
+            row_header.extend(get_ctl_labels(json_objs, args.ctl_paired_ends))
+        html_align += html_vert_table_multi_rep(json_objs_all, row_header)
         html_align += html_help_pbc()
 
     if args.nodup_flagstat_qcs or args.ctl_nodup_flagstat_qcs:
@@ -293,13 +335,13 @@ def main():
             json_objs = [parse_flagstat_qc(qc) for qc in args.nodup_flagstat_qcs]
             json_all['nodup_flagstat_qc'] = json_objs
             json_objs_all.extend(json_objs)
-            row_header.extend(get_rep_labels(json_objs))
+            row_header.extend(get_rep_labels(json_objs, args.paired_ends))
         if args.ctl_nodup_flagstat_qcs:
             json_objs = [parse_flagstat_qc(qc) for qc in args.ctl_nodup_flagstat_qcs]
             json_all['ctl_nodup_flagstat_qc'] = json_objs
             json_objs_all.extend(json_objs)
-            row_header.extend(get_ctl_labels(json_objs))
-        html_align += html_vert_table_multi_rep(json_objs_all, args.paired_end, row_header)
+            row_header.extend(get_ctl_labels(json_objs, args.ctl_paired_ends))
+        html_align += html_vert_table_multi_rep(json_objs_all, row_header)
 
     # IDR plots
     if args.idr_plots or args.idr_plots_pr or args.idr_plot_ppr:
@@ -309,11 +351,13 @@ def main():
             num_rep = infer_n_from_nC2(len(args.idr_plots))        
             # embed PNGs into HTML
             for i, png in enumerate(args.idr_plots):
-                pair_label = infer_pair_label_from_idx(num_rep, i)
-                html_peakcall += html_embedded_png(png, pair_label)
+                if png:
+                    pair_label = infer_pair_label_from_idx(num_rep, i)
+                    html_peakcall += html_embedded_png(png, pair_label)
         if args.idr_plots_pr:
             for i, png in enumerate(args.idr_plots_pr):
-                html_peakcall += html_embedded_png(png, 'rep{}-pr'.format(i+1))
+                if png:
+                    html_peakcall += html_embedded_png(png, 'rep{}-pr'.format(i+1))
         if args.idr_plot_ppr:
             png = args.idr_plot_ppr[0]
             html_peakcall += html_embedded_png(png, 'ppr')
@@ -341,7 +385,6 @@ def main():
             row_header_reproducibility_qc.append('IDR')
         html_peakcall += html_vert_table_multi_rep(
             json_objs_reproducibility_qc, 
-            args.paired_end,
             row_header_reproducibility_qc)
         if args.overlap_reproducibility_qc:
             html_peakcall += html_help_overlap()
@@ -351,13 +394,18 @@ def main():
     if args.xcor_plots and args.xcor_scores:
         html_enrich += html_heading(2, 'Strand cross-correlation measures')
         json_objs = [parse_xcor_score(qc) for qc in args.xcor_scores]
+        num_reads = 0 # json_objs[0]['num_reads']
+        for _, j in enumerate(json_objs):
+            if j:
+                num_reads = j['num_reads']
         html_enrich += html_paragraph('Performed on subsampled reads ({})'.format(
-            human_readable_number(json_objs[0]['num_reads'])))
+            human_readable_number(num_reads)))
 
-        html_enrich += html_vert_table_multi_rep(json_objs, args.paired_end)
+        html_enrich += html_vert_table_multi_rep(json_objs)
         html_enrich += html_help_xcor()
         for i, xcor_plot in enumerate(args.xcor_plots):
-            html_enrich += html_embedded_png(xcor_plot, 'rep{}'.format(i+1), 60)
+            if xcor_plot:
+                html_enrich += html_embedded_png(xcor_plot, 'rep{}'.format(i+1), 60)
         json_all['xcor_score'] = json_objs
 
     # frip (Enrichment QC) for MACS2 raw peaks
@@ -398,7 +446,7 @@ def main():
             row_header_frip.append('ppr2')
         json_all['frip_macs2_qc'] = OrderedDict(
             zip(row_header_frip,json_objs_frip))
-        # html_enrich += html_vert_table_multi_rep(json_objs_frip,args.paired_end,row_header_frip)
+        # html_enrich += html_vert_table_multi_rep(json_objs_frip,row_header_frip)
         # html_enrich += html_help_FRiP(args.peak_caller)
 
     # frip (Enrichment QC) for SPP raw peaks
@@ -439,7 +487,7 @@ def main():
             row_header_frip.append('ppr2')
         json_all['frip_spp_qc'] = OrderedDict(
             zip(row_header_frip,json_objs_frip))
-        # html_enrich += html_vert_table_multi_rep(json_objs_frip,args.paired_end,row_header_frip)
+        # html_enrich += html_vert_table_multi_rep(json_objs_frip,row_header_frip)
         # html_enrich += html_help_FRiP(args.peak_caller)
 
     # frip (Enrichment QC) for overlap
@@ -466,7 +514,6 @@ def main():
         json_all['overlap_frip_qc'] = OrderedDict(zip(row_header_frip_overlap,json_objs_frip_overlap))
         html_enrich += html_vert_table_multi_rep(
             json_objs_frip_overlap,
-            args.paired_end,
             row_header_frip_overlap)
         html_enrich += html_help_overlap_FRiP()
 
@@ -494,14 +541,13 @@ def main():
         json_all['idr_frip_qc'] = OrderedDict(zip(row_header_frip_idr,json_objs_frip_idr))
         html_enrich += html_vert_table_multi_rep(
             json_objs_frip_idr,
-            args.paired_end,
             row_header_frip_idr)
         html_enrich += html_help_idr_FRiP()
 
     if args.jsd_plot:
         html_etc += html_heading(2, 'Fingerprint and Jensen-Shannon distance')
         json_objs = [parse_jsd_qc(qc) for qc in args.jsd_qcs]
-        html_etc += html_vert_table_multi_rep(json_objs, args.paired_end)
+        html_etc += html_vert_table_multi_rep(json_objs)
         html_etc += html_embedded_png(args.jsd_plot[0], '', 40)
         json_all['jsd_qc'] = json_objs
 
@@ -512,9 +558,10 @@ def main():
         html_ataqc += html_heading(2, 'Summary table')
         html_ataqc += html_vert_table_multi_rep(json_objs)
         for i, ataqc_html in enumerate(args.ataqc_htmls):
-            html_ataqc += html_heading(2, 'Replicate {}'.format(i+1))
-            html_ataqc += html_parse_body_from_file(ataqc_html).replace('<h2>ATAqC</h2>','')
-            html_ataqc += '\n<br>'
+            if ataqc_html:
+                html_ataqc += html_heading(2, 'Replicate {}'.format(i+1))
+                html_ataqc += html_parse_body_from_file(ataqc_html).replace('<h2>ATAqC</h2>','')
+                html_ataqc += '\n<br>'
 
     if html_align:
         html_align = html_heading(1, 'Alignment')+'<hr>'+html_align

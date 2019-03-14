@@ -1,0 +1,8 @@
+{
+    "test_count_signal_track.se_chrsz" : "atac-seq-pipeline-test-data/genome_data/hg38_chr19_chrM/hg38_chr19_chrM.chrom.sizes",
+
+    "test_count_signal_track.se_ta" : "atac-seq-pipeline-test-data/input/se/tas/rep1/ENCFF439VSY.subsampled.400.trim.merged.nodup.tn5.tagAlign.gz",
+
+    "test_count_signal_track.ref_se_count_signal_track_pos_bw" : "atac-seq-pipeline-test-data/ref_output/test_count_signal_track/ENCFF439VSY.subsampled.400.trim.merged.nodup.tn5.positive.bigwig",
+    "test_count_signal_track.ref_se_count_signal_track_neg_bw" : "atac-seq-pipeline-test-data/ref_output/test_count_signal_track/ENCFF439VSY.subsampled.400.trim.merged.nodup.tn5.negative.bigwig"
+}

@@ -1,27 +1,33 @@
 {
-    "test_trim_adapter.pe_adapters" : [
-        ["CTGTCTCTTATA",
-        "CTGTCTCTTATA"],
-        ["CTGTCTCTTATA",
-        "CTGTCTCTTATA"]
+    "test_trim_adapter.cutadapt_param" : "-e 0.1 -m 5",
+
+    "test_trim_adapter.pe_adapters_R1" : [
+        "CTGTCTCTTATA",
+        "CTGTCTCTTATA"
     ],
-    "test_trim_adapter.pe_fastqs" : [
-        ["atac-seq-pipeline-test-data/input/pe/fastqs/rep1/pair1/ENCFF341MYG.subsampled.400.fastq.gz",
-         "atac-seq-pipeline-test-data/input/pe/fastqs/rep1/pair2/ENCFF248EJF.subsampled.400.fastq.gz"],
-        ["atac-seq-pipeline-test-data/input/pe/fastqs/rep1/pair1/ENCFF106QGY.subsampled.400.fastq.gz",
-         "atac-seq-pipeline-test-data/input/pe/fastqs/rep1/pair2/ENCFF368TYI.subsampled.400.fastq.gz"]
+    "test_trim_adapter.pe_adapters_R2" : [
+        "CTGTCTCTTATA",
+        "CTGTCTCTTATA"
     ],
-    "test_trim_adapter.se_adapters" : [
-        ["CTGTCTCTTATA"],
-        ["CTGTCTCTTATA"],
-        ["CTGTCTCTTATA"],
-        ["CTGTCTCTTATA"]
+    "test_trim_adapter.pe_fastqs_R1" : [
+        "atac-seq-pipeline-test-data/input/pe/fastqs/rep1/pair1/ENCFF341MYG.subsampled.400.fastq.gz",
+        "atac-seq-pipeline-test-data/input/pe/fastqs/rep1/pair1/ENCFF106QGY.subsampled.400.fastq.gz"
     ],
-    "test_trim_adapter.se_fastqs" : [
-        ["atac-seq-pipeline-test-data/input/se/fastqs/rep1/ENCFF439VSY.subsampled.400.fastq.gz"],
-        ["atac-seq-pipeline-test-data/input/se/fastqs/rep1/ENCFF325FCQ.subsampled.400.fastq.gz"],
-        ["atac-seq-pipeline-test-data/input/se/fastqs/rep1/ENCFF683IQS.subsampled.400.fastq.gz"],
-        ["atac-seq-pipeline-test-data/input/se/fastqs/rep1/ENCFF744CHW.subsampled.400.fastq.gz"]
+    "test_trim_adapter.pe_fastqs_R2" : [
+        "atac-seq-pipeline-test-data/input/pe/fastqs/rep1/pair2/ENCFF248EJF.subsampled.400.fastq.gz",
+        "atac-seq-pipeline-test-data/input/pe/fastqs/rep1/pair2/ENCFF368TYI.subsampled.400.fastq.gz"
+    ],
+    "test_trim_adapter.se_adapters_R1" : [
+        "CTGTCTCTTATA",
+        "CTGTCTCTTATA",
+        "CTGTCTCTTATA",
+        "CTGTCTCTTATA"
+    ],
+    "test_trim_adapter.se_fastqs_R1" : [
+        "atac-seq-pipeline-test-data/input/se/fastqs/rep1/ENCFF439VSY.subsampled.400.fastq.gz",
+        "atac-seq-pipeline-test-data/input/se/fastqs/rep1/ENCFF325FCQ.subsampled.400.fastq.gz",
+        "atac-seq-pipeline-test-data/input/se/fastqs/rep1/ENCFF683IQS.subsampled.400.fastq.gz",
+        "atac-seq-pipeline-test-data/input/se/fastqs/rep1/ENCFF744CHW.subsampled.400.fastq.gz"
     ],
     "test_trim_adapter.ref_pe_trimmed_fastqs" : [
         "atac-seq-pipeline-test-data/ref_output/test_trim_adapter/pe/merge_fastqs_R1_ENCFF341MYG.subsampled.400.trim.merged.fastq.gz",

@@ -22,13 +22,12 @@ def parse_arguments(debug=False):
     parser.add_argument('--auto-detect-adapter', action='store_true',
                         help='Automatically detect/trim adapters \
                             (supported system: Illumina, Nextera and smallRNA).')
-    parser.add_argument('--min-trim-len', type=int, default=5,
-                        help='Minimum trim length for cutadapt -m \
-                            (throwing away processed reads shorter than this).')
-    parser.add_argument('--err-rate', type=float, default=0.1,
-                        help='Maximum allowed adapter error rate for cutadapt -e \
-                            (no. errors divided by the length \
-                            of the matching adapter region).')
+    parser.add_argument('--cutadapt-param', type=str, default='-e 0.1 -m 5',
+                        help='Parameters for cutadapt \
+                            (default: -e 0.1 -m 5; err_rate=0.1, min_trim_len=5).')
+    parser.add_argument('--adapter', type=str,
+                        help='One adapter to use for all fastqs. '
+                            'This will override individual adapters defined in --adapters.')
     parser.add_argument('--adapters', nargs='+', type=str,
                         help='TSV file path or list of adapter strings. \
                             Use TSV for multiple fastqs to be merged later. \
@@ -46,8 +45,9 @@ def parse_arguments(debug=False):
     args = parser.parse_args()
 
     # parse fastqs command line
-    if args.fastqs[0].endswith('.gz'): # it's fastq
-         args.fastqs = [[f] for f in args.fastqs] # make it a matrix
+    if args.fastqs[0].endswith('.gz') or args.fastqs[0].endswith('.fastq') or \
+        args.fastqs[0].endswith('.fq'): # it's fastq
+        args.fastqs = [[f] for f in args.fastqs] # make it a matrix
     else: # it's TSV
         args.fastqs = read_tsv(args.fastqs[0])
 
@@ -84,16 +84,15 @@ def parse_arguments(debug=False):
     log.info(sys.argv)
     return args
 
-def trim_adapter_se(fastq, adapter, min_trim_len, err_rate, out_dir):
+def trim_adapter_se(fastq, adapter, adapter_for_all, cutadapt_param, out_dir):
     if adapter:
         prefix = os.path.join(out_dir,
             os.path.basename(strip_ext_fastq(fastq)))
         trimmed = '{}.trim.fastq.gz'.format(prefix)
 
-        cmd = 'cutadapt {} -e {} -a {} {} | gzip -nc > {}'.format(
-            '-m {}'.format(min_trim_len) if min_trim_len > 0 else '',
-            err_rate,
-            adapter,
+        cmd = 'cutadapt {} -a {} {} | gzip -nc > {}'.format(
+            cutadapt_param,
+            adapter_for_all if adapter_for_all else adapter,
             fastq,
             trimmed)     
         run_shell_cmd(cmd)
@@ -105,8 +104,8 @@ def trim_adapter_se(fastq, adapter, min_trim_len, err_rate, out_dir):
         os.link(fastq, linked)
         return linked        
 
-def trim_adapter_pe(fastq1, fastq2, adapter1, adapter2,
-        min_trim_len, err_rate, out_dir):
+def trim_adapter_pe(fastq1, fastq2, adapter1, adapter2, adapter_for_all,
+        cutadapt_param, out_dir):
     if adapter1 and adapter2:
         prefix1 = os.path.join(out_dir,
             os.path.basename(strip_ext_fastq(fastq1)))
@@ -115,10 +114,10 @@ def trim_adapter_pe(fastq1, fastq2, adapter1, adapter2,
         trimmed1 = '{}.trim.fastq.gz'.format(prefix1)
         trimmed2 = '{}.trim.fastq.gz'.format(prefix2)
 
-        cmd = 'cutadapt {} -e {} -a {} -A {} {} {} -o {} -p {}'.format(
-            '-m {}'.format(min_trim_len) if min_trim_len > 0 else '',
-            err_rate,
-            adapter1, adapter2,
+        cmd = 'cutadapt {} -a {} -A {} {} {} -o {} -p {}'.format(
+            cutadapt_param,
+            adapter_for_all if adapter_for_all else adapter1,
+            adapter_for_all if adapter_for_all else adapter2,
             fastq1, fastq2,
             trimmed1, trimmed2)
         run_shell_cmd(cmd)
@@ -133,15 +132,12 @@ def trim_adapter_pe(fastq1, fastq2, adapter1, adapter2,
         os.link(fastq2, linked2)
         return [linked1, linked2]
 
-# WDL glob() globs in an alphabetical order
-# so R1 and R2 can be switched, which results in an
-# unexpected behavior of a workflow
-# so we prepend merge_fastqs_'end'_ (R1 or R2)
-# to the basename of original filename
+# make merged fastqs on $out_dir/R1, $out_dir/R2
 def merge_fastqs(fastqs, end, out_dir):
-    basename = os.path.basename(strip_ext_fastq(fastqs[0]))
+    out_dir = os.path.join(out_dir, end)
+    mkdir_p(out_dir)
     prefix = os.path.join(out_dir,
-        'merge_fastqs_{}_{}'.format(end, basename))
+        os.path.basename(strip_ext_fastq(fastqs[0])))
     merged = '{}.merged.fastq.gz'.format(prefix)
 
     if len(fastqs)>1:
@@ -180,7 +176,7 @@ def main():
         fastqs = args.fastqs[i] # R1 and R2
         adapters = args.adapters[i]
         if args.paired_end:
-            if args.auto_detect_adapter and \
+            if not args.adapter and args.auto_detect_adapter and \
                 not (adapters[0] and adapters[1]):                
                 ret_val1 = pool.apply_async(
                     detect_most_likely_adapter,(fastqs[0],))
@@ -188,7 +184,7 @@ def main():
                     detect_most_likely_adapter,(fastqs[1],))
                 ret_vals.append([ret_val1,ret_val2])
         else:
-            if args.auto_detect_adapter and \
+            if not args.adapter and args.auto_detect_adapter and \
                 not adapters[0]:
                 ret_val1 = pool.apply_async(
                     detect_most_likely_adapter,(fastqs[0],))
@@ -212,16 +208,16 @@ def main():
                 trim_adapter_pe,(
                     fastqs[0], fastqs[1], 
                     adapters[0], adapters[1],
-                    args.min_trim_len,
-                    args.err_rate,
+                    args.adapter,
+                    args.cutadapt_param,
                     args.out_dir))
         else:
             ret_val = pool.apply_async(
                 trim_adapter_se,(
                     fastqs[0],
                     adapters[0],
-                    args.min_trim_len,
-                    args.err_rate,
+                    args.adapter,
+                    args.cutadapt_param,
                     args.out_dir))
         ret_vals.append(ret_val)
 
