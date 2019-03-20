@@ -1,17 +1,15 @@
 {
     "atac.pipeline_type" : "atac",
     "atac.genome_tsv" : "/mnt/data/pipeline_genome_data/mm10/mm10_klab.tsv",
-    "atac.fastqs" : [
-        [
-            ["/mnt/data/pipeline_test_samples/encode-atac-seq-pipeline/ENCSR889WQX/fastq/rep1/ENCFF439VSY.subsampled.400.fastq.gz"],
-            ["/mnt/data/pipeline_test_samples/encode-atac-seq-pipeline/ENCSR889WQX/fastq/rep1/ENCFF325FCQ.subsampled.400.fastq.gz"],
-            ["/mnt/data/pipeline_test_samples/encode-atac-seq-pipeline/ENCSR889WQX/fastq/rep1/ENCFF683IQS.subsampled.400.fastq.gz"],
-            ["/mnt/data/pipeline_test_samples/encode-atac-seq-pipeline/ENCSR889WQX/fastq/rep1/ENCFF744CHW.subsampled.400.fastq.gz"]
-        ],
-        [
-            ["/mnt/data/pipeline_test_samples/encode-atac-seq-pipeline/ENCSR889WQX/fastq/rep2/ENCFF463QCX.subsampled.400.fastq.gz"],
-            ["/mnt/data/pipeline_test_samples/encode-atac-seq-pipeline/ENCSR889WQX/fastq/rep2/ENCFF992TSA.subsampled.400.fastq.gz"]
-        ]
+    "atac.fastqs_rep1_R1" : [
+        "/mnt/data/pipeline_test_samples/encode-atac-seq-pipeline/ENCSR889WQX/fastq/rep1/ENCFF439VSY.subsampled.400.fastq.gz",
+        "/mnt/data/pipeline_test_samples/encode-atac-seq-pipeline/ENCSR889WQX/fastq/rep1/ENCFF325FCQ.subsampled.400.fastq.gz",
+        "/mnt/data/pipeline_test_samples/encode-atac-seq-pipeline/ENCSR889WQX/fastq/rep1/ENCFF683IQS.subsampled.400.fastq.gz",
+        "/mnt/data/pipeline_test_samples/encode-atac-seq-pipeline/ENCSR889WQX/fastq/rep1/ENCFF744CHW.subsampled.400.fastq.gz"
+    ],
+    "atac.fastqs_rep2_R1" : [
+        "/mnt/data/pipeline_test_samples/encode-atac-seq-pipeline/ENCSR889WQX/fastq/rep2/ENCFF463QCX.subsampled.400.fastq.gz",
+        "/mnt/data/pipeline_test_samples/encode-atac-seq-pipeline/ENCSR889WQX/fastq/rep2/ENCFF992TSA.subsampled.400.fastq.gz"
     ],
 
     "atac.paired_end" : false,
