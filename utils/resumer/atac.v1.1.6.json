@@ -27,17 +27,11 @@
         "plot_png" : "atac.xcor__plot_png",
         "score" : "atac.xcor__score"
     },
-    "atac.count_signal_track" : {
-        "pos_bw" : "atac.count_signal_track__pos_bw",
-        "neg_bw" : "atac.count_signal_track__neg_bw"
-    },
-    "atac.macs2_signal_track" : {
-        "pval_bw" : "atac.macs2_signal_track__pval_bw",
-        "fc_bw" : "atac.macs2_signal_track__fc_bw"
-    },
     "atac.macs2" : {
         "npeak" : "atac.peaks",
-        "frip_qc" : "atac.macs2__frip_qc"
+        "frip_qc" : "atac.macs2__frip_qc",
+        "sig_pval" : "atac.macs2_signal_track__pval_bw",
+        "sig_fc" : "atac.macs2_signal_track__fc_bw"
     },
     "atac.macs2_pr1" : {
         "npeak" : "atac.peaks_pr1",
@@ -82,17 +76,11 @@
     "atac.pool_ta_pr2" : {
         "ta_pooled" : "atac.pool_ta_pr2__ta_pooled"
     },
-    "atac.count_signal_track_pooled" : {
-        "pos_bw" : "atac.count_signal_track_pooled__pos_bw",
-        "neg_bw" : "atac.count_signal_track_pooled__neg_bw"
-    },
-    "atac.macs2_signal_track_pooled" : {
-        "pval_bw" : "atac.macs2_signal_track_pooled__pval_bw",
-        "fc_bw" : "atac.macs2_signal_track_pooled__fc_bw"
-    },
     "atac.macs2_pooled" : {
         "npeak" : "atac.peak_pooled",
-        "frip_qc" : "atac.macs2_pooled__frip_qc"
+        "frip_qc" : "atac.macs2_pooled__frip_qc",
+        "sig_pval" : "atac.macs2_signal_track_pooled__pval_bw",
+        "sig_fc" : "atac.macs2_signal_track_pooled__fc_bw"
     },
     "atac.macs2_ppr1" : {
         "npeak" : "atac.peak_ppr1",
