@@ -27,10 +27,9 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
 
 ## For Conda users
 
-4. [Install Conda](https://conda.io/miniconda.html). Skip this if you already have equivalent Conda alternatives (Anaconda Python). Download and run the [installer](https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh). Agree to the license term by typing `yes`. It will ask you about the installation location. On Stanford clusters (Sherlock and SCG4), we recommend to install it outside of your `$HOME` directory since its filesystem is slow and has very limited space. At the end of the installation, choose `yes` to add Miniconda's binary to `$PATH` in your BASH startup script.
+4. Load the Miniconda3 module available on SCG4
     ```bash
-    $ wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
-    $ bash Miniconda3-latest-Linux-x86_64.sh
+    $ module load miniconda/3
     ```
 
 5. Install Conda dependencies.
@@ -41,6 +40,8 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
 
 6. Run a pipeline for the test sample. You must have a paid account on SCG4.
     ```bash
+    $ module load miniconda/3 # conda module must be loaded in order to activate ENCODE ATAC-seq conda environment
+    $ source activate encode-atac-seq-pipeline # activate ENCODE ATAC-seq conda environment
     $ sbatch --account [YOUR_PAID_ACCOUNT_ON_SCG4] examples/scg/ENCSR356KRQ_subsampled_scg_conda.sh
     ```
 
