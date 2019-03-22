@@ -844,7 +844,7 @@ def get_peak_counts(raw_peaks, naive_overlap_peaks=None, idr_peaks=None):
 
     # Literally just throw these into a QC table
     results = []
-    results.append(QCGreaterThanEqualCheck('Raw peaks', 10000)(raw_count))
+    # results.append(QCGreaterThanEqualCheck('Raw peaks', 10000)(raw_count))
     results.append(QCGreaterThanEqualCheck('Naive overlap peaks',
                                            10000)(naive_count))
     results.append(QCGreaterThanEqualCheck('IDR peaks', 10000)(idr_count))
