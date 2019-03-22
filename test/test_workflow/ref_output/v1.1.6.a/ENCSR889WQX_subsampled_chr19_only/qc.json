@@ -1,0 +1,262 @@
+{
+    "general": {
+        "date": "2019-01-16 11:20:59", 
+        "pipeline_ver": "v1.1.6", 
+        "peak_caller": "macs2", 
+        "genome": "mm10_chr19_chrM_google.tsv", 
+        "description": "ATAC-seq on Mus musculus C57BL/6 frontal cortex adult", 
+        "title": "ENCSR889WQX (subsampled 1/400 reads)", 
+        "paired_end": false
+    }, 
+    "flagstat_qc": {
+        "rep1": {
+            "total": 241186, 
+            "total_qc_failed": 0, 
+            "duplicates": 0, 
+            "duplicates_qc_failed": 0, 
+            "mapped": 118495, 
+            "mapped_qc_failed": 0, 
+            "mapped_pct": 49.13, 
+            "paired": 0, 
+            "paired_qc_failed": 0, 
+            "read1": 0, 
+            "read1_qc_failed": 0, 
+            "read2": 0, 
+            "read2_qc_failed": 0, 
+            "paired_properly": 0, 
+            "paired_properly_qc_failed": 0, 
+            "paired_properly_pct": 0.0, 
+            "with_itself": 0, 
+            "with_itself_qc_failed": 0, 
+            "singletons": 0, 
+            "singletons_qc_failed": 0, 
+            "singletons_pct": 0.0, 
+            "diff_chroms": 0, 
+            "diff_chroms_qc_failed": 0
+        }, 
+        "rep2": {
+            "total": 213743, 
+            "total_qc_failed": 0, 
+            "duplicates": 0, 
+            "duplicates_qc_failed": 0, 
+            "mapped": 86974, 
+            "mapped_qc_failed": 0, 
+            "mapped_pct": 40.69, 
+            "paired": 0, 
+            "paired_qc_failed": 0, 
+            "read1": 0, 
+            "read1_qc_failed": 0, 
+            "read2": 0, 
+            "read2_qc_failed": 0, 
+            "paired_properly": 0, 
+            "paired_properly_qc_failed": 0, 
+            "paired_properly_pct": 0.0, 
+            "with_itself": 0, 
+            "with_itself_qc_failed": 0, 
+            "singletons": 0, 
+            "singletons_qc_failed": 0, 
+            "singletons_pct": 0.0, 
+            "diff_chroms": 0, 
+            "diff_chroms_qc_failed": 0
+        }
+    }, 
+    "dup_qc": {
+        "rep1": {
+            "unpaired_reads": 65292, 
+            "paired_reads": 0, 
+            "unmapped_reads": 0, 
+            "unpaired_dupes": 44202, 
+            "paired_dupes": 0, 
+            "paired_opt_dupes": 0, 
+            "dupes_pct": 0.67699
+        }, 
+        "rep2": {
+            "unpaired_reads": 28860, 
+            "paired_reads": 0, 
+            "unmapped_reads": 0, 
+            "unpaired_dupes": 11886, 
+            "paired_dupes": 0, 
+            "paired_opt_dupes": 0, 
+            "dupes_pct": 0.41185
+        }
+    }, 
+    "pbc_qc": {
+        "rep1": {
+            "total_read_pairs": 6678, 
+            "distinct_read_pairs": 6386, 
+            "one_read_pair": 6318, 
+            "two_read_pair": 32, 
+            "NRF": 0.956274, 
+            "PBC1": 0.989352, 
+            "PBC2": 197.4375
+        }, 
+        "rep2": {
+            "total_read_pairs": 8337, 
+            "distinct_read_pairs": 7831, 
+            "one_read_pair": 7759, 
+            "two_read_pair": 31, 
+            "NRF": 0.939307, 
+            "PBC1": 0.990806, 
+            "PBC2": 250.290323
+        }
+    }, 
+    "nodup_flagstat_qc": {
+        "rep1": {
+            "total": 21090, 
+            "total_qc_failed": 0, 
+            "duplicates": 0, 
+            "duplicates_qc_failed": 0, 
+            "mapped": 21090, 
+            "mapped_qc_failed": 0, 
+            "mapped_pct": 100.0, 
+            "paired": 0, 
+            "paired_qc_failed": 0, 
+            "read1": 0, 
+            "read1_qc_failed": 0, 
+            "read2": 0, 
+            "read2_qc_failed": 0, 
+            "paired_properly": 0, 
+            "paired_properly_qc_failed": 0, 
+            "paired_properly_pct": 0.0, 
+            "with_itself": 0, 
+            "with_itself_qc_failed": 0, 
+            "singletons": 0, 
+            "singletons_qc_failed": 0, 
+            "singletons_pct": 0.0, 
+            "diff_chroms": 0, 
+            "diff_chroms_qc_failed": 0
+        }, 
+        "rep2": {
+            "total": 16974, 
+            "total_qc_failed": 0, 
+            "duplicates": 0, 
+            "duplicates_qc_failed": 0, 
+            "mapped": 16974, 
+            "mapped_qc_failed": 0, 
+            "mapped_pct": 100.0, 
+            "paired": 0, 
+            "paired_qc_failed": 0, 
+            "read1": 0, 
+            "read1_qc_failed": 0, 
+            "read2": 0, 
+            "read2_qc_failed": 0, 
+            "paired_properly": 0, 
+            "paired_properly_qc_failed": 0, 
+            "paired_properly_pct": 0.0, 
+            "with_itself": 0, 
+            "with_itself_qc_failed": 0, 
+            "singletons": 0, 
+            "singletons_qc_failed": 0, 
+            "singletons_pct": 0.0, 
+            "diff_chroms": 0, 
+            "diff_chroms_qc_failed": 0
+        }
+    }, 
+    "overlap_reproducibility_qc": {
+        "Nt": 6782, 
+        "N1": 4066, 
+        "N2": 4786, 
+        "Np": 6499, 
+        "N_opt": 6782, 
+        "N_consv": 6782, 
+        "opt_set": "rep1-rep2", 
+        "consv_set": "rep1-rep2", 
+        "rescue_ratio": 1.04354516079, 
+        "self_consistency_ratio": 1.17707820954, 
+        "reproducibility": "pass"
+    }, 
+    "idr_reproducibility_qc": {
+        "Nt": 6, 
+        "N1": 1, 
+        "N2": 2, 
+        "Np": 5, 
+        "N_opt": 6, 
+        "N_consv": 6, 
+        "opt_set": "rep1-rep2", 
+        "consv_set": "rep1-rep2", 
+        "rescue_ratio": 1.2, 
+        "self_consistency_ratio": 2.0, 
+        "reproducibility": "pass"
+    }, 
+    "xcor_score": {
+        "rep1": {
+            "num_reads": 6294, 
+            "est_frag_len": 0, 
+            "corr_est_frag_len": 0.0115227391406977, 
+            "phantom_peak": 45, 
+            "corr_phantom_peak": 0.02620779, 
+            "argmin_corr": 1500, 
+            "min_corr": 0.004486151, 
+            "NSC": 2.568514, 
+            "RSC": 0.3239437
+        }, 
+        "rep2": {
+            "num_reads": 7767, 
+            "est_frag_len": 0, 
+            "corr_est_frag_len": 0.0139132150749603, 
+            "phantom_peak": 40, 
+            "corr_phantom_peak": 0.01743494, 
+            "argmin_corr": 1500, 
+            "min_corr": 0.005612001, 
+            "NSC": 2.47919, 
+            "RSC": 0.7021277
+        }
+    }, 
+    "frip_macs2_qc": {
+        "rep1": {
+            "FRiP": 0.998728948205
+        }, 
+        "rep2": {
+            "FRiP": 0.99729625338
+        }, 
+        "rep1-pr1": {
+            "FRiP": 0.997775659358
+        }, 
+        "rep2-pr1": {
+            "FRiP": 0.998455200824
+        }, 
+        "rep1-pr2": {
+            "FRiP": 0.998728948205
+        }, 
+        "rep2-pr2": {
+            "FRiP": 0.998454802987
+        }, 
+        "pooled": {
+            "FRiP": 0.993883792049
+        }, 
+        "ppr1": {
+            "FRiP": 0.998719954487
+        }, 
+        "ppr2": {
+            "FRiP": 0.997155049787
+        }
+    }, 
+    "overlap_frip_qc": {
+        "rep1-rep2": {
+            "FRiP": 0.576772633525
+        }, 
+        "rep1-pr": {
+            "FRiP": 0.814108674929
+        }, 
+        "rep2-pr": {
+            "FRiP": 0.734775331531
+        }, 
+        "ppr": {
+            "FRiP": 0.552592276509
+        }
+    }, 
+    "idr_frip_qc": {
+        "rep1-rep2": {
+            "FRiP": 0.0134414337529
+        }, 
+        "rep1-pr": {
+            "FRiP": 0.013981569749
+        }, 
+        "rep2-pr": {
+            "FRiP": 0.00952748809064
+        }, 
+        "ppr": {
+            "FRiP": 0.0131569589645
+        }
+    }
+}
