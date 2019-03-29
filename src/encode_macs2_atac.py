@@ -202,7 +202,7 @@ def main():
     peak_to_bigbed(bfilt_npeak, 'narrowPeak', args.chrsz, args.keep_irregular_chr, args.out_dir)
 
     log.info('Converting peak to hammock...')
-    peak_to_hammock(bfilt_npeak, args.out_dir)
+    peak_to_hammock(bfilt_npeak, args.keep_irregular_chr, args.out_dir)
 
     if args.ta: # if TAG-ALIGN is given
         log.info('FRiP without fragment length...')

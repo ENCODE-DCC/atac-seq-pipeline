@@ -209,7 +209,7 @@ def subsample_ta_pe(ta, subsample, non_mito, mito_chr_name, r1_only, out_dir):
     return ta_subsampled
 
 # convert encode peak file to hammock (for Wash U browser track)
-def peak_to_hammock(peak, out_dir):
+def peak_to_hammock(peak, keep_irregular_chr, out_dir):
     peak_type = get_peak_type(peak)
     prefix = os.path.join(out_dir, os.path.basename(
         strip_ext_peak(peak)))
@@ -224,7 +224,10 @@ def peak_to_hammock(peak, out_dir):
         run_shell_cmd(cmd)
         cmd2 = 'touch {}'.format(hammock_gz_tbi)
     else:
-        cmd = "zcat -f {} | sed '/^\(chr\)/!d' | LC_COLLATE=C sort -k1,1V -k2,2n > {}"
+        cmd = "zcat -f {} | "
+        if not keep_irregular_chr:
+            cmd += "sed '/^\(chr\)/!d' | "
+        cmd += "LC_COLLATE=C sort -k1,1V -k2,2n > {}"
         cmd = cmd.format(peak, hammock_tmp)
         run_shell_cmd(cmd)
 

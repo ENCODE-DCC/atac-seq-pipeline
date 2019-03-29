@@ -117,8 +117,8 @@ def main():
         peak_to_bigbed(conservative_peak_file, args.peak_type, args.chrsz, args.keep_irregular_chr, args.out_dir)
 
         log.info('Converting peak to hammock...')
-        peak_to_hammock(optimal_peak_file, args.out_dir)
-        peak_to_hammock(conservative_peak_file, args.out_dir)
+        peak_to_hammock(optimal_peak_file, args.keep_irregular_chr, args.out_dir)
+        peak_to_hammock(conservative_peak_file, args.keep_irregular_chr, args.out_dir)
 
     log.info('Writing reproducibility QC log...')
     if args.prefix:
