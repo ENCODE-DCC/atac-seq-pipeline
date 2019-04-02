@@ -9,8 +9,8 @@
 
     "atac.adapter" : "AATTCCGG",
     "atac.adapters_rep1_R1" : [ "AATTCCGG", "AATTCCGG", "AATTCCGG" ],
-    "atac.adapters_rep2_R2" : [ "AATTCCGG", "AATTCCGG" ],
-    "atac.adapters_rep1_R1" : [ "AATTCCGG", "AATTCCGG", "AATTCCGG" ],
+    "atac.adapters_rep1_R2" : [ "AATTCCGG", "AATTCCGG" ],
+    "atac.adapters_rep2_R1" : [ "AATTCCGG", "AATTCCGG", "AATTCCGG" ],
     "atac.adapters_rep2_R2" : [ "AATTCCGG", "AATTCCGG" ],
     "atac.auto_detect_adapter" : false,
 
