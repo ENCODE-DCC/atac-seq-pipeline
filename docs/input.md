@@ -120,8 +120,8 @@ Let us take a close look at the following template JSON. Comments are not allowe
     // Otherwise define adapters for each FASTQ.
     // Adapters should have the same dimension as FASTQs.
     "atac.adapters_rep1_R1" : [ "AATTCCGG", "AATTCCGG", "AATTCCGG" ],
-    "atac.adapters_rep2_R2" : [ "AATTCCGG", "AATTCCGG" ],
-    "atac.adapters_rep1_R1" : [ "AATTCCGG", "AATTCCGG", "AATTCCGG" ],
+    "atac.adapters_rep1_R2" : [ "AATTCCGG", "AATTCCGG" ],
+    "atac.adapters_rep2_R1" : [ "AATTCCGG", "AATTCCGG", "AATTCCGG" ],
     "atac.adapters_rep2_R2" : [ "AATTCCGG", "AATTCCGG" ],
 
     ////////// 4) Pipeline parameters //////////
