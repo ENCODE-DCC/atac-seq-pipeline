@@ -147,7 +147,7 @@ def main():
     peak_to_bigbed(bfilt_idr_peak, args.peak_type, args.chrsz, args.keep_irregular_chr, args.out_dir)
 
     log.info('Converting peak to hammock...')
-    peak_to_hammock(bfilt_idr_peak, args.out_dir)
+    peak_to_hammock(bfilt_idr_peak, args.keep_irregular_chr, args.out_dir)
 
     if args.ta: # if TAG-ALIGN is given
         if args.fraglen: # chip-seq

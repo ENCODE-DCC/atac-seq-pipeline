@@ -1,0 +1,454 @@
+{
+    "general": {
+        "date": "2019-01-11 04:05:27", 
+        "pipeline_ver": "v1.1.6", 
+        "peak_caller": "macs2", 
+        "genome": "hg38_google.tsv", 
+        "description": "ATAC-seq on primary keratinocytes in day 0.0 of differentiation", 
+        "title": "ENCSR356KRQ (subsampled 1/400 reads)", 
+        "paired_end": true
+    }, 
+    "flagstat_qc": {
+        "rep1": {
+            "total": 1286827, 
+            "total_qc_failed": 0, 
+            "duplicates": 0, 
+            "duplicates_qc_failed": 0, 
+            "mapped": 1281533, 
+            "mapped_qc_failed": 0, 
+            "mapped_pct": 99.59, 
+            "paired": 691166, 
+            "paired_qc_failed": 0, 
+            "read1": 345583, 
+            "read1_qc_failed": 0, 
+            "read2": 345583, 
+            "read2_qc_failed": 0, 
+            "paired_properly": 605666, 
+            "paired_properly_qc_failed": 0, 
+            "paired_properly_pct": 87.63, 
+            "with_itself": 684846, 
+            "with_itself_qc_failed": 0, 
+            "singletons": 1026, 
+            "singletons_qc_failed": 0, 
+            "singletons_pct": 0.15, 
+            "diff_chroms": 553, 
+            "diff_chroms_qc_failed": 0
+        }, 
+        "rep2": {
+            "total": 1641618, 
+            "total_qc_failed": 0, 
+            "duplicates": 0, 
+            "duplicates_qc_failed": 0, 
+            "mapped": 1638620, 
+            "mapped_qc_failed": 0, 
+            "mapped_pct": 99.82, 
+            "paired": 848854, 
+            "paired_qc_failed": 0, 
+            "read1": 424427, 
+            "read1_qc_failed": 0, 
+            "read2": 424427, 
+            "read2_qc_failed": 0, 
+            "paired_properly": 748282, 
+            "paired_properly_qc_failed": 0, 
+            "paired_properly_pct": 88.15, 
+            "with_itself": 844410, 
+            "with_itself_qc_failed": 0, 
+            "singletons": 1446, 
+            "singletons_qc_failed": 0, 
+            "singletons_pct": 0.17, 
+            "diff_chroms": 720, 
+            "diff_chroms_qc_failed": 0
+        }
+    }, 
+    "dup_qc": {
+        "rep1": {
+            "unpaired_reads": 0, 
+            "paired_reads": 220822, 
+            "unmapped_reads": 0, 
+            "unpaired_dupes": 0, 
+            "paired_dupes": 682, 
+            "paired_opt_dupes": 3, 
+            "dupes_pct": 0.003088
+        }, 
+        "rep2": {
+            "unpaired_reads": 0, 
+            "paired_reads": 264763, 
+            "unmapped_reads": 0, 
+            "unpaired_dupes": 0, 
+            "paired_dupes": 1312, 
+            "paired_opt_dupes": 4, 
+            "dupes_pct": 0.004955
+        }
+    }, 
+    "pbc_qc": {
+        "rep1": {
+            "total_read_pairs": 210134, 
+            "distinct_read_pairs": 209477, 
+            "one_read_pair": 209023, 
+            "two_read_pair": 357, 
+            "NRF": 0.996873, 
+            "PBC1": 0.997833, 
+            "PBC2": 585.498599
+        }, 
+        "rep2": {
+            "total_read_pairs": 249549, 
+            "distinct_read_pairs": 248592, 
+            "one_read_pair": 248018, 
+            "two_read_pair": 416, 
+            "NRF": 0.996165, 
+            "PBC1": 0.997691, 
+            "PBC2": 596.197115
+        }
+    }, 
+    "nodup_flagstat_qc": {
+        "rep1": {
+            "total": 440280, 
+            "total_qc_failed": 0, 
+            "duplicates": 0, 
+            "duplicates_qc_failed": 0, 
+            "mapped": 440280, 
+            "mapped_qc_failed": 0, 
+            "mapped_pct": 100.0, 
+            "paired": 440280, 
+            "paired_qc_failed": 0, 
+            "read1": 220140, 
+            "read1_qc_failed": 0, 
+            "read2": 220140, 
+            "read2_qc_failed": 0, 
+            "paired_properly": 440280, 
+            "paired_properly_qc_failed": 0, 
+            "paired_properly_pct": 100.0, 
+            "with_itself": 440280, 
+            "with_itself_qc_failed": 0, 
+            "singletons": 0, 
+            "singletons_qc_failed": 0, 
+            "singletons_pct": 0.0, 
+            "diff_chroms": 0, 
+            "diff_chroms_qc_failed": 0
+        }, 
+        "rep2": {
+            "total": 526902, 
+            "total_qc_failed": 0, 
+            "duplicates": 0, 
+            "duplicates_qc_failed": 0, 
+            "mapped": 526902, 
+            "mapped_qc_failed": 0, 
+            "mapped_pct": 100.0, 
+            "paired": 526902, 
+            "paired_qc_failed": 0, 
+            "read1": 263451, 
+            "read1_qc_failed": 0, 
+            "read2": 263451, 
+            "read2_qc_failed": 0, 
+            "paired_properly": 526902, 
+            "paired_properly_qc_failed": 0, 
+            "paired_properly_pct": 100.0, 
+            "with_itself": 526902, 
+            "with_itself_qc_failed": 0, 
+            "singletons": 0, 
+            "singletons_qc_failed": 0, 
+            "singletons_pct": 0.0, 
+            "diff_chroms": 0, 
+            "diff_chroms_qc_failed": 0
+        }
+    }, 
+    "overlap_reproducibility_qc": {
+        "Nt": 32588, 
+        "N1": 14546, 
+        "N2": 16009, 
+        "Np": 32823, 
+        "N_opt": 32823, 
+        "N_consv": 32588, 
+        "opt_set": "ppr", 
+        "consv_set": "rep1-rep2", 
+        "rescue_ratio": 1.0072112434, 
+        "self_consistency_ratio": 1.10057747834, 
+        "reproducibility": "pass"
+    }, 
+    "idr_reproducibility_qc": {
+        "Nt": 499, 
+        "N1": 132, 
+        "N2": 157, 
+        "Np": 639, 
+        "N_opt": 639, 
+        "N_consv": 499, 
+        "opt_set": "ppr", 
+        "consv_set": "rep1-rep2", 
+        "rescue_ratio": 1.28056112224, 
+        "self_consistency_ratio": 1.18939393939, 
+        "reproducibility": "pass"
+    }, 
+    "xcor_score": {
+        "rep1": {
+            "num_reads": 209895, 
+            "est_frag_len": 0, 
+            "corr_est_frag_len": 0.00855237457383064, 
+            "phantom_peak": 70, 
+            "corr_phantom_peak": 0.009261564, 
+            "argmin_corr": 1500, 
+            "min_corr": 0.00410843, 
+            "NSC": 2.081665, 
+            "RSC": 0.8623771
+        }, 
+        "rep2": {
+            "num_reads": 249245, 
+            "est_frag_len": 0, 
+            "corr_est_frag_len": 0.00984122742143778, 
+            "phantom_peak": 65, 
+            "corr_phantom_peak": 0.01161518, 
+            "argmin_corr": 1500, 
+            "min_corr": 0.005227118, 
+            "NSC": 1.882725, 
+            "RSC": 0.7223014
+        }
+    }, 
+    "frip_macs2_qc": {
+        "rep1": {
+            "FRiP": 0.989959265347
+        }, 
+        "rep2": {
+            "FRiP": 0.978581315573
+        }, 
+        "rep1-pr1": {
+            "FRiP": 0.996717421961
+        }, 
+        "rep2-pr1": {
+            "FRiP": 0.995931730098
+        }, 
+        "rep1-pr2": {
+            "FRiP": 0.996707862064
+        }, 
+        "rep2-pr2": {
+            "FRiP": 0.996609747878
+        }, 
+        "pooled": {
+            "FRiP": 0.684160604609
+        }, 
+        "ppr1": {
+            "FRiP": 0.98916457218
+        }, 
+        "ppr2": {
+            "FRiP": 0.989639280565
+        }
+    }, 
+    "overlap_frip_qc": {
+        "rep1-rep2": {
+            "FRiP": 0.212792394477
+        }, 
+        "rep1-pr": {
+            "FRiP": 0.163567498035
+        }, 
+        "rep2-pr": {
+            "FRiP": 0.159447531545
+        }, 
+        "ppr": {
+            "FRiP": 0.214356187655
+        }
+    }, 
+    "idr_frip_qc": {
+        "rep1-rep2": {
+            "FRiP": 0.0147896066559
+        }, 
+        "rep1-pr": {
+            "FRiP": 0.00646751947402
+        }, 
+        "rep2-pr": {
+            "FRiP": 0.00797006961022
+        }, 
+        "ppr": {
+            "FRiP": 0.0168412684584
+        }
+    }, 
+    "ataqc": {
+        "rep1": {
+            "Genome": "GRCh38_no_alt_analysis_set_GCA_000001405.15.fasta.gz", 
+            "Paired/Single-ended": "Paired-ended", 
+            "Read length": 76, 
+            "Read count from sequencer": 1286827, 
+            "Read count successfully aligned": 1281533, 
+            "Read count after filtering for mapping quality": 888079, 
+            "Read count after removing duplicate reads": 887397, 
+            "Read count after removing mitochondrial reads (final read count)": 440280, 
+            "Mapping quality > q30 (out of total)": [
+                888079, 
+                0.690130841209
+            ], 
+            "Duplicates (after filtering)": [
+                682, 
+                0.003088
+            ], 
+            "Mitochondrial reads (out of total)": [
+                48934, 
+                0.0381839562462
+            ], 
+            "Duplicates that are mitochondrial (out of all dups)": [
+                886, 
+                0.649560117302
+            ], 
+            "Final reads (after all filters)": [
+                440280, 
+                0.342143893468
+            ], 
+            "NRF": [
+                0.996873, 
+                "OK"
+            ], 
+            "PBC1": [
+                0.997833, 
+                "OK"
+            ], 
+            "PBC2": [
+                585.498599, 
+                "OK"
+            ], 
+            "picard_est_library_size": 51268130, 
+            "Fraction of reads in NFR": [
+                0.194369567086, 
+                "out of range [0.4, inf]"
+            ], 
+            "NFR / mono-nuc reads": [
+                1.37730649413, 
+                "out of range [2.5, inf]"
+            ], 
+            "Presence of NFR peak": "OK", 
+            "Presence of Mono-Nuc peak": "OK", 
+            "Presence of Di-Nuc peak": "OK", 
+            "Naive overlap peaks": [
+                32823, 
+                "OK"
+            ], 
+            "IDR peaks": [
+                639, 
+                "out of range [10000, inf]"
+            ], 
+            "Naive peak stats: Min size": 73.0, 
+            "Naive peak stats: 25 percentile": 141.0, 
+            "Naive peak stats: 50 percentile (median)": 209.0, 
+            "Naive peak stats: 75 percentile": 293.0, 
+            "Naive peak stats: Max size": 1206.0, 
+            "Naive peak stats: Mean": 231.782225878, 
+            "IDR peak stats: Min size": 73.0, 
+            "IDR peak stats: 25 percentile": 186.0, 
+            "IDR peak stats: 50 percentile (median)": 337.0, 
+            "IDR peak stats: 75 percentile": 451.5, 
+            "IDR peak stats: Max size": 819.0, 
+            "IDR peak stats: Mean": 333.9342723, 
+            "TSS_enrichment": 20.3977388654, 
+            "Fraction of reads in universal DHS regions": [
+                207705, 
+                0.494783105839
+            ], 
+            "Fraction of reads in blacklist regions": [
+                8, 
+                1.90571476214e-05
+            ], 
+            "Fraction of reads in promoter regions": [
+                69869, 
+                0.166437980895
+            ], 
+            "Fraction of reads in enhancer regions": [
+                170294, 
+                0.40566473713
+            ], 
+            "Fraction of reads in called peak regions": [
+                2715, 
+                0.00646751947402
+            ]
+        }, 
+        "rep2": {
+            "Genome": "GRCh38_no_alt_analysis_set_GCA_000001405.15.fasta.gz", 
+            "Paired/Single-ended": "Paired-ended", 
+            "Read length": 76, 
+            "Read count from sequencer": 1641618, 
+            "Read count successfully aligned": 1638620, 
+            "Read count after filtering for mapping quality": 1084992, 
+            "Read count after removing duplicate reads": 1083680, 
+            "Read count after removing mitochondrial reads (final read count)": 526902, 
+            "Mapping quality > q30 (out of total)": [
+                1084992, 
+                0.660928425492
+            ], 
+            "Duplicates (after filtering)": [
+                1312, 
+                0.004955
+            ], 
+            "Mitochondrial reads (out of total)": [
+                69935, 
+                0.0426792056731
+            ], 
+            "Duplicates that are mitochondrial (out of all dups)": [
+                2016, 
+                0.768292682927
+            ], 
+            "Final reads (after all filters)": [
+                526902, 
+                0.320965047898
+            ], 
+            "NRF": [
+                0.996165, 
+                "OK"
+            ], 
+            "PBC1": [
+                0.997691, 
+                "OK"
+            ], 
+            "PBC2": [
+                596.197115, 
+                "OK"
+            ], 
+            "picard_est_library_size": 40892504, 
+            "Fraction of reads in NFR": [
+                0.229200264621, 
+                "out of range [0.4, inf]"
+            ], 
+            "NFR / mono-nuc reads": [
+                1.62168563721, 
+                "out of range [2.5, inf]"
+            ], 
+            "Presence of NFR peak": "OK", 
+            "Presence of Mono-Nuc peak": "OK", 
+            "Presence of Di-Nuc peak": "OK", 
+            "Naive overlap peaks": [
+                32823, 
+                "OK"
+            ], 
+            "IDR peaks": [
+                639, 
+                "out of range [10000, inf]"
+            ], 
+            "Naive peak stats: Min size": 73.0, 
+            "Naive peak stats: 25 percentile": 141.0, 
+            "Naive peak stats: 50 percentile (median)": 209.0, 
+            "Naive peak stats: 75 percentile": 293.0, 
+            "Naive peak stats: Max size": 1206.0, 
+            "Naive peak stats: Mean": 231.782225878, 
+            "IDR peak stats: Min size": 73.0, 
+            "IDR peak stats: 25 percentile": 186.0, 
+            "IDR peak stats: 50 percentile (median)": 337.0, 
+            "IDR peak stats: 75 percentile": 451.5, 
+            "IDR peak stats: Max size": 819.0, 
+            "IDR peak stats: Mean": 333.9342723, 
+            "TSS_enrichment": 17.8908961998, 
+            "Fraction of reads in universal DHS regions": [
+                229492, 
+                0.460374330478
+            ], 
+            "Fraction of reads in blacklist regions": [
+                8, 
+                1.60484663684e-05
+            ], 
+            "Fraction of reads in promoter regions": [
+                74604, 
+                0.149659973119
+            ], 
+            "Fraction of reads in enhancer regions": [
+                194866, 
+                0.390912555919
+            ], 
+            "Fraction of reads in called peak regions": [
+                3973, 
+                0.00797006961022
+            ]
+        }
+    }
+}

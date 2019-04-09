@@ -3,7 +3,7 @@
 
 workflow atac {
 	# pipeline version
-	String pipeline_ver = 'v1.1.7'
+	String pipeline_ver = 'v1.1.7.1'
 
 	# general sample information
 	String title = 'Untitled'
@@ -838,7 +838,12 @@ workflow atac {
 
 	# do IDR/overlap on all pairs of two replicates (i,j)
 	# 	where i and j are zero-based indices and 0 <= i < j < num_rep
-	Array[Pair[Int, Int]] pairs = cross(range(num_rep),range(num_rep))
+	Array[Pair[Int, Int]] pairs_ = cross(range(num_rep),range(num_rep))
+	scatter( pair in pairs_ ) {
+		Pair[Int, Int]? null_pair
+		Pair[Int, Int]? pairs__ = if pair.left<pair.right then pair else null_pair
+	}
+	Array[Pair[Int, Int]] pairs = select_all(pairs__)
 
 	scatter( pair in pairs ) {
 		# pair.left = 0-based index of 1st replicate
@@ -898,9 +903,7 @@ workflow atac {
 		}
 	}
 
-	scatter( i in range(num_rep*num_rep) ) {
-	# scatter( pair in pairs ) {
-		# Int idx = pair.left*num_rep + pair.right # enum index in "pairs"
+	scatter( i in range(length(pairs)) ) {
 		# take raw peak if blacklist doesn't exist
 		File? overlap_overlap_peak_ = 
 			if has_output_of_overlap[i] && defined(blacklist_) then overlap__bfilt_overlap_peak[i]
@@ -1076,7 +1079,7 @@ workflow atac {
 		# reproducibility QC for overlapping peaks
 		call reproducibility as reproducibility_overlap { input :
 			prefix = 'overlap',
-			peaks = select_all(overlap_overlap_peak_),
+			peaks = overlap_overlap_peak_,
 			peaks_pr = overlap_pr_overlap_peak_,
 			peak_ppr = overlap_ppr_overlap_peak_,
 			peak_type = peak_type,
@@ -1102,7 +1105,7 @@ workflow atac {
 		# reproducibility QC for IDR peaks
 		call reproducibility as reproducibility_idr { input :
 			prefix = 'idr',
-			peaks = select_all(idr_idr_peak_),
+			peaks = idr_idr_peak_,
 			peaks_pr = idr_pr_idr_peak_,
 			peak_ppr = idr_ppr_idr_peak_,
 			peak_type = peak_type,
@@ -1196,13 +1199,13 @@ workflow atac {
 		frip_macs2_qc_ppr1 = frip_macs2_qc_ppr1_,
 		frip_macs2_qc_ppr2 = frip_macs2_qc_ppr2_,
 		
-		idr_plots = select_all(idr_idr_plot_), # use select_all to get list of pairs (repX,repY) where X<Y
+		idr_plots = idr_idr_plot_,
 		idr_plots_pr = idr_pr_idr_plot_,
 		idr_plot_ppr = idr_ppr_idr_plot_,
-		frip_idr_qcs = select_all(idr_frip_qc_), # use select_all to get list of pairs (repX,repY) where X<Y
+		frip_idr_qcs = idr_frip_qc_,
 		frip_idr_qcs_pr = idr_pr_frip_qc_,
 		frip_idr_qc_ppr = idr_ppr_frip_qc_,
-		frip_overlap_qcs = select_all(overlap_frip_qc_), # use select_all to get list of pairs (repX,repY) where X<Y
+		frip_overlap_qcs = overlap_frip_qc_,
 		frip_overlap_qcs_pr = overlap_pr_frip_qc_,
 		frip_overlap_qc_ppr = overlap_ppr_frip_qc_,
 		idr_reproducibility_qc = reproducibility_idr_reproducibility_qc_,

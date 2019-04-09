@@ -12,26 +12,26 @@ ucsc-bedclip
 ucsc-bedtobigbed
 ucsc-twobittofa
 macs2 ==2.1.1.20160309 #2.1.0 (no binaries for OSX)
-boost ==1.57.0
+boost #==1.57.0
 openblas ==0.2.20
 numpy ==1.11.3 #1.10.2 (no binaries for OSX) #1.9.0, 1.8.2 conflicts with ATAQC
-matplotlib #==1.5.1
+matplotlib ==1.5.3 #==1.5.1
 six==1.11.0 # to fix (ImportError: cannot import name _thread)
 python-dateutil==2.6.1
 libgfortran==3.0
-graphviz ==2.38.0
+#graphviz ==2.38.0
 libtool
 ghostscript # pdf2png
 pigz
 zlib
 sambamba ==0.6.6 # to fix seg fault error in 0.6.1
-r ==3.2.2
+r ==3.3.2 #3.2.2
 r-snow
 r-snowfall
 r-bitops
 r-catools
 bioconductor-rsamtools
-r-spp ==1.13
+r-spp ==1.14 #1.13
 #glibc #segmentation fault in conda with openssl
 pyfaidx ==0.4.7.1
 
