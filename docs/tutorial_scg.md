@@ -40,8 +40,6 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
 
 6. Run a pipeline for the test sample. You must have a paid account on SCG4.
     ```bash
-    $ module load miniconda/3 # conda module must be loaded in order to activate ENCODE ATAC-seq conda environment
-    $ source activate encode-atac-seq-pipeline # activate ENCODE ATAC-seq conda environment
     $ sbatch --account [YOUR_PAID_ACCOUNT_ON_SCG4] examples/scg/ENCSR356KRQ_subsampled_scg_conda.sh
     ```
 
