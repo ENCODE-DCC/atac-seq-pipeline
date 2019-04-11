@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 # do not touch these settings
 #  number of tasks and nodes are fixed at 1
 #SBATCH -n 1
@@ -36,6 +38,7 @@
 module load java
 
 # activate pipeline's Conda environment if Conda env exists
+module load miniconda/3
 source activate encode-atac-seq-pipeline
 
 # use input JSON for a small test sample
