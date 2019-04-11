@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 # do not touch these settings
 #  number of tasks and nodes are fixed at 1
 #SBATCH -n 1
@@ -35,6 +37,10 @@
 # load java module if it exists
 module load java
 
+# activate pipeline's Conda environment if Conda env exists
+module load miniconda/3
+source activate encode-atac-seq-pipeline
+
 # use input JSON for a small test sample
 #  you make an input JSON for your own sample
 #  start from any of two templates for single-ended and paired-ended samples
@@ -57,6 +63,6 @@ NUM_CONCURRENT_TASK=2
 
 # run pipeline
 #  you can monitor your jobs with "squeue -u $USER"
-java -jar -Dconfig.file=backends/backend.conf -Dbackend.default=singularity \
--Dbackend.providers.singularity.config.concurrent-job-limit=${NUM_CONCURRENT_TASK} \
-$HOME/cromwell-34.jar run atac.wdl -i ${INPUT} -o workflow_opts/scg.json -m ${PIPELINE_METADATA}
+java -jar -Dconfig.file=backends/backend.conf \
+-Dbackend.providers.Local.config.concurrent-job-limit=${NUM_CONCURRENT_TASK} \
+$HOME/cromwell-34.jar run atac.wdl -i ${INPUT} -m ${PIPELINE_METADATA}
