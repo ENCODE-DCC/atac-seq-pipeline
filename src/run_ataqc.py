@@ -910,10 +910,11 @@ def fragment_length_qc(data):
             percent_nfr_vs_mono_nuc))
 
     # peak locations
+    pos_start_val = data[0,0] # this may be greater than 0
     peaks = find_peaks_cwt(data[:, 1], np.array([25]))
-    nuc_range_metrics = [('Presence of NFR peak', 20, 90),
-                         ('Presence of Mono-Nuc peak', 120, 250),
-                         ('Presence of Di-Nuc peak', 300, 500)]
+    nuc_range_metrics = [('Presence of NFR peak', 20 - pos_start_val, 90 - pos_start_val),
+                         ('Presence of Mono-Nuc peak', 120 - pos_start_val, 250 - pos_start_val),
+                         ('Presence of Di-Nuc peak', 300 - pos_start_val, 500 - pos_start_val)]
     for range_metric in nuc_range_metrics:
         results.append(QCHasElementInRange(*range_metric)(peaks))
 
