@@ -892,14 +892,19 @@ def fragment_length_qc(data):
     MONO_NUC_UPPER_LIMIT = 300
 
     # % of NFR vs res
-    percent_nfr = data[:NFR_UPPER_LIMIT].sum() / data.sum()
+    nfr_reads = data[data[:,0] < NFR_UPPER_LIMIT][:,1]
+    percent_nfr = nfr_reads.sum() / data[:,1].sum()
     results.append(
         QCGreaterThanEqualCheck('Fraction of reads in NFR', 0.4)(percent_nfr))
 
     # % of NFR vs mononucleosome
+    mono_nuc_reads = data[
+        (data[:,0] > MONO_NUC_LOWER_LIMIT) &
+        (data[:,0] <= MONO_NUC_UPPER_LIMIT)][:,1]
+    
     percent_nfr_vs_mono_nuc = (
-        data[:NFR_UPPER_LIMIT].sum() /
-        data[MONO_NUC_LOWER_LIMIT:MONO_NUC_UPPER_LIMIT + 1].sum())
+        nfr_reads.sum() /
+        mono_nuc_reads.sum())
     results.append(
         QCGreaterThanEqualCheck('NFR / mono-nuc reads', 2.5)(
             percent_nfr_vs_mono_nuc))
