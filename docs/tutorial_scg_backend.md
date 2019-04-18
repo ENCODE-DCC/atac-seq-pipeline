@@ -34,24 +34,23 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
 
 ## For Conda users
 
-5. [Install Conda](https://conda.io/miniconda.html)
-
-6. Install Conda dependencies.
+5. Install Conda dependencies.
     ```bash
     $ bash conda/uninstall_dependencies.sh  # to remove any existing pipeline env
     $ bash conda/install_dependencies.sh
     ```
 
-7. Run a pipeline for a SUBSAMPLED (1/400) paired-end sample of [ENCSR356KRQ](https://www.encodeproject.org/experiments/ENCSR356KRQ/).
+6. Run a pipeline for a SUBSAMPLED (1/400) paired-end sample of [ENCSR356KRQ](https://www.encodeproject.org/experiments/ENCSR356KRQ/).
     ```bash
+    $ module load java miniconda/3
     $ source activate encode-atac-seq-pipeline # IMPORTANT!
     $ INPUT=examples/scg/ENCSR356KRQ_subsampled_scg.json
     $ java -jar -Xmx1G -Dconfig.file=backends/backend.conf -Dbackend.default=slurm cromwell-34.jar run atac.wdl -i ${INPUT} -o workflow_opts/scg.json
     ```
 
-8. It will take about an hour. You will be able to find all outputs on `cromwell-executions/atac/[RANDOM_HASH_STRING]/`. See [output directory structure](output.md) for details.
+7. It will take about an hour. You will be able to find all outputs on `cromwell-executions/atac/[RANDOM_HASH_STRING]/`. See [output directory structure](output.md) for details.
 
-9. See full specification for [input JSON file](input.md).
+8. See full specification for [input JSON file](input.md).
 
 ## For singularity users
 
@@ -64,6 +63,7 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
 
 6. Run a pipeline for a SUBSAMPLED (1/400) paired-end sample of [ENCSR356KRQ](https://www.encodeproject.org/experiments/ENCSR356KRQ/).
     ```bash
+    $ module load java
     $ INPUT=examples/scg/ENCSR356KRQ_subsampled_scg.json
     $ java -jar -Xmx1G -Dconfig.file=backends/backend.conf -Dbackend.default=slurm_singularity cromwell-34.jar run atac.wdl -i ${INPUT} -o workflow_opts/scg.json
     ```

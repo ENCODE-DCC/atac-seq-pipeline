@@ -34,6 +34,7 @@
 
 # load java module if it exists
 module load java
+module load miniconda/3
 
 # activate pipeline's Conda environment if Conda env exists
 source activate encode-atac-seq-pipeline

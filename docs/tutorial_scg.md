@@ -27,44 +27,39 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
 
 ## For Conda users
 
-4. [Install Conda](https://conda.io/miniconda.html). Skip this if you already have equivalent Conda alternatives (Anaconda Python). Download and run the [installer](https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh). Agree to the license term by typing `yes`. It will ask you about the installation location. On Stanford clusters (Sherlock and SCG4), we recommend to install it outside of your `$HOME` directory since its filesystem is slow and has very limited space. At the end of the installation, choose `yes` to add Miniconda's binary to `$PATH` in your BASH startup script.
+4. Install Conda dependencies.
     ```bash
-    $ wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
-    $ bash Miniconda3-latest-Linux-x86_64.sh
-    ```
-
-5. Install Conda dependencies.
-    ```bash
+    $ module load miniconda/3
     $ bash conda/uninstall_dependencies.sh  # to remove any existing pipeline env
     $ bash conda/install_dependencies.sh
     ```
 
-6. Run a pipeline for the test sample. You must have a paid account on SCG4.
+5. Run a pipeline for the test sample. You must have a paid account on SCG4.
     ```bash
     $ sbatch --account [YOUR_PAID_ACCOUNT_ON_SCG4] examples/scg/ENCSR356KRQ_subsampled_scg_conda.sh
     ```
 
 ## For singularity users
 
-6. Run a pipeline for the test sample. You must have a paid account on SCG4.
+4. Run a pipeline for the test sample. You must have a paid account on SCG4.
     ```bash
     $ sbatch --account [YOUR_PAID_ACCOUNT_ON_SCG4] examples/scg/ENCSR356KRQ_subsampled_scg_singularity.sh
     ```
 
 ## For all users
 
-7. It will take about an hour. You will be able to find all outputs on `cromwell-executions/atac/[RANDOM_HASH_STRING]/`. See [output directory structure](output.md) for details. You can monitor your jobs with the following command:
+6. It will take about an hour. You will be able to find all outputs on `cromwell-executions/atac/[RANDOM_HASH_STRING]/`. See [output directory structure](output.md) for details. You can monitor your jobs with the following command:
     ```bash
     $ squeue -u $USER
     ```
 
-8. See full specification for [input JSON file](input.md).
+7. See full specification for [input JSON file](input.md).
 
-9. You can resume a failed pipeline from where it left off by using `PIPELINE_METADATA`(`metadata.json`) file. This file is created for each pipeline run. See [here](../utils/resumer/README.md) for details. Once you get a new input JSON file from the resumer, then edit your shell script (`examples/scg/ENCSR356KRQ_subsampled_scg_*.sh`) to use it `INPUT=resume.[FAILED_WORKFLOW_ID].json` instead of `INPUT=examples/...`.
+8. You can resume a failed pipeline from where it left off by using `PIPELINE_METADATA`(`metadata.json`) file. This file is created for each pipeline run. See [here](../utils/resumer/README.md) for details. Once you get a new input JSON file from the resumer, then edit your shell script (`examples/scg/ENCSR356KRQ_subsampled_scg_*.sh`) to use it `INPUT=resume.[FAILED_WORKFLOW_ID].json` instead of `INPUT=examples/...`.
 
 ## For singularity users
 
-10. IF YOU WANT TO RUN PIPELINES WITH YOUR OWN INPUT DATA/GENOME DATABASE, PLEASE ADD THEIR DIRECTORIES TO `workflow_opts/scg.json`. For example, you have input FASTQs on `/your/input/fastqs/` and genome database installed on `/your/genome/database/` then add `/your/` to `singularity_bindpath`. You can also define multiple directories there. It's comma-separated.
+9. IF YOU WANT TO RUN PIPELINES WITH YOUR OWN INPUT DATA/GENOME DATABASE, PLEASE ADD THEIR DIRECTORIES TO `workflow_opts/scg.json`. For example, you have input FASTQs on `/your/input/fastqs/` and genome database installed on `/your/genome/database/` then add `/your/` to `singularity_bindpath`. You can also define multiple directories there. It's comma-separated.
     ```javascript
     {
         "default_runtime_attributes" : {
