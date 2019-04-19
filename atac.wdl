@@ -3,7 +3,7 @@
 
 workflow atac {
 	# pipeline version
-	String pipeline_ver = 'v1.1.7.1'
+	String pipeline_ver = 'v1.2.0'
 
 	# general sample information
 	String title = 'Untitled'

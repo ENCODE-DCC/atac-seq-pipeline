@@ -74,6 +74,7 @@ source activate ${CONDA_ENV}
   cd ${CONDA_BIN}
   rm -f idr
   ln -s ../../${CONDA_ENV_PY3}/bin/idr
+  ln -s ../../${CONDA_ENV_PY3}/bin/python3
 
   # make an executable symlink for cromwell.jar on conda bin dir
   CONDA_SHARE="${CONDA_PREFIX}/share"

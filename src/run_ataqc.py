@@ -892,23 +892,29 @@ def fragment_length_qc(data):
     MONO_NUC_UPPER_LIMIT = 300
 
     # % of NFR vs res
-    percent_nfr = data[:NFR_UPPER_LIMIT].sum() / data.sum()
+    nfr_reads = data[data[:,0] < NFR_UPPER_LIMIT][:,1]
+    percent_nfr = nfr_reads.sum() / data[:,1].sum()
     results.append(
         QCGreaterThanEqualCheck('Fraction of reads in NFR', 0.4)(percent_nfr))
 
     # % of NFR vs mononucleosome
+    mono_nuc_reads = data[
+        (data[:,0] > MONO_NUC_LOWER_LIMIT) &
+        (data[:,0] <= MONO_NUC_UPPER_LIMIT)][:,1]
+    
     percent_nfr_vs_mono_nuc = (
-        data[:NFR_UPPER_LIMIT].sum() /
-        data[MONO_NUC_LOWER_LIMIT:MONO_NUC_UPPER_LIMIT + 1].sum())
+        nfr_reads.sum() /
+        mono_nuc_reads.sum())
     results.append(
         QCGreaterThanEqualCheck('NFR / mono-nuc reads', 2.5)(
             percent_nfr_vs_mono_nuc))
 
     # peak locations
+    pos_start_val = data[0,0] # this may be greater than 0
     peaks = find_peaks_cwt(data[:, 1], np.array([25]))
-    nuc_range_metrics = [('Presence of NFR peak', 20, 90),
-                         ('Presence of Mono-Nuc peak', 120, 250),
-                         ('Presence of Di-Nuc peak', 300, 500)]
+    nuc_range_metrics = [('Presence of NFR peak', 20 - pos_start_val, 90 - pos_start_val),
+                         ('Presence of Mono-Nuc peak', 120 - pos_start_val, 250 - pos_start_val),
+                         ('Presence of Di-Nuc peak', 300 - pos_start_val, 500 - pos_start_val)]
     for range_metric in nuc_range_metrics:
         results.append(QCHasElementInRange(*range_metric)(peaks))
 

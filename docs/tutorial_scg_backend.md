@@ -34,36 +34,36 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
 
 ## For Conda users
 
-5. [Install Conda](https://conda.io/miniconda.html)
-
-6. Install Conda dependencies.
+5. Install Conda dependencies.
     ```bash
     $ bash conda/uninstall_dependencies.sh  # to remove any existing pipeline env
     $ bash conda/install_dependencies.sh
     ```
 
-7. Run a pipeline for a SUBSAMPLED (1/400) paired-end sample of [ENCSR356KRQ](https://www.encodeproject.org/experiments/ENCSR356KRQ/).
+6. Run a pipeline for a SUBSAMPLED (1/400) paired-end sample of [ENCSR356KRQ](https://www.encodeproject.org/experiments/ENCSR356KRQ/).
     ```bash
+    $ module load java miniconda/3
     $ source activate encode-atac-seq-pipeline # IMPORTANT!
     $ INPUT=examples/scg/ENCSR356KRQ_subsampled_scg.json
     $ java -jar -Xmx1G -Dconfig.file=backends/backend.conf -Dbackend.default=slurm cromwell-34.jar run atac.wdl -i ${INPUT} -o workflow_opts/scg.json
     ```
 
-8. It will take about an hour. You will be able to find all outputs on `cromwell-executions/atac/[RANDOM_HASH_STRING]/`. See [output directory structure](output.md) for details.
+7. It will take about an hour. You will be able to find all outputs on `cromwell-executions/atac/[RANDOM_HASH_STRING]/`. See [output directory structure](output.md) for details.
 
-9. See full specification for [input JSON file](input.md).
+8. See full specification for [input JSON file](input.md).
 
 ## For singularity users
 
 5. Pull a singularity container for the pipeline. This will pull pipeline's docker container first and build a singularity one on `~/.singularity`.
     ```bash
     $ sdev    # SCG cluster does not allow building a container on login node
-    $ mkdir -p ~/.singularity && cd ~/.singularity && SINGULARITY_CACHEDIR=~/.singularity SINGULARITY_PULLFOLDER=~/.singularity singularity pull --name atac-seq-pipeline-v1.1.7.1.simg -F docker://quay.io/encode-dcc/atac-seq-pipeline:v1.1.7.1
+    $ mkdir -p ~/.singularity && cd ~/.singularity && SINGULARITY_CACHEDIR=~/.singularity SINGULARITY_PULLFOLDER=~/.singularity singularity pull --name atac-seq-pipeline-v1.2.0.simg -F docker://quay.io/encode-dcc/atac-seq-pipeline:v1.2.0
     $ exit
     ```
 
 6. Run a pipeline for a SUBSAMPLED (1/400) paired-end sample of [ENCSR356KRQ](https://www.encodeproject.org/experiments/ENCSR356KRQ/).
     ```bash
+    $ module load java
     $ INPUT=examples/scg/ENCSR356KRQ_subsampled_scg.json
     $ java -jar -Xmx1G -Dconfig.file=backends/backend.conf -Dbackend.default=slurm_singularity cromwell-34.jar run atac.wdl -i ${INPUT} -o workflow_opts/scg.json
     ```
@@ -76,7 +76,7 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
     ```javascript
     {
         "default_runtime_attributes" : {
-            "singularity_container" : "~/.singularity/chip-seq-pipeline-v1.1.7.1.simg",
+            "singularity_container" : "~/.singularity/chip-seq-pipeline-v1.2.0.simg",
             "singularity_bindpath" : "/scratch/users,/srv/gsfs0,/your/,YOUR_OWN_DATA_DIR1,YOUR_OWN_DATA_DIR1,..."
         }
     }
