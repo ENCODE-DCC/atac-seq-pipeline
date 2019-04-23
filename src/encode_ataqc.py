@@ -200,11 +200,12 @@ def ataqc():
         flagstat_map = parse_flagstat_qc(args.flagstat_log)
         with open(args.flagstat_log,'r') as fp:
             flagstat = fp.read()
-        mapped_count = flagstat_map['mapped']
+        #mapped_count = flagstat_map['mapped']
     else:
         flagstat = None
-        mapped_count = None
-
+        #mapped_count = None
+    mapped_count = get_mapped_count(ALIGNED_BAM)
+        
     if ALIGNED_BAM and FINAL_BAM:
         # Final read statistics
         first_read_count, final_read_count, \
