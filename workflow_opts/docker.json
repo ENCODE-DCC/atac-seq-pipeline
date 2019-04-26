@@ -1,6 +1,6 @@
 {
     "default_runtime_attributes" : {
-        "docker" : "quay.io/encode-dcc/atac-seq-pipeline:v1.2.0",
+        "docker" : "quay.io/encode-dcc/atac-seq-pipeline:v1.3.0",
         "zones": "us-west1-a us-west1-b us-west1-c us-central1-c us-central1-b",
         "failOnStderr" : false,
         "continueOnReturnCode" : 0,
