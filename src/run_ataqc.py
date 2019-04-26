@@ -1330,8 +1330,8 @@ into consideration as necessary.
   {{ inline_img(sample['enrichment_plots']['tss']) }}
   <pre>
 Open chromatin assays should show enrichment in open chromatin sites, such as
-TSS's. An average TSS enrichment is above 6-7. A strong TSS enrichment is
-above 10.
+TSS's. An average TSS enrichment in human (hg19) is above 6. A strong TSS enrichment is
+above 10. For other references please see https://www.encodeproject.org/atac-seq/
   </pre>
 {% endif %}
 
