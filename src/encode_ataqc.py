@@ -153,10 +153,13 @@ def ataqc():
 
         # Filtering metrics: duplicates, map quality
         num_mapq, fract_mapq = get_fract_mapq(ALIGNED_BAM)
+
+        mapped_count = get_mapped_count(ALIGNED_BAM)
     else:
         picard_est_library_size = None
         preseq_data, preseq_log = (None, None)
         num_mapq, fract_mapq = (None, None)
+        mapped_count = None
 
     if PBC_LOG:
         encode_lib_metrics = get_encode_complexity_measures(PBC_LOG)
@@ -204,7 +207,6 @@ def ataqc():
     else:
         flagstat = None
         #mapped_count = None
-    mapped_count = get_mapped_count(ALIGNED_BAM)
         
     if ALIGNED_BAM and FINAL_BAM:
         # Final read statistics
