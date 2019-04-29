@@ -63,7 +63,7 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
 6. Pull a singularity container for the pipeline. This will pull pipeline's docker container first and build a singularity one on `~/.singularity`. Stanford Sherlock does not allow building a container on login nodes. Wait until you get a command prompt after `sdev`.
     ```bash
     $ sdev    # sherlock cluster does not allow building a container on login node
-    $ mkdir -p ~/.singularity && cd ~/.singularity && SINGULARITY_CACHEDIR=~/.singularity SINGULARITY_PULLFOLDER=~/.singularity singularity pull --name atac-seq-pipeline-v1.2.0.simg -F docker://quay.io/encode-dcc/atac-seq-pipeline:v1.2.0
+    $ mkdir -p ~/.singularity && cd ~/.singularity && SINGULARITY_CACHEDIR=~/.singularity SINGULARITY_PULLFOLDER=~/.singularity singularity pull --name atac-seq-pipeline-v1.3.0.simg -F docker://quay.io/encode-dcc/atac-seq-pipeline:v1.3.0
     $ exit    # exit from an interactive node
     ```
 
@@ -81,7 +81,7 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
     ```javascript
     {
         "default_runtime_attributes" : {
-            "singularity_container" : "~/.singularity/chip-seq-pipeline-v1.2.0.simg",
+            "singularity_container" : "~/.singularity/chip-seq-pipeline-v1.3.0.simg",
             "singularity_bindpath" : "/scratch,/oak/stanford,/your/,YOUR_OWN_DATA_DIR1,YOUR_OWN_DATA_DIR1,..."
         }
     }

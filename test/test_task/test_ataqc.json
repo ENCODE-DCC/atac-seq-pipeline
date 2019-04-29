@@ -26,9 +26,9 @@
     "test_ataqc.overlap_peak" : "atac-seq-pipeline-test-data/input/pe/ataqc/test_ataqc_full_chr_ppr.naive_overlap.filt.narrowPeak.gz",
     "test_ataqc.pval_bw" : "atac-seq-pipeline-test-data/input/pe/ataqc/ENCFF341MYG.subsampled.400.trim.merged.nodup.tn5.pval.signal.bigwig",
 
-    "test_ataqc.ref_qc_txt" : "atac-seq-pipeline-test-data/ref_output/test_ataqc/v1.1.7.2/ENCFF341MYG.subsampled.400.trim.merged_qc.txt",
+    "test_ataqc.ref_qc_txt" : "atac-seq-pipeline-test-data/ref_output/test_ataqc/v1.3.0/ENCFF341MYG.subsampled.400.trim.merged_qc.txt",
     "test_ataqc.ref_qc_align_only_1_txt" : "atac-seq-pipeline-test-data/ref_output/test_ataqc/align_only_1/ENCFF341MYG.subsampled.400.trim.merged.nodup_qc.txt",
     "test_ataqc.ref_qc_align_only_2_txt" : "atac-seq-pipeline-test-data/ref_output/test_ataqc/align_only_2/ENCFF341MYG.subsampled.400.trim.merged_qc.txt",
     "test_ataqc.ref_qc_peak_only_txt" : "atac-seq-pipeline-test-data/ref_output/test_ataqc/peak_only/test_ataqc_full_chr_rep1-pr.IDR0.05.filt_qc.txt",
-    "test_ataqc.ref_qc_tss_enrich_txt" : "atac-seq-pipeline-test-data/ref_output/test_ataqc/v1.1.7.2/tss_enrich/ENCFF341MYG.subsampled.400.trim.merged.nodup_qc.txt"
+    "test_ataqc.ref_qc_tss_enrich_txt" : "atac-seq-pipeline-test-data/ref_output/test_ataqc/v1.3.0/tss_enrich/ENCFF341MYG.subsampled.400.trim.merged.nodup_qc.txt"
 }

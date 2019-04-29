@@ -153,10 +153,13 @@ def ataqc():
 
         # Filtering metrics: duplicates, map quality
         num_mapq, fract_mapq = get_fract_mapq(ALIGNED_BAM)
+
+        mapped_count = get_mapped_count(ALIGNED_BAM)
     else:
         picard_est_library_size = None
         preseq_data, preseq_log = (None, None)
         num_mapq, fract_mapq = (None, None)
+        mapped_count = None
 
     if PBC_LOG:
         encode_lib_metrics = get_encode_complexity_measures(PBC_LOG)
@@ -200,11 +203,9 @@ def ataqc():
         flagstat_map = parse_flagstat_qc(args.flagstat_log)
         with open(args.flagstat_log,'r') as fp:
             flagstat = fp.read()
-        mapped_count = flagstat_map['mapped']
     else:
         flagstat = None
-        mapped_count = None
-
+        
     if ALIGNED_BAM and FINAL_BAM:
         # Final read statistics
         first_read_count, final_read_count, \

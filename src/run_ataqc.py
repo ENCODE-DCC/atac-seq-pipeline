@@ -518,7 +518,7 @@ def get_picard_dup_stats(picard_dup_file, paired_status):
                 dup_stats['READ_PAIR_DUPLICATES'] = line_elems[5]
                 dup_stats['READ_PAIRS_EXAMINED'] = line_elems[2]
                 if paired_status == 'Paired-ended':
-                    return float(line_elems[5]), float(line_elems[7])
+                    return 2*float(line_elems[5]), float(line_elems[7])
                 else:
                     return float(line_elems[4]), float(line_elems[7])
 
@@ -635,6 +635,21 @@ def get_samtools_flagstat(bam_file):
     return flagstat, mapped_reads
 
 
+def get_mapped_count(bam_file):
+    """run samtools view, removing unmapped (0x4) and nonprimary (0x100)
+    """
+    # Current bug in pysam.view module...
+    logging.info("getting mapped count...")
+
+    # There is a bug in pysam.view('-c'), so just use subprocess
+    num_mapped = int(subprocess.check_output(
+        ["samtools", "view",
+         "-F", "260", "-c",
+         bam_file]).strip())
+    
+    return num_mapped
+
+
 def get_fract_mapq(bam_file, q=30):
     '''
     Runs samtools view to get the fraction of reads of a certain
@@ -644,12 +659,14 @@ def get_fract_mapq(bam_file, q=30):
     logging.info('samtools mapq 30...')
 
     # There is a bug in pysam.view('-c'), so just use subprocess
-    num_qreads = int(subprocess.check_output(['samtools',
-                                              'view', '-c',
-                                              '-q', str(q), bam_file]).strip())
-    tot_reads = int(subprocess.check_output(['samtools',
-                                             'view', '-c',
-                                             bam_file]).strip())
+    num_qreads = int(subprocess.check_output(
+        ["samtools", "view",
+         "-F", "256", "-c",
+         '-q', str(q), bam_file]).strip())
+    tot_reads = int(subprocess.check_output(
+        ["samtools", "view",
+         "-F", "256", "-c",
+         bam_file]).strip())
     fract_good_mapq = float(num_qreads)/tot_reads
     return num_qreads, fract_good_mapq
 
@@ -660,12 +677,14 @@ def get_final_read_count(first_bam, last_bam):
     '''
     logging.info('final read counts...')
     # Bug in pysam.view
-    num_reads_last_bam = int(subprocess.check_output(['samtools',
-                                                      'view', '-c',
-                                                      last_bam]).strip())
-    num_reads_first_bam = int(subprocess.check_output(['samtools',
-                                                       'view', '-c',
-                                                       first_bam]).strip())
+    num_reads_last_bam = int(subprocess.check_output(
+        ["samtools", "view",
+         "-F", "256", "-c",
+         last_bam]).strip())
+    num_reads_first_bam = int(subprocess.check_output(
+        ["samtools", "view",
+         "-F", "256", "-c",
+         first_bam]).strip())
     fract_reads_left = float(num_reads_last_bam)/num_reads_first_bam
 
     return num_reads_first_bam, num_reads_last_bam, fract_reads_left
@@ -1139,6 +1158,11 @@ if your file is paired end, then you should divide these counts by two.
   <pre>
 {{ sample['samtools_flagstat'] }}
   </pre>
+<pre>
+Note that the flagstat command counts alignments, not reads. please 
+use the read counts table to get accurate counts of reads at each
+stage of the pipeline.
+</pre>
 {% endif %}
 
 {% if 'filtering_stats' in sample %}
@@ -1306,8 +1330,8 @@ into consideration as necessary.
   {{ inline_img(sample['enrichment_plots']['tss']) }}
   <pre>
 Open chromatin assays should show enrichment in open chromatin sites, such as
-TSS's. An average TSS enrichment is above 6-7. A strong TSS enrichment is
-above 10.
+TSS's. An average TSS enrichment in human (hg19) is above 6. A strong TSS enrichment is
+above 10. For other references please see https://www.encodeproject.org/atac-seq/
   </pre>
 {% endif %}
 
@@ -1521,8 +1545,9 @@ def main():
                                                     MITO_CHR_NAME,
                                                     paired_status,
                                                     use_sambamba=USE_SAMBAMBA_MARKDUP)
-    [flagstat, mapped_count] = get_samtools_flagstat(ALIGNED_BAM)
-
+    flagstat, _ = get_samtools_flagstat(ALIGNED_BAM)
+    mapped_count = get_mapped_count(ALIGNED_BAM)
+    
     # Final read statistics
     first_read_count, final_read_count, \
         fract_reads_left = get_final_read_count(ALIGNED_BAM,

@@ -2,8 +2,8 @@
 
 ## Command line for version change
 ```bash
-PREV_VER=v1.2.0
-NEW_VER=v1.2.0
+PREV_VER=v1.3.0
+NEW_VER=v1.3.0
 for f in $(grep -rl ${PREV_VER} --include=*.{wdl,md,sh})
 do
   sed -i "s/${PREV_VER}/${NEW_VER}/g" ${f}
@@ -24,7 +24,7 @@ Run the following command line locally to build out DX workflows for this pipeli
 
 ```bash
 # version
-VER=v1.2.0
+VER=v1.3.0
 
 # general
 java -jar ~/dxWDL-0.77.jar compile atac.wdl -project "ENCODE Uniform Processing Pipelines" -extras workflow_opts/docker.json -f -folder /ATAC-seq/workflows/$VER/general -defaults examples/dx/template_general.json
