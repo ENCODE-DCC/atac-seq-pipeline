@@ -205,7 +205,6 @@ def ataqc():
             flagstat = fp.read()
     else:
         flagstat = None
-    mapped_count = get_mapped_count(ALIGNED_BAM)
         
     if ALIGNED_BAM and FINAL_BAM:
         # Final read statistics
