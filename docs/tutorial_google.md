@@ -32,8 +32,8 @@ All test samples and genome data are shared on our public Google Cloud buckets. 
 8. Download [cromwell](https://github.com/broadinstitute/cromwell).
     ```bash
     $ cd
-    $ wget https://github.com/broadinstitute/cromwell/releases/download/34/cromwell-34.jar
-    $ chmod +rx cromwell-34.jar
+    $ wget https://github.com/broadinstitute/cromwell/releases/download/38/cromwell-38.jar
+    $ chmod +rx cromwell-38.jar
     ```
 
 9. Git clone this pipeline and move into it.
@@ -50,7 +50,7 @@ All test samples and genome data are shared on our public Google Cloud buckets. 
     $ INPUT=examples/google/ENCSR356KRQ_subsampled.json
     $ PIPELINE_METADATA=metadata.json
 
-    $ java -jar -Dconfig.file=backends/backend.conf -Dbackend.default=google -Dbackend.providers.google.config.project=${PROJECT} -Dbackend.providers.google.config.root=${BUCKET} cromwell-34.jar run atac.wdl -i ${INPUT} -o workflow_opts/docker.json -m ${PIPELINE_METADATA}
+    $ java -jar -Dconfig.file=backends/backend.conf -Dbackend.default=google -Dbackend.providers.google.config.project=${PROJECT} -Dbackend.providers.google.config.root=${BUCKET} cromwell-38.jar run atac.wdl -i ${INPUT} -o workflow_opts/docker.json -m ${PIPELINE_METADATA}
     ```
 
 11. It will take about an hour. You will be able to find all outputs on your Google Cloud bucket. Final QC report/JSON will be written on `gs://[YOUR_BUCKET_NAME]/ENCSR356KRQ_subsampled/atac/[SOME_HASH_STRING]/call-qc_report/execution/glob*/qc.html` or `qc.json`. See [output directory structure](output.md) for details.

@@ -12,8 +12,8 @@ All test samples and genome data are shared on Stanford SCG4 cluster based on SL
 2. Download [cromwell](https://github.com/broadinstitute/cromwell) on your `$HOME` directory.
     ```bash
     $ cd 
-    $ wget https://github.com/broadinstitute/cromwell/releases/download/34/cromwell-34.jar
-    $ chmod +rx cromwell-34.jar
+    $ wget https://github.com/broadinstitute/cromwell/releases/download/38/cromwell-38.jar
+    $ chmod +rx cromwell-38.jar
     ```
 
 3. Git clone this pipeline and move into its directory.

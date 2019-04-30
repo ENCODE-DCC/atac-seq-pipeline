@@ -8,7 +8,7 @@ This python script parses a metadata JSON file from a previous failed workflow a
 
 Before running this script, you should have a metadata JSON file for a previous failed workflow. You can get it by adding a parameter `-m metadata.json` to the cromwell Java command line. If you stop a workflow (CTRL+C or kill) metadata then JSON file will not be generated.
 ```bash
-$ java -jar ... cromwell-34.jar run chip.wdl -i original_input.json ... -m metadata.json
+$ java -jar ... cromwell-38.jar run chip.wdl -i original_input.json ... -m metadata.json
 ```
 
 Unfortunately your workflow failed for some reasons but you can fix the problem and want to resume it from where it left off.
@@ -18,7 +18,7 @@ $ python resumer.py metadata.json
 
 You will get a new input JSON file `resume.FAILED_WORKFLOW_ID.json` and run cromwell with it instead of the original one `original_input.json`.
 ```bash
-$ java -jar ... cromwell-34.jar run chip.wdl -i resume.FAILED_WORKFLOW_ID.json ...
+$ java -jar ... cromwell-38.jar run chip.wdl -i resume.FAILED_WORKFLOW_ID.json ...
 ```
 
 ## Usage
@@ -132,7 +132,7 @@ An original input JSON file to start from fastqs.
 
 Run a pipeline with this original input JSON.
 ```bash
-$ java -jar cromwell-34.jar run toy_chip.wdl -i org_input.json -m metadata.json
+$ java -jar cromwell-38.jar run toy_chip.wdl -i org_input.json -m metadata.json
 ```
 
 Pipeline fails due to some errors in `call_peak` task. Run `resumer.py` to make a new input JSON file to resume.
@@ -151,7 +151,7 @@ Then `result.WORKFLOW_ID.json` will be generated.
 
 You feed it to the cromwell java command line after fixing the problem. Then pipeline will start from ``scatter` block for `call_peak` tasks.
 ```bash
-$ java -jar cromwell-34.jar run toy_chip.wdl -i resume.WORKFLOW_ID.json
+$ java -jar cromwell-38.jar run toy_chip.wdl -i resume.WORKFLOW_ID.json
 ```
 
 ## Output definition JSON file (for developers)

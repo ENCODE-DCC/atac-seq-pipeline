@@ -62,4 +62,4 @@ NUM_CONCURRENT_TASK=2
 #  you can monitor your jobs with "squeue -u $USER"
 java -jar -Dconfig.file=backends/backend.conf \
 -Dbackend.providers.Local.config.concurrent-job-limit=${NUM_CONCURRENT_TASK} \
-$HOME/cromwell-34.jar run atac.wdl -i ${INPUT} -m ${PIPELINE_METADATA}
+$HOME/cromwell-38.jar run atac.wdl -i ${INPUT} -m ${PIPELINE_METADATA}

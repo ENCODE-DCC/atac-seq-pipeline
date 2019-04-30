@@ -3,8 +3,8 @@
 1. Download [cromwell](https://github.com/broadinstitute/cromwell).
     ```bash
     $ cd
-    $ wget https://github.com/broadinstitute/cromwell/releases/download/34/cromwell-34.jar
-    $ chmod +rx cromwell-34.jar
+    $ wget https://github.com/broadinstitute/cromwell/releases/download/38/cromwell-38.jar
+    $ chmod +rx cromwell-38.jar
     ```
 
 2. Git clone this pipeline and move into it.
@@ -40,7 +40,7 @@
     ```bash
     $ INPUT=examples/local/ENCSR356KRQ_subsampled.json
     $ PIPELINE_METADATA=metadata.json
-    $ java -jar -Xmx1G -Dconfig.file=backends/backend.conf -Dbackend.default=singularity cromwell-34.jar run atac.wdl -i ${INPUT} -o workflow_opts/singularity.json -m ${PIPELINE_METADATA}
+    $ java -jar -Xmx1G -Dconfig.file=backends/backend.conf -Dbackend.default=singularity cromwell-38.jar run atac.wdl -i ${INPUT} -o workflow_opts/singularity.json -m ${PIPELINE_METADATA}
     ```
 
 8. It will take about an hour. You will be able to find all outputs on `cromwell-executions/atac/[RANDOM_HASH_STRING]/`. See [output directory structure](output.md) for details.
