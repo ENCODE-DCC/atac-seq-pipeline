@@ -17,7 +17,7 @@
 
     "atac.auto_detect_adapter" : true,
 
-    "atac.trim_adapter.cpu" : 2,
+    "atac.trim_adapter_cpu" : 2,
 
     "atac.bowtie2_cpu" : 4,
     "atac.bowtie2_mem_mb" : 16000,
