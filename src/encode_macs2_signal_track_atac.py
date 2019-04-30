@@ -87,6 +87,7 @@ def macs2_signal_track(ta, chrsz, gensz, pval_thresh, smooth_win, out_dir):
         fc_bedgraph,
         fc_bedgraph_srt)
     run_shell_cmd(cmd5)
+    rm_f(fc_bedgraph)
 
     cmd6 = 'bedGraphToBigWig {} {} {}'
     cmd6 = cmd6.format(
@@ -94,6 +95,7 @@ def macs2_signal_track(ta, chrsz, gensz, pval_thresh, smooth_win, out_dir):
         chrsz,
         fc_bigwig)
     run_shell_cmd(cmd6)
+    rm_f(fc_bedgraph_srt)
 
     # sval counts the number of tags per million in the (compressed) BED file
     sval = float(get_num_lines(ta))/1000000.0
@@ -124,6 +126,7 @@ def macs2_signal_track(ta, chrsz, gensz, pval_thresh, smooth_win, out_dir):
         pval_bedgraph,
         pval_bedgraph_srt)
     run_shell_cmd(cmd9)
+    rm_f(pval_bedgraph)
 
     cmd10 = 'bedGraphToBigWig {} {} {}'
     cmd10 = cmd10.format(
@@ -131,10 +134,9 @@ def macs2_signal_track(ta, chrsz, gensz, pval_thresh, smooth_win, out_dir):
         chrsz,
         pval_bigwig)
     run_shell_cmd(cmd10)
-
+    rm_f(pval_bedgraph_srt)
+    
     # remove temporary files
-    temp_files.extend([fc_bedgraph,fc_bedgraph_srt,
-                        pval_bedgraph,pval_bedgraph_srt])
     temp_files.append("{}_*".format(prefix))
     rm_f(temp_files)
 

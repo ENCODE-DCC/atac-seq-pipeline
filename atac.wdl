@@ -118,12 +118,12 @@ workflow atac {
 	Int bowtie2_cpu = 4
 	Int bowtie2_mem_mb = 20000
 	Int bowtie2_time_hr = 48
-	String bowtie2_disks = "local-disk 100 HDD"
+	String bowtie2_disks = "local-disk 200 HDD"
 
 	Int filter_cpu = 2
 	Int filter_mem_mb = 20000
 	Int filter_time_hr = 24
-	String filter_disks = "local-disk 100 HDD"
+	String filter_disks = "local-disk 200 HDD"
 
 	Int bam2ta_cpu = 2
 	Int bam2ta_mem_mb = 10000
@@ -139,12 +139,12 @@ workflow atac {
 
 	Int macs2_mem_mb = 16000
 	Int macs2_time_hr = 24
-	String macs2_disks = "local-disk 100 HDD"
+	String macs2_disks = "local-disk 200 HDD"
 
 	Int ataqc_mem_mb = 16000
 	Int ataqc_mem_java_mb = 15000
 	Int ataqc_time_hr = 24
-	String ataqc_disks = "local-disk 400 HDD"
+	String ataqc_disks = "local-disk 200 HDD"
 
 	# input file definition
 	# supported types: fastq, bam, nodup_bam (or filtered bam), ta (tagAlign), peak
