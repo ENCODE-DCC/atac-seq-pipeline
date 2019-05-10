@@ -123,7 +123,8 @@ def bowtie2_pe(fastq1, fastq2, ref_index_prefix,
 
 def chk_bowtie2_index(prefix):    
     index_1 = '{}.1.bt2'.format(prefix)
-    if not os.path.exists(index_1):
+    index_2 = '{}.1.bt2l'.format(prefix)
+    if not (os.path.exists(index_1) or os.path.exists(index_2)):
         raise Exception("Bowtie2 index does not exists. "+
             "Prefix = {}".format(prefix))
 
