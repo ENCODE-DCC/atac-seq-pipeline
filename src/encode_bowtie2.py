@@ -16,10 +16,10 @@ def parse_arguments():
     parser.add_argument('bowtie2_index_prefix_or_tar', type=str,
                         help='Path for prefix (or a tarball .tar) \
                             for reference bowtie2 index. \
-                            Prefix must be like [PREFIX].1.bt2. \
+                            Prefix must be like [PREFIX].1.bt2*. \
                             Tar ball must be packed without compression \
                             and directory by using command line \
-                            "tar cvf [TAR] [TAR_PREFIX].*.bt2".')
+                            "tar cvf [TAR] [TAR_PREFIX].*.bt2*".')
     parser.add_argument('fastqs', nargs='+', type=str,
                         help='List of FASTQs (R1 and R2). \
                             FASTQs must be compressed with gzip (with .gz).')
@@ -155,6 +155,8 @@ def main():
         bowtie2_index_prefix = os.path.join(
             args.out_dir, os.path.basename(strip_ext_tar(tar)))
         temp_files.append('{}.*.bt2'.format(
+            bowtie2_index_prefix))
+        temp_files.append('{}.*.bt2l'.format(
             bowtie2_index_prefix))
     else:
         bowtie2_index_prefix = args.bowtie2_index_prefix_or_tar
