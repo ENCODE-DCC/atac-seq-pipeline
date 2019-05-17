@@ -30,7 +30,9 @@ def parse_arguments():
     parser.add_argument('--paired-end', action="store_true",
                         help='Paired-end FASTQs.')
     parser.add_argument('--multimapping', default=4, type=int,
-                        help='Multimapping reads (for bowtie2 -k).')
+                        help='Multimapping reads (for bowtie2 -k(m+1). '
+                             'This will be incremented in an actual bowtie2 command line'
+                             'e.g. --multimapping 3 will be bowtie2 -k 4')
     parser.add_argument('--nth', type=int, default=1,
                         help='Number of threads to parallelize.')
     parser.add_argument('--out-dir', default='', type=str,
@@ -81,7 +83,7 @@ def bowtie2_se(fastq, ref_index_prefix,
     cmd = 'bowtie2 {} {} --threads {} -x {} -U {} 2> {} '
     cmd += '| samtools view -Su /dev/stdin | samtools sort - {}'
     cmd = cmd.format(
-        '-k {}'.format(multimapping) if multimapping else '',
+        '-k {}'.format(multimapping+1) if multimapping else '',
         bowtie2_param_se,
         nth,
         ref_index_prefix,
@@ -107,7 +109,7 @@ def bowtie2_pe(fastq1, fastq2, ref_index_prefix,
     cmd += '-1 {} -2 {} 2>{} | '
     cmd += 'samtools view -Su /dev/stdin | samtools sort - {}'
     cmd = cmd.format(
-        '-k {}'.format(multimapping) if multimapping else '',
+        '-k {}'.format(multimapping+1) if multimapping else '',
         bowtie2_param_pe,
         nth,
         ref_index_prefix,
