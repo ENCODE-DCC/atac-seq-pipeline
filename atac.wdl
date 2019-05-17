@@ -52,7 +52,7 @@ workflow atac {
 
 	# parameters for align (align FASTQs and create raw BAM)
 	#String aligner = 'bowtie2' 		# bowtie2, custom
-	Int multimapping = 0			# for samples with multimapping reads
+	Int multimapping = 4			# for samples with multimapping reads
 	String bowtie2_param_se = '--local'
 									# params for bowtie2 (single-ended samples)
 	String bowtie2_param_pe = '-X2000 --mm --local' 
@@ -94,14 +94,14 @@ workflow atac {
 	String peak_type = 'narrowPeak'
 	Int cap_num_peak = 300000		# cap number of raw peaks called
 	Float pval_thresh = 0.01		# p.value threshold for peak caller
-	Int smooth_win = 150			# size of smoothing window for peak caller
+	Int smooth_win = 73				# size of smoothing window for peak caller
 
 	# parameters for signal tracks
 	Boolean enable_count_signal_track = false # generate count signal track
 
 	# parameters for IDR
 	Boolean enable_idr = false 		# enable IDR analysis on raw peaks
-	Float idr_thresh = 0.1			# IDR threshold
+	Float idr_thresh = 0.05			# IDR threshold
 	String idr_rank = 'p.value' 	# IDR ranking method (p.value, q.value, score)
 
 	# parameters for ATAqC

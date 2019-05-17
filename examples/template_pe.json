@@ -41,7 +41,7 @@
 
     "atac.enable_count_signal_track" : false,
 
-    "atac.multimapping" : 0,
+    "atac.multimapping" : 4,
 
     "atac.bowtie2_param_pe" : "-X2000 --mm --local",
     "atac.bowtie2_param_se" : "--local",
@@ -61,10 +61,10 @@
 
     "atac.cap_num_peak" : 300000,
     "atac.pval_thresh" : 0.01,
-    "atac.smooth_win" : 150,
+    "atac.smooth_win" : 73,
 
     "atac.enable_idr" : false,
-    "atac.idr_thresh" : 0.1,
+    "atac.idr_thresh" : 0.05,
 
     "atac.disable_ataqc" : false,
 
