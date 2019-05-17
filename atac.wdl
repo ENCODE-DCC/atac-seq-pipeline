@@ -1,6 +1,9 @@
 # ENCODE DCC ATAC-Seq/DNase-Seq pipeline
 # Author: Jin Lee (leepc12@gmail.com)
 
+#CAPER docker quay.io/encode-dcc/atac-seq-pipeline:v1.3.1
+#CAPER singularity docker://quay.io/encode-dcc/atac-seq-pipeline:v1.3.1
+
 workflow atac {
 	# pipeline version
 	String pipeline_ver = 'v1.3.1'
