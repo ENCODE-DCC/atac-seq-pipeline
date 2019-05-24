@@ -1,5 +1,7 @@
 # resumer
 
+** RESUMER HAS BEEN DEPRECATED. PIPELINE NO LONGER SUPPORTS RESUMING. USE [CAPER](https://github.com/ENCODE-DCC/caper) WITH MYSQL DATABASE TO USE CROMWELL'S CALL-CACHING. WE WILL KEEP IT FOR A COUPLE OF NEXT RELEASES BUT WILL BE REMOVED SOON AFTER THAT **
+
 ## Introduction
 
 This python script parses a metadata JSON file from a previous failed workflow and generates a new input JSON file to start a pipeline from where it left off.
