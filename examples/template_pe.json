@@ -41,7 +41,7 @@
 
     "atac.enable_count_signal_track" : false,
 
-    "atac.multimapping" : 0,
+    "atac.multimapping" : 4,
 
     "atac.bowtie2_param_pe" : "-X2000 --mm --local",
     "atac.bowtie2_param_se" : "--local",
@@ -61,10 +61,10 @@
 
     "atac.cap_num_peak" : 300000,
     "atac.pval_thresh" : 0.01,
-    "atac.smooth_win" : 150,
+    "atac.smooth_win" : 73,
 
     "atac.enable_idr" : false,
-    "atac.idr_thresh" : 0.1,
+    "atac.idr_thresh" : 0.05,
 
     "atac.disable_ataqc" : false,
 
@@ -76,12 +76,12 @@
     "atac.bowtie2_cpu" : 4,
     "atac.bowtie2_mem_mb" : 20000,
     "atac.bowtie2_time_hr" : 48,
-    "atac.bowtie2_disks" : "local-disk 100 HDD",
+    "atac.bowtie2_disks" : "local-disk 200 HDD",
 
     "atac.filter_cpu" : 2,
     "atac.filter_mem_mb" : 20000,
     "atac.filter_time_hr" : 24,
-    "atac.filter_disks" : "local-disk 100 HDD",
+    "atac.filter_disks" : "local-disk 200 HDD",
 
     "atac.bam2ta_cpu" : 2,
     "atac.bam2ta_mem_mb" : 10000,
@@ -97,10 +97,10 @@
 
     "atac.macs2_mem_mb" : 16000,
     "atac.macs2_time_hr" : 24,
-    "atac.macs2_disks" : "local-disk 100 HDD",
+    "atac.macs2_disks" : "local-disk 200 HDD",
 
     "atac.ataqc_mem_mb" : 16000,
     "atac.ataqc_mem_java_mb" : 15000,
     "atac.ataqc_time_hr" : 24,
-    "atac.ataqc_disks" : "local-disk 100 HDD"
+    "atac.ataqc_disks" : "local-disk 200 HDD"
 }

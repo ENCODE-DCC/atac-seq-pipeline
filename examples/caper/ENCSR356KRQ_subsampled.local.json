@@ -1,0 +1,43 @@
+{
+    "atac.pipeline_type": "atac",
+    "atac.genome_tsv": "/srv/scratch/leepc12/cromweller_tmp_dir/hg38_caper.local.tsv",
+    "atac.fastqs_rep1_R1": [
+        "/srv/scratch/leepc12/cromweller_tmp_dir/ENCFF341MYG.subsampled.400.fastq.gz",
+        "/srv/scratch/leepc12/cromweller_tmp_dir/ENCFF106QGY.subsampled.400.fastq.gz"
+    ],
+    "atac.fastqs_rep1_R2": [
+        "/srv/scratch/leepc12/cromweller_tmp_dir/ENCFF248EJF.subsampled.400.fastq.gz",
+        "/srv/scratch/leepc12/cromweller_tmp_dir/ENCFF368TYI.subsampled.400.fastq.gz"
+    ],
+    "atac.fastqs_rep2_R1": [
+        "/srv/scratch/leepc12/cromweller_tmp_dir/ENCFF641SFZ.subsampled.400.fastq.gz",
+        "/srv/scratch/leepc12/cromweller_tmp_dir/ENCFF751XTV.subsampled.400.fastq.gz",
+        "/srv/scratch/leepc12/cromweller_tmp_dir/ENCFF927LSG.subsampled.400.fastq.gz",
+        "/srv/scratch/leepc12/cromweller_tmp_dir/ENCFF859BDM.subsampled.400.fastq.gz",
+        "/srv/scratch/leepc12/cromweller_tmp_dir/ENCFF193RRC.subsampled.400.fastq.gz",
+        "/srv/scratch/leepc12/cromweller_tmp_dir/ENCFF366DFI.subsampled.400.fastq.gz"
+    ],
+    "atac.fastqs_rep2_R2": [
+        "/srv/scratch/leepc12/cromweller_tmp_dir/ENCFF031ARQ.subsampled.400.fastq.gz",
+        "/srv/scratch/leepc12/cromweller_tmp_dir/ENCFF590SYZ.subsampled.400.fastq.gz",
+        "/srv/scratch/leepc12/cromweller_tmp_dir/ENCFF734PEQ.subsampled.400.fastq.gz",
+        "/srv/scratch/leepc12/cromweller_tmp_dir/ENCFF007USV.subsampled.400.fastq.gz",
+        "/srv/scratch/leepc12/cromweller_tmp_dir/ENCFF886FSC.subsampled.400.fastq.gz",
+        "/srv/scratch/leepc12/cromweller_tmp_dir/ENCFF573UXK.subsampled.400.fastq.gz"
+    ],
+    "atac.paired_end": true,
+    "atac.multimapping": 4,
+    "atac.auto_detect_adapter": true,
+    "atac.trim_adapter.cpu": 2,
+    "atac.bowtie2_cpu": 8,
+    "atac.bowtie2_mem_mb": 16000,
+    "atac.filter_cpu": 2,
+    "atac.filter_mem_mb": 12000,
+    "atac.macs2_mem_mb": 16000,
+    "atac.smooth_win": 73,
+    "atac.enable_idr": true,
+    "atac.idr_thresh": 0.05,
+    "atac.enable_xcor": true,
+    "atac.title": "ENCSR356KRQ (subsampled 1/400 reads)",
+    "atac.description": "ATAC-seq on primary keratinocytes in day 0.0 of differentiation"
+}

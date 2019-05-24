@@ -158,7 +158,7 @@ if [[ ${BUILD_BWT2_IDX} == 1 ]]; then
   ln -s ../${REF_FA_PREFIX} ${REF_FA_PREFIX}
   if [[ ! -f ${REF_FA_PREFIX}.rev.1.bt2 ]]; then
     bowtie2-build ${REF_FA_PREFIX} ${REF_FA_PREFIX}
-    tar cvf ${REF_FA_PREFIX}.tar ${REF_FA_PREFIX}.*.bt2
+    tar cvf ${REF_FA_PREFIX}.tar ${REF_FA_PREFIX}.*.bt2*
   fi
 fi
 

@@ -16,10 +16,10 @@ def parse_arguments():
     parser.add_argument('bowtie2_index_prefix_or_tar', type=str,
                         help='Path for prefix (or a tarball .tar) \
                             for reference bowtie2 index. \
-                            Prefix must be like [PREFIX].1.bt2. \
+                            Prefix must be like [PREFIX].1.bt2*. \
                             Tar ball must be packed without compression \
                             and directory by using command line \
-                            "tar cvf [TAR] [TAR_PREFIX].*.bt2".')
+                            "tar cvf [TAR] [TAR_PREFIX].*.bt2*".')
     parser.add_argument('fastqs', nargs='+', type=str,
                         help='List of FASTQs (R1 and R2). \
                             FASTQs must be compressed with gzip (with .gz).')
@@ -29,8 +29,10 @@ def parse_arguments():
                         help='Parameters for bowtie2 for paired-ended samples.')
     parser.add_argument('--paired-end', action="store_true",
                         help='Paired-end FASTQs.')
-    parser.add_argument('--multimapping', default=0, type=int,
-                        help='Multimapping reads (for bowtie2 -k).')
+    parser.add_argument('--multimapping', default=4, type=int,
+                        help='Multimapping reads (for bowtie2 -k(m+1). '
+                             'This will be incremented in an actual bowtie2 command line'
+                             'e.g. --multimapping 3 will be bowtie2 -k 4')
     parser.add_argument('--nth', type=int, default=1,
                         help='Number of threads to parallelize.')
     parser.add_argument('--out-dir', default='', type=str,
@@ -81,7 +83,7 @@ def bowtie2_se(fastq, ref_index_prefix,
     cmd = 'bowtie2 {} {} --threads {} -x {} -U {} 2> {} '
     cmd += '| samtools view -Su /dev/stdin | samtools sort - {}'
     cmd = cmd.format(
-        '-k {}'.format(multimapping) if multimapping else '',
+        '-k {}'.format(multimapping+1) if multimapping else '',
         bowtie2_param_se,
         nth,
         ref_index_prefix,
@@ -107,7 +109,7 @@ def bowtie2_pe(fastq1, fastq2, ref_index_prefix,
     cmd += '-1 {} -2 {} 2>{} | '
     cmd += 'samtools view -Su /dev/stdin | samtools sort - {}'
     cmd = cmd.format(
-        '-k {}'.format(multimapping) if multimapping else '',
+        '-k {}'.format(multimapping+1) if multimapping else '',
         bowtie2_param_pe,
         nth,
         ref_index_prefix,
@@ -123,7 +125,8 @@ def bowtie2_pe(fastq1, fastq2, ref_index_prefix,
 
 def chk_bowtie2_index(prefix):    
     index_1 = '{}.1.bt2'.format(prefix)
-    if not os.path.exists(index_1):
+    index_2 = '{}.1.bt2l'.format(prefix)
+    if not (os.path.exists(index_1) or os.path.exists(index_2)):
         raise Exception("Bowtie2 index does not exists. "+
             "Prefix = {}".format(prefix))
 
@@ -154,6 +157,8 @@ def main():
         bowtie2_index_prefix = os.path.join(
             args.out_dir, os.path.basename(strip_ext_tar(tar)))
         temp_files.append('{}.*.bt2'.format(
+            bowtie2_index_prefix))
+        temp_files.append('{}.*.bt2l'.format(
             bowtie2_index_prefix))
     else:
         bowtie2_index_prefix = args.bowtie2_index_prefix_or_tar

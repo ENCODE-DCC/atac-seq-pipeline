@@ -3,8 +3,8 @@
 1. Download [cromwell](https://github.com/broadinstitute/cromwell).
     ```bash
     $ cd
-    $ wget https://github.com/broadinstitute/cromwell/releases/download/34/cromwell-34.jar
-    $ chmod +rx cromwell-34.jar
+    $ wget https://github.com/broadinstitute/cromwell/releases/download/38/cromwell-38.jar
+    $ chmod +rx cromwell-38.jar
     ```
 
 2. Git clone this pipeline and move into it.
@@ -33,14 +33,14 @@
 
 6. Pull a singularity container for the pipeline. This will pull pipeline's docker container first and build a singularity one on `~/.singularity`.
     ```bash
-    $ mkdir -p ~/.singularity && cd ~/.singularity && SINGULARITY_CACHEDIR=~/.singularity SINGULARITY_PULLFOLDER=~/.singularity singularity pull --name atac-seq-pipeline-v1.3.0.simg -F docker://quay.io/encode-dcc/atac-seq-pipeline:v1.3.0
+    $ mkdir -p ~/.singularity && cd ~/.singularity && SINGULARITY_CACHEDIR=~/.singularity SINGULARITY_PULLFOLDER=~/.singularity singularity pull --name atac-seq-pipeline-v1.4.0.simg -F docker://quay.io/encode-dcc/atac-seq-pipeline:v1.4.0
     ```
 
 7. Run a pipeline for the test sample.
     ```bash
     $ INPUT=examples/local/ENCSR356KRQ_subsampled.json
     $ PIPELINE_METADATA=metadata.json
-    $ java -jar -Xmx1G -Dconfig.file=backends/backend.conf -Dbackend.default=singularity cromwell-34.jar run atac.wdl -i ${INPUT} -o workflow_opts/singularity.json -m ${PIPELINE_METADATA}
+    $ java -jar -Xmx1G -Dconfig.file=backends/backend.conf -Dbackend.default=singularity cromwell-38.jar run atac.wdl -i ${INPUT} -o workflow_opts/singularity.json -m ${PIPELINE_METADATA}
     ```
 
 8. It will take about an hour. You will be able to find all outputs on `cromwell-executions/atac/[RANDOM_HASH_STRING]/`. See [output directory structure](output.md) for details.
@@ -53,7 +53,7 @@
     ```javascript
     {
         "default_runtime_attributes" : {
-            "singularity_container" : "~/.singularity/chip-seq-pipeline-v1.3.0.simg",
+            "singularity_container" : "~/.singularity/chip-seq-pipeline-v1.4.0.simg",
             "singularity_bindpath" : "/your/,YOUR_OWN_DATA_DIR1,YOUR_OWN_DATA_DIR1,..."
         }
     }

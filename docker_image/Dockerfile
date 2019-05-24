@@ -74,8 +74,8 @@ RUN git clone --branch 2.0.4.2 --single-branch https://github.com/kundajelab/idr
     cd idr && python3 setup.py install && cd ../ && rm -rf idr*
 
 # Install UCSC tools (Kent utils) latest
-RUN wget http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/bedClip && chmod +x bedClip
-RUN wget http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/bedGraphToBigWig && chmod +x bedGraphToBigWig
+RUN wget http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64.v369/bedClip && chmod +x bedClip
+RUN wget http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64.v369/bedGraphToBigWig && chmod +x bedGraphToBigWig
 
 # Install samtools 1.2
 RUN git clone --branch 1.2 --single-branch https://github.com/samtools/samtools.git && \
@@ -123,7 +123,7 @@ RUN apt-get update && apt-get install -y \
 && rm -rf /var/lib/apt/lists/*
 
 # Install python packages for ATAQC (pysam, pybedtools, metaseq, pandas, jinja2)
-RUN pip install --no-cache-dir pysam==0.8.2.1 pybedtools==0.6.9 pandas==0.21.1 metaseq==0.5.6 jinja2==2.10
+RUN pip install --no-cache-dir pysam==0.8.2.1 pybedtools==0.6.9 pandas==0.21.1 scikit-learn==0.20 metaseq==0.5.6 jinja2==2.10
 
 # Install gsl 1.16
 RUN wget http://gnu.mirror.vexxhost.com/gsl/gsl-1.16.tar.gz && tar -zxvf gsl-1.16.tar.gz && cd gsl-1.16 && ./configure && make && make install && cd .. && rm -rf gsl-1.16 gsl-1.16.tar.gz
@@ -133,10 +133,10 @@ ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib
 RUN git clone --branch v2.0.3 --single-branch --recursive https://github.com/smithlabcode/preseq preseq_2.0.3 && cd preseq_2.0.3 && make && cd ../ && mv preseq_2.0.3/preseq . && rm -rf preseq_2.0.3
 
 # Install UCSC tools (Kent utils) for ATAQC
-RUN wget http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/bigWigAverageOverBed && chmod +x bigWigAverageOverBed
+RUN wget http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64.v369/bigWigAverageOverBed && chmod +x bigWigAverageOverBed
 
 # Install UCSC tools (Kent utils) latest for peak2bigbed conversion
-RUN wget http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/bedToBigBed && chmod +x bedToBigBed
+RUN wget http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64.v369/bedToBigBed && chmod +x bedToBigBed
 
 # Install bgzip/tabix for Wash U browser track (hammock type)
 #RUN apt-get update && apt-get install -y tabix && rm -rf /var/lib/apt/lists/*

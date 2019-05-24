@@ -1,0 +1,13 @@
+ref_fa	https://storage.googleapis.com/encode-pipeline-genome-data/hg38/GRCh38_no_alt_analysis_set_GCA_000001405.15.fasta.gz
+bowtie2_idx_tar	https://storage.googleapis.com/encode-pipeline-genome-data/hg38/bowtie2_index/GRCh38_no_alt_analysis_set_GCA_000001405.15.fasta.tar
+bwa_idx_tar	https://storage.googleapis.com/encode-pipeline-genome-data/hg38/bwa_index/GRCh38_no_alt_analysis_set_GCA_000001405.15.fasta.tar
+chrsz	https://storage.googleapis.com/encode-pipeline-genome-data/hg38/hg38.chrom.sizes
+blacklist	https://storage.googleapis.com/encode-pipeline-genome-data/hg38/hg38.blacklist.bed.gz
+gensz	hs
+tss_enrich	https://storage.googleapis.com/encode-pipeline-genome-data/hg38/ataqc/hg38_gencode_tss_unique.bed.gz
+dnase	https://storage.googleapis.com/encode-pipeline-genome-data/hg38/ataqc/reg2map_honeybadger2_dnase_all_p10_ucsc.hg19_to_hg38.bed.gz
+prom	https://storage.googleapis.com/encode-pipeline-genome-data/hg38/ataqc/reg2map_honeybadger2_dnase_prom_p2.hg19_to_hg38.bed.gz
+enh	https://storage.googleapis.com/encode-pipeline-genome-data/hg38/ataqc/reg2map_honeybadger2_dnase_enh_p2.hg19_to_hg38.bed.gz
+reg2map	https://storage.googleapis.com/encode-pipeline-genome-data/hg38/ataqc/hg38_dnase_avg_fseq_signal_formatted.txt.gz
+reg2map_bed	https://storage.googleapis.com/encode-pipeline-genome-data/hg38/ataqc/hg38_celltype_compare_subsample.bed.gz
+roadmap_meta	https://storage.googleapis.com/encode-pipeline-genome-data/hg38/ataqc/hg38_dnase_avg_fseq_signal_metadata.txt

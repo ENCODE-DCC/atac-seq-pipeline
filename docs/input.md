@@ -147,7 +147,7 @@ Let us take a close look at the following template JSON. Comments are not allowe
     "atac.enable_count_signal_track" : false,
 
     // multimapping reads
-    "atac.multimapping" : 0,
+    "atac.multimapping" : 4,
 
     // bowtie2 parameters for each read-endedness (single-ended, paired-end).
     // See bowtie2 --help for details.
@@ -193,12 +193,12 @@ Let us take a close look at the following template JSON. Comments are not allowe
     // P-value threshold for MACS2 (macs2 callpeak -p)
     "atac.pval_thresh" : 0.01,
     // Smoothing window for MACS2 (macs2 callpeak --shift -smooth_win/2 --extsize smooth_win)
-    "atac.smooth_win" : 150,
+    "atac.smooth_win" : 73,
 
     // IDR (irreproducible discovery rate)
     "atac.enable_idr" : false,
     // Threshold for IDR
-    "atac.idr_thresh" : 0.1,
+    "atac.idr_thresh" : 0.05,
 
     // ATAqC (annotation-based analysis which include TSS enrichment and etc.)
     "atac.disable_ataqc" : false,

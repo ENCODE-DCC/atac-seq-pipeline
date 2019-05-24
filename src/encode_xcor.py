@@ -21,6 +21,14 @@ def parse_arguments():
     parser.add_argument('--speak', type=int, default=-1,
                         help='User-defined cross-corr. peak strandshift \
                         (-speak= in run_spp.R). Disabled if -1.')    
+    parser.add_argument('--exclusion-range-min', type=int,
+                        help='User-defined exclusion range minimum used for '
+                             '-x=${xcor_exclusion_range_min}:${xcor_exclusion_range_max}')
+    parser.add_argument('--exclusion-range-max', type=int,
+                        help='User-defined exclusion range maximum used for '
+                             '-x=${xcor_exclusion_range_min}:${xcor_exclusion_range_max}')
+    parser.add_argument('--chip-seq-type', choices=['tf', 'histone'],
+                        help='Type of ChIP-seq pipeline (histone of tf)')
     parser.add_argument('--paired-end', action="store_true",
                         help='Paired-end TAGALIGN.')
     parser.add_argument('--nth', type=int, default=1,
@@ -37,15 +45,48 @@ def parse_arguments():
     log.info(sys.argv)
     return args
 
-def xcor(ta, speak, mito_chr_name, nth, out_dir):
+
+def get_exclusion_range_max(ta, chip_seq_type):
+    # estimate read length from TA
+    cmd0 = "zcat -f {} > {}.tmp".format(ta, ta)
+    run_shell_cmd(cmd0)
+
+    cmd = "head -n 100 {}.tmp | awk 'function abs(v) "
+    cmd += "{{return v < 0 ? -v : v}} BEGIN{{sum=0}} "
+    cmd += "{{sum+=abs($3-$2)}} END{{print int(sum/NR)}}'"
+    cmd = cmd.format(ta)
+    read_len = int(run_shell_cmd(cmd))
+    rm_f(ta+'.tmp')
+
+    if chip_seq_type == 'tf':
+        return max(read_len + 10, 50)
+    elif chip_seq_type == 'histone':
+        return max(read_len + 10, 100)
+    else:
+        raise NotImplementedError('chip_seq_type not supported')
+
+
+def xcor(ta, speak, mito_chr_name,
+         nth, out_dir, chip_seq_type=None,
+         exclusion_range_min=None, exclusion_range_max=None):
     prefix = os.path.join(out_dir,
         os.path.basename(strip_ext_ta(ta)))
     xcor_plot_pdf = '{}.cc.plot.pdf'.format(prefix)
     xcor_score = '{}.cc.qc'.format(prefix)
     fraglen_txt = '{}.cc.fraglen.txt'.format(prefix)
 
+    if chip_seq_type is not None and exclusion_range_min is not None:
+        if exclusion_range_max is None:
+            exclusion_range_max = get_exclusion_range_max(ta, chip_seq_type)
+
+        exclusion_range_param = ' -x={}:{}'.format(
+            exclusion_range_min, exclusion_range_max)
+    else:
+        exclusion_range_param = ''
+
     cmd1 = 'Rscript --max-ppsize=500000 $(which run_spp.R) -rf -c={} -p={} '
     cmd1 += '-filtchr="{}" -savp={} -out={} {}'
+    cmd1 += exclusion_range_param
     cmd1 = cmd1.format(
         ta,
         nth,
@@ -88,7 +129,8 @@ def main():
 
     log.info('Cross-correlation analysis...')
     xcor_plot_pdf, xcor_plot_png, xcor_score, fraglen_txt = xcor(
-        ta_subsampled, args.speak, args.mito_chr_name, args.nth, args.out_dir)
+        ta_subsampled, args.speak, args.mito_chr_name, args.nth, args.out_dir,
+        args.chip_seq_type, args.exclusion_range_min, args.exclusion_range_max)
 
     log.info('Removing temporary files...')
     rm_f(temp_files)

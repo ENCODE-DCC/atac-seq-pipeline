@@ -9,6 +9,7 @@ import re
 import argparse
 import json
 import csv
+import hashlib
 from collections import OrderedDict, defaultdict
 
 def parse_arguments():
@@ -41,15 +42,33 @@ def find_workflow_id_from_path(path):
     m = re.findall(pattern, abspath)
     return m[0] if m else None
 
+def calc_md5(fname):
+    """https://stackoverflow.com/a/3431838
+    """
+    hash_md5 = hashlib.md5()
+    with open(fname, "rb") as f:
+        for chunk in iter(lambda: f.read(4096), b""):
+            hash_md5.update(chunk)
+    return hash_md5.hexdigest()
+
 def recursively_read_qc_jsons(search_dir, qc_json_file_basename, 
         map_qc_json_path_to_title=None, map_workflow_id_to_title=None):
     # find all qc.json recursively
     json_files = [y for x in os.walk(search_dir) \
         for y in glob.glob(os.path.join(x[0], qc_json_file_basename))]
 
+    uniq_json_files = []
+    json_files_md5sum = set()
+    for json_file in json_files:
+        md5 = calc_md5(json_file)
+        if md5 in json_files_md5sum:
+            continue
+        json_files_md5sum.add(md5)
+        uniq_json_files.append(json_file)
+
     # read all qc.json files
     qc_jsons = []
-    for json_file in json_files:        
+    for json_file in uniq_json_files:
         with open(json_file,'r') as fp:
             qc = json.load(fp, object_pairs_hook=OrderedDict)
 

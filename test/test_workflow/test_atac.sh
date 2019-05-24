@@ -8,17 +8,17 @@ fi
 if [ $# -gt 2 ]; then
   DOCKER_IMAGE=$3
 else
-  DOCKER_IMAGE=quay.io/encode-dcc/atac-seq-pipeline:test-v1.3.0
+  DOCKER_IMAGE=quay.io/encode-dcc/atac-seq-pipeline:test-v1.4.0
 fi
 INPUT=$1
 GCLOUD_SERVICE_ACCOUNT_SECRET_JSON_FILE=$2
 PREFIX=$(basename $INPUT .json)
 
-CROMWELL_JAR="cromwell-34.jar"
+CROMWELL_JAR="cromwell-38.jar"
 if [ -f ${CROMWELL_JAR} ]; then
   echo "Skip downloading cromwell."
 else
-  wget -N -c https://github.com/broadinstitute/cromwell/releases/download/34/cromwell-34.jar
+  wget -N -c https://github.com/broadinstitute/cromwell/releases/download/38/cromwell-38.jar
 fi
 
 # Write workflow option JSON file

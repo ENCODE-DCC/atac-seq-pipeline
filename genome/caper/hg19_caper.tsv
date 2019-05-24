@@ -1,0 +1,13 @@
+ref_fa	https://storage.googleapis.com/encode-pipeline-genome-data/hg19/male.hg19.fa
+bowtie2_idx_tar	https://storage.googleapis.com/encode-pipeline-genome-data/hg19/bowtie2_index/male.hg19.fa.tar
+bwa_idx_tar	https://storage.googleapis.com/encode-pipeline-genome-data/hg19/bwa_index/male.hg19.fa.tar
+chrsz	https://storage.googleapis.com/encode-pipeline-genome-data/hg19/hg19.chrom.sizes
+blacklist	https://storage.googleapis.com/encode-pipeline-genome-data/hg19/wgEncodeDacMapabilityConsensusExcludable.bed.gz
+gensz	hs
+tss_enrich	https://storage.googleapis.com/encode-pipeline-genome-data/hg19/ataqc/hg19_gencode_tss_unique.bed.gz
+dnase	https://storage.googleapis.com/encode-pipeline-genome-data/hg19/ataqc/reg2map_honeybadger2_dnase_all_p10_ucsc.bed.gz
+prom	https://storage.googleapis.com/encode-pipeline-genome-data/hg19/ataqc/reg2map_honeybadger2_dnase_prom_p2.bed.gz
+enh	https://storage.googleapis.com/encode-pipeline-genome-data/hg19/ataqc/reg2map_honeybadger2_dnase_enh_p2.bed.gz
+reg2map	https://storage.googleapis.com/encode-pipeline-genome-data/hg19/ataqc/dnase_avgs_reg2map_p10_merged_named.pvals.gz
+reg2map_bed	https://storage.googleapis.com/encode-pipeline-genome-data/hg19/ataqc/null
+roadmap_meta	https://storage.googleapis.com/encode-pipeline-genome-data/hg19/ataqc/eid_to_mnemonic.txt

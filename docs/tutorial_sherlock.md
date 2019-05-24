@@ -12,8 +12,8 @@ All test samples and genome data are shared on Stanford Sherlock cluster based o
 2. Download [cromwell](https://github.com/broadinstitute/cromwell) on your `$HOME` directory.
     ```bash
     $ cd 
-    $ wget https://github.com/broadinstitute/cromwell/releases/download/34/cromwell-34.jar
-    $ chmod +rx cromwell-34.jar
+    $ wget https://github.com/broadinstitute/cromwell/releases/download/38/cromwell-38.jar
+    $ chmod +rx cromwell-38.jar
     ```
 
 3. Git clone this pipeline and move into its directory.
@@ -68,7 +68,7 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
     ```javascript
     {
         "default_runtime_attributes" : {
-            "singularity_container" : "~/.singularity/atac-seq-pipeline-v1.3.0.simg",
+            "singularity_container" : "~/.singularity/atac-seq-pipeline-v1.4.0.simg",
             "singularity_bindpath" : "/scratch,/lscratch,/oak/stanford,/home/groups/cherry/encode,/your/,YOUR_OWN_DATA_DIR1,YOUR_OWN_DATA_DIR1,..."
         }
     }

@@ -12,7 +12,7 @@ INPUT=$2
 if [ $# -gt 2 ]; then
   DOCKER_IMAGE=$3
 else
-  DOCKER_IMAGE=quay.io/encode-dcc/atac-seq-pipeline:test-v1.3.0
+  DOCKER_IMAGE=quay.io/encode-dcc/atac-seq-pipeline:test-v1.4.0
 fi
 if [ $# -gt 3 ]; then
   NUM_TASK=$4
@@ -20,12 +20,12 @@ else
   NUM_TASK=1
 fi
 
-if [ -f "cromwell-34.jar" ]; then
+if [ -f "cromwell-38.jar" ]; then
   echo "Skip downloading cromwell."
 else
-  wget -N -c https://github.com/broadinstitute/cromwell/releases/download/34/cromwell-34.jar
+  wget -N -c https://github.com/broadinstitute/cromwell/releases/download/38/cromwell-38.jar
 fi
-CROMWELL_JAR=cromwell-34.jar
+CROMWELL_JAR=cromwell-38.jar
 BACKEND_CONF=../../backends/backend.conf
 BACKEND=Local
 EXTRA_PARAM="-Dbackend.providers.Local.config.concurrent-job-limit=${NUM_TASK}"

@@ -1,9 +1,13 @@
 # ENCODE DCC ATAC-Seq/DNase-Seq pipeline
 # Author: Jin Lee (leepc12@gmail.com)
 
+#CAPER docker quay.io/encode-dcc/atac-seq-pipeline:v1.4.0
+#CAPER singularity docker://quay.io/encode-dcc/atac-seq-pipeline:v1.4.0
+#CROO out_def https://storage.googleapis.com/encode-pipeline-output-definition/atac.out_def.json
+
 workflow atac {
 	# pipeline version
-	String pipeline_ver = 'v1.3.0'
+	String pipeline_ver = 'v1.4.0'
 
 	# general sample information
 	String title = 'Untitled'
@@ -52,7 +56,7 @@ workflow atac {
 
 	# parameters for align (align FASTQs and create raw BAM)
 	#String aligner = 'bowtie2' 		# bowtie2, custom
-	Int multimapping = 0			# for samples with multimapping reads
+	Int multimapping = 4			# for samples with multimapping reads
 	String bowtie2_param_se = '--local'
 									# params for bowtie2 (single-ended samples)
 	String bowtie2_param_pe = '-X2000 --mm --local' 
@@ -94,14 +98,14 @@ workflow atac {
 	String peak_type = 'narrowPeak'
 	Int cap_num_peak = 300000		# cap number of raw peaks called
 	Float pval_thresh = 0.01		# p.value threshold for peak caller
-	Int smooth_win = 150			# size of smoothing window for peak caller
+	Int smooth_win = 73				# size of smoothing window for peak caller
 
 	# parameters for signal tracks
 	Boolean enable_count_signal_track = false # generate count signal track
 
 	# parameters for IDR
 	Boolean enable_idr = false 		# enable IDR analysis on raw peaks
-	Float idr_thresh = 0.1			# IDR threshold
+	Float idr_thresh = 0.05			# IDR threshold
 	String idr_rank = 'p.value' 	# IDR ranking method (p.value, q.value, score)
 
 	# parameters for ATAqC
@@ -118,12 +122,12 @@ workflow atac {
 	Int bowtie2_cpu = 4
 	Int bowtie2_mem_mb = 20000
 	Int bowtie2_time_hr = 48
-	String bowtie2_disks = "local-disk 100 HDD"
+	String bowtie2_disks = "local-disk 200 HDD"
 
 	Int filter_cpu = 2
 	Int filter_mem_mb = 20000
 	Int filter_time_hr = 24
-	String filter_disks = "local-disk 100 HDD"
+	String filter_disks = "local-disk 200 HDD"
 
 	Int bam2ta_cpu = 2
 	Int bam2ta_mem_mb = 10000
@@ -139,12 +143,12 @@ workflow atac {
 
 	Int macs2_mem_mb = 16000
 	Int macs2_time_hr = 24
-	String macs2_disks = "local-disk 100 HDD"
+	String macs2_disks = "local-disk 200 HDD"
 
 	Int ataqc_mem_mb = 16000
 	Int ataqc_mem_java_mb = 15000
 	Int ataqc_time_hr = 24
-	String ataqc_disks = "local-disk 400 HDD"
+	String ataqc_disks = "local-disk 200 HDD"
 
 	# input file definition
 	# supported types: fastq, bam, nodup_bam (or filtered bam), ta (tagAlign), peak

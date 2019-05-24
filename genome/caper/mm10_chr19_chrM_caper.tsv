@@ -1,0 +1,13 @@
+blacklist	https://storage.googleapis.com/encode-pipeline-genome-data/mm10_chr19_chrM/mm10.blacklist.bed.gz
+chrsz	https://storage.googleapis.com/encode-pipeline-genome-data/mm10_chr19_chrM/mm10_chr19_chrM.chrom.sizes
+gensz	mm
+bowtie2_idx_tar	https://storage.googleapis.com/encode-pipeline-genome-data/mm10_chr19_chrM/bowtie2_index/mm10_no_alt_analysis_set_ENCODE.chr19_chrM.fasta.tar
+bwa_idx_tar	https://storage.googleapis.com/encode-pipeline-genome-data/mm10_chr19_chrM/bwa_index/mm10_no_alt_analysis_set_ENCODE.chr19_chrM.fasta.tar
+ref_fa	https://storage.googleapis.com/encode-pipeline-genome-data/mm10_chr19_chrM/mm10_no_alt_analysis_set_ENCODE.chr19_chrM.fasta
+tss_enrich	https://storage.googleapis.com/encode-pipeline-genome-data/mm10/ataqc/null
+dnase	https://storage.googleapis.com/encode-pipeline-genome-data/mm10/ataqc/null
+prom	https://storage.googleapis.com/encode-pipeline-genome-data/mm10/ataqc/null
+enh	https://storage.googleapis.com/encode-pipeline-genome-data/mm10/ataqc/null
+reg2map	https://storage.googleapis.com/encode-pipeline-genome-data/mm10/ataqc/null
+reg2map_bed	https://storage.googleapis.com/encode-pipeline-genome-data/mm10/ataqc/null
+roadmap_meta	https://storage.googleapis.com/encode-pipeline-genome-data/mm10/ataqc/null

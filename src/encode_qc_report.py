@@ -83,6 +83,10 @@ def parse_arguments():
                         help='Pipeline version.')
     parser.add_argument('--multimapping', default=0, type=int,
                         help='Multimapping reads.')
+    parser.add_argument('--paired-end', action='store_true',
+                        help='Endedness of all replicates.')
+    parser.add_argument('--ctl-paired-end', action='store_true',
+                        help='Endedness of all controls.')
     parser.add_argument('--paired-ends', type=str2bool, nargs='*',
                         help='List of true/false for paired endedness of sample.')
     parser.add_argument('--ctl-paired-ends', type=str2bool, nargs='*',
@@ -192,6 +196,18 @@ def parse_arguments():
     for a in vars(args):
         if type(eval('args.{}'.format(a)))==list:
             exec('args.{} = split_entries_and_extend(args.{})'.format(a,a))        
+
+    if args.paired_ends is None:
+        if args.paired_end:
+            args.paired_ends = [True]*20
+        else:
+            args.paired_ends = [False]*20
+
+    if args.ctl_paired_ends is None:
+        if args.ctl_paired_end:
+            args.ctl_paired_ends = [True]*20
+        else:
+            args.ctl_paired_ends = args.paired_ends
 
     log.setLevel(args.log_level)
     log.info(sys.argv)
