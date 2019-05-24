@@ -10,45 +10,73 @@ The ATAC-seq pipeline specification is also the official pipeline specification 
 
 ### Features
 
-* **Flexibility**: Support for `docker`, `singularity` and `Conda`.
 * **Portability**: Support for many cloud platforms (Google/DNAnexus) and cluster engines (SLURM/SGE/PBS).
-* **Resumability**: [Resume](utils/qc_jsons_to_tsv/README.md) a failed workflow from where it left off.
 * **User-friendly HTML report**: tabulated quality metrics including alignment/peak statistics and FRiP along with many useful plots (IDR/cross-correlation measures).
   - Examples: [HTML](https://storage.googleapis.com/encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR889WQX/example_output/qc.html), [JSON](docs/example_output/v1.1.5/qc.json)
 * **ATAqC**: Annotation-based analysis including TSS enrichment and comparison to Roadmap DNase.
 * **Genomes**: Pre-built database for GRCh38, hg19, mm10, mm9 and additional support for custom genomes.
 
-## Installation and tutorial
+## Installation
 
-This pipeline supports many cloud platforms and cluster engines. It also supports `docker`, `singularity` and `Conda` to resolve complicated software dependencies for the pipeline. A tutorial-based instruction for each platform will be helpful to understand how to run pipelines. There are special instructions for two major Stanford HPC servers (SCG4 and Sherlock).
+1) Install [Caper](https://github.com/ENCODE-DCC/caper#installation). Caper is a python wrapper for [Cromwell](https://github.com/broadinstitute/cromwell). Make sure that you have python3(> 3.4.1) installed on your system.
 
-* Cloud platforms
-  * Web interface
-    * [DNAnexus Platform](docs/tutorial_dx_web.md)
-  * CLI (command line interface)
-    * [Google Cloud Platform](docs/tutorial_google.md)
-    * [DNAnexus Platform](docs/tutorial_dx_cli.md)
-* Stanford HPC servers (CLI)
-  * [Stanford SCG4](docs/tutorial_scg.md)
-  * [Stanford Sherlock 2.0](docs/tutorial_sherlock.md)
-* Cluster engines (CLI)
-  * [SLURM](docs/tutorial_slurm.md)
-  * [Sun GridEngine (SGE/PBS)](docs/tutorial_sge.md)
-* Local Linux computers (CLI)
-  * [Local system with `singularity`](docs/tutorial_local_singularity.md)
-  * [Local system with `docker`](docs/tutorial_local_docker.md)
-  * [Local system with `Conda`](docs/tutorial_local_conda.md)
-* Local Windows computers (CLI)
-  * [Windows 10 Pro with `docker`](docs/tutorial_windows_docker.md)
-  * [Windows 10 Pro/Home with `Conda`](docs/tutorial_windows_conda.md)
+  ```bash
+  $ pip install caper
+  ```
+
+2) Read through [Caper's README](https://github.com/ENCODE-DCC/caper) carefully.
+
+3) Run a pipeline with Caper.
+
+## Conda
+
+We don't recommend Conda for dependency helper. Use Docker or Singularity instead. We will not take any issues about Conda. You can install Singularity locally without super-user privilege and use it for our pipeline with Caper (with `--use-singularity`).
+
+1) Install [Conda](https://docs.conda.io/en/latest/miniconda.html).
+
+2) Install Conda environment for pipeline.
+
+  ```bash
+  $ conda/install_dependencies.sh
+  ```
+
+## Tutorial
+
+Make sure that you have configured Caper correctly.
+> **WARNING**: DO NOT RUN THIS ON HPC LOGIN NODES. YOUR JOBS WILL BE KILLED.
+
+```bash
+$ caper run atac.wdl -i examples/caper/ENCSR356KRQ_subsampled.json --deepcopy --use-singularity
+```
+
+If you use Conda or Docker (on cloud platforms) then remove `--use-singularity` from the command line and activate it before running a pipeline.
+```bash
+$ conda activate encode-atac-seq-pipeline
+```
 
 ## Input JSON file
 
 [Input JSON file specification](docs/input.md)
 
-## Output directories
+## How to organize outputs
 
-[Output directory specification](docs/output.md)
+Install [Croo](https://github.com/ENCODE-DCC/croo#installation). Make sure that you have python3(> 3.4.1) installed on your system.
+
+```bash
+$ pip install croo
+```
+
+Find a `metadata.json` on Caper's output directory.
+
+```bash
+$ croo [METADATA_JSON_FILE]
+```
+
+## How to build/download genome database
+
+You need to specify a genome data TSV file in your input JSON. Such TSV can be generated/downloaded with actual genome database files.
+
+Use genome database [downloader](genome/download_genome_data.sh) or [builder](docs/build_genome_database.md) for your own genome.
 
 ## Useful tools
 
@@ -57,10 +85,6 @@ There are some useful tools to post-process outputs of the pipeline.
 ### qc_jsons_to_tsv
 
 [This tool](utils/qc_jsons_to_tsv/README.md) recursively finds and parses all `qc.json` (pipeline's [final output](docs/example_output/v1.1.5/qc.json)) found from a specified root directory. It generates a TSV file that has all quality metrics tabulated in rows for each experiment and replicate. This tool also estimates overall quality of a sample by [a criteria definition JSON file](utils/qc_jsons_to_tsv/criteria.default.json) which can be a good guideline for QC'ing experiments.
-
-### resumer
-
-[This tool](utils/resumer/README.md) parses a metadata JSON file from a previous failed workflow and generates a new input JSON file to start a pipeline from where it left off.
 
 ### ENCODE downloader
 
