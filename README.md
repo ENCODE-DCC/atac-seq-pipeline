@@ -28,6 +28,13 @@ The ATAC-seq pipeline specification is also the official pipeline specification 
 
 3) Run a pipeline with Caper.
 
+## DNAnexus
+
+You can also run our pipeline on DNAnexus without using Caper or Cromwell. There are two ways to build a workflow on DNAnexus based on our WDL.
+
+1) [dxWDL CLI](docs/tutorial_dx_cli.md)
+2) [DNAnexus Web UI](docs/tutorial_dx_web.md)
+
 ## Conda
 
 We don't recommend Conda for resolving dependencies. Use Docker or Singularity instead. We will not take any issues about Conda. You can install Singularity and use it for our pipeline with Caper (by adding `--use-singularity` to command line arguments).
@@ -79,6 +86,8 @@ $ caper run atac.wdl -i examples/caper/ENCSR356KRQ_subsampled.json --deepcopy
 To run it on an HPC (e.g. Stanford Sherlock and SCG). See details at [Caper's README](https://github.com/ENCODE-DCC/caper/blob/master/README.md#how-to-run-it-on-slurm-cluster).
 
 ## Input JSON file
+
+Always use absolute paths in an input JSON.
 
 [Input JSON file specification](docs/input.md)
 
