@@ -30,7 +30,8 @@ The ATAC-seq pipeline specification is also the official pipeline specification 
 
 ## Conda
 
-We don't recommend Conda for dependency helper. Use Docker or Singularity instead. We will not take any issues about Conda. You can install Singularity locally without super-user privilege and use it for our pipeline with Caper (with `--use-singularity`).
+
+We don't recommend Conda for software dependency resolver. Use Docker or Singularity instead. We will not take any issues about Conda. You can install Singularity and use it for our pipeline with Caper (by adding `--use-singularity` to command line arguments).
 
 1) Install [Conda](https://docs.conda.io/en/latest/miniconda.html).
 
@@ -38,6 +39,26 @@ We don't recommend Conda for dependency helper. Use Docker or Singularity instea
 
   ```bash
   $ conda/install_dependencies.sh
+  ```
+
+3) Initialize Conda and re-login.
+
+  ```bash
+  $ conda init bash
+  $ exit
+  ```
+
+4) Configure pipeline's python2 and python3 environments.
+
+  ```bash
+  $ conda/config_conda_env.sh
+  $ conda/config_conda_env_py3.sh
+  ```
+
+5) Update pipeline's Conda environment with pipeline's python source code. You need to run this step everytime you update (`git pull`) this pipeline.
+
+  ```bash
+  $ conda/update_conda_env.sh
   ```
 
 ## Tutorial
