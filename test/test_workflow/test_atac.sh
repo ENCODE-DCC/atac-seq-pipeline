@@ -26,7 +26,8 @@ TMP_WF_OPT=$PREFIX.test_atac_wf_opt.json
 cat > $TMP_WF_OPT << EOM
 {
     "default_runtime_attributes" : {
-        "docker" : "$DOCKER_IMAGE"
+        "docker" : "$DOCKER_IMAGE",
+        "zones": "us-west1-a us-west1-b us-west1-c us-central1-c us-central1-b"
     }
 }
 EOM
