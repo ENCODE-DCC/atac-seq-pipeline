@@ -1040,7 +1040,7 @@ workflow atac {
 		# reproducibility QC for overlapping peaks
 		call reproducibility as reproducibility_overlap { input :
 			prefix = 'overlap',
-			peaks = overlap.overlap_peak,
+			peaks = overlap.bfilt_overlap_peak,
 			peaks_pr = overlap_pr_overlap_peak_,
 			peak_ppr = overlap_ppr_overlap_peak_,
 			peak_type = peak_type,
@@ -1066,7 +1066,7 @@ workflow atac {
 		# reproducibility QC for IDR peaks
 		call reproducibility as reproducibility_idr { input :
 			prefix = 'idr',
-			peaks = idr.idr_peak,
+			peaks = idr.bfilt_idr_peak,
 			peaks_pr = idr_pr_idr_peak_,
 			peak_ppr = idr_ppr_idr_peak_,
 			peak_type = peak_type,
