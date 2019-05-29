@@ -27,7 +27,7 @@ cat > $TMP_WF_OPT << EOM
 {
     "default_runtime_attributes" : {
         "docker" : "$DOCKER_IMAGE",
-        "zones": "us-west1-a us-west1-b us-west1-c us-central1-c us-central1-b"
+        "zones": "us-west1-a us-west1-b us-west1-c"
     }
 }
 EOM
