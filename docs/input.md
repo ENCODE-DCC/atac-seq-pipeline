@@ -15,12 +15,19 @@ An input JSON file includes all input parameters and metadata for running pipeli
 
 ## Templates
 
-We provide two template JSON files for both single ended and paired-end samples. We recommend to use one of these input JSON files instead of that used in the tutorial section. These template JSON files include all parameters of the pipeline with default values defined.
+We provide two sets of template JSON files (minimum and full), and each set for both single ended and paired-end samples. We recommend to use one of minimum templates instead of that used in the tutorial section. A full template includes all parameters of the pipeline with default values defined.
 
-* [template](../examples/template_se.json) for single ended sample
-* [template](../examples/template_pe.json) for paired-end sample
+1) Minimum template:
 
-Let us take a close look at the following template JSON. Comments are not allowed in a JSON file but we added some comments to help you understand each parameter.
+    * [mini template](../examples/template_se.json) for single ended sample
+    * [mini template](../examples/template_pe.json) for paired-end sample
+
+2) Full template:
+
+    * [full template](../examples/template_se.full.json) for single ended sample
+    * [full template](../examples/template_pe.full.json) for paired-end sample
+
+Let us take a close look at a full template JSON. Comments are not allowed in a JSON file but we added some comments to help you understand each parameter.
 ```javascript
 {
     ////////// 1) Reference genome //////////
