@@ -847,42 +847,45 @@ workflow atac {
 		Pair[Int, Int]? null_pair
 		Pair[Int, Int]? pairs__ = if pair.left<pair.right then pair else null_pair
 	}
-	Array[Pair[Int, Int]] pairs_overlap = if align_only then [] else select_all(pairs__)
-	Array[Pair[Int, Int]] pairs_idr = if !enable_idr then [] else pairs_overlap
+	Array[Pair[Int, Int]] pairs = select_all(pairs__)
 
-	scatter( pair in pairs_overlap ) {
-		# pair.left = 0-based index of 1st replicate
-		# pair.right = 0-based index of 2nd replicate
-		# Naive overlap on every pair of true replicates
-		call overlap { input :
-			prefix = 'rep'+(pair.left+1)+"_rep"+(pair.right+1),
-			peak1 = peak_[pair.left],
-			peak2 = peak_[pair.right],
-			peak_pooled = peak_pooled_,
-			peak_type = peak_type,
-			blacklist = blacklist_,
-			chrsz = chrsz_,
-			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
-			ta = ta_pooled_,
+	if ( !align_only ) {
+		scatter( pair in pairs ) {
+			# pair.left = 0-based index of 1st replicate
+			# pair.right = 0-based index of 2nd replicate
+			# Naive overlap on every pair of true replicates
+			call overlap { input :
+				prefix = 'rep'+(pair.left+1)+"_rep"+(pair.right+1),
+				peak1 = peak_[pair.left],
+				peak2 = peak_[pair.right],
+				peak_pooled = peak_pooled_,
+				peak_type = peak_type,
+				blacklist = blacklist_,
+				chrsz = chrsz_,
+				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
+				ta = ta_pooled_,
+			}
 		}
 	}
 
-	scatter( pair in pairs_idr ) {
-		# pair.left = 0-based index of 1st replicate
-		# pair.right = 0-based index of 2nd replicate
-		# IDR on every pair of true replicates
-		call idr { input :
-			prefix = 'rep'+(pair.left+1)+"_rep"+(pair.right+1),
-			peak1 = peak_[pair.left],
-			peak2 = peak_[pair.right],
-			peak_pooled = peak_pooled_,
-			idr_thresh = idr_thresh,
-			peak_type = peak_type,
-			rank = idr_rank,
-			blacklist = blacklist_,
-			chrsz = chrsz_,
-			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
-			ta = ta_pooled_,
+	if ( enable_idr && !align_only ) {
+		scatter( pair in pairs ) {
+			# pair.left = 0-based index of 1st replicate
+			# pair.right = 0-based index of 2nd replicate
+			# IDR on every pair of true replicates
+			call idr { input :
+				prefix = 'rep'+(pair.left+1)+"_rep"+(pair.right+1),
+				peak1 = peak_[pair.left],
+				peak2 = peak_[pair.right],
+				peak_pooled = peak_pooled_,
+				idr_thresh = idr_thresh,
+				peak_type = peak_type,
+				rank = idr_rank,
+				blacklist = blacklist_,
+				chrsz = chrsz_,
+				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
+				ta = ta_pooled_,
+			}
 		}
 	}
 
@@ -1537,6 +1540,7 @@ task idr {
 	File? null_f
 
 	command {
+		touch null 
 		python $(which encode_idr.py) \
 			${peak1} ${peak2} ${peak_pooled} \
 			${"--prefix " + prefix} \
@@ -1550,15 +1554,15 @@ task idr {
 	}
 	output {
 		File idr_peak = glob("*[!.][!b][!f][!i][!l][!t]."+peak_type+".gz")[0]
-		File? bfilt_idr_peak = if defined(blacklist) then glob("*.bfilt."+peak_type+".gz")[0] else null_f
-		File? bfilt_idr_peak_bb = if defined(blacklist) then glob("*.bfilt."+peak_type+".bb")[0] else null_f
+		File bfilt_idr_peak = glob("*.bfilt."+peak_type+".gz")[0]
+		File bfilt_idr_peak_bb = glob("*.bfilt."+peak_type+".bb")[0]
 		# Array[File] bfilt_idr_peak_hammock = glob("*.bfilt."+peak_type+".hammock.gz*")
-		File? bfilt_idr_peak_hammock = if defined(blacklist) then glob("*.bfilt."+peak_type+".hammock.gz*")[0] else null_f
-		File? bfilt_idr_peak_hammock_tbi = if defined(blacklist) then glob("*.bfilt."+peak_type+".hammock.gz*")[1] else null_f
+		File bfilt_idr_peak_hammock = glob("*.bfilt."+peak_type+".hammock.gz*")[0]
+		File bfilt_idr_peak_hammock_tbi = glob("*.bfilt."+peak_type+".hammock.gz*")[1]
 		File idr_plot = glob("*.txt.png")[0]
 		File idr_unthresholded_peak = glob("*.txt.gz")[0]
 		File idr_log = glob("*.idr*.log")[0]
-		File? frip_qc = if defined(ta) then glob("*.frip.qc")[0] else null_f
+		File frip_qc = if defined(ta) then glob("*.frip.qc")[0] else glob("null")[0]
 	}
 	runtime {
 		cpu : 1
@@ -1582,6 +1586,7 @@ task overlap {
 	File? null_f
 
 	command {
+		touch null 
 		python $(which encode_naive_overlap.py) \
 			${peak1} ${peak2} ${peak_pooled} \
 			${"--prefix " + prefix} \
@@ -1594,12 +1599,12 @@ task overlap {
 	}
 	output {
 		File overlap_peak = glob("*[!.][!b][!f][!i][!l][!t]."+peak_type+".gz")[0]
-		File? bfilt_overlap_peak = if defined(blacklist) then glob("*.bfilt."+peak_type+".gz")[0] else null_f
-		File? bfilt_overlap_peak_bb = if defined(blacklist) then glob("*.bfilt."+peak_type+".bb")[0] else null_f
+		File bfilt_overlap_peak = glob("*.bfilt."+peak_type+".gz")[0]
+		File bfilt_overlap_peak_bb = glob("*.bfilt."+peak_type+".bb")[0]
 		# Array[File] bfilt_overlap_peak_hammock = glob("*.bfilt."+peak_type+".hammock.gz*")
-		File? bfilt_overlap_peak_hammock = if defined(blacklist) then glob("*.bfilt."+peak_type+".hammock.gz*")[0] else null_f
-		File? bfilt_overlap_peak_hammock_tbi = if defined(blacklist) then glob("*.bfilt."+peak_type+".hammock.gz*")[1] else null_f
-		File? frip_qc = if defined(ta) then glob("*.frip.qc")[0] else null_f
+		File bfilt_overlap_peak_hammock = glob("*.bfilt."+peak_type+".hammock.gz*")[0]
+		File bfilt_overlap_peak_hammock_tbi = glob("*.bfilt."+peak_type+".hammock.gz*")[1]
+		File frip_qc = if defined(ta) then glob("*.frip.qc")[0] else glob("null")[0]
 	}
 	runtime {
 		cpu : 1
@@ -1611,7 +1616,7 @@ task overlap {
 
 task reproducibility {
 	String prefix
-	Array[File?] peaks # peak files from pair of true replicates
+	Array[File] peaks # peak files from pair of true replicates
 						# in a sorted order. for example of 4 replicates,
 						# 1,2 1,3 1,4 2,3 2,4 3,4.
                         # x,y means peak file from rep-x vs rep-y
