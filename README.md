@@ -30,7 +30,7 @@ The ATAC-seq pipeline specification is also the official pipeline specification 
 
 ## Running pipelines without Caper
 
-> **WARNING** : It's not recommended to run this pipeline without Caper but if you are still interested then refer to [this document](docs/deprecated/OLD_METHOD.md).
+Caper uses the cromwell workflow execution engine to run the workflow on the platform you specify.  While we recommend you use caper, if you want to run cromwell directly without caper you can learn about that [here](docs/deprecated/OLD_METHOD.md).
 
 ## DNAnexus
 
