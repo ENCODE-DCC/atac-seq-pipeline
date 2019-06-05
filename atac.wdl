@@ -127,7 +127,7 @@ workflow atac {
 	Int filter_cpu = 2
 	Int filter_mem_mb = 20000
 	Int filter_time_hr = 24
-	String filter_disks = "local-disk 200 HDD"
+	String filter_disks = "local-disk 400 HDD"
 
 	Int bam2ta_cpu = 2
 	Int bam2ta_mem_mb = 10000
