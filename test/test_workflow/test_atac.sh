@@ -8,7 +8,7 @@ fi
 if [ $# -gt 2 ]; then
   DOCKER_IMAGE=$3
 else
-  DOCKER_IMAGE=quay.io/encode-dcc/atac-seq-pipeline:test-v1.4.0
+  DOCKER_IMAGE=quay.io/encode-dcc/atac-seq-pipeline:test-v1.4.1
 fi
 INPUT=$1
 GCLOUD_SERVICE_ACCOUNT_SECRET_JSON_FILE=$2
@@ -26,7 +26,8 @@ TMP_WF_OPT=$PREFIX.test_atac_wf_opt.json
 cat > $TMP_WF_OPT << EOM
 {
     "default_runtime_attributes" : {
-        "docker" : "$DOCKER_IMAGE"
+        "docker" : "$DOCKER_IMAGE",
+        "zones": "us-west1-a us-west1-b us-west1-c"
     }
 }
 EOM

@@ -13,14 +13,45 @@ An input JSON file includes all input parameters and metadata for running pipeli
 4. Pipeline parameters.
 5. Resource settings for jobs.
 
+## Reference genome
+
+We currently support 4 genomes. You can [download](../genome/download_genome_data.sh) following supported genomes from our repo. You can also [build a genome database for your own genome](build_genome_database.md).
+
+|genome|source|built from|
+|-|-|-|
+|hg38|ENCODE|[GRCh38_no_alt_analysis_set_GCA_000001405](https://www.encodeproject.org/files/GRCh38_no_alt_analysis_set_GCA_000001405.15/@@download/GRCh38_no_alt_analysis_set_GCA_000001405.15.fasta.gz)|
+|mm10|ENCODE|[mm10_no_alt_analysis_set_ENCODE](https://www.encodeproject.org/files/mm10_no_alt_analysis_set_ENCODE/@@download/mm10_no_alt_analysis_set_ENCODE.fasta.gz)|
+|hg19|UCSC|[GRCh37/hg19](http://hgdownload.cse.ucsc.edu/goldenpath/hg19/encodeDCC/referenceSequences/male.hg19.fa.gz)|
+|mm9|UCSC|[mm9, NCBI Build 37](<http://hgdownload.cse.ucsc.edu/goldenPath/mm9/bigZips/mm9.2bit>)|
+
+Choose one TSV file for `"atac.genome_tsv"` in your input JSON. `[GENOME]` should be `hg38`, `mm10`, `hg19` or `mm9`.
+
+|platform|path/URI|
+|-|-|
+|Google Cloud Platform|`gs://encode-pipeline-genome-data/[GENOME]_google.tsv`|
+|DNAnexus (CLI)|`dx://project-BKpvFg00VBPV975PgJ6Q03v6:pipeline-genome-data/[GENOME]_dx.tsv`|
+|DNAnexus (CLI, Azure)|`dx://project-F6K911Q9xyfgJ36JFzv03Z5J:pipeline-genome-data/[GENOME]_dx_azure.tsv`|
+|DNAnexus (Web)|Choose `[GENOME]_dx.tsv` from [here](https://platform.DNAnexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/pipeline-genome-data)|
+|DNAnexus (Web, Azure)|Choose `[GENOME]_dx.tsv` from [here](https://platform.DNAnexus.com/projects/XXXXXXXXXXXXXX/data/pipeline-genome-data)|
+|Stanford Sherlock|`/home/groups/cherry/encode/pipeline_genome_data/[GENOME]_sherlock.tsv`|
+|Stanford SCG|`/reference/ENCODE/pipeline_genome_data/[GENOME]_scg.tsv`|
+|Local/SLURM/SGE/PBS|You need to [download](../genome/download_genome_data.sh) or [build a genome database](build_genome_database.md). |
+
 ## Templates
 
-We provide two template JSON files for both single ended and paired-end samples. We recommend to use one of these input JSON files instead of that used in the tutorial section. These template JSON files include all parameters of the pipeline with default values defined.
+We provide two sets of template JSON files (minimum and full), and each set for both single ended and paired-end samples. We recommend to use one of minimum templates instead of that used in the tutorial section. A full template includes all parameters of the pipeline with default values defined.
 
-* [template](../examples/template_se.json) for single ended sample
-* [template](../examples/template_pe.json) for paired-end sample
+1) Minimum template:
 
-Let us take a close look at the following template JSON. Comments are not allowed in a JSON file but we added some comments to help you understand each parameter.
+    * [mini template](../examples/template_se.json) for single ended sample
+    * [mini template](../examples/template_pe.json) for paired-end sample
+
+2) Full template:
+
+    * [full template](../examples/template_se.full.json) for single ended sample
+    * [full template](../examples/template_pe.full.json) for paired-end sample
+
+Let us take a close look at a full template JSON. Comments are not allowed in a JSON file but we added some comments to help you understand each parameter.
 ```javascript
 {
     ////////// 1) Reference genome //////////
@@ -249,27 +280,3 @@ Let us take a close look at the following template JSON. Comments are not allowe
     "atac.ataqc_disks" : "local-disk 100 HDD"
 }
 ```
-
-## Reference genome
-
-We currently support 4 genomes. You can [download](../genome/download_genome_data.sh) following supported genomes from our repo. You can also [build a genome database for your own genome](build_genome_database.md).
-
-|genome|source|built from|
-|-|-|-|
-|hg38|ENCODE|[GRCh38_no_alt_analysis_set_GCA_000001405](https://www.encodeproject.org/files/GRCh38_no_alt_analysis_set_GCA_000001405.15/@@download/GRCh38_no_alt_analysis_set_GCA_000001405.15.fasta.gz)|
-|mm10|ENCODE|[mm10_no_alt_analysis_set_ENCODE](https://www.encodeproject.org/files/mm10_no_alt_analysis_set_ENCODE/@@download/mm10_no_alt_analysis_set_ENCODE.fasta.gz)|
-|hg19|UCSC|[GRCh37/hg19](http://hgdownload.cse.ucsc.edu/goldenpath/hg19/encodeDCC/referenceSequences/male.hg19.fa.gz)|
-|mm9|UCSC|[mm9, NCBI Build 37](<http://hgdownload.cse.ucsc.edu/goldenPath/mm9/bigZips/mm9.2bit>)|
-
-Choose one TSV file for `"atac.genome_tsv"` in your input JSON. `[GENOME]` should be `hg38`, `mm10`, `hg19` or `mm9`.
-
-|platform|path/URI|
-|-|-|
-|Google Cloud Platform|`gs://encode-pipeline-genome-data/[GENOME]_google.tsv`|
-|DNAnexus (CLI)|`dx://project-BKpvFg00VBPV975PgJ6Q03v6:pipeline-genome-data/[GENOME]_dx.tsv`|
-|DNAnexus (CLI, Azure)|`dx://project-F6K911Q9xyfgJ36JFzv03Z5J:pipeline-genome-data/[GENOME]_dx_azure.tsv`|
-|DNAnexus (Web)|Choose `[GENOME]_dx.tsv` from [here](https://platform.DNAnexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/pipeline-genome-data)|
-|DNAnexus (Web, Azure)|Choose `[GENOME]_dx.tsv` from [here](https://platform.DNAnexus.com/projects/XXXXXXXXXXXXXX/data/pipeline-genome-data)|
-|Stanford Sherlock|`/home/groups/cherry/encode/pipeline_genome_data/[GENOME]_sherlock.tsv`|
-|Stanford SCG|`/reference/ENCODE/pipeline_genome_data/[GENOME]_scg.tsv`|
-|Local/SLURM/SGE/PBS|You need to [download](../genome/download_genome_data.sh) or [build a genome database](build_genome_database.md). |

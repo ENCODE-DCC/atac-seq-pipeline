@@ -1,6 +1,6 @@
-# Tutorial for SLURM clusters
+# Tutorial for Sun GridEngine (SGE) clusters
 
-1. Download cromwell.
+1. Download [cromwell](https://github.com/broadinstitute/cromwell).
     ```bash
     $ cd
     $ wget https://github.com/broadinstitute/cromwell/releases/download/38/cromwell-38.jar
@@ -9,7 +9,6 @@
 
 2. Git clone this pipeline and move into it.
     ```bash
-    $ cd
     $ git clone https://github.com/ENCODE-DCC/atac-seq-pipeline
     $ cd atac-seq-pipeline
     ```
@@ -26,13 +25,13 @@
     $ tar xvf test_genome_database_hg38_atac.tar
     ```
 
-5. Set your partition/account in `workflow_opts/slurm.json`. If your SLURM cluster does not require either user's partition or account information, then remove them from this file. Otherwise, `YOUR_SLURM_PARTITON` or `YOUR_SLURM_ACCOUNT` will be used internally for `srun ... --partition YOUR_SLURM_PARTITON` or `srun ... --account YOUR_SLURM_PARTITON`, respectively.
+5. Set your parallel environment (PE) and queue in `workflow_opts/sge.json`. If your SGE cluster does not have any PE, ask your admin to add one for our pipeline. If you don't want to specify any queue then remove `, "sge_queue" : "YOUR_SGE_QUEUE"` from the file. See [here](how_to_config_sge.md) to find details about how to configure SGE for the pipeline.
     ```javascript
     {
-      "default_runtime_attributes" : {
-        "slurm_partition": "YOUR_SLURM_PARTITON",
-        "slurm_account": "YOUR_SLURM_ACCOUNT"
-      }
+        "default_runtime_attributes" : {
+            "sge_pe" : "YOUR_SGE_PE",
+            "sge_queue" : "YOUR_SGE_QUEUE"
+        }
     }
     ```
 
@@ -52,14 +51,14 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
     ```bash
     $ source activate encode-atac-seq-pipeline # IMPORTANT!
     $ INPUT=examples/local/ENCSR356KRQ_subsampled.json
-    $ java -jar -Xmx1G -Dconfig.file=backends/backend.conf -Dbackend.default=slurm cromwell-38.jar run atac.wdl -i ${INPUT} -o workflow_opts/slurm.json
+    $ java -jar -Xmx1G -Dconfig.file=backends/backend.conf -Dbackend.default=sge cromwell-38.jar run atac.wdl -i ${INPUT} -o workflow_opts/sge.json
     ```
 
 9. It will take about an hour. You will be able to find all outputs on `cromwell-executions/atac/[RANDOM_HASH_STRING]/`. See [output directory structure](output.md) for details.
 
 10. See full specification for [input JSON file](input.md).
 
-## For singularity users
+## For singularity users,
 
 6. CHECK YOUR SINGULARITY VERSION FIRST AND UPGRADE IT TO A VERSION `>=2.5.2` OR PIPELINE WILL NOT WORK CORRECTLY.
     ```bash
@@ -68,50 +67,48 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
 
 7. Pull a singularity container for the pipeline. This will pull pipeline's docker container first and build a singularity one on `~/.singularity`.
     ```bash
-    $ mkdir -p ~/.singularity && cd ~/.singularity && SINGULARITY_CACHEDIR=~/.singularity SINGULARITY_PULLFOLDER=~/.singularity singularity pull --name atac-seq-pipeline-v1.4.0.simg -F docker://quay.io/encode-dcc/atac-seq-pipeline:v1.4.0
+    $ mkdir -p ~/.singularity && cd ~/.singularity && SINGULARITY_CACHEDIR=~/.singularity SINGULARITY_PULLFOLDER=~/.singularity singularity pull --name atac-seq-pipeline-v1.4.1.simg -F docker://quay.io/encode-dcc/atac-seq-pipeline:v1.1
     ```
 
 8. Run a pipeline for the test sample.
     ```bash
     $ INPUT=examples/local/ENCSR356KRQ_subsampled.json
-    $ java -jar -Xmx1G -Dconfig.file=backends/backend.conf -Dbackend.default=slurm_singularity cromwell-38.jar run atac.wdl -i ${INPUT} -o workflow_opts/slurm.json
+    $ java -jar -Xmx1G -Dconfig.file=backends/backend.conf -Dbackend.default=sge_singularity cromwell-38.jar run atac.wdl -i ${INPUT} -o workflow_opts/sge.json
     ```
 
 9. It will take about an hour. You will be able to find all outputs on `cromwell-executions/atac/[RANDOM_HASH_STRING]/`. See [output directory structure](output.md) for details.
 
 10. See full specification for [input JSON file](input.md).
 
-11. IF YOU WANT TO RUN PIPELINES WITH YOUR OWN INPUT DATA/GENOME DATABASE, PLEASE ADD THEIR DIRECTORIES TO `workflow_opts/slurm.json`. For example, you have input FASTQs on `/your/input/fastqs/` and genome database installed on `/your/genome/database/` then add `/your/` to `singularity_bindpath`. You can also define multiple directories there. It's comma-separated.
+11. IF YOU WANT TO RUN PIPELINES WITH YOUR OWN INPUT DATA/GENOME DATABASE, PLEASE ADD THEIR DIRECTORIES TO `workflow_opts/sge.json`. For example, you have input FASTQs on `/your/input/fastqs/` and genome database installed on `/your/genome/database/` then add `/your/` to `singularity_bindpath`. You can also define multiple directories there. It's comma-separated.
     ```javascript
     {
         "default_runtime_attributes" : {
-            "singularity_container" : "~/.singularity/chip-seq-pipeline-v1.4.0.simg",
+            "singularity_container" : "~/.singularity/chip-seq-pipeline-v1.1.simg",
             "singularity_bindpath" : "/your/,YOUR_OWN_DATA_DIR1,YOUR_OWN_DATA_DIR2,..."
         }
     }
     ```
 
-
 ## Running multiple pipelines with cromwell server mode
 
-1. If you want to run multiple (>10) pipelines, then run a cromwell server on an interactive node. We recommend to use `screen` or `tmux` to keep your session alive and note that all running pipelines will be killed after walltime. Run a Cromwell server with the following commands. You can skip `-p [YOUR_SLURM_PARTITION]` or `--account [YOUR_SLURM_ACCOUNT]` according to your cluster's SLURM configuration.
-
+1. If you want to run multiple (>10) pipelines, then run a cromwell server on an interactive node. We recommend to use `screen` or `tmux` to keep your session alive and note that all running pipelines will be killed after walltime. Run a Cromwell server with the following commands.
     ```bash
-    $ srun -n 2 --mem 5G -t 3-0 --qos normal -p [YOUR_SLURM_PARTITION] --account [YOUR_SLURM_ACCOUNT] --pty /bin/bash -i -l    # 2 CPU, 5 GB RAM and 3 day walltime
+    $ qlogin -h_vmem=5G -h_rt=72:00:00 # long walltime      
     $ hostname -f    # to get [CROMWELL_SVR_IP]
     ```
 
     For Conda users,
     ```bash
     $ source activate encode-atac-seq-pipeline
-    $ _JAVA_OPTIONS="-Xmx5G" java -jar -Dconfig.file=backends/backend.conf -Dbackend.default=slurm cromwell-38.jar server
+    $ _JAVA_OPTIONS="-Xmx5G" java -jar -Dconfig.file=backends/backend.conf -Dbackend.default=sge cromwell-38.jar server
     ```
     For singularity users,
     ```bash
-    $ _JAVA_OPTIONS="-Xmx5G" java -jar -Dconfig.file=backends/backend.conf -Dbackend.default=slurm_singularity cromwell-38.jar server
+    $ _JAVA_OPTIONS="-Xmx5G" java -jar -Dconfig.file=backends/backend.conf -Dbackend.default=sge_singularity cromwell-38.jar server
     ```
 
-2. You can modify `backend.providers.slurm.concurrent-job-limit` or `backend.providers.slurm_singularity.concurrent-job-limit` in `backends/backend.conf` to increase maximum concurrent jobs. This limit is **not per sample**. It's for all sub-tasks of all submitted samples.
+2. You can modify `backend.providers.sge.concurrent-job-limit` or `backend.providers.sge_singularity.concurrent-job-limit` in `backends/backend.conf` to increase maximum concurrent jobs. This limit is **not per sample**. It's for all sub-tasks of all submitted samples.
 
 3. On a login node, submit jobs to the cromwell server. You will get `[WORKFLOW_ID]` as a return value. Keep these workflow IDs for monitoring pipelines and finding outputs for a specific sample later.  
     ```bash  
@@ -119,7 +116,7 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
     $ curl -X POST --header "Accept: application/json" -v "[CROMWELL_SVR_IP]:8000/api/workflows/v1" \
       -F workflowSource=@atac.wdl \
       -F workflowInputs=@${INPUT} \
-      -F workflowOptions=@workflow_opts/slurm.json
+      -F workflowOptions=@workflow_opts/sge.json
     ```
 
   To monitor pipelines, see [cromwell server REST API description](http://cromwell.readthedocs.io/en/develop/api/RESTAPI/#cromwell-server-rest-api>) for more details. `squeue` will not give you enough information for monitoring jobs per sample.

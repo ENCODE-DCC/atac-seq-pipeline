@@ -147,8 +147,11 @@ def ataqc():
 
     if ALIGNED_BAM:
         # Library complexity: Preseq results, NRF, PBC1, PBC2    
-        picard_est_library_size = get_picard_complexity_metrics(RG_FREE_ALIGNED_BAM,
-                                                                OUTPUT_PREFIX)
+        if args.paired_end:
+            picard_est_library_size = get_picard_complexity_metrics(RG_FREE_ALIGNED_BAM,
+                                                                    OUTPUT_PREFIX)
+        else:
+            picard_est_library_size = None
         preseq_data, preseq_log = run_preseq(ALIGNED_BAM, OUTPUT_PREFIX) # SORTED BAM
 
         # Filtering metrics: duplicates, map quality

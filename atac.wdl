@@ -1,13 +1,13 @@
 # ENCODE DCC ATAC-Seq/DNase-Seq pipeline
 # Author: Jin Lee (leepc12@gmail.com)
 
-#CAPER docker quay.io/encode-dcc/atac-seq-pipeline:v1.4.0
-#CAPER singularity docker://quay.io/encode-dcc/atac-seq-pipeline:v1.4.0
+#CAPER docker quay.io/encode-dcc/atac-seq-pipeline:v1.4.1
+#CAPER singularity docker://quay.io/encode-dcc/atac-seq-pipeline:v1.4.1
 #CROO out_def https://storage.googleapis.com/encode-pipeline-output-definition/atac.out_def.json
 
 workflow atac {
 	# pipeline version
-	String pipeline_ver = 'v1.4.0'
+	String pipeline_ver = 'v1.4.1'
 
 	# general sample information
 	String title = 'Untitled'
@@ -849,20 +849,10 @@ workflow atac {
 	}
 	Array[Pair[Int, Int]] pairs = select_all(pairs__)
 
-	scatter( pair in pairs ) {
-		# pair.left = 0-based index of 1st replicate
-		# pair.right = 0-based index of 2nd replicate
-		Boolean has_input_of_overlap = 
-			defined(peak_[pair.left]) && defined(peak_[pair.right]) && defined(peak_pooled_)
-		Boolean has_output_of_overlap = pair.left<length(overlap__overlap_peak) &&
-			defined(overlap__overlap_peak[pair.left])
-		# for the case without frip_qc 
-		#	where pipeline starts from peaks so tag-align is missing
- 		Boolean has_output_of_overlap_frip_qc = pair.left<length(overlap__frip_qc) &&
-			defined(overlap__frip_qc[pair.left])
-
-		if ( has_input_of_overlap && !has_output_of_overlap &&
-			pair.left<pair.right && !align_only ) { # only for repX-repY where X<Y
+	if ( !align_only ) {
+		scatter( pair in pairs ) {
+			# pair.left = 0-based index of 1st replicate
+			# pair.right = 0-based index of 2nd replicate
 			# Naive overlap on every pair of true replicates
 			call overlap { input :
 				prefix = 'rep'+(pair.left+1)+"_rep"+(pair.right+1),
@@ -878,18 +868,10 @@ workflow atac {
 		}
 	}
 
-	scatter( pair in pairs ) {
-		# pair.left = 0-based index of 1st replicate
-		# pair.right = 0-based index of 2nd replicate
-		Boolean has_input_of_idr =
-			defined(peak_[pair.left]) && defined(peak_[pair.right]) && defined(peak_pooled_)
-		Boolean has_output_of_idr = pair.left<length(idr__idr_peak) &&
-			defined(idr__idr_peak[pair.left])
-		Boolean has_output_of_idr_frip_qc = pair.left<length(idr__frip_qc) &&
-			defined(idr__frip_qc[pair.left])
-
-		if ( has_input_of_idr && !has_output_of_idr &&
-			pair.left<pair.right && !align_only && enable_idr) {
+	if ( enable_idr && !align_only ) {
+		scatter( pair in pairs ) {
+			# pair.left = 0-based index of 1st replicate
+			# pair.right = 0-based index of 2nd replicate
 			# IDR on every pair of true replicates
 			call idr { input :
 				prefix = 'rep'+(pair.left+1)+"_rep"+(pair.right+1),
@@ -905,28 +887,6 @@ workflow atac {
 				ta = ta_pooled_,
 			}
 		}
-	}
-
-	scatter( i in range(length(pairs)) ) {
-		# take raw peak if blacklist doesn't exist
-		File? overlap_overlap_peak_ = 
-			if has_output_of_overlap[i] && defined(blacklist_) then overlap__bfilt_overlap_peak[i]
-			else if has_output_of_overlap[i] && !defined(blacklist_) then overlap__overlap_peak[i]
-			else if defined(blacklist_) then overlap.bfilt_overlap_peak[i]
-			else overlap.overlap_peak[i]
-		File? overlap_frip_qc_ = if has_output_of_overlap_frip_qc[i] then overlap__frip_qc[i]
-			else overlap.frip_qc[i]
-
-		# take raw peak if blacklist doesn't exist
-		File? idr_idr_peak_ = 
-			if has_output_of_idr[i] && defined(blacklist_) then idr__bfilt_idr_peak[i]
-			else if has_output_of_idr[i] && !defined(blacklist_) then idr__idr_peak[i]
-			else if defined(blacklist_) then idr.bfilt_idr_peak[i]
-			else idr.idr_peak[i]
-		File? idr_idr_plot_ = if has_output_of_idr[i] then idr__idr_plot[i]
-			else idr.idr_plot[i]
-		File? idr_frip_qc_ = if has_output_of_idr_frip_qc[i] then idr__frip_qc[i]
-			else idr.frip_qc[i]
 	}
 
 	# overlap on pseudo-replicates (pr1, pr2) for each true replicate
@@ -1083,7 +1043,7 @@ workflow atac {
 		# reproducibility QC for overlapping peaks
 		call reproducibility as reproducibility_overlap { input :
 			prefix = 'overlap',
-			peaks = overlap_overlap_peak_,
+			peaks = overlap.bfilt_overlap_peak,
 			peaks_pr = overlap_pr_overlap_peak_,
 			peak_ppr = overlap_ppr_overlap_peak_,
 			peak_type = peak_type,
@@ -1109,7 +1069,7 @@ workflow atac {
 		# reproducibility QC for IDR peaks
 		call reproducibility as reproducibility_idr { input :
 			prefix = 'idr',
-			peaks = idr_idr_peak_,
+			peaks = idr.bfilt_idr_peak,
 			peaks_pr = idr_pr_idr_peak_,
 			peak_ppr = idr_ppr_idr_peak_,
 			peak_type = peak_type,
@@ -1203,13 +1163,13 @@ workflow atac {
 		frip_macs2_qc_ppr1 = frip_macs2_qc_ppr1_,
 		frip_macs2_qc_ppr2 = frip_macs2_qc_ppr2_,
 		
-		idr_plots = idr_idr_plot_,
+		idr_plots = idr.idr_plot,
 		idr_plots_pr = idr_pr_idr_plot_,
 		idr_plot_ppr = idr_ppr_idr_plot_,
-		frip_idr_qcs = idr_frip_qc_,
+		frip_idr_qcs = idr.frip_qc,
 		frip_idr_qcs_pr = idr_pr_frip_qc_,
 		frip_idr_qc_ppr = idr_ppr_frip_qc_,
-		frip_overlap_qcs = overlap_frip_qc_,
+		frip_overlap_qcs = overlap.frip_qc,
 		frip_overlap_qcs_pr = overlap_pr_frip_qc_,
 		frip_overlap_qc_ppr = overlap_ppr_frip_qc_,
 		idr_reproducibility_qc = reproducibility_idr_reproducibility_qc_,
@@ -1580,6 +1540,7 @@ task idr {
 	File? null_f
 
 	command {
+		touch null 
 		python $(which encode_idr.py) \
 			${peak1} ${peak2} ${peak_pooled} \
 			${"--prefix " + prefix} \
@@ -1593,15 +1554,15 @@ task idr {
 	}
 	output {
 		File idr_peak = glob("*[!.][!b][!f][!i][!l][!t]."+peak_type+".gz")[0]
-		File? bfilt_idr_peak = if defined(blacklist) then glob("*.bfilt."+peak_type+".gz")[0] else null_f
-		File? bfilt_idr_peak_bb = if defined(blacklist) then glob("*.bfilt."+peak_type+".bb")[0] else null_f
+		File bfilt_idr_peak = glob("*.bfilt."+peak_type+".gz")[0]
+		File bfilt_idr_peak_bb = glob("*.bfilt."+peak_type+".bb")[0]
 		# Array[File] bfilt_idr_peak_hammock = glob("*.bfilt."+peak_type+".hammock.gz*")
-		File? bfilt_idr_peak_hammock = if defined(blacklist) then glob("*.bfilt."+peak_type+".hammock.gz*")[0] else null_f
-		File? bfilt_idr_peak_hammock_tbi = if defined(blacklist) then glob("*.bfilt."+peak_type+".hammock.gz*")[1] else null_f
+		File bfilt_idr_peak_hammock = glob("*.bfilt."+peak_type+".hammock.gz*")[0]
+		File bfilt_idr_peak_hammock_tbi = glob("*.bfilt."+peak_type+".hammock.gz*")[1]
 		File idr_plot = glob("*.txt.png")[0]
 		File idr_unthresholded_peak = glob("*.txt.gz")[0]
 		File idr_log = glob("*.idr*.log")[0]
-		File? frip_qc = if defined(ta) then glob("*.frip.qc")[0] else null_f
+		File frip_qc = if defined(ta) then glob("*.frip.qc")[0] else glob("null")[0]
 	}
 	runtime {
 		cpu : 1
@@ -1625,6 +1586,7 @@ task overlap {
 	File? null_f
 
 	command {
+		touch null 
 		python $(which encode_naive_overlap.py) \
 			${peak1} ${peak2} ${peak_pooled} \
 			${"--prefix " + prefix} \
@@ -1637,12 +1599,12 @@ task overlap {
 	}
 	output {
 		File overlap_peak = glob("*[!.][!b][!f][!i][!l][!t]."+peak_type+".gz")[0]
-		File? bfilt_overlap_peak = if defined(blacklist) then glob("*.bfilt."+peak_type+".gz")[0] else null_f
-		File? bfilt_overlap_peak_bb = if defined(blacklist) then glob("*.bfilt."+peak_type+".bb")[0] else null_f
+		File bfilt_overlap_peak = glob("*.bfilt."+peak_type+".gz")[0]
+		File bfilt_overlap_peak_bb = glob("*.bfilt."+peak_type+".bb")[0]
 		# Array[File] bfilt_overlap_peak_hammock = glob("*.bfilt."+peak_type+".hammock.gz*")
-		File? bfilt_overlap_peak_hammock = if defined(blacklist) then glob("*.bfilt."+peak_type+".hammock.gz*")[0] else null_f
-		File? bfilt_overlap_peak_hammock_tbi = if defined(blacklist) then glob("*.bfilt."+peak_type+".hammock.gz*")[1] else null_f
-		File? frip_qc = if defined(ta) then glob("*.frip.qc")[0] else null_f
+		File bfilt_overlap_peak_hammock = glob("*.bfilt."+peak_type+".hammock.gz*")[0]
+		File bfilt_overlap_peak_hammock_tbi = glob("*.bfilt."+peak_type+".hammock.gz*")[1]
+		File frip_qc = if defined(ta) then glob("*.frip.qc")[0] else glob("null")[0]
 	}
 	runtime {
 		cpu : 1
@@ -1654,7 +1616,7 @@ task overlap {
 
 task reproducibility {
 	String prefix
-	Array[File?] peaks # peak files from pair of true replicates
+	Array[File] peaks # peak files from pair of true replicates
 						# in a sorted order. for example of 4 replicates,
 						# 1,2 1,3 1,4 2,3 2,4 3,4.
                         # x,y means peak file from rep-x vs rep-y

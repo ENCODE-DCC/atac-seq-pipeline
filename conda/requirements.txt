@@ -4,13 +4,13 @@ samtools ==1.2
 htslib ==1.4 # 1.5 in bioconda needed libbz2.so.1.0
 bedtools ==2.26.0 #2.22 # 2.21.0
 picard ==2.10.6 #==1.126 # wanted 1.129 here but doesn't exist. instead 1.139 has backward compatibility issue, so take 1.126
-ucsc-fetchchromsizes
-ucsc-wigtobigwig
-ucsc-bedgraphtobigwig
-ucsc-bigwiginfo
-ucsc-bedclip
-ucsc-bedtobigbed
-ucsc-twobittofa
+ucsc-fetchchromsizes ==377
+ucsc-wigtobigwig ==377
+ucsc-bedgraphtobigwig ==377
+ucsc-bigwiginfo ==377
+ucsc-bedclip ==377
+ucsc-bedtobigbed ==377
+ucsc-twobittofa ==377
 macs2 ==2.1.1.20160309 #2.1.0 (no binaries for OSX)
 boost #==1.57.0
 openblas ==0.2.20

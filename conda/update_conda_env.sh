@@ -30,6 +30,5 @@ source activate ${CONDA_ENV}
   # copy all python scripts in /src into conda env bin dir
   cp -f ${SH_SCRIPT_DIR}/../src/*.py ${CONDA_BIN}/
   chmod u+rx ${CONDA_BIN}/*.py
-source deactivate
 
 echo "=== All done."

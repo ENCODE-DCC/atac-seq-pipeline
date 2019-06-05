@@ -28,9 +28,20 @@ The ATAC-seq pipeline specification is also the official pipeline specification 
 
 3) Run a pipeline with Caper.
 
+## Running pipelines without Caper
+
+Caper uses the cromwell workflow execution engine to run the workflow on the platform you specify.  While we recommend you use caper, if you want to run cromwell directly without caper you can learn about that [here](docs/deprecated/OLD_METHOD.md).
+
+## DNAnexus
+
+You can also run our pipeline on DNAnexus without using Caper or Cromwell. There are two ways to build a workflow on DNAnexus based on our WDL.
+
+1) [dxWDL CLI](docs/tutorial_dx_cli.md)
+2) [DNAnexus Web UI](docs/tutorial_dx_web.md)
+
 ## Conda
 
-We don't recommend Conda for dependency helper. Use Docker or Singularity instead. We will not take any issues about Conda. You can install Singularity locally without super-user privilege and use it for our pipeline with Caper (with `--use-singularity`).
+We no longer recommend Conda for resolving dependencies and plan to phase out Conda support. Instead we recommend using Docker or Singularity. You can install Singularity and use it for our pipeline with Caper (by adding `--use-singularity` to command line arguments).
 
 1) Install [Conda](https://docs.conda.io/en/latest/miniconda.html).
 
@@ -40,11 +51,32 @@ We don't recommend Conda for dependency helper. Use Docker or Singularity instea
   $ conda/install_dependencies.sh
   ```
 
+3) Initialize Conda and re-login.
+
+  ```bash
+  $ conda init bash
+  $ exit
+  ```
+
+4) Configure pipeline's python2 and python3 environments.
+
+  ```bash
+  $ conda/config_conda_env.sh
+  $ conda/config_conda_env_py3.sh
+  ```
+
+5) Update pipeline's Conda environment with pipeline's python source code. You need to run this step everytime you update (`git pull`) this pipeline.
+
+  ```bash
+  $ conda/update_conda_env.sh
+  ```
+
 ## Tutorial
 
 Make sure that you have configured Caper correctly.
 > **WARNING**: DO NOT RUN THIS ON HPC LOGIN NODES. YOUR JOBS WILL BE KILLED.
 
+Run it. Due to `--deepcopy` all files in `examples/caper/ENCSR356KRQ_subsampled.json` will be recursively copied into Caper's temporary folder (`--tmp-dir`).
 ```bash
 $ caper run atac.wdl -i examples/caper/ENCSR356KRQ_subsampled.json --deepcopy --use-singularity
 ```
@@ -52,9 +84,14 @@ $ caper run atac.wdl -i examples/caper/ENCSR356KRQ_subsampled.json --deepcopy --
 If you use Conda or Docker (on cloud platforms) then remove `--use-singularity` from the command line and activate it before running a pipeline.
 ```bash
 $ conda activate encode-atac-seq-pipeline
+$ caper run atac.wdl -i examples/caper/ENCSR356KRQ_subsampled.json --deepcopy
 ```
 
+To run it on an HPC (e.g. Stanford Sherlock and SCG). See details at [Caper's README](https://github.com/ENCODE-DCC/caper/blob/master/README.md#how-to-run-it-on-slurm-cluster).
+
 ## Input JSON file
+
+Always use absolute paths in an input JSON.
 
 [Input JSON file specification](docs/input.md)
 
