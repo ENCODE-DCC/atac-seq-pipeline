@@ -81,7 +81,7 @@ workflow atac {
 									# 	0 for no subsampling
 
 	# parameters for cross-correlation analysis
-	Boolean enable_xcor = false 	# enable cross-corr analysis
+	Boolean enable_xcor = true 	# enable cross-corr analysis
 	Int xcor_subsample_reads = 25000000	
 									# number of reads to subsample TAG-ALIGN
 									# 	this will be used for cross-corr only
@@ -104,7 +104,7 @@ workflow atac {
 	Boolean enable_count_signal_track = false # generate count signal track
 
 	# parameters for IDR
-	Boolean enable_idr = false 		# enable IDR analysis on raw peaks
+	Boolean enable_idr = true 		# enable IDR analysis on raw peaks
 	Float idr_thresh = 0.05			# IDR threshold
 	String idr_rank = 'p.value' 	# IDR ranking method (p.value, q.value, score)
 

@@ -209,7 +209,7 @@ Let us take a close look at a full template JSON. Comments are not allowed in a 
     "atac.subsample_reads" : 0,
 
     // Cross-correlation analysis
-    "atac.enable_xcor" : false,
+    "atac.enable_xcor" : true,
 
     // Subsample reads for cross-corr. analysis only (0: no subsampling)
     // Subsampled reads will be used for cross-corr. analysis only
@@ -227,7 +227,7 @@ Let us take a close look at a full template JSON. Comments are not allowed in a 
     "atac.smooth_win" : 73,
 
     // IDR (irreproducible discovery rate)
-    "atac.enable_idr" : false,
+    "atac.enable_idr" : true,
     // Threshold for IDR
     "atac.idr_thresh" : 0.05,
 
@@ -250,12 +250,12 @@ Let us take a close look at a full template JSON. Comments are not allowed in a 
     "atac.bowtie2_cpu" : 4,
     "atac.bowtie2_mem_mb" : 20000,
     "atac.bowtie2_time_hr" : 48,
-    "atac.bowtie2_disks" : "local-disk 100 HDD",
+    "atac.bowtie2_disks" : "local-disk 200 HDD",
 
     "atac.filter_cpu" : 2,
     "atac.filter_mem_mb" : 20000,
     "atac.filter_time_hr" : 24,
-    "atac.filter_disks" : "local-disk 100 HDD",
+    "atac.filter_disks" : "local-disk 400 HDD",
 
     "atac.bam2ta_cpu" : 2,
     "atac.bam2ta_mem_mb" : 10000,
@@ -271,12 +271,12 @@ Let us take a close look at a full template JSON. Comments are not allowed in a 
 
     "atac.macs2_mem_mb" : 16000,
     "atac.macs2_time_hr" : 24,
-    "atac.macs2_disks" : "local-disk 100 HDD",
+    "atac.macs2_disks" : "local-disk 200 HDD",
 
     "atac.ataqc_mem_mb" : 16000,
     // make sure that ataqc_mem_java_mb < ataqc_mem_mb
     "atac.ataqc_mem_java_mb" : 15000,
     "atac.ataqc_time_hr" : 24,
-    "atac.ataqc_disks" : "local-disk 100 HDD"
+    "atac.ataqc_disks" : "local-disk 200 HDD"
 }
 ```
