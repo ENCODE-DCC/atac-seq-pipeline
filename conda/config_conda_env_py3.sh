@@ -18,8 +18,8 @@ else
   exit 1
 fi
 
-echo "=== Installing additional packages for python3 env..."
-source activate ${CONDA_ENV_PY3}
-  pip install caper croo
+#echo "=== Installing additional packages for python3 env..."
+#source activate ${CONDA_ENV_PY3}
+#  pip install caper croo
 
 echo "=== All done."
