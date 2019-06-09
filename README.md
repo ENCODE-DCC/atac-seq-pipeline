@@ -41,47 +41,24 @@ You can also run our pipeline on DNAnexus without using Caper or Cromwell. There
 
 ## Conda
 
-We no longer recommend Conda for resolving dependencies and plan to phase out Conda support. Instead we recommend using Docker or Singularity. You can install Singularity and use it for our pipeline with Caper (by adding `--use-singularity` to command line arguments).
-
-1) Install [Conda](https://docs.conda.io/en/latest/miniconda.html).
-
-2) Install Conda environment for pipeline.
-
-  ```bash
-  $ conda/install_dependencies.sh
-  ```
-
-3) Initialize Conda and re-login.
-
-  ```bash
-  $ conda init bash
-  $ exit
-  ```
-
-4) Configure pipeline's python2 and python3 environments.
-
-  ```bash
-  $ conda/config_conda_env.sh
-  $ conda/config_conda_env_py3.sh
-  ```
-
-5) Update pipeline's Conda environment with pipeline's python source code. You need to run this step everytime you update (`git pull`) this pipeline.
-
-  ```bash
-  $ conda/update_conda_env.sh
-  ```
+We no longer recommend Conda for resolving dependencies and plan to phase out Conda support. Instead we recommend using Docker or Singularity. You can install Singularity and use it for our pipeline with Caper (by adding `--use-singularity` to command line arguments). Please see [this instruction](docs/install_conda.md).
 
 ## Tutorial
 
 Make sure that you have configured Caper correctly.
-> **WARNING**: DO NOT RUN THIS ON HPC LOGIN NODES. YOUR JOBS WILL BE KILLED.
+> **WARNING**: Do not run Caper on HPC login nodes. Your jobs can be killed.
 
-Run it. Due to `--deepcopy` all files in `examples/caper/ENCSR356KRQ_subsampled.json` will be recursively copied into Caper's temporary folder (`--tmp-dir`).
+Run it. Due to `--deepcopy` all files (HTTP URLs) in `examples/caper/ENCSR356KRQ_subsampled.json` will be recursively copied into Caper's temporary folder (`--tmp-dir`).
 ```bash
 $ caper run atac.wdl -i examples/caper/ENCSR356KRQ_subsampled.json --deepcopy --use-singularity
 ```
 
-If you use Conda or Docker (on cloud platforms) then remove `--use-singularity` from the command line and activate it before running a pipeline.
+If you use Docker then replace `--use-singularity` with `--use-docker`.
+```bash
+$ caper run atac.wdl -i examples/caper/ENCSR356KRQ_subsampled.json --deepcopy --use-docker
+```
+
+If you use Conda then remove `--use-singularity` from the command line and activate pipeline's Conda env before running a pipeline.
 ```bash
 $ conda activate encode-atac-seq-pipeline
 $ caper run atac.wdl -i examples/caper/ENCSR356KRQ_subsampled.json --deepcopy
@@ -91,7 +68,7 @@ To run it on an HPC (e.g. Stanford Sherlock and SCG). See details at [Caper's RE
 
 ## Input JSON file
 
-Always use absolute paths in an input JSON.
+An input JSON file includes all genomic data files, input parameters and metadata for running pipelines. Always use absolute paths in an input JSON.
 
 [Input JSON file specification](docs/input.md)
 
@@ -108,12 +85,6 @@ Find a `metadata.json` on Caper's output directory.
 ```bash
 $ croo [METADATA_JSON_FILE]
 ```
-
-## How to build/download genome database
-
-You need to specify a genome data TSV file in your input JSON. Such TSV can be generated/downloaded with actual genome database files.
-
-Use genome database [downloader](genome/download_genome_data.sh) or [builder](docs/build_genome_database.md) for your own genome.
 
 ## Useful tools
 

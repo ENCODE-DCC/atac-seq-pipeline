@@ -1,3 +1,11 @@
+## How to download genome database
+
+1. Choose `GENOME` from `hg19`, `hg38`, `mm9` and `mm10` and specify a destination directory.
+    ```bash
+    $ bash genome/download_genome_data.sh [GENOME] [DESTINATION_DIR]
+    ```
+2. Find a TSV file on the destination directory and use it for `"atac.genome_tsv"` in your input JSON.
+
 # How to build genome database
 
 1. [Install Conda](https://conda.io/miniconda.html). Skip this if you already have equivalent Conda alternatives (Anaconda Python). Download and run the [installer](https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh). Agree to the license term by typing `yes`. It will ask you about the installation location. On Stanford clusters (Sherlock and SCG4), we recommend to install it outside of your `$HOME` directory since its filesystem is slow and has very limited space. At the end of the installation, choose `yes` to add Miniconda's binary to `$PATH` in your BASH startup script.
