@@ -652,8 +652,8 @@ workflow atac {
 	}
 	Array[Pair[Int, Int]] pairs = select_all(pairs__)
 
-	if ( !align_only ) {
-		scatter( pair in pairs ) {
+	scatter( pair in pairs ) {
+		if ( !align_only ) {
 			# pair.left = 0-based index of 1st replicate
 			# pair.right = 0-based index of 2nd replicate
 			# Naive overlap on every pair of true replicates
@@ -671,8 +671,8 @@ workflow atac {
 		}
 	}
 
-	if ( enable_idr && !align_only ) {
-		scatter( pair in pairs ) {
+	scatter( pair in pairs ) {
+		if ( enable_idr && !align_only ) {
 			# pair.left = 0-based index of 1st replicate
 			# pair.right = 0-based index of 2nd replicate
 			# IDR on every pair of true replicates
@@ -1306,7 +1306,7 @@ task overlap {
 
 task reproducibility {
 	String prefix
-	Array[File] peaks # peak files from pair of true replicates
+	Array[File?] peaks # peak files from pair of true replicates
 						# in a sorted order. for example of 4 replicates,
 						# 1,2 1,3 1,4 2,3 2,4 3,4.
                         # x,y means peak file from rep-x vs rep-y
