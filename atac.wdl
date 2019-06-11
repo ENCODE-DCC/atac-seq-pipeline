@@ -652,8 +652,8 @@ workflow atac {
 	}
 	Array[Pair[Int, Int]] pairs = select_all(pairs__)
 
-	scatter( pair in pairs ) {
-		if ( !align_only ) {
+	if ( !align_only ) {
+		scatter( pair in pairs ) {
 			# pair.left = 0-based index of 1st replicate
 			# pair.right = 0-based index of 2nd replicate
 			# Naive overlap on every pair of true replicates
@@ -671,8 +671,8 @@ workflow atac {
 		}
 	}
 
-	scatter( pair in pairs ) {
-		if ( enable_idr && !align_only ) {
+	if ( enable_idr && !align_only ) {
+		scatter( pair in pairs ) {
 			# pair.left = 0-based index of 1st replicate
 			# pair.right = 0-based index of 2nd replicate
 			# IDR on every pair of true replicates
@@ -1306,7 +1306,7 @@ task overlap {
 
 task reproducibility {
 	String prefix
-	Array[File?] peaks # peak files from pair of true replicates
+	Array[File]? peaks # peak files from pair of true replicates
 						# in a sorted order. for example of 4 replicates,
 						# 1,2 1,3 1,4 2,3 2,4 3,4.
                         # x,y means peak file from rep-x vs rep-y
@@ -1447,7 +1447,7 @@ task qc_report {
 	Array[File?] pbc_qcs
 	Array[File?] xcor_plots
 	Array[File?] xcor_scores
-	Array[File?] idr_plots
+	Array[File]? idr_plots
 	Array[File?] idr_plots_pr
 	File? idr_plot_ppr
 	Array[File?] frip_macs2_qcs
@@ -1456,7 +1456,7 @@ task qc_report {
 	File? frip_macs2_qc_pooled
 	File? frip_macs2_qc_ppr1 
 	File? frip_macs2_qc_ppr2 
-	Array[File?] frip_idr_qcs
+	Array[File]? frip_idr_qcs
 	Array[File?] frip_idr_qcs_pr
 	File? frip_idr_qc_ppr 
 	Array[File?] frip_overlap_qcs
