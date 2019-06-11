@@ -138,7 +138,7 @@ def ataqc():
     else:
         chr_m_reads, fraction_chr_m = (None, None)
 
-    if FINAL_BAM:
+    if FINAL_BAM and ALIGNMENT_LOG:
         gc_out, gc_plot, gc_summary = get_gc(RG_FREE_FINAL_BAM,
                                              REF,
                                              OUTPUT_PREFIX)
