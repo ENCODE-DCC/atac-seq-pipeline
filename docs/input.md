@@ -160,7 +160,7 @@ Parameter|Default|Description
 
 Parameter|Default|Description
 ---------|-------|-----------
-`atac.enable_xcor` | true | Enable cross-correlation analysis
+`atac.enable_xcor` | false | Enable cross-correlation analysis
 `atac.enable_count_signal_track` | false | Enable count signal track generation
 `atac.keep_irregular_chr_in_bfilt_peak` | false | Keep irregular chromosome names. Use this for custom genomes without canonical chromosome names (chr1, chrX, ...)
 `atac.disable_ataqc` | false | Disable ATAqC (including all annotation-based analyses in it)

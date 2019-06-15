@@ -81,7 +81,7 @@ workflow atac {
 									# 	0 for no subsampling
 
 	# parameters for cross-correlation analysis
-	Boolean enable_xcor = true 	# enable cross-corr analysis
+	Boolean enable_xcor = false 	# enable cross-corr analysis
 	Int xcor_subsample_reads = 25000000	
 									# number of reads to subsample TAG-ALIGN
 									# 	this will be used for cross-corr only
