@@ -43,11 +43,11 @@ workflow test_macs2 {
 			'se_macs2_bfilt_npeak',
 			'se_macs2_frip_qc',
 		],
-		files = select_all([
+		files = [
 			se_macs2.npeak,
 			se_macs2.bfilt_npeak,
 			se_macs2.frip_qc,
-		]),
+		],
 		ref_files = [
 			ref_se_macs2_npeak,
 			ref_se_macs2_bfilt_npeak,

@@ -1,13 +1,13 @@
 # ENCODE DCC ATAC-Seq/DNase-Seq pipeline
 # Author: Jin Lee (leepc12@gmail.com)
 
-#CAPER docker quay.io/encode-dcc/atac-seq-pipeline:v1.4.1
-#CAPER singularity docker://quay.io/encode-dcc/atac-seq-pipeline:v1.4.1
+#CAPER docker quay.io/encode-dcc/atac-seq-pipeline:v1.4.2
+#CAPER singularity docker://quay.io/encode-dcc/atac-seq-pipeline:v1.4.2
 #CROO out_def https://storage.googleapis.com/encode-pipeline-output-definition/atac.out_def.json
 
 workflow atac {
 	# pipeline version
-	String pipeline_ver = 'v1.4.1'
+	String pipeline_ver = 'v1.4.2'
 
 	# general sample information
 	String title = 'Untitled'
@@ -104,7 +104,7 @@ workflow atac {
 	Boolean enable_count_signal_track = false # generate count signal track
 
 	# parameters for IDR
-	Boolean enable_idr = false 		# enable IDR analysis on raw peaks
+	Boolean enable_idr = true 		# enable IDR analysis on raw peaks
 	Float idr_thresh = 0.05			# IDR threshold
 	String idr_rank = 'p.value' 	# IDR ranking method (p.value, q.value, score)
 
@@ -127,7 +127,7 @@ workflow atac {
 	Int filter_cpu = 2
 	Int filter_mem_mb = 20000
 	Int filter_time_hr = 24
-	String filter_disks = "local-disk 200 HDD"
+	String filter_disks = "local-disk 400 HDD"
 
 	Int bam2ta_cpu = 2
 	Int bam2ta_mem_mb = 10000
@@ -252,82 +252,6 @@ workflow atac {
 	File? roadmap_meta_ = if defined(roadmap_meta) then roadmap_meta
 		else read_genome_tsv.roadmap_meta
 
-	# temporary files used for resumer, output from task align
-	Array[File?] bowtie2__align_log = []
-	Array[File?] bowtie2__flagstat_qc = []
-	Array[File?] bowtie2__read_len_log = []
-
-	Array[File?] filter__flagstat_qc = []
-	Array[File?] filter__dup_qc = []
-	Array[File?] filter__pbc_qc = []
-	Array[File?] filter__mito_dup_log = []
-
-	Array[File?] spr__ta_pr1 = []
-	Array[File?] spr__ta_pr2 = []
-
-	Array[File?] xcor__plot_png = []
-	Array[File?] xcor__score = []
-
-	Array[File?] count_signal_track__pos_bw = []
-	Array[File?] count_signal_track__neg_bw = []
-
-	Array[File?] macs2_signal_track__pval_bw = []
-	Array[File?] macs2_signal_track__fc_bw = []
-
-	Array[File?] macs2__frip_qc = []
-	Array[File?] macs2_pr1__frip_qc = []
-	Array[File?] macs2_pr2__frip_qc = []
-
-	Array[File?] idr__idr_peak = [] # per pair of replicate
-	Array[File?] idr__bfilt_idr_peak = []
-	Array[File?] idr__idr_plot = []
-	Array[File?] idr__frip_qc = []
-
-	Array[File?] idr_pr__idr_peak = []	# per replicate
-	Array[File?] idr_pr__bfilt_idr_peak = []
-	Array[File?] idr_pr__idr_plot = []
-	Array[File?] idr_pr__frip_qc = []
-
-	Array[File?] overlap__overlap_peak = []	# per pair of replicate
-	Array[File?] overlap__bfilt_overlap_peak = []
-	Array[File?] overlap__frip_qc = []
-
-	Array[File?] overlap_pr__overlap_peak = [] # per replicate
-	Array[File?] overlap_pr__bfilt_overlap_peak = []
-	Array[File?] overlap_pr__frip_qc = []
-
-	Array[File?] ataqc__html = []
-	Array[File?] ataqc__txt = []
-
-	File? pool_ta__ta_pooled
-	File? pool_ta_pr1__ta_pooled
-	File? pool_ta_pr2__ta_pooled
-
-	File? count_signal_track_pooled__pos_bw
-	File? count_signal_track_pooled__neg_bw
-
-	File? macs2_signal_track_pooled__pval_bw
-	File? macs2_signal_track_pooled__fc_bw
-
-	File? macs2_pooled__frip_qc
-	File? macs2_ppr1__frip_qc
-	File? macs2_ppr2__frip_qc
-
-	File? idr_ppr__idr_peak
-	File? idr_ppr__bfilt_idr_peak
-	File? idr_ppr__idr_plot
-	File? idr_ppr__frip_qc
-	
-	File? overlap_ppr__overlap_peak
-	File? overlap_ppr__bfilt_overlap_peak
-	File? overlap_ppr__frip_qc
-
-	File? reproducibility_idr__optimal_peak
-	File? reproducibility_idr__reproducibility_qc
-
-	File? reproducibility_overlap__optimal_peak
-	File? reproducibility_overlap__reproducibility_qc
-
 	# temporary 2-dim fastqs array [rep_id][merge_id]
 	Array[Array[File]] fastqs_R1 = 
 		if length(fastqs_rep10_R1)>0 then
@@ -394,7 +318,6 @@ workflow atac {
 		Boolean has_input_of_trim_adapter = i<length(fastqs_R1) && length(fastqs_R1[i])>0		
 		Boolean has_output_of_trim_adapter = i<length(trim_merged_fastqs_R1) &&
 			defined(trim_merged_fastqs_R1[i])
-
 		# skip if we already have output of this step
 		if ( has_input_of_trim_adapter && !has_output_of_trim_adapter ) {
 			call trim_adapter { input :
@@ -413,7 +336,6 @@ workflow atac {
 				disks = trim_adapter_disks,
 			}
 		}
-
 		File? trim_merged_fastq_R1_ = if has_output_of_trim_adapter
 			then trim_merged_fastqs_R1[i]
 			else trim_adapter.trim_merged_fastq_R1
@@ -425,7 +347,6 @@ workflow atac {
 		Boolean has_input_of_bowtie2 = has_output_of_trim_adapter ||
 			defined(trim_adapter.trim_merged_fastq_R1)
 		Boolean has_output_of_bowtie2 = i<length(bams) && defined(bams[i])
-
 		if ( has_input_of_bowtie2 && !has_output_of_bowtie2 ) {
 			call bowtie2 { input :
 				fastq_R1 = trim_merged_fastq_R1_,
@@ -443,22 +364,10 @@ workflow atac {
 				disks = bowtie2_disks,
 			}
 		}
-
-		File? bam_ = if has_output_of_bowtie2 then bams[i]
-			else bowtie2.bam
-		File? flagstat_qc_ = if i<length(bowtie2__flagstat_qc) &&
-			defined(bowtie2__flagstat_qc[i]) then bowtie2__flagstat_qc[i]
-			else bowtie2.flagstat_qc
-		File? align_log_ = if i<length(bowtie2__align_log) &&
-			defined(bowtie2__align_log[i]) then bowtie2__align_log[i]
-			else bowtie2.align_log
-		File? read_len_log_ = if i<length(bowtie2__read_len_log) &&
-			defined(bowtie2__read_len_log[i]) then bowtie2__read_len_log[i]
-			else bowtie2.read_len_log
+		File? bam_ = if has_output_of_bowtie2 then bams[i] else bowtie2.bam
 
 		Boolean has_input_of_filter = has_output_of_bowtie2 || defined(bowtie2.bam)
 		Boolean has_output_of_filter = i<length(nodup_bams) && defined(nodup_bams[i])
-		
 		# skip if we already have output of this step
 		if ( has_input_of_filter && !has_output_of_filter ) {
 			call filter { input :
@@ -476,25 +385,10 @@ workflow atac {
 				disks = filter_disks,
 			}
 		}
-
-		File? nodup_bam_ = if has_output_of_filter then nodup_bams[i]
-			else filter.nodup_bam
-		File? nodup_flagstat_qc_ = if i<length(filter__flagstat_qc) &&
-			defined(filter__flagstat_qc[i]) then filter__flagstat_qc[i]
-			else filter.flagstat_qc
-		File? dup_qc_ = if i<length(filter__dup_qc) &&
-			defined(filter__dup_qc[i]) then filter__dup_qc[i]
-			else filter.dup_qc
-		File? pbc_qc_ = if i<length(filter__pbc_qc) &&
-			defined(filter__pbc_qc[i]) then filter__pbc_qc[i]
-			else filter.pbc_qc
-		File? mito_dup_log_ = if i<length(filter__mito_dup_log) &&
-			defined(filter__mito_dup_log[i]) then filter__mito_dup_log[i]
-			else filter.mito_dup_log
+		File? nodup_bam_ = if has_output_of_filter then nodup_bams[i] else filter.nodup_bam
 
 		Boolean has_input_of_bam2ta = has_output_of_filter || defined(filter.nodup_bam)
 		Boolean has_output_of_bam2ta = i<length(tas) && defined(tas[i])
-
 		if ( has_input_of_bam2ta && !has_output_of_bam2ta ) {
 			call bam2ta { input :
 				bam = nodup_bam_,
@@ -510,14 +404,10 @@ workflow atac {
 				disks = bam2ta_disks,
 			}
 		}
-
 		File? ta_ = if has_output_of_bam2ta then tas[i] else bam2ta.ta
 
 		Boolean has_input_of_xcor = has_output_of_bam2ta || defined(bam2ta.ta)
-		Boolean has_output_of_xcor = i<length(xcor__score) && defined(xcor__score[i])
-
-		if ( has_input_of_xcor && !has_output_of_xcor && 
-			enable_xcor ) {
+		if ( has_input_of_xcor && enable_xcor ) {
 			# subsample tagalign (non-mito) and cross-correlation analysis
 			call xcor { input :
 				ta = ta_,
@@ -532,15 +422,8 @@ workflow atac {
 			}
 		}
 
-		File? xcor_score_ = if has_output_of_xcor then xcor__score[i] else xcor.score
-		File? xcor_plot_ = if i<length(xcor__plot_png) &&
-			defined(xcor__plot_png[i]) then xcor__plot_png[i] else xcor.plot_png
-
 		Boolean has_input_of_macs2_signal_track = has_output_of_bam2ta || defined(bam2ta.ta)
-		Boolean has_output_of_macs2_signal_track = i<length(macs2_signal_track__pval_bw) && 
-			defined(macs2_signal_track__pval_bw[i])
-
-		if ( has_input_of_macs2_signal_track && !has_output_of_macs2_signal_track ) {
+		if ( has_input_of_macs2_signal_track ) {
 			# generate count signal track
 			call macs2_signal_track { input :
 				ta = ta_,
@@ -555,17 +438,9 @@ workflow atac {
 			}
 		}
 
-		File? pval_bw_ = if has_output_of_macs2_signal_track then macs2_signal_track__pval_bw[i]
-			else macs2_signal_track.pval_bw
-		File? fc_bw_ = if i<length(macs2_signal_track__fc_bw) &&
-			defined(macs2_signal_track__fc_bw[i]) then macs2_signal_track__fc_bw[i]
-			else macs2_signal_track.fc_bw
-
 		Boolean has_input_of_macs2 = has_output_of_bam2ta || defined(bam2ta.ta)
 		Boolean has_output_of_macs2 = i<length(peaks) && defined(peaks[i])
-
-		if ( has_input_of_macs2 && !has_output_of_macs2 &&
-			!align_only ) {
+		if ( has_input_of_macs2 && !has_output_of_macs2 && !align_only ) {
 			# call peaks on tagalign
 			call macs2 { input :
 				ta = ta_,
@@ -582,16 +457,10 @@ workflow atac {
 				time_hr = macs2_time_hr,
 			}
 		}
-
 		File? peak_ = if has_output_of_macs2 then peaks[i] else macs2.npeak
-		File? macs2_frip_qc_ = if i<length(macs2__frip_qc) &&
-			defined(macs2__frip_qc[i]) then macs2__frip_qc[i] else macs2.frip_qc
 
 		Boolean has_input_of_spr = has_output_of_bam2ta || defined(bam2ta.ta)
-		Boolean has_output_of_spr = i<length(spr__ta_pr1) && defined(spr__ta_pr1[i])
-
-		if ( has_input_of_spr && !has_output_of_spr &&
-			!align_only && !true_rep_only ) {
+		if ( has_input_of_spr && !align_only && !true_rep_only ) {
 			call spr { input :
 				ta = ta_,
 				paired_end = paired_end_,
@@ -599,19 +468,13 @@ workflow atac {
 			}
 		}
 
-		File? ta_pr1_ = if has_output_of_spr then spr__ta_pr1[i] else spr.ta_pr1
-		File? ta_pr2_ = if i<length(spr__ta_pr2) &&
-			defined(spr__ta_pr2[i]) then spr__ta_pr2[i]
-			else spr.ta_pr2
-
-		Boolean has_input_of_macs2_pr1 = has_output_of_spr || defined(spr.ta_pr1)
+		Boolean has_input_of_macs2_pr1 = defined(spr.ta_pr1)
 		Boolean has_output_of_macs2_pr1 = i<length(peaks_pr1) && defined(peaks_pr1[i])
-
 		if ( has_input_of_macs2_pr1 && !has_output_of_macs2_pr1 &&
 			!align_only && !true_rep_only ) {
 			# call peaks on 1st pseudo replicated tagalign 
 			call macs2 as macs2_pr1 { input :
-				ta = ta_pr1_,
+				ta = spr.ta_pr1,
 				gensz = gensz_,
 				chrsz = chrsz_,
 				cap_num_peak = cap_num_peak,
@@ -625,21 +488,16 @@ workflow atac {
 				time_hr = macs2_time_hr,
 			}
 		}
-
 		File? peak_pr1_ = if has_output_of_macs2_pr1 then peaks_pr1[i]
 			else macs2_pr1.npeak
-		File? macs2_pr1_frip_qc_ = if i<length(macs2_pr1__frip_qc) &&
-			defined(macs2_pr1__frip_qc[i]) then macs2_pr1__frip_qc[i]
-			else macs2_pr1.frip_qc
 
-		Boolean has_input_of_macs2_pr2 = has_output_of_spr || defined(spr.ta_pr2)
+		Boolean has_input_of_macs2_pr2 = defined(spr.ta_pr2)
 		Boolean has_output_of_macs2_pr2 = i<length(peaks_pr2) && defined(peaks_pr2[i])
-
 		if ( has_input_of_macs2_pr2 && !has_output_of_macs2_pr2 &&
 			!align_only && !true_rep_only ) {
 			# call peaks on 2nd pseudo replicated tagalign 
 			call macs2 as macs2_pr2 { input :
-				ta = ta_pr2_,
+				ta = spr.ta_pr2,
 				gensz = gensz_,
 				chrsz = chrsz_,
 				cap_num_peak = cap_num_peak,
@@ -653,86 +511,53 @@ workflow atac {
 				time_hr = macs2_time_hr,
 			}
 		}
-
 		File? peak_pr2_ = if has_output_of_macs2_pr2 then peaks_pr2[i]
 			else macs2_pr2.npeak
-		File? macs2_pr2_frip_qc_ = if i<length(macs2_pr2__frip_qc) &&
-			defined(macs2_pr2__frip_qc[i]) then macs2_pr2__frip_qc[i]
-			else macs2_pr2.frip_qc
 
 		Boolean has_input_of_count_signal_track = has_output_of_bam2ta || defined(bam2ta.ta)
-		Boolean has_output_of_count_signal_track = i<length(count_signal_track__pos_bw) && 
-			defined(count_signal_track__pos_bw[i])
-
-		if ( has_input_of_count_signal_track && !has_output_of_count_signal_track &&
-			enable_count_signal_track ) {
+		if ( has_input_of_count_signal_track && enable_count_signal_track ) {
 			# generate count signal track
 			call count_signal_track { input :
 				ta = ta_,
 				chrsz = chrsz_,
 			}
 		}
-
-		File? pos_bw_ = if has_output_of_count_signal_track then count_signal_track__pos_bw[i]
-			else count_signal_track.pos_bw
-		File? neg_bw_ = if i<length(count_signal_track__neg_bw) &&
-			defined(count_signal_track__neg_bw[i]) then count_signal_track__neg_bw[i]
-			else count_signal_track.neg_bw
 	}
 
 	# if there are TAs for ALL replicates then pool them
 	Boolean has_all_inputs_of_pool_ta = length(select_all(ta_))==num_rep
-	Boolean has_output_of_pool_ta = defined(pool_ta__ta_pooled)
-
-	if ( has_all_inputs_of_pool_ta && !has_output_of_pool_ta &&
-		num_rep>1 ) {
+	if ( has_all_inputs_of_pool_ta && num_rep>1 ) {
 		# pool tagaligns from true replicates
 		call pool_ta { input :
 			tas = ta_,
 		}
 	}
 
-	File? ta_pooled_ = if has_output_of_pool_ta then pool_ta__ta_pooled
-		else pool_ta.ta_pooled	
-
 	# if there are pr1 TAs for ALL replicates then pool them
-	Boolean has_all_inputs_of_pool_ta_pr1 = length(select_all(ta_pr1_))==num_rep
-	Boolean has_output_of_pool_ta_pr1 = defined(pool_ta_pr1__ta_pooled)
-
-	if ( has_all_inputs_of_pool_ta_pr1 && !has_output_of_pool_ta_pr1 &&
-		!align_only && !true_rep_only && num_rep>1 ) {
+	Boolean has_all_inputs_of_pool_ta_pr1 = length(select_all(spr.ta_pr1))==num_rep
+	if ( has_all_inputs_of_pool_ta_pr1 && num_rep>1 && !align_only && !true_rep_only ) {
 		# pool tagaligns from pseudo replicate 1
 		call pool_ta as pool_ta_pr1 { input :
-			tas = ta_pr1_,
+			tas = spr.ta_pr1,
 		}
 	}
-
-	File? ta_ppr1_ = if has_output_of_pool_ta_pr1 then pool_ta_pr1__ta_pooled
-		else pool_ta_pr1.ta_pooled	
 
 	# if there are pr2 TAs for ALL replicates then pool them
-	Boolean has_all_inputs_of_pool_ta_pr2 = length(select_all(ta_pr2_))==num_rep
-	Boolean has_output_of_pool_ta_pr2 = defined(pool_ta_pr2__ta_pooled)
-
-	if ( has_all_inputs_of_pool_ta_pr1 && !has_output_of_pool_ta_pr1 &&
-		!align_only && !true_rep_only && num_rep>1 ) {
+	Boolean has_all_inputs_of_pool_ta_pr2 = length(select_all(spr.ta_pr2))==num_rep
+	if ( has_all_inputs_of_pool_ta_pr1 && num_rep>1 && !align_only && !true_rep_only ) {
 		# pool tagaligns from pseudo replicate 2
 		call pool_ta as pool_ta_pr2 { input :
-			tas = ta_pr2_,
+			tas = spr.ta_pr2,
 		}
 	}
 
-	File? ta_ppr2_ = if has_output_of_pool_ta_pr2 then pool_ta_pr2__ta_pooled
-		else pool_ta_pr2.ta_pooled	
-
-	Boolean has_input_of_macs2_pooled = has_output_of_pool_ta || defined(pool_ta.ta_pooled)
+	Boolean has_input_of_macs2_pooled = defined(pool_ta.ta_pooled)
 	Boolean has_output_of_macs2_pooled = defined(peak_pooled)
-
 	if ( has_input_of_macs2_pooled && !has_output_of_macs2_pooled &&
 		!align_only && num_rep>1 ) {
 		# call peaks on pooled replicate
 		call macs2 as macs2_pooled { input :
-			ta = ta_pooled_,
+			ta = pool_ta.ta_pooled,
 			gensz = gensz_,
 			chrsz = chrsz_,
 			cap_num_peak = cap_num_peak,
@@ -746,30 +571,21 @@ workflow atac {
 			time_hr = macs2_time_hr,
 		}
 	}
-
 	File? peak_pooled_ = if has_output_of_macs2_pooled then peak_pooled
 		else macs2_pooled.npeak
-	File? frip_macs2_qc_pooled_ = if defined(macs2_pooled__frip_qc) then macs2_pooled__frip_qc
-		else macs2_pooled.frip_qc
 
-	Boolean has_input_of_count_signal_track_pooled = has_output_of_pool_ta || defined(pool_ta.ta_pooled)
-	Boolean has_output_of_count_signal_track_pooled = defined(count_signal_track_pooled__pos_bw)
-
-	if ( has_input_of_count_signal_track_pooled && !has_output_of_count_signal_track_pooled &&
-		enable_count_signal_track && num_rep>1 ) {
+	Boolean has_input_of_count_signal_track_pooled = defined(pool_ta.ta_pooled)
+	if ( has_input_of_count_signal_track_pooled && enable_count_signal_track && num_rep>1 ) {
 		call count_signal_track as count_signal_track_pooled { input :
-			ta = ta_pooled_,
+			ta = pool_ta.ta_pooled,
 			chrsz = chrsz_,
 		}
 	}
 
-	Boolean has_input_of_macs2_signal_track_pooled = has_output_of_pool_ta || defined(pool_ta.ta_pooled)
-	Boolean has_output_of_macs2_signal_track_pooled = defined(macs2_signal_track_pooled__pval_bw)
-
-	if ( has_input_of_macs2_signal_track_pooled && !has_output_of_macs2_signal_track_pooled &&
-		num_rep>1 ) {
+	Boolean has_input_of_macs2_signal_track_pooled = defined(pool_ta.ta_pooled)
+	if ( has_input_of_macs2_signal_track_pooled && num_rep>1 ) {
 		call macs2_signal_track as macs2_signal_track_pooled { input :
-			ta = ta_pooled_,
+			ta = pool_ta.ta_pooled,
 			gensz = gensz_,
 			chrsz = chrsz_,
 			pval_thresh = pval_thresh,
@@ -781,14 +597,13 @@ workflow atac {
 		}
 	}
 
-	Boolean has_input_of_macs2_ppr1 = has_output_of_pool_ta_pr1 || defined(pool_ta_pr1.ta_pooled)
+	Boolean has_input_of_macs2_ppr1 = defined(pool_ta_pr1.ta_pooled)
 	Boolean has_output_of_macs2_ppr1 = defined(peak_ppr1)
-
 	if ( has_input_of_macs2_ppr1 && !has_output_of_macs2_ppr1 &&
 		!align_only && !true_rep_only && num_rep>1 ) {
 		# call peaks on 1st pooled pseudo replicates
 		call macs2 as macs2_ppr1 { input :
-			ta = ta_ppr1_,
+			ta = pool_ta_pr1.ta_pooled,
 			gensz = gensz_,
 			chrsz = chrsz_,
 			cap_num_peak = cap_num_peak,
@@ -802,20 +617,16 @@ workflow atac {
 			time_hr = macs2_time_hr,
 		}
 	}
-
 	File? peak_ppr1_ = if has_output_of_macs2_ppr1 then peak_ppr1
 		else macs2_ppr1.npeak
-	File? frip_macs2_qc_ppr1_ = if defined(macs2_ppr1__frip_qc) then macs2_ppr1__frip_qc
-		else macs2_ppr1.frip_qc
 
-	Boolean has_input_of_macs2_ppr2 = has_output_of_pool_ta_pr2 || defined(pool_ta_pr2.ta_pooled)
+	Boolean has_input_of_macs2_ppr2 = defined(pool_ta_pr2.ta_pooled)
 	Boolean has_output_of_macs2_ppr2 = defined(peak_ppr2)
-
 	if ( has_input_of_macs2_ppr2 && !has_output_of_macs2_ppr2 &&
 		!align_only && !true_rep_only && num_rep>1 ) {
 		# call peaks on 2nd pooled pseudo replicates
 		call macs2 as macs2_ppr2 { input :
-			ta = ta_ppr2_,
+			ta = pool_ta_pr2.ta_pooled,
 			gensz = gensz_,
 			chrsz = chrsz_,
 			cap_num_peak = cap_num_peak,
@@ -829,16 +640,8 @@ workflow atac {
 			time_hr = macs2_time_hr,
 		}
 	}
-
 	File? peak_ppr2_ = if has_output_of_macs2_ppr2 then peak_ppr2
 		else macs2_ppr2.npeak
-	File? frip_macs2_qc_ppr2_ = if defined(macs2_ppr2__frip_qc) then macs2_ppr2__frip_qc
-		else macs2_ppr2.frip_qc
-
-	# IDR/overlap (post-peak-call analyses)
-
-	# pipeline cannot resume from here
-	# 	code will get too complicated for that
 
 	# do IDR/overlap on all pairs of two replicates (i,j)
 	# 	where i and j are zero-based indices and 0 <= i < j < num_rep
@@ -863,7 +666,7 @@ workflow atac {
 				blacklist = blacklist_,
 				chrsz = chrsz_,
 				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
-				ta = ta_pooled_,
+				ta = pool_ta.ta_pooled,
 			}
 		}
 	}
@@ -884,22 +687,14 @@ workflow atac {
 				blacklist = blacklist_,
 				chrsz = chrsz_,
 				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
-				ta = ta_pooled_,
+				ta = pool_ta.ta_pooled,
 			}
 		}
 	}
 
 	# overlap on pseudo-replicates (pr1, pr2) for each true replicate
 	scatter( i in range(num_rep) ) {
-		Boolean has_input_of_overlap_pr =
-			defined(peak_pr1_[i]) && defined(peak_pr2_[i]) && defined(peak_[i])
-		Boolean has_output_of_overlap_pr = i<length(overlap_pr__overlap_peak) &&
-			defined(overlap_pr__overlap_peak[i])
-		Boolean has_output_of_overlap_pr_frip_qc = i<length(overlap_pr__frip_qc) &&
-			defined(overlap_pr__frip_qc[i])
-
-		if ( has_input_of_overlap_pr && !has_output_of_overlap_pr &&
-			!align_only && !true_rep_only ) {
+		if ( !align_only && !true_rep_only ) {
 			call overlap as overlap_pr { input :
 				prefix = "rep"+(i+1)+"-pr",
 				peak1 = peak_pr1_[i],
@@ -915,15 +710,7 @@ workflow atac {
 	}
 
 	scatter( i in range(num_rep) ) {
-		Boolean has_input_of_idr_pr = 
-			defined(peak_pr1_[i]) && defined(peak_pr2_[i]) && defined(peak_[i])
-		Boolean has_output_of_idr_pr = i<length(idr_pr__idr_peak) &&
-			defined(idr_pr__idr_peak[i])
-		Boolean has_output_of_idr_pr_frip_qc = i<length(idr_pr__frip_qc) &&
-			defined(idr_pr__frip_qc[i])
-
-		if ( has_input_of_idr_pr && !has_output_of_idr_pr &&
-			!align_only && !true_rep_only && enable_idr ) {
+		if ( !align_only && !true_rep_only && enable_idr ) {
 			# IDR on pseduo replicates
 			call idr as idr_pr { input :
 				prefix = "rep"+(i+1)+"-pr",
@@ -941,38 +728,7 @@ workflow atac {
 		}
 	}
 
-	# gather outputs
-	scatter( i in range(num_rep) ) {	
-		File? overlap_pr_overlap_peak_ = 
-			if has_output_of_overlap_pr[i] && defined(blacklist_) then overlap_pr__bfilt_overlap_peak[i]
-			else if has_output_of_overlap_pr[i] && !defined(blacklist_) then overlap_pr__overlap_peak[i]
-			else if defined(blacklist_) then overlap_pr.bfilt_overlap_peak[i]
-			else overlap_pr.overlap_peak[i]
-		File? overlap_pr_frip_qc_ = 
-			if has_output_of_overlap_pr_frip_qc[i] then overlap_pr__frip_qc[i]
-			else overlap_pr.frip_qc[i]
-
-		File? idr_pr_idr_peak_ = 
-			if has_output_of_idr_pr[i] && defined(blacklist_) then idr_pr__bfilt_idr_peak[i]
-			else if has_output_of_idr_pr[i] && !defined(blacklist_) then idr_pr__idr_peak[i]
-			else if defined(blacklist_) then idr_pr.bfilt_idr_peak[i]
-			else idr_pr.idr_peak[i]
-		File? idr_pr_idr_plot_ = 
-			if has_output_of_idr_pr[i] then idr_pr__idr_plot[i]
-			else idr_pr.idr_plot[i]
-		File? idr_pr_frip_qc_ = 
-			if has_output_of_idr_pr_frip_qc[i] then idr_pr__frip_qc[i]
-			else idr_pr.frip_qc[i]
-	}
-
-	Boolean has_input_of_overlap_ppr =
-		(has_output_of_macs2_ppr1 || defined(macs2_ppr1.npeak)) &&
-		(has_output_of_macs2_ppr2 || defined(macs2_ppr2.npeak)) &&
-		(has_output_of_macs2_pooled || defined(macs2_pooled.npeak))
-	Boolean has_output_of_overlap_ppr = defined(overlap_ppr__overlap_peak)
-
-	if ( has_input_of_overlap_ppr && !has_output_of_overlap_ppr &&
-		!align_only && !true_rep_only && num_rep>1 ) {
+	if ( !align_only && !true_rep_only && num_rep>1 ) {
 		# Naive overlap on pooled pseudo replicates
 		call overlap as overlap_ppr { input :
 			prefix = "ppr",
@@ -983,27 +739,11 @@ workflow atac {
 			blacklist = blacklist_,
 			chrsz = chrsz_,
 			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
-			ta = ta_pooled_,
+			ta = pool_ta.ta_pooled,
 		}
 	}
 
-	File? overlap_ppr_overlap_peak_ =
-		if has_output_of_overlap_ppr && defined(blacklist_) then overlap_ppr__bfilt_overlap_peak
-		else if has_output_of_overlap_ppr && !defined(blacklist_) then overlap_ppr__overlap_peak
-		else if defined(blacklist_) then overlap_ppr.bfilt_overlap_peak
-		else overlap_ppr.overlap_peak
-	File? overlap_ppr_frip_qc_ =
-		if defined(overlap_ppr__frip_qc) then overlap_ppr__frip_qc
-		else overlap_ppr.frip_qc
-
-	Boolean has_input_of_idr_ppr =
-		(has_output_of_macs2_ppr1 || defined(macs2_ppr1.npeak)) &&
-		(has_output_of_macs2_ppr2 || defined(macs2_ppr2.npeak)) &&
-		(has_output_of_macs2_pooled || defined(macs2_pooled.npeak))
-	Boolean has_output_of_idr_ppr = defined(idr_ppr__idr_peak)
-
-	if ( has_input_of_idr_ppr && !has_output_of_idr_ppr &&
-		!align_only && !true_rep_only && num_rep>1 ) {
+	if ( !align_only && !true_rep_only && num_rep>1 ) {
 		# IDR on pooled pseduo replicates
 		call idr as idr_ppr { input :
 			prefix = "ppr",
@@ -1016,101 +756,57 @@ workflow atac {
 			blacklist = blacklist_,
 			chrsz = chrsz_,
 			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
-			ta = ta_pooled_,
+			ta = pool_ta.ta_pooled,
 		}
 	}
 
-	File? idr_ppr_idr_peak_ =
-		if has_output_of_idr_ppr && defined(blacklist_) then idr_ppr__bfilt_idr_peak
-		else if has_output_of_idr_ppr && !defined(blacklist_) then idr_ppr__idr_peak
-		else if defined(blacklist_) then idr_ppr.bfilt_idr_peak
-		else idr_ppr.idr_peak
-	File? idr_ppr_idr_plot_ =
-		if has_output_of_idr_ppr then idr_ppr__idr_plot
-		else idr_ppr.idr_plot
-	File? idr_ppr_frip_qc_ =
-		if defined(idr_ppr__frip_qc) then idr_ppr__frip_qc
-		else idr_ppr.frip_qc
-
-	Boolean has_input_of_reproducibility_overlap =
-		length(select_all(overlap_pr_overlap_peak_))==num_rep
-	Boolean has_output_of_reproducibility_overlap =
-		defined(reproducibility_overlap__reproducibility_qc)
-
 	# reproducibility QC for overlap/IDR peaks
-	if ( has_input_of_reproducibility_overlap && !has_output_of_reproducibility_overlap &&
-		!align_only && !true_rep_only ) {
+	if ( !align_only && !true_rep_only ) {
 		# reproducibility QC for overlapping peaks
 		call reproducibility as reproducibility_overlap { input :
 			prefix = 'overlap',
 			peaks = overlap.bfilt_overlap_peak,
-			peaks_pr = overlap_pr_overlap_peak_,
-			peak_ppr = overlap_ppr_overlap_peak_,
+			peaks_pr = overlap_pr.bfilt_overlap_peak,
+			peak_ppr = overlap_ppr.bfilt_overlap_peak,
 			peak_type = peak_type,
 			chrsz = chrsz_,
 			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 		}
 	}
 
-	File? reproducibility_overlap_optimal_peak_ =
-		if has_output_of_reproducibility_overlap then reproducibility_overlap__optimal_peak
-		else reproducibility_overlap.optimal_peak
-	File? reproducibility_overlap_reproducibility_qc_ =
-		if has_output_of_reproducibility_overlap then reproducibility_overlap__reproducibility_qc
-		else reproducibility_overlap.reproducibility_qc
-
-	Boolean has_input_of_reproducibility_idr =
-		length(select_all(idr_pr_idr_peak_))==num_rep
-	Boolean has_output_of_reproducibility_idr =
-		defined(reproducibility_idr__reproducibility_qc)
-
-	if ( has_input_of_reproducibility_idr && !has_output_of_reproducibility_idr &&
-		!align_only && !true_rep_only && enable_idr ) {
+	if ( !align_only && !true_rep_only && enable_idr ) {
 		# reproducibility QC for IDR peaks
 		call reproducibility as reproducibility_idr { input :
 			prefix = 'idr',
 			peaks = idr.bfilt_idr_peak,
-			peaks_pr = idr_pr_idr_peak_,
-			peak_ppr = idr_ppr_idr_peak_,
+			peaks_pr = idr_pr.bfilt_idr_peak,
+			peak_ppr = idr_ppr.bfilt_idr_peak,
 			peak_type = peak_type,
 			chrsz = chrsz_,
 			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 		}
 	}
 
-	File? reproducibility_idr_optimal_peak_ =
-		if has_output_of_reproducibility_idr then reproducibility_idr__optimal_peak
-		else reproducibility_idr.optimal_peak
-	File? reproducibility_idr_reproducibility_qc_ =
-		if has_output_of_reproducibility_idr then reproducibility_idr__reproducibility_qc
-		else reproducibility_idr.reproducibility_qc
-
 	# ATAqC
 	scatter( i in range(num_rep) ) {
-
-		Boolean has_input_of_ataqc = true # can run for any given inputs
-		Boolean has_output_of_ataqc = i<length(ataqc__txt) &&
-			defined(ataqc__txt[i])
-
-		if ( has_input_of_ataqc && !has_output_of_ataqc &&
-			!disable_ataqc ) {
+		if ( !disable_ataqc ) {
 			call ataqc { input :
 				paired_end = paired_end_[i],
-				read_len_log = read_len_log_[i],
-				flagstat_qc = flagstat_qc_[i],
-				bowtie2_log = align_log_[i],
-				pbc_qc = pbc_qc_[i],
-				dup_qc = dup_qc_[i],
+				read_len_log = bowtie2.read_len_log[i],
+				flagstat_qc = bowtie2.flagstat_qc[i],
+				bowtie2_log = bowtie2.align_log[i],
+				pbc_qc = filter.pbc_qc[i],
+				dup_qc = filter.dup_qc[i],
 				bam = bam_[i],
-				nodup_flagstat_qc = nodup_flagstat_qc_[i],
-				mito_dup_log = mito_dup_log_[i],
+				nodup_flagstat_qc = filter.flagstat_qc[i],
+				mito_dup_log = filter.mito_dup_log[i],
 				nodup_bam = nodup_bam_[i],
 				ta = ta_[i],
-				peak = if defined(idr_pr_idr_peak_[i]) then idr_pr_idr_peak_[i]
-					else reproducibility_overlap_optimal_peak_,
-				idr_peak = reproducibility_idr_optimal_peak_, #idr_peaks_ataqc[i],
-				overlap_peak= reproducibility_overlap_optimal_peak_, #overlap_peaks_ataqc[i],
-				pval_bw = pval_bw_[i],
+				peak = if defined(idr_pr.bfilt_idr_peak[i]) then idr_pr.bfilt_idr_peak[i]
+					else reproducibility_overlap.optimal_peak,
+				idr_peak = reproducibility_idr.optimal_peak,
+				overlap_peak= reproducibility_overlap.optimal_peak,
+				pval_bw = macs2_signal_track.pval_bw[i],
 				ref_fa = ref_fa_,
 				chrsz = chrsz_,
 				tss = tss_,
@@ -1131,11 +827,6 @@ workflow atac {
 		}
 	}
 
-	scatter( i in range(num_rep) ) {
-		File? ataqc_txt_ = if has_output_of_ataqc[i] then ataqc__txt[i] else ataqc.txt[i]
-		File? ataqc_html_ = if has_output_of_ataqc[i] then ataqc__html[i] else ataqc.html[i]
-	}
-
 	# Generate final QC report and JSON
 	call qc_report { input :
 		pipeline_ver = pipeline_ver,
@@ -1148,35 +839,36 @@ workflow atac {
 		peak_caller = 'macs2',
 		macs2_cap_num_peak = cap_num_peak,
 		idr_thresh = idr_thresh,
-		flagstat_qcs = flagstat_qc_,
-		nodup_flagstat_qcs = nodup_flagstat_qc_,
-		dup_qcs = dup_qc_,
-		pbc_qcs = pbc_qc_,
-		xcor_plots = xcor_plot_,
-		xcor_scores = xcor_score_,
-
-		frip_macs2_qcs = macs2_frip_qc_,
-		frip_macs2_qcs_pr1 = macs2_pr1_frip_qc_,
-		frip_macs2_qcs_pr2 = macs2_pr2_frip_qc_,
-
-		frip_macs2_qc_pooled = frip_macs2_qc_pooled_,
-		frip_macs2_qc_ppr1 = frip_macs2_qc_ppr1_,
-		frip_macs2_qc_ppr2 = frip_macs2_qc_ppr2_,
 		
-		idr_plots = idr.idr_plot,
-		idr_plots_pr = idr_pr_idr_plot_,
-		idr_plot_ppr = idr_ppr_idr_plot_,
-		frip_idr_qcs = idr.frip_qc,
-		frip_idr_qcs_pr = idr_pr_frip_qc_,
-		frip_idr_qc_ppr = idr_ppr_frip_qc_,
-		frip_overlap_qcs = overlap.frip_qc,
-		frip_overlap_qcs_pr = overlap_pr_frip_qc_,
-		frip_overlap_qc_ppr = overlap_ppr_frip_qc_,
-		idr_reproducibility_qc = reproducibility_idr_reproducibility_qc_,
-		overlap_reproducibility_qc = reproducibility_overlap_reproducibility_qc_,
+		flagstat_qcs = bowtie2.flagstat_qc,
+		nodup_flagstat_qcs = filter.flagstat_qc,
+		dup_qcs = filter.dup_qc,
+		pbc_qcs = filter.pbc_qc,
+		xcor_plots = xcor.plot_png,
+		xcor_scores = xcor.score,
 
-		ataqc_txts = ataqc_txt_,
-		ataqc_htmls = ataqc_html_,
+		frip_macs2_qcs = macs2.frip_qc,
+		frip_macs2_qcs_pr1 = macs2_pr1.frip_qc,
+		frip_macs2_qcs_pr2 = macs2_pr2.frip_qc,
+
+		frip_macs2_qc_pooled = macs2_pooled.frip_qc,
+		frip_macs2_qc_ppr1 = macs2_ppr1.frip_qc,
+		frip_macs2_qc_ppr2 = macs2_ppr2.frip_qc,
+
+		idr_plots = idr.idr_plot,
+		idr_plots_pr = idr_pr.idr_plot,
+		idr_plot_ppr = idr_ppr.idr_plot,
+		frip_idr_qcs = idr.frip_qc,
+		frip_idr_qcs_pr = idr_pr.frip_qc,
+		frip_idr_qc_ppr = idr_ppr.frip_qc,
+		frip_overlap_qcs = overlap.frip_qc,
+		frip_overlap_qcs_pr = overlap_pr.frip_qc,
+		frip_overlap_qc_ppr = overlap_ppr.frip_qc,
+		idr_reproducibility_qc = reproducibility_idr.reproducibility_qc,
+		overlap_reproducibility_qc = reproducibility_overlap.reproducibility_qc,
+
+		ataqc_txts = ataqc.txt,
+		ataqc_htmls = ataqc.html,
 	}
 
 	output {
@@ -1475,12 +1167,10 @@ task macs2 {
 	}
 	output {
 		File npeak = glob("*[!.][!b][!f][!i][!l][!t].narrowPeak.gz")[0]
-		File? bfilt_npeak = if defined(blacklist) then glob("*.bfilt.narrowPeak.gz")[0] else null_f
-		File? bfilt_npeak_bb = if defined(blacklist) then glob("*.bfilt.narrowPeak.bb")[0] else null_f
-		# hammock (.hammock.gz) and its index (.tbi)
-		# Array[File] bfilt_npeak_hammock = glob("*.bfilt.narrowPeak.hammock.gz*")
-		File? bfilt_npeak_hammock = if defined(blacklist) then glob("*.bfilt.narrowPeak.hammock.gz*")[0] else null_f
-		File? bfilt_npeak_hammock_tbi = if defined(blacklist) then glob("*.bfilt.narrowPeak.hammock.gz*")[1] else null_f
+		File bfilt_npeak = glob("*.bfilt.narrowPeak.gz")[0]
+		File bfilt_npeak_bb = glob("*.bfilt.narrowPeak.bb")[0]
+		File bfilt_npeak_hammock = glob("*.bfilt.narrowPeak.hammock.gz*")[0]
+		File bfilt_npeak_hammock_tbi = glob("*.bfilt.narrowPeak.hammock.gz*")[1]
 		File frip_qc = glob("*.frip.qc")[0]
 	}
 	runtime {
@@ -1540,7 +1230,8 @@ task idr {
 	File? null_f
 
 	command {
-		touch null 
+		${if defined(ta) then "" else "touch null.frip.qc"}
+		touch null
 		python $(which encode_idr.py) \
 			${peak1} ${peak2} ${peak_pooled} \
 			${"--prefix " + prefix} \
@@ -1556,7 +1247,6 @@ task idr {
 		File idr_peak = glob("*[!.][!b][!f][!i][!l][!t]."+peak_type+".gz")[0]
 		File bfilt_idr_peak = glob("*.bfilt."+peak_type+".gz")[0]
 		File bfilt_idr_peak_bb = glob("*.bfilt."+peak_type+".bb")[0]
-		# Array[File] bfilt_idr_peak_hammock = glob("*.bfilt."+peak_type+".hammock.gz*")
 		File bfilt_idr_peak_hammock = glob("*.bfilt."+peak_type+".hammock.gz*")[0]
 		File bfilt_idr_peak_hammock_tbi = glob("*.bfilt."+peak_type+".hammock.gz*")[1]
 		File idr_plot = glob("*.txt.png")[0]
@@ -1586,6 +1276,7 @@ task overlap {
 	File? null_f
 
 	command {
+		${if defined(ta) then "" else "touch null.frip.qc"}
 		touch null 
 		python $(which encode_naive_overlap.py) \
 			${peak1} ${peak2} ${peak_pooled} \
@@ -1601,7 +1292,6 @@ task overlap {
 		File overlap_peak = glob("*[!.][!b][!f][!i][!l][!t]."+peak_type+".gz")[0]
 		File bfilt_overlap_peak = glob("*.bfilt."+peak_type+".gz")[0]
 		File bfilt_overlap_peak_bb = glob("*.bfilt."+peak_type+".bb")[0]
-		# Array[File] bfilt_overlap_peak_hammock = glob("*.bfilt."+peak_type+".hammock.gz*")
 		File bfilt_overlap_peak_hammock = glob("*.bfilt."+peak_type+".hammock.gz*")[0]
 		File bfilt_overlap_peak_hammock_tbi = glob("*.bfilt."+peak_type+".hammock.gz*")[1]
 		File frip_qc = if defined(ta) then glob("*.frip.qc")[0] else glob("null")[0]
@@ -1616,7 +1306,7 @@ task overlap {
 
 task reproducibility {
 	String prefix
-	Array[File] peaks # peak files from pair of true replicates
+	Array[File]? peaks # peak files from pair of true replicates
 						# in a sorted order. for example of 4 replicates,
 						# 1,2 1,3 1,4 2,3 2,4 3,4.
                         # x,y means peak file from rep-x vs rep-y
@@ -1641,8 +1331,6 @@ task reproducibility {
 		File conservative_peak = glob("conservative_peak.*.gz")[0]
 		File optimal_peak_bb = glob("optimal_peak.*.bb")[0]
 		File conservative_peak_bb = glob("conservative_peak.*.bb")[0]
-		# Array[File] optimal_peak_hammock = glob("optimal_peak.*.hammock.gz*")
-		# Array[File] conservative_peak_hammock = glob("conservative_peak.*.hammock.gz*")
 		File optimal_peak_hammock = glob("optimal_peak.*.hammock.gz*")[0]
 		File optimal_peak_hammock_tbi = glob("optimal_peak.*.hammock.gz*")[1]
 		File conservative_peak_hammock = glob("conservative_peak.*.hammock.gz*")[0]
@@ -1759,7 +1447,7 @@ task qc_report {
 	Array[File?] pbc_qcs
 	Array[File?] xcor_plots
 	Array[File?] xcor_scores
-	Array[File?] idr_plots
+	Array[File]? idr_plots
 	Array[File?] idr_plots_pr
 	File? idr_plot_ppr
 	Array[File?] frip_macs2_qcs
@@ -1768,7 +1456,7 @@ task qc_report {
 	File? frip_macs2_qc_pooled
 	File? frip_macs2_qc_ppr1 
 	File? frip_macs2_qc_ppr2 
-	Array[File?] frip_idr_qcs
+	Array[File]? frip_idr_qcs
 	Array[File?] frip_idr_qcs_pr
 	File? frip_idr_qc_ppr 
 	Array[File?] frip_overlap_qcs
