@@ -275,7 +275,7 @@ def make_cat_align(args, cat_root):
 
     cat_align_dup = QCCategory(
         'dup',
-        html_head='<h2>Marking duplicates on (filtered BAMs)</h2>',
+        html_head='<h2>Marking duplicates (filtered BAMs)</h2>',
         html_foot="""
             <div id='help-filter'>
             Filtered out (samtools view -F 1804):
@@ -395,7 +395,7 @@ def make_cat_align(args, cat_root):
                 cat_align_nodup_flagstat.add_log(qc, key=ctl)
 
     cat_fraglen = QCCategory(
-        'fraglen_stat',
+        'frag_len_stat',
         html_head='<h2>Fragment length statistics</h2>',
         html_foot="""        
             <p>Open chromatin assays show distinct fragment length enrichments, as the cut
@@ -424,7 +424,7 @@ def make_cat_align(args, cat_root):
 
 def make_cat_peak(args, cat_root):
     cat_peak = QCCategory(
-        'peak',
+        'peak_calling',
         html_head='<h1>Peak calling quality metrics</h1><hr>',
         parent=cat_root
     )
@@ -489,7 +489,8 @@ def make_cat_peak(args, cat_root):
     )
     if args.num_peak_qcs:
         for i, qc in enumerate(args.num_peak_qcs):
-            rep = args.peak_caller + '_rep' + str(i+1)
+            # rep = args.peak_caller + '_rep' + str(i+1)
+            rep = 'rep' + str(i+1)
             if qc:
                 cat_num_peak.add_log(qc, key=rep)
     if args.idr_opt_num_peak_qc:

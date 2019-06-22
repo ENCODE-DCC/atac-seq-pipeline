@@ -426,6 +426,7 @@ def parse_annot_enrich_qc(txt):
         lines = fp.read().strip('\n').split('\n')
     for line in lines:
         key, reads, frac = line.split('\t')
+        frac = to_float(flac)
         if key == 'fraction_of_reads_in_universal_DHS_regions':
             result['fri_dhs'] = frac
         elif key == 'fraction_of_reads_in_blacklist_regions':
@@ -472,7 +473,7 @@ MAP_KEY_DESC_NUCLEOSOMAL_QC = {
     'nfr_over_mono_nun_reads_qc_reason' : 'NFR / mono-nuc reads (QC reason)',
     'nfr_peak_exists' : 'Presence of NFR peak',
     'mono_nuc_peak_exists' : 'Presence of Mono-Nuc peak',
-    'di_num_peak_exists' : 'Presence of Di-Nuc peak True',
+    'di_nuc_peak_exists' : 'Presence of Di-Nuc peak True',
 }
 
 def parse_nucleosomal_qc(txt):
@@ -484,23 +485,23 @@ def parse_nucleosomal_qc(txt):
         arr = line.split('\t')
         key = arr[0]
         if key == 'Fraction of reads in NFR':
-            result['frac_reads_in_nfr'] = arr[2]
-            result['frac_reads_in_nfr_qc_pass'] = arr[1]
+            result['frac_reads_in_nfr'] = to_float(arr[2])
+            result['frac_reads_in_nfr_qc_pass'] = to_bool(arr[1])
             result['frac_reads_in_nfr_qc_reason'] = arr[3]
 
         elif key == 'NFR / mono-nuc reads':
-            result['nfr_over_mono_nun_reads'] = arr[2]
-            result['nfr_over_mono_nun_reads_qc_pass'] = arr[1]
+            result['nfr_over_mono_nun_reads'] = to_float(arr[2])
+            result['nfr_over_mono_nun_reads_qc_pass'] = to_bool(arr[1])
             result['nfr_over_mono_nun_reads_qc_reason'] = arr[3]
 
         elif key == 'Presence of NFR peak':
-            result['nfr_peak_exists'] = arr[1]
+            result['nfr_peak_exists'] = to_bool(arr[1])
 
         elif key == 'Presence of Mono-Nuc peak':
-            result['mono_nuc_peak_exists'] = arr[1]
+            result['mono_nuc_peak_exists'] = to_bool(arr[1])
 
         elif key == 'Presence of Di-Nuc peak':
-            result['di_num_peak_exists'] = arr[1]
+            result['di_nuc_peak_exists'] = to_bool(arr[1])
 
         else:
             raise ValueError(
@@ -524,17 +525,17 @@ def parse_peak_region_size_qc(txt):
     for line in lines:
         key, val = line.split('\t')
         if key == 'Min size':
-            result['min_size'] = val
+            result['min_size'] = to_float(val)
         elif key == '25 percentile':
-            result['25_pct'] = val
+            result['25_pct'] = to_float(val)
         elif key == '50 percentile (median)':
-            result['50_pct'] = val
+            result['50_pct'] = to_float(val)
         elif key == '75 percentile':
-            result['75_pct'] = val
+            result['75_pct'] = to_float(val)
         elif key == 'Max size':
-            result['max_size'] = val
+            result['max_size'] = to_float(val)
         elif key == 'Mean':
-            result['mean'] = val
+            result['mean'] = to_float(val)
         else:
             raise ValueError(
                 'Wrong line in peak region size log file')
@@ -576,3 +577,6 @@ def to_number(var):
             return float(var)
         except ValueError:
             return None
+
+def to_bool(var):
+    return var.lower() in ('true', 't', 'ok', 'yes', '1')
