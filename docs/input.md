@@ -129,8 +129,6 @@ Parameter|Default|Description
 Parameter|Default|Description
 ---------|-------|-----------
 `atac.multimapping` | 4 | Multimapping reads
-`atac.bowtie2_param_pe` | `-X2000 --mm --local` | bowtie2 parameters for each read-endedness (paired-end). See bowtie2 --help for details.
-`atac.bowtie2_param_se` | `--local` | bowtie2 parameters for each read-endedness (single-ended). See bowtie2 --help for details.
 
 ## Optional filtering parameters
 

@@ -22,10 +22,6 @@ def parse_arguments():
     parser.add_argument('fastqs', nargs='+', type=str,
                         help='List of FASTQs (R1 and R2). \
                             FASTQs must be compressed with gzip (with .gz).')
-    parser.add_argument('--bowtie2-param-se', type=str, default='--local',
-                        help='Parameters for bowtie2 for single-ended samples.')
-    parser.add_argument('--bowtie2-param-pe', type=str, default='-X2000 --mm --local',
-                        help='Parameters for bowtie2 for paired-ended samples.')
     parser.add_argument('--paired-end', action="store_true",
                         help='Paired-end FASTQs.')
     parser.add_argument('--multimapping', default=4, type=int,
@@ -72,18 +68,17 @@ def make_read_length_file(fastq, out_dir):
     return txt
 
 def bowtie2_se(fastq, ref_index_prefix, 
-        multimapping, bowtie2_param_se, nth, out_dir):
+        multimapping, nth, out_dir):
     basename = os.path.basename(strip_ext_fastq(fastq))
     prefix = os.path.join(out_dir,
         strip_merge_fastqs_prefix(basename))        
     bam = '{}.bam'.format(prefix)
     align_log = '{}.align.log'.format(prefix)
 
-    cmd = 'bowtie2 {} {} --threads {} -x {} -U {} 2> {} '
+    cmd = 'bowtie2 {} --threads {} -x {} -U {} 2> {} '
     cmd += '| samtools view -Su /dev/stdin | samtools sort - {}'
     cmd = cmd.format(
         '-k {}'.format(multimapping+1) if multimapping else '',
-        bowtie2_param_se,
         nth,
         ref_index_prefix,
         fastq,
@@ -96,7 +91,7 @@ def bowtie2_se(fastq, ref_index_prefix,
     return bam, align_log
 
 def bowtie2_pe(fastq1, fastq2, ref_index_prefix, 
-        multimapping, bowtie2_param_pe, nth, out_dir):
+        multimapping, nth, out_dir):
     basename = os.path.basename(strip_ext_fastq(fastq1))
     prefix = os.path.join(out_dir,
         strip_merge_fastqs_prefix(basename))
@@ -104,12 +99,11 @@ def bowtie2_pe(fastq1, fastq2, ref_index_prefix,
     bai = '{}.bam.bai'.format(prefix)
     align_log = '{}.align.log'.format(prefix)
 
-    cmd = 'bowtie2 {} {} --threads {} -x {} '
+    cmd = 'bowtie2 {} -X2000 --mm --threads {} -x {} '
     cmd += '-1 {} -2 {} 2>{} | '
     cmd += 'samtools view -Su /dev/stdin | samtools sort - {}'
     cmd = cmd.format(
         '-k {}'.format(multimapping+1) if multimapping else '',
-        bowtie2_param_pe,
         nth,
         ref_index_prefix,
         fastq1,
@@ -171,13 +165,13 @@ def main():
         bam, align_log = bowtie2_pe(
             args.fastqs[0], args.fastqs[1], 
             bowtie2_index_prefix,
-            args.multimapping, args.bowtie2_param_pe, args.nth,
+            args.multimapping, args.nth,
             args.out_dir)
     else:
         bam, align_log = bowtie2_se(
             args.fastqs[0], 
             bowtie2_index_prefix,
-            args.multimapping, args.bowtie2_param_se, args.nth,
+            args.multimapping, args.nth,
             args.out_dir)
 
     # initialize multithreading

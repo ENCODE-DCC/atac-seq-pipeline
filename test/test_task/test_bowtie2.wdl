@@ -4,9 +4,6 @@ import "../../atac.wdl" as atac
 
 workflow test_bowtie2 {
 	Int multimapping
-	String bowtie2_param_pe
-	String bowtie2_param_se
-
 
 	Array[String] pe_trimmed_fastqs
 	Array[String] se_trimmed_fastqs
@@ -33,8 +30,6 @@ workflow test_bowtie2 {
 		fastq_R2 = pe_trimmed_fastqs[1],
 		multimapping = multimapping,
 		paired_end = true,
-		bowtie2_param_pe = bowtie2_param_pe,
-		bowtie2_param_se = bowtie2_param_se,
 
 		cpu = bowtie2_cpu,
 		mem_mb = bowtie2_mem_mb,
@@ -47,8 +42,6 @@ workflow test_bowtie2 {
 		fastq_R2 = pe_trimmed_fastqs[1],
 		multimapping = 0,
 		paired_end = true,
-		bowtie2_param_pe = bowtie2_param_pe,
-		bowtie2_param_se = bowtie2_param_se,
 
 		cpu = bowtie2_cpu,
 		mem_mb = bowtie2_mem_mb,
@@ -60,8 +53,6 @@ workflow test_bowtie2 {
 		fastq_R1 = se_trimmed_fastqs[0],
 		multimapping = multimapping,
 		paired_end = false,
-		bowtie2_param_pe = bowtie2_param_pe,
-		bowtie2_param_se = bowtie2_param_se,
 
 		cpu = bowtie2_cpu,
 		mem_mb = bowtie2_mem_mb,
@@ -73,8 +64,6 @@ workflow test_bowtie2 {
 		fastq_R1 = se_trimmed_fastqs[0],
 		multimapping = 0,
 		paired_end = false,
-		bowtie2_param_pe = bowtie2_param_pe,
-		bowtie2_param_se = bowtie2_param_se,
 
 		cpu = bowtie2_cpu,
 		mem_mb = bowtie2_mem_mb,

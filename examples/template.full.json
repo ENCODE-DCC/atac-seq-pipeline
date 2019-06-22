@@ -54,8 +54,6 @@
     ],
 
     "atac.multimapping" : 4,
-    "atac.bowtie2_param_pe" : "-X2000 --mm --local",
-    "atac.bowtie2_param_se" : "--local",
 
     "atac.mapq_thresh" : 30,
     "atac.dup_marker" : "picard",

@@ -57,10 +57,6 @@ workflow atac {
 	# parameters for align (align FASTQs and create raw BAM)
 	#String aligner = 'bowtie2' 		# bowtie2, custom
 	Int multimapping = 4			# for samples with multimapping reads
-	String bowtie2_param_se = '--local'
-									# params for bowtie2 (single-ended samples)
-	String bowtie2_param_pe = '-X2000 --mm --local' 
-									# params for bowtie2 (paired-ended samples)
 
 	# parameters for filter (filter/dedup raw BAM)
 	String dup_marker = 'picard'	# picard, sambamba
@@ -999,8 +995,6 @@ task bowtie2 {
 	File? fastq_R2
 	Boolean paired_end
 	Int multimapping
-	String bowtie2_param_se
-	String bowtie2_param_pe
 	Int cpu
 	Int mem_mb
 	Int time_hr
@@ -1012,14 +1006,11 @@ task bowtie2 {
 			${fastq_R1} ${fastq_R2} \
 			${if paired_end then "--paired-end" else ""} \
 			${"--multimapping " + multimapping} \
-			--bowtie2-param-se ' ${bowtie2_param_se}' \
-			--bowtie2-param-pe ' ${bowtie2_param_pe}' \
 			${"--nth " + cpu}
 	}
 	output {
 		File bam = glob("*.bam")[0]
 		File bai = glob("*.bai")[0]
-		File align_log = glob("*.align.log")[0]
 		File flagstat_qc = glob("*.flagstat.qc")[0]
 		File read_len_log = glob("*.read_length.txt")[0] # read_len
 	}
