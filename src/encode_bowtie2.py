@@ -75,7 +75,7 @@ def bowtie2_se(fastq, ref_index_prefix,
     bam = '{}.bam'.format(prefix)
     align_log = '{}.align.log'.format(prefix)
 
-    cmd = 'bowtie2 {} --threads {} -x {} -U {} 2> {} '
+    cmd = 'bowtie2 {} --mm --threads {} -x {} -U {} 2> {} '
     cmd += '| samtools view -Su /dev/stdin | samtools sort - {}'
     cmd = cmd.format(
         '-k {}'.format(multimapping+1) if multimapping else '',
@@ -174,7 +174,6 @@ def main():
             args.multimapping, args.nth,
             args.out_dir)
 
-    # initialize multithreading
     log.info('Running samtools index...')
     bai = samtools_index(bam, args.out_dir)
 
