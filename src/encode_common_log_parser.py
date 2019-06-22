@@ -1,9 +1,38 @@
 #!/usr/bin/env python
+"""
+ENCODE QC log parser wrapper which converts a log file into a dict
 
-# ENCODE DCC reporting module wrapper
-# Author: Jin Lee (leepc12@gmail.com)
+Author: Jin Lee (leepc12@gmail.com)
+"""
 
 from collections import OrderedDict
+
+
+MAP_KEY_DESC_FLAGSTAT_QC = {
+    'total' : 'Total',
+    'total_qc_failed' : 'Total(QC-failed)',
+    'duplicates' : 'Dupes',
+    'duplicates_qc_failed' : 'Dupes(QC-failed)',
+    'mapped' : 'Mapped',
+    'mapped_qc_failed' : 'Mapped(QC-failed)',
+    'mapped_pct' : '% Mapped',
+    'paired' : 'Paired',
+    'paired_qc_failed' : 'Paired(QC-failed)',
+    'read1' : 'Read1',
+    'read1_qc_failed' : 'Read1(QC-failed)',
+    'read2' : 'Read2',
+    'read2_qc_failed' : 'Read2(QC-failed)',
+    'paired_properly' : 'Properly Paired',
+    'paired_properly_qc_failed' : 'Properly Paired(QC-failed)',
+    'paired_properly_pct' : '% Properly Paired',
+    'with_itself' : 'With itself',
+    'with_itself_qc_failed' : 'With itself(QC-failed)',
+    'singletons' : 'Singletons',
+    'singletons_qc_failed' : 'Singletons(QC-failed)',
+    'singletons_pct' : '% Singleton',
+    'diff_chroms' : 'Diff. Chroms',
+    'diff_chroms_qc_failed' : 'Diff. Chroms (QC-failed)',
+}
 
 def parse_flagstat_qc(txt):
     result = OrderedDict()
@@ -160,6 +189,16 @@ def parse_flagstat_qc(txt):
         result['diff_chroms_qc_failed'] = int(diff_chroms_qc_failed)
     return result
 
+MAP_KEY_DESC_DUP_QC = {
+    'unpaired_reads' : 'Unpaired Reads',
+    'paired_reads' : 'Paired Reads',
+    'unmapped_reads' : 'Unmapped Reads',
+    'unpaired_dupes' : 'Unpaired Dupes',
+    'paired_dupes' : 'Paired Dupes',
+    'paired_opt_dupes' : 'Paired Opt. Dupes',
+    'dupes_pct' : '% Dupes/100',
+}
+
 def parse_dup_qc(txt):
     result = OrderedDict()
     if not txt: return result
@@ -238,17 +277,15 @@ def parse_dup_qc(txt):
         result['dupes_pct'] = float(dupes_pct)
     return result
 
-def int_or_none(var):
-    try:
-        return int(var)
-    except ValueError:
-        return None
-
-def float_or_none(var):
-    try:
-        return float(var)
-    except ValueError:
-        return None
+MAP_KEY_DESC_PBC_QC = {
+    'total_read_pairs' : 'Total Reads (Pairs)',
+    'distinct_read_pairs' : 'Distinct Reads (Pairs)',
+    'one_read_pair' : 'One Read (Pair)',
+    'two_read_pair' : 'Two Reads (Pairs)',
+    'NRF' : 'NRF = Distinct/Total',
+    'PBC1' : 'PBC1 = OnePair/Distinct',
+    'PBC2' : 'PBC2 = OnePair/TwoPair'
+}
 
 def parse_pbc_qc(txt):
     result = OrderedDict()
@@ -257,14 +294,26 @@ def parse_pbc_qc(txt):
         for line in f:
             arr = line.strip().split('\t')
             break
-    result['total_read_pairs'] = int_or_none(arr[0])
-    result['distinct_read_pairs'] = int_or_none(arr[1])
-    result['one_read_pair'] = int_or_none(arr[2])
-    result['two_read_pair'] = int_or_none(arr[3])
-    result['NRF'] = float_or_none(arr[4])
-    result['PBC1'] = float_or_none(arr[5])
-    result['PBC2'] = float_or_none(arr[6])
+    result['total_read_pairs'] = to_int(arr[0])
+    result['distinct_read_pairs'] = to_int(arr[1])
+    result['one_read_pair'] = to_int(arr[2])
+    result['two_read_pair'] = to_int(arr[3])
+    result['NRF'] = to_float(arr[4])
+    result['PBC1'] = to_float(arr[5])
+    result['PBC2'] = to_float(arr[6])
     return result
+
+MAP_KEY_DESC_XCOR_SCORE = {
+    'num_reads' : 'Reads',
+    'est_frag_len' : 'Est. Fragment Len.',
+    'corr_est_frag_len' : 'Corr. Est. Fragment Len.',
+    'phantom_peak' : 'Phantom Peak',
+    'corr_phantom_peak' : 'Corr. Phantom Peak',
+    'argmin_corr' : 'Argmin. Corr.',
+    'min_corr' : 'Min. Corr.',
+    'NSC' : 'NSC',
+    'RSC' : 'RSC',
+}
 
 def parse_xcor_score(txt):
     result = OrderedDict()
@@ -281,6 +330,20 @@ def parse_xcor_score(txt):
     result['NSC'] = float(arr[8])
     result['RSC'] = float(arr[9])
     return result
+
+MAP_KEY_DESC_JSD_QC = {
+    'pct_gen_enrich' : '% genome enriched',
+    'auc' : 'AUC',
+    'ch_div' : 'CHANCE divergence',
+    'elbow_pt' : 'Elbow Point',
+    'jsd' : 'JS Distance',
+    'syn_auc' : 'Synthetic AUC',
+    'syn_elbow_pt' : 'Synthetic Elbow Point',
+    'syn_jsd' : 'Synthetic JS Distance',
+    'syn_x_intcpt' : 'Synthetic X-intercept',
+    'x_intcpt' : 'X-intercept',
+    'diff_enrich' : 'diff. enrichment',
+}
 
 def parse_jsd_qc(txt):
     result = OrderedDict()
@@ -300,6 +363,28 @@ def parse_jsd_qc(txt):
     # result['diff_enrich'] = float(arr[10])
     return result
 
+MAP_KEY_DESC_REPRODUCIBILITY_QC = {
+    'Np' : 'Np',
+    'Nt' : 'Nt',
+    'N1' : 'N1',
+    'N2' : 'N2',
+    'N3' : 'N3',
+    'N4' : 'N4',
+    'N5' : 'N5',
+    'N6' : 'N6',
+    'N7' : 'N7',
+    'N8' : 'N8',
+    'N9' : 'N9',
+    'N10' : 'N10',
+    'N_opt' : 'N optimal',
+    'N_consv' : 'N conservative',
+    'opt_set' : 'Optimal Set',
+    'consv_set' : 'Conservative Set',
+    'rescue_ratio' : 'Rescue Ratio',
+    'self_consistency_ratio' : 'Self Consistency Ratio',
+    'reproducibility' : 'Reproducibility Test',
+}
+
 def parse_reproducibility_qc(txt):
     if not txt: return OrderedDict()
     with open(txt, 'r') as f:
@@ -315,153 +400,179 @@ def parse_reproducibility_qc(txt):
                 result[key] = float(result[key])
     return result
 
+MAP_KEY_DESC_FRIP_QC = {
+    'frip' : 'Fraction of Reads in Peaks',
+}
+
 def parse_frip_qc(txt):
     result = OrderedDict()
     if not txt: return result
     with open(txt, 'r') as f:
         frip = f.readlines()[0].strip()
-    result['FRiP'] = float(frip)
+    result['frip'] = float(frip)
     return result
 
-def parse_multi_col_txt(txt):
+MAP_KEY_DESC_ANNOT_ENRICH_QC = {
+    'fri_dhs' : 'Fraction of Reads in universal DHS regions',
+    'fri_blacklist' : 'Fraction of Reads in blacklist regions',
+    'fri_prom' : 'Fraction of Reads in promoter regions',
+    'fri_enh' : 'Fraction of Reads in enhancer regions',
+}
+
+def parse_annot_enrich_qc(txt):
+    result = OrderedDict()
+    if not txt: return result
+    with open(txt, 'r') as fp:
+        lines = fp.read().strip('\n').split('\n')
+    for line in lines:
+        key, reads, frac = line.split('\t')
+        if key == 'fraction_of_reads_in_universal_DHS_regions':
+            result['fri_dhs'] = frac
+        elif key == 'fraction_of_reads_in_blacklist_regions':
+            result['fri_blacklist'] = frac
+        elif key == 'fraction_of_reads_in_promoter_regions':
+            result['fri_prom'] = frac
+        elif key == 'fraction_of_reads_in_enhancer_regions':
+            result['fri_enh'] = frac
+        else:
+            raise ValueError(
+                'Wrong line in annot_enrich QC file')
+    return result
+
+MAP_KEY_DESC_PICARD_EST_LIB_SIZE_QC = {
+    'picard_est_lib_size' : 'Estimated library size by Picard tools',
+}
+
+def parse_picard_est_lib_size_qc(txt):
     result = OrderedDict()
     if not txt: return result
     with open(txt, 'r') as f:
-        lines = f.readlines()    
-    for line in lines:
-        line = line.strip().replace(' reads; of these:','')
-        arr = line.split('\t')
-        header = arr[0]
-        if len(arr)==2:
-            result[header] = arr[1]
-        elif len(arr)>2:
-            result[header] = arr[1:]
+        val = f.readlines()[0].strip()
+    result['picard_est_lib_size'] = float(val)
     return result
 
-def parse_ataqc_txt(txt): # to read ATAQC log
-    def num(s): # try to parse a number string (int->float->string)
-        try:
-            # not implemented
-            if '.' in s:
-                return float(s.strip())
-            else:
-                return int(s.strip())
-        except ValueError:
-            return s.strip()            
-    pre_parsed = parse_multi_col_txt(txt)
+MAP_KEY_DESC_TSS_ENRICH_QC = {
+    'tss_enrich' : 'TSS enrichment',
+}
+
+def parse_tss_enrich_qc(txt):
     result = OrderedDict()
     if not txt: return result
-    for key in pre_parsed:
-        val = pre_parsed[key]
-        if type(val)==list:
-            result[key] = [num(x) for x in val]
-        elif '- OK' in val:    
-            delim = '- OK'
-            arr = val.split(delim)
-            result[key] = [num(arr[0]), 'OK']
-        elif 'out of range' in val:
-            delim = 'out of range'
-            arr = val.split(delim)
-            result[key] = [num(arr[0]), '{}{}'.format(delim,arr[1])]
-        else:
-            result[key] = num(val)
+    with open(txt, 'r') as f:
+        val = f.readlines()[0].strip()
+    result['tss_enrich'] = float(val)
     return result
 
-def get_long_keyname(key): #, paired_end=False):
-    short_to_long = {
-        'total' : 'Total',
-        'total_qc_failed' : 'Total(QC-failed)',
-        'duplicates' : 'Dupes',
-        'duplicates_qc_failed' : 'Dupes(QC-failed)',
-        'mapped' : 'Mapped',
-        'mapped_qc_failed' : 'Mapped(QC-failed)',
-        'mapped_pct' : '% Mapped',
-        'paired' : 'Paired',
-        'paired_qc_failed' : 'Paired(QC-failed)',
-        'read1' : 'Read1',
-        'read1_qc_failed' : 'Read1(QC-failed)',
-        'read2' : 'Read2',
-        'read2_qc_failed' : 'Read2(QC-failed)',
-        'paired_properly' : 'Properly Paired',
-        'paired_properly_qc_failed' : 'Properly Paired(QC-failed)',
-        'paired_properly_pct' : '% Properly Paired',
-        'with_itself' : 'With itself',
-        'with_itself_qc_failed' : 'With itself(QC-failed)',
-        'singletons' : 'Singletons',
-        'singletons_qc_failed' : 'Singletons(QC-failed)',
-        'singletons_pct' : '% Singleton',
-        'diff_chroms' : 'Diff. Chroms',
-        'diff_chroms_qc_failed' : 'Diff. Chroms (QC-failed)',
-        'unpaired_reads' : 'Unpaired Reads',
-        'paired_reads' : 'Paired Reads',
-        'unmapped_reads' : 'Unmapped Reads',
-        'unpaired_dupes' : 'Unpaired Dupes',
-        'paired_dupes' : 'Paired Dupes',
-        'paired_opt_dupes' : 'Paired Opt. Dupes',
-        'dupes_pct' : '% Dupes/100',
-        'num_reads' : 'Reads',
-        'est_frag_len' : 'Est. Fragment Len.',
-        'corr_est_frag_len' : 'Corr. Est. Fragment Len.',
-        'phantom_peak' : 'Phantom Peak',
-        'corr_phantom_peak' : 'Corr. Phantom Peak',
-        'argmin_corr' : 'Argmin. Corr.',
-        'min_corr' : 'Min. Corr.',
-        'NSC' : 'NSC',
-        'RSC' : 'RSC',
-        'Nt' : 'Nt',
-        'N1' : 'N1',
-        'N2' : 'N2',
-        'Np' : 'Np',
-        'N_opt' : 'N optimal',
-        'N_consv' : 'N conservative',
-        'opt_set' : 'Optimal Set',
-        'consv_set' : 'Conservative Set',
-        'rescue_ratio' : 'Rescue Ratio',
-        'self_consistency_ratio' : 'Self Consistency Ratio',
-        'reproducibility_test' : 'Reproducibility Test',
-        'FRiP' : 'Fraction of Reads in Peak',
-        'pct_gen_enrich' : '% genome enriched',
-        'auc' : 'AUC',
-        'ch_div' : 'CHANCE divergence',
-        'elbow_pt' : 'Elbow Point',
-        'jsd' : 'JS Distance',
-        'syn_auc' : 'Synthetic AUC',
-        'syn_elbow_pt' : 'Synthetic Elbow Point',
-        'syn_jsd' : 'Synthetic JS Distance',
-        'syn_x_intcpt' : 'Synthetic X-intercept',
-        'x_intcpt' : 'X-intercept',
-        'diff_enrich' : 'diff. enrichment',
-        'total_read_pairs' : 'Total Reads (Pairs)',
-        'distinct_read_pairs' : 'Distinct Reads (Pairs)',
-        'one_read_pair' : 'One Read (Pair)',
-        'two_read_pair' : 'Two Reads (Pairs)',
-        'NRF' : 'NRF = Distinct/Total',
-        'PBC1' : 'PBC1 = OnePair/Distinct',
-        'PBC2' : 'PBC2 = OnePair/TwoPair'
-    }
+MAP_KEY_DESC_NUCLEOSOMAL_QC = {
+    'frac_reads_in_nfr' : 'Fraction of reads in NFR',
+    'frac_reads_in_nfr_qc_pass' : 'Fraction of reads in NFR (QC pass)',
+    'frac_reads_in_nfr_qc_reason' : 'Fraction of reads in NFR (QC reason)',
+    'nfr_over_mono_nun_reads' : 'NFR / mono-nuc reads',
+    'nfr_over_mono_nun_reads_qc_pass' : 'NFR / mono-nuc reads (QC pass)',
+    'nfr_over_mono_nun_reads_qc_reason' : 'NFR / mono-nuc reads (QC reason)',
+    'nfr_peak_exists' : 'Presence of NFR peak',
+    'mono_nuc_peak_exists' : 'Presence of Mono-Nuc peak',
+    'di_num_peak_exists' : 'Presence of Di-Nuc peak True',
+}
 
-    # short_to_long_se = {
-    #     'total_read_pairs' : 'Total Reads',
-    #     'distinct_read_pairs' : 'Distinct Reads',
-    #     'one_read_pair' : 'One Read',
-    #     'two_read_pair' : 'Two Reads',
-    #     'NRF' : 'NRF = Distinct/Total',
-    #     'PBC1' : 'PBC1 = OneRead/Distinct',
-    #     'PBC2' : 'PBC2 = OneRead/TwoReads',}
+def parse_nucleosomal_qc(txt):
+    result = OrderedDict()
+    if not txt: return result
+    with open(txt, 'r') as fp:
+        lines = fp.read().strip('\n').split('\n')
+    for line in lines:
+        arr = line.split('\t')
+        key = arr[0]
+        if key == 'Fraction of reads in NFR':
+            result['frac_reads_in_nfr'] = arr[2]
+            result['frac_reads_in_nfr_qc_pass'] = arr[1]
+            result['frac_reads_in_nfr_qc_reason'] = arr[3]
 
-    # short_to_long_pe = {
-    #     'total_read_pairs' : 'Total Read Pairs',
-    #     'distinct_read_pairs' : 'Distinct Read Pairs',
-    #     'one_read_pair' : 'One Read Pair',
-    #     'two_read_pair' : 'Two Read Pairs',
-    #     'NRF' : 'NRF = Distinct/Total',
-    #     'PBC1' : 'PBC1 = OnePair/Distinct',
-    #     'PBC2' : 'PBC2 = OnePair/TwoPair',}
+        elif key == 'NFR / mono-nuc reads':
+            result['nfr_over_mono_nun_reads'] = arr[2]
+            result['nfr_over_mono_nun_reads_qc_pass'] = arr[1]
+            result['nfr_over_mono_nun_reads_qc_reason'] = arr[3]
 
-    if key in short_to_long:
-        return short_to_long[key]
-    # if paired_end and key in short_to_long_pe:
-    #     return short_to_long_pe[key]
-    # if not paired_end and key in short_to_long_se:
-    #     return short_to_long_se[key]
-    return key.replace('_',' ').capitalize()
+        elif key == 'Presence of NFR peak':
+            result['nfr_peak_exists'] = arr[1]
+
+        elif key == 'Presence of Mono-Nuc peak':
+            result['mono_nuc_peak_exists'] = arr[1]
+
+        elif key == 'Presence of Di-Nuc peak':
+            result['di_num_peak_exists'] = arr[1]
+
+        else:
+            raise ValueError(
+                'Wrong line in nucleosomal QC file')
+    return result
+
+MAP_KEY_DESC_PEAK_REGION_SIZE_QC = {
+    'min_size' : 'Min size',
+    '25_pct' : '25 percentile',
+    '50_pct' : '50 percentile (median)',
+    '75_pct' : '75 percentile',
+    'max_size' : 'Max size',
+    'mean' : 'Mean',
+}
+
+def parse_peak_region_size_qc(txt):
+    result = OrderedDict()
+    if not txt: return result
+    with open(txt, 'r') as fp:
+        lines = fp.read().strip('\n').split('\n')
+    for line in lines:
+        key, val = line.split('\t')
+        if key == 'Min size':
+            result['min_size'] = val
+        elif key == '25 percentile':
+            result['25_pct'] = val
+        elif key == '50 percentile (median)':
+            result['50_pct'] = val
+        elif key == '75 percentile':
+            result['75_pct'] = val
+        elif key == 'Max size':
+            result['max_size'] = val
+        elif key == 'Mean':
+            result['mean'] = val
+        else:
+            raise ValueError(
+                'Wrong line in peak region size log file')
+    return result
+
+MAP_KEY_DESC_NUM_PEAK_QC = {
+    'num_peak' : 'Number of peaks',
+}
+
+def parse_num_peak_qc(txt):
+    result = OrderedDict()
+    if not txt: return result
+    with open(txt, 'r') as f:
+        val = f.readlines()[0].strip()
+    result['num_peak'] = int(val)
+    return result
+
+def to_int(var):
+    try:
+        return int(var)
+    except ValueError:
+        return None
+
+def to_float(var):
+    try:
+        return float(var)
+    except ValueError:
+        return None
+
+def to_number(var):
+    """Convert to number or return None
+    """
+    try:
+        if '.' in var:
+            raise ValueError
+        return int(var)
+    except ValueError:
+        try:
+            return float(var)
+        except ValueError:
+            return None

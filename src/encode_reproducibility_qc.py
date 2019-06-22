@@ -8,7 +8,7 @@ import os
 import argparse
 import multiprocessing
 from encode_common import *
-from encode_common_genomic import peak_to_bigbed, peak_to_hammock
+from encode_common_genomic import peak_to_bigbed, peak_to_hammock, get_region_size_metrics, get_num_peaks
 
 def parse_arguments():
     parser = argparse.ArgumentParser(prog='ENCODE DCC reproducibility QC.',
@@ -106,8 +106,14 @@ def main():
         reproducibility = 'fail'
 
     log.info('Writing optimal/conservative peak files...')
-    optimal_peak_file = os.path.join(args.out_dir, 'optimal_peak.{}.gz'.format(args.peak_type))
-    conservative_peak_file = os.path.join(args.out_dir, 'conservative_peak.{}.gz'.format(args.peak_type))
+    optimal_peak_file = os.path.join(
+        args.out_dir, '{}optimal_peak.{}.gz'.format(
+            (args.prefix + '.') if args.prefix else '',
+            args.peak_type))
+    conservative_peak_file = os.path.join(
+        args.out_dir, '{}conservative_peak.{}.gz'.format(
+            (args.prefix + '.') if args.prefix else '',
+            args.peak_type))
     copy_f_to_f(optimal_peak, optimal_peak_file)
     copy_f_to_f(conservative_peak, conservative_peak_file)
 
@@ -153,6 +159,12 @@ def main():
             reproducibility)
         fp.write(header)
         fp.write(line)
+
+    log.info('Calculating (optimal) peak region size QC/plot...')
+    region_size_qc, region_size_plot = get_region_size_metrics(optimal_peak_file)
+
+    log.info('Calculating number of peaks (optimal)...')
+    num_peak_qc = get_num_peaks(optimal_peak_file)
 
     log.info('All done.')
 

@@ -278,7 +278,7 @@ def infer_pair_label_from_idx(n, idx, prefix='rep'):
     for i in range(n):
         for j in range(i+1,n):
             if idx==cnt:
-                return '{}{}-{}{}'.format(
+                return '{}{}_vs_{}{}'.format(
                     prefix, i+1, prefix, j+1)
             cnt += 1
     raise argparse.ArgumentTypeError(

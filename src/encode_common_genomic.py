@@ -393,7 +393,7 @@ def get_read_length(fastq):
     return int(max_length)
 
 def remove_read_group(bam, out_dir='.'):
-    basename = os.path.basename(bam.rsplit('.bam',1)[0])
+    basename = os.path.basename(strip_ext_bam(bam))
     prefix = os.path.join(out_dir, basename)
     new_bam = '{}.no_rg.bam'.format(prefix)
 
@@ -404,3 +404,81 @@ def remove_read_group(bam, out_dir='.'):
     run_shell_cmd(cmd)
 
     return new_bam
+
+def get_region_size_metrics(peak_file, out_dir='.'):
+    '''
+    From the peak file, return a plot of the region size distribution and
+    the quartile metrics (summary from R)
+    '''
+    import pandas as pd
+    import numpy as np
+    from matplotlib import pyplot as plt
+    from collections import OrderedDict
+
+    basename = os.path.basename(strip_ext_peak(peak_file))
+    prefix = os.path.join(out_dir, basename)
+    log = '{}.peak_region_size.qc'.format(prefix)
+    plot = '{}.peak_region_size.png'.format(prefix)
+
+    # Load peak file. If it fails, return nothing as above
+    peak_df = pd.read_table(peak_file, compression='gzip', header=None)
+
+    # Subtract third column from second to get summary
+    region_sizes = peak_df.ix[:,2] - peak_df.ix[:,1]
+
+    # Summarize and store in ordered dict
+    peak_summary_stats = region_sizes.describe()
+
+    peak_size_summ = OrderedDict([
+        ('Min size', peak_summary_stats['min']),
+        ('25 percentile', peak_summary_stats['25%']),
+        ('50 percentile (median)', peak_summary_stats['50%']),
+        ('75 percentile', peak_summary_stats['75%']),
+        ('Max size', peak_summary_stats['max']),
+        ('Mean', peak_summary_stats['mean']),
+    ])
+
+    # Plot density diagram using matplotlib
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+
+    y, binEdges = np.histogram(region_sizes, bins=100)
+    bincenters = 0.5 * (binEdges[1:] + binEdges[:-1])
+
+    # write to log file
+    with open(log, 'w') as fp:
+        for key, val in peak_size_summ.items():
+            fp.write(key + '\t' + str(val) + '\n')
+
+    plt.plot(bincenters, y, '-')
+    filename = peak_file.split('/')[-1]
+    ax.set_title('Peak width distribution for {0}'.format(filename))
+
+    # write to plot file
+    fig.savefig(plot, format='png')
+
+    return log, plot
+
+def get_num_peaks(peak_file, out_dir='.'):
+    '''
+    From the peak file, return number of lines in it
+    '''
+    basename = os.path.basename(strip_ext_peak(peak_file))
+    prefix = os.path.join(out_dir, basename)
+    log = '{}.num_peak.qc'.format(prefix)
+
+    with open(log, 'w') as fp:
+        fp.write(str(get_num_lines(peak_file))+'\n')
+    return log
+
+def determine_paired(bam):
+    '''
+    Quick function to determine if the BAM file is paired end or single end
+    '''
+    num_paired_reads = int(subprocess.check_output(['samtools',
+                                                    'view', '-f', '0x1',
+                                                    '-c', bam]).strip())
+    if num_paired_reads > 1:
+        return True
+    else:
+        return False

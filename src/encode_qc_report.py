@@ -1,78 +1,20 @@
 #!/usr/bin/env python
 
-# ENCODE DCC reporting module wrapper
+# ENCODE reporting module wrapper
 # Author: Jin Lee (leepc12@gmail.com)
 
 import sys
 import os
 import json
-import base64
 import argparse
 from encode_common import *
 from encode_common_log_parser import *
-from encode_common_html import *
+from encode_lib_qc_category import QCCategory
 from collections import OrderedDict
 
-ATAQC_HTML_HEAD = \
-'''
-<head>
-<title>QC report</title>
-<style>
-  .qc_table {
-      font-family:"Lucida Sans Unicode", "Lucida Grande", Sans-Serif;
-      font-size:12px;
-      width:480px;
-      text-align:left;
-      border-collapse:collapse;
-      margin:20px;
-  }
-
-  .qc_table th{
-      font-size:14px;
-      font-weight:normal;
-      background:#8c1515;
-      border-top:4px solid #700000;
-      border-bottom:1px solid #fff;
-      color:white;
-      padding:8px;
-  }
-
-  .qc_table td{
-      background:#f2f1eb;
-      border-bottom:1px solid #fff;
-      color:black;
-      border-top:1px solid transparent;
-      padding:8px;
-  }
-
-  .qc_table .fail{
-      color:#ff0000;
-      font-weight:bold;
-  }
-  </style>
-</head>
-'''
-
-def split_entries_and_extend(l, delim='_:_'):
-    result = []
-    for a in l:
-        if type(a)==str:
-            result.extend(a.split(delim))
-        else:
-            result.append(a)
-    test_not_all_empty = [r for r in result if r]
-    # if all empty then return []
-    return result if test_not_all_empty else []
-
-def str2bool(s):
-    if s not in ['false', 'true', 'False', 'True']:
-        raise ValueError('Not a valid boolean string')
-    return s=='True' or s=='true'
 
 def parse_arguments():
-    parser = argparse.ArgumentParser(
-                        prog='ENCODE DCC generate HTML report and QC JSON.',
-                        description='')
+    parser = argparse.ArgumentParser(prog='ENCODE Final QC report/JSON generator.')
     parser.add_argument('--title', type=str, default='Untitled',
                         help='Title of sample.')
     parser.add_argument('--desc', type=str, default='No description',
@@ -93,8 +35,10 @@ def parse_arguments():
                         help='List of true/false for paired endedness of control.')
     parser.add_argument('--pipeline-type', type=str, required=True,                        
                         help='Pipeline type.')
+    parser.add_argument('--aligner', type=str, required=True,
+                        help='Aligner.')
     parser.add_argument('--peak-caller', type=str, required=True,
-                        help='Description for sample.')
+                        help='Peak caller.')
     parser.add_argument('--macs2-cap-num-peak', default=0, type=int,
                         help='Capping number of peaks by taking top N peaks for MACS.')
     parser.add_argument('--spp-cap-num-peak', default=0, type=int,
@@ -172,14 +116,52 @@ def parse_arguments():
     parser.add_argument('--frip-overlap-qc-ppr', type=str, nargs='*',
                         help='Overlapping peak FRiP score file \
                             for pooled pseudo replicates.')
+
     parser.add_argument('--idr-reproducibility-qc', type=str, nargs='*',
                         help='IDR reproducibility QC file.')
     parser.add_argument('--overlap-reproducibility-qc', type=str, nargs='*',
                         help='Overlapping peak reproducibility QC file.')
-    parser.add_argument('--ataqc-txts', type=str, nargs='*',
-                        help='ATAQC QC metrics JSON files *_qc.txt.')
-    parser.add_argument('--ataqc-htmls', type=str, nargs='*',
-                        help='ATAQC HTML reports *_qc.html.')
+
+    parser.add_argument('--annot-enrich-qcs', type=str, nargs='*',
+                        help='List of annot_enrich QC files.')
+    parser.add_argument('--tss-enrich-qcs', type=str, nargs='*',
+                        help='List of TSS enrichment QC files.')
+    parser.add_argument('--tss-large-plots', type=str, nargs='*',
+                        help='List of TSS enrichment large plots.')
+    parser.add_argument('--roadmap-compare-plots', type=str, nargs='*',
+                        help='List of Roadmap-compare plots.')
+    parser.add_argument('--fraglen-dist-plots', type=str, nargs='*',
+                        help='List of fragment length distribution plots.')
+    parser.add_argument('--fraglen-nucleosomal-qcs', type=str, nargs='*',
+                        help='List of fragment length nucleosomal QC files.')
+    parser.add_argument('--gc-plots', type=str, nargs='*',
+                        help='List of GC bias plots.')
+    parser.add_argument('--preseq-plots', type=str, nargs='*',
+                        help='List of preseq plots.')
+    parser.add_argument('--picard-est-lib-size-qcs', type=str, nargs='*',
+                        help='List of Picard estimated library size QC files.')
+
+    parser.add_argument('--peak-region-size-qcs', type=str, nargs='*',
+                        help='List of peak region size QC files.')
+    parser.add_argument('--peak-region-size-plots', type=str, nargs='*',
+                        help='List of peak region size plot files.')
+    parser.add_argument('--num-peak-qcs', type=str, nargs='*',
+                        help='List of QC files with number of peaks.')
+
+    parser.add_argument('--idr-opt-peak-region-size-qc', type=str, nargs='*',
+                        help='IDR opt peak region size QC files.')
+    parser.add_argument('--idr-opt-peak-region-size-plot', type=str, nargs='*',
+                        help='IDR opt peak region size plot files.')
+    parser.add_argument('--idr-opt-num-peak-qc', type=str, nargs='*',
+                        help='QC file with number of peaks in IDR opt peak.')
+
+    parser.add_argument('--overlap-opt-peak-region-size-qc', type=str, nargs='*',
+                        help='overlap opt peak region size QC files.')
+    parser.add_argument('--overlap-opt-peak-region-size-plot', type=str, nargs='*',
+                        help='overlap opt peak region size plot files.')
+    parser.add_argument('--overlap-opt-num-peak-qc', type=str, nargs='*',
+                        help='QC file with number of peaks in overlap opt peak.')
+
     parser.add_argument('--out-qc-html', default='qc.html', type=str,
                         help='Output QC report HTML file.')
     parser.add_argument('--out-qc-json', default='qc.json', type=str,
@@ -192,7 +174,7 @@ def parse_arguments():
                         help='Log level')
     args = parser.parse_args()
 
-    # _:_
+    # parse with a special delimiter "_:_"    
     for a in vars(args):
         if type(eval('args.{}'.format(a)))==list:
             exec('args.{} = split_entries_and_extend(args.{})'.format(a,a))        
@@ -213,418 +195,679 @@ def parse_arguments():
     log.info(sys.argv)
     return args
 
-def get_full_name(pipeline_type):
-    if pipeline_type=='atac':
-        return 'ATAC-Seq'
-    elif pipeline_type=='dnase':
-        return 'DNase-Seq'
-    elif pipeline_type=='tf':
-        return 'TF ChIP-Seq'
-    elif pipeline_type=='histone':
-        return 'Histone ChIP-Seq'
-    return pipeline_type
-
-def get_rep_labels(arr, paired_ends=[]):
+def split_entries_and_extend(l, delim='_:_'):
     result = []
-    for i, a in enumerate(arr):
-        s = 'rep'+str(i+1)
-        if paired_ends:
-            if paired_ends[i]:
-                s+= ' (PE)'
-            else:
-                s+= ' (SE)'
-        result.append(s)
-    return result
+    for a in l:
+        if isinstance(a, str):
+            result.extend(a.split(delim))
+        else:
+            result.append(a)
+    test_not_all_empty = [r for r in result if r]
+    # if all empty then return []
+    return result if test_not_all_empty else []
 
-def get_ctl_labels(arr, paired_ends=[]):
-    result = []
-    for i, a in enumerate(arr):
-        s = 'ctl'+str(i+1)
-        if paired_ends:
-            if paired_ends[i]:
-                s+= ' (PE)'
-            else:
-                s+= ' (SE)'
-        result.append(s)
-    return result
+def str2bool(s):
+    if s not in ['false', 'true', 'False', 'True']:
+        raise ValueError('Not a valid boolean string')
+    return s=='True' or s=='true'
+
+MAP_KEY_DESC_GENERAL = {
+    'date': 'Report generated at',
+    'title': 'Title',
+    'description': 'Description',
+    'pipeline_ver': 'Pipeline version',
+    'pipeline_type': 'Pipeline type',
+    'aligner': 'Aligner',
+    'peak_caller': 'Peak caller',
+    'genome': 'Genome',
+    'paired_end': 'Paired-end per replicate',
+    'ctl_paired_end': 'Control paired-end per replicate',
+}
+
+def make_cat_root(args):
+    cat_root = QCCategory(
+        'root',
+        html_head='<h1>QC Report</h1><hr>',
+        map_key_desc=MAP_KEY_DESC_GENERAL
+    )
+
+    # add general information dict to cat_root
+    d_general = OrderedDict([
+        ('date', now()),
+        ('title', args.title),
+        ('description', args.desc),
+        ('pipeline_ver', args.pipeline_ver),
+        ('peak_caller', args.peak_caller),
+        ('aligner', args.aligner),
+        ('genome', args.genome),
+        ('paired_end', args.paired_ends),
+    ])
+    if args.ctl_paired_ends:
+        d_general['ctl_paired_end'] = args.ctl_paired_ends
+    cat_root.add_log(d_general, key='general')
+
+    return cat_root
+
+def make_cat_align(args, cat_root):
+    cat_align = QCCategory(
+        'alignment',
+        html_head='<h1>Alignment quality metrics</h1><hr>',
+        parent=cat_root
+    )
+
+    cat_align_flagstat = QCCategory(
+        'flagstat',
+        html_head='<h2>Samtools flagstat (raw BAM)</h2>',
+        parser=parse_flagstat_qc,
+        map_key_desc=MAP_KEY_DESC_FLAGSTAT_QC,
+        parent=cat_align
+    )
+    if args.flagstat_qcs:
+        for i, qc in enumerate(args.flagstat_qcs):
+            rep = 'rep' + str(i + 1)
+            if qc:
+                cat_align_flagstat.add_log(qc, key=rep)
+    if args.ctl_flagstat_qcs:
+        for i, qc in enumerate(args.ctl_flagstat_qcs):
+            ctl = 'ctl' + str(i + 1)
+            if qc:
+                cat_align_flagstat.add_log(qc, key=ctl)
+
+    cat_align_dup = QCCategory(
+        'dup',
+        html_head='<h2>Marking duplicates on (filtered BAMs)</h2>',
+        html_foot="""
+            <div id='help-filter'>
+            Filtered out (samtools view -F 1804):
+            <ul>
+            <li>read unmapped (0x4)</li>
+            <li>mate unmapped (0x8, for paired-end)</li>
+            <li>not primary alignment (0x100)</li>
+            <li>read fails platform/vendor quality checks (0x200)</li>
+            <li>read is PCR or optical duplicate (0x400)</li>
+            </ul></p></div><br>        
+        """,
+        parser=parse_dup_qc,
+        map_key_desc=MAP_KEY_DESC_DUP_QC,
+        parent=cat_align
+    )
+    if args.dup_qcs:
+        for i, qc in enumerate(args.dup_qcs):
+            rep = 'rep' + str(i + 1)
+            if qc:
+                cat_align_dup.add_log(qc, key=rep)
+    if args.ctl_dup_qcs:
+        for i, qc in enumerate(args.ctl_dup_qcs):
+            ctl = 'ctl' + str(i + 1)
+            if qc:
+                cat_align_dup.add_log(qc, key=ctl)
+
+    cat_align_pbc = QCCategory(
+        'pbc',
+        html_head='<h2>Library complexity (filtered non-mito BAM)</h2>',
+        html_foot="""
+            <div id='help-pbc'>
+            <p>Mitochondrial reads are filtered out by default. 
+            The non-redundant fraction (NRF) is the fraction of non-redundant mapped reads
+            in a dataset; it is the ratio between the number of positions in the genome
+            that uniquely mapped reads map to and the total number of uniquely mappable
+            reads. The NRF should be > 0.8. The PBC1 is the ratio of genomic locations
+            with EXACTLY one read pair over the genomic locations with AT LEAST one read
+            pair. PBC1 is the primary measure, and the PBC1 should be close to 1.
+            Provisionally 0-0.5 is severe bottlenecking, 0.5-0.8 is moderate bottlenecking,
+            0.8-0.9 is mild bottlenecking, and 0.9-1.0 is no bottlenecking. The PBC2 is
+            the ratio of genomic locations with EXACTLY one read pair over the genomic
+            locations with EXACTLY two read pairs. The PBC2 should be significantly
+            greater than 1.</p><br>
+            <p>NRF (non redundant fraction) <br>
+            PBC1 (PCR Bottleneck coefficient 1) <br>
+            PBC2 (PCR Bottleneck coefficient 2) <br>
+            PBC1 is the primary measure. Provisionally <br>
+            <ul>
+            <li>0-0.5 is severe bottlenecking</li>
+            <li>0.5-0.8 is moderate bottlenecking </li>
+            <li>0.8-0.9 is mild bottlenecking </li>
+            <li>0.9-1.0 is no bottlenecking </li>
+            </ul></p></div><br>
+        """,
+        parser=parse_pbc_qc,
+        map_key_desc=MAP_KEY_DESC_PBC_QC,
+        parent=cat_align
+    )
+    if args.pbc_qcs:
+        for i, qc in enumerate(args.pbc_qcs):
+            rep = 'rep' + str(i + 1)
+            if qc:
+                cat_align_pbc.add_log(qc, key=rep)
+    if args.ctl_pbc_qcs:
+        for i, qc in enumerate(args.ctl_pbc_qcs):
+            ctl = 'ctl' + str(i + 1)
+            if qc:
+                cat_align_pbc.add_log(qc, key=ctl)
+    
+    cat_align_lib_size = QCCategory(
+        'lib_size',
+        parser=parse_picard_est_lib_size_qc,
+        map_key_desc=MAP_KEY_DESC_PICARD_EST_LIB_SIZE_QC,
+        parent=cat_align
+    )
+    if args.picard_est_lib_size_qcs:
+        for i, qc in enumerate(args.picard_est_lib_size_qcs):
+            rep = 'rep' + str(i + 1)
+            if qc:
+                cat_align_lib_size.add_log(qc, key=rep)
+
+    cat_align_preseq = QCCategory(
+        'preseq',
+        html_foot="""
+            <p>Preseq performs a yield prediction by subsampling the reads, calculating the
+            number of distinct reads, and then extrapolating out to see where the
+            expected number of distinct reads no longer increases. The confidence interval
+            gives a gauge as to the validity of the yield predictions.</p>
+        """,
+        parent=cat_align
+    )
+    if args.preseq_plots:
+        for i, plot in enumerate(args.preseq_plots):
+            rep = 'rep' + str(i + 1)
+            if plot:
+                cat_align_preseq.add_plot(plot, key=rep, size_pct=50)
+
+    cat_align_nodup_flagstat = QCCategory(
+        'nodup_flagstat',
+        html_head='<h2>Samtools flagstat (filtered/deduped BAM)</h2>',
+        html_foot="""
+            <p>Filtered and duplicates removed</p><br>
+        """,
+        parser=parse_flagstat_qc,
+        map_key_desc=MAP_KEY_DESC_FLAGSTAT_QC,
+        parent=cat_align
+    )
+    if args.nodup_flagstat_qcs:
+        for i, qc in enumerate(args.nodup_flagstat_qcs):
+            rep = 'rep' + str(i + 1)
+            if qc:
+                cat_align_nodup_flagstat.add_log(qc, key=rep)
+    if args.ctl_nodup_flagstat_qcs:
+        for i, qc in enumerate(args.ctl_nodup_flagstat_qcs):
+            ctl = 'ctl' + str(i + 1)
+            if qc:
+                cat_align_nodup_flagstat.add_log(qc, key=ctl)
+
+    cat_fraglen = QCCategory(
+        'fraglen_stat',
+        html_head='<h2>Fragment length statistics</h2>',
+        html_foot="""        
+            <p>Open chromatin assays show distinct fragment length enrichments, as the cut
+            sites are only in open chromatin and not in nucleosomes. As such, peaks
+            representing different n-nucleosomal (ex mono-nucleosomal, di-nucleosomal)
+            fragment lengths will arise. Good libraries will show these peaks in a
+            fragment length distribution and will show specific peak ratios.</p><br>
+        """,
+        parser=parse_nucleosomal_qc,
+        map_key_desc=MAP_KEY_DESC_NUCLEOSOMAL_QC,
+        parent=cat_align
+    )
+
+    if args.fraglen_nucleosomal_qcs:
+        for i, qc in enumerate(args.fraglen_nucleosomal_qcs):
+            rep = 'rep' + str(i + 1)
+            if qc:
+                cat_fraglen.add_log(qc, key=rep)
+    if args.fraglen_dist_plots:
+        for i, plot in enumerate(args.fraglen_dist_plots):
+            rep = 'rep' + str(i + 1)
+            if plot:
+                cat_fraglen.add_plot(plot, key=rep, size_pct=50)
+
+    return cat_align
+
+def make_cat_peak(args, cat_root):
+    cat_peak = QCCategory(
+        'peak',
+        html_head='<h1>Peak calling quality metrics</h1><hr>',
+        parent=cat_root
+    )
+
+    cat_idr = QCCategory(
+        'idr',
+        html_head='<h2>IDR (Irreproducible Discovery Rate) plots</h2>',
+        parent=cat_peak,
+    )
+    if args.idr_plots:
+        num_rep = infer_n_from_nC2(len(args.idr_plots))
+        for i, plot in enumerate(args.idr_plots):
+            rep = infer_pair_label_from_idx(num_rep, i)
+            if plot:
+                cat_idr.add_plot(plot, key=rep)
+    if args.idr_plots_pr:
+        for i, plot in enumerate(args.idr_plots_pr):
+            rep = 'rep{X}-pr1_vs_rep{X}-pr2'.format(X=i+1)
+            if plot:
+                cat_idr.add_plot(plot, key=rep)
+    if args.idr_plot_ppr:
+        plot = args.idr_plot_ppr[0]
+        rep = 'ppr1_vs_ppr2'
+        cat_idr.add_plot(plot, key=rep)
+
+    cat_reproducibility = QCCategory(
+        'reproducibility',
+        html_head='<h2>Reproducibility QC and peak detection statistics</h2>',
+        html_foot="""
+            <div id='help-reproducibility'><p>Reproducibility QC<br>
+            <ul>
+            <li>N1: Replicate 1 self-consistent peaks (comparing two pseudoreplicates generated by subsampling Rep1 reads) </li>
+            <li>N2: Replicate 2 self-consistent peaks (comparing two pseudoreplicates generated by subsampling Rep2 reads) </li>
+            <li>Ni: Replicate i self-consistent peaks (comparing two pseudoreplicates generated by subsampling RepX reads) </li>
+            <li>Nt: True Replicate consistent peaks (comparing true replicates Rep1 vs Rep2) </li>
+            <li>Np: Pooled-pseudoreplicate consistent peaks (comparing two pseudoreplicates generated by subsampling pooled reads from Rep1 and Rep2) </li>
+            <li>Self-consistency Ratio: max(N1,N2) / min (N1,N2) </li>
+            <li>Rescue Ratio: max(Np,Nt) / min (Np,Nt) </li>
+            <li>Reproducibility Test: If Self-consistency Ratio >2 AND Rescue Ratio > 2, then 'Fail' else 'Pass' </li>
+            </ul></p></div><br>
+        """,
+        parser=parse_reproducibility_qc,
+        map_key_desc=MAP_KEY_DESC_REPRODUCIBILITY_QC,
+        parent=cat_peak,
+    )
+    if args.overlap_reproducibility_qc:
+        qc = args.overlap_reproducibility_qc[0]
+        cat_reproducibility.add_log(qc, key='overlap')
+
+    if args.idr_reproducibility_qc:
+        qc = args.idr_reproducibility_qc[0]
+        cat_reproducibility.add_log(qc, key='idr')
+
+    cat_num_peak = QCCategory(
+        'num_peaks',
+        html_head='<h2>Number of peaks called</h2>',
+        html_foot="""
+        """,
+        parser=parse_num_peak_qc,
+        map_key_desc=MAP_KEY_DESC_NUM_PEAK_QC,
+        parent=cat_peak,
+    )
+    if args.num_peak_qcs:
+        for i, qc in enumerate(args.num_peak_qcs):
+            rep = args.peak_caller + '_rep' + str(i+1)
+            if qc:
+                cat_num_peak.add_log(qc, key=rep)
+    if args.idr_opt_num_peak_qc:
+        qc = args.idr_opt_num_peak_qc[0]
+        rep = 'idr_opt'
+        cat_num_peak.add_log(qc, key=rep)
+    if args.overlap_opt_num_peak_qc:
+        qc = args.overlap_opt_num_peak_qc[0]
+        rep = 'overlap_opt'
+        cat_num_peak.add_log(qc, key=rep)
+
+    cat_peak_region_size = QCCategory(
+        'peak_region_size',
+        html_head='<h2>Peak region size</h2>',
+        html_foot="""
+        """,
+        parser=parse_peak_region_size_qc,
+        map_key_desc=MAP_KEY_DESC_PEAK_REGION_SIZE_QC,
+        parent=cat_peak,
+    )
+    if args.peak_region_size_qcs:
+        for i, qc in enumerate(args.peak_region_size_qcs):
+            rep = 'rep' + str(i+1)
+            if qc:
+                cat_peak_region_size.add_log(qc, key=rep)
+    if args.idr_opt_peak_region_size_qc:
+        qc = args.idr_opt_peak_region_size_qc[0]
+        rep = 'idr_opt'
+        cat_peak_region_size.add_log(qc, key=rep)
+    if args.overlap_opt_peak_region_size_qc:
+        qc = args.overlap_opt_peak_region_size_qc[0]
+        rep = 'overlap_opt'
+        cat_peak_region_size.add_log(qc, key=rep)
+    # plots
+    if args.peak_region_size_plots:
+        for i, plot in enumerate(args.peak_region_size_plots):
+            rep = 'rep' + str(i+1)
+            if plot:
+                cat_peak_region_size.add_plot(plot, key=rep, size_pct=50)
+    if args.idr_opt_peak_region_size_plot:
+        plot = args.idr_opt_peak_region_size_plot[0]
+        rep = 'idr_opt'
+        cat_peak_region_size.add_plot(plot, key=rep, size_pct=50)
+    if args.overlap_opt_peak_region_size_plot:
+        plot = args.overlap_opt_peak_region_size_plot[0]
+        rep = 'overlap_opt'
+        cat_peak_region_size.add_plot(plot, key=rep, size_pct=50)
+
+    return cat_peak
+
+def make_cat_enrich(args, cat_root):
+    cat_enrich = QCCategory(
+        'enrichment',
+        html_head='<h1>Enrichment</h1><hr>',       
+        parent=cat_root
+    )
+    
+    cat_xcor = QCCategory(
+        'xcor_score',
+        html_head='<h2>Strand cross-correlation measures</h2>',
+        html_foot="""
+            <br><p>Performed on subsampled reads</p>
+            <div id='help-xcor'><p>
+            NOTE1: For SE datasets, reads from replicates are randomly subsampled.<br>
+            NOTE2: For PE datasets, the first end of each read-pair is selected and the reads are then randomly subsampled.<br>
+            <ul>
+            <li>Normalized strand cross-correlation coefficient (NSC) = col9 in outFile </li>
+            <li>Relative strand cross-correlation coefficient (RSC) = col10 in outFile </li>
+            <li>Estimated fragment length = col3 in outFile, take the top value </li>
+            </ul></p></div><br>
+        """,
+        parser=parse_xcor_score,
+        map_key_desc=MAP_KEY_DESC_XCOR_SCORE,
+        parent=cat_enrich,
+    )
+    if args.xcor_scores:
+        for i, qc in enumerate(args.xcor_scores):
+            rep = 'rep' + str(i + 1)
+            if qc:
+                cat_xcor.add_log(qc, key=rep)
+    # trivial subcategory to show table legend before plots
+    cat_xcor_plot = QCCategory(
+        'xcor_plot',
+        parent=cat_enrich,
+    )
+    if args.xcor_plots:
+        for i, plot in enumerate(args.xcor_plots):
+            rep = 'rep' + str(i + 1)
+            if plot:
+                cat_xcor_plot.add_plot(plot, key=rep, size_pct=60)
+
+    cat_frip = QCCategory(
+        'frac_reads_in_peaks',
+        html_head='<h2>Fraction of reads in peaks (FRiP)</h2>',
+        html_foot="""
+            <div id='help-FRiP'>
+            For raw peaks (SPP and MACS2):<br>
+            <p><ul>
+            <li>repX: Peak from true replicate X </li>
+            <li>repX-prY: Peak from Yth pseudoreplicates from replicate X </li>
+            <li>pooled: Peak from pooled true replicates (pool of rep1, rep2, ...) </li>
+            <li>ppr1: Peak from 1st pooled pseudo replicate (pool of rep1-pr1, rep2-pr1, ...)</li>
+            <li>ppr1: Peak from 2nd pooled pseudo replicate (pool of rep1-pr2, rep2-pr2, ...)</li>
+            </ul></p>
+            <br>
+            For overlap/IDR peaks:<br>
+            <p><ul>
+            <li>repX_vs_repY: Comparing two peaks from true replicates X and Y </li>
+            <li>repX-pr1_vs_repX-pr2: Comparing two peaks from both pseudoreplicates from replicate X </li>
+            <li>ppr1_vs_ppr2: Comparing two peaks from 1st and 2nd pooled pseudo replicates </li>
+            </ul></p>
+            </div>
+        """,
+        parent=cat_enrich,
+    )
+
+    # macs2
+    cat_frip_macs2 = QCCategory(
+        'macs2',
+        html_head='<h3>FRiP for MACS2 raw peaks</h3>',
+        parser=parse_frip_qc,
+        map_key_desc=MAP_KEY_DESC_FRIP_QC,
+        parent=cat_frip
+    )
+    if args.frip_macs2_qcs:
+        for i, qc in enumerate(args.frip_macs2_qcs):
+            rep = 'rep' + str(i + 1)
+            if qc:
+                cat_frip_macs2.add_log(qc, key=rep)
+    if args.frip_macs2_qcs_pr1:
+        for i, qc in enumerate(args.frip_macs2_qcs_pr1):
+            rep = 'rep' + str(i + 1) + '-pr1'
+            if qc:
+                cat_frip_macs2.add_log(qc, key=rep)
+    if args.frip_macs2_qcs_pr2:
+        for i, qc in enumerate(args.frip_macs2_qcs_pr2):
+            rep = 'rep' + str(i + 1) + '-pr2'
+            if qc:
+                cat_frip_macs2.add_log(qc, key=rep)
+    if args.frip_macs2_qc_pooled:
+        qc = args.frip_macs2_qc_pooled[0]
+        rep = 'pooled'
+        cat_frip_macs2.add_log(qc, key=rep)
+    if args.frip_macs2_qc_ppr1:
+        qc = args.frip_macs2_qc_ppr1[0]
+        rep = 'ppr1'
+        cat_frip_macs2.add_log(qc, key=rep)
+    if args.frip_macs2_qc_ppr2:
+        qc = args.frip_macs2_qc_ppr2[0]
+        rep = 'ppr2'
+        cat_frip_macs2.add_log(qc, key=rep)
+
+    # spp
+    cat_frip_spp = QCCategory(
+        'spp',
+        html_head='<h3>FRiP for SPP raw peaks</h3>',
+        parser=parse_frip_qc,
+        map_key_desc=MAP_KEY_DESC_FRIP_QC,
+        parent=cat_frip
+    )
+    if args.frip_spp_qcs:
+        for i, qc in enumerate(args.frip_spp_qcs):
+            rep = 'rep' + str(i + 1)
+            if qc:
+                cat_frip_spp.add_log(qc, key=rep)
+    if args.frip_spp_qcs_pr1:
+        for i, qc in enumerate(args.frip_spp_qcs_pr1):
+            rep = 'rep' + str(i + 1) + '-pr1'
+            if qc:
+                cat_frip_spp.add_log(qc, key=rep)
+    if args.frip_spp_qcs_pr2:
+        for i, qc in enumerate(args.frip_spp_qcs_pr2):
+            rep = 'rep' + str(i + 1) + '-pr2'
+            if qc:
+                cat_frip_spp.add_log(qc, key=rep)
+    if args.frip_spp_qc_pooled:
+        qc = args.frip_spp_qc_pooled[0]
+        rep = 'pooled'
+        cat_frip_spp.add_log(qc, key=rep)
+    if args.frip_spp_qc_ppr1:
+        qc = args.frip_spp_qc_ppr1[0]
+        rep = 'ppr1'
+        cat_frip_spp.add_log(qc, key=rep)
+    if args.frip_spp_qc_ppr2:
+        qc = args.frip_spp_qc_ppr2[0]
+        rep = 'ppr2'
+        cat_frip_spp.add_log(qc, key=rep)
+
+    # overlap
+    cat_frip_overlap = QCCategory(
+        'overlap',
+        html_head='<h3>FRiP for overlap peaks</h3>',
+        parser=parse_frip_qc,
+        map_key_desc=MAP_KEY_DESC_FRIP_QC,
+        parent=cat_frip
+    )
+    if args.frip_overlap_qcs:
+        num_rep = infer_n_from_nC2(len(args.frip_overlap_qcs))
+        for i, qc in enumerate(args.frip_overlap_qcs):
+            rep = infer_pair_label_from_idx(num_rep, i)
+            if qc:
+                cat_frip_overlap.add_log(qc, key=rep)
+    if args.frip_overlap_qcs_pr:
+        for i, qc in enumerate(args.frip_overlap_qcs_pr):
+            rep = 'rep{X}-pr1_vs_rep{X}-pr2'.format(X=i+1)
+            if qc:
+                cat_frip_overlap.add_log(qc, key=rep)
+    if args.frip_overlap_qc_ppr:
+        qc = args.frip_overlap_qc_ppr[0]
+        rep = 'ppr1_vs_ppr2'        
+        cat_frip_overlap.add_log(qc, key=rep)
+
+    # IDR
+    cat_frip_idr = QCCategory(
+        'idr',
+        html_head='<h3>FRiP for IDR peaks</h3>',
+        parser=parse_frip_qc,
+        map_key_desc=MAP_KEY_DESC_FRIP_QC,
+        parent=cat_frip
+    )
+    if args.frip_idr_qcs:
+        num_rep = infer_n_from_nC2(len(args.frip_idr_qcs))
+        for i, qc in enumerate(args.frip_idr_qcs):
+            rep = infer_pair_label_from_idx(num_rep, i)
+            if qc:
+                cat_frip_idr.add_log(qc, key=rep)
+    if args.frip_idr_qcs_pr:
+        for i, qc in enumerate(args.frip_idr_qcs_pr):
+            rep = 'rep{X}-pr1_vs_rep{X}-pr2'.format(X=i+1)
+            if qc:
+                cat_frip_idr.add_log(qc, key=rep)
+    if args.frip_idr_qc_ppr:
+        qc = args.frip_idr_qc_ppr[0]
+        rep = 'ppr1_vs_ppr2'        
+        cat_frip_idr.add_log(qc, key=rep)
+
+    cat_annot_enrich = QCCategory(
+        'annot_enrich',
+        html_head='<h2>Annotated genomic region enrichments</h2>',
+        html_foot="""
+            <p>Signal to noise can be assessed by considering whether reads are falling into
+            known open regions (such as DHS regions) or not. A high fraction of reads
+            should fall into the universal (across cell type) DHS set. A small fraction
+            should fall into the blacklist regions. A high set (though not all) should
+            fall into the promoter regions. A high set (though not all) should fall into
+            the enhancer regions. The promoter regions should not take up all reads, as
+            it is known that there is a bias for promoters in open chromatin assays.</p><br>
+        """,
+        parser=parse_annot_enrich_qc,
+        map_key_desc=MAP_KEY_DESC_ANNOT_ENRICH_QC,
+        parent=cat_enrich,
+    )
+
+    if args.annot_enrich_qcs:
+        for i, qc in enumerate(args.annot_enrich_qcs):
+            rep = 'rep' + str(i+1)
+            if qc:
+                cat_annot_enrich.add_log(qc, key=rep)
+
+    cat_tss_enrich = QCCategory(
+        'tss_enrich',
+        html_head='<h2>TSS enrichment</h2>',
+        html_foot="""
+            <p>Open chromatin assays should show enrichment in open chromatin sites, such as
+            TSS's. An average TSS enrichment in human (hg19) is above 6. A strong TSS enrichment is
+            above 10. For other references please see https://www.encodeproject.org/atac-seq/</p><br>
+        """,
+        parser=parse_tss_enrich_qc,
+        map_key_desc=MAP_KEY_DESC_TSS_ENRICH_QC,
+        parent=cat_enrich
+    )
+
+    if args.tss_enrich_qcs:
+        for i, qc in enumerate(args.tss_enrich_qcs):
+            rep = 'rep' + str(i + 1)
+            if qc:
+                cat_tss_enrich.add_log(qc, key=rep)
+
+    if args.tss_large_plots:
+        for i, plot in enumerate(args.tss_large_plots):
+            rep = 'rep' + str(i + 1)
+            if plot:
+                cat_tss_enrich.add_plot(plot, key=rep)
+
+    return cat_enrich
+
+def make_cat_etc(args, cat_root):
+    cat_etc = QCCategory(
+        'etc',
+        html_head='<h1>Other quality metrics</h1><hr>',
+        parent=cat_root
+    )
+
+    cat_jsd = QCCategory(
+        'jsd_qc',
+        html_head='<h2>Fingerprint and Jensen-Shannon distance</h2>',
+        parser=parse_jsd_qc,
+        map_key_desc=MAP_KEY_DESC_JSD_QC,
+        parent=cat_etc
+    )
+    if args.jsd_plot:
+        plot = args.jsd_plot[0]
+        cat_jsd.add_plot(plot, size_pct=40)
+    if args.jsd_qcs:
+        for i, qc in enumerate(args.jsd_qcs):
+            rep = 'rep' + str(i + 1)
+            if qc:
+                cat_jsd.add_log(qc, key=rep)
+
+    cat_gc_bias = QCCategory(
+        'gc_bias',
+        html_head='<h2>Sequence quality metrics (GC bias)</h2>',
+        html_foot="""
+            <p>Open chromatin assays are known to have significant GC bias. Please take this
+            into consideration as necessary.</p><br>
+        """,
+        parent=cat_etc
+    )
+    if args.gc_plots:
+        for i, plot in enumerate(args.gc_plots):
+            rep = 'rep' + str(i + 1)
+            if plot:
+                cat_gc_bias.add_plot(plot, key=rep, size_pct=60)
+
+    cat_roadmap = QCCategory(
+        'roadmap',
+        html_head='<h2>Comparison to Roadmap DNase</h2>',
+        html_foot="""
+            <p>This bar chart shows the correlation between the Roadmap DNase samples to
+            your sample, when the signal in the universal DNase peak region sets are
+            compared. The closer the sample is in signal distribution in the regions
+            to your sample, the higher the correlation.</p><br>
+        """,
+        parent=cat_etc
+    )
+    if args.roadmap_compare_plots:
+        for i, plot in enumerate(args.roadmap_compare_plots):
+            rep = 'rep' + str(i + 1)
+            if plot:
+                cat_roadmap.add_plot(plot, key=rep, size_pct=500)
+
+    return cat_etc
 
 def main():
     # read params
+    log.info('Parsing QC logs and reading QC plots...')
     args = parse_arguments()
-
-    log.info('Initializing...')
-    html = ATAQC_HTML_HEAD
-
-    json_all = OrderedDict()
-    json_all['general'] = OrderedDict()
-    json_all['general']['date'] = now()
-    json_all['general']['pipeline_ver'] = args.pipeline_ver
-    json_all['general']['peak_caller'] = args.peak_caller
-    json_all['general']['genome'] = args.genome
-    json_all['general']['description'] = args.desc
-    json_all['general']['title'] = args.title
-    json_all['general']['paired_end'] = args.paired_ends
-    if args.ctl_paired_ends:
-        json_all['general']['ctl_paired_end'] = args.ctl_paired_ends
     
-    html += html_heading(1, args.title)
-    html += html_paragraph(args.desc)
-    html += html_paragraph('Pipeline version: {}'.format(args.pipeline_ver))
-    html += html_paragraph('Report generated at {}'.format(now()))
-    html += html_paragraph('Paired-end: {}'.format(args.paired_ends))
-    html += html_paragraph('Pipeline type: {}'.format(get_full_name(args.pipeline_type)))
-    html += html_paragraph('Genome: {}'.format(args.genome))
-    html += html_paragraph('Peak caller: {}'.format(args.peak_caller.upper()))
+    # make a root QCCategory
+    cat_root = make_cat_root(args)
 
-    # order of each chapter in report
-    html_align = ''
-    html_peakcall = ''
-    html_enrich = ''
-    html_etc = ''
-    html_ataqc = ''
-
-    log.info('Parsing QC logs...')
-
-    if args.flagstat_qcs or args.ctl_flagstat_qcs:
-        html_align += html_heading(2, 'Flagstat (raw BAM)')
-        json_objs_all = []
-        row_header = []
-        if args.flagstat_qcs:
-            json_objs = [parse_flagstat_qc(qc) for qc in args.flagstat_qcs]
-            json_all['flagstat_qc'] = json_objs
-            json_objs_all.extend(json_objs)
-            row_header.extend(get_rep_labels(json_objs, args.paired_ends))
-        if args.ctl_flagstat_qcs:
-            json_objs = [parse_flagstat_qc(qc) for qc in args.ctl_flagstat_qcs]
-            json_all['ctl_flagstat_qc'] = json_objs
-            json_objs_all.extend(json_objs)
-            row_header.extend(get_ctl_labels(json_objs, args.ctl_paired_ends))
-
-        html_align += html_vert_table_multi_rep(json_objs_all, row_header)
-
-    if args.dup_qcs and get_num_lines(args.dup_qcs[0]) \
-        or args.ctl_dup_qcs and get_num_lines(args.ctl_dup_qcs[0]):
-        html_align += html_heading(2, 'Marking duplicates (filtered BAM)')
-        html_align += html_help_filter(args.multimapping)
-        # check if file is empty (when filter.no_dup_removal is on)
-        # if empty then skip
-        json_objs_all = []
-        row_header = []
-        if args.dup_qcs and get_num_lines(args.dup_qcs[0]):
-            json_objs = [parse_dup_qc(qc) for qc in args.dup_qcs]
-            json_all['dup_qc'] = json_objs
-            json_objs_all.extend(json_objs)
-            row_header.extend(get_rep_labels(json_objs, args.paired_ends))
-        if args.ctl_dup_qcs and get_num_lines(args.ctl_dup_qcs[0]):
-            json_objs = [parse_dup_qc(qc) for qc in args.ctl_dup_qcs]
-            json_all['ctl_dup_qc'] = json_objs
-            json_objs_all.extend(json_objs)
-            row_header.extend(get_ctl_labels(json_objs, args.ctl_paired_ends))
-        html_align += html_vert_table_multi_rep(json_objs_all, row_header)
-
-    if args.pbc_qcs and get_num_lines(args.pbc_qcs[0]) \
-        or args.ctl_pbc_qcs and get_num_lines(args.ctl_pbc_qcs[0]):
-        html_align += html_heading(2, 'Library complexity (filtered non-mito BAM)')
-        # check if file is empty (when filter.no_dup_removal is on)
-        # if empty then skip
-        json_objs_all = []
-        row_header = []
-        if args.pbc_qcs and get_num_lines(args.pbc_qcs[0]):
-            json_objs = [parse_pbc_qc(qc) for qc in args.pbc_qcs]
-            json_all['pbc_qc'] = json_objs
-            json_objs_all.extend(json_objs)
-            row_header.extend(get_rep_labels(json_objs, args.paired_ends))
-        if args.ctl_pbc_qcs and get_num_lines(args.ctl_pbc_qcs[0]):
-            json_objs = [parse_pbc_qc(qc) for qc in args.ctl_pbc_qcs]
-            json_all['ctl_pbc_qc'] = json_objs
-            json_objs_all.extend(json_objs)
-            row_header.extend(get_ctl_labels(json_objs, args.ctl_paired_ends))
-        html_align += html_vert_table_multi_rep(json_objs_all, row_header)
-        html_align += html_help_pbc()
-
-    if args.nodup_flagstat_qcs or args.ctl_nodup_flagstat_qcs:
-        html_align += html_heading(2, 'Flagstat (filtered/deduped BAM)')
-        html_align += html_paragraph('Filtered and duplicates removed')
-        json_objs_all = []
-        row_header = []
-        if args.nodup_flagstat_qcs:
-            json_objs = [parse_flagstat_qc(qc) for qc in args.nodup_flagstat_qcs]
-            json_all['nodup_flagstat_qc'] = json_objs
-            json_objs_all.extend(json_objs)
-            row_header.extend(get_rep_labels(json_objs, args.paired_ends))
-        if args.ctl_nodup_flagstat_qcs:
-            json_objs = [parse_flagstat_qc(qc) for qc in args.ctl_nodup_flagstat_qcs]
-            json_all['ctl_nodup_flagstat_qc'] = json_objs
-            json_objs_all.extend(json_objs)
-            row_header.extend(get_ctl_labels(json_objs, args.ctl_paired_ends))
-        html_align += html_vert_table_multi_rep(json_objs_all, row_header)
-
-    # IDR plots
-    if args.idr_plots or args.idr_plots_pr or args.idr_plot_ppr:
-        html_peakcall += html_heading(2, 'IDR (Irreproducible Discovery Rate) plots')
-        if args.idr_plots:
-            # infer num_rep from size of --idr-plots
-            num_rep = infer_n_from_nC2(len(args.idr_plots))        
-            # embed PNGs into HTML
-            for i, png in enumerate(args.idr_plots):
-                if png:
-                    pair_label = infer_pair_label_from_idx(num_rep, i)
-                    html_peakcall += html_embedded_png(png, pair_label)
-        if args.idr_plots_pr:
-            for i, png in enumerate(args.idr_plots_pr):
-                if png:
-                    html_peakcall += html_embedded_png(png, 'rep{}-pr'.format(i+1))
-        if args.idr_plot_ppr:
-            png = args.idr_plot_ppr[0]
-            html_peakcall += html_embedded_png(png, 'ppr')
-
-    # reproducibility_qc for naive-overlap and IDR
-    if args.overlap_reproducibility_qc or args.idr_reproducibility_qc:
-        html_peakcall += html_heading(2, 'Reproducibility QC and peak detection statistics')
-        if args.peak_caller=='macs2':
-            html_peakcall += html_help_macs2(args.macs2_cap_num_peak)
-        elif args.peak_caller=='spp':
-            html_peakcall += html_help_spp(args.spp_cap_num_peak)
-        else:
-            raise Exception("Unsupported peak_caller")
-        json_objs_reproducibility_qc = []
-        row_header_reproducibility_qc = []
-        if args.overlap_reproducibility_qc:
-            json_obj = parse_reproducibility_qc(args.overlap_reproducibility_qc[0])
-            json_all['overlap_reproducibility_qc'] = json_obj
-            json_objs_reproducibility_qc.append(json_obj)
-            row_header_reproducibility_qc.append('overlap')
-        if args.idr_reproducibility_qc:
-            json_obj = parse_reproducibility_qc(args.idr_reproducibility_qc[0])
-            json_all['idr_reproducibility_qc'] = json_obj
-            json_objs_reproducibility_qc.append(json_obj)
-            row_header_reproducibility_qc.append('IDR')
-        html_peakcall += html_vert_table_multi_rep(
-            json_objs_reproducibility_qc, 
-            row_header_reproducibility_qc)
-        if args.overlap_reproducibility_qc:
-            html_peakcall += html_help_overlap()
-        if args.idr_reproducibility_qc:
-            html_peakcall += html_help_idr(args.idr_thresh)
-
-    if args.xcor_plots and args.xcor_scores:
-        html_enrich += html_heading(2, 'Strand cross-correlation measures')
-        json_objs = [parse_xcor_score(qc) for qc in args.xcor_scores]
-        num_reads = 0 # json_objs[0]['num_reads']
-        for _, j in enumerate(json_objs):
-            if j:
-                num_reads = j['num_reads']
-        html_enrich += html_paragraph('Performed on subsampled reads ({})'.format(
-            human_readable_number(num_reads)))
-
-        html_enrich += html_vert_table_multi_rep(json_objs)
-        html_enrich += html_help_xcor()
-        for i, xcor_plot in enumerate(args.xcor_plots):
-            if xcor_plot:
-                html_enrich += html_embedded_png(xcor_plot, 'rep{}'.format(i+1), 60)
-        json_all['xcor_score'] = json_objs
-
-    # frip (Enrichment QC) for MACS2 raw peaks
-    if args.frip_macs2_qcs or args.frip_macs2_qcs_pr1 or args.frip_macs2_qcs_pr2 \
-        or args.frip_macs2_qc_pooled or args.frip_macs2_qc_ppr1 or args.frip_macs2_qc_ppr2:
-        # html_enrich += html_heading(2, 'Fraction of reads in {} raw peaks'.format(
-        #     args.peak_caller.upper()))
-        # html_enrich += html_help_macs2(args.macs2_cap_num_peak)
-        json_objs_frip = []
-        row_header_frip = []
-        true_rep_labels = ['rep{}'.format(i+1) for i, qc in enumerate(args.frip_macs2_qcs)]
-        rep_pr1_labels = ['rep{}-pr1'.format(i+1) for i, qc in enumerate(args.frip_macs2_qcs_pr1)]
-        rep_pr2_labels = ['rep{}-pr2'.format(i+1) for i, qc in enumerate(args.frip_macs2_qcs_pr2)]
-
-        if args.frip_macs2_qcs:
-            json_objs = [parse_frip_qc(qc) for qc in args.frip_macs2_qcs]
-            json_objs_frip.extend(json_objs)
-            row_header_frip.extend(true_rep_labels)
-        if args.frip_macs2_qcs_pr1:
-            json_objs = [parse_frip_qc(qc) for qc in args.frip_macs2_qcs_pr1]
-            json_objs_frip.extend(json_objs)
-            row_header_frip.extend(rep_pr1_labels)
-        if args.frip_macs2_qcs_pr2:
-            json_objs = [parse_frip_qc(qc) for qc in args.frip_macs2_qcs_pr2]
-            json_objs_frip.extend(json_objs)
-            row_header_frip.extend(rep_pr2_labels)
-        if args.frip_macs2_qc_pooled:
-            json_obj = parse_frip_qc(args.frip_macs2_qc_pooled[0])
-            json_objs_frip.append(json_obj)
-            row_header_frip.append('pooled')
-        if args.frip_macs2_qc_ppr1:
-            json_obj = parse_frip_qc(args.frip_macs2_qc_ppr1[0])
-            json_objs_frip.append(json_obj)
-            row_header_frip.append('ppr1')
-        if args.frip_macs2_qc_ppr2:
-            json_obj = parse_frip_qc(args.frip_macs2_qc_ppr2[0])
-            json_objs_frip.append(json_obj)
-            row_header_frip.append('ppr2')
-        json_all['frip_macs2_qc'] = OrderedDict(
-            zip(row_header_frip,json_objs_frip))
-        # html_enrich += html_vert_table_multi_rep(json_objs_frip,row_header_frip)
-        # html_enrich += html_help_FRiP(args.peak_caller)
-
-    # frip (Enrichment QC) for SPP raw peaks
-    if args.frip_spp_qcs or args.frip_spp_qcs_pr1 or args.frip_spp_qcs_pr2 \
-        or args.frip_spp_qc_pooled or args.frip_spp_qc_ppr1 or args.frip_spp_qc_ppr2:
-        # html_enrich += html_heading(2, 'Fraction of reads in {} raw peaks'.format(
-        #     args.peak_caller.upper()))
-        # html_peakcall += html_help_spp(args.spp_cap_num_peak)
-        json_objs_frip = []
-        row_header_frip = []
-        true_rep_labels = ['rep{}'.format(i+1) for i, qc in enumerate(args.frip_spp_qcs)]
-        rep_pr1_labels = ['rep{}-pr1'.format(i+1) for i, qc in enumerate(args.frip_spp_qcs_pr1)]
-        rep_pr2_labels = ['rep{}-pr2'.format(i+1) for i, qc in enumerate(args.frip_spp_qcs_pr2)]
-
-        if args.frip_spp_qcs:
-            json_objs = [parse_frip_qc(qc) for qc in args.frip_spp_qcs]
-            json_objs_frip.extend(json_objs)
-            row_header_frip.extend(true_rep_labels)
-        if args.frip_spp_qcs_pr1:
-            json_objs = [parse_frip_qc(qc) for qc in args.frip_spp_qcs_pr1]
-            json_objs_frip.extend(json_objs)
-            row_header_frip.extend(rep_pr1_labels)
-        if args.frip_spp_qcs_pr2:
-            json_objs = [parse_frip_qc(qc) for qc in args.frip_spp_qcs_pr2]
-            json_objs_frip.extend(json_objs)
-            row_header_frip.extend(rep_pr2_labels)
-        if args.frip_spp_qc_pooled:
-            json_obj = parse_frip_qc(args.frip_spp_qc_pooled[0])
-            json_objs_frip.append(json_obj)
-            row_header_frip.append('pooled')
-        if args.frip_spp_qc_ppr1:
-            json_obj = parse_frip_qc(args.frip_spp_qc_ppr1[0])
-            json_objs_frip.append(json_obj)
-            row_header_frip.append('ppr1')
-        if args.frip_spp_qc_ppr2:
-            json_obj = parse_frip_qc(args.frip_spp_qc_ppr2[0])
-            json_objs_frip.append(json_obj)
-            row_header_frip.append('ppr2')
-        json_all['frip_spp_qc'] = OrderedDict(
-            zip(row_header_frip,json_objs_frip))
-        # html_enrich += html_vert_table_multi_rep(json_objs_frip,row_header_frip)
-        # html_enrich += html_help_FRiP(args.peak_caller)
-
-    # frip (Enrichment QC) for overlap
-    if args.frip_overlap_qcs or args.frip_overlap_qcs_pr or args.frip_overlap_qc_ppr:
-        html_enrich += html_heading(2, 'Fraction of reads in overlapping peaks')
-        json_objs_frip_overlap = []
-        row_header_frip_overlap = []
-        if args.frip_overlap_qcs:
-            # infer num_rep from size of --frip-overlap-qcs
-            num_rep = infer_n_from_nC2(len(args.frip_overlap_qcs))
-            json_objs = [parse_frip_qc(qc) for qc in args.frip_overlap_qcs]
-            json_objs_frip_overlap.extend(json_objs)
-            row_header_frip_overlap.extend(
-                [infer_pair_label_from_idx(num_rep, i) for i in range(len(args.frip_overlap_qcs))])
-        if args.frip_overlap_qcs_pr:
-            json_objs = [parse_frip_qc(qc) for qc in args.frip_overlap_qcs_pr]
-            json_objs_frip_overlap.extend(json_objs)
-            row_header_frip_overlap.extend(
-                ['rep{}-pr'.format(i+1) for i in range(len(args.frip_overlap_qcs_pr))])
-        if args.frip_overlap_qc_ppr:
-            json_obj = parse_frip_qc(args.frip_overlap_qc_ppr[0])
-            json_objs_frip_overlap.append(json_obj)
-            row_header_frip_overlap.append('ppr')
-        json_all['overlap_frip_qc'] = OrderedDict(zip(row_header_frip_overlap,json_objs_frip_overlap))
-        html_enrich += html_vert_table_multi_rep(
-            json_objs_frip_overlap,
-            row_header_frip_overlap)
-        html_enrich += html_help_overlap_FRiP()
-
-    # frip (Enrichment QC) for IDR
-    if args.frip_idr_qcs or args.frip_idr_qcs_pr or args.frip_idr_qc_ppr:
-        html_enrich += html_heading(2, 'Fraction of reads in IDR peaks')
-        json_objs_frip_idr = []
-        row_header_frip_idr = []
-        if args.frip_idr_qcs:
-            # infer num_rep from size of --frip-idr-qcs
-            num_rep = infer_n_from_nC2(len(args.frip_idr_qcs))
-            json_objs = [parse_frip_qc(qc) for qc in args.frip_idr_qcs]
-            json_objs_frip_idr.extend(json_objs)
-            row_header_frip_idr.extend(
-                [infer_pair_label_from_idx(num_rep, i) for i in range(len(args.frip_idr_qcs))])
-        if args.frip_idr_qcs_pr:
-            json_objs = [parse_frip_qc(qc) for qc in args.frip_idr_qcs_pr]
-            json_objs_frip_idr.extend(json_objs)
-            row_header_frip_idr.extend(
-                ['rep{}-pr'.format(i+1) for i in range(len(args.frip_idr_qcs_pr))])
-        if args.frip_idr_qc_ppr:
-            json_obj = parse_frip_qc(args.frip_idr_qc_ppr[0])
-            json_objs_frip_idr.append(json_obj)
-            row_header_frip_idr.append('ppr')
-        json_all['idr_frip_qc'] = OrderedDict(zip(row_header_frip_idr,json_objs_frip_idr))
-        html_enrich += html_vert_table_multi_rep(
-            json_objs_frip_idr,
-            row_header_frip_idr)
-        html_enrich += html_help_idr_FRiP()
-
-    if args.jsd_plot:
-        html_etc += html_heading(2, 'Fingerprint and Jensen-Shannon distance')
-        json_objs = [parse_jsd_qc(qc) for qc in args.jsd_qcs]
-        html_etc += html_vert_table_multi_rep(json_objs)
-        html_etc += html_embedded_png(args.jsd_plot[0], '', 40)
-        json_all['jsd_qc'] = json_objs
-
-    # ATAQC
-    if args.ataqc_txts and args.ataqc_htmls:
-        json_objs = [parse_ataqc_txt(txt) for txt in args.ataqc_txts]
-        json_all['ataqc'] = json_objs
-        html_ataqc += html_heading(2, 'Summary table')
-        html_ataqc += html_vert_table_multi_rep(json_objs)
-        for i, ataqc_html in enumerate(args.ataqc_htmls):
-            if ataqc_html:
-                html_ataqc += html_heading(2, 'Replicate {}'.format(i+1))
-                html_ataqc += html_parse_body_from_file(ataqc_html).replace('<h2>ATAqC</h2>','')
-                html_ataqc += '\n<br>'
-
-    if html_align:
-        html_align = html_heading(1, 'Alignment')+'<hr>'+html_align
-    if html_peakcall:
-        html_peakcall = html_heading(1, 'Peak calling')+'<hr>'+html_peakcall
-    if html_enrich:
-        html_enrich = html_heading(1, 'Enrichment')+'<hr>'+html_enrich
-    if html_etc:
-        html_etc = html_heading(1, 'Other quality metrics')+'<hr>'+html_etc
-    if html_ataqc:
-        html_ataqc = html_heading(1, 'ATAQC')+'<hr>'+html_ataqc
-
-    html += html_align + html_peakcall + html_enrich + html_etc + html_ataqc
-
+    # make QCCategory for each category
+    make_cat_align(args, cat_root)
+    make_cat_peak(args, cat_root)
+    make_cat_enrich(args, cat_root)
+    make_cat_etc(args, cat_root)
+   
     log.info('Creating HTML report...')
-    write_txt(args.out_qc_html, html)
+    write_txt(args.out_qc_html, cat_root.to_html())
 
-    log.info('Converting format of qc.json...')
-    # convert format of json_all
-    # old: [](zero-based array) 0=rep1, 1=rep2, ...
-    # new: obj (.rep1, .rep2, ...)
-    json_all_new_format = OrderedDict()
-    for key in json_all:
-        val = json_all[key]
-        if type(val)==list:
-            json_all_new_format[key] = OrderedDict()
-            for i, rep in enumerate(val):
-                json_all_new_format[key]["rep{}".format(i+1)] = val[i]
-        else:
-            json_all_new_format[key] = json_all[key]
-    log.info('Write JSON file...')
-    write_txt(args.out_qc_json, json.dumps(json_all_new_format, indent=4))
-    # b = json.loads(a, object_pairs_hook=OrderedDict)
+    log.info('Creating QC JSON file...')
+    j = cat_root.to_dict()
+    write_txt(args.out_qc_json, json.dumps(j, indent=4))
 
-    log.info('Comparing JSON file with reference...')
     if args.qc_json_ref:
+        log.info('Comparing QC JSON file with reference...')
         # exclude general section from comparing 
-        #  because it includes metadata like date, pipeline_ver, ...
-        # we just want to compare quality metric values only
-        json_all_new_format.pop('general')
+        # because it includes metadata like date, pipeline_ver, ...
+        # we want to compare actual quality metrics only
+        j.pop('general')
         with open(args.qc_json_ref,'r') as fp:
-            json_ref = json.load(fp, object_pairs_hook=OrderedDict)
-            if 'general' in json_ref:
-                json_ref.pop("general")
-            match_qc_json_ref = json_all_new_format==json_ref
+            j_ref = json.load(fp, object_pairs_hook=OrderedDict)
+            if 'general' in j_ref:
+                j_ref.pop("general")
+            match_qc_json_ref = j == j_ref
     else:
         match_qc_json_ref = False
+
     run_shell_cmd('echo {} > qc_json_ref_match.txt'.format(match_qc_json_ref))
 
     log.info('All done.')

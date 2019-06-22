@@ -150,6 +150,8 @@ workflow atac {
 	Int ataqc_time_hr = 24
 	String ataqc_disks = "local-disk 200 HDD"
 
+	Int preseq_mem_mb = 16000
+
 	# input file definition
 	# supported types: fastq, bam, nodup_bam (or filtered bam), ta (tagAlign), peak
 	# 	pipeline can start from any type of inputs
@@ -522,6 +524,53 @@ workflow atac {
 				chrsz = chrsz_,
 			}
 		}
+
+
+		# tasks factored out from ATAqC
+		if ( defined(nodup_bam_) && defined(tss_) && defined(bowtie2.read_len_log) ) {
+			call tss_enrich { input :
+				read_len_log = bowtie2.read_len_log,
+				nodup_bam = nodup_bam_,
+				tss = tss_,
+				chrsz = chrsz_,
+			}
+		}
+		if ( paired_end_ && defined(nodup_bam_) ) {
+			call fraglen_stat_pe { input :
+				nodup_bam = nodup_bam_,
+			}
+		}
+		if ( defined(bam_) ) {
+			call preseq { input :
+				bam = bam_,
+				paired_end = paired_end_,
+				mem_mb = preseq_mem_mb,
+			}
+		}
+		if ( defined(nodup_bam_) && defined(ref_fa_) && defined(bowtie2.read_len_log) ) {
+			call gc_bias { input :
+				read_len_log = bowtie2.read_len_log,
+				nodup_bam = nodup_bam_,
+				ref_fa = ref_fa_,
+			}
+		}
+		if ( defined(ta_) ) {
+			call annot_enrich { input :
+				ta = ta_,
+				blacklist = blacklist_,
+				dnase = dnase_,
+				prom = prom_,
+				enh = enh_,
+			}
+		}
+		if ( defined(macs2_signal_track.pval_bw) ) {
+			call compare_signal_to_roadmap { input :
+				pval_bw = macs2_signal_track.pval_bw,
+				reg2map_bed = reg2map_bed_,
+				reg2map = reg2map_,
+				roadmap_meta = roadmap_meta_,
+			}
+		}
 	}
 
 	# if there are TAs for ALL replicates then pool them
@@ -836,6 +885,7 @@ workflow atac {
 		multimapping = multimapping,
 		paired_ends = paired_end_,
 		pipeline_type = pipeline_type,
+		aligner = 'bowtie2',
 		peak_caller = 'macs2',
 		macs2_cap_num_peak = cap_num_peak,
 		idr_thresh = idr_thresh,
@@ -867,8 +917,27 @@ workflow atac {
 		idr_reproducibility_qc = reproducibility_idr.reproducibility_qc,
 		overlap_reproducibility_qc = reproducibility_overlap.reproducibility_qc,
 
-		ataqc_txts = ataqc.txt,
-		ataqc_htmls = ataqc.html,
+		annot_enrich_qcs = annot_enrich.annot_enrich_qc,
+		tss_enrich_qcs = tss_enrich.tss_enrich_qc,
+		tss_large_plots = tss_enrich.tss_large_plot,
+		roadmap_compare_plots = compare_signal_to_roadmap.roadmap_compare_plot,
+		fraglen_dist_plots = fraglen_stat_pe.fraglen_dist_plot,
+		fraglen_nucleosomal_qcs = fraglen_stat_pe.nucleosomal_qc,
+		gc_plots = gc_bias.gc_plot,
+		preseq_plots = preseq.preseq_plot,
+		picard_est_lib_size_qcs = preseq.picard_est_lib_size_qc,
+
+		peak_region_size_qcs = macs2.peak_region_size_qc,
+		peak_region_size_plots = macs2.peak_region_size_plot,
+		num_peak_qcs = macs2.num_peak_qc,
+
+		idr_opt_peak_region_size_qc = reproducibility_idr.peak_region_size_qc,
+		idr_opt_peak_region_size_plot = reproducibility_overlap.peak_region_size_plot,
+		idr_opt_num_peak_qc = reproducibility_idr.num_peak_qc,
+
+		overlap_opt_peak_region_size_qc = reproducibility_overlap.peak_region_size_qc,
+		overlap_opt_peak_region_size_plot = reproducibility_overlap.peak_region_size_plot,
+		overlap_opt_num_peak_qc = reproducibility_overlap.num_peak_qc,
 	}
 
 	output {
@@ -1172,6 +1241,9 @@ task macs2 {
 		File bfilt_npeak_hammock = glob("*.bfilt.narrowPeak.hammock.gz*")[0]
 		File bfilt_npeak_hammock_tbi = glob("*.bfilt.narrowPeak.hammock.gz*")[1]
 		File frip_qc = glob("*.frip.qc")[0]
+		File peak_region_size_qc = glob("*.peak_region_size.qc")[0]
+		File peak_region_size_plot = glob("*.peak_region_size.png")[0]
+		File num_peak_qc = glob("*.num_peak.qc")[0]
 	}
 	runtime {
 		cpu : 1
@@ -1327,21 +1399,172 @@ task reproducibility {
 			${"--chrsz " + chrsz}
 	}
 	output {
-		File optimal_peak = glob("optimal_peak.*.gz")[0]
-		File conservative_peak = glob("conservative_peak.*.gz")[0]
-		File optimal_peak_bb = glob("optimal_peak.*.bb")[0]
-		File conservative_peak_bb = glob("conservative_peak.*.bb")[0]
-		File optimal_peak_hammock = glob("optimal_peak.*.hammock.gz*")[0]
-		File optimal_peak_hammock_tbi = glob("optimal_peak.*.hammock.gz*")[1]
-		File conservative_peak_hammock = glob("conservative_peak.*.hammock.gz*")[0]
-		File conservative_peak_hammock_tbi = glob("conservative_peak.*.hammock.gz*")[1]
+		File optimal_peak = glob("*optimal_peak.*.gz")[0]
+		File optimal_peak_bb = glob("*optimal_peak.*.bb")[0]
+		File optimal_peak_hammock = glob("*optimal_peak.*.hammock.gz*")[0]
+		File optimal_peak_hammock_tbi = glob("*optimal_peak.*.hammock.gz*")[1]
+		File conservative_peak = glob("*conservative_peak.*.gz")[0]
+		File conservative_peak_bb = glob("*conservative_peak.*.bb")[0]
+		File conservative_peak_hammock = glob("*conservative_peak.*.hammock.gz*")[0]
+		File conservative_peak_hammock_tbi = glob("*conservative_peak.*.hammock.gz*")[1]
 		File reproducibility_qc = glob("*reproducibility.qc")[0]
+		# QC metrics for optimal peak
+		File peak_region_size_qc = glob("*.peak_region_size.qc")[0]
+		File peak_region_size_plot = glob("*.peak_region_size.png")[0]
+		File num_peak_qc = glob("*.num_peak.qc")[0]
 	}
 	runtime {
 		cpu : 1
 		memory : "4000 MB"
 		time : 1
 		disks : "local-disk 50 HDD"
+	}
+}
+
+task preseq {
+	# Fraction of Reads In Annotated Regions
+	File bam
+	Boolean paired_end
+
+	Int mem_mb
+
+	File? null_f
+	command {
+		python $(which encode_preseq.py) \
+			${if paired_end then "--paired-end" else ""} \
+			${"--bam " + bam}
+	}
+	output {
+		File? picard_est_lib_size_qc = if paired_end then 
+			glob('*.picard_est_lib_size.qc')[0] else null_f
+		File preseq_plot = glob("*.preseq.png")[0]
+	}
+	runtime {
+		cpu : 1
+		memory : "${mem_mb} MB"
+		time : 1
+		disks : "local-disk 100 HDD"
+	}
+}
+
+task annot_enrich {
+	# Fraction of Reads In Annotated Regions
+	File ta
+	File? blacklist
+	File? dnase
+	File? prom
+	File? enh
+
+	command {
+		python $(which encode_annot_enrich.py) \
+			${"--ta " + ta} \
+			${"--blacklist " + blacklist} \
+			${"--dnase " + dnase} \
+			${"--prom " + prom} \
+			${"--enh " + enh}
+	}
+	output {
+		File annot_enrich_qc = glob("*.annot_enrich.qc")[0]
+	}
+	runtime {
+		cpu : 1
+		memory : "8000 MB"
+		time : 1
+		disks : "local-disk 100 HDD"
+	}
+}
+
+task tss_enrich {
+	File read_len_log
+	File nodup_bam
+	File tss
+	File chrsz
+
+	command {
+		python $(which encode_tss_enrich.py) \
+			${"--read-len-log " + read_len_log} \
+			${"--nodup-bam " + nodup_bam} \
+			${"--chrsz " + chrsz} \
+			${"--tss " + tss}
+	}
+	output {
+		File tss_plot = glob("*.tss_enrich.png")[0]
+		File tss_large_plot = glob("*.large_tss_enrich.png")[0]
+		File tss_enrich_qc = glob("*.tss_enrich.qc")[0]
+		Float tss_enrich = read_float(tss_enrich_qc)
+	}
+	runtime {
+		cpu : 1
+		memory : "8000 MB"
+		time : 1
+		disks : "local-disk 100 HDD"
+	}
+}
+
+task fraglen_stat_pe {
+	# for PE only
+	File nodup_bam
+
+	command {
+		python $(which encode_fraglen_stat_pe.py) \
+			${"--nodup-bam " + nodup_bam}
+	}
+	output {
+		File nucleosomal_qc = glob("*nucleosomal.qc")[0]
+		File fraglen_dist_plot = glob("*fraglen_dist.png")[0]
+	}
+	runtime {
+		cpu : 1
+		memory : "8000 MB"
+		time : 1
+		disks : "local-disk 100 HDD"
+	}
+}
+
+task gc_bias {
+	File read_len_log
+	File nodup_bam
+	File ref_fa
+
+	command {
+		python $(which encode_gc_bias.py) \
+			${"--read-len-log " + read_len_log} \
+			${"--nodup-bam " + nodup_bam} \
+			${"--ref-fa " + ref_fa}
+	}
+	output {
+		File gc_plot = glob("*.gc_plot.png")[0]
+		File gc_log = glob("*.gc.txt")[0]
+	}
+	runtime {
+		cpu : 1
+		memory : "8000 MB"
+		time : 1
+		disks : "local-disk 100 HDD"
+	}
+}
+
+task compare_signal_to_roadmap {
+	File pval_bw
+	File reg2map_bed
+	File reg2map
+	File roadmap_meta
+
+	command {
+		python $(which encode_compare_signal_to_roadmap.py) \
+			${"--bigwig " + pval_bw} \
+			${"--reg2map-bed " + reg2map_bed} \
+			${"--reg2map " + reg2map} \
+			${"--roadmap-meta " + roadmap_meta}
+	}
+	output {
+		File roadmap_compare_plot = glob("*roadmap_compare_plot.png")[0]
+	}
+	runtime {
+		cpu : 1
+		memory : "8000 MB"
+		time : 1
+		disks : "local-disk 100 HDD"
 	}
 }
 
@@ -1410,7 +1633,6 @@ task ataqc {
 			${"--reg2map " + reg2map} \
 			${"--roadmap-meta " + roadmap_meta} \
 			${"--mito-chr-name " + mito_chr_name}
-
 	}
 	output {
 		File html = glob("*_qc.html")[0]
@@ -1436,6 +1658,7 @@ task qc_report {
 	Int multimapping
 	Array[Boolean?] paired_ends
 	String pipeline_type
+	String aligner
 	String peak_caller
 	Int? macs2_cap_num_peak
 	Int? spp_cap_num_peak
@@ -1464,8 +1687,28 @@ task qc_report {
 	File? frip_overlap_qc_ppr
 	File? idr_reproducibility_qc
 	File? overlap_reproducibility_qc
-	Array[File?] ataqc_txts
-	Array[File?] ataqc_htmls
+
+	Array[File?] annot_enrich_qcs
+	Array[File?] tss_enrich_qcs
+	Array[File?] tss_large_plots
+	Array[File?] roadmap_compare_plots
+	Array[File?] fraglen_dist_plots
+	Array[File?] fraglen_nucleosomal_qcs
+	Array[File?] gc_plots
+	Array[File?] preseq_plots
+	Array[File?] picard_est_lib_size_qcs
+
+	Array[File?] peak_region_size_qcs
+	Array[File?] peak_region_size_plots
+	Array[File?] num_peak_qcs
+
+	File? idr_opt_peak_region_size_qc
+	File? idr_opt_peak_region_size_plot
+	File? idr_opt_num_peak_qc
+
+	File? overlap_opt_peak_region_size_qc
+	File? overlap_opt_peak_region_size_plot
+	File? overlap_opt_num_peak_qc
 
 	File? qc_json_ref
 
@@ -1478,6 +1721,7 @@ task qc_report {
 			${"--multimapping " + multimapping} \
 			--paired-ends ${sep=" " paired_ends} \
 			--pipeline-type ${pipeline_type} \
+			--aligner ${aligner} \
 			--peak-caller ${peak_caller} \
 			${"--macs2-cap-num-peak " + macs2_cap_num_peak} \
 			${"--spp-cap-num-peak " + spp_cap_num_peak} \
@@ -1505,8 +1749,24 @@ task qc_report {
 			${"--frip-overlap-qc-ppr " + frip_overlap_qc_ppr} \
 			${"--idr-reproducibility-qc " + idr_reproducibility_qc} \
 			${"--overlap-reproducibility-qc " + overlap_reproducibility_qc} \
-			--ataqc-txts ${sep="_:_" ataqc_txts} \
-			--ataqc-htmls ${sep="_:_" ataqc_htmls} \
+			--annot-enrich-qcs ${sep="_:_" annot_enrich_qcs} \
+			--tss-enrich-qcs ${sep="_:_" tss_enrich_qcs} \
+			--tss-large-plots ${sep="_:_" tss_large_plots} \
+			--roadmap-compare-plots ${sep="_:_" roadmap_compare_plots} \
+			--fraglen-dist-plots ${sep="_:_" fraglen_dist_plots} \
+			--fraglen-nucleosomal-qcs ${sep="_:_" fraglen_nucleosomal_qcs} \
+			--gc-plots ${sep="_:_" gc_plots} \
+			--preseq-plots ${sep="_:_" preseq_plots} \
+			--picard-est-lib-size-qcs ${sep="_:_" picard_est_lib_size_qcs} \
+			--peak-region-size-qcs ${sep="_:_" peak_region_size_qcs} \
+			--peak-region-size-plots ${sep="_:_" peak_region_size_plots} \
+			--num-peak-qcs ${sep="_:_" num_peak_qcs} \
+			${"--idr-opt-peak-region-size-qc " + idr_opt_peak_region_size_qc} \
+			${"--idr-opt-peak-region-size-plot " + idr_opt_peak_region_size_plot} \
+			${"--idr-opt-num-peak-qc " + idr_opt_num_peak_qc} \
+			${"--overlap-opt-peak-region-size-qc " + overlap_opt_peak_region_size_qc} \
+			${"--overlap-opt-peak-region-size-plot " + overlap_opt_peak_region_size_plot} \
+			${"--overlap-opt-num-peak-qc " + overlap_opt_num_peak_qc} \
 			--out-qc-html qc.html \
 			--out-qc-json qc.json \
 			${"--qc-json-ref " + qc_json_ref}

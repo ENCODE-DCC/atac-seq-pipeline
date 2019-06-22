@@ -7,7 +7,7 @@ import sys
 import os
 import argparse
 from encode_common import *
-from encode_common_genomic import peak_to_bigbed, peak_to_hammock
+from encode_common_genomic import peak_to_bigbed, peak_to_hammock, get_region_size_metrics, get_num_peaks
 from encode_blacklist_filter import blacklist_filter
 from encode_frip import frip
 
@@ -121,9 +121,15 @@ def main():
 
     if args.ta: # if TAG-ALIGN is given
         log.info('FRiP without fragment length...')
-        frip_qc = frip( args.ta, bfilt_npeak, args.out_dir)
+        frip_qc = frip(args.ta, bfilt_npeak, args.out_dir)
     else:
         frip_qc = '/dev/null'
+
+    log.info('Calculating (blacklist-filtered) peak region size QC/plot...')
+    region_size_qc, region_size_plot = get_region_size_metrics(bfilt_npeak)
+
+    log.info('Calculating number of peaks (blacklist-filtered)...')
+    num_peak_qc = get_num_peaks(bfilt_npeak)
 
     log.info('List all files in output directory...')
     ls_l(args.out_dir)
