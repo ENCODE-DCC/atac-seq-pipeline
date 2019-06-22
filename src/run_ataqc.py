@@ -13,7 +13,6 @@ import pysam
 import pybedtools
 import metaseq
 import subprocess
-import multiprocessing
 import timeit
 import datetime
 import gzip

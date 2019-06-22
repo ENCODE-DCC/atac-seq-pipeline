@@ -6,7 +6,6 @@
 import sys
 import os
 import argparse
-import multiprocessing
 from encode_common import *
 from encode_common_genomic import peak_to_bigbed, peak_to_hammock, get_region_size_metrics, get_num_peaks
 

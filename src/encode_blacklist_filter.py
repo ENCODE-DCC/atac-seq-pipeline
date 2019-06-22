@@ -6,7 +6,6 @@
 import sys
 import os
 import argparse
-import multiprocessing
 from encode_common import *
 
 def parse_arguments():

@@ -7,7 +7,6 @@ import sys
 import os
 import re
 import argparse
-import multiprocessing
 from encode_common_genomic import *
 from run_ataqc import *
 from encode_common_log_parser import parse_dup_qc, parse_flagstat_qc

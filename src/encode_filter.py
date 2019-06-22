@@ -6,7 +6,6 @@
 import sys
 import os
 import argparse
-import multiprocessing
 from encode_common_genomic import *
 
 def parse_arguments():
@@ -343,41 +342,22 @@ def main():
         temp_files.append(dupmark_bam+'.bai')
     temp_files.append(dupmark_bam)
 
-    # initialize multithreading
-    log.info('Initializing multi-threading...')
-    num_process = min(3,args.nth)
-    log.info('Number of threads={}.'.format(num_process))
-    pool = multiprocessing.Pool(num_process)
-
     log.info('sambamba index...')
-    ret_val_1 = pool.apply_async(sambamba_index, 
-                                (nodup_bam, args.nth, args.out_dir))
+    nodup_bai = sambamba_index(nodup_bam, args.nth, args.out_dir)
+
     log.info('sambamba flagstat...')
-    ret_val_2 = pool.apply_async(sambamba_flagstat,
-                                (nodup_bam, args.nth, args.out_dir))
+    nodup_flagstat_qc = sambamba_flagstat(nodup_bam, args.nth, args.out_dir)
 
     log.info('Generating PBC QC log...')
     if args.paired_end:
-        ret_val_3 = pool.apply_async(pbc_qc_pe,
-                        (dupmark_bam, args.mito_chr_name,
-                            max(1,args.nth-2),
-                            args.out_dir))
+        pbc_qc = pbc_qc_pe(dupmark_bam, args.mito_chr_name, nth,
+                           args.out_dir)
     else:
-        ret_val_3 = pool.apply_async(pbc_qc_se,
-                        (dupmark_bam, args.mito_chr_name, args.out_dir))
-        
-    # gather
-    nodup_bai = ret_val_1.get(BIG_INT)
-    nodup_flagstat_qc = ret_val_2.get(BIG_INT)
-
-    pbc_qc = ret_val_3.get(BIG_INT)
+        pbc_qc = pbc_qc_se(dupmark_bam, args.mito_chr_name, args.out_dir)
+   
 
     log.info('Making mito dup log...')
     mito_dup_log = make_mito_dup_log(dupmark_bam, args.out_dir)
-
-    log.info('Closing multi-threading...')
-    pool.close()
-    pool.join()
 
     log.info('Removing temporary files...')
     rm_f(temp_files)

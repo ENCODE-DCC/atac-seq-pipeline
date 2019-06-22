@@ -6,7 +6,6 @@
 import sys
 import os
 import argparse
-import multiprocessing
 import copy
 from detect_adapter import detect_most_likely_adapter
 from encode_common import *
@@ -159,16 +158,7 @@ def main():
     # declare temp arrays
     temp_files = [] # files to deleted later at the end
 
-    log.info('Initializing multi-threading...')
-    if args.paired_end:
-        num_process = min(2*len(args.fastqs),args.nth)
-    else:
-        num_process = min(len(args.fastqs),args.nth)
-    log.info('Number of threads={}.'.format(num_process))
-    pool = multiprocessing.Pool(num_process)
-
     log.info('Detecting adapters...')
-    ret_vals = []
     for i in range(len(args.fastqs)):
         # for each fastq to be merged later
         log.info('Detecting adapters for merge_id={}...'.format(
@@ -178,80 +168,51 @@ def main():
         if args.paired_end:
             if not args.adapter and args.auto_detect_adapter and \
                 not (adapters[0] and adapters[1]):                
-                ret_val1 = pool.apply_async(
-                    detect_most_likely_adapter,(fastqs[0],))
-                ret_val2 = pool.apply_async(
-                    detect_most_likely_adapter,(fastqs[1],))
-                ret_vals.append([ret_val1,ret_val2])
+                args.adapters[i][0] = detect_most_likely_adapter(fastqs[0])
+                args.adapters[i][1] = detect_most_likely_adapter(fastqs[1])
+                log.info('Detected adapters for merge_id={}, R1: {}, R2: {}'.format(
+                    i+1, args.adapters[i][0], args.adapters[i][1]))
         else:
             if not args.adapter and args.auto_detect_adapter and \
                 not adapters[0]:
-                ret_val1 = pool.apply_async(
-                    detect_most_likely_adapter,(fastqs[0],))
-                ret_vals.append([ret_val1])
-
-    # update array with detected adapters
-    for i, ret_vals_ in enumerate(ret_vals):
-        for j, ret_val in enumerate(ret_vals_):
-            args.adapters[i][j] = str(ret_val.get(BIG_INT))
-            log.info('Detected adapters for merge_id={}, R{}: {}'.format(
-                    i+1, j+1, args.adapters[i][j]))
+                args.adapters[i][0] = detect_most_likely_adapter(fastqs[0])
+                log.info('Detected adapter for merge_id={}, R1: {}'.format(
+                    i+1, args.adapters[i][0]))
 
     log.info('Trimming adapters...')
-    ret_vals = []
+    trimmed_fastqs_R1 = []
+    trimmed_fastqs_R2 = []
     for i in range(len(args.fastqs)):
         # for each fastq to be merged later
         fastqs = args.fastqs[i] # R1 and R2
         adapters = args.adapters[i]
         if args.paired_end:
-            ret_val = pool.apply_async(
-                trim_adapter_pe,(
+            fastqs = trim_adapter_pe(
                     fastqs[0], fastqs[1], 
                     adapters[0], adapters[1],
                     args.adapter,
                     args.cutadapt_param,
-                    args.out_dir))
+                    args.out_dir)
+            trimmed_fastqs_R1.append(fastqs[0])
+            trimmed_fastqs_R2.append(fastqs[1])
         else:
-            ret_val = pool.apply_async(
-                trim_adapter_se,(
+            fastq = trim_adapter_se(
                     fastqs[0],
                     adapters[0],
                     args.adapter,
                     args.cutadapt_param,
-                    args.out_dir))
-        ret_vals.append(ret_val)
-
-    # update array with trimmed fastqs
-    trimmed_fastqs_R1 = []
-    trimmed_fastqs_R2 = []
-    for i, ret_val in enumerate(ret_vals):
-        if args.paired_end:
-            fastqs = ret_val.get(BIG_INT)
-            trimmed_fastqs_R1.append(fastqs[0])
-            trimmed_fastqs_R2.append(fastqs[1])
-        else:
-            fastq = ret_val.get(BIG_INT)
+                    args.out_dir)
             trimmed_fastqs_R1.append(fastq)
 
     log.info('Merging fastqs...')
     log.info('R1 to be merged: {}'.format(trimmed_fastqs_R1))
-    ret_val1 = pool.apply_async(merge_fastqs,
-                    (trimmed_fastqs_R1, 'R1', args.out_dir,))
+    R1_merged = merge_fastqs(trimmed_fastqs_R1, 'R1', args.out_dir)
     if args.paired_end:
         log.info('R2 to be merged: {}'.format(trimmed_fastqs_R2))
-        ret_val2 = pool.apply_async(merge_fastqs,
-                        (trimmed_fastqs_R2, 'R2', args.out_dir,))
-    # gather
-    R1_merged = ret_val1.get(BIG_INT)
-    if args.paired_end:
-        R2_merged = ret_val2.get(BIG_INT)
+        R2_merged = merge_fastqs(trimmed_fastqs_R2, 'R2', args.out_dir)
 
     temp_files.extend(trimmed_fastqs_R1)
     temp_files.extend(trimmed_fastqs_R2)
-
-    log.info('Closing multi-threading...')
-    pool.close()
-    pool.join()
 
     log.info('Removing temporary files...')
     rm_f(temp_files)
