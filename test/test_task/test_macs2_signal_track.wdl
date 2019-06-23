@@ -1,6 +1,7 @@
 # ENCODE DCC ATAC-Seq/DNase-Seq pipeline tester for task macs2
 # Author: Jin Lee (leepc12@gmail.com)
 import "../../atac.wdl" as atac
+import "compare_md5sum.wdl" as compare_md5sum
 
 workflow test_macs2_signal_track {
 	Float pval_thresh
@@ -30,7 +31,7 @@ workflow test_macs2_signal_track {
 		disks = macs2_disks,
 	}
 
-	call atac.compare_md5sum { input :
+	call compare_md5sum.compare_md5sum { input :
 		labels = [
 			'se_macs2_pval_bw',
 		],

@@ -1,6 +1,7 @@
 # ENCODE DCC ATAC-Seq/DNase-Seq pipeline tester
 # Author: Jin Lee (leepc12@gmail.com)
 import "../../atac.wdl" as atac
+import "compare_md5sum.wdl" as compare_md5sum
 
 workflow test_pool_ta {
 	String se_ta_rep1
@@ -12,7 +13,7 @@ workflow test_pool_ta {
 		tas = [se_ta_rep1, se_ta_rep2],
 	}
 
-	call atac.compare_md5sum { input :
+	call compare_md5sum.compare_md5sum { input :
 		labels = [
 			'se_pool_ta',
 		],

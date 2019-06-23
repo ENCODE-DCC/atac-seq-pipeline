@@ -1,6 +1,7 @@
 # ENCODE DCC ATAC-Seq/DNase-Seq pipeline tester
 # Author: Jin Lee (leepc12@gmail.com)
 import "../../atac.wdl" as atac
+import "compare_md5sum.wdl" as compare_md5sum
 
 workflow test_bam2ta {
 	Int bam2ta_subsample
@@ -101,7 +102,7 @@ workflow test_bam2ta {
 		disks = bam2ta_disks,
 	}
 
-	call atac.compare_md5sum { input :
+	call compare_md5sum.compare_md5sum { input :
 		labels = [
 			'pe_bam2ta',
 			'pe_bam2ta_disable_tn5_shift',

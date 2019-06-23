@@ -1,6 +1,7 @@
 # ENCODE DCC ATAC-Seq/DNase-Seq pipeline tester
 # Author: Jin Lee (leepc12@gmail.com)
 import "../../atac.wdl" as atac
+import "compare_md5sum.wdl" as compare_md5sum
 
 workflow test_spr {
 	String pe_ta
@@ -26,7 +27,7 @@ workflow test_spr {
 		mem_mb = spr_mem_mb,
 	}
 
-	call atac.compare_md5sum { input :
+	call compare_md5sum.compare_md5sum { input :
 		labels = [
 			'pe_spr_pr1',
 			'pe_spr_pr2',
