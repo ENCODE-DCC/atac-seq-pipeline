@@ -29,6 +29,7 @@ workflow atac {
 	File? bowtie2_idx_tar 			# bowtie2 index tar (uncompressed)
 	File? chrsz 					# 2-col chromosome sizes file
 	File? blacklist 				# blacklist BED (peaks overlapping will be filtered out)
+	File? blacklist2 				# 2nd blacklist (will be merged with 1st one)
 	String? gensz 					# genome sizes (hs for human, mm for mouse or sum of 2nd col in chrsz)
 	# individual genome parameters for ATAqC
 	File? tss 						# TSS BED file
@@ -233,8 +234,22 @@ workflow atac {
 		else read_genome_tsv.chrsz
 	String? gensz_ = if defined(gensz) then gensz
 		else read_genome_tsv.gensz
-	File? blacklist_ = if defined(blacklist) then blacklist
+	File? blacklist1_ = if defined(blacklist) then blacklist
 		else read_genome_tsv.blacklist
+	File? blacklist2_ = if defined(blacklist2) then blacklist2
+		else read_genome_tsv.blacklist2		
+	# merge multiple blacklists
+	Array[File] blacklists = select_all([blacklist1_, blacklist2_])
+	if ( length(blacklists) > 1 ) {
+		call pool_ta as pool_blacklist { input:
+			tas = blacklists,
+		}
+	}
+	File? blacklist_ = if length(blacklists) > 1 then pool_blacklist.ta_pooled
+		else if length(blacklists) > 0 then blacklists[0]
+		else blacklist2_
+
+	# read additional annotation data
 	File? tss_ = if defined(tss) then tss
 		else read_genome_tsv.tss
 	File? dnase_ = if defined(dnase) then dnase
@@ -1812,6 +1827,7 @@ task read_genome_tsv {
 		String? gensz = if size('gensz')==0 then null_s else read_string('gensz')
 		String? blacklist = if size('blacklist')==0 then null_s else read_string('blacklist')
 		String? blacklist2 = if size('blacklist2')==0 then null_s else read_string('blacklist2')
+		# annotation data
 		String? tss = if size('tss')!=0 then read_string('tss')
 			else if size('tss_enrich')!=0 then read_string('tss_enrich') else null_s
 		String? dnase = if size('dnase')==0 then null_s else read_string('dnase')
