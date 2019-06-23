@@ -8,7 +8,7 @@ import os
 import argparse
 import math
 from encode_common import *
-from encode_common_genomic import peak_to_bigbed, peak_to_hammock, get_region_size_metrics
+from encode_common_genomic import peak_to_bigbed, peak_to_hammock
 from encode_blacklist_filter import blacklist_filter
 from encode_frip import frip, frip_shifted
 

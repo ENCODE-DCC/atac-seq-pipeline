@@ -1787,7 +1787,8 @@ task read_genome_tsv {
 	String? null_s
 	command <<<
 		# create empty files for all entries
-		touch ref_fa bowtie2_idx_tar chrsz gensz blacklist
+		touch ref_fa bowtie2_idx_tar bwa_idx_tar chrsz gensz blacklist blacklist2
+		touch custom_aligner_idx_tar
 		touch tss tss_enrich # for backward compatibility
 		touch dnase prom enh reg2map reg2map_bed roadmap_meta
 
@@ -1804,10 +1805,13 @@ task read_genome_tsv {
 	>>>
 	output {
 		String? ref_fa = if size('ref_fa')==0 then null_s else read_string('ref_fa')
+		String? bwa_idx_tar = if size('bwa_idx_tar')==0 then null_s else read_string('bwa_idx_tar')
 		String? bowtie2_idx_tar = if size('bowtie2_idx_tar')==0 then null_s else read_string('bowtie2_idx_tar')
+		String? custom_aligner_idx_tar = if size('custom_aligner_idx_tar')==0 then null_s else read_string('custom_aligner_idx_tar')
 		String? chrsz = if size('chrsz')==0 then null_s else read_string('chrsz')
 		String? gensz = if size('gensz')==0 then null_s else read_string('gensz')
 		String? blacklist = if size('blacklist')==0 then null_s else read_string('blacklist')
+		String? blacklist2 = if size('blacklist2')==0 then null_s else read_string('blacklist2')
 		String? tss = if size('tss')!=0 then read_string('tss')
 			else if size('tss_enrich')!=0 then read_string('tss_enrich') else null_s
 		String? dnase = if size('dnase')==0 then null_s else read_string('dnase')

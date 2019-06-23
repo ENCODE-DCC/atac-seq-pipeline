@@ -580,3 +580,4 @@ def to_number(var):
 
 def to_bool(var):
     return var.lower() in ('true', 't', 'ok', 'yes', '1')
+
