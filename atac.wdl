@@ -55,7 +55,7 @@ workflow atac {
 									# cutadapt parameters (err_rate=0.1, min_trim_len=5)
 
 	# parameters for align (align FASTQs and create raw BAM)
-	#String aligner = 'bowtie2' 		# bowtie2, custom
+	String aligner = 'bowtie2' 		# supported aligner: bowtie2
 	Int multimapping = 4			# for samples with multimapping reads
 
 	# parameters for filter (filter/dedup raw BAM)
@@ -115,10 +115,10 @@ workflow atac {
 	Int trim_adapter_time_hr = 24
 	String trim_adapter_disks = "local-disk 100 HDD"
 
-	Int bowtie2_cpu = 4
-	Int bowtie2_mem_mb = 20000
-	Int bowtie2_time_hr = 48
-	String bowtie2_disks = "local-disk 200 HDD"
+	Int align_cpu = 4
+	Int align_mem_mb = 20000
+	Int align_time_hr = 48
+	String align_disks = "local-disk 200 HDD"
 
 	Int filter_cpu = 2
 	Int filter_mem_mb = 20000
@@ -342,29 +342,27 @@ workflow atac {
 			then trim_merged_fastqs_R2[i]
 			else trim_adapter.trim_merged_fastq_R2
 
-		Boolean has_input_of_bowtie2 = has_output_of_trim_adapter ||
+		Boolean has_input_of_align = has_output_of_trim_adapter ||
 			defined(trim_adapter.trim_merged_fastq_R1)
-		Boolean has_output_of_bowtie2 = i<length(bams) && defined(bams[i])
-		if ( has_input_of_bowtie2 && !has_output_of_bowtie2 ) {
-			call bowtie2 { input :
+		Boolean has_output_of_align = i<length(bams) && defined(bams[i])
+		if ( has_input_of_align && !has_output_of_align ) {
+			call align { input :
 				fastq_R1 = trim_merged_fastq_R1_,
 				fastq_R2 = trim_merged_fastq_R2_,
 				paired_end = paired_end_,
 				#aligner = aligner,
 				multimapping = multimapping,
-				idx_tar = bowtie2_idx_tar_,
-				bowtie2_param_se = bowtie2_param_se,
-				bowtie2_param_pe = bowtie2_param_pe,
+				bowtie2_idx_tar = bowtie2_idx_tar_,
 				# resource
-				cpu = bowtie2_cpu,
-				mem_mb = bowtie2_mem_mb,
-				time_hr = bowtie2_time_hr,
-				disks = bowtie2_disks,
+				cpu = align_cpu,
+				mem_mb = align_mem_mb,
+				time_hr = align_time_hr,
+				disks = align_disks,
 			}
 		}
-		File? bam_ = if has_output_of_bowtie2 then bams[i] else bowtie2.bam
+		File? bam_ = if has_output_of_align then bams[i] else align.bam
 
-		Boolean has_input_of_filter = has_output_of_bowtie2 || defined(bowtie2.bam)
+		Boolean has_input_of_filter = has_output_of_align || defined(align.bam)
 		Boolean has_output_of_filter = i<length(nodup_bams) && defined(nodup_bams[i])
 		# skip if we already have output of this step
 		if ( has_input_of_filter && !has_output_of_filter ) {
@@ -523,9 +521,9 @@ workflow atac {
 
 
 		# tasks factored out from ATAqC
-		if ( defined(nodup_bam_) && defined(tss_) && defined(bowtie2.read_len_log) ) {
+		if ( defined(nodup_bam_) && defined(tss_) && defined(align.read_len_log) ) {
 			call tss_enrich { input :
-				read_len_log = bowtie2.read_len_log,
+				read_len_log = align.read_len_log,
 				nodup_bam = nodup_bam_,
 				tss = tss_,
 				chrsz = chrsz_,
@@ -543,9 +541,9 @@ workflow atac {
 				mem_mb = preseq_mem_mb,
 			}
 		}
-		if ( defined(nodup_bam_) && defined(ref_fa_) && defined(bowtie2.read_len_log) ) {
+		if ( defined(nodup_bam_) && defined(ref_fa_) && defined(align.read_len_log) ) {
 			call gc_bias { input :
-				read_len_log = bowtie2.read_len_log,
+				read_len_log = align.read_len_log,
 				nodup_bam = nodup_bam_,
 				ref_fa = ref_fa_,
 			}
@@ -837,9 +835,9 @@ workflow atac {
 		if ( !disable_ataqc ) {
 			call ataqc { input :
 				paired_end = paired_end_[i],
-				read_len_log = bowtie2.read_len_log[i],
-				flagstat_qc = bowtie2.flagstat_qc[i],
-				bowtie2_log = bowtie2.align_log[i],
+				read_len_log = align.read_len_log[i],
+				flagstat_qc = align.flagstat_qc[i],
+				align_log = align.align_log[i],
 				pbc_qc = filter.pbc_qc[i],
 				dup_qc = filter.dup_qc[i],
 				bam = bam_[i],
@@ -886,7 +884,7 @@ workflow atac {
 		macs2_cap_num_peak = cap_num_peak,
 		idr_thresh = idr_thresh,
 		
-		flagstat_qcs = bowtie2.flagstat_qc,
+		flagstat_qcs = align.flagstat_qc,
 		nodup_flagstat_qcs = filter.flagstat_qc,
 		dup_qcs = filter.dup_qc,
 		pbc_qcs = filter.pbc_qc,
@@ -989,24 +987,32 @@ task trim_adapter {
 	}
 }
 
-task bowtie2 {
-	File idx_tar 		# reference bowtie2 index tar
-	File? fastq_R1 		# [read_end_id]
+task align {
+	String aligner
+	File bowtie2_idx_tar	# reference bowtie2 index tar
+	File? fastq_R1 			# [read_end_id]
 	File? fastq_R2
 	Boolean paired_end
 	Int multimapping
+
 	Int cpu
 	Int mem_mb
 	Int time_hr
 	String disks
 
 	command {
-		python $(which encode_bowtie2.py) \
-			${idx_tar} \
-			${fastq_R1} ${fastq_R2} \
-			${if paired_end then "--paired-end" else ""} \
-			${"--multimapping " + multimapping} \
-			${"--nth " + cpu}
+		if [ "${aligner}" == "bowtie2" ]; then
+			python $(which encode_bowtie2.py) \
+				${bowtie2_idx_tar} \
+				${fastq_R1} ${fastq_R2} \
+				${if paired_end then "--paired-end" else ""} \
+				${"--multimapping " + multimapping} \
+				${"--nth " + cpu}
+		else
+			echo "[Error] Aligner not supported: ${aligner}"
+			echo "Currently supported aligner: bowtie2"
+			ERROR_ALIGNER_NOT_SUPPORTED
+		fi 
 	}
 	output {
 		File bam = glob("*.bam")[0]
@@ -1564,7 +1570,7 @@ task ataqc {
 	Boolean paired_end
 	File? read_len_log
 	File? flagstat_qc
-	File? bowtie2_log
+	File? align_log
 	File? bam
 	File? nodup_flagstat_qc
 	File? mito_dup_log
@@ -1601,7 +1607,7 @@ task ataqc {
 			${if paired_end then "--paired-end" else ""} \
 			${"--read-len-log " + read_len_log} \
 			${"--flagstat-log " + flagstat_qc} \
-			${"--bowtie2-log " + bowtie2_log} \
+			${"--bowtie2-log " + align_log} \
 			${"--bam " + bam} \
 			${"--nodup-flagstat-log " + nodup_flagstat_qc} \
 			${"--mito-dup-log " + mito_dup_log} \
