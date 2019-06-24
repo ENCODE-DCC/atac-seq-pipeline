@@ -845,45 +845,6 @@ workflow atac {
 		}
 	}
 
-	# ATAqC
-	scatter( i in range(num_rep) ) {
-		if ( !disable_ataqc ) {
-			call ataqc { input :
-				paired_end = paired_end_[i],
-				read_len_log = bowtie2.read_len_log[i],
-				flagstat_qc = bowtie2.flagstat_qc[i],
-				pbc_qc = filter.pbc_qc[i],
-				dup_qc = filter.dup_qc[i],
-				bam = bam_[i],
-				nodup_flagstat_qc = filter.flagstat_qc[i],
-				mito_dup_log = filter.mito_dup_log[i],
-				nodup_bam = nodup_bam_[i],
-				ta = ta_[i],
-				peak = if defined(idr_pr.bfilt_idr_peak[i]) then idr_pr.bfilt_idr_peak[i]
-					else reproducibility_overlap.optimal_peak,
-				idr_peak = reproducibility_idr.optimal_peak,
-				overlap_peak= reproducibility_overlap.optimal_peak,
-				pval_bw = macs2_signal_track.pval_bw[i],
-				ref_fa = ref_fa_,
-				chrsz = chrsz_,
-				tss = tss_,
-				blacklist = blacklist_,
-				dnase = dnase_,
-				prom = prom_,
-				enh = enh_,
-				reg2map_bed = reg2map_bed_,
-				reg2map = reg2map_,
-				roadmap_meta = roadmap_meta_,
-				mito_chr_name = mito_chr_name,
-
-				mem_mb = ataqc_mem_mb,
-				mem_java_mb = ataqc_mem_java_mb,
-				time_hr = ataqc_time_hr,
-				disks = ataqc_disks,
-			}
-		}
-	}
-
 	# Generate final QC report and JSON
 	call qc_report { input :
 		pipeline_ver = pipeline_ver,
