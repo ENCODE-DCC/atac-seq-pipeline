@@ -984,7 +984,6 @@ task bowtie2 {
 				${"--multimapping " + multimapping} \
 				${"--nth " + cpu}
 		else
-			echo "[Error] Aligner not supported: ${aligner}"
 			echo "Currently supported aligner: bowtie2"
 			ERROR_ALIGNER_NOT_SUPPORTED
 		fi 
