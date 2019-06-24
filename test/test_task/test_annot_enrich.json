@@ -1,0 +1,11 @@
+{
+    "test_annot_enrich.paired_end" : true,
+    "test_annot_enrich.blacklist" : "atac-seq-pipeline-test-data/genome_data/hg38_chr19_chrM/hg38.blacklist.bed.gz",
+    "test_annot_enrich.dnase" : "atac-seq-pipeline-test-data/genome_data/hg38/ataqc/reg2map_honeybadger2_dnase_all_p10_ucsc.hg19_to_hg38.bed.gz",
+    "test_annot_enrich.prom" : "atac-seq-pipeline-test-data/genome_data/hg38/ataqc/reg2map_honeybadger2_dnase_prom_p2.hg19_to_hg38.bed.gz",
+    "test_annot_enrich.enh" : "atac-seq-pipeline-test-data/genome_data/hg38/ataqc/reg2map_honeybadger2_dnase_enh_p2.hg19_to_hg38.bed.gz",
+    
+    "test_annot_enrich.ta" : "atac-seq-pipeline-test-data/input/pe/ataqc/ENCFF341MYG.subsampled.400.trim.merged.nodup.tn5.tagAlign.gz",
+
+    "test_annot_enrich.ref_annot_enrich_qc" : "atac-seq-pipeline-test-data/ref_output/test_annot_enrich/ENCFF341MYG.subsampled.400.trim.merged.nodup.tn5.annot_enrich.qc"
+}

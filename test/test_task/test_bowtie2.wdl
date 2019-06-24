@@ -26,7 +26,7 @@ workflow test_bowtie2 {
 	String bowtie2_disks = "local-disk 100 HDD"
 
 	call atac.bowtie2 as pe_bowtie2 { input :
-		idx_tar = pe_bowtie2_idx_tar,
+		bowtie2_idx_tar = pe_bowtie2_idx_tar,
 		fastq_R1 = pe_trimmed_fastqs[0],
 		fastq_R2 = pe_trimmed_fastqs[1],
 		multimapping = multimapping,
@@ -38,7 +38,7 @@ workflow test_bowtie2 {
 		disks = bowtie2_disks,
 	}
 	call atac.bowtie2 as pe_bowtie2_no_multimapping { input :
-		idx_tar = pe_bowtie2_idx_tar,
+		bowtie2_idx_tar = pe_bowtie2_idx_tar,
 		fastq_R1 = pe_trimmed_fastqs[0],
 		fastq_R2 = pe_trimmed_fastqs[1],
 		multimapping = 0,
@@ -50,7 +50,7 @@ workflow test_bowtie2 {
 		disks = bowtie2_disks,
 	}
 	call atac.bowtie2 as se_bowtie2 { input :
-		idx_tar = se_bowtie2_idx_tar,
+		bowtie2_idx_tar = se_bowtie2_idx_tar,
 		fastq_R1 = se_trimmed_fastqs[0],
 		multimapping = multimapping,
 		paired_end = false,
@@ -61,7 +61,7 @@ workflow test_bowtie2 {
 		disks = bowtie2_disks,
 	}
 	call atac.bowtie2 as se_bowtie2_no_multimapping { input :
-		idx_tar = se_bowtie2_idx_tar,
+		bowtie2_idx_tar = se_bowtie2_idx_tar,
 		fastq_R1 = se_trimmed_fastqs[0],
 		multimapping = 0,
 		paired_end = false,

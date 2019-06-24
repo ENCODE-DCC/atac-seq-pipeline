@@ -357,11 +357,11 @@ workflow atac {
 			then trim_merged_fastqs_R2[i]
 			else trim_adapter.trim_merged_fastq_R2
 
-		Boolean has_input_of_align = has_output_of_trim_adapter ||
+		Boolean has_input_of_bowtie2 = has_output_of_trim_adapter ||
 			defined(trim_adapter.trim_merged_fastq_R1)
-		Boolean has_output_of_align = i<length(bams) && defined(bams[i])
-		if ( has_input_of_align && !has_output_of_align ) {
-			call align { input :
+		Boolean has_output_of_bowtie2 = i<length(bams) && defined(bams[i])
+		if ( has_input_of_bowtie2 && !has_output_of_bowtie2 ) {
+			call bowtie2 { input :
 				fastq_R1 = trim_merged_fastq_R1_,
 				fastq_R2 = trim_merged_fastq_R2_,
 				paired_end = paired_end_,
@@ -375,9 +375,9 @@ workflow atac {
 				disks = align_disks,
 			}
 		}
-		File? bam_ = if has_output_of_align then bams[i] else align.bam
+		File? bam_ = if has_output_of_bowtie2 then bams[i] else bowtie2.bam
 
-		Boolean has_input_of_filter = has_output_of_align || defined(align.bam)
+		Boolean has_input_of_filter = has_output_of_bowtie2 || defined(bowtie2.bam)
 		Boolean has_output_of_filter = i<length(nodup_bams) && defined(nodup_bams[i])
 		# skip if we already have output of this step
 		if ( has_input_of_filter && !has_output_of_filter ) {
@@ -536,9 +536,9 @@ workflow atac {
 
 
 		# tasks factored out from ATAqC
-		if ( defined(nodup_bam_) && defined(tss_) && defined(align.read_len_log) ) {
+		if ( defined(nodup_bam_) && defined(tss_) && defined(bowtie2.read_len_log) ) {
 			call tss_enrich { input :
-				read_len_log = align.read_len_log,
+				read_len_log = bowtie2.read_len_log,
 				nodup_bam = nodup_bam_,
 				tss = tss_,
 				chrsz = chrsz_,
@@ -556,9 +556,9 @@ workflow atac {
 				mem_mb = preseq_mem_mb,
 			}
 		}
-		if ( defined(nodup_bam_) && defined(ref_fa_) && defined(align.read_len_log) ) {
+		if ( defined(nodup_bam_) && defined(ref_fa_) && defined(bowtie2.read_len_log) ) {
 			call gc_bias { input :
-				read_len_log = align.read_len_log,
+				read_len_log = bowtie2.read_len_log,
 				nodup_bam = nodup_bam_,
 				ref_fa = ref_fa_,
 			}
@@ -850,8 +850,8 @@ workflow atac {
 		if ( !disable_ataqc ) {
 			call ataqc { input :
 				paired_end = paired_end_[i],
-				read_len_log = align.read_len_log[i],
-				flagstat_qc = align.flagstat_qc[i],
+				read_len_log = bowtie2.read_len_log[i],
+				flagstat_qc = bowtie2.flagstat_qc[i],
 				pbc_qc = filter.pbc_qc[i],
 				dup_qc = filter.dup_qc[i],
 				bam = bam_[i],
@@ -898,7 +898,7 @@ workflow atac {
 		macs2_cap_num_peak = cap_num_peak,
 		idr_thresh = idr_thresh,
 		
-		flagstat_qcs = align.flagstat_qc,
+		flagstat_qcs = bowtie2.flagstat_qc,
 		nodup_flagstat_qcs = filter.flagstat_qc,
 		dup_qcs = filter.dup_qc,
 		pbc_qcs = filter.pbc_qc,
@@ -1001,8 +1001,8 @@ task trim_adapter {
 	}
 }
 
-task align {
-	String aligner
+task bowtie2 {
+	String aligner = "bowtie2"
 	File bowtie2_idx_tar	# reference bowtie2 index tar
 	File? fastq_R1 			# [read_end_id]
 	File? fastq_R2
@@ -1449,6 +1449,7 @@ task preseq {
 		File? picard_est_lib_size_qc = if paired_end then 
 			glob('*.picard_est_lib_size.qc')[0] else null_f
 		File preseq_plot = glob("*.preseq.png")[0]
+		File preseq_log = glob("*.preseq.log")[0]
 	}
 	runtime {
 		cpu : 1

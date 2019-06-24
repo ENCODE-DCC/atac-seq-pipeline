@@ -1,0 +1,6 @@
+{
+    "test_fraglen_stat_pe.nodup_bam" : "atac-seq-pipeline-test-data/input/pe/ataqc/ENCFF341MYG.subsampled.400.trim.merged.nodup.bam",
+
+    "test_fraglen_stat_pe.ref_nucleosomal_qc" : "atac-seq-pipeline-test-data/ref_output/test_fraglen_stat_pe/ENCFF341MYG.subsampled.400.trim.merged.nodup.nucleosomal.qc",
+    "test_fraglen_stat_pe.ref_fraglen_dist_plot" : "atac-seq-pipeline-test-data/ref_output/test_fraglen_stat_pe/ENCFF341MYG.subsampled.400.trim.merged.nodup.fraglen_dist.png"
+}

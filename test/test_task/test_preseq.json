@@ -1,0 +1,7 @@
+{
+    "test_preseq.paired_end" : true,
+    "test_preseq.bam" : "atac-seq-pipeline-test-data/input/pe/ataqc/ENCFF341MYG.subsampled.400.trim.merged.bam",
+
+    "test_preseq.ref_picard_est_lib_size_qc" : "atac-seq-pipeline-test-data/ref_output/test_preseq/ENCFF341MYG.subsampled.400.trim.merged.picard_est_lib_size.qc",
+    "test_preseq.ref_preseq_log" : "atac-seq-pipeline-test-data/ref_output/test_preseq/ENCFF341MYG.subsampled.400.trim.merged.preseq.log"
+}

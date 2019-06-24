@@ -29,9 +29,9 @@ def parse_arguments():
                         help='Endedness of all replicates.')
     parser.add_argument('--ctl-paired-end', action='store_true',
                         help='Endedness of all controls.')
-    parser.add_argument('--paired-ends', type=str2bool, nargs='*',
+    parser.add_argument('--paired-ends', type=str, nargs='*',
                         help='List of true/false for paired endedness of sample.')
-    parser.add_argument('--ctl-paired-ends', type=str2bool, nargs='*',
+    parser.add_argument('--ctl-paired-ends', type=str, nargs='*',
                         help='List of true/false for paired endedness of control.')
     parser.add_argument('--pipeline-type', type=str, required=True,                        
                         help='Pipeline type.')
@@ -179,17 +179,25 @@ def parse_arguments():
         if type(eval('args.{}'.format(a)))==list:
             exec('args.{} = split_entries_and_extend(args.{})'.format(a,a))        
 
+    print("__DEBUG__", args.paired_ends)
+
     if args.paired_ends is None:
         if args.paired_end:
             args.paired_ends = [True]*20
         else:
             args.paired_ends = [False]*20
+    else:
+        for i, _ in enumerate(args.paired_ends):
+            args.paired_ends[i] = str2bool(args.paired_ends[i])
 
     if args.ctl_paired_ends is None:
         if args.ctl_paired_end:
             args.ctl_paired_ends = [True]*20
         else:
             args.ctl_paired_ends = args.paired_ends
+    else:
+        for i, _ in enumerate(args.ctl_paired_ends):
+            args.ctl_paired_ends[i] = str2bool(args.ctl_paired_ends[i])
 
     log.setLevel(args.log_level)
     log.info(sys.argv)
@@ -207,9 +215,10 @@ def split_entries_and_extend(l, delim='_:_'):
     return result if test_not_all_empty else []
 
 def str2bool(s):
-    if s not in ['false', 'true', 'False', 'True']:
+    s = s.lower()
+    if s not in ('false', 'true', 'False', 'True'):
         raise ValueError('Not a valid boolean string')
-    return s=='True' or s=='true'
+    return s == 'true'
 
 MAP_KEY_DESC_GENERAL = {
     'date': 'Report generated at',

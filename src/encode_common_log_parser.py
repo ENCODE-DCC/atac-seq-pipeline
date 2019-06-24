@@ -426,7 +426,7 @@ def parse_annot_enrich_qc(txt):
         lines = fp.read().strip('\n').split('\n')
     for line in lines:
         key, reads, frac = line.split('\t')
-        frac = to_float(flac)
+        frac = to_float(frac)
         if key == 'fraction_of_reads_in_universal_DHS_regions':
             result['fri_dhs'] = frac
         elif key == 'fraction_of_reads_in_blacklist_regions':
