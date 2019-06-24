@@ -17,6 +17,24 @@
       "table": "QC and logs/Replicate ${i+1}/Read length"
     }
   },
+  "atac.align": {
+    "bam": {
+      "path": "align/rep${i+1}/${basename}",
+      "table": "Alignment/Replicate ${i+1}/Raw BAM from aligner"
+    },
+    "align_log": {
+      "path": "qc/rep${i+1}/${basename}",
+      "table": "QC and logs/Replicate ${i+1}/Alignment log from aligner"
+    },
+    "flagstat_qc": {
+      "path": "qc/rep${i+1}/${basename}",
+      "table": "QC and logs/Replicate ${i+1}/Samtools flagstat for Raw BAM"
+    },
+    "read_len_log": {
+      "path": "qc/rep${i+1}/${basename}",
+      "table": "QC and logs/Replicate ${i+1}/Read length"
+    }
+  },
   "atac.filter": {
     "nodup_bam": {
       "path": "align/rep${i+1}/${basename}",
