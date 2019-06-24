@@ -195,7 +195,7 @@
                 "Np": 32593, 
                 "N_opt": 32593, 
                 "N_consv": 30605, 
-                "opt_set": "ppr", 
+                "opt_set": "pooled-pr1_vs_pooled-pr2", 
                 "consv_set": "rep1_vs_rep2", 
                 "rescue_ratio": 1.06495670642, 
                 "self_consistency_ratio": 1.05058955273, 
@@ -208,7 +208,7 @@
                 "Np": 349, 
                 "N_opt": 349, 
                 "N_consv": 276, 
-                "opt_set": "ppr", 
+                "opt_set": "pooled-pr1_vs_pooled-pr2", 
                 "consv_set": "rep1_vs_rep2", 
                 "rescue_ratio": 1.26449275362, 
                 "self_consistency_ratio": 1.42857142857, 
@@ -312,10 +312,10 @@
                 "pooled": {
                     "frip": 0.629682459194
                 }, 
-                "ppr1": {
+                "pooled-pr1": {
                     "frip": 0.961857571789
                 }, 
-                "ppr2": {
+                "pooled-pr2": {
                     "frip": 0.956273756668
                 }
             }, 
@@ -329,7 +329,7 @@
                 "rep2-pr1_vs_rep2-pr2": {
                     "frip": 0.143497354769
                 }, 
-                "ppr1_vs_ppr2": {
+                "pooled-pr1_vs_pooled-pr2": {
                     "frip": 0.190829926215
                 }
             }, 
@@ -343,7 +343,7 @@
                 "rep2-pr1_vs_rep2-pr2": {
                     "frip": 0.00424851228693
                 }, 
-                "ppr1_vs_ppr2": {
+                "pooled-pr1_vs_pooled-pr2": {
                     "frip": 0.00964740313668
                 }
             }

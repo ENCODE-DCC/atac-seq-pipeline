@@ -456,7 +456,7 @@ def make_cat_peak(args, cat_root):
                 cat_idr.add_plot(plot, key=rep)
     if args.idr_plot_ppr:
         plot = args.idr_plot_ppr[0]
-        rep = 'ppr1_vs_ppr2'
+        rep = 'pooled-pr1_vs_pooled-pr2'
         cat_idr.add_plot(plot, key=rep)
 
     cat_reproducibility = QCCategory(
@@ -601,15 +601,15 @@ def make_cat_enrich(args, cat_root):
             <li>repX: Peak from true replicate X </li>
             <li>repX-prY: Peak from Yth pseudoreplicates from replicate X </li>
             <li>pooled: Peak from pooled true replicates (pool of rep1, rep2, ...) </li>
-            <li>ppr1: Peak from 1st pooled pseudo replicate (pool of rep1-pr1, rep2-pr1, ...)</li>
-            <li>ppr1: Peak from 2nd pooled pseudo replicate (pool of rep1-pr2, rep2-pr2, ...)</li>
+            <li>pooled-pr1: Peak from 1st pooled pseudo replicate (pool of rep1-pr1, rep2-pr1, ...)</li>
+            <li>pooled-pr2: Peak from 2nd pooled pseudo replicate (pool of rep1-pr2, rep2-pr2, ...)</li>
             </ul></p>
             <br>
             For overlap/IDR peaks:<br>
             <p><ul>
             <li>repX_vs_repY: Comparing two peaks from true replicates X and Y </li>
             <li>repX-pr1_vs_repX-pr2: Comparing two peaks from both pseudoreplicates from replicate X </li>
-            <li>ppr1_vs_ppr2: Comparing two peaks from 1st and 2nd pooled pseudo replicates </li>
+            <li>pooled-pr1_vs_pooled-pr2: Comparing two peaks from 1st and 2nd pooled pseudo replicates </li>
             </ul></p>
             </div>
         """,
@@ -645,11 +645,11 @@ def make_cat_enrich(args, cat_root):
         cat_frip_macs2.add_log(qc, key=rep)
     if args.frip_macs2_qc_ppr1:
         qc = args.frip_macs2_qc_ppr1[0]
-        rep = 'ppr1'
+        rep = 'pooled-pr1'
         cat_frip_macs2.add_log(qc, key=rep)
     if args.frip_macs2_qc_ppr2:
         qc = args.frip_macs2_qc_ppr2[0]
-        rep = 'ppr2'
+        rep = 'pooled-pr2'
         cat_frip_macs2.add_log(qc, key=rep)
 
     # spp
@@ -681,11 +681,11 @@ def make_cat_enrich(args, cat_root):
         cat_frip_spp.add_log(qc, key=rep)
     if args.frip_spp_qc_ppr1:
         qc = args.frip_spp_qc_ppr1[0]
-        rep = 'ppr1'
+        rep = 'pooled-pr1'
         cat_frip_spp.add_log(qc, key=rep)
     if args.frip_spp_qc_ppr2:
         qc = args.frip_spp_qc_ppr2[0]
-        rep = 'ppr2'
+        rep = 'pooled-pr2'
         cat_frip_spp.add_log(qc, key=rep)
 
     # overlap
@@ -709,7 +709,7 @@ def make_cat_enrich(args, cat_root):
                 cat_frip_overlap.add_log(qc, key=rep)
     if args.frip_overlap_qc_ppr:
         qc = args.frip_overlap_qc_ppr[0]
-        rep = 'ppr1_vs_ppr2'        
+        rep = 'pooled-pr1_vs_pooled-pr2'
         cat_frip_overlap.add_log(qc, key=rep)
 
     # IDR
@@ -733,7 +733,7 @@ def make_cat_enrich(args, cat_root):
                 cat_frip_idr.add_log(qc, key=rep)
     if args.frip_idr_qc_ppr:
         qc = args.frip_idr_qc_ppr[0]
-        rep = 'ppr1_vs_ppr2'        
+        rep = 'pooled-pr1_vs_pooled-pr2'
         cat_frip_idr.add_log(qc, key=rep)
 
     cat_annot_enrich = QCCategory(

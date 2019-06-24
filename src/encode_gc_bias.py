@@ -87,7 +87,7 @@ def plot_gc(data_file, prefix):
 
     # plot_img = BytesIO()
     # fig.savefig(plot_img, format='png')
-    prefix = data_file.rstrip('.txt')
+    prefix = data_file.rstrip('.gc.txt')
     plot_png = prefix + '.gc_plot.png'
     fig.savefig(plot_png, format='png')
 

@@ -79,7 +79,7 @@ def main():
             optimal_peak = conservative_peak
             N_optimal = N_conservative
         else:
-            optimal_set = "ppr"
+            optimal_set = "pooled-pr1_vs_pooled-pr2"
             optimal_peak = make_hard_link(args.peak_ppr, args.out_dir)
             N_optimal = Np
     else:
@@ -91,7 +91,7 @@ def main():
         rescue_ratio = 0.0
         self_consistency_ratio = 1.0
 
-        conservative_set = 'rep1-pr'
+        conservative_set = 'rep1-pr1_vs_rep1-pr2'
         conservative_peak = make_hard_link(args.peaks_pr[0], args.out_dir)
         N_conservative = N[0]
         optimal_set = conservative_set

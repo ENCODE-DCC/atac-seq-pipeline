@@ -9,7 +9,6 @@ workflow test_gc_bias {
 
 	File ref_fa
 
-	File ref_gc_plot
 	File ref_gc_log
 
 	call atac.gc_bias { input : 
@@ -29,15 +28,12 @@ workflow test_gc_bias {
 
 	call compare_md5sum.compare_md5sum { input :
 		labels = [
-			'test_gc_plot',
 			'test_gc_log',
 		],
 		files = [
-			gc_bias.gc_plot,
 			remove_comments_from_gc_log.filt_gc_log,
 		],
 		ref_files = [
-			ref_gc_plot,
 			remove_comments_from_gc_log_ref.filt_gc_log,
 		],
 	}

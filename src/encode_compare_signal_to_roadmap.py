@@ -38,6 +38,7 @@ def compare_to_roadmap(bw_file, regions_file, reg2map_file,
     '''
 
     out_file = '{0}.signal'.format(output_prefix)
+    log_file = '{0}.roadmap_compare.log'.format(output_prefix)
 
     # First get the signal vals for the peak regions
     # remember to use a UCSC formatted bed file for regions
@@ -56,13 +57,16 @@ def compare_to_roadmap(bw_file, regions_file, reg2map_file,
     (nrow, ncol) = roadmap_signals.shape
 
     results = pd.DataFrame(columns=('eid', 'corr'))
-    for i in range(ncol):
-        # Slice, run correlation
-        roadmap_i = roadmap_signals.iloc[:, i]
-        spearman_corr = scipy.stats.spearmanr(np.array(roadmap_i),
-                                              sample_mean0_col)
-        results.loc[i] = [roadmap_i.name, spearman_corr[0]]
-        logging.info('{0}\t{1}'.format(roadmap_i.name, spearman_corr))
+    with open(log_file, 'w') as fp:
+        for i in range(ncol):
+            # Slice, run correlation
+            roadmap_i = roadmap_signals.iloc[:, i]
+            spearman_corr = scipy.stats.spearmanr(np.array(roadmap_i),
+                                                  sample_mean0_col)
+            results.loc[i] = [roadmap_i.name, spearman_corr[0]]
+            s = '{0}\t{1}'.format(roadmap_i.name, spearman_corr)
+            logging.info(s)
+            fp.write(s + '\n')
 
     # Read in metadata to make the chart more understandable
     metadata = pd.read_table(metadata)

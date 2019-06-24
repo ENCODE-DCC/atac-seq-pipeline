@@ -716,7 +716,7 @@ workflow atac {
 			# pair.right = 0-based index of 2nd replicate
 			# Naive overlap on every pair of true replicates
 			call overlap { input :
-				prefix = 'rep'+(pair.left+1)+"_rep"+(pair.right+1),
+				prefix = 'rep'+(pair.left+1)+"_vs_rep"+(pair.right+1),
 				peak1 = peak_[pair.left],
 				peak2 = peak_[pair.right],
 				peak_pooled = peak_pooled_,
@@ -735,7 +735,7 @@ workflow atac {
 			# pair.right = 0-based index of 2nd replicate
 			# IDR on every pair of true replicates
 			call idr { input :
-				prefix = 'rep'+(pair.left+1)+"_rep"+(pair.right+1),
+				prefix = 'rep'+(pair.left+1)+"_vs_rep"+(pair.right+1),
 				peak1 = peak_[pair.left],
 				peak2 = peak_[pair.right],
 				peak_pooled = peak_pooled_,
@@ -754,7 +754,7 @@ workflow atac {
 	scatter( i in range(num_rep) ) {
 		if ( !align_only && !true_rep_only ) {
 			call overlap as overlap_pr { input :
-				prefix = "rep"+(i+1)+"-pr",
+				prefix = "rep"+(i+1)+"-pr1_vs_rep"+(i+1)+"-pr2",
 				peak1 = peak_pr1_[i],
 				peak2 = peak_pr2_[i],
 				peak_pooled = peak_[i],
@@ -771,7 +771,7 @@ workflow atac {
 		if ( !align_only && !true_rep_only && enable_idr ) {
 			# IDR on pseduo replicates
 			call idr as idr_pr { input :
-				prefix = "rep"+(i+1)+"-pr",
+				prefix = "rep"+(i+1)+"-pr1_vs_rep"+(i+1)+"-pr2",
 				peak1 = peak_pr1_[i],
 				peak2 = peak_pr2_[i],
 				peak_pooled = peak_[i],
@@ -789,7 +789,7 @@ workflow atac {
 	if ( !align_only && !true_rep_only && num_rep>1 ) {
 		# Naive overlap on pooled pseudo replicates
 		call overlap as overlap_ppr { input :
-			prefix = "ppr",
+			prefix = "pooled-pr1_vs_pooled-pr2",
 			peak1 = peak_ppr1_,
 			peak2 = peak_ppr2_,
 			peak_pooled = peak_pooled_,
@@ -804,7 +804,7 @@ workflow atac {
 	if ( !align_only && !true_rep_only && num_rep>1 ) {
 		# IDR on pooled pseduo replicates
 		call idr as idr_ppr { input :
-			prefix = "ppr",
+			prefix = "pooled-pr1_vs_pooled-pr2",
 			peak1 = peak_ppr1_,
 			peak2 = peak_ppr2_,
 			peak_pooled = peak_pooled_,
@@ -1531,6 +1531,7 @@ task compare_signal_to_roadmap {
 	}
 	output {
 		File roadmap_compare_plot = glob("*roadmap_compare_plot.png")[0]
+		File roadmap_compare_log = glob("*roadmap_compare.log")[0]
 	}
 	runtime {
 		cpu : 1
