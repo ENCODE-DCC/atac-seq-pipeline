@@ -473,7 +473,7 @@ MAP_KEY_DESC_NUCLEOSOMAL_QC = {
     'nfr_over_mono_nun_reads_qc_reason' : 'NFR / mono-nuc reads (QC reason)',
     'nfr_peak_exists' : 'Presence of NFR peak',
     'mono_nuc_peak_exists' : 'Presence of Mono-Nuc peak',
-    'di_nuc_peak_exists' : 'Presence of Di-Nuc peak True',
+    'di_nuc_peak_exists' : 'Presence of Di-Nuc peak',
 }
 
 def parse_nucleosomal_qc(txt):
