@@ -27,6 +27,7 @@
     ],
 
     "atac.paired_end" : true,
+    "atac.disable_preseq" : true,
     "atac.multimapping" : 4,
 
     "atac.auto_detect_adapter" : true,

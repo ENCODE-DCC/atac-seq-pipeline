@@ -106,7 +106,8 @@ workflow atac {
 	String idr_rank = 'p.value' 	# IDR ranking method (p.value, q.value, score)
 
 	# parameters for ATAqC
-	Boolean disable_ataqc = false 	# disable ATAqC (extra annotation-based analysis)
+	Boolean disable_preseq = false
+	Boolean disable_gc_bias = false
 
 	# resources 	
 	#	these variables will be automatically ignored if they are not supported by platform
@@ -534,7 +535,6 @@ workflow atac {
 			}
 		}
 
-
 		# tasks factored out from ATAqC
 		if ( defined(nodup_bam_) && defined(tss_) && defined(bowtie2.read_len_log) ) {
 			call tss_enrich { input :
@@ -549,14 +549,14 @@ workflow atac {
 				nodup_bam = nodup_bam_,
 			}
 		}
-		if ( defined(bam_) ) {
+		if ( !disable_preseq && defined(bam_) ) {
 			call preseq { input :
 				bam = bam_,
 				paired_end = paired_end_,
 				mem_mb = preseq_mem_mb,
 			}
 		}
-		if ( defined(nodup_bam_) && defined(ref_fa_) && defined(bowtie2.read_len_log) ) {
+		if ( !disable_gc_bias && defined(nodup_bam_) && defined(ref_fa_) && defined(bowtie2.read_len_log) ) {
 			call gc_bias { input :
 				read_len_log = bowtie2.read_len_log,
 				nodup_bam = nodup_bam_,
