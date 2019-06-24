@@ -350,7 +350,7 @@ def main():
 
     log.info('Generating PBC QC log...')
     if args.paired_end:
-        pbc_qc = pbc_qc_pe(dupmark_bam, args.mito_chr_name, nth,
+        pbc_qc = pbc_qc_pe(dupmark_bam, args.mito_chr_name, args.nth,
                            args.out_dir)
     else:
         pbc_qc = pbc_qc_se(dupmark_bam, args.mito_chr_name, args.out_dir)
