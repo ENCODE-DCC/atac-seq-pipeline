@@ -6,8 +6,8 @@
 import sys
 import os
 import argparse
-from encode_common import *
-from encode_common_genomic import peak_to_bigbed, peak_to_hammock, get_region_size_metrics, get_num_peaks
+from encode_lib_common import *
+from encode_lib_genomic import peak_to_bigbed, peak_to_hammock, get_region_size_metrics, get_num_peaks
 
 def parse_arguments():
     parser = argparse.ArgumentParser(prog='ENCODE DCC reproducibility QC.',

@@ -6,7 +6,7 @@
 import sys
 import os
 import argparse
-from encode_common import *
+from encode_lib_common import *
 
 def parse_arguments():
     parser = argparse.ArgumentParser(prog='ENCODE DCC MACS2 signal track',

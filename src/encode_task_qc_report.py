@@ -7,8 +7,8 @@ import sys
 import os
 import json
 import argparse
-from encode_common import *
-from encode_common_log_parser import *
+from encode_lib_common import *
+from encode_lib_log_parser import *
 from encode_lib_qc_category import QCCategory
 from collections import OrderedDict
 

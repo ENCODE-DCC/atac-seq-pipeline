@@ -6,8 +6,8 @@
 import sys
 import os
 import argparse
-from encode_common import strip_ext_bam, ls_l, log, logging, mkdir_p, rm_f
-from encode_common_genomic import remove_read_group, samtools_index
+from encode_lib_common import strip_ext_bam, ls_l, log, logging, mkdir_p, rm_f
+from encode_lib_genomic import remove_read_group, samtools_index
 from matplotlib import pyplot as plt
 from matplotlib import mlab
 import metaseq

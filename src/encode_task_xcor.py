@@ -6,8 +6,8 @@
 import sys
 import os
 import argparse
-from encode_common_genomic import *
-from encode_common_log_parser import parse_xcor_score
+from encode_lib_genomic import *
+from encode_lib_log_parser import parse_xcor_score
 
 def parse_arguments():
     parser = argparse.ArgumentParser(prog='ENCODE DCC cross-correlation analysis.',

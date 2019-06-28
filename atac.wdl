@@ -1201,8 +1201,6 @@ task call_peak {
 	Int time_hr
 	String disks
 
-	File? null_f
-
 	command {
 		if [ "${peak_caller}" == "macs2" ]; then
 			python $(which encode_task_macs2_atac.py) \
@@ -1292,8 +1290,6 @@ task idr {
 	String peak_type
 	String rank
 
-	File? null_f
-
 	command {
 		${if defined(ta) then "" else "touch null.frip.qc"}
 		touch null
@@ -1337,8 +1333,6 @@ task overlap {
 	File? ta		# to calculate FRiP
 	File chrsz			# 2-col chromosome sizes file
 	String peak_type
-
-	File? null_f
 
 	command {
 		${if defined(ta) then "" else "touch null.frip.qc"}

@@ -7,7 +7,7 @@ import sys
 import os
 import argparse
 import warnings
-from encode_common import run_shell_cmd, strip_ext_ta, ls_l, get_num_lines, log, logging, mkdir_p, rm_f
+from encode_lib_common import run_shell_cmd, strip_ext_ta, ls_l, get_num_lines, log, logging, mkdir_p, rm_f
 warnings.filterwarnings("ignore")
 
 def parse_arguments():

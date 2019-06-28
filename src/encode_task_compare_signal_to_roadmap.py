@@ -6,7 +6,7 @@
 import sys
 import os
 import argparse
-from encode_common import strip_ext_bigwig, ls_l, log, logging, mkdir_p, rm_f
+from encode_lib_common import strip_ext_bigwig, ls_l, log, logging, mkdir_p, rm_f
 import numpy as np
 import pandas as pd
 import scipy.stats

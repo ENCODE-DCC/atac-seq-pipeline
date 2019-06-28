@@ -4,7 +4,7 @@
 # Author: Jin Lee (leepc12@gmail.com)
 
 import os
-from encode_common import *
+from encode_lib_common import *
 
 def samtools_index(bam, out_dir=''):
     bai = '{}.bai'.format(bam)

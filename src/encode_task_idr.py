@@ -7,8 +7,8 @@ import sys
 import os
 import argparse
 import math
-from encode_common import *
-from encode_common_genomic import peak_to_bigbed, peak_to_hammock
+from encode_lib_common import *
+from encode_lib_genomic import peak_to_bigbed, peak_to_hammock
 from encode_lib_blacklist_filter import blacklist_filter
 from encode_lib_frip import frip, frip_shifted
 
