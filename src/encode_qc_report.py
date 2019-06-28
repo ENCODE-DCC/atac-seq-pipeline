@@ -39,10 +39,8 @@ def parse_arguments():
                         help='Aligner.')
     parser.add_argument('--peak-caller', type=str, required=True,
                         help='Peak caller.')
-    parser.add_argument('--macs2-cap-num-peak', default=0, type=int,
-                        help='Capping number of peaks by taking top N peaks for MACS.')
-    parser.add_argument('--spp-cap-num-peak', default=0, type=int,
-                        help='Capping number of peaks by taking top N peaks for SPP.')
+    parser.add_argument('--cap-num-peak', default=0, type=int,
+                        help='Capping number of peaks by taking top N peaks.')
     parser.add_argument('--idr-thresh', type=float, required=True,
                         help='IDR threshold.')
     parser.add_argument('--flagstat-qcs', type=str, nargs='*',
@@ -76,30 +74,18 @@ def parse_arguments():
     parser.add_argument('--idr-plot-ppr', type=str, nargs='*',
                         help='IDR plot file for pooled pseudo replicate.')
 
-    parser.add_argument('--frip-macs2-qcs', type=str, nargs='*',
-                        help='List of macs2 FRiP score files per replicate.')
-    parser.add_argument('--frip-macs2-qcs-pr1', type=str, nargs='*',
-                        help='List of macs2 FRiP score files for 1st pseudo replicates per replicate.')
-    parser.add_argument('--frip-macs2-qcs-pr2', type=str, nargs='*',
-                        help='List of macs2 FRiP score files for 2nd pseudo replicates per replicate.')
-    parser.add_argument('--frip-macs2-qc-pooled', type=str, nargs='*',
-                        help='macs2 FRiP score file for pooled replicates.')
-    parser.add_argument('--frip-macs2-qc-ppr1', type=str, nargs='*',
-                        help='macs2 FRiP score file for 1st pooled pseudo replicates.')
-    parser.add_argument('--frip-macs2-qc-ppr2', type=str, nargs='*',
-                        help='macs2 FRiP score file for 2nd pooled pseudo replicates.')
-    parser.add_argument('--frip-spp-qcs', type=str, nargs='*',
-                        help='List of spp FRiP score files per replicate.')
-    parser.add_argument('--frip-spp-qcs-pr1', type=str, nargs='*',
-                        help='List of spp FRiP score files for 1st pseudo replicates per replicate.')
-    parser.add_argument('--frip-spp-qcs-pr2', type=str, nargs='*',
-                        help='List of spp FRiP score files for 2nd pseudo replicates per replicate.')
-    parser.add_argument('--frip-spp-qc-pooled', type=str, nargs='*',
-                        help='spp FRiP score file for pooled replicates.')
-    parser.add_argument('--frip-spp-qc-ppr1', type=str, nargs='*',
-                        help='spp FRiP score file for 1st pooled pseudo replicates.')
-    parser.add_argument('--frip-spp-qc-ppr2', type=str, nargs='*',
-                        help='spp FRiP score file for 2nd pooled pseudo replicates.')
+    parser.add_argument('--frip-qcs', type=str, nargs='*',
+                        help='List of raw peak FRiP score files per replicate.')
+    parser.add_argument('--frip-qcs-pr1', type=str, nargs='*',
+                        help='List of raw peak FRiP score files for 1st pseudo replicates per replicate.')
+    parser.add_argument('--frip-qcs-pr2', type=str, nargs='*',
+                        help='List of raw peak FRiP score files for 2nd pseudo replicates per replicate.')
+    parser.add_argument('--frip-qc-pooled', type=str, nargs='*',
+                        help='Raw peak FRiP score file for pooled replicates.')
+    parser.add_argument('--frip-qc-ppr1', type=str, nargs='*',
+                        help='Raw peak FRiP score file for 1st pooled pseudo replicates.')
+    parser.add_argument('--frip-qc-ppr2', type=str, nargs='*',
+                        help='Raw peak FRiP score file for 2nd pooled pseudo replicates.')
 
     parser.add_argument('--frip-idr-qcs', type=str, nargs='*',
                         help='List of IDR FRiP score files per a pair of two replicates.')
@@ -596,7 +582,7 @@ def make_cat_enrich(args, cat_root):
         html_head='<h2>Fraction of reads in peaks (FRiP)</h2>',
         html_foot="""
             <div id='help-FRiP'>
-            For raw peaks (SPP and MACS2):<br>
+            For raw peaks (e.g. spp and macs2):<br>
             <p><ul>
             <li>repX: Peak from true replicate X </li>
             <li>repX-prY: Peak from Yth pseudoreplicates from replicate X </li>
@@ -616,77 +602,41 @@ def make_cat_enrich(args, cat_root):
         parent=cat_enrich,
     )
 
-    # macs2
-    cat_frip_macs2 = QCCategory(
-        'macs2',
-        html_head='<h3>FRiP for MACS2 raw peaks</h3>',
+    # raw peaks
+    cat_frip_call_peak = QCCategory(
+        args.peak_caller,
+        html_head='<h3>FRiP for {} raw peaks</h3>'.format(peak_caller),
         parser=parse_frip_qc,
         map_key_desc=MAP_KEY_DESC_FRIP_QC,
         parent=cat_frip
     )
-    if args.frip_macs2_qcs:
-        for i, qc in enumerate(args.frip_macs2_qcs):
+    if args.frip_qcs:
+        for i, qc in enumerate(args.frip_qcs):
             rep = 'rep' + str(i + 1)
             if qc:
-                cat_frip_macs2.add_log(qc, key=rep)
-    if args.frip_macs2_qcs_pr1:
-        for i, qc in enumerate(args.frip_macs2_qcs_pr1):
+                cat_frip_call_peak.add_log(qc, key=rep)
+    if args.frip_qcs_pr1:
+        for i, qc in enumerate(args.frip_qcs_pr1):
             rep = 'rep' + str(i + 1) + '-pr1'
             if qc:
-                cat_frip_macs2.add_log(qc, key=rep)
-    if args.frip_macs2_qcs_pr2:
-        for i, qc in enumerate(args.frip_macs2_qcs_pr2):
+                cat_frip_call_peak.add_log(qc, key=rep)
+    if args.frip_qcs_pr2:
+        for i, qc in enumerate(args.frip_qcs_pr2):
             rep = 'rep' + str(i + 1) + '-pr2'
             if qc:
-                cat_frip_macs2.add_log(qc, key=rep)
-    if args.frip_macs2_qc_pooled:
-        qc = args.frip_macs2_qc_pooled[0]
+                cat_frip_call_peak.add_log(qc, key=rep)
+    if args.frip_qc_pooled:
+        qc = args.frip_qc_pooled[0]
         rep = 'pooled'
-        cat_frip_macs2.add_log(qc, key=rep)
-    if args.frip_macs2_qc_ppr1:
-        qc = args.frip_macs2_qc_ppr1[0]
+        cat_frip_call_peak.add_log(qc, key=rep)
+    if args.frip_qc_ppr1:
+        qc = args.frip_qc_ppr1[0]
         rep = 'pooled-pr1'
-        cat_frip_macs2.add_log(qc, key=rep)
-    if args.frip_macs2_qc_ppr2:
-        qc = args.frip_macs2_qc_ppr2[0]
+        cat_frip_call_peak.add_log(qc, key=rep)
+    if args.frip_qc_ppr2:
+        qc = args.frip_qc_ppr2[0]
         rep = 'pooled-pr2'
-        cat_frip_macs2.add_log(qc, key=rep)
-
-    # spp
-    cat_frip_spp = QCCategory(
-        'spp',
-        html_head='<h3>FRiP for SPP raw peaks</h3>',
-        parser=parse_frip_qc,
-        map_key_desc=MAP_KEY_DESC_FRIP_QC,
-        parent=cat_frip
-    )
-    if args.frip_spp_qcs:
-        for i, qc in enumerate(args.frip_spp_qcs):
-            rep = 'rep' + str(i + 1)
-            if qc:
-                cat_frip_spp.add_log(qc, key=rep)
-    if args.frip_spp_qcs_pr1:
-        for i, qc in enumerate(args.frip_spp_qcs_pr1):
-            rep = 'rep' + str(i + 1) + '-pr1'
-            if qc:
-                cat_frip_spp.add_log(qc, key=rep)
-    if args.frip_spp_qcs_pr2:
-        for i, qc in enumerate(args.frip_spp_qcs_pr2):
-            rep = 'rep' + str(i + 1) + '-pr2'
-            if qc:
-                cat_frip_spp.add_log(qc, key=rep)
-    if args.frip_spp_qc_pooled:
-        qc = args.frip_spp_qc_pooled[0]
-        rep = 'pooled'
-        cat_frip_spp.add_log(qc, key=rep)
-    if args.frip_spp_qc_ppr1:
-        qc = args.frip_spp_qc_ppr1[0]
-        rep = 'pooled-pr1'
-        cat_frip_spp.add_log(qc, key=rep)
-    if args.frip_spp_qc_ppr2:
-        qc = args.frip_spp_qc_ppr2[0]
-        rep = 'pooled-pr2'
-        cat_frip_spp.add_log(qc, key=rep)
+        cat_frip_call_peak.add_log(qc, key=rep)
 
     # overlap
     cat_frip_overlap = QCCategory(

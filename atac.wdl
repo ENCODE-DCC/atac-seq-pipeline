@@ -26,12 +26,13 @@ workflow atac {
 									# all genome-specific file paths and parameters
 	# individual genome parameters
 	File? ref_fa					# reference fasta (*.fa.gz)
-	File? bowtie2_idx_tar 			# bowtie2 index tar (uncompressed)
+	File? bwa_idx_tar 				# bwa index tar (uncompressed .tar)
+	File? bowtie2_idx_tar 			# bowtie2 index tar (uncompressed .tar)
+	File? custom_aligner_idx_tar 	# custom aligner's index tar (uncompressed .tar)
 	File? chrsz 					# 2-col chromosome sizes file
 	File? blacklist 				# blacklist BED (peaks overlapping will be filtered out)
 	File? blacklist2 				# 2nd blacklist (will be merged with 1st one)
 	String? gensz 					# genome sizes (hs for human, mm for mouse or sum of 2nd col in chrsz)
-	# individual genome parameters for annotation-based analyses
 	File? tss 						# TSS BED file
 	File? dnase 					# open chromatin region BED file
 	File? prom 						# promoter region BED file
@@ -41,74 +42,51 @@ workflow atac {
 	File? roadmap_meta 				# roadmap metedata
 
 	# parameters for pipeline
-	String pipeline_type = 'atac'	# atac (default), dnase
-									# tn5 shiting will be enabled for atac only
+	String pipeline_type = 'atac'	# atac (default), dnase (same as atac but no tn5 shifting)
+
+	String aligner = 'bowtie2' 		# supported aligner: bowtie2
+	File? custom_align_py 			# custom align python script
+
+	String peak_caller = 'macs2'
+	String peak_type = 'narrowPeak'
+	File? custom_call_peak_py 		# custom call_peak python script
+
+	# important flags for pipeline
 	Boolean align_only = false		# disable all post-align analyses (peak-calling, overlap, idr, ...)
-	Boolean true_rep_only = false 	# disable all analyses for pseudo replicates
-									# 	if activated, overlap and idr will be disabled
+	Boolean true_rep_only = false 	# disable all analyses involving pseudo replicates (including overlap/idr)
+	Boolean enable_xcor = false 	# enable cross-corr analysis
+	Boolean enable_count_signal_track = false # generate count signal track
+	Boolean enable_idr = true 		# enable IDR analysis on raw peaks
+	Boolean disable_preseq = false
+	Boolean disable_gc_bias = false
 
 	# parameters for trim_adapter
-	Boolean auto_detect_adapter = false
-									# automatically detect/trim adapters
-									# 	can detect three adapters only
-									# 	see /src/detect_adapter.py for details
-	String cutadapt_param = '-e 0.1 -m 5'
-									# cutadapt parameters (err_rate=0.1, min_trim_len=5)
+	Boolean auto_detect_adapter = false # automatically detect/trim adapters
+	String cutadapt_param = '-e 0.1 -m 5' # cutadapt parameters (err_rate=0.1, min_trim_len=5)
 
-	# parameters for align (align FASTQs and create raw BAM)
-	String aligner = 'bowtie2' 		# supported aligner: bowtie2
+	# parameters for aligner and filter
 	Int multimapping = 4			# for samples with multimapping reads
-
-	# parameters for filter (filter/dedup raw BAM)
 	String dup_marker = 'picard'	# picard, sambamba
+	Boolean no_dup_removal = false 	# keep all dups in final BAM
 	Int mapq_thresh = 30			# threshold for low MAPQ reads removal
-	Boolean no_dup_removal = false 	# keep all dupes in final BAM
-									
-	# parameters for bam2ta (convert filtered/deduped BAM to TAG-ALIGN)
 	String mito_chr_name = 'chrM' 	# name of mito chromosome
-									# 	THIS IS NOT A REG-EX!
-									#	you can define only one name for mito chrom
-	String regex_filter_reads = 'chrM' 	
-									# Perl-style regular expression pattern 
-									#	for chr name to filter out reads
-									# 	THIS IS A REG-EX!
-									# 	you can define multiple chrom names e.g. \(chrM\|chr21\|chr19\)
-									# 	make sure that you escape (, ) and | with \
-	Int subsample_reads = 0			# number of reads to subsample TAGALIGN
-									# 	0 for no subsampling
+									# THIS IS NOT A REG-EX! you can define only one name for mito chrom
+	String regex_filter_reads = 'chrM' 	# Perl-style regular expression pattern for chr name to filter out reads
+									# those reads will be excluded from peak calling
+									# mito reads will be removed before peak-calling by default
+	Int subsample_reads = 0			# subsample TAGALIGN (0: no subsampling)
+	Int xcor_subsample_reads = 25000000 # subsample TAG-ALIGN for xcor only (not used for other downsteam analyses)
 
-	# parameters for cross-correlation analysis
-	Boolean enable_xcor = false 	# enable cross-corr analysis
-	Int xcor_subsample_reads = 25000000	
-									# number of reads to subsample TAG-ALIGN
-									# 	this will be used for cross-corr only
-									# 	will not affect any downstream analyses
-
-	# parameters for blacklist filtering peaks
+	# parameters for peak calling
+	Int cap_num_peak = 300000		# cap number of raw peaks for each replicate
+	Float pval_thresh = 0.01		# p.value threshold for peak caller
+	Int smooth_win = 73				# size of smoothing window for peak caller
+	Float idr_thresh = 0.05			# IDR threshold
 	Boolean keep_irregular_chr_in_bfilt_peak = false 
 									# peaks with irregular chr name will not be filtered out
 									# 	in bfilt_peak (blacklist filtered peak) file
 									# 	(e.g. chr1_AABBCC, AABR07024382.1, ...)
 									# 	reg-ex pattern for "regular" chr name is chr[\dXY]+\b
-
-	# parameters for peak calling
-	String peak_type = 'narrowPeak'
-	Int cap_num_peak = 300000		# cap number of raw peaks called
-	Float pval_thresh = 0.01		# p.value threshold for peak caller
-	Int smooth_win = 73				# size of smoothing window for peak caller
-
-	# parameters for signal tracks
-	Boolean enable_count_signal_track = false # generate count signal track
-
-	# parameters for IDR
-	Boolean enable_idr = true 		# enable IDR analysis on raw peaks
-	Float idr_thresh = 0.05			# IDR threshold
-	String idr_rank = 'p.value' 	# IDR ranking method (p.value, q.value, score)
-
-	# parameters for ATAqC
-	Boolean disable_preseq = false
-	Boolean disable_gc_bias = false
-
 	# resources 	
 	#	these variables will be automatically ignored if they are not supported by platform
 	# 	"disks" is for cloud platforms (Google Cloud Platform, DNAnexus) only
@@ -139,14 +117,13 @@ workflow atac {
 	Int xcor_time_hr = 6
 	String xcor_disks = "local-disk 100 HDD"
 
-	Int macs2_mem_mb = 16000
-	Int macs2_time_hr = 24
-	String macs2_disks = "local-disk 200 HDD"
+	Int call_peak_mem_mb = 16000
+	Int call_peak_time_hr = 24
+	String call_peak_disks = "local-disk 200 HDD"
 
-	Int ataqc_mem_mb = 16000
-	Int ataqc_mem_java_mb = 15000
-	Int ataqc_time_hr = 24
-	String ataqc_disks = "local-disk 200 HDD"
+	Int macs2_signal_track_mem_mb = 16000
+	Int macs2_signal_track_time_hr = 24
+	String macs2_signal_track_disks = "local-disk 200 HDD"
 
 	Int preseq_mem_mb = 16000
 
@@ -231,6 +208,8 @@ workflow atac {
 		else read_genome_tsv.ref_fa
 	File? bowtie2_idx_tar_ = if defined(bowtie2_idx_tar) then bowtie2_idx_tar
 		else read_genome_tsv.bowtie2_idx_tar
+	File? custom_aligner_idx_tar_ = if defined(custom_aligner_idx_tar) then custom_aligner_idx_tar
+		else read_genome_tsv.custom_aligner_idx_tar
 	File? chrsz_ = if defined(chrsz) then chrsz
 		else read_genome_tsv.chrsz
 	String? gensz_ = if defined(gensz) then gensz
@@ -265,6 +244,13 @@ workflow atac {
 		else read_genome_tsv.reg2map_bed
 	File? roadmap_meta_ = if defined(roadmap_meta) then roadmap_meta
 		else read_genome_tsv.roadmap_meta
+
+	### temp vars (do not define these)
+	String aligner_ = aligner
+	String peak_caller_ = peak_caller
+	String peak_type_ = peak_type
+	String idr_rank = 'p.value' 	# IDR ranking method (p.value, q.value, score)
+	Int cap_num_peak_ = cap_num_peak
 
 	# temporary 2-dim fastqs array [rep_id][merge_id]
 	Array[Array[File]] fastqs_R1 = 
@@ -358,17 +344,20 @@ workflow atac {
 			then trim_merged_fastqs_R2[i]
 			else trim_adapter.trim_merged_fastq_R2
 
-		Boolean has_input_of_bowtie2 = has_output_of_trim_adapter ||
+		Boolean has_input_of_align = has_output_of_trim_adapter ||
 			defined(trim_adapter.trim_merged_fastq_R1)
-		Boolean has_output_of_bowtie2 = i<length(bams) && defined(bams[i])
-		if ( has_input_of_bowtie2 && !has_output_of_bowtie2 ) {
-			call bowtie2 { input :
+		Boolean has_output_of_align = i<length(bams) && defined(bams[i])
+		if ( has_input_of_align && !has_output_of_align ) {
+			call align { input :
+				aligner = aligner_,
+				custom_align_py = custom_align_py,
 				fastq_R1 = trim_merged_fastq_R1_,
 				fastq_R2 = trim_merged_fastq_R2_,
 				paired_end = paired_end_,
-				#aligner = aligner,
 				multimapping = multimapping,
-				bowtie2_idx_tar = bowtie2_idx_tar_,
+				idx_tar = if aligner=='bwa' then bwa_idx_tar_
+					else if aligner=='bowtie2' then bowtie2_idx_tar_
+					else custom_aligner_idx_tar_,
 				# resource
 				cpu = align_cpu,
 				mem_mb = align_mem_mb,
@@ -376,9 +365,9 @@ workflow atac {
 				disks = align_disks,
 			}
 		}
-		File? bam_ = if has_output_of_bowtie2 then bams[i] else bowtie2.bam
+		File? bam_ = if has_output_of_align then bams[i] else align.bam
 
-		Boolean has_input_of_filter = has_output_of_bowtie2 || defined(bowtie2.bam)
+		Boolean has_input_of_filter = has_output_of_align || defined(align.bam)
 		Boolean has_output_of_filter = i<length(nodup_bams) && defined(nodup_bams[i])
 		# skip if we already have output of this step
 		if ( has_input_of_filter && !has_output_of_filter ) {
@@ -444,32 +433,34 @@ workflow atac {
 				pval_thresh = pval_thresh,
 				smooth_win = smooth_win,
 
-				mem_mb = macs2_mem_mb,
-				disks = macs2_disks,
-				time_hr = macs2_time_hr,
+				mem_mb = macs2_signal_track_mem_mb,
+				disks = macs2_signal_track_disks,
+				time_hr = macs2_signal_track_time_hr,
 			}
 		}
 
-		Boolean has_input_of_macs2 = has_output_of_bam2ta || defined(bam2ta.ta)
-		Boolean has_output_of_macs2 = i<length(peaks) && defined(peaks[i])
-		if ( has_input_of_macs2 && !has_output_of_macs2 && !align_only ) {
+		Boolean has_input_of_call_peak = has_output_of_bam2ta || defined(bam2ta.ta)
+		Boolean has_output_of_call_peak = i<length(peaks) && defined(peaks[i])
+		if ( has_input_of_call_peak && !has_output_of_call_peak && !align_only ) {
 			# call peaks on tagalign
-			call macs2 { input :
+			call call_peak { input :
+				peak_caller = peak_caller_,
+				custom_call_peak_py = custom_call_peak_py,
 				ta = ta_,
 				gensz = gensz_,
 				chrsz = chrsz_,
-				cap_num_peak = cap_num_peak,
+				cap_num_peak = cap_num_peak_,
 				pval_thresh = pval_thresh,
 				smooth_win = smooth_win,
 				blacklist = blacklist_,
 				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 
-				mem_mb = macs2_mem_mb,
-				disks = macs2_disks,
-				time_hr = macs2_time_hr,
+				mem_mb = call_peak_mem_mb,
+				disks = call_peak_disks,
+				time_hr = call_peak_time_hr,
 			}
 		}
-		File? peak_ = if has_output_of_macs2 then peaks[i] else macs2.npeak
+		File? peak_ = if has_output_of_call_peak then peaks[i] else call_peak.peak
 
 		Boolean has_input_of_spr = has_output_of_bam2ta || defined(bam2ta.ta)
 		if ( has_input_of_spr && !align_only && !true_rep_only ) {
@@ -480,51 +471,55 @@ workflow atac {
 			}
 		}
 
-		Boolean has_input_of_macs2_pr1 = defined(spr.ta_pr1)
-		Boolean has_output_of_macs2_pr1 = i<length(peaks_pr1) && defined(peaks_pr1[i])
-		if ( has_input_of_macs2_pr1 && !has_output_of_macs2_pr1 &&
+		Boolean has_input_of_call_peak_pr1 = defined(spr.ta_pr1)
+		Boolean has_output_of_call_peak_pr1 = i<length(peaks_pr1) && defined(peaks_pr1[i])
+		if ( has_input_of_call_peak_pr1 && !has_output_of_call_peak_pr1 &&
 			!align_only && !true_rep_only ) {
 			# call peaks on 1st pseudo replicated tagalign 
-			call macs2 as macs2_pr1 { input :
+			call call_peak as call_peak_pr1 { input :
+				peak_caller = peak_caller_,
+				custom_call_peak_py = custom_call_peak_py,
 				ta = spr.ta_pr1,
 				gensz = gensz_,
 				chrsz = chrsz_,
-				cap_num_peak = cap_num_peak,
+				cap_num_peak = cap_num_peak_,
 				pval_thresh = pval_thresh,
 				smooth_win = smooth_win,
 				blacklist = blacklist_,
 				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 
-				mem_mb = macs2_mem_mb,
-				disks = macs2_disks,
-				time_hr = macs2_time_hr,
+				mem_mb = call_peak_mem_mb,
+				disks = call_peak_disks,
+				time_hr = call_peak_time_hr,
 			}
 		}
-		File? peak_pr1_ = if has_output_of_macs2_pr1 then peaks_pr1[i]
-			else macs2_pr1.npeak
+		File? peak_pr1_ = if has_output_of_call_peak_pr1 then peaks_pr1[i]
+			else call_peak_pr1.peak
 
-		Boolean has_input_of_macs2_pr2 = defined(spr.ta_pr2)
-		Boolean has_output_of_macs2_pr2 = i<length(peaks_pr2) && defined(peaks_pr2[i])
-		if ( has_input_of_macs2_pr2 && !has_output_of_macs2_pr2 &&
+		Boolean has_input_of_call_peak_pr2 = defined(spr.ta_pr2)
+		Boolean has_output_of_call_peak_pr2 = i<length(peaks_pr2) && defined(peaks_pr2[i])
+		if ( has_input_of_call_peak_pr2 && !has_output_of_call_peak_pr2 &&
 			!align_only && !true_rep_only ) {
 			# call peaks on 2nd pseudo replicated tagalign 
-			call macs2 as macs2_pr2 { input :
+			call call_peak as call_peak_pr2 { input :
+				peak_caller = peak_caller_,
+				custom_call_peak_py = custom_call_peak_py,
 				ta = spr.ta_pr2,
 				gensz = gensz_,
 				chrsz = chrsz_,
-				cap_num_peak = cap_num_peak,
+				cap_num_peak = cap_num_peak_,
 				pval_thresh = pval_thresh,
 				smooth_win = smooth_win,
 				blacklist = blacklist_,
 				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 
-				mem_mb = macs2_mem_mb,
-				disks = macs2_disks,
-				time_hr = macs2_time_hr,
+				mem_mb = call_peak_mem_mb,
+				disks = call_peak_disks,
+				time_hr = call_peak_time_hr,
 			}
 		}
-		File? peak_pr2_ = if has_output_of_macs2_pr2 then peaks_pr2[i]
-			else macs2_pr2.npeak
+		File? peak_pr2_ = if has_output_of_call_peak_pr2 then peaks_pr2[i]
+			else call_peak_pr2.peak
 
 		Boolean has_input_of_count_signal_track = has_output_of_bam2ta || defined(bam2ta.ta)
 		if ( has_input_of_count_signal_track && enable_count_signal_track ) {
@@ -536,9 +531,9 @@ workflow atac {
 		}
 
 		# tasks factored out from ATAqC
-		if ( defined(nodup_bam_) && defined(tss_) && defined(bowtie2.read_len_log) ) {
+		if ( defined(nodup_bam_) && defined(tss_) && defined(align.read_len_log) ) {
 			call tss_enrich { input :
-				read_len_log = bowtie2.read_len_log,
+				read_len_log = align.read_len_log,
 				nodup_bam = nodup_bam_,
 				tss = tss_,
 				chrsz = chrsz_,
@@ -556,9 +551,9 @@ workflow atac {
 				mem_mb = preseq_mem_mb,
 			}
 		}
-		if ( !disable_gc_bias && defined(nodup_bam_) && defined(ref_fa_) && defined(bowtie2.read_len_log) ) {
+		if ( !disable_gc_bias && defined(nodup_bam_) && defined(ref_fa_) && defined(align.read_len_log) ) {
 			call gc_bias { input :
-				read_len_log = bowtie2.read_len_log,
+				read_len_log = align.read_len_log,
 				nodup_bam = nodup_bam_,
 				ref_fa = ref_fa_,
 			}
@@ -609,28 +604,30 @@ workflow atac {
 		}
 	}
 
-	Boolean has_input_of_macs2_pooled = defined(pool_ta.ta_pooled)
-	Boolean has_output_of_macs2_pooled = defined(peak_pooled)
-	if ( has_input_of_macs2_pooled && !has_output_of_macs2_pooled &&
+	Boolean has_input_of_call_peak_pooled = defined(pool_ta.ta_pooled)
+	Boolean has_output_of_call_peak_pooled = defined(peak_pooled)
+	if ( has_input_of_call_peak_pooled && !has_output_of_call_peak_pooled &&
 		!align_only && num_rep>1 ) {
 		# call peaks on pooled replicate
-		call macs2 as macs2_pooled { input :
+		call call_peak as call_peak_pooled { input :
+			peak_caller = peak_caller_,
+			custom_call_peak_py = custom_call_peak_py,
 			ta = pool_ta.ta_pooled,
 			gensz = gensz_,
 			chrsz = chrsz_,
-			cap_num_peak = cap_num_peak,
+			cap_num_peak = cap_num_peak_,
 			pval_thresh = pval_thresh,
 			smooth_win = smooth_win,
 			blacklist = blacklist_,
 			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 
-			mem_mb = macs2_mem_mb,
-			disks = macs2_disks,
-			time_hr = macs2_time_hr,
+			mem_mb = call_peak_mem_mb,
+			disks = call_peak_disks,
+			time_hr = call_peak_time_hr,
 		}
 	}
-	File? peak_pooled_ = if has_output_of_macs2_pooled then peak_pooled
-		else macs2_pooled.npeak
+	File? peak_pooled_ = if has_output_of_call_peak_pooled then peak_pooled
+		else call_peak_pooled.peak
 
 	Boolean has_input_of_count_signal_track_pooled = defined(pool_ta.ta_pooled)
 	if ( has_input_of_count_signal_track_pooled && enable_count_signal_track && num_rep>1 ) {
@@ -649,57 +646,61 @@ workflow atac {
 			pval_thresh = pval_thresh,
 			smooth_win = smooth_win,
 
-			mem_mb = macs2_mem_mb,
-			disks = macs2_disks,
-			time_hr = macs2_time_hr,
+			mem_mb = macs2_signal_track_mem_mb,
+			disks = macs2_signal_track_disks,
+			time_hr = macs2_signal_track_time_hr,
 		}
 	}
 
-	Boolean has_input_of_macs2_ppr1 = defined(pool_ta_pr1.ta_pooled)
-	Boolean has_output_of_macs2_ppr1 = defined(peak_ppr1)
-	if ( has_input_of_macs2_ppr1 && !has_output_of_macs2_ppr1 &&
+	Boolean has_input_of_call_peak_ppr1 = defined(pool_ta_pr1.ta_pooled)
+	Boolean has_output_of_call_peak_ppr1 = defined(peak_ppr1)
+	if ( has_input_of_call_peak_ppr1 && !has_output_of_call_peak_ppr1 &&
 		!align_only && !true_rep_only && num_rep>1 ) {
 		# call peaks on 1st pooled pseudo replicates
-		call macs2 as macs2_ppr1 { input :
+		call call_peak as call_peak_ppr1 { input :
+			peak_caller = peak_caller_,
+			custom_call_peak_py = custom_call_peak_py,
 			ta = pool_ta_pr1.ta_pooled,
 			gensz = gensz_,
 			chrsz = chrsz_,
-			cap_num_peak = cap_num_peak,
+			cap_num_peak = cap_num_peak_,
 			pval_thresh = pval_thresh,
 			smooth_win = smooth_win,
 			blacklist = blacklist_,
 			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 
-			mem_mb = macs2_mem_mb,
-			disks = macs2_disks,
-			time_hr = macs2_time_hr,
+			mem_mb = call_peak_mem_mb,
+			disks = call_peak_disks,
+			time_hr = call_peak_time_hr,
 		}
 	}
-	File? peak_ppr1_ = if has_output_of_macs2_ppr1 then peak_ppr1
-		else macs2_ppr1.npeak
+	File? peak_ppr1_ = if has_output_of_call_peak_ppr1 then peak_ppr1
+		else call_peak_ppr1.peak
 
-	Boolean has_input_of_macs2_ppr2 = defined(pool_ta_pr2.ta_pooled)
-	Boolean has_output_of_macs2_ppr2 = defined(peak_ppr2)
-	if ( has_input_of_macs2_ppr2 && !has_output_of_macs2_ppr2 &&
+	Boolean has_input_of_call_peak_ppr2 = defined(pool_ta_pr2.ta_pooled)
+	Boolean has_output_of_call_peak_ppr2 = defined(peak_ppr2)
+	if ( has_input_of_call_peak_ppr2 && !has_output_of_call_peak_ppr2 &&
 		!align_only && !true_rep_only && num_rep>1 ) {
 		# call peaks on 2nd pooled pseudo replicates
-		call macs2 as macs2_ppr2 { input :
+		call call_peak as call_peak_ppr2 { input :
+			peak_caller = peak_caller_,
+			custom_call_peak_py = custom_call_peak_py,
 			ta = pool_ta_pr2.ta_pooled,
 			gensz = gensz_,
 			chrsz = chrsz_,
-			cap_num_peak = cap_num_peak,
+			cap_num_peak = cap_num_peak_,
 			pval_thresh = pval_thresh,
 			smooth_win = smooth_win,
 			blacklist = blacklist_,
 			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 
-			mem_mb = macs2_mem_mb,
-			disks = macs2_disks,
-			time_hr = macs2_time_hr,
+			mem_mb = call_peak_mem_mb,
+			disks = call_peak_disks,
+			time_hr = call_peak_time_hr,
 		}
 	}
-	File? peak_ppr2_ = if has_output_of_macs2_ppr2 then peak_ppr2
-		else macs2_ppr2.npeak
+	File? peak_ppr2_ = if has_output_of_call_peak_ppr2 then peak_ppr2
+		else call_peak_ppr2.peak
 
 	# do IDR/overlap on all pairs of two replicates (i,j)
 	# 	where i and j are zero-based indices and 0 <= i < j < num_rep
@@ -720,7 +721,7 @@ workflow atac {
 				peak1 = peak_[pair.left],
 				peak2 = peak_[pair.right],
 				peak_pooled = peak_pooled_,
-				peak_type = peak_type,
+				peak_type = peak_type_,
 				blacklist = blacklist_,
 				chrsz = chrsz_,
 				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
@@ -740,8 +741,8 @@ workflow atac {
 				peak2 = peak_[pair.right],
 				peak_pooled = peak_pooled_,
 				idr_thresh = idr_thresh,
-				peak_type = peak_type,
-				rank = idr_rank,
+				peak_type = peak_type_,
+				rank = idr_rank_,
 				blacklist = blacklist_,
 				chrsz = chrsz_,
 				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
@@ -758,7 +759,7 @@ workflow atac {
 				peak1 = peak_pr1_[i],
 				peak2 = peak_pr2_[i],
 				peak_pooled = peak_[i],
-				peak_type = peak_type,
+				peak_type = peak_type_,
 				blacklist = blacklist_,
 				chrsz = chrsz_,
 				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
@@ -776,8 +777,8 @@ workflow atac {
 				peak2 = peak_pr2_[i],
 				peak_pooled = peak_[i],
 				idr_thresh = idr_thresh,
-				peak_type = peak_type,
-				rank = idr_rank,
+				peak_type = peak_type_,
+				rank = idr_rank_,
 				blacklist = blacklist_,
 				chrsz = chrsz_,
 				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
@@ -793,7 +794,7 @@ workflow atac {
 			peak1 = peak_ppr1_,
 			peak2 = peak_ppr2_,
 			peak_pooled = peak_pooled_,
-			peak_type = peak_type,
+			peak_type = peak_type_,
 			blacklist = blacklist_,
 			chrsz = chrsz_,
 			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
@@ -809,8 +810,8 @@ workflow atac {
 			peak2 = peak_ppr2_,
 			peak_pooled = peak_pooled_,
 			idr_thresh = idr_thresh,
-			peak_type = peak_type,
-			rank = idr_rank,
+			peak_type = peak_type_,
+			rank = idr_rank_,
 			blacklist = blacklist_,
 			chrsz = chrsz_,
 			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
@@ -826,7 +827,7 @@ workflow atac {
 			peaks = overlap.bfilt_overlap_peak,
 			peaks_pr = overlap_pr.bfilt_overlap_peak,
 			peak_ppr = overlap_ppr.bfilt_overlap_peak,
-			peak_type = peak_type,
+			peak_type = peak_type_,
 			chrsz = chrsz_,
 			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 		}
@@ -839,7 +840,7 @@ workflow atac {
 			peaks = idr.bfilt_idr_peak,
 			peaks_pr = idr_pr.bfilt_idr_peak,
 			peak_ppr = idr_ppr.bfilt_idr_peak,
-			peak_type = peak_type,
+			peak_type = peak_type_,
 			chrsz = chrsz_,
 			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 		}
@@ -854,25 +855,25 @@ workflow atac {
 		multimapping = multimapping,
 		paired_ends = paired_end_,
 		pipeline_type = pipeline_type,
-		aligner = 'bowtie2',
-		peak_caller = 'macs2',
-		macs2_cap_num_peak = cap_num_peak,
+		aligner = aligner_,
+		peak_caller = peak_caller_,
+		cap_num_peak = cap_num_peak_,
 		idr_thresh = idr_thresh,
 		
-		flagstat_qcs = bowtie2.flagstat_qc,
+		flagstat_qcs = align.flagstat_qc,
 		nodup_flagstat_qcs = filter.flagstat_qc,
 		dup_qcs = filter.dup_qc,
 		pbc_qcs = filter.pbc_qc,
 		xcor_plots = xcor.plot_png,
 		xcor_scores = xcor.score,
 
-		frip_macs2_qcs = macs2.frip_qc,
-		frip_macs2_qcs_pr1 = macs2_pr1.frip_qc,
-		frip_macs2_qcs_pr2 = macs2_pr2.frip_qc,
+		frip_qcs = call_peak.frip_qc,
+		frip_qcs_pr1 = call_peak_pr1.frip_qc,
+		frip_qcs_pr2 = call_peak_pr2.frip_qc,
 
-		frip_macs2_qc_pooled = macs2_pooled.frip_qc,
-		frip_macs2_qc_ppr1 = macs2_ppr1.frip_qc,
-		frip_macs2_qc_ppr2 = macs2_ppr2.frip_qc,
+		frip_qc_pooled = call_peak_pooled.frip_qc,
+		frip_qc_ppr1 = call_peak_ppr1.frip_qc,
+		frip_qc_ppr2 = call_peak_ppr2.frip_qc,
 
 		idr_plots = idr.idr_plot,
 		idr_plots_pr = idr_pr.idr_plot,
@@ -896,9 +897,9 @@ workflow atac {
 		preseq_plots = preseq.preseq_plot,
 		picard_est_lib_size_qcs = preseq.picard_est_lib_size_qc,
 
-		peak_region_size_qcs = macs2.peak_region_size_qc,
-		peak_region_size_plots = macs2.peak_region_size_plot,
-		num_peak_qcs = macs2.num_peak_qc,
+		peak_region_size_qcs = call_peak.peak_region_size_qc,
+		peak_region_size_plots = call_peak.peak_region_size_plot,
+		num_peak_qcs = call_peak.num_peak_qc,
 
 		idr_opt_peak_region_size_qc = reproducibility_idr.peak_region_size_qc,
 		idr_opt_peak_region_size_plot = reproducibility_overlap.peak_region_size_plot,
@@ -962,10 +963,11 @@ task trim_adapter {
 	}
 }
 
-task bowtie2 {
-	String aligner = "bowtie2"
-	File bowtie2_idx_tar	# reference bowtie2 index tar
-	File? fastq_R1 			# [read_end_id]
+task align {
+	String aligner
+	File? custom_align_py
+	File idx_tar		# reference index tar
+	File? fastq_R1 		# [read_end_id]
 	File? fastq_R2
 	Boolean paired_end
 	Int multimapping
@@ -978,14 +980,18 @@ task bowtie2 {
 	command {
 		if [ "${aligner}" == "bowtie2" ]; then
 			python $(which encode_bowtie2.py) \
-				${bowtie2_idx_tar} \
+				${idx_tar} \
 				${fastq_R1} ${fastq_R2} \
 				${if paired_end then "--paired-end" else ""} \
 				${"--multimapping " + multimapping} \
 				${"--nth " + cpu}
 		else
-			echo "Currently supported aligner: bowtie2"
-			ERROR_ALIGNER_NOT_SUPPORTED
+			python ${custom_align_py} \
+				${idx_tar} \
+				${fastq_R1} ${fastq_R2} \
+				${if paired_end then "--paired-end" else ""} \
+				${"--multimapping " + multimapping} \
+				${"--nth " + cpu}
 		fi 
 	}
 	output {
@@ -1177,7 +1183,10 @@ task count_signal_track {
 	}
 }
 
-task macs2 {
+task call_peak {
+	String peak_caller
+	File? custom_call_peak_py
+
 	File ta
 	String gensz		# Genome size (sum of entries in 2nd column of 
                         # chr. sizes file, or hs for human, ms for mouse)
@@ -1187,7 +1196,7 @@ task macs2 {
 	Int smooth_win 		# size of smoothing window
 	File? blacklist 	# blacklist BED to filter raw peaks
 	Boolean	keep_irregular_chr_in_bfilt_peak
-	
+
 	Int mem_mb
 	Int time_hr
 	String disks
@@ -1195,22 +1204,35 @@ task macs2 {
 	File? null_f
 
 	command {
-		python $(which encode_macs2_atac.py) \
-			${ta} \
-			${"--gensz "+ gensz} \
-			${"--chrsz " + chrsz} \
-			${"--cap-num-peak " + cap_num_peak} \
-			${"--pval-thresh "+ pval_thresh} \
-			${"--smooth-win "+ smooth_win} \
-			${if keep_irregular_chr_in_bfilt_peak then "--keep-irregular-chr" else ""} \
-			${"--blacklist "+ blacklist}
+		if [ "${peak_caller}" == "macs2" ]; then
+			python $(which encode_macs2_atac.py) \
+				${ta} \
+				${"--gensz "+ gensz} \
+				${"--chrsz " + chrsz} \
+				${"--cap-num-peak " + cap_num_peak} \
+				${"--pval-thresh "+ pval_thresh} \
+				${"--smooth-win "+ smooth_win} \
+				${if keep_irregular_chr_in_bfilt_peak then "--keep-irregular-chr" else ""} \
+				${"--blacklist "+ blacklist}
+
+		else
+			python ${custom_call_peak_py} \
+				${ta} \
+				${"--gensz "+ gensz} \
+				${"--chrsz " + chrsz} \
+				${"--cap-num-peak " + cap_num_peak} \
+				${"--pval-thresh "+ pval_thresh} \
+				${"--smooth-win "+ smooth_win} \
+				${if keep_irregular_chr_in_bfilt_peak then "--keep-irregular-chr" else ""} \
+				${"--blacklist "+ blacklist}				
+		fi
 	}
 	output {
-		File npeak = glob("*[!.][!b][!f][!i][!l][!t].narrowPeak.gz")[0]
-		File bfilt_npeak = glob("*.bfilt.narrowPeak.gz")[0]
-		File bfilt_npeak_bb = glob("*.bfilt.narrowPeak.bb")[0]
-		File bfilt_npeak_hammock = glob("*.bfilt.narrowPeak.hammock.gz*")[0]
-		File bfilt_npeak_hammock_tbi = glob("*.bfilt.narrowPeak.hammock.gz*")[1]
+		File peak = glob("*[!.][!b][!f][!i][!l][!t].*Peak.gz")[0]
+		File bfilt_peak = glob("*.bfilt.*Peak.gz")[0]
+		File bfilt_peak_bb = glob("*.bfilt.*Peak.bb")[0]
+		File bfilt_peak_hammock = glob("*.bfilt.*Peak.hammock.gz*")[0]
+		File bfilt_peak_hammock_tbi = glob("*.bfilt.*Peak.hammock.gz*")[1]
 		File frip_qc = glob("*.frip.qc")[0]
 		File peak_region_size_qc = glob("*.peak_region_size.qc")[0]
 		File peak_region_size_plot = glob("*.peak_region_size.png")[0]
@@ -1633,8 +1655,7 @@ task qc_report {
 	String pipeline_type
 	String aligner
 	String peak_caller
-	Int? macs2_cap_num_peak
-	Int? spp_cap_num_peak
+	Int cap_num_peak
 	Float idr_thresh
 	# QCs
 	Array[File?] flagstat_qcs
@@ -1696,8 +1717,7 @@ task qc_report {
 			--pipeline-type ${pipeline_type} \
 			--aligner ${aligner} \
 			--peak-caller ${peak_caller} \
-			${"--macs2-cap-num-peak " + macs2_cap_num_peak} \
-			${"--spp-cap-num-peak " + spp_cap_num_peak} \
+			${"--cap-num-peak " + cap_num_peak} \
 			--idr-thresh ${idr_thresh} \
 			--flagstat-qcs ${sep="_:_" flagstat_qcs} \
 			--nodup-flagstat-qcs ${sep="_:_" nodup_flagstat_qcs} \
@@ -1708,12 +1728,12 @@ task qc_report {
 			--idr-plots ${sep="_:_" idr_plots} \
 			--idr-plots-pr ${sep="_:_" idr_plots_pr} \
 			${"--idr-plot-ppr " + idr_plot_ppr} \
-			--frip-macs2-qcs ${sep="_:_" frip_macs2_qcs} \
-			--frip-macs2-qcs-pr1 ${sep="_:_" frip_macs2_qcs_pr1} \
-			--frip-macs2-qcs-pr2 ${sep="_:_" frip_macs2_qcs_pr2} \
-			${"--frip-macs2-qc-pooled " + frip_macs2_qc_pooled} \
-			${"--frip-macs2-qc-ppr1 " + frip_macs2_qc_ppr1} \
-			${"--frip-macs2-qc-ppr2 " + frip_macs2_qc_ppr2} \
+			--frip-qcs ${sep="_:_" frip_qcs} \
+			--frip-qcs-pr1 ${sep="_:_" frip_qcs_pr1} \
+			--frip-qcs-pr2 ${sep="_:_" frip_qcs_pr2} \
+			${"--frip-qc-pooled " + frip_qc_pooled} \
+			${"--frip-qc-ppr1 " + frip_qc_ppr1} \
+			${"--frip-qc-ppr2 " + frip_qc_ppr2} \
 			--frip-idr-qcs ${sep="_:_" frip_idr_qcs} \
 			--frip-idr-qcs-pr ${sep="_:_" frip_idr_qcs_pr} \
 			${"--frip-idr-qc-ppr " + frip_idr_qc_ppr} \
@@ -1803,5 +1823,16 @@ task read_genome_tsv {
 		memory : "4000 MB"
 		time : 1
 		disks : "local-disk 50 HDD"		
+	}
+}
+
+task raise_exception {
+	String msg
+	command {
+		echo "Exception raised: ${msg}" >&2
+		ERROR_EXCEPTION_RAISED
+	}
+	output {
+		String error_msg = '${msg}'
 	}
 }
