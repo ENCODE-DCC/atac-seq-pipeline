@@ -9,8 +9,8 @@ import argparse
 import math
 from encode_common import *
 from encode_common_genomic import peak_to_bigbed, peak_to_hammock
-from encode_blacklist_filter import blacklist_filter
-from encode_frip import frip, frip_shifted
+from encode_lib_blacklist_filter import blacklist_filter
+from encode_lib_frip import frip, frip_shifted
 
 def parse_arguments():
     parser = argparse.ArgumentParser(prog='ENCODE DCC IDR.',

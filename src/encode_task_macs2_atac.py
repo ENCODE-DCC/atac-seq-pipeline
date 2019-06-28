@@ -8,8 +8,8 @@ import os
 import argparse
 from encode_common import *
 from encode_common_genomic import peak_to_bigbed, peak_to_hammock, get_region_size_metrics, get_num_peaks
-from encode_blacklist_filter import blacklist_filter
-from encode_frip import frip
+from encode_lib_blacklist_filter import blacklist_filter
+from encode_lib_frip import frip
 
 def parse_arguments():
     parser = argparse.ArgumentParser(prog='ENCODE DCC MACS2 callpeak',
