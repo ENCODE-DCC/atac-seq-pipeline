@@ -35,6 +35,7 @@ workflow test_macs2 {
 		blacklist = se_blacklist,
 		keep_irregular_chr_in_bfilt_peak = false,
 
+		cpu = 1,
 		mem_mb = macs2_mem_mb,
 		time_hr = macs2_time_hr,
 		disks = macs2_disks,
