@@ -605,7 +605,7 @@ def make_cat_enrich(args, cat_root):
     # raw peaks
     cat_frip_call_peak = QCCategory(
         args.peak_caller,
-        html_head='<h3>FRiP for {} raw peaks</h3>'.format(peak_caller),
+        html_head='<h3>FRiP for {} raw peaks</h3>'.format(args.peak_caller),
         parser=parse_frip_qc,
         map_key_desc=MAP_KEY_DESC_FRIP_QC,
         parent=cat_frip

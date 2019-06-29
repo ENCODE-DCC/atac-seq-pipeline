@@ -1,4 +1,4 @@
-# ENCODE DCC ATAC-Seq/DNase-Seq pipeline
+# ENCODE ATAC-Seq/DNase-Seq pipeline
 # Author: Jin Lee (leepc12@gmail.com)
 
 #CAPER docker quay.io/encode-dcc/atac-seq-pipeline:v1.4.2
@@ -117,6 +117,7 @@ workflow atac {
 	Int xcor_time_hr = 6
 	String xcor_disks = "local-disk 100 HDD"
 
+	Int call_peak_cpu = 1
 	Int call_peak_mem_mb = 16000
 	Int call_peak_time_hr = 24
 	String call_peak_disks = "local-disk 200 HDD"
@@ -206,6 +207,8 @@ workflow atac {
 	}
 	File? ref_fa_ = if defined(ref_fa) then ref_fa
 		else read_genome_tsv.ref_fa
+	File? bwa_idx_tar_ = if defined(bwa_idx_tar) then bwa_idx_tar
+		else read_genome_tsv.bwa_idx_tar
 	File? bowtie2_idx_tar_ = if defined(bowtie2_idx_tar) then bowtie2_idx_tar
 		else read_genome_tsv.bowtie2_idx_tar
 	File? custom_aligner_idx_tar_ = if defined(custom_aligner_idx_tar) then custom_aligner_idx_tar
@@ -246,10 +249,12 @@ workflow atac {
 		else read_genome_tsv.roadmap_meta
 
 	### temp vars (do not define these)
-	String aligner_ = aligner
-	String peak_caller_ = peak_caller
+	String aligner_ = if defined(custom_align_py) then 'custom' else aligner
+	String peak_caller_ = if defined(custom_call_peak_py) then 'custom' else peak_caller
 	String peak_type_ = peak_type
-	String idr_rank = 'p.value' 	# IDR ranking method (p.value, q.value, score)
+	String idr_rank_ = if peak_caller_=='spp' then 'signal.value'
+						else if peak_caller_=='macs2' then 'p.value'
+						else 'p.value'
 	Int cap_num_peak_ = cap_num_peak
 
 	# temporary 2-dim fastqs array [rep_id][merge_id]
@@ -445,6 +450,7 @@ workflow atac {
 			# call peaks on tagalign
 			call call_peak { input :
 				peak_caller = peak_caller_,
+				peak_type = peak_type_,
 				custom_call_peak_py = custom_call_peak_py,
 				ta = ta_,
 				gensz = gensz_,
@@ -455,6 +461,7 @@ workflow atac {
 				blacklist = blacklist_,
 				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 
+				cpu = call_peak_cpu,
 				mem_mb = call_peak_mem_mb,
 				disks = call_peak_disks,
 				time_hr = call_peak_time_hr,
@@ -478,6 +485,7 @@ workflow atac {
 			# call peaks on 1st pseudo replicated tagalign 
 			call call_peak as call_peak_pr1 { input :
 				peak_caller = peak_caller_,
+				peak_type = peak_type_,
 				custom_call_peak_py = custom_call_peak_py,
 				ta = spr.ta_pr1,
 				gensz = gensz_,
@@ -488,6 +496,7 @@ workflow atac {
 				blacklist = blacklist_,
 				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 
+				cpu = call_peak_cpu,
 				mem_mb = call_peak_mem_mb,
 				disks = call_peak_disks,
 				time_hr = call_peak_time_hr,
@@ -503,6 +512,7 @@ workflow atac {
 			# call peaks on 2nd pseudo replicated tagalign 
 			call call_peak as call_peak_pr2 { input :
 				peak_caller = peak_caller_,
+				peak_type = peak_type_,
 				custom_call_peak_py = custom_call_peak_py,
 				ta = spr.ta_pr2,
 				gensz = gensz_,
@@ -513,6 +523,7 @@ workflow atac {
 				blacklist = blacklist_,
 				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 
+				cpu = call_peak_cpu,
 				mem_mb = call_peak_mem_mb,
 				disks = call_peak_disks,
 				time_hr = call_peak_time_hr,
@@ -611,6 +622,7 @@ workflow atac {
 		# call peaks on pooled replicate
 		call call_peak as call_peak_pooled { input :
 			peak_caller = peak_caller_,
+			peak_type = peak_type_,
 			custom_call_peak_py = custom_call_peak_py,
 			ta = pool_ta.ta_pooled,
 			gensz = gensz_,
@@ -621,6 +633,7 @@ workflow atac {
 			blacklist = blacklist_,
 			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 
+			cpu = call_peak_cpu,
 			mem_mb = call_peak_mem_mb,
 			disks = call_peak_disks,
 			time_hr = call_peak_time_hr,
@@ -659,6 +672,7 @@ workflow atac {
 		# call peaks on 1st pooled pseudo replicates
 		call call_peak as call_peak_ppr1 { input :
 			peak_caller = peak_caller_,
+			peak_type = peak_type_,
 			custom_call_peak_py = custom_call_peak_py,
 			ta = pool_ta_pr1.ta_pooled,
 			gensz = gensz_,
@@ -669,6 +683,7 @@ workflow atac {
 			blacklist = blacklist_,
 			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 
+			cpu = call_peak_cpu,
 			mem_mb = call_peak_mem_mb,
 			disks = call_peak_disks,
 			time_hr = call_peak_time_hr,
@@ -684,6 +699,7 @@ workflow atac {
 		# call peaks on 2nd pooled pseudo replicates
 		call call_peak as call_peak_ppr2 { input :
 			peak_caller = peak_caller_,
+			peak_type = peak_type_,
 			custom_call_peak_py = custom_call_peak_py,
 			ta = pool_ta_pr2.ta_pooled,
 			gensz = gensz_,
@@ -694,6 +710,7 @@ workflow atac {
 			blacklist = blacklist_,
 			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 
+			cpu = call_peak_cpu,
 			mem_mb = call_peak_mem_mb,
 			disks = call_peak_disks,
 			time_hr = call_peak_time_hr,
@@ -1185,6 +1202,7 @@ task count_signal_track {
 
 task call_peak {
 	String peak_caller
+	String peak_type
 	File? custom_call_peak_py
 
 	File ta
@@ -1197,6 +1215,7 @@ task call_peak {
 	File? blacklist 	# blacklist BED to filter raw peaks
 	Boolean	keep_irregular_chr_in_bfilt_peak
 
+	Int cpu
 	Int mem_mb
 	Int time_hr
 	String disks
@@ -1205,28 +1224,33 @@ task call_peak {
 		if [ "${peak_caller}" == "macs2" ]; then
 			python $(which encode_task_macs2_atac.py) \
 				${ta} \
-				${"--gensz "+ gensz} \
+				${"--gensz " + gensz} \
 				${"--chrsz " + chrsz} \
 				${"--cap-num-peak " + cap_num_peak} \
 				${"--pval-thresh "+ pval_thresh} \
-				${"--smooth-win "+ smooth_win} \
-				${if keep_irregular_chr_in_bfilt_peak then "--keep-irregular-chr" else ""} \
-				${"--blacklist "+ blacklist}
-
+				${"--smooth-win "+ smooth_win}
 		else
 			python ${custom_call_peak_py} \
 				${ta} \
-				${"--gensz "+ gensz} \
+				${"--gensz " + gensz} \
 				${"--chrsz " + chrsz} \
 				${"--cap-num-peak " + cap_num_peak} \
 				${"--pval-thresh "+ pval_thresh} \
-				${"--smooth-win "+ smooth_win} \
-				${if keep_irregular_chr_in_bfilt_peak then "--keep-irregular-chr" else ""} \
-				${"--blacklist "+ blacklist}				
+				${"--smooth-win "+ smooth_win}
 		fi
+
+		python $(which encode_task_post_call_peak_atac.py) \
+			$(ls *Peak.gz) \
+			${"--ta " + ta} \
+			${if keep_irregular_chr_in_bfilt_peak then "--keep-irregular-chr" else ""} \
+			${"--chrsz " + chrsz} \
+			${"--peak-type " + peak_type} \
+			${"--blacklist " + blacklist}
 	}
 	output {
+		# generated by custom_call_peak_py
 		File peak = glob("*[!.][!b][!f][!i][!l][!t].*Peak.gz")[0]
+		# generated by post_call_peak py
 		File bfilt_peak = glob("*.bfilt.*Peak.gz")[0]
 		File bfilt_peak_bb = glob("*.bfilt.*Peak.bb")[0]
 		File bfilt_peak_hammock = glob("*.bfilt.*Peak.hammock.gz*")[0]
@@ -1237,7 +1261,7 @@ task call_peak {
 		File num_peak_qc = glob("*.num_peak.qc")[0]
 	}
 	runtime {
-		cpu : 1
+		cpu : if peak_caller == 'macs2' then 1 else cpu
 		memory : "${mem_mb} MB"
 		time : time_hr
 		disks : disks
@@ -1661,12 +1685,12 @@ task qc_report {
 	Array[File]? idr_plots
 	Array[File?] idr_plots_pr
 	File? idr_plot_ppr
-	Array[File?] frip_macs2_qcs
-	Array[File?] frip_macs2_qcs_pr1
-	Array[File?] frip_macs2_qcs_pr2
-	File? frip_macs2_qc_pooled
-	File? frip_macs2_qc_ppr1 
-	File? frip_macs2_qc_ppr2 
+	Array[File?] frip_qcs
+	Array[File?] frip_qcs_pr1
+	Array[File?] frip_qcs_pr2
+	File? frip_qc_pooled
+	File? frip_qc_ppr1 
+	File? frip_qc_ppr2 
 	Array[File]? frip_idr_qcs
 	Array[File?] frip_idr_qcs_pr
 	File? frip_idr_qc_ppr 

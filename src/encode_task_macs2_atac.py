@@ -7,12 +7,9 @@ import sys
 import os
 import argparse
 from encode_lib_common import *
-from encode_lib_genomic import peak_to_bigbed, peak_to_hammock, get_region_size_metrics, get_num_peaks
-from encode_lib_blacklist_filter import blacklist_filter
-from encode_lib_frip import frip
 
 def parse_arguments():
-    parser = argparse.ArgumentParser(prog='ENCODE DCC MACS2 callpeak',
+    parser = argparse.ArgumentParser(prog='ENCODE MACS2 callpeak',
                                         description='')
     parser.add_argument('ta', type=str,
                         help='Path for TAGALIGN file.')
@@ -27,10 +24,6 @@ def parse_arguments():
                         help='Smoothing window size.')
     parser.add_argument('--cap-num-peak', default=300000, type=int,
                         help='Capping number of peaks by taking top N peaks.')
-    parser.add_argument('--blacklist', type=str, required=True,
-                        help='Blacklist BED file.')
-    parser.add_argument('--keep-irregular-chr', action="store_true",
-                        help='Keep reads with non-canonical chromosome names.')    
     parser.add_argument('--out-dir', default='', type=str,
                         help='Output directory.')
     parser.add_argument('--log-level', default='INFO', 
@@ -38,8 +31,6 @@ def parse_arguments():
                             'WARNING','CRITICAL','ERROR','CRITICAL'],
                         help='Log level')
     args = parser.parse_args()
-    if args.blacklist.endswith('/dev/null'):
-        args.blacklist = ''
 
     log.setLevel(args.log_level)
     log.info(sys.argv)
@@ -100,36 +91,14 @@ def main():
     log.info('Initializing and making output directory...')
     mkdir_p(args.out_dir)
 
-    log.info('Calling peaks and generating signal tracks with MACS2...')
+    log.info('Calling peaks macs2...')
     npeak = macs2(
         args.ta, args.chrsz, args.gensz, args.pval_thresh,
         args.smooth_win, args.cap_num_peak,
         args.out_dir)
 
-    log.info('Blacklist-filtering peaks...')
-    bfilt_npeak = blacklist_filter(
-            npeak, args.blacklist, args.keep_irregular_chr, args.out_dir)
-
     log.info('Checking if output is empty...')
-    assert_file_not_empty(bfilt_npeak)
-
-    log.info('Converting peak to bigbed...')
-    peak_to_bigbed(bfilt_npeak, 'narrowPeak', args.chrsz, args.keep_irregular_chr, args.out_dir)
-
-    log.info('Converting peak to hammock...')
-    peak_to_hammock(bfilt_npeak, args.keep_irregular_chr, args.out_dir)
-
-    if args.ta: # if TAG-ALIGN is given
-        log.info('FRiP without fragment length...')
-        frip_qc = frip(args.ta, bfilt_npeak, args.out_dir)
-    else:
-        frip_qc = '/dev/null'
-
-    log.info('Calculating (blacklist-filtered) peak region size QC/plot...')
-    region_size_qc, region_size_plot = get_region_size_metrics(bfilt_npeak)
-
-    log.info('Calculating number of peaks (blacklist-filtered)...')
-    num_peak_qc = get_num_peaks(bfilt_npeak)
+    assert_file_not_empty(npeak)
 
     log.info('List all files in output directory...')
     ls_l(args.out_dir)

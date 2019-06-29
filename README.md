@@ -48,6 +48,12 @@ We no longer recommend Conda for resolving dependencies and plan to phase out Co
 Make sure that you have configured Caper correctly.
 > **WARNING**: Do not run Caper on HPC login nodes. Your jobs can be killed.
 
+Git clone the pipeline repository to download WDL and example input JSON.
+```bash
+$ git clone https://github.com/ENCODE-DCC/atac-seq-pipeline
+$ cd atac-seq-pipeline
+```
+
 Run it. Due to `--deepcopy` all files (HTTP URLs) in `examples/caper/ENCSR356KRQ_subsampled.json` will be recursively copied into Caper's temporary folder (`--tmp-dir`).
 ```bash
 $ caper run atac.wdl -i examples/caper/ENCSR356KRQ_subsampled.json --deepcopy --use-singularity
