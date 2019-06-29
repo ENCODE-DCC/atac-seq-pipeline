@@ -23,7 +23,9 @@ workflow test_macs2 {
 	Int macs2_time_hr = 24
 	String macs2_disks = "local-disk 100 HDD"
 
-	call atac.macs2 as se_macs2 { input :
+	call atac.call_peak as se_macs2 { input :
+		peak_caller = 'macs2',
+		peak_type = 'narrowPeak',
 		ta = se_ta,
 		gensz = se_gensz,
 		chrsz = se_chrsz,
@@ -45,8 +47,8 @@ workflow test_macs2 {
 			'se_macs2_frip_qc',
 		],
 		files = [
-			se_macs2.npeak,
-			se_macs2.bfilt_npeak,
+			se_macs2.peak,
+			se_macs2.bfilt_peak,
 			se_macs2.frip_qc,
 		],
 		ref_files = [

@@ -25,8 +25,9 @@ workflow test_bowtie2 {
 	Int bowtie2_time_hr = 48
 	String bowtie2_disks = "local-disk 100 HDD"
 
-	call atac.bowtie2 as pe_bowtie2 { input :
-		bowtie2_idx_tar = pe_bowtie2_idx_tar,
+	call atac.align as pe_bowtie2 { input :
+		aligner = 'bowtie2',
+		idx_tar = pe_bowtie2_idx_tar,
 		fastq_R1 = pe_trimmed_fastqs[0],
 		fastq_R2 = pe_trimmed_fastqs[1],
 		multimapping = multimapping,
@@ -37,8 +38,9 @@ workflow test_bowtie2 {
 		time_hr = bowtie2_time_hr,
 		disks = bowtie2_disks,
 	}
-	call atac.bowtie2 as pe_bowtie2_no_multimapping { input :
-		bowtie2_idx_tar = pe_bowtie2_idx_tar,
+	call atac.align as pe_bowtie2_no_multimapping { input :
+		aligner = 'bowtie2',
+		idx_tar = pe_bowtie2_idx_tar,
 		fastq_R1 = pe_trimmed_fastqs[0],
 		fastq_R2 = pe_trimmed_fastqs[1],
 		multimapping = 0,
@@ -49,8 +51,9 @@ workflow test_bowtie2 {
 		time_hr = bowtie2_time_hr,
 		disks = bowtie2_disks,
 	}
-	call atac.bowtie2 as se_bowtie2 { input :
-		bowtie2_idx_tar = se_bowtie2_idx_tar,
+	call atac.align as se_bowtie2 { input :
+		aligner = 'bowtie2',
+		idx_tar = se_bowtie2_idx_tar,
 		fastq_R1 = se_trimmed_fastqs[0],
 		multimapping = multimapping,
 		paired_end = false,
@@ -60,8 +63,9 @@ workflow test_bowtie2 {
 		time_hr = bowtie2_time_hr,
 		disks = bowtie2_disks,
 	}
-	call atac.bowtie2 as se_bowtie2_no_multimapping { input :
-		bowtie2_idx_tar = se_bowtie2_idx_tar,
+	call atac.align as se_bowtie2_no_multimapping { input :
+		aligner = 'bowtie2',
+		idx_tar = se_bowtie2_idx_tar,
 		fastq_R1 = se_trimmed_fastqs[0],
 		multimapping = 0,
 		paired_end = false,
