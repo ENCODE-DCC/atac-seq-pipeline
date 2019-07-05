@@ -232,10 +232,10 @@ def make_cat_root(args):
         ('title', args.title),
         ('description', args.desc),
         ('pipeline_ver', args.pipeline_ver),
-        ('peak_caller', args.peak_caller),
-        ('aligner', args.aligner),
         ('genome', args.genome),
         ('paired_end', args.paired_ends),
+        ('aligner', args.aligner),
+        ('peak_caller', args.peak_caller),
     ])
     if args.ctl_paired_ends:
         d_general['ctl_paired_end'] = args.ctl_paired_ends
@@ -245,7 +245,7 @@ def make_cat_root(args):
 
 def make_cat_align(args, cat_root):
     cat_align = QCCategory(
-        'alignment',
+        'align',
         html_head='<h1>Alignment quality metrics</h1><hr>',
         parent=cat_root
     )
@@ -296,61 +296,6 @@ def make_cat_align(args, cat_root):
             ctl = 'ctl' + str(i + 1)
             if qc:
                 cat_align_dup.add_log(qc, key=ctl)
-
-    cat_align_pbc = QCCategory(
-        'pbc',
-        html_head='<h2>Library complexity (filtered non-mito BAM)</h2>',
-        html_foot="""
-            <div id='help-pbc'>
-            <p>Mitochondrial reads are filtered out by default. 
-            The non-redundant fraction (NRF) is the fraction of non-redundant mapped reads
-            in a dataset; it is the ratio between the number of positions in the genome
-            that uniquely mapped reads map to and the total number of uniquely mappable
-            reads. The NRF should be > 0.8. The PBC1 is the ratio of genomic locations
-            with EXACTLY one read pair over the genomic locations with AT LEAST one read
-            pair. PBC1 is the primary measure, and the PBC1 should be close to 1.
-            Provisionally 0-0.5 is severe bottlenecking, 0.5-0.8 is moderate bottlenecking,
-            0.8-0.9 is mild bottlenecking, and 0.9-1.0 is no bottlenecking. The PBC2 is
-            the ratio of genomic locations with EXACTLY one read pair over the genomic
-            locations with EXACTLY two read pairs. The PBC2 should be significantly
-            greater than 1.</p><br>
-            <p>NRF (non redundant fraction) <br>
-            PBC1 (PCR Bottleneck coefficient 1) <br>
-            PBC2 (PCR Bottleneck coefficient 2) <br>
-            PBC1 is the primary measure. Provisionally <br>
-            <ul>
-            <li>0-0.5 is severe bottlenecking</li>
-            <li>0.5-0.8 is moderate bottlenecking </li>
-            <li>0.8-0.9 is mild bottlenecking </li>
-            <li>0.9-1.0 is no bottlenecking </li>
-            </ul></p></div><br>
-        """,
-        parser=parse_pbc_qc,
-        map_key_desc=MAP_KEY_DESC_PBC_QC,
-        parent=cat_align
-    )
-    if args.pbc_qcs:
-        for i, qc in enumerate(args.pbc_qcs):
-            rep = 'rep' + str(i + 1)
-            if qc:
-                cat_align_pbc.add_log(qc, key=rep)
-    if args.ctl_pbc_qcs:
-        for i, qc in enumerate(args.ctl_pbc_qcs):
-            ctl = 'ctl' + str(i + 1)
-            if qc:
-                cat_align_pbc.add_log(qc, key=ctl)
-    
-    cat_align_lib_size = QCCategory(
-        'lib_size',
-        parser=parse_picard_est_lib_size_qc,
-        map_key_desc=MAP_KEY_DESC_PICARD_EST_LIB_SIZE_QC,
-        parent=cat_align
-    )
-    if args.picard_est_lib_size_qcs:
-        for i, qc in enumerate(args.picard_est_lib_size_qcs):
-            rep = 'rep' + str(i + 1)
-            if qc:
-                cat_align_lib_size.add_log(qc, key=rep)
 
     cat_align_preseq = QCCategory(
         'preseq',
@@ -417,17 +362,82 @@ def make_cat_align(args, cat_root):
 
     return cat_align
 
-def make_cat_peak(args, cat_root):
-    cat_peak = QCCategory(
-        'peak_calling',
-        html_head='<h1>Peak calling quality metrics</h1><hr>',
+
+def make_cat_lib_complexity(args, cat_root):
+    cat_lc = QCCategory(
+        'lib_complexity',
+        html_head='<h1>Library complexity quality metrics</h1><hr>',
+        parent=cat_root
+    )
+
+    cat_lc_pbc = QCCategory(
+        'lib_complexity',
+        html_head='<h2>Library complexity (filtered non-mito BAM)</h2>',
+        html_foot="""
+            <div id='help-pbc'>
+            <p>Mitochondrial reads are filtered out by default. 
+            The non-redundant fraction (NRF) is the fraction of non-redundant mapped reads
+            in a dataset; it is the ratio between the number of positions in the genome
+            that uniquely mapped reads map to and the total number of uniquely mappable
+            reads. The NRF should be > 0.8. The PBC1 is the ratio of genomic locations
+            with EXACTLY one read pair over the genomic locations with AT LEAST one read
+            pair. PBC1 is the primary measure, and the PBC1 should be close to 1.
+            Provisionally 0-0.5 is severe bottlenecking, 0.5-0.8 is moderate bottlenecking,
+            0.8-0.9 is mild bottlenecking, and 0.9-1.0 is no bottlenecking. The PBC2 is
+            the ratio of genomic locations with EXACTLY one read pair over the genomic
+            locations with EXACTLY two read pairs. The PBC2 should be significantly
+            greater than 1.</p><br>
+            <p>NRF (non redundant fraction) <br>
+            PBC1 (PCR Bottleneck coefficient 1) <br>
+            PBC2 (PCR Bottleneck coefficient 2) <br>
+            PBC1 is the primary measure. Provisionally <br>
+            <ul>
+            <li>0-0.5 is severe bottlenecking</li>
+            <li>0.5-0.8 is moderate bottlenecking </li>
+            <li>0.8-0.9 is mild bottlenecking </li>
+            <li>0.9-1.0 is no bottlenecking </li>
+            </ul></p></div><br>
+        """,
+        parser=parse_pbc_qc,
+        map_key_desc=MAP_KEY_DESC_PBC_QC,
+        parent=cat_lc
+    )
+    if args.pbc_qcs:
+        for i, qc in enumerate(args.pbc_qcs):
+            rep = 'rep' + str(i + 1)
+            if qc:
+                cat_lc_pbc.add_log(qc, key=rep)
+    if args.ctl_pbc_qcs:
+        for i, qc in enumerate(args.ctl_pbc_qcs):
+            ctl = 'ctl' + str(i + 1)
+            if qc:
+                cat_lc_pbc.add_log(qc, key=ctl)
+
+    cat_lc_lib_size = QCCategory(
+        'lib_size',
+        parser=parse_picard_est_lib_size_qc,
+        map_key_desc=MAP_KEY_DESC_PICARD_EST_LIB_SIZE_QC,
+        parent=cat_lc
+    )
+    if args.picard_est_lib_size_qcs:
+        for i, qc in enumerate(args.picard_est_lib_size_qcs):
+            rep = 'rep' + str(i + 1)
+            if qc:
+                cat_lc_lib_size.add_log(qc, key=rep)
+
+    return cat_lc
+
+def make_cat_replication(args, cat_root):
+    cat_replication = QCCategory(
+        'replication',
+        html_head='<h1>Replication quality metrics</h1><hr>',
         parent=cat_root
     )
 
     cat_idr = QCCategory(
         'idr',
         html_head='<h2>IDR (Irreproducible Discovery Rate) plots</h2>',
-        parent=cat_peak,
+        parent=cat_replication,
     )
     if args.idr_plots:
         num_rep = infer_n_from_nC2(len(args.idr_plots))
@@ -463,7 +473,7 @@ def make_cat_peak(args, cat_root):
         """,
         parser=parse_reproducibility_qc,
         map_key_desc=MAP_KEY_DESC_REPRODUCIBILITY_QC,
-        parent=cat_peak,
+        parent=cat_replication,
     )
     if args.overlap_reproducibility_qc:
         qc = args.overlap_reproducibility_qc[0]
@@ -480,7 +490,7 @@ def make_cat_peak(args, cat_root):
         """,
         parser=parse_num_peak_qc,
         map_key_desc=MAP_KEY_DESC_NUM_PEAK_QC,
-        parent=cat_peak,
+        parent=cat_replication,
     )
     if args.num_peak_qcs:
         for i, qc in enumerate(args.num_peak_qcs):
@@ -497,6 +507,15 @@ def make_cat_peak(args, cat_root):
         rep = 'overlap_opt'
         cat_num_peak.add_log(qc, key=rep)
 
+    return cat_replication
+
+def make_cat_peak_stat(args, cat_root):
+    cat_peak_stat = QCCategory(
+        'peak_stat',
+        html_head='<h1>Peak calling statistics</h1><hr>',
+        parent=cat_root
+    )
+
     cat_peak_region_size = QCCategory(
         'peak_region_size',
         html_head='<h2>Peak region size</h2>',
@@ -504,7 +523,7 @@ def make_cat_peak(args, cat_root):
         """,
         parser=parse_peak_region_size_qc,
         map_key_desc=MAP_KEY_DESC_PEAK_REGION_SIZE_QC,
-        parent=cat_peak,
+        parent=cat_peak_stat,
     )
     if args.peak_region_size_qcs:
         for i, qc in enumerate(args.peak_region_size_qcs):
@@ -534,15 +553,15 @@ def make_cat_peak(args, cat_root):
         rep = 'overlap_opt'
         cat_peak_region_size.add_plot(plot, key=rep, size_pct=50)
 
-    return cat_peak
+    return cat_peak_stat
 
-def make_cat_enrich(args, cat_root):
-    cat_enrich = QCCategory(
-        'enrichment',
-        html_head='<h1>Enrichment</h1><hr>',       
+def make_cat_align_enrich(args, cat_root):
+    cat_align_enrich = QCCategory(
+        'align_enrich',
+        html_head='<h1>Alignment enrichment</h1><hr>',       
         parent=cat_root
     )
-    
+
     cat_xcor = QCCategory(
         'xcor_score',
         html_head='<h2>Strand cross-correlation measures</h2>',
@@ -559,7 +578,7 @@ def make_cat_enrich(args, cat_root):
         """,
         parser=parse_xcor_score,
         map_key_desc=MAP_KEY_DESC_XCOR_SCORE,
-        parent=cat_enrich,
+        parent=cat_align_enrich,
     )
     if args.xcor_scores:
         for i, qc in enumerate(args.xcor_scores):
@@ -569,13 +588,63 @@ def make_cat_enrich(args, cat_root):
     # trivial subcategory to show table legend before plots
     cat_xcor_plot = QCCategory(
         'xcor_plot',
-        parent=cat_enrich,
+        parent=cat_align_enrich,
     )
     if args.xcor_plots:
         for i, plot in enumerate(args.xcor_plots):
             rep = 'rep' + str(i + 1)
             if plot:
                 cat_xcor_plot.add_plot(plot, key=rep, size_pct=60)
+
+    cat_tss_enrich = QCCategory(
+        'tss_enrich',
+        html_head='<h2>TSS enrichment</h2>',
+        html_foot="""
+            <p>Open chromatin assays should show enrichment in open chromatin sites, such as
+            TSS's. An average TSS enrichment in human (hg19) is above 6. A strong TSS enrichment is
+            above 10. For other references please see https://www.encodeproject.org/atac-seq/</p><br>
+        """,
+        parser=parse_tss_enrich_qc,
+        map_key_desc=MAP_KEY_DESC_TSS_ENRICH_QC,
+        parent=cat_align_enrich
+    )
+
+    if args.tss_enrich_qcs:
+        for i, qc in enumerate(args.tss_enrich_qcs):
+            rep = 'rep' + str(i + 1)
+            if qc:
+                cat_tss_enrich.add_log(qc, key=rep)
+
+    if args.tss_large_plots:
+        for i, plot in enumerate(args.tss_large_plots):
+            rep = 'rep' + str(i + 1)
+            if plot:
+                cat_tss_enrich.add_plot(plot, key=rep)
+
+    cat_jsd = QCCategory(
+        'jsd',
+        html_head='<h2>Fingerprint and Jensen-Shannon distance</h2>',
+        parser=parse_jsd_qc,
+        map_key_desc=MAP_KEY_DESC_JSD_QC,
+        parent=cat_align_enrich
+    )
+    if args.jsd_plot:
+        plot = args.jsd_plot[0]
+        cat_jsd.add_plot(plot, size_pct=40)
+    if args.jsd_qcs:
+        for i, qc in enumerate(args.jsd_qcs):
+            rep = 'rep' + str(i + 1)
+            if qc:
+                cat_jsd.add_log(qc, key=rep)
+
+    return cat_align_enrich
+
+def make_cat_peak_enrich(args, cat_root):
+    cat_peak_enrich = QCCategory(
+        'peak_enrich',
+        html_head='<h1>Peak enrichment</h1><hr>',
+        parent=cat_root
+    )
 
     cat_frip = QCCategory(
         'frac_reads_in_peaks',
@@ -599,7 +668,7 @@ def make_cat_enrich(args, cat_root):
             </ul></p>
             </div>
         """,
-        parent=cat_enrich,
+        parent=cat_peak_enrich,
     )
 
     # raw peaks
@@ -687,8 +756,8 @@ def make_cat_enrich(args, cat_root):
         cat_frip_idr.add_log(qc, key=rep)
 
     cat_annot_enrich = QCCategory(
-        'annot_enrich',
-        html_head='<h2>Annotated genomic region enrichments</h2>',
+        'frac_reads_in_annot',
+        html_head='<h2>Annotated genomic region enrichment</h2>',
         html_foot="""
             <p>Signal to noise can be assessed by considering whether reads are falling into
             known open regions (such as DHS regions) or not. A high fraction of reads
@@ -700,7 +769,7 @@ def make_cat_enrich(args, cat_root):
         """,
         parser=parse_annot_enrich_qc,
         map_key_desc=MAP_KEY_DESC_ANNOT_ENRICH_QC,
-        parent=cat_enrich,
+        parent=cat_peak_enrich,
     )
 
     if args.annot_enrich_qcs:
@@ -709,32 +778,7 @@ def make_cat_enrich(args, cat_root):
             if qc:
                 cat_annot_enrich.add_log(qc, key=rep)
 
-    cat_tss_enrich = QCCategory(
-        'tss_enrich',
-        html_head='<h2>TSS enrichment</h2>',
-        html_foot="""
-            <p>Open chromatin assays should show enrichment in open chromatin sites, such as
-            TSS's. An average TSS enrichment in human (hg19) is above 6. A strong TSS enrichment is
-            above 10. For other references please see https://www.encodeproject.org/atac-seq/</p><br>
-        """,
-        parser=parse_tss_enrich_qc,
-        map_key_desc=MAP_KEY_DESC_TSS_ENRICH_QC,
-        parent=cat_enrich
-    )
-
-    if args.tss_enrich_qcs:
-        for i, qc in enumerate(args.tss_enrich_qcs):
-            rep = 'rep' + str(i + 1)
-            if qc:
-                cat_tss_enrich.add_log(qc, key=rep)
-
-    if args.tss_large_plots:
-        for i, plot in enumerate(args.tss_large_plots):
-            rep = 'rep' + str(i + 1)
-            if plot:
-                cat_tss_enrich.add_plot(plot, key=rep)
-
-    return cat_enrich
+    return cat_peak_enrich
 
 def make_cat_etc(args, cat_root):
     cat_etc = QCCategory(
@@ -742,22 +786,6 @@ def make_cat_etc(args, cat_root):
         html_head='<h1>Other quality metrics</h1><hr>',
         parent=cat_root
     )
-
-    cat_jsd = QCCategory(
-        'jsd_qc',
-        html_head='<h2>Fingerprint and Jensen-Shannon distance</h2>',
-        parser=parse_jsd_qc,
-        map_key_desc=MAP_KEY_DESC_JSD_QC,
-        parent=cat_etc
-    )
-    if args.jsd_plot:
-        plot = args.jsd_plot[0]
-        cat_jsd.add_plot(plot, size_pct=40)
-    if args.jsd_qcs:
-        for i, qc in enumerate(args.jsd_qcs):
-            rep = 'rep' + str(i + 1)
-            if qc:
-                cat_jsd.add_log(qc, key=rep)
 
     cat_gc_bias = QCCategory(
         'gc_bias',
@@ -803,8 +831,11 @@ def main():
 
     # make QCCategory for each category
     make_cat_align(args, cat_root)
-    make_cat_peak(args, cat_root)
-    make_cat_enrich(args, cat_root)
+    make_cat_lib_complexity(args, cat_root)
+    make_cat_replication(args, cat_root)
+    make_cat_peak_stat(args, cat_root)
+    make_cat_align_enrich(args, cat_root)
+    make_cat_peak_enrich(args, cat_root)
     make_cat_etc(args, cat_root)
    
     log.info('Creating HTML report...')
