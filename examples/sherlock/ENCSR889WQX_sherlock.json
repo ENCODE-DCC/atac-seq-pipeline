@@ -25,7 +25,7 @@
     "atac.filter_mem_mb" : 12000,
     "atac.filter_time_hr" : 23,
 
-    "atac.macs2_mem_mb" : 16000,
+    "atac.call_peak_mem_mb" : 16000,
 
     "atac.smooth_win" : 73,
     "atac.enable_idr" : true,

@@ -105,9 +105,9 @@
     "atac.xcor_time_hr" : 6,
     "atac.xcor_disks" : "local-disk 100 HDD",
 
-    "atac.macs2_mem_mb" : 16000,
-    "atac.macs2_time_hr" : 24,
-    "atac.macs2_disks" : "local-disk 200 HDD",
+    "atac.call_peak_mem_mb" : 16000,
+    "atac.call_peak_time_hr" : 24,
+    "atac.call_peak_disks" : "local-disk 200 HDD",
 
     "atac.ataqc_mem_mb" : 16000,
     "atac.ataqc_mem_java_mb" : 15000,

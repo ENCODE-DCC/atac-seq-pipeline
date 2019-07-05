@@ -229,6 +229,138 @@
       "table": "QC and logs/Pooled replicate/Pseudoreplicate 2/Fraction of MACS2 peaks in reads"
     }
   },
+  "atac.call_peak": {
+    "npeak": {
+      "path": "peak/rep${i+1}/${basename}",
+      "table": "Peak/Replicate ${i+1}/Raw narrowpeak"
+    },
+    "bfilt_npeak": {
+      "path": "peak/rep${i+1}/${basename}",
+      "table": "Peak/Replicate ${i+1}/Blacklist-filtered narrowpeak"
+    },
+    "bfilt_npeak_bb": {
+      "path": "peak/rep${i+1}/${basename}",
+      "table": "Peak/Replicate ${i+1}/Blacklist-filtered narrowpeak (BigBed)"
+    },
+    "bfilt_npeak_hammock": {
+      "path": "peak/rep${i+1}/${basename}",
+      "table": "Peak/Replicate ${i+1}/Blacklist-filtered narrowpeak (hammock)"
+    },
+    "frip_qc": {
+      "path": "qc/rep${i+1}/${basename}",
+      "table": "QC and logs/Replicate ${i+1}/Fraction of peaks in reads"
+    }
+  },
+  "atac.call_peak_pr1": {
+    "npeak": {
+      "path": "peak/rep${i+1}/pseudorep1/${basename}",
+      "table": "Peak/Replicate ${i+1}/Pseudoreplicate 1/Raw narrowpeak"
+    },
+    "bfilt_npeak": {
+      "path": "peak/rep${i+1}/pseudorep1/${basename}",
+      "table": "Peak/Replicate ${i+1}/Pseudoreplicate 1/Blacklist-filtered narrowpeak"
+    },
+    "bfilt_npeak_bb": {
+      "path": "peak/rep${i+1}/pseudorep1/${basename}",
+      "table": "Peak/Replicate ${i+1}/Pseudoreplicate 1/Blacklist-filtered narrowpeak (BigBed)"
+    },
+    "bfilt_npeak_hammock": {
+      "path": "peak/rep${i+1}/pseudorep1/${basename}",
+      "table": "Peak/Replicate ${i+1}/Pseudoreplicate 1/Blacklist-filtered narrowpeak (hammock)"
+    },
+    "frip_qc": {
+      "path": "qc/rep${i+1}/pseudorep1/${basename}",
+      "table": "QC and logs/Replicate ${i+1}/Pseudoreplicate 1/Fraction of peaks in reads"
+    }
+  },
+  "atac.call_peak_pr2": {
+    "npeak": {
+      "path": "peak/rep${i+1}/pseudorep2/${basename}",
+      "table": "Peak/Replicate ${i+1}/Pseudoreplicate 2/Raw narrowpeak"
+    },
+    "bfilt_npeak": {
+      "path": "peak/rep${i+1}/pseudorep2/${basename}",
+      "table": "Peak/Replicate ${i+1}/Pseudoreplicate 2/Blacklist-filtered narrowpeak"
+    },
+    "bfilt_npeak_bb": {
+      "path": "peak/rep${i+1}/pseudorep2/${basename}",
+      "table": "Peak/Replicate ${i+1}/Pseudoreplicate 2/Blacklist-filtered narrowpeak (BigBed)"
+    },
+    "bfilt_npeak_hammock": {
+      "path": "peak/rep${i+1}/pseudorep2/${basename}",
+      "table": "Peak/Replicate ${i+1}/Pseudoreplicate 2/Blacklist-filtered narrowpeak (hammock)"
+    },
+    "frip_qc": {
+      "path": "qc/rep${i+1}/pseudorep2/${basename}",
+      "table": "QC and logs/Replicate ${i+1}/Pseudoreplicate 2/Fraction of peaks in reads"
+    }
+  },
+  "atac.call_peak_pooled": {
+    "npeak": {
+      "path": "peak/pooled-rep/${basename}",
+      "table": "Peak/Pooled replicate/Raw narrowpeak"
+    },
+    "bfilt_npeak": {
+      "path": "peak/pooled-rep/${basename}",
+      "table": "Peak/Pooled replicate/Blacklist-filtered narrowpeak"
+    },
+    "bfilt_npeak_bb": {
+      "path": "peak/pooled-rep/${basename}",
+      "table": "Peak/Pooled replicate/Blacklist-filtered narrowpeak (BigBed)"
+    },
+    "bfilt_npeak_hammock": {
+      "path": "peak/pooled-rep/${basename}",
+      "table": "Peak/Pooled replicate/Blacklist-filtered narrowpeak (hammock)"
+    },
+    "frip_qc": {
+      "path": "qc/pooled-rep/${basename}",
+      "table": "QC and logs/Pooled replicate/Fraction of peaks in reads"
+    }
+  },
+  "atac.call_peak_ppr1": {
+    "npeak": {
+      "path": "peak/pooled-rep/pseudorep1/${basename}",
+      "table": "Peak/Pooled replicate/Pseudoreplicate 1/Raw narrowpeak"
+    },
+    "bfilt_npeak": {
+      "path": "peak/pooled-rep/pseudorep1/${basename}",
+      "table": "Peak/Pooled replicate/Pseudoreplicate 1/Blacklist-filtered narrowpeak"
+    },
+    "bfilt_npeak_bb": {
+      "path": "peak/pooled-rep/pseudorep1/${basename}",
+      "table": "Peak/Pooled replicate/Pseudoreplicate 1/Blacklist-filtered narrowpeak (BigBed)"
+    },
+    "bfilt_npeak_hammock": {
+      "path": "peak/pooled-rep/pseudorep1/${basename}",
+      "table": "Peak/Pooled replicate/Pseudoreplicate 1/Blacklist-filtered narrowpeak (hammock)"
+    },
+    "frip_qc": {
+      "path": "qc/pooled-rep/pseudorep1/${basename}",
+      "table": "QC and logs/Pooled replicate/Pseudoreplicate 1/Fraction of peaks in reads"
+    }
+  },
+  "atac.call_peak_ppr2": {
+    "npeak": {
+      "path": "peak/pooled-rep/pseudorep2/${basename}",
+      "table": "Peak/Pooled replicate/Pseudoreplicate 2/Raw narrowpeak"
+    },
+    "bfilt_npeak": {
+      "path": "peak/pooled-rep/pseudorep2/${basename}",
+      "table": "Peak/Pooled replicate/Pseudoreplicate 2/Blacklist-filtered narrowpeak"
+    },
+    "bfilt_npeak_bb": {
+      "path": "peak/pooled-rep/pseudorep2/${basename}",
+      "table": "Peak/Pooled replicate/Pseudoreplicate 2/Blacklist-filtered narrowpeak (BigBed)"
+    },
+    "bfilt_npeak_hammock": {
+      "path": "peak/pooled-rep/pseudorep2/${basename}",
+      "table": "Peak/Pooled replicate/Pseudoreplicate 2/Blacklist-filtered narrowpeak (hammock)"
+    },
+    "frip_qc": {
+      "path": "qc/pooled-rep/pseudorep2/${basename}",
+      "table": "QC and logs/Pooled replicate/Pseudoreplicate 2/Fraction of peaks in reads"
+    }
+  },
   "atac.macs2_signal_track": {
     "pval_bw": {
       "path": "signal/rep${i+1}/${basename}",
