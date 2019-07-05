@@ -30,6 +30,7 @@
     "atac.multimapping" : 4,
 
     "atac.auto_detect_adapter" : true,
+    "atac.disable_preseq" : true,
 
     "atac.trim_adapter.cpu" : 2,
 
