@@ -2,8 +2,8 @@
     "atac.qc_report.qc_json_ref" : "gs://encode-pipeline-test-samples/encode-atac-seq-pipeline/ref_output/v1.1.6.a/ENCSR889WQX/qc.json",
     "atac.pipeline_type" : "atac",
     "atac.genome_tsv" : "gs://encode-pipeline-genome-data/mm10_google.tsv",
-    "atac.bowtie2_param_se" : "",
-    "atac.bowtie2_param_pe" : "-X2000 --mm",
+    "atac.align_param_se" : "",
+    "atac.align_param_pe" : "-X2000 --mm",
     "atac.fastqs_rep1_R1" : [
         "gs://encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR889WQX/fastq/rep1/ENCFF439VSY.fastq.gz",
         "gs://encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR889WQX/fastq/rep1/ENCFF325FCQ.fastq.gz",
@@ -22,8 +22,8 @@
 
     "atac.trim_adapter.cpu" : 2,
 
-    "atac.bowtie2_cpu" : 4,
-    "atac.bowtie2_mem_mb" : 16000,
+    "atac.align_cpu" : 4,
+    "atac.align_mem_mb" : 16000,
 
     "atac.filter_cpu" : 2,
     "atac.filter_mem_mb" : 12000,

@@ -45,14 +45,12 @@
     "atac.trim_adapter_cpu" : 1,
     "atac.trim_adapter_mem_mb" : 4000,
     "atac.trim_adapter_time_hr" : 1,
-    "atac.bowtie2_cpu" : 1,
-    "atac.bowtie2_mem_mb" : 4000,
-    "atac.bowtie2_time_hr" : 1,
+    "atac.align_cpu" : 1,
+    "atac.align_mem_mb" : 4000,
+    "atac.align_time_hr" : 1,
     "atac.filter_cpu" : 1,
     "atac.filter_mem_mb" : 4000,
     "atac.filter_time_hr" : 1,
     "atac.macs2_mem_mb" : 4000,
-    "atac.macs2_time_hr" : 1,
-    "atac.ataqc_mem_mb" : 4000,
-    "atac.ataqc_time_hr" : 1    
+    "atac.macs2_time_hr" : 1
 }

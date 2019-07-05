@@ -20,8 +20,8 @@
 
     "atac.trim_adapter.cpu" : 2,
 
-    "atac.bowtie2_cpu" : 4,
-    "atac.bowtie2_mem_mb" : 16000,
+    "atac.align_cpu" : 4,
+    "atac.align_mem_mb" : 16000,
 
     "atac.filter_cpu" : 2,
     "atac.filter_mem_mb" : 12000,

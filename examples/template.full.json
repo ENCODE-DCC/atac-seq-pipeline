@@ -9,7 +9,7 @@
     "atac.genome_tsv" : "/path_to_genome_data/hg38/hg38.tsv",
 
     "atac.ref_fa" : null,
-    "atac.bowtie2_idx_tar" : null,
+    "atac.align_idx_tar" : null,
     "atac.chrsz" : null,
     "atac.blacklist" : null,
     "atac.gensz" : null,
@@ -83,10 +83,10 @@
     "atac.trim_adapter_time_hr" : 24,
     "atac.trim_adapter_disks" : "local-disk 100 HDD",
 
-    "atac.bowtie2_cpu" : 4,
-    "atac.bowtie2_mem_mb" : 20000,
-    "atac.bowtie2_time_hr" : 48,
-    "atac.bowtie2_disks" : "local-disk 200 HDD",
+    "atac.align_cpu" : 4,
+    "atac.align_mem_mb" : 20000,
+    "atac.align_time_hr" : 48,
+    "atac.align_disks" : "local-disk 200 HDD",
 
     "atac.filter_cpu" : 2,
     "atac.filter_mem_mb" : 20000,
