@@ -51,8 +51,8 @@ def main():
     log.info('Running samtools index...')
     bai = samtools_index(args.bam, args.out_dir)
 
-    log.info('Running samtools flagstat...')
-    flagstat_qc = samtools_flagstat(args.bam, args.out_dir)
+    log.info('SAMstat...')
+    flagstat = samstat(bam, args.nth, args.out_dir)
 
     log.info('List all files in output directory...')
     ls_l(args.out_dir)

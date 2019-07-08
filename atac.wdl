@@ -877,8 +877,8 @@ workflow atac {
 		cap_num_peak = cap_num_peak_,
 		idr_thresh = idr_thresh,
 		
-		flagstat_qcs = align.flagstat_qc,
-		nodup_flagstat_qcs = filter.flagstat_qc,
+		samstat_qcs = align.samstat_qc,
+		nodup_samstat_qcs = filter.samstat_qc,
 		dup_qcs = filter.dup_qc,
 		pbc_qcs = filter.pbc_qc,
 		xcor_plots = xcor.plot_png,
@@ -1017,7 +1017,7 @@ task align {
 	output {
 		File bam = glob("*.bam")[0]
 		File bai = glob("*.bai")[0]
-		File flagstat_qc = glob("*.flagstat.qc")[0]
+		File samstat_qc = glob("*.samstat.qc")[0]
 		File read_len_log = glob("*.read_length.txt")[0] # read_len
 	}
 	runtime {
@@ -1057,7 +1057,7 @@ task filter {
 	output {
 		File nodup_bam = glob("*.bam")[0]
 		File nodup_bai = glob("*.bai")[0]
-		File flagstat_qc = glob("*.flagstat.qc")[0]
+		File samstat_qc = glob("*.samstat.qc")[0]
 		File dup_qc = glob("*.dup.qc")[0]
 		File pbc_qc = glob("*.pbc.qc")[0]
 		File mito_dup_log = glob("*.mito_dup.txt")[0] # mito_dups, fract_dups_from_mito
@@ -1588,10 +1588,10 @@ task compare_signal_to_roadmap {
 task ataqc {
 	Boolean paired_end
 	File? read_len_log
-	File? flagstat_qc
+	File? samstat_qc
 	File? align_log
 	File? bam
-	File? nodup_flagstat_qc
+	File? nodup_samstat_qc
 	File? mito_dup_log
 	File? dup_qc
 	File? pbc_qc
@@ -1625,10 +1625,10 @@ task ataqc {
 		python $(which encode_ataqc.py) \
 			${if paired_end then "--paired-end" else ""} \
 			${"--read-len-log " + read_len_log} \
-			${"--flagstat-log " + flagstat_qc} \
+			${"--samstat-log " + samstat_qc} \
 			${"--bowtie2-log " + align_log} \
 			${"--bam " + bam} \
-			${"--nodup-flagstat-log " + nodup_flagstat_qc} \
+			${"--nodup-samstat-log " + nodup_samstat_qc} \
 			${"--mito-dup-log " + mito_dup_log} \
 			${"--dup-log " + dup_qc} \
 			${"--pbc-log " + pbc_qc} \
@@ -1679,8 +1679,8 @@ task qc_report {
 	Int cap_num_peak
 	Float idr_thresh
 	# QCs
-	Array[File?] flagstat_qcs
-	Array[File?] nodup_flagstat_qcs
+	Array[File?] samstat_qcs
+	Array[File?] nodup_samstat_qcs
 	Array[File?] dup_qcs
 	Array[File?] pbc_qcs
 	Array[File?] xcor_plots
@@ -1740,8 +1740,8 @@ task qc_report {
 			--peak-caller ${peak_caller} \
 			${"--cap-num-peak " + cap_num_peak} \
 			--idr-thresh ${idr_thresh} \
-			--flagstat-qcs ${sep="_:_" flagstat_qcs} \
-			--nodup-flagstat-qcs ${sep="_:_" nodup_flagstat_qcs} \
+			--samstat-qcs ${sep="_:_" samstat_qcs} \
+			--nodup-samstat-qcs ${sep="_:_" nodup_samstat_qcs} \
 			--dup-qcs ${sep="_:_" dup_qcs} \
 			--pbc-qcs ${sep="_:_" pbc_qcs} \
 			--xcor-plots ${sep="_:_" xcor_plots} \

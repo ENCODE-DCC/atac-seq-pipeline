@@ -345,8 +345,8 @@ def main():
     log.info('sambamba index...')
     nodup_bai = sambamba_index(nodup_bam, args.nth, args.out_dir)
 
-    log.info('sambamba flagstat...')
-    nodup_flagstat_qc = sambamba_flagstat(nodup_bam, args.nth, args.out_dir)
+    log.info('samstat...')
+    nodup_samstat_qc = samstat(nodup_bam, args.nth, args.out_dir)
 
     log.info('Generating PBC QC log...')
     if args.paired_end:

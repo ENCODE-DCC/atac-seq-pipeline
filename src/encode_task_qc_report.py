@@ -43,18 +43,18 @@ def parse_arguments():
                         help='Capping number of peaks by taking top N peaks.')
     parser.add_argument('--idr-thresh', type=float, required=True,
                         help='IDR threshold.')
-    parser.add_argument('--flagstat-qcs', type=str, nargs='*',
-                        help='List of flagstat QC (raw BAM) files per replicate.')
-    parser.add_argument('--nodup-flagstat-qcs', type=str, nargs='*',
-                        help='List of flagstat QC (filtered BAM) files per replicate.')
+    parser.add_argument('--samstat-qcs', type=str, nargs='*',
+                        help='List of samstat QC (raw BAM) files per replicate.')
+    parser.add_argument('--nodup-samstat-qcs', type=str, nargs='*',
+                        help='List of samstat QC (filtered BAM) files per replicate.')
     parser.add_argument('--dup-qcs', type=str, nargs='*',
                         help='List of dup QC files per replicate.')
     parser.add_argument('--pbc-qcs', type=str, nargs='*',
                         help='List of PBC QC files per replicate.')
-    parser.add_argument('--ctl-flagstat-qcs', type=str, nargs='*',
-                        help='List of flagstat QC (raw BAM) files per control.')
-    parser.add_argument('--ctl-nodup-flagstat-qcs', type=str, nargs='*',
-                        help='List of flagstat QC (filtered BAM) files per control.')
+    parser.add_argument('--ctl-samstat-qcs', type=str, nargs='*',
+                        help='List of samstat QC (raw BAM) files per control.')
+    parser.add_argument('--ctl-nodup-samstat-qcs', type=str, nargs='*',
+                        help='List of samstat QC (filtered BAM) files per control.')
     parser.add_argument('--ctl-dup-qcs', type=str, nargs='*',
                         help='List of dup QC files per control.')
     parser.add_argument('--ctl-pbc-qcs', type=str, nargs='*',
@@ -250,23 +250,23 @@ def make_cat_align(args, cat_root):
         parent=cat_root
     )
 
-    cat_align_flagstat = QCCategory(
-        'flagstat',
-        html_head='<h2>Samtools flagstat (raw BAM)</h2>',
+    cat_align_samstat = QCCategory(
+        'samstat',
+        html_head='<h2>SAMstat (raw BAM)</h2>',
         parser=parse_flagstat_qc,
         map_key_desc=MAP_KEY_DESC_FLAGSTAT_QC,
         parent=cat_align
     )
-    if args.flagstat_qcs:
-        for i, qc in enumerate(args.flagstat_qcs):
+    if args.samstat_qcs:
+        for i, qc in enumerate(args.samstat_qcs):
             rep = 'rep' + str(i + 1)
             if qc:
-                cat_align_flagstat.add_log(qc, key=rep)
-    if args.ctl_flagstat_qcs:
-        for i, qc in enumerate(args.ctl_flagstat_qcs):
+                cat_align_samstat.add_log(qc, key=rep)
+    if args.ctl_samstat_qcs:
+        for i, qc in enumerate(args.ctl_samstat_qcs):
             ctl = 'ctl' + str(i + 1)
             if qc:
-                cat_align_flagstat.add_log(qc, key=ctl)
+                cat_align_samstat.add_log(qc, key=ctl)
 
     cat_align_dup = QCCategory(
         'dup',
@@ -313,9 +313,9 @@ def make_cat_align(args, cat_root):
             if plot:
                 cat_align_preseq.add_plot(plot, key=rep, size_pct=50)
 
-    cat_align_nodup_flagstat = QCCategory(
-        'nodup_flagstat',
-        html_head='<h2>Samtools flagstat (filtered/deduped BAM)</h2>',
+    cat_align_nodup_samstat = QCCategory(
+        'nodup_samstat',
+        html_head='<h2>SAMstat (filtered/deduped BAM)</h2>',
         html_foot="""
             <p>Filtered and duplicates removed</p><br>
         """,
@@ -323,16 +323,16 @@ def make_cat_align(args, cat_root):
         map_key_desc=MAP_KEY_DESC_FLAGSTAT_QC,
         parent=cat_align
     )
-    if args.nodup_flagstat_qcs:
-        for i, qc in enumerate(args.nodup_flagstat_qcs):
+    if args.nodup_samstat_qcs:
+        for i, qc in enumerate(args.nodup_samstat_qcs):
             rep = 'rep' + str(i + 1)
             if qc:
-                cat_align_nodup_flagstat.add_log(qc, key=rep)
-    if args.ctl_nodup_flagstat_qcs:
-        for i, qc in enumerate(args.ctl_nodup_flagstat_qcs):
+                cat_align_nodup_samstat.add_log(qc, key=rep)
+    if args.ctl_nodup_samstat_qcs:
+        for i, qc in enumerate(args.ctl_nodup_samstat_qcs):
             ctl = 'ctl' + str(i + 1)
             if qc:
-                cat_align_nodup_flagstat.add_log(qc, key=ctl)
+                cat_align_nodup_samstat.add_log(qc, key=ctl)
 
     cat_fraglen = QCCategory(
         'frag_len_stat',

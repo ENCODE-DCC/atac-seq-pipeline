@@ -144,7 +144,7 @@ def main():
             bowtie2_index_prefix,
             args.multimapping, args.nth,
             args.out_dir)
-
+    
     log.info('Removing temporary files...')
     rm_f(temp_files)
 
