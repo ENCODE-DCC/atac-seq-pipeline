@@ -46,27 +46,19 @@ def rm_unmapped_lowq_reads_se(bam, multimapping, mapq_thresh, nth, out_dir):
     filt_bam = '{}.filt.bam'.format(prefix)
 
     if multimapping:        
-        # qname_sort_bam = samtools_name_sort(bam, nth, out_dir)
-        qname_sort_bam = sambamba_name_sort(bam, nth, out_dir)
+        qname_sort_bam = samtools_name_sort(bam, nth, out_dir)
 
         cmd2 = 'samtools view -h {} | '
         cmd2 += '$(which assign_multimappers.py) -k {} | '
         cmd2 += 'samtools view -F 1804 -Su /dev/stdin | '
 
-        # cmd2 += 'samtools sort /dev/stdin -o {} -T {} -@ {}'
-        # cmd2 = cmd2.format(
-        #     qname_sort_bam,
-        #     multimapping,
-        #     filt_bam,
-        #     prefix,
-        #     nth)
-        cmd2 += 'sambamba sort /dev/stdin -o {} -t {}'
+        cmd2 += 'samtools sort /dev/stdin -o {} -T {} -@ {}'
         cmd2 = cmd2.format(
             qname_sort_bam,
             multimapping,
             filt_bam,
+            prefix,
             nth)
-        run_shell_cmd(cmd2)
         rm_f(qname_sort_bam) # remove temporary files
     else:
         cmd = 'samtools view -F 1804 -q {} -u {} | '
@@ -89,19 +81,12 @@ def rm_unmapped_lowq_reads_pe(bam, multimapping, mapq_thresh, nth, out_dir):
     fixmate_bam = '{}.fixmate.bam'.format(prefix)
 
     if multimapping:
-        # cmd1 = 'samtools view -F 524 -f 2 -u {} | '
-        # cmd1 += 'samtools sort -n /dev/stdin -o {} -T {} -@ {} '
-        # cmd1 = cmd1.format(
-        #     bam,
-        #     tmp_filt_bam,
-        #     prefix,
-        #     nth)
-        # run_shell_cmd(cmd1)
         cmd1 = 'samtools view -F 524 -f 2 -u {} | '
-        cmd1 += 'sambamba sort -n /dev/stdin -o {} -t {} '
+        cmd1 += 'samtools sort -n /dev/stdin -o {} -T {} -@ {} '
         cmd1 = cmd1.format(
             bam,
             tmp_filt_bam,
+            prefix,
             nth)
         run_shell_cmd(cmd1)
 
@@ -115,21 +100,13 @@ def rm_unmapped_lowq_reads_pe(bam, multimapping, mapq_thresh, nth, out_dir):
             fixmate_bam)
         run_shell_cmd(cmd2)
     else:
-        # cmd1 = 'samtools view -F 1804 -f 2 -q {} -u {} | '
-        # cmd1 += 'samtools sort -n /dev/stdin -o {} -T {} -@ {}'
-        # cmd1 = cmd1.format(
-        #     mapq_thresh,
-        #     bam,
-        #     tmp_filt_bam,
-        #     prefix,
-        #     nth)
-        # run_shell_cmd(cmd1)
         cmd1 = 'samtools view -F 1804 -f 2 -q {} -u {} | '
-        cmd1 += 'sambamba sort -n /dev/stdin -o {} -t {}'
+        cmd1 += 'samtools sort -n /dev/stdin -o {} -T {} -@ {}'
         cmd1 = cmd1.format(
             mapq_thresh,
             bam,
             tmp_filt_bam,
+            prefix,
             nth)
         run_shell_cmd(cmd1)
 
@@ -140,18 +117,12 @@ def rm_unmapped_lowq_reads_pe(bam, multimapping, mapq_thresh, nth, out_dir):
         run_shell_cmd(cmd2)
     rm_f(tmp_filt_bam)
 
-    # cmd = 'samtools view -F 1804 -f 2 -u {} | '
-    # cmd += 'samtools sort /dev/stdin -o {} -T {} -@ {}'
-    # cmd = cmd.format(
-    #     fixmate_bam,
-    #     filt_bam,
-    #     prefix,
-    #     nth)
     cmd = 'samtools view -F 1804 -f 2 -u {} | '
-    cmd += 'sambamba sort /dev/stdin -o {} -t {}'
+    cmd += 'samtools sort /dev/stdin -o {} -T {} -@ {}'
     cmd = cmd.format(
         fixmate_bam,
         filt_bam,
+        prefix,
         nth)
     run_shell_cmd(cmd)
     rm_f(fixmate_bam)
@@ -256,8 +227,7 @@ def pbc_qc_pe(bam, mito_chr_name, nth, out_dir):
         os.path.basename(strip_ext_bam(bam)))
     pbc_qc = '{}.pbc.qc'.format(prefix)
 
-    # nmsrt_bam = samtools_name_sort(bam, nth, out_dir)
-    nmsrt_bam = sambamba_name_sort(bam, nth, out_dir)
+    nmsrt_bam = samtools_name_sort(bam, nth, out_dir)
     cmd3 = 'bedtools bamtobed -bedpe -i {} | '
     cmd3 += 'awk \'BEGIN{{OFS="\\t"}}{{print $1,$2,$4,$6,$9,$10}}\' | '
     cmd3 += 'grep -v "^{}\\b" | sort | uniq -c | '
@@ -342,8 +312,8 @@ def main():
         temp_files.append(dupmark_bam+'.bai')
     temp_files.append(dupmark_bam)
 
-    log.info('sambamba index...')
-    nodup_bai = sambamba_index(nodup_bam, args.nth, args.out_dir)
+    log.info('samtools index...')
+    nodup_bai = samtools_index(nodup_bam, args.nth, args.out_dir)
 
     log.info('samstat...')
     nodup_samstat_qc = samstat(nodup_bam, args.nth, args.out_dir)
