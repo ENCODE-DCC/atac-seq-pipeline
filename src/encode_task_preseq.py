@@ -114,7 +114,6 @@ def main():
     OUTPUT_PREFIX = os.path.join(
         args.out_dir,
         os.path.basename(strip_ext_bam(ALIGNED_BAM)))
-    # samtools_index(ALIGNED_BAM)
     RG_FREE_ALIGNED_BAM = remove_read_group(ALIGNED_BAM)
     # Library complexity: Preseq results, NRF, PBC1, PBC2    
     if args.paired_end:

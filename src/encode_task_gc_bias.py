@@ -102,7 +102,6 @@ def main():
     OUTPUT_PREFIX = os.path.join(
         args.out_dir,
         os.path.basename(strip_ext_bam(FINAL_BAM)))
-    # samtools_index(FINAL_BAM) # make an index first
     RG_FREE_FINAL_BAM = remove_read_group(FINAL_BAM)
 
     gc_out, gc_plot_pdf, gc_summary = get_gc(RG_FREE_FINAL_BAM,

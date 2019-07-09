@@ -15,20 +15,20 @@ def samstat(bam, nth=1, out_dir=''):
     samstat_qc = '{}.samstat.qc'.format(prefix)
     samstat_exec = which(SAMSTAT_PY)
 
-    cmd = 'samtools sort -n --threads ${nth} ${bam} -O SAM | '
-    cmd += 'python {samstat_exec} | '
-    cmd += '--sorted_sam_file - --outf ${samstat_qc}'
+    cmd = 'samtools sort -n {bam} -T {prefix}.tmp -O SAM | '
+    cmd += 'python {samstat_exec} '
+    cmd += '--sorted_sam_file - --outf {samstat_qc}'
     cmd = cmd.format(
-        nth=nth,
         bam=bam,
+        prefix=prefix,
         samstat_exec=samstat_exec,
         samstat_qc=samstat_qc)
     run_shell_cmd(cmd)
     return samstat_qc
 
-def samtools_index(bam, out_dir=''):
+def samtools_index(bam, nth=1, out_dir=''):
     bai = '{}.bai'.format(bam)
-    cmd = 'samtools index {}'.format(bam)
+    cmd = 'samtools index {} -@ {}'.format(bam, nth)
     run_shell_cmd(cmd)
     if os.path.abspath(out_dir)!= \
         os.path.abspath(os.path.dirname(bam)):

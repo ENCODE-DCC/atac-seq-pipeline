@@ -1012,7 +1012,8 @@ task align {
 		fi
 
 		python $(which encode_task_post_align.py) \
-			${fastq_R1} $(ls *.bam)
+			${fastq_R1} $(ls *.bam) \
+			${"--nth " + cpu}
 	}
 	output {
 		File bam = glob("*.bam")[0]

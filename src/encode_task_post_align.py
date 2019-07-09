@@ -15,6 +15,8 @@ def parse_arguments():
                         help='Path for FASTQ R1')
     parser.add_argument('bam', type=str,
                         help='Path for BAM')
+    parser.add_argument('--nth', type=int, default=1,
+                        help='Number of threads to parallelize.')
     parser.add_argument('--out-dir', default='', type=str,
                             help='Output directory.')
     parser.add_argument('--log-level', default='INFO', 
@@ -49,10 +51,10 @@ def main():
                             args.fastq, args.out_dir)
 
     log.info('Running samtools index...')
-    bai = samtools_index(args.bam, args.out_dir)
+    bai = samtools_index(args.bam, args.nth, args.out_dir)
 
     log.info('SAMstat...')
-    flagstat = samstat(bam, args.nth, args.out_dir)
+    flagstat = samstat(args.bam, args.nth, args.out_dir)
 
     log.info('List all files in output directory...')
     ls_l(args.out_dir)
