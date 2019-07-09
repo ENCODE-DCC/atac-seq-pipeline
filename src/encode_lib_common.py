@@ -283,3 +283,6 @@ def infer_pair_label_from_idx(n, idx, prefix='rep'):
             cnt += 1
     raise argparse.ArgumentTypeError(
         'Cannot infer rep_id from n and idx.')
+
+def which(executable):
+    return run_shell_cmd('which {}'.format(executable))

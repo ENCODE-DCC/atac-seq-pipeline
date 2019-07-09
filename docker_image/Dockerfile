@@ -139,6 +139,11 @@ RUN git clone https://github.com/ENCODE-DCC/kentUtils_bin_v377
 ENV PATH=${PATH}:/software/kentUtils_bin_v377/bin
 ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/software/kentUtils_bin_v377/lib
 
+# Install SAMstats (Kundaje lab)
+RUN git clone https://github.com/kundajelab/SAMstats
+RUN cd SAMstats && chmod +x *.py *.sh && cd ../
+RUN ln -s SAMstats/SAMstats.sort.stat.filter.py
+
 # Prevent conflict with locally installed python outside of singularity container
 ENV PYTHONNOUSERSITE=True
 
