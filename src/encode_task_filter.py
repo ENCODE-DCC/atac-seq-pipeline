@@ -51,7 +51,6 @@ def rm_unmapped_lowq_reads_se(bam, multimapping, mapq_thresh, nth, out_dir):
         cmd2 = 'samtools view -h {} | '
         cmd2 += '$(which assign_multimappers.py) -k {} | '
         cmd2 += 'samtools view -F 1804 -Su /dev/stdin | '
-
         cmd2 += 'samtools sort /dev/stdin -o {} -T {} -@ {}'
         cmd2 = cmd2.format(
             qname_sort_bam,
@@ -59,6 +58,7 @@ def rm_unmapped_lowq_reads_se(bam, multimapping, mapq_thresh, nth, out_dir):
             filt_bam,
             prefix,
             nth)
+        run_shell_cmd(cmd2)
         rm_f(qname_sort_bam) # remove temporary files
     else:
         cmd = 'samtools view -F 1804 -q {} -u {} | '
