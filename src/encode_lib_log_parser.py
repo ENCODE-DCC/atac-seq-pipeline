@@ -63,8 +63,11 @@ def parse_flagstat_qc(txt):
 
     with open(txt, 'r') as f:
         for line in f:    
-            if ' in total ' in line:
-                tmp1 = line.split(' in total ')
+            if ' total ' in line:
+                if ' in total ' in line:
+                    tmp1 = line.split(' in total ')
+                else:
+                    tmp1 = line.split(' total ')
                 line1 = tmp1[0]
                 tmp1 = line1.split(' + ')
                 total = tmp1[0]
@@ -83,7 +86,7 @@ def parse_flagstat_qc(txt):
                 mapped_qc_failed = tmp3_1[1]
                 line3_2 = tmp3[1]
                 tmp3_2 = line3_2.split(':')
-                mapped_pct = tmp3_2[0].replace('%','')
+                mapped_pct = tmp3_2[0]  #.replace('%','')
             if ' paired in sequencing' in line:
                 tmp2 = line.split(' paired in sequencing')
                 line2 = tmp2[0]
@@ -110,7 +113,7 @@ def parse_flagstat_qc(txt):
                 paired_properly_qc_failed = tmp3_1[1]
                 line3_2 = tmp3[1]
                 tmp3_2 = line3_2.split(':')
-                paired_properly_pct = tmp3_2[0].replace('%','')
+                paired_properly_pct = tmp3_2[0]  #.replace('%','')
             if ' with itself and mate mapped' in line:
                 tmp3 = line.split(' with itself and mate mapped')
                 line3_1 = tmp3[0]
@@ -125,7 +128,7 @@ def parse_flagstat_qc(txt):
                 singletons_qc_failed = tmp3_1[1]
                 line3_2 = tmp3[1]
                 tmp3_2 = line3_2.split(':')
-                singletons_pct = tmp3_2[0].replace('%','')       
+                singletons_pct = tmp3_2[0]  #.replace('%','')       
             if ' with mate mapped to a different chr' in line:
                 tmp3 = line.split(' with mate mapped to a different chr')
                 line3_1 = tmp3[0]
@@ -145,8 +148,13 @@ def parse_flagstat_qc(txt):
     if mapped_qc_failed:
         result['mapped_qc_failed'] = int(mapped_qc_failed)
     if mapped_pct:
-        if mapped_pct!='N/A' and not 'nan' in mapped_pct:
-            result['mapped_pct'] = float(mapped_pct)
+        if 'nan' not in mapped_pct and 'N/A' not in mapped_pct
+                and 'NA' not in mapped_pct:
+            if '%' in mapped_pct:
+                mapped_pct = mapped_pct.replace('%','')
+                result['mapped_pct'] = float(mapped_pct)
+            else:
+                result['mapped_pct'] = 100.0 * float(mapped_pct)
         else:
             result['mapped_pct'] = 0.0
     if paired:
@@ -166,8 +174,13 @@ def parse_flagstat_qc(txt):
     if paired_properly_qc_failed:
         result['paired_properly_qc_failed'] = int(paired_properly_qc_failed)
     if paired_properly_pct:
-        if paired_properly_pct!='N/A' and not 'nan' in paired_properly_pct:
-            result['paired_properly_pct'] = float(paired_properly_pct)
+        if 'nan' not in paired_properly_pct and 'N/A' not in paired_properly_pct
+                and 'NA' not in paired_properly_pct:
+            if '%' in paired_properly_pct:
+                paired_properly_pct = paired_properly_pct.replace('%','')
+                result['paired_properly_pct'] = float(paired_properly_pct)
+            else:
+                result['paired_properly_pct'] = 100.0 * float(paired_properly_pct)
         else:
             result['paired_properly_pct'] = 0.0
     if with_itself:
@@ -179,8 +192,13 @@ def parse_flagstat_qc(txt):
     if singletons_qc_failed:
         result['singletons_qc_failed'] = int(singletons_qc_failed)
     if singletons_pct:
-        if singletons_pct!='N/A' and not 'nan' in singletons_pct:
-            result['singletons_pct'] = float(singletons_pct)
+        if 'nan' not in singletons_pct and 'N/A' not in singletons_pct
+                and 'NA' not in singletons_pct:
+            if '%' in singletons_pct:
+                singletons_pct = singletons_pct.replace('%','')
+                result['singletons_pct'] = float(singletons_pct)
+            else:
+                result['singletons_pct'] = 100.0 * float(singletons_pct)
         else:
             result['singletons_pct'] = 0.0
     if diff_chroms:
