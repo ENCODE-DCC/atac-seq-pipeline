@@ -64,12 +64,8 @@ source activate ${CONDA_ENV}
   cd ${CONDA_BIN}
   ln -s ../share/cromwell/cromwell.jar
 
-  # install SAMstats
-  # https://github.com/kundajelab/SAMstats
-  cd ${CONDA_BIN}
-  git clone https://github.com/kundajelab/SAMstats
-  cd SAMstats && chmod +x *.py *.sh
-  cd ${CONDA_BIN} && ln -s SAMstats/SAMstats.sort.stat.filter.py
+  # install SAMstats 0.1.0
+  pip install SAMstats==0.1.0
 
   # make a soft link for picard.jar
   if [ -f ${CONDA_PREFIX}/bin/picard ]; then
