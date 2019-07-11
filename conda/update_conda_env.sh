@@ -29,6 +29,6 @@ source activate ${CONDA_ENV}
   chmod u+rx ${SH_SCRIPT_DIR}/../src/*.py
   # copy all python scripts in /src into conda env bin dir
   cp -f ${SH_SCRIPT_DIR}/../src/*.py ${CONDA_BIN}/
-  chmod u+rx ${CONDA_BIN}/*.py
+  chmod u+rx ${CONDA_BIN}/encode_*.py
 
 echo "=== All done."
