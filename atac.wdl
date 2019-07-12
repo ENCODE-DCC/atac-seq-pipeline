@@ -1018,7 +1018,7 @@ task align {
 	output {
 		File bam = glob("*.bam")[0]
 		File bai = glob("*.bai")[0]
-		File samstat_qc = glob("*.samstat.qc")[0]
+		File samstat_qc = glob("*.samstats.qc")[0]
 		File read_len_log = glob("*.read_length.txt")[0] # read_len
 	}
 	runtime {
@@ -1058,7 +1058,7 @@ task filter {
 	output {
 		File nodup_bam = glob("*.bam")[0]
 		File nodup_bai = glob("*.bai")[0]
-		File samstat_qc = glob("*.samstat.qc")[0]
+		File samstat_qc = glob("*.samstats.qc")[0]
 		File dup_qc = glob("*.dup.qc")[0]
 		File pbc_qc = glob("*.pbc.qc")[0]
 		File mito_dup_log = glob("*.mito_dup.txt")[0] # mito_dups, fract_dups_from_mito
