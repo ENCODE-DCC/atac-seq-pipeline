@@ -56,14 +56,15 @@ def bowtie2_se(fastq, ref_index_prefix,
     align_log = '{}.align.log'.format(prefix)
 
     cmd = 'bowtie2 {} --mm --threads {} -x {} -U {} 2> {} '
-    cmd += '| samtools view -Su /dev/stdin | samtools sort /dev/stdin -o {}'
+    cmd += '| samtools view -Su /dev/stdin | samtools sort /dev/stdin -o {} -T {}'
     cmd = cmd.format(
         '-k {}'.format(multimapping+1) if multimapping else '',
         nth,
         ref_index_prefix,
         fastq,
         align_log,
-        bam)
+        bam,
+        prefix)
     run_shell_cmd(cmd)
 
     cmd2 = 'cat {}'.format(align_log)
@@ -80,7 +81,7 @@ def bowtie2_pe(fastq1, fastq2, ref_index_prefix,
 
     cmd = 'bowtie2 {} -X2000 --mm --threads {} -x {} '
     cmd += '-1 {} -2 {} 2>{} | '
-    cmd += 'samtools view -Su /dev/stdin | samtools sort /dev/stdin -o {}'
+    cmd += 'samtools view -Su /dev/stdin | samtools sort /dev/stdin -o {} -T {}'
     cmd = cmd.format(
         '-k {}'.format(multimapping+1) if multimapping else '',
         nth,
@@ -88,7 +89,8 @@ def bowtie2_pe(fastq1, fastq2, ref_index_prefix,
         fastq1,
         fastq2,
         align_log,
-        bam)
+        bam,
+        prefix)
     run_shell_cmd(cmd)
 
     cmd2 = 'cat {}'.format(align_log)

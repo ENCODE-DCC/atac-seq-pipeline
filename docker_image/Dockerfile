@@ -73,9 +73,9 @@ RUN pip install --no-cache-dir --no-dependencies macs2==2.1.1.20160309
 RUN git clone --branch 2.0.4.2 --single-branch https://github.com/kundajelab/idr && \
     cd idr && python3 setup.py install && cd ../ && rm -rf idr*
 
-# Install samtools 1.7
-RUN git clone --branch 1.7 --single-branch https://github.com/samtools/samtools.git && \
-    git clone --branch 1.7 --single-branch https://github.com/samtools/htslib.git && \
+# Install samtools 1.2
+RUN git clone --branch 1.2 --single-branch https://github.com/samtools/samtools.git && \
+    git clone --branch 1.2 --single-branch https://github.com/samtools/htslib.git && \
     cd samtools && make && make install && cd ../ && rm -rf samtools* htslib*
 
 # Install bedtools 2.26.0

@@ -12,7 +12,7 @@ def samstat(bam, nth=1, out_dir=''):
         os.path.basename(strip_ext_bam(bam)))
     samstat_qc = '{}.samstats.qc'.format(prefix)
 
-    cmd = 'samtools sort -n {bam} -T {prefix}.tmp -O SAM | '
+    cmd = 'samtools sort -n {bam} -T {prefix}.tmp -O sam | '
     cmd += 'SAMstats --sorted_sam_file - --outf {samstat_qc}'
     cmd = cmd.format(
         bam=bam,
@@ -23,7 +23,7 @@ def samstat(bam, nth=1, out_dir=''):
 
 def samtools_index(bam, nth=1, out_dir=''):
     bai = '{}.bai'.format(bam)
-    cmd = 'samtools index {} -@ {}'.format(bam, nth)
+    cmd = 'samtools index {}'.format(bam)
     run_shell_cmd(cmd)
     if os.path.abspath(out_dir)!= \
         os.path.abspath(os.path.dirname(bam)):
