@@ -427,6 +427,8 @@ def get_region_size_metrics(peak_file, out_dir='.'):
     '''
     import pandas as pd
     import numpy as np
+    import matplotlib as mpl
+    mpl.use('Agg')
     from matplotlib import pyplot as plt
     from collections import OrderedDict
 
