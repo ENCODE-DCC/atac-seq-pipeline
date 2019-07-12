@@ -148,7 +148,7 @@ def parse_flagstat_qc(txt):
     if mapped_qc_failed:
         result['mapped_qc_failed'] = int(mapped_qc_failed)
     if mapped_pct:
-        if 'nan' not in mapped_pct and 'N/A' not in mapped_pct
+        if 'nan' not in mapped_pct and 'N/A' not in mapped_pct \
                 and 'NA' not in mapped_pct:
             if '%' in mapped_pct:
                 mapped_pct = mapped_pct.replace('%','')
@@ -174,7 +174,7 @@ def parse_flagstat_qc(txt):
     if paired_properly_qc_failed:
         result['paired_properly_qc_failed'] = int(paired_properly_qc_failed)
     if paired_properly_pct:
-        if 'nan' not in paired_properly_pct and 'N/A' not in paired_properly_pct
+        if 'nan' not in paired_properly_pct and 'N/A' not in paired_properly_pct \
                 and 'NA' not in paired_properly_pct:
             if '%' in paired_properly_pct:
                 paired_properly_pct = paired_properly_pct.replace('%','')
@@ -192,7 +192,7 @@ def parse_flagstat_qc(txt):
     if singletons_qc_failed:
         result['singletons_qc_failed'] = int(singletons_qc_failed)
     if singletons_pct:
-        if 'nan' not in singletons_pct and 'N/A' not in singletons_pct
+        if 'nan' not in singletons_pct and 'N/A' not in singletons_pct \
                 and 'NA' not in singletons_pct:
             if '%' in singletons_pct:
                 singletons_pct = singletons_pct.replace('%','')
