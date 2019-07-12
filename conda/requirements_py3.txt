@@ -14,3 +14,4 @@ tabix==0.2.6
 readline==6.2
 pyhocon
 requests
+pandas
