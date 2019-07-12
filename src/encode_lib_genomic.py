@@ -10,7 +10,7 @@ from encode_lib_common import *
 def samstat(bam, nth=1, out_dir=''):
     prefix = os.path.join(out_dir,
         os.path.basename(strip_ext_bam(bam)))
-    samstat_qc = '{}.samstat.qc'.format(prefix)
+    samstat_qc = '{}.samstats.qc'.format(prefix)
 
     cmd = 'samtools sort -n {bam} -T {prefix}.tmp -O SAM | '
     cmd += 'SAMstats --sorted_sam_file - --outf {samstat_qc}'
