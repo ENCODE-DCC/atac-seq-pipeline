@@ -881,6 +881,7 @@ workflow atac {
 		nodup_samstat_qcs = filter.samstat_qc,
 		dup_qcs = filter.dup_qc,
 		pbc_qcs = filter.pbc_qc,
+		frac_mito_qcs = filter.frac_mito_qc,
 		xcor_plots = xcor.plot_png,
 		xcor_scores = xcor.score,
 
@@ -1019,7 +1020,7 @@ task align {
 		File bam = glob("*.bam")[0]
 		File bai = glob("*.bai")[0]
 		File samstat_qc = glob("*.samstats.qc")[0]
-		File read_len_log = glob("*.read_length.txt")[0] # read_len
+		File read_len_log = glob("*.read_length.txt")[0]
 	}
 	runtime {
 		cpu : cpu
@@ -1061,7 +1062,7 @@ task filter {
 		File samstat_qc = glob("*.samstats.qc")[0]
 		File dup_qc = glob("*.dup.qc")[0]
 		File pbc_qc = glob("*.pbc.qc")[0]
-		File mito_dup_log = glob("*.mito_dup.txt")[0] # mito_dups, fract_dups_from_mito
+		File frac_mito_qc = glob("*.frac_mito.qc")[0]
 	}
 	runtime {
 		cpu : cpu
@@ -1585,84 +1586,6 @@ task compare_signal_to_roadmap {
 	}
 }
 
-# annotation-based analysis
-task ataqc {
-	Boolean paired_end
-	File? read_len_log
-	File? samstat_qc
-	File? align_log
-	File? bam
-	File? nodup_samstat_qc
-	File? mito_dup_log
-	File? dup_qc
-	File? pbc_qc
-	File? nodup_bam
-	File? ta
-	File? peak
-	File? idr_peak 
-	File? overlap_peak
-	File? pval_bw
-	# from genome database
-	File? ref_fa
-	File? chrsz
-	File? tss
-	File? blacklist
-	File? dnase
-	File? prom
-	File? enh
-	File? reg2map_bed
-	File? reg2map
-	File? roadmap_meta
-	String mito_chr_name
-
-	Int mem_mb
-	Int mem_java_mb
-	Int time_hr
-	String disks
-
-	command {
-		export _JAVA_OPTIONS="-Xms256M -Xmx${mem_java_mb}M -XX:ParallelGCThreads=1 $_JAVA_OPTIONS"
-
-		python $(which encode_ataqc.py) \
-			${if paired_end then "--paired-end" else ""} \
-			${"--read-len-log " + read_len_log} \
-			${"--samstat-log " + samstat_qc} \
-			${"--bowtie2-log " + align_log} \
-			${"--bam " + bam} \
-			${"--nodup-samstat-log " + nodup_samstat_qc} \
-			${"--mito-dup-log " + mito_dup_log} \
-			${"--dup-log " + dup_qc} \
-			${"--pbc-log " + pbc_qc} \
-			${"--nodup-bam " + nodup_bam} \
-			${"--ta " + ta} \
-			${"--bigwig " + pval_bw} \
-			${"--peak " + peak} \
-			${"--idr-peak " + idr_peak} \
-			${"--overlap-peak " + overlap_peak} \
-			${"--ref-fa " + ref_fa} \
-			${"--blacklist " + blacklist} \
-			${"--chrsz " + chrsz} \
-			${"--dnase " + dnase} \
-			${"--tss " + tss} \
-			${"--prom " + prom} \
-			${"--enh " + enh} \
-			${"--reg2map-bed " + reg2map_bed} \
-			${"--reg2map " + reg2map} \
-			${"--roadmap-meta " + roadmap_meta} \
-			${"--mito-chr-name " + mito_chr_name}
-	}
-	output {
-		File html = glob("*_qc.html")[0]
-		File txt = glob("*_qc.txt")[0]
-	}
-	runtime {
-		cpu : 1
-		memory : "${mem_mb} MB"
-		time : time_hr
-		disks : disks
-	}
-}
-
 # gather all outputs and generate 
 # - qc.html		: organized final HTML report
 # - qc.json		: all QCs
@@ -1684,6 +1607,7 @@ task qc_report {
 	Array[File?] nodup_samstat_qcs
 	Array[File?] dup_qcs
 	Array[File?] pbc_qcs
+	Array[File?] frac_mito_qcs
 	Array[File?] xcor_plots
 	Array[File?] xcor_scores
 	Array[File]? idr_plots
@@ -1745,6 +1669,7 @@ task qc_report {
 			--nodup-samstat-qcs ${sep="_:_" nodup_samstat_qcs} \
 			--dup-qcs ${sep="_:_" dup_qcs} \
 			--pbc-qcs ${sep="_:_" pbc_qcs} \
+			--frac-mito-qcs ${sep="_:_" frac_mito_qcs} \
 			--xcor-plots ${sep="_:_" xcor_plots} \
 			--xcor-scores ${sep="_:_" xcor_scores} \
 			--idr-plots ${sep="_:_" idr_plots} \

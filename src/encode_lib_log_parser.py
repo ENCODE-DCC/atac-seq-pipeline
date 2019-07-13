@@ -8,6 +8,26 @@ Author: Jin Lee (leepc12@gmail.com)
 from collections import OrderedDict
 
 
+MAP_KEY_DESC_FRAC_MITO_QC = {
+    'total_reads': 'Total reads',
+    'mito_reads': 'Mito. reads',
+    'frac_mito': 'Frac. of mito. reads',
+    'total_nodup_reads': 'Total deduped reads',
+    'mito_nodup_reads': 'Mito. deduped reads',
+    'frac_nodup_mito': 'Frac. of deduped mito. reads',
+    'total_dup_reads': 'Total dup reads',
+    'mito_dup_reads': 'Mito. dup reads',
+    'frac_dup_mito': 'Frac. of mito. dup reads',
+}
+
+def parse_frac_mito_qc(txt):
+    result = OrderedDict()
+    with open(txt, 'r') as fp:
+        for line in fp.read().strip('\n').split('\n'):
+            k, v = line.split('\t')
+            result[k] = v
+    return result
+
 MAP_KEY_DESC_FLAGSTAT_QC = {
     'total' : 'Total',
     'total_qc_failed' : 'Total(QC-failed)',

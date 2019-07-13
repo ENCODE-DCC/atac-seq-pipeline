@@ -51,6 +51,8 @@ def parse_arguments():
                         help='List of dup QC files per replicate.')
     parser.add_argument('--pbc-qcs', type=str, nargs='*',
                         help='List of PBC QC files per replicate.')
+    parser.add_argument('--frac-mito-qcs', type=str, nargs='*',
+                        help='List of fraction of mito QC files per replicate.')
     parser.add_argument('--ctl-samstat-qcs', type=str, nargs='*',
                         help='List of samstat QC (raw BAM) files per control.')
     parser.add_argument('--ctl-nodup-samstat-qcs', type=str, nargs='*',
@@ -59,6 +61,8 @@ def parse_arguments():
                         help='List of dup QC files per control.')
     parser.add_argument('--ctl-pbc-qcs', type=str, nargs='*',
                         help='List of PBC QC files per control.')
+    parser.add_argument('--ctl-frac-mito-qcs', type=str, nargs='*',
+                        help='List of fraction of mito QC files per control.')
     parser.add_argument('--xcor-plots', type=str, nargs='*',
                         help='List of cross-correlation QC plot files per replicate.')
     parser.add_argument('--xcor-scores', type=str, nargs='*',
@@ -296,6 +300,24 @@ def make_cat_align(args, cat_root):
             ctl = 'ctl' + str(i + 1)
             if qc:
                 cat_align_dup.add_log(qc, key=ctl)
+
+    cat_align_frac_mito = QCCategory(
+        'frac_mito',
+        html_head='<h2>Fraction of mitochondrial reads</h2>',
+        parser=parse_frac_mito_qc,
+        map_key_desc=MAP_KEY_DESC_FRAC_MITO_QC,
+        parent=cat_align
+    )
+    if args.frac_mito_qcs:
+        for i, qc in enumerate(args.frac_mito_qcs):
+            rep = 'rep' + str(i + 1)
+            if qc:
+                cat_align_frac_mito.add_log(qc, key=rep)
+    if args.ctl_frac_mito_qcs:
+        for i, qc in enumerate(args.ctl_frac_mito_qcs):
+            ctl = 'ctl' + str(i + 1)
+            if qc:
+                cat_align_frac_mito.add_log(qc, key=ctl)
 
     cat_align_preseq = QCCategory(
         'preseq',

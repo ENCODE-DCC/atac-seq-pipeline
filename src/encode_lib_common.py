@@ -205,6 +205,7 @@ def copy_f_to_f(f, dest): # copy 'f' to 'out_dir'/'f'
     return dest
 
 def copy_f_to_dir(f, out_dir): # copy 'f' to 'out_dir'/'f'
+    out_dir = os.path.abspath(out_dir)
     if not os.path.isdir(out_dir):
         raise Exception('Invalid destination directory {}.'.format(out_dir))
     dest = os.path.join(out_dir, os.path.basename(f))
