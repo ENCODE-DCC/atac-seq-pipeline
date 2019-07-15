@@ -84,10 +84,10 @@ workflow test_bowtie2 {
 			'se_bowtie2_no_multimapping',
 		],
 		files = [
-			pe_bowtie2.flagstat_qc,
-			pe_bowtie2_no_multimapping.flagstat_qc,
-			se_bowtie2.flagstat_qc,
-			se_bowtie2_no_multimapping.flagstat_qc,
+			pe_bowtie2.samstat_qc,
+			pe_bowtie2_no_multimapping.samstat_qc,
+			se_bowtie2.samstat_qc,
+			se_bowtie2_no_multimapping.samstat_qc,
 		],
 		ref_files = [
 			ref_pe_flagstat,
