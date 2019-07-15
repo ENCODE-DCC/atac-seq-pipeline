@@ -839,7 +839,7 @@ def make_cat_etc(args, cat_root):
         for i, plot in enumerate(args.roadmap_compare_plots):
             rep = 'rep' + str(i + 1)
             if plot:
-                cat_roadmap.add_plot(plot, key=rep, size_pct=500)
+                cat_roadmap.add_plot(plot, key=rep, size_pct=50)
 
     return cat_etc
 
