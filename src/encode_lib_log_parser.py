@@ -25,7 +25,10 @@ def parse_frac_mito_qc(txt):
     with open(txt, 'r') as fp:
         for line in fp.read().strip('\n').split('\n'):
             k, v = line.split('\t')
-            result[k] = v
+            if k.startswith('frac_'):
+                result[k] = float(v)
+            else:
+                result[k] = int(v)
     return result
 
 MAP_KEY_DESC_FLAGSTAT_QC = {
