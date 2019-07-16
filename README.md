@@ -41,6 +41,8 @@ You can also run our pipeline on DNAnexus without using Caper or Cromwell. There
 
 ## Conda
 
+> **WARNING**: DO NOT INSTALL CONDA 4.7 UNTIL WE FIX CONDA ENV INSTALLATION ISSUES. [4.6.14](https://repo.anaconda.com/miniconda/Miniconda3-4.6.14-Linux-x86_64.sh) IS RECOMMENDED.
+
 We no longer recommend Conda for resolving dependencies and plan to phase out Conda support. Instead we recommend using Docker or Singularity. You can install Singularity and use it for our pipeline with Caper (by adding `--use-singularity` to command line arguments). Please see [this instruction](docs/install_conda.md).
 
 ## Tutorial
