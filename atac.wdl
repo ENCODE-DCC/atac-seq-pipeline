@@ -1622,7 +1622,7 @@ task qc_report {
 	Array[File]? frip_idr_qcs
 	Array[File?] frip_idr_qcs_pr
 	File? frip_idr_qc_ppr 
-	Array[File?] frip_overlap_qcs
+	Array[File]? frip_overlap_qcs
 	Array[File?] frip_overlap_qcs_pr
 	File? frip_overlap_qc_ppr
 	File? idr_reproducibility_qc
