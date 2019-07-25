@@ -244,55 +244,6 @@ def pbc_qc_pe(bam, mito_chr_name, nth, out_dir):
     rm_f(nmsrt_bam)
     return pbc_qc
 
-def make_frac_mito_qc(bam, dupmark_bam, nodup_bam,
-                      mito_chr_name='chrM', out_dir=''):
-    """bam and nodup_bam must be sorted
-    """
-    import pysam
-
-    prefix = os.path.join(out_dir,
-        os.path.basename(strip_ext_bam(bam)))
-    frac_mito_qc = '{}.frac_mito.qc'.format(prefix)
-
-    def calc_frac_mito(srt_bam):
-        chrom_list = pysam.idxstats(srt_bam, split_lines=True)
-        total_reads = 0
-        mito_reads = 0
-        for chrom in chrom_list:
-            chrom_stats = chrom.split('\t')
-            if chrom_stats[0] == mito_chr_name:
-                mito_reads = int(chrom_stats[2])
-            total_reads += int(chrom_stats[2])
-        if total_reads==0:
-            frac_mito = 0
-        else:
-            frac_mito = float(mito_reads) / total_reads
-        return total_reads, mito_reads, frac_mito
-
-    total_reads, mito_reads, frac_mito = calc_frac_mito(bam)
-    total_nodup_reads, mito_nodup_reads, frac_nodup_mito = calc_frac_mito(nodup_bam)
-
-    # Get the mitochondrial reads that are marked duplicates
-    total_dup_reads = int(run_shell_cmd('samtools view -f 1024 -c {}'.format(dupmark_bam)))
-    mito_dup_reads = int(run_shell_cmd('samtools view -f 1024 -c {} chrM'.format(dupmark_bam)))
-    if total_dup_reads == 0:
-        frac_dup_mito = 0
-    else:
-        frac_dup_mito = float(mito_dup_reads) / total_dup_reads
-
-    with open(frac_mito_qc, 'w') as fp:
-        fp.write('total_reads\t{}'.format(total_reads) + '\n')
-        fp.write('mito_reads\t{}'.format(mito_reads) + '\n')
-        fp.write('frac_mito\t{}'.format(frac_mito) + '\n')
-        fp.write('total_nodup_reads\t{}'.format(total_nodup_reads) + '\n')
-        fp.write('mito_nodup_reads\t{}'.format(mito_nodup_reads) + '\n')
-        fp.write('frac_nodup_mito\t{}'.format(frac_nodup_mito) + '\n')
-        fp.write('total_dup_reads\t{}'.format(total_dup_reads) + '\n')
-        fp.write('mito_dup_reads\t{}'.format(mito_dup_reads) + '\n')
-        fp.write('frac_dup_mito\t{}'.format(frac_dup_mito) + '\n')
-
-    return frac_mito_qc
-
 def main():
     # filt_bam - dupmark_bam - nodup_bam
     #          \ dup_qc      \ pbc_qc
@@ -355,15 +306,10 @@ def main():
     else:
         pbc_qc = pbc_qc_se(dupmark_bam, args.mito_chr_name, args.out_dir)
 
-    log.info('Making frac_mito log...')
-
     log.info('samtools index (raw bam)...')
     bam = copy_f_to_dir(args.bam, args.out_dir)
     bai = samtools_index(bam, args.nth, args.out_dir)
     temp_files.extend([bam, bai])
-
-    frac_mito_qc = make_frac_mito_qc(bam, dupmark_bam, nodup_bam,
-                                     args.mito_chr_name, args.out_dir)
 
     log.info('Removing temporary files...')
     rm_f(temp_files)

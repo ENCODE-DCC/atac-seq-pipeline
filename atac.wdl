@@ -881,7 +881,6 @@ workflow atac {
 		nodup_samstat_qcs = filter.samstat_qc,
 		dup_qcs = filter.dup_qc,
 		pbc_qcs = filter.pbc_qc,
-		frac_mito_qcs = filter.frac_mito_qc,
 		xcor_plots = xcor.plot_png,
 		xcor_scores = xcor.score,
 
@@ -1062,7 +1061,6 @@ task filter {
 		File samstat_qc = glob("*.samstats.qc")[0]
 		File dup_qc = glob("*.dup.qc")[0]
 		File pbc_qc = glob("*.pbc.qc")[0]
-		File frac_mito_qc = glob("*.frac_mito.qc")[0]
 	}
 	runtime {
 		cpu : cpu
@@ -1607,7 +1605,6 @@ task qc_report {
 	Array[File?] nodup_samstat_qcs
 	Array[File?] dup_qcs
 	Array[File?] pbc_qcs
-	Array[File?] frac_mito_qcs
 	Array[File?] xcor_plots
 	Array[File?] xcor_scores
 	Array[File]? idr_plots
@@ -1669,7 +1666,6 @@ task qc_report {
 			--nodup-samstat-qcs ${sep="_:_" nodup_samstat_qcs} \
 			--dup-qcs ${sep="_:_" dup_qcs} \
 			--pbc-qcs ${sep="_:_" pbc_qcs} \
-			--frac-mito-qcs ${sep="_:_" frac_mito_qcs} \
 			--xcor-plots ${sep="_:_" xcor_plots} \
 			--xcor-scores ${sep="_:_" xcor_scores} \
 			--idr-plots ${sep="_:_" idr_plots} \
