@@ -236,6 +236,7 @@ def make_cat_root(args):
         ('title', args.title),
         ('description', args.desc),
         ('pipeline_ver', args.pipeline_ver),
+        ('pipeline_type', args.pipeline_type),
         ('genome', args.genome),
         ('paired_end', args.paired_ends),
         ('aligner', args.aligner),
