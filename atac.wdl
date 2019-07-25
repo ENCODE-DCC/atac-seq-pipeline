@@ -57,7 +57,7 @@ workflow atac {
 	Boolean enable_xcor = false 	# enable cross-corr analysis
 	Boolean enable_count_signal_track = false # generate count signal track
 	Boolean enable_idr = true 		# enable IDR analysis on raw peaks
-	Boolean disable_preseq = false
+	Boolean disable_preseq = true
 	Boolean disable_gc_bias = false
 
 	# parameters for trim_adapter
