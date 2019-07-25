@@ -57,8 +57,9 @@ workflow atac {
 	Boolean enable_xcor = false 	# enable cross-corr analysis
 	Boolean enable_count_signal_track = false # generate count signal track
 	Boolean enable_idr = true 		# enable IDR analysis on raw peaks
-	Boolean disable_preseq = true
-	Boolean disable_gc_bias = false
+	Boolean enable_preseq = false
+	Boolean enable_compare_to_roadmap = false
+	Boolean enable_gc_bias = true
 
 	# parameters for trim_adapter
 	Boolean auto_detect_adapter = false # automatically detect/trim adapters
@@ -555,14 +556,14 @@ workflow atac {
 				nodup_bam = nodup_bam_,
 			}
 		}
-		if ( !disable_preseq && defined(bam_) ) {
+		if ( enable_preseq && defined(bam_) ) {
 			call preseq { input :
 				bam = bam_,
 				paired_end = paired_end_,
 				mem_mb = preseq_mem_mb,
 			}
 		}
-		if ( !disable_gc_bias && defined(nodup_bam_) && defined(ref_fa_) && defined(align.read_len_log) ) {
+		if ( enable_gc_bias && defined(nodup_bam_) && defined(ref_fa_) && defined(align.read_len_log) ) {
 			call gc_bias { input :
 				read_len_log = align.read_len_log,
 				nodup_bam = nodup_bam_,

@@ -73,10 +73,12 @@
     "atac.enable_count_signal_track" : false,
     "atac.keep_irregular_chr_in_bfilt_peak" : false,        
 
-    "atac.disable_ataqc" : false,
-
     "atac.mito_chr_name" : "chrM",
     "atac.regex_filter_reads" : "chrM",
+
+    "atac.enable_preseq" : false,
+    "atac.enable_compare_to_roadmap" : false,
+    "atac.enable_gc_bias" : true,
 
     "atac.trim_adapter_cpu" : 2,
     "atac.trim_adapter_mem_mb" : 12000,
@@ -109,8 +111,9 @@
     "atac.call_peak_time_hr" : 24,
     "atac.call_peak_disks" : "local-disk 200 HDD",
 
-    "atac.ataqc_mem_mb" : 16000,
-    "atac.ataqc_mem_java_mb" : 15000,
-    "atac.ataqc_time_hr" : 24,
-    "atac.ataqc_disks" : "local-disk 200 HDD"
+    "atac.macs2_signal_track_mem_mb" : 16000,
+    "atac.macs2_signal_track_time_hr" : 24,
+    "atac.macs2_signal_track_disks" : "local-disk 200 HDD",
+
+    "atac.preseq_mem_mb" : 16000
 }

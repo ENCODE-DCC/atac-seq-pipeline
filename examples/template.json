@@ -37,9 +37,5 @@
         "rep2.tagAlign.gz"
     ],
 
-    "atac.multimapping" : 4,
-    "atac.enable_xcor" : false,
-    "atac.enable_idr" : true,
-    "atac.idr_thresh" : 0.05,
-    "atac.disable_ataqc" : false
+    "atac.multimapping" : 4
 }

@@ -164,8 +164,9 @@ Parameter|Default|Description
 `atac.enable_xcor` | false | Enable cross-correlation analysis
 `atac.enable_count_signal_track` | false | Enable count signal track generation
 `atac.keep_irregular_chr_in_bfilt_peak` | false | Keep irregular chromosome names. Use this for custom genomes without canonical chromosome names (chr1, chrX, ...)
-`atac.disable_preseq` | true | Disable preseq, which performs a yield prediction for reads
-`atac.disable_gc_bias` | false | Disable GC bias computation
+`atac.enable_preseq` | false | Disable preseq, which performs a yield prediction for reads
+`atac.enable_gc_bias` | true | Disable GC bias computation
+`atac.enable_compare_to_roadmap` | false | Enable comparing signals to epigenome roadmap
 
 ## Other optional parameters
 
