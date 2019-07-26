@@ -6,6 +6,7 @@ import sys
 import os
 import re
 import argparse
+from encode_lib_common import mkdir_p
 from encode_lib_genomic import *
 
 def parse_arguments():
@@ -15,6 +16,8 @@ def parse_arguments():
                         help='Path for FASTQ R1')
     parser.add_argument('bam', type=str,
                         help='Path for BAM')
+    parser.add_argument('--mito-chr-name', default='chrM',
+                        help='Mito chromosome name.')
     parser.add_argument('--nth', type=int, default=1,
                         help='Number of threads to parallelize.')
     parser.add_argument('--out-dir', default='', type=str,
@@ -53,8 +56,16 @@ def main():
     log.info('Running samtools index...')
     bai = samtools_index(args.bam, args.nth, args.out_dir)
 
-    log.info('SAMstat...')
+    log.info('SAMstat on raw BAM...')
     flagstat = samstat(args.bam, args.nth, args.out_dir)
+
+    log.info('SAMstat on non-mito BAM...')
+    non_mito_out_dir = os.path.join(args.out_dir, 'non_mito')
+    mkdir_p(non_mito_out_dir)
+    non_mito_bam = remove_mito_reads(args.bam, args.mito_chr_name,
+                                     args.nth, non_mito_out_dir)
+    non_mito_flagstat = samstat(non_mito_bam, args.nth,
+                                non_mito_out_dir)
 
     log.info('List all files in output directory...')
     ls_l(args.out_dir)

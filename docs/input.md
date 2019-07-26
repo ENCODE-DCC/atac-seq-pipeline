@@ -136,7 +136,7 @@ Parameter|Type | Default|Description
 
 Parameter|Default|Description
 ---------|-------|-----------
-`atac.mapq_thresh` | 30 | Threshold for mapped reads quality (samtools view -q)
+`atac.mapq_thresh` | 30 for bwa, 255 for bowtie2 | Threshold for mapped reads quality (samtools view -q)
 `atac.dup_marker` | `picard` | Choose a dup marker between `picard` and `sambamba`. `picard` is recommended, use `sambamba` only when picard fails.
 `atac.no_dup_removal` | false | Skip dup removal in a BAM filtering stage.
 

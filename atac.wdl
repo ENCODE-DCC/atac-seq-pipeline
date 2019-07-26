@@ -27,11 +27,15 @@ workflow atac {
 	# individual genome parameters
 	File? ref_fa					# reference fasta (*.fa.gz)
 	File? bwa_idx_tar 				# bwa index tar (uncompressed .tar)
+	File? bwa_mito_idx_tar 			# bwa mito-only index tar (uncompressed .tar)
 	File? bowtie2_idx_tar 			# bowtie2 index tar (uncompressed .tar)
+	File? bowtie2_mito_idx_tar 		# bowtie2 mito-only index tar (uncompressed .tar)
 	File? custom_aligner_idx_tar 	# custom aligner's index tar (uncompressed .tar)
+	File? custom_aligner_mito_idx_tar 	# custom aligner's mito-only index tar (uncompressed .tar)
 	File? chrsz 					# 2-col chromosome sizes file
 	File? blacklist 				# blacklist BED (peaks overlapping will be filtered out)
 	File? blacklist2 				# 2nd blacklist (will be merged with 1st one)
+	String? mito_chr_name
 	String? gensz 					# genome sizes (hs for human, mm for mouse or sum of 2nd col in chrsz)
 	File? tss 						# TSS BED file
 	File? dnase 					# open chromatin region BED file
@@ -69,9 +73,9 @@ workflow atac {
 	Int multimapping = 4			# for samples with multimapping reads
 	String dup_marker = 'picard'	# picard, sambamba
 	Boolean no_dup_removal = false 	# keep all dups in final BAM
-	Int mapq_thresh = 30			# threshold for low MAPQ reads removal
-	String mito_chr_name = 'chrM' 	# name of mito chromosome
-									# THIS IS NOT A REG-EX! you can define only one name for mito chrom
+	Int? mapq_thresh				# threshold for low MAPQ reads removal
+	Int mapq_thresh_bwa = 30
+	Int mapq_thresh_bowtie2 = 255
 	String regex_filter_reads = 'chrM' 	# Perl-style regular expression pattern for chr name to filter out reads
 									# those reads will be excluded from peak calling
 									# mito reads will be removed before peak-calling by default
@@ -88,7 +92,7 @@ workflow atac {
 									# 	in bfilt_peak (blacklist filtered peak) file
 									# 	(e.g. chr1_AABBCC, AABR07024382.1, ...)
 									# 	reg-ex pattern for "regular" chr name is chr[\dXY]+\b
-	# resources 	
+	# resources
 	#	these variables will be automatically ignored if they are not supported by platform
 	# 	"disks" is for cloud platforms (Google Cloud Platform, DNAnexus) only
 	Int trim_adapter_cpu = 2
@@ -210,10 +214,16 @@ workflow atac {
 		else read_genome_tsv.ref_fa
 	File? bwa_idx_tar_ = if defined(bwa_idx_tar) then bwa_idx_tar
 		else read_genome_tsv.bwa_idx_tar
+	File? bwa_mito_idx_tar_ = if defined(bwa_mito_idx_tar) then bwa_mito_idx_tar
+		else read_genome_tsv.bwa_mito_idx_tar
 	File? bowtie2_idx_tar_ = if defined(bowtie2_idx_tar) then bowtie2_idx_tar
 		else read_genome_tsv.bowtie2_idx_tar
+	File? bowtie2_mito_idx_tar_ = if defined(bowtie2_mito_idx_tar) then bowtie2_mito_idx_tar
+		else read_genome_tsv.bowtie2_mito_idx_tar
 	File? custom_aligner_idx_tar_ = if defined(custom_aligner_idx_tar) then custom_aligner_idx_tar
 		else read_genome_tsv.custom_aligner_idx_tar
+	File? custom_aligner_mito_idx_tar_ = if defined(custom_aligner_mito_idx_tar) then custom_aligner_mito_idx_tar
+		else read_genome_tsv.custom_aligner_mito_idx_tar
 	File? chrsz_ = if defined(chrsz) then chrsz
 		else read_genome_tsv.chrsz
 	String? gensz_ = if defined(gensz) then gensz
@@ -232,6 +242,8 @@ workflow atac {
 	File? blacklist_ = if length(blacklists) > 1 then pool_blacklist.ta_pooled
 		else if length(blacklists) > 0 then blacklists[0]
 		else blacklist2_
+	String? mito_chr_name_ = if defined(mito_chr_name) then mito_chr_name
+		else read_genome_tsv.mito_chr_name
 
 	# read additional annotation data
 	File? tss_ = if defined(tss) then tss
@@ -257,6 +269,8 @@ workflow atac {
 						else if peak_caller_=='macs2' then 'p.value'
 						else 'p.value'
 	Int cap_num_peak_ = cap_num_peak
+	Int mapq_thresh_ = if aligner=='bowtie2' then select_first([mapq_thresh, mapq_thresh_bowtie2])
+						else select_first([mapq_thresh, mapq_thresh_bwa])
 
 	# temporary 2-dim fastqs array [rep_id][merge_id]
 	Array[Array[File]] fastqs_R1 = 
@@ -356,6 +370,7 @@ workflow atac {
 		if ( has_input_of_align && !has_output_of_align ) {
 			call align { input :
 				aligner = aligner_,
+				mito_chr_name = mito_chr_name_,
 				custom_align_py = custom_align_py,
 				fastq_R1 = trim_merged_fastq_R1_,
 				fastq_R2 = trim_merged_fastq_R2_,
@@ -373,6 +388,38 @@ workflow atac {
 		}
 		File? bam_ = if has_output_of_align then bams[i] else align.bam
 
+		# mito only mapping to get frac mito qc
+		Boolean has_input_of_align_mito = has_input_of_align &&
+			(aligner=='bowtie2' && defined(bowtie2_mito_idx_tar_) ||
+			 aligner=='bwa' && defined(bwa_mito_idx_tar_) ||
+			 defined(custom_aligner_mito_idx_tar_))
+		if ( has_input_of_align_mito ) {
+			call align as align_mito { input :
+				aligner = aligner_,
+				mito_chr_name = mito_chr_name_,
+				custom_align_py = custom_align_py,
+				fastq_R1 = trim_merged_fastq_R1_,
+				fastq_R2 = trim_merged_fastq_R2_,
+				paired_end = paired_end_,
+				multimapping = multimapping,
+				idx_tar = if aligner=='bwa' then bwa_mito_idx_tar_
+					else if aligner=='bowtie2' then bowtie2_mito_idx_tar_
+					else custom_aligner_mito_idx_tar_,
+				# resource
+				cpu = align_cpu,
+				mem_mb = align_mem_mb,
+				time_hr = align_time_hr,
+				disks = align_disks,
+			}
+		}
+
+		if ( defined(align.non_mito_samstat_qc) && defined(align_mito.samstat_qc) ) {
+			call frac_mito { input:
+				non_mito_samstat = align.non_mito_samstat_qc,
+				mito_samstat = align_mito.samstat_qc
+			}
+		}		
+
 		Boolean has_input_of_filter = has_output_of_align || defined(align.bam)
 		Boolean has_output_of_filter = i<length(nodup_bams) && defined(nodup_bams[i])
 		# skip if we already have output of this step
@@ -381,10 +428,10 @@ workflow atac {
 				bam = bam_,
 				paired_end = paired_end_,
 				dup_marker = dup_marker,
-				mapq_thresh = mapq_thresh,
+				mapq_thresh = mapq_thresh_,
 				no_dup_removal = no_dup_removal,
 				multimapping = multimapping,
-				mito_chr_name = mito_chr_name,
+				mito_chr_name = mito_chr_name_,
 
 				cpu = filter_cpu,
 				mem_mb = filter_mem_mb,
@@ -403,7 +450,7 @@ workflow atac {
 				regex_grep_v_ta = regex_filter_reads,
 				subsample = subsample_reads,
 				paired_end = paired_end_,
-				mito_chr_name = mito_chr_name,
+				mito_chr_name = mito_chr_name_,
 
 				cpu = bam2ta_cpu,
 				mem_mb = bam2ta_mem_mb,
@@ -420,7 +467,7 @@ workflow atac {
 				ta = ta_,
 				subsample = xcor_subsample_reads,
 				paired_end = paired_end_,
-				mito_chr_name = mito_chr_name,
+				mito_chr_name = mito_chr_name_,
 
 				cpu = xcor_cpu,
 				mem_mb = xcor_mem_mb,
@@ -880,6 +927,8 @@ workflow atac {
 		
 		samstat_qcs = align.samstat_qc,
 		nodup_samstat_qcs = filter.samstat_qc,
+
+		frac_mito_qcs = frac_mito.frac_mito_qc,
 		dup_qcs = filter.dup_qc,
 		pbc_qcs = filter.pbc_qc,
 		xcor_plots = xcor.plot_png,
@@ -983,6 +1032,7 @@ task trim_adapter {
 
 task align {
 	String aligner
+	String mito_chr_name
 	File? custom_align_py
 	File idx_tar		# reference index tar
 	File? fastq_R1 		# [read_end_id]
@@ -1014,12 +1064,14 @@ task align {
 
 		python $(which encode_task_post_align.py) \
 			${fastq_R1} $(ls *.bam) \
+			${"--mito-chr-name " + mito_chr_name} \
 			${"--nth " + cpu}
 	}
 	output {
 		File bam = glob("*.bam")[0]
 		File bai = glob("*.bai")[0]
 		File samstat_qc = glob("*.samstats.qc")[0]
+		File non_mito_samstat_qc = glob("non_mito/*.samstats.qc")[0]
 		File read_len_log = glob("*.read_length.txt")[0]
 	}
 	runtime {
@@ -1028,6 +1080,25 @@ task align {
 		time : time_hr
 		disks : disks
 		preemptible: 0
+	}
+}
+
+task frac_mito {
+	File non_mito_samstat
+	File mito_samstat
+
+	command {
+		python $(which encode_task_frac_mito.py) \
+			${non_mito_samstat} ${mito_samstat}
+	}
+	output {
+		File frac_mito_qc = glob("*.frac_mito.qc")[0]
+	}
+	runtime {
+		cpu : 1
+		memory : "8000 MB"
+		time : 1
+		disks : "local-disk 100 HDD"
 	}
 }
 
@@ -1602,6 +1673,7 @@ task qc_report {
 	Int cap_num_peak
 	Float idr_thresh
 	# QCs
+	Array[File?] frac_mito_qcs
 	Array[File?] samstat_qcs
 	Array[File?] nodup_samstat_qcs
 	Array[File?] dup_qcs
@@ -1663,6 +1735,7 @@ task qc_report {
 			--peak-caller ${peak_caller} \
 			${"--cap-num-peak " + cap_num_peak} \
 			--idr-thresh ${idr_thresh} \
+			--frac-mito-qcs ${sep="_:_" frac_mito_qcs} \
 			--samstat-qcs ${sep="_:_" samstat_qcs} \
 			--nodup-samstat-qcs ${sep="_:_" nodup_samstat_qcs} \
 			--dup-qcs ${sep="_:_" dup_qcs} \
@@ -1729,8 +1802,10 @@ task read_genome_tsv {
 		# create empty files for all entries
 		touch ref_fa bowtie2_idx_tar bwa_idx_tar chrsz gensz blacklist blacklist2
 		touch custom_aligner_idx_tar
+		touch bowtie2_mito_idx_tar bwa_mito_idx_tar custom_aligner_mito_idx_tar
 		touch tss tss_enrich # for backward compatibility
 		touch dnase prom enh reg2map reg2map_bed roadmap_meta
+		touch mito_chr_name
 
 		python <<CODE
 		import os
@@ -1746,13 +1821,17 @@ task read_genome_tsv {
 	output {
 		String? ref_fa = if size('ref_fa')==0 then null_s else read_string('ref_fa')
 		String? bwa_idx_tar = if size('bwa_idx_tar')==0 then null_s else read_string('bwa_idx_tar')
+		String? bwa_mito_idx_tar = if size('bwa_mito_idx_tar')==0 then null_s else read_string('bwa_mito_idx_tar')
 		String? bowtie2_idx_tar = if size('bowtie2_idx_tar')==0 then null_s else read_string('bowtie2_idx_tar')
+		String? bowtie2_mito_idx_tar = if size('bowtie2_mito_idx_tar')==0 then null_s else read_string('bowtie2_mito_idx_tar')
 		String? custom_aligner_idx_tar = if size('custom_aligner_idx_tar')==0 then null_s else read_string('custom_aligner_idx_tar')
+		String? custom_aligner_mito_idx_tar = if size('custom_aligner_mito_idx_tar')==0 then null_s else read_string('custom_aligner_mito_idx_tar')
 		String? chrsz = if size('chrsz')==0 then null_s else read_string('chrsz')
 		String? gensz = if size('gensz')==0 then null_s else read_string('gensz')
 		String? blacklist = if size('blacklist')==0 then null_s else read_string('blacklist')
 		String? blacklist2 = if size('blacklist2')==0 then null_s else read_string('blacklist2')
-		# annotation data
+		String? mito_chr_name = if size('mito_chr_name')==0 then null_s else read_string('mito_chr_name')
+		# optional data
 		String? tss = if size('tss')!=0 then read_string('tss')
 			else if size('tss_enrich')!=0 then read_string('tss_enrich') else null_s
 		String? dnase = if size('dnase')==0 then null_s else read_string('dnase')

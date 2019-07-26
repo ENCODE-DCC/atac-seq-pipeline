@@ -7,6 +7,23 @@ import os
 from encode_lib_common import *
 
 
+def remove_mito_reads(bam, mito_chr_name, nth=1, out_dir=''):
+    prefix = os.path.join(out_dir,
+        os.path.basename(strip_ext_bam(bam)))
+    samtools_index(bam, nth)
+    non_mito_bam = '{}.non_mito.bam'.format(prefix)
+
+    cmd = 'samtools idxstats {bam} | cut -f 1 | '
+    cmd += 'grep -v -P "^{mito_chr_name}$" | xargs '
+    cmd += 'samtools view {bam} -@ {nth} -b > {non_mito_bam}'
+    cmd = cmd.format(
+        bam=bam,
+        mito_chr_name=mito_chr_name,
+        nth=nth,
+        non_mito_bam=non_mito_bam)
+    run_shell_cmd(cmd)
+    return non_mito_bam
+
 def samstat(bam, nth=1, out_dir=''):
     prefix = os.path.join(out_dir,
         os.path.basename(strip_ext_bam(bam)))
