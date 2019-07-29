@@ -26,7 +26,7 @@
     $ tar xvf test_genome_database_hg38_atac.tar
     ```
 
-5. Set your partition/account in `workflow_opts/slurm.json`. If your SLURM cluster does not require either user's partition or account information, then remove them from this file. Otherwise, `YOUR_SLURM_PARTITON` or `YOUR_SLURM_ACCOUNT` will be used internally for `srun ... --partition YOUR_SLURM_PARTITON` or `srun ... --account YOUR_SLURM_PARTITON`, respectively.
+5. Set your partition/account in `dev/workflow_opts/slurm.json`. If your SLURM cluster does not require either user's partition or account information, then remove them from this file. Otherwise, `YOUR_SLURM_PARTITON` or `YOUR_SLURM_ACCOUNT` will be used internally for `srun ... --partition YOUR_SLURM_PARTITON` or `srun ... --account YOUR_SLURM_PARTITON`, respectively.
     ```javascript
     {
       "default_runtime_attributes" : {
@@ -51,8 +51,8 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
 8. Run a pipeline for the test sample.
     ```bash
     $ source activate encode-atac-seq-pipeline # IMPORTANT!
-    $ INPUT=examples/local/ENCSR356KRQ_subsampled.json
-    $ java -jar -Xmx1G -Dconfig.file=backends/backend.conf -Dbackend.default=slurm cromwell-38.jar run atac.wdl -i ${INPUT} -o workflow_opts/slurm.json
+    $ INPUT=dev/examples/local/ENCSR356KRQ_subsampled.json
+    $ java -jar -Xmx1G -Dconfig.file=dev/backends/backend.conf -Dbackend.default=slurm cromwell-38.jar run atac.wdl -i ${INPUT} -o dev/workflow_opts/slurm.json
     ```
 
 9. It will take about an hour. You will be able to find all outputs on `cromwell-executions/atac/[RANDOM_HASH_STRING]/`. See [output directory structure](output.md) for details.
@@ -73,15 +73,15 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
 
 8. Run a pipeline for the test sample.
     ```bash
-    $ INPUT=examples/local/ENCSR356KRQ_subsampled.json
-    $ java -jar -Xmx1G -Dconfig.file=backends/backend.conf -Dbackend.default=slurm_singularity cromwell-38.jar run atac.wdl -i ${INPUT} -o workflow_opts/slurm.json
+    $ INPUT=dev/examples/local/ENCSR356KRQ_subsampled.json
+    $ java -jar -Xmx1G -Dconfig.file=dev/backends/backend.conf -Dbackend.default=slurm_singularity cromwell-38.jar run atac.wdl -i ${INPUT} -o dev/workflow_opts/slurm.json
     ```
 
 9. It will take about an hour. You will be able to find all outputs on `cromwell-executions/atac/[RANDOM_HASH_STRING]/`. See [output directory structure](output.md) for details.
 
 10. See full specification for [input JSON file](input.md).
 
-11. IF YOU WANT TO RUN PIPELINES WITH YOUR OWN INPUT DATA/GENOME DATABASE, PLEASE ADD THEIR DIRECTORIES TO `workflow_opts/slurm.json`. For example, you have input FASTQs on `/your/input/fastqs/` and genome database installed on `/your/genome/database/` then add `/your/` to `singularity_bindpath`. You can also define multiple directories there. It's comma-separated.
+11. IF YOU WANT TO RUN PIPELINES WITH YOUR OWN INPUT DATA/GENOME DATABASE, PLEASE ADD THEIR DIRECTORIES TO `dev/workflow_opts/slurm.json`. For example, you have input FASTQs on `/your/input/fastqs/` and genome database installed on `/your/genome/database/` then add `/your/` to `singularity_bindpath`. You can also define multiple directories there. It's comma-separated.
     ```javascript
     {
         "default_runtime_attributes" : {
@@ -104,14 +104,14 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
     For Conda users,
     ```bash
     $ source activate encode-atac-seq-pipeline
-    $ _JAVA_OPTIONS="-Xmx5G" java -jar -Dconfig.file=backends/backend.conf -Dbackend.default=slurm cromwell-38.jar server
+    $ _JAVA_OPTIONS="-Xmx5G" java -jar -Dconfig.file=dev/backends/backend.conf -Dbackend.default=slurm cromwell-38.jar server
     ```
     For singularity users,
     ```bash
-    $ _JAVA_OPTIONS="-Xmx5G" java -jar -Dconfig.file=backends/backend.conf -Dbackend.default=slurm_singularity cromwell-38.jar server
+    $ _JAVA_OPTIONS="-Xmx5G" java -jar -Dconfig.file=dev/backends/backend.conf -Dbackend.default=slurm_singularity cromwell-38.jar server
     ```
 
-2. You can modify `backend.providers.slurm.concurrent-job-limit` or `backend.providers.slurm_singularity.concurrent-job-limit` in `backends/backend.conf` to increase maximum concurrent jobs. This limit is **not per sample**. It's for all sub-tasks of all submitted samples.
+2. You can modify `backend.providers.slurm.concurrent-job-limit` or `backend.providers.slurm_singularity.concurrent-job-limit` in `dev/backends/backend.conf` to increase maximum concurrent jobs. This limit is **not per sample**. It's for all sub-tasks of all submitted samples.
 
 3. On a login node, submit jobs to the cromwell server. You will get `[WORKFLOW_ID]` as a return value. Keep these workflow IDs for monitoring pipelines and finding outputs for a specific sample later.  
     ```bash  
@@ -119,7 +119,7 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
     $ curl -X POST --header "Accept: application/json" -v "[CROMWELL_SVR_IP]:8000/api/workflows/v1" \
       -F workflowSource=@atac.wdl \
       -F workflowInputs=@${INPUT} \
-      -F workflowOptions=@workflow_opts/slurm.json
+      -F workflowOptions=@dev/workflow_opts/slurm.json
     ```
 
   To monitor pipelines, see [cromwell server REST API description](http://cromwell.readthedocs.io/en/develop/api/RESTAPI/#cromwell-server-rest-api>) for more details. `squeue` will not give you enough information for monitoring jobs per sample.
