@@ -22,6 +22,10 @@
       "path": "qc/rep${i+1}/${basename}",
       "table": "QC and logs/Replicate ${i+1}/Samtools flagstat for Raw BAM"
     },
+    "samstat_qc": {
+      "path": "qc/rep${i+1}/${basename}",
+      "table": "QC and logs/Replicate ${i+1}/SAMstats log for Raw BAM"
+    },
     "read_len_log": {
       "path": "qc/rep${i+1}/${basename}",
       "table": "QC and logs/Replicate ${i+1}/Read length"
@@ -43,6 +47,10 @@
     "pbc_qc": {
       "path": "qc/rep${i+1}/${basename}",
       "table": "QC and logs/Replicate ${i+1}/PBC QC for filtered BAM"
+    },
+    "lib_complexity_qc": {
+      "path": "qc/rep${i+1}/${basename}",
+      "table": "QC and logs/Replicate ${i+1}/Library complexity QC for filtered BAM"
     },
     "mito_dup_log": {
       "path": "qc/rep${i+1}/${basename}",
