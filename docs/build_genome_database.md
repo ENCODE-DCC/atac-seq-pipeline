@@ -2,7 +2,7 @@
 
 1. Choose `GENOME` from `hg19`, `hg38`, `mm9` and `mm10` and specify a destination directory.
     ```bash
-    $ bash genome/download_genome_data.sh [GENOME] [DESTINATION_DIR]
+    $ bash scripts/download_genome_data.sh [GENOME] [DESTINATION_DIR]
     ```
 2. Find a TSV file on the destination directory and use it for `"atac.genome_tsv"` in your input JSON.
 

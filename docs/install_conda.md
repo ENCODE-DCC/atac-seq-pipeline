@@ -11,7 +11,8 @@
 2) Install Conda environment for pipeline.
 
   ```bash
-  $ conda/install_dependencies.sh
+  $ scripts/uninstall_dependencies.sh  # uninstall it for clean-install
+  $ scripts/install_dependencies.sh
   ```
 
 3) Initialize Conda and re-login.
@@ -24,14 +25,13 @@
 4) Configure pipeline's python2 and python3 environments.
 
   ```bash
-  $ conda/config_conda_env.sh
-  $ conda/config_conda_env_py3.sh
+  $ scripts/config_conda_env.sh
   ```
 
 5) Update pipeline's Conda environment with pipeline's python source code. You need to run this step everytime you update (`git pull`) this pipeline.
 
   ```bash
-  $ conda/update_conda_env.sh
+  $ scripts/update_conda_env.sh
   ```
 
 ## How to download genome database

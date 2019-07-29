@@ -8,12 +8,12 @@ for f in $(grep -rl ${PREV_VER} --include=*.{wdl,md,sh})
 do
   sed -i "s/${PREV_VER}/${NEW_VER}/g" ${f}
 done
-cd workflow_opts
+cd dev/workflow_opts
 for f in $(grep -rl ${PREV_VER} --include=*.json)
 do
   sed -i "s/${PREV_VER}/${NEW_VER}/g" ${f}
 done
-cd ..
+cd ../../
 ```
 
 ## Building templates on DX for each genome
@@ -27,40 +27,40 @@ Run the following command line locally to build out DX workflows for this pipeli
 VER=v1.4.2
 
 # general
-java -jar ~/dxWDL-0.79.1.jar compile atac.wdl -project "ENCODE Uniform Processing Pipelines" -extras workflow_opts/docker.json -f -folder /ATAC-seq/workflows/$VER/general -defaults examples/dx/template_general.json
+java -jar ~/dxWDL-0.79.1.jar compile atac.wdl -project "ENCODE Uniform Processing Pipelines" -extras dev/workflow_opts/docker.json -f -folder /ATAC-seq/workflows/$VER/general -defaults dev/examples/dx/template_general.json
 
 # hg38
-java -jar ~/dxWDL-0.79.1.jar compile atac.wdl -project "ENCODE Uniform Processing Pipelines" -extras workflow_opts/docker.json -f -folder /ATAC-seq/workflows/$VER/hg38 -defaults examples/dx/template_hg38.json
+java -jar ~/dxWDL-0.79.1.jar compile atac.wdl -project "ENCODE Uniform Processing Pipelines" -extras dev/workflow_opts/docker.json -f -folder /ATAC-seq/workflows/$VER/hg38 -defaults dev/examples/dx/template_hg38.json
 
 # hg19
-java -jar ~/dxWDL-0.79.1.jar compile atac.wdl -project "ENCODE Uniform Processing Pipelines" -extras workflow_opts/docker.json -f -folder /ATAC-seq/workflows/$VER/hg19 -defaults examples/dx/template_hg19.json
+java -jar ~/dxWDL-0.79.1.jar compile atac.wdl -project "ENCODE Uniform Processing Pipelines" -extras dev/workflow_opts/docker.json -f -folder /ATAC-seq/workflows/$VER/hg19 -defaults dev/examples/dx/template_hg19.json
 
 # mm10
-java -jar ~/dxWDL-0.79.1.jar compile atac.wdl -project "ENCODE Uniform Processing Pipelines" -extras workflow_opts/docker.json -f -folder /ATAC-seq/workflows/$VER/mm10 -defaults examples/dx/template_mm10.json
+java -jar ~/dxWDL-0.79.1.jar compile atac.wdl -project "ENCODE Uniform Processing Pipelines" -extras dev/workflow_opts/docker.json -f -folder /ATAC-seq/workflows/$VER/mm10 -defaults dev/examples/dx/template_mm10.json
 
 # mm9
-java -jar ~/dxWDL-0.79.1.jar compile atac.wdl -project "ENCODE Uniform Processing Pipelines" -extras workflow_opts/docker.json -f -folder /ATAC-seq/workflows/$VER/mm9 -defaults examples/dx/template_mm9.json
+java -jar ~/dxWDL-0.79.1.jar compile atac.wdl -project "ENCODE Uniform Processing Pipelines" -extras dev/workflow_opts/docker.json -f -folder /ATAC-seq/workflows/$VER/mm9 -defaults dev/examples/dx/template_mm9.json
 
 # test sample
-java -jar ~/dxWDL-0.79.1.jar compile atac.wdl -project "ENCODE Uniform Processing Pipelines" -extras workflow_opts/docker.json -f -folder /ATAC-seq/workflows/$VER/test_ENCSR356KRQ_subsampled -defaults examples/dx/ENCSR356KRQ_subsampled_dx.json
+java -jar ~/dxWDL-0.79.1.jar compile atac.wdl -project "ENCODE Uniform Processing Pipelines" -extras dev/workflow_opts/docker.json -f -folder /ATAC-seq/workflows/$VER/test_ENCSR356KRQ_subsampled -defaults dev/examples/dx/ENCSR356KRQ_subsampled_dx.json
 
 ## DX Azure
 
 # general
-java -jar ~/dxWDL-0.79.1.jar compile atac.wdl -project "ENCODE Uniform Processing Pipelines Azure" -extras workflow_opts/docker.json -f -folder /ATAC-seq/workflows/$VER/general -defaults examples/dx_azure/template_general.json
+java -jar ~/dxWDL-0.79.1.jar compile atac.wdl -project "ENCODE Uniform Processing Pipelines Azure" -extras dev/workflow_opts/docker.json -f -folder /ATAC-seq/workflows/$VER/general -defaults dev/examples/dx_azure/template_general.json
 
 # hg38
-java -jar ~/dxWDL-0.79.1.jar compile atac.wdl -project "ENCODE Uniform Processing Pipelines Azure" -extras workflow_opts/docker.json -f -folder /ATAC-seq/workflows/$VER/hg38 -defaults examples/dx_azure/template_hg38.json
+java -jar ~/dxWDL-0.79.1.jar compile atac.wdl -project "ENCODE Uniform Processing Pipelines Azure" -extras dev/workflow_opts/docker.json -f -folder /ATAC-seq/workflows/$VER/hg38 -defaults dev/examples/dx_azure/template_hg38.json
 
 # hg19
-java -jar ~/dxWDL-0.79.1.jar compile atac.wdl -project "ENCODE Uniform Processing Pipelines Azure" -extras workflow_opts/docker.json -f -folder /ATAC-seq/workflows/$VER/hg19 -defaults examples/dx_azure/template_hg19.json
+java -jar ~/dxWDL-0.79.1.jar compile atac.wdl -project "ENCODE Uniform Processing Pipelines Azure" -extras dev/workflow_opts/docker.json -f -folder /ATAC-seq/workflows/$VER/hg19 -defaults dev/examples/dx_azure/template_hg19.json
 
 # mm10
-java -jar ~/dxWDL-0.79.1.jar compile atac.wdl -project "ENCODE Uniform Processing Pipelines Azure" -extras workflow_opts/docker.json -f -folder /ATAC-seq/workflows/$VER/mm10 -defaults examples/dx_azure/template_mm10.json
+java -jar ~/dxWDL-0.79.1.jar compile atac.wdl -project "ENCODE Uniform Processing Pipelines Azure" -extras dev/workflow_opts/docker.json -f -folder /ATAC-seq/workflows/$VER/mm10 -defaults dev/examples/dx_azure/template_mm10.json
 
 # mm9
-java -jar ~/dxWDL-0.79.1.jar compile atac.wdl -project "ENCODE Uniform Processing Pipelines Azure" -extras workflow_opts/docker.json -f -folder /ATAC-seq/workflows/$VER/mm9 -defaults examples/dx_azure/template_mm9.json
+java -jar ~/dxWDL-0.79.1.jar compile atac.wdl -project "ENCODE Uniform Processing Pipelines Azure" -extras dev/workflow_opts/docker.json -f -folder /ATAC-seq/workflows/$VER/mm9 -defaults dev/examples/dx_azure/template_mm9.json
 
 # test sample
-java -jar ~/dxWDL-0.79.1.jar compile atac.wdl -project "ENCODE Uniform Processing Pipelines Azure" -extras workflow_opts/docker.json -f -folder /ATAC-seq/workflows/$VER/test_ENCSR356KRQ_subsampled -defaults examples/dx_azure/ENCSR356KRQ_subsampled_dx_azure.json
+java -jar ~/dxWDL-0.79.1.jar compile atac.wdl -project "ENCODE Uniform Processing Pipelines Azure" -extras dev/workflow_opts/docker.json -f -folder /ATAC-seq/workflows/$VER/test_ENCSR356KRQ_subsampled -defaults dev/examples/dx_azure/ENCSR356KRQ_subsampled_dx_azure.json
 ```

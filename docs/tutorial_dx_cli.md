@@ -34,11 +34,11 @@ This document describes instruction for the item 1).
 6. Choose an appropriate input for your project (AWS or Azure):
     * AWS
       ```bash
-      $ INPUT=examples/dx/ENCSR356KRQ_subsampled_dx.json
+      $ INPUT=example_input_json/dx/ENCSR356KRQ_subsampled_dx.json
       ```
     * Azure
       ```bash
-      $ INPUT=examples/dx_azure/ENCSR356KRQ_subsampled_dx_azure.json
+      $ INPUT=example_input_json/dx_azure/ENCSR356KRQ_subsampled_dx_azure.json
       ```
 
 7. Compile `atac.wdl` with an input JSON for the SUBSAMPLED (1/400) paired-end sample of [ENCSR356KRQ](https://www.encodeproject.org/experiments/ENCSR356KRQ/).
@@ -46,7 +46,7 @@ This document describes instruction for the item 1).
     $ PROJECT=[YOUR_PROJECT_NAME]
     $ OUT_FOLDER=/test_sample_atac_ENCSR356KRQ_subsampled
 
-    $ java -jar dxWDL-0.77.jar compile atac.wdl -project ${PROJECT} -f -folder ${OUT_FOLDER} -defaults ${INPUT} -extras workflow_opts/docker.json
+    $ java -jar dxWDL-0.77.jar compile atac.wdl -project ${PROJECT} -f -folder ${OUT_FOLDER} -defaults ${INPUT} -extras dev/workflow_opts/docker.json
     ```
 
 8. Go to DNAnexus [project page](https://platform.DNAnexus.com/projects) and click on your project.
