@@ -30,7 +30,7 @@ The ATAC-seq pipeline specification is also the official pipeline specification 
 
 ## Running pipelines without Caper
 
-Caper uses the cromwell workflow execution engine to run the workflow on the platform you specify.  While we recommend you use caper, if you want to run cromwell directly without caper you can learn about that [here](docs/deprecated/OLD_METHOD.md).
+Caper uses the cromwell workflow execution engine to run the workflow on the platform you specify. While we recommend you use caper, if you want to run cromwell directly without caper you can learn about that [here](docs/deprecated/OLD_METHOD.md).
 
 ## DNAnexus
 
@@ -56,20 +56,20 @@ $ git clone https://github.com/ENCODE-DCC/atac-seq-pipeline
 $ cd atac-seq-pipeline
 ```
 
-Run it. Due to `--deepcopy` all files (HTTP URLs) in `examples/caper/ENCSR356KRQ_subsampled.json` will be recursively copied into Caper's temporary folder (`--tmp-dir`).
+Run it. Due to `--deepcopy` all files (HTTP URLs) in `example_input_json/caper/ENCSR356KRQ_subsampled.json` will be recursively copied into Caper's temporary folder (`--tmp-dir`).
 ```bash
-$ caper run atac.wdl -i examples/caper/ENCSR356KRQ_subsampled.json --deepcopy --use-singularity
+$ caper run atac.wdl -i example_input_json/caper/ENCSR356KRQ_subsampled_caper.json --deepcopy --use-singularity
 ```
 
 If you use Docker then replace `--use-singularity` with `--use-docker`.
 ```bash
-$ caper run atac.wdl -i examples/caper/ENCSR356KRQ_subsampled.json --deepcopy --use-docker
+$ caper run atac.wdl -i example_input_json/caper/ENCSR356KRQ_subsampled_caper.json --deepcopy --use-docker
 ```
 
 If you use Conda then remove `--use-singularity` from the command line and activate pipeline's Conda env before running a pipeline.
 ```bash
 $ conda activate encode-atac-seq-pipeline
-$ caper run atac.wdl -i examples/caper/ENCSR356KRQ_subsampled.json --deepcopy
+$ caper run atac.wdl -i example_input_json/caper/ENCSR356KRQ_subsampled_caper.json --deepcopy
 ```
 
 To run it on an HPC (e.g. Stanford Sherlock and SCG). See details at [Caper's README](https://github.com/ENCODE-DCC/caper/blob/master/README.md#how-to-run-it-on-slurm-cluster).
@@ -101,7 +101,3 @@ There are some useful tools to post-process outputs of the pipeline.
 ### qc_jsons_to_tsv
 
 [This tool](utils/qc_jsons_to_tsv/README.md) recursively finds and parses all `qc.json` (pipeline's [final output](docs/example_output/v1.1.5/qc.json)) found from a specified root directory. It generates a TSV file that has all quality metrics tabulated in rows for each experiment and replicate. This tool also estimates overall quality of a sample by [a criteria definition JSON file](utils/qc_jsons_to_tsv/criteria.default.json) which can be a good guideline for QC'ing experiments.
-
-### ENCODE downloader
-
-[This tool](https://github.com/kundajelab/ENCODE_downloader) downloads any type (FASTQ, BAM, PEAK, ...) of data from the ENCODE portal. It also generates a metadata JSON file per experiment which will be very useful to make an input JSON file for the pipeline.
