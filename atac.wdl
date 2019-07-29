@@ -817,8 +817,8 @@ workflow atac {
 	}
 
 	# overlap on pseudo-replicates (pr1, pr2) for each true replicate
-	scatter( i in range(num_rep) ) {
-		if ( !align_only && !true_rep_only ) {
+	if ( !align_only && !true_rep_only ) {
+		scatter( i in range(num_rep) ) {
 			call overlap as overlap_pr { input :
 				prefix = "rep"+(i+1)+"-pr1_vs_rep"+(i+1)+"-pr2",
 				peak1 = peak_pr1_[i],
@@ -833,8 +833,8 @@ workflow atac {
 		}
 	}
 
-	scatter( i in range(num_rep) ) {
-		if ( !align_only && !true_rep_only && enable_idr ) {
+	if ( !align_only && !true_rep_only && enable_idr ) {
+		scatter( i in range(num_rep) ) {
 			# IDR on pseduo replicates
 			call idr as idr_pr { input :
 				prefix = "rep"+(i+1)+"-pr1_vs_rep"+(i+1)+"-pr2",
@@ -930,7 +930,7 @@ workflow atac {
 
 		frac_mito_qcs = frac_mito.frac_mito_qc,
 		dup_qcs = filter.dup_qc,
-		pbc_qcs = filter.pbc_qc,
+		lib_complexity_qcs = filter.lib_complexity_qc,
 		xcor_plots = xcor.plot_png,
 		xcor_scores = xcor.score,
 
@@ -1132,7 +1132,7 @@ task filter {
 		File nodup_bai = glob("*.bai")[0]
 		File samstat_qc = glob("*.samstats.qc")[0]
 		File dup_qc = glob("*.dup.qc")[0]
-		File pbc_qc = glob("*.pbc.qc")[0]
+		File lib_complexity_qc = glob("*.lib_complexity.qc")[0]
 	}
 	runtime {
 		cpu : cpu
@@ -1508,7 +1508,6 @@ task reproducibility {
 }
 
 task preseq {
-	# Fraction of Reads In Annotated Regions
 	File bam
 	Boolean paired_end
 
@@ -1677,11 +1676,11 @@ task qc_report {
 	Array[File?] samstat_qcs
 	Array[File?] nodup_samstat_qcs
 	Array[File?] dup_qcs
-	Array[File?] pbc_qcs
+	Array[File?] lib_complexity_qcs
 	Array[File?] xcor_plots
 	Array[File?] xcor_scores
 	Array[File]? idr_plots
-	Array[File?] idr_plots_pr
+	Array[File]? idr_plots_pr
 	File? idr_plot_ppr
 	Array[File?] frip_qcs
 	Array[File?] frip_qcs_pr1
@@ -1690,10 +1689,10 @@ task qc_report {
 	File? frip_qc_ppr1 
 	File? frip_qc_ppr2 
 	Array[File]? frip_idr_qcs
-	Array[File?] frip_idr_qcs_pr
+	Array[File]? frip_idr_qcs_pr
 	File? frip_idr_qc_ppr 
 	Array[File]? frip_overlap_qcs
-	Array[File?] frip_overlap_qcs_pr
+	Array[File]? frip_overlap_qcs_pr
 	File? frip_overlap_qc_ppr
 	File? idr_reproducibility_qc
 	File? overlap_reproducibility_qc
@@ -1739,7 +1738,7 @@ task qc_report {
 			--samstat-qcs ${sep="_:_" samstat_qcs} \
 			--nodup-samstat-qcs ${sep="_:_" nodup_samstat_qcs} \
 			--dup-qcs ${sep="_:_" dup_qcs} \
-			--pbc-qcs ${sep="_:_" pbc_qcs} \
+			--lib_complexity-qcs ${sep="_:_" lib_complexity_qcs} \
 			--xcor-plots ${sep="_:_" xcor_plots} \
 			--xcor-scores ${sep="_:_" xcor_scores} \
 			--idr-plots ${sep="_:_" idr_plots} \
