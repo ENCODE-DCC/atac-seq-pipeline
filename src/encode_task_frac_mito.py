@@ -55,9 +55,9 @@ def frac_mito(non_mito_samstat, mito_samstat, out_dir):
 
     frac = float(Rm)/float(Rn + Rm)
     with open(frac_mito_qc, 'w') as fp:
-        fp.write('Rn\t{}\n'.format(Rn))
-        fp.write('Rm\t{}\n'.format(Rm))
-        fp.write('frac_mito\t{}\n'.format(frac))
+        fp.write('non_mito_reads\t{}\n'.format(Rn))
+        fp.write('mito_reads\t{}\n'.format(Rm))
+        fp.write('frac_mito_reads\t{}\n'.format(frac))
 
     return frac_mito_qc
 

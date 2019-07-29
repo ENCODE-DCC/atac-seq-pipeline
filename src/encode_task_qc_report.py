@@ -43,14 +43,16 @@ def parse_arguments():
                         help='Capping number of peaks by taking top N peaks.')
     parser.add_argument('--idr-thresh', type=float, required=True,
                         help='IDR threshold.')
+    parser.add_argument('--pval-thresh', type=float,
+                        help='pValue threshold for MACS2 peak caller.')
     parser.add_argument('--samstat-qcs', type=str, nargs='*',
                         help='List of samstat QC (raw BAM) files per replicate.')
     parser.add_argument('--nodup-samstat-qcs', type=str, nargs='*',
                         help='List of samstat QC (filtered BAM) files per replicate.')
     parser.add_argument('--dup-qcs', type=str, nargs='*',
                         help='List of dup QC files per replicate.')
-    parser.add_argument('--pbc-qcs', type=str, nargs='*',
-                        help='List of PBC QC files per replicate.')
+    parser.add_argument('--lib-complexity-qcs', type=str, nargs='*',
+                        help='List of lib complexity QC files per replicate.')
     parser.add_argument('--frac-mito-qcs', type=str, nargs='*',
                         help='List of fraction of mito QC files per replicate.')
     parser.add_argument('--ctl-samstat-qcs', type=str, nargs='*',
@@ -59,8 +61,8 @@ def parse_arguments():
                         help='List of samstat QC (filtered BAM) files per control.')
     parser.add_argument('--ctl-dup-qcs', type=str, nargs='*',
                         help='List of dup QC files per control.')
-    parser.add_argument('--ctl-pbc-qcs', type=str, nargs='*',
-                        help='List of PBC QC files per control.')
+    parser.add_argument('--ctl-lib-complexity-qcs', type=str, nargs='*',
+                        help='List of lib complexity QC files per control.')
     parser.add_argument('--ctl-frac-mito-qcs', type=str, nargs='*',
                         help='List of fraction of mito QC files per control.')
     parser.add_argument('--xcor-plots', type=str, nargs='*',
@@ -366,6 +368,9 @@ def make_cat_align(args, cat_root):
             representing different n-nucleosomal (ex mono-nucleosomal, di-nucleosomal)
             fragment lengths will arise. Good libraries will show these peaks in a
             fragment length distribution and will show specific peak ratios.</p><br>
+            <ul>
+            <li>NFR: Nucleosome free region
+            </ul><br>
         """,
         parser=parse_nucleosomal_qc,
         map_key_desc=MAP_KEY_DESC_NUCLEOSOMAL_QC,
@@ -393,11 +398,11 @@ def make_cat_lib_complexity(args, cat_root):
         parent=cat_root
     )
 
-    cat_lc_pbc = QCCategory(
+    cat_lc_lib_complexity = QCCategory(
         'lib_complexity',
         html_head='<h2>Library complexity (filtered non-mito BAM)</h2>',
         html_foot="""
-            <div id='help-pbc'>
+            <div id='help-lib_complexity'>
             <p>Mitochondrial reads are filtered out by default. 
             The non-redundant fraction (NRF) is the fraction of non-redundant mapped reads
             in a dataset; it is the ratio between the number of positions in the genome
@@ -421,20 +426,20 @@ def make_cat_lib_complexity(args, cat_root):
             <li>0.9-1.0 is no bottlenecking </li>
             </ul></p></div><br>
         """,
-        parser=parse_pbc_qc,
-        map_key_desc=MAP_KEY_DESC_PBC_QC,
+        parser=parse_lib_complexity_qc,
+        map_key_desc=MAP_KEY_DESC_LIB_COMPLEXITY_QC,
         parent=cat_lc
     )
-    if args.pbc_qcs:
-        for i, qc in enumerate(args.pbc_qcs):
+    if args.lib_complexity_qcs:
+        for i, qc in enumerate(args.lib_complexity_qcs):
             rep = 'rep' + str(i + 1)
             if qc:
-                cat_lc_pbc.add_log(qc, key=rep)
-    if args.ctl_pbc_qcs:
-        for i, qc in enumerate(args.ctl_pbc_qcs):
+                cat_lc_lib_complexity.add_log(qc, key=rep)
+    if args.ctl_lib_complexity_qcs:
+        for i, qc in enumerate(args.ctl_lib_complexity_qcs):
             ctl = 'ctl' + str(i + 1)
             if qc:
-                cat_lc_pbc.add_log(qc, key=ctl)
+                cat_lc_lib_complexity.add_log(qc, key=ctl)
 
     cat_lc_lib_size = QCCategory(
         'lib_size',
@@ -506,12 +511,24 @@ def make_cat_replication(args, cat_root):
         qc = args.idr_reproducibility_qc[0]
         cat_reproducibility.add_log(qc, key='idr')
 
+    if args.peak_caller == 'spp':
+        extra_info = 'with FDR 0.01'
+    elif args.peak_caller == 'macs2':
+        extra_info = 'with p-val threshold {}'.format(args.pval_thresh)
+    else:
+        extra_info = ''
+
     cat_num_peak = QCCategory(
         'num_peaks',
-        html_head='<h2>Number of peaks called</h2>',
+        html_head='<h2>Number of raw peaks</h2>',
         html_foot="""
-        """,
-        parser=parse_num_peak_qc,
+            Top {num_peak} raw peaks from {peak_caller} {extra_info}
+        """.format(
+            num_peak=args.cap_num_peak,
+            peak_caller=args.peak_caller,
+            extra_info=extra_info,
+        ),
+        ex=parse_num_peak_qc,
         map_key_desc=MAP_KEY_DESC_NUM_PEAK_QC,
         parent=cat_replication,
     )
@@ -521,14 +538,6 @@ def make_cat_replication(args, cat_root):
             rep = 'rep' + str(i+1)
             if qc:
                 cat_num_peak.add_log(qc, key=rep)
-    if args.idr_opt_num_peak_qc:
-        qc = args.idr_opt_num_peak_qc[0]
-        rep = 'idr_opt'
-        cat_num_peak.add_log(qc, key=rep)
-    if args.overlap_opt_num_peak_qc:
-        qc = args.overlap_opt_num_peak_qc[0]
-        rep = 'overlap_opt'
-        cat_num_peak.add_log(qc, key=rep)
 
     return cat_replication
 
@@ -566,22 +575,22 @@ def make_cat_peak_stat(args, cat_root):
         for i, plot in enumerate(args.peak_region_size_plots):
             rep = 'rep' + str(i+1)
             if plot:
-                cat_peak_region_size.add_plot(plot, key=rep, size_pct=50)
+                cat_peak_region_size.add_plot(plot, key=rep, size_pct=35)
     if args.idr_opt_peak_region_size_plot:
         plot = args.idr_opt_peak_region_size_plot[0]
         rep = 'idr_opt'
-        cat_peak_region_size.add_plot(plot, key=rep, size_pct=50)
+        cat_peak_region_size.add_plot(plot, key=rep, size_pct=35)
     if args.overlap_opt_peak_region_size_plot:
         plot = args.overlap_opt_peak_region_size_plot[0]
         rep = 'overlap_opt'
-        cat_peak_region_size.add_plot(plot, key=rep, size_pct=50)
+        cat_peak_region_size.add_plot(plot, key=rep, size_pct=35)
 
     return cat_peak_stat
 
 def make_cat_align_enrich(args, cat_root):
     cat_align_enrich = QCCategory(
         'align_enrich',
-        html_head='<h1>Alignment enrichment</h1><hr>',       
+        html_head='<h1>Enrichment / Signal-to-noise ratio</h1><hr>',
         parent=cat_root
     )
 
@@ -646,7 +655,7 @@ def make_cat_align_enrich(args, cat_root):
 
     cat_jsd = QCCategory(
         'jsd',
-        html_head='<h2>Fingerprint and Jensen-Shannon distance</h2>',
+        html_head='<h2>Jensen-Shannon distance</h2>',
         parser=parse_jsd_qc,
         map_key_desc=MAP_KEY_DESC_JSD_QC,
         parent=cat_align_enrich
@@ -669,12 +678,13 @@ def make_cat_peak_enrich(args, cat_root):
         parent=cat_root
     )
 
+
     cat_frip = QCCategory(
         'frac_reads_in_peaks',
         html_head='<h2>Fraction of reads in peaks (FRiP)</h2>',
         html_foot="""
             <div id='help-FRiP'>
-            For raw peaks (e.g. spp and macs2):<br>
+            For {peak_caller} raw peaks:<br>
             <p><ul>
             <li>repX: Peak from true replicate X </li>
             <li>repX-prY: Peak from Yth pseudoreplicates from replicate X </li>
@@ -690,7 +700,8 @@ def make_cat_peak_enrich(args, cat_root):
             <li>pooled-pr1_vs_pooled-pr2: Comparing two peaks from 1st and 2nd pooled pseudo replicates </li>
             </ul></p>
             </div>
-        """,
+        """.format(
+            peak_caller=args.peak_caller),
         parent=cat_peak_enrich,
     )
 
