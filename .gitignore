@@ -119,4 +119,5 @@ test_sample
 tmp
 tmp_db*
 *.local.json
+temp_db*
 
