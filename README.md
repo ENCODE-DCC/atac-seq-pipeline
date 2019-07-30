@@ -10,69 +10,75 @@ The ATAC-seq pipeline specification is also the official pipeline specification 
 
 ### Features
 
-* **Portability**: Support for many cloud platforms (Google/DNAnexus) and cluster engines (SLURM/SGE/PBS).
+* **Portability**: Support for many cloud platforms (Google/AWS/DNAnexus) and cluster engines (SLURM/SGE/PBS).
 * **User-friendly HTML report**: tabulated quality metrics including alignment/peak statistics and FRiP along with many useful plots (IDR/cross-correlation measures).
   - Examples: [HTML](https://storage.googleapis.com/encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR889WQX/example_output/qc.html), [JSON](docs/example_output/v1.1.5/qc.json)
 * **ATAqC**: Annotation-based analysis including TSS enrichment and comparison to Roadmap DNase.
-* **Genomes**: Pre-built database for GRCh38, hg19, mm10, mm9 and additional support for custom genomes.
+* **Genomes**: Pre-built database for hg38, hg19, mm10, mm9 and additional support for custom genomes.
 
 ## Installation
 
-1) Install [Caper](https://github.com/ENCODE-DCC/caper#installation). Caper is a python wrapper for [Cromwell](https://github.com/broadinstitute/cromwell). Make sure that you have python3(> 3.4.1) installed on your system.
+1) Git clone this repo.
+
+	```bash
+	$ cd
+	$ git clone https://github.com/ENCODE-DCC/atac-seq-pipeline
+	```
+
+2) Install [Caper](https://github.com/ENCODE-DCC/caper#installation). Caper is a python wrapper for [Cromwell](https://github.com/broadinstitute/cromwell).
+
+	> **IMPORTANT**: Make sure that you have python3(> 3.4.1) installed on your system.
+
+	```bash
+	$ pip install caper  # use pip3 if it doesn't work
+	```
+
+3) Read through [Caper's README](https://github.com/ENCODE-DCC/caper) carefully. Find an instruction for your platform. 
+	> **IMPORTANT**: Configure your Caper configuration file `~/.caper/default.conf` correctly for your platform.
+
+## Running a pipeline locally with Caper
+
+1) Prepare an input JSON file. We will use a subsampled example input JSON based on URLs. Caper will automatically download (with a flag `--deepcopy`) all fastqs and reference human genome data recursively.
+	```bash
+	$ INPUT_JSON=https://storage.googleapis.com/encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ_subsampled_caper.json
+	```
+
+2-1) **Conda**: Run a workflow with Conda. Make sure that you have followed [this instruction](docs/install_conda.md) to install Conda and its environments.
+	> **WARNING**: We no longer recommend Conda for resolving dependencies and plan to phase out Conda support. Instead we recommend using Docker or Singularity. You can install Singularity and use it for our pipeline with Caper (by adding `--use-singularity` to command line arguments).
+
+	```bash
+	$ source activate encode-atac-seq-pipeline
+	$ caper run atac.wdl -i ${INPUT_JSON} --deepcopy
+	```
+
+2-2) **Singularity (RECOMMENDED)**: Run a workflow with Singularity.
+
+	```bash
+	$ caper run atac.wdl -i ${INPUT_JSON} --deepcopy --use-singularity
+	```
+
+	> **HPCs**: To run multiple workflows on HPCs (e.g. Stanford Sherlock and SCG) see details at [Caper's README](https://github.com/ENCODE-DCC/caper/blob/master/README.md#how-to-run-it-on-slurm-cluster). Do not run Caper on login nodes. Your workflows will get killed. There is a learning curve to understand server/client structure of Caper/Cromwell.
+
+
+2-3) **Docker**: Run a workflow with Docker.
 
   ```bash
-  $ pip install caper
+	$ caper run atac.wdl -i ${INPUT_JSON} --deepcopy --use-docker
   ```
 
-2) Read through [Caper's README](https://github.com/ENCODE-DCC/caper) carefully.
+3) You can also run a workflow on cloud platforms such as AWS (`aws`) and Google Cloud Platform (`gcp`) if Caper's configuration file is correctly configured for them. See details at [Caper's README](https://github.com/ENCODE-DCC/caper).
 
-3) Run a pipeline with Caper.
 
-## Running pipelines without Caper
+## Running a pipeline without Caper
 
 Caper uses the cromwell workflow execution engine to run the workflow on the platform you specify. While we recommend you use caper, if you want to run cromwell directly without caper you can learn about that [here](docs/deprecated/OLD_METHOD.md).
 
-## DNAnexus
+## Running a pipeline on DNAnexus
 
 You can also run our pipeline on DNAnexus without using Caper or Cromwell. There are two ways to build a workflow on DNAnexus based on our WDL.
 
 1) [dxWDL CLI](docs/tutorial_dx_cli.md)
 2) [DNAnexus Web UI](docs/tutorial_dx_web.md)
-
-## Conda
-
-> **WARNING**: DO NOT INSTALL CONDA 4.7 UNTIL WE FIX CONDA ENV INSTALLATION ISSUES. [4.6.14](https://repo.anaconda.com/miniconda/Miniconda3-4.6.14-Linux-x86_64.sh) IS RECOMMENDED.
-
-We no longer recommend Conda for resolving dependencies and plan to phase out Conda support. Instead we recommend using Docker or Singularity. You can install Singularity and use it for our pipeline with Caper (by adding `--use-singularity` to command line arguments). Please see [this instruction](docs/install_conda.md).
-
-## Tutorial
-
-Make sure that you have configured Caper correctly.
-> **WARNING**: Do not run Caper on HPC login nodes. Your jobs can be killed.
-
-Git clone the pipeline repository to download WDL and example input JSON.
-```bash
-$ git clone https://github.com/ENCODE-DCC/atac-seq-pipeline
-$ cd atac-seq-pipeline
-```
-
-Run it. Due to `--deepcopy` all files (HTTP URLs) in `example_input_json/caper/ENCSR356KRQ_subsampled.json` will be recursively copied into Caper's temporary folder (`--tmp-dir`).
-```bash
-$ caper run atac.wdl -i example_input_json/caper/ENCSR356KRQ_subsampled_caper.json --deepcopy --use-singularity
-```
-
-If you use Docker then replace `--use-singularity` with `--use-docker`.
-```bash
-$ caper run atac.wdl -i example_input_json/caper/ENCSR356KRQ_subsampled_caper.json --deepcopy --use-docker
-```
-
-If you use Conda then remove `--use-singularity` from the command line and activate pipeline's Conda env before running a pipeline.
-```bash
-$ conda activate encode-atac-seq-pipeline
-$ caper run atac.wdl -i example_input_json/caper/ENCSR356KRQ_subsampled_caper.json --deepcopy
-```
-
-To run it on an HPC (e.g. Stanford Sherlock and SCG). See details at [Caper's README](https://github.com/ENCODE-DCC/caper/blob/master/README.md#how-to-run-it-on-slurm-cluster).
 
 ## Input JSON file
 
@@ -82,15 +88,10 @@ An input JSON file includes all genomic data files, input parameters and metadat
 
 ## How to organize outputs
 
-Install [Croo](https://github.com/ENCODE-DCC/croo#installation). Make sure that you have python3(> 3.4.1) installed on your system.
+Install [Croo](https://github.com/ENCODE-DCC/croo#installation). Make sure that you have python3(> 3.4.1) installed on your system. Find a `metadata.json` on Caper's output directory.
 
 ```bash
 $ pip install croo
-```
-
-Find a `metadata.json` on Caper's output directory.
-
-```bash
 $ croo [METADATA_JSON_FILE]
 ```
 
