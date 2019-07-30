@@ -25,7 +25,9 @@ workflow atac {
 	File? genome_tsv 				# reference genome data TSV file including
 									# all genome-specific file paths and parameters
 	# individual genome parameters
+	String? genome_name				# genome name
 	File? ref_fa					# reference fasta (*.fa.gz)
+	File? ref_mito_fa				# mito-only reference fasta (*.fa.gz)
 	File? bwa_idx_tar 				# bwa index tar (uncompressed .tar)
 	File? bwa_mito_idx_tar 			# bwa mito-only index tar (uncompressed .tar)
 	File? bowtie2_idx_tar 			# bowtie2 index tar (uncompressed .tar)
@@ -62,6 +64,7 @@ workflow atac {
 	Boolean enable_count_signal_track = false # generate count signal track
 	Boolean enable_idr = true 		# enable IDR analysis on raw peaks
 	Boolean enable_preseq = false
+	Boolean enable_jsd = true 		# enable JSD plot generation (deeptools fingerprint)
 	Boolean enable_compare_to_roadmap = false
 	Boolean enable_gc_bias = true
 
@@ -116,6 +119,11 @@ workflow atac {
 	String bam2ta_disks = "local-disk 100 HDD"
 
 	Int spr_mem_mb = 16000
+
+	Int jsd_cpu = 2
+	Int jsd_mem_mb = 12000
+	Int jsd_time_hr = 6
+	String jsd_disks = "local-disk 200 HDD"
 
 	Int xcor_cpu = 2
 	Int xcor_mem_mb = 16000
@@ -244,6 +252,9 @@ workflow atac {
 		else blacklist2_
 	String? mito_chr_name_ = if defined(mito_chr_name) then mito_chr_name
 		else read_genome_tsv.mito_chr_name
+	String? genome_name_ = if defined(genome_name) then genome_name
+		else if defined(read_genome_tsv.genome_name) then read_genome_tsv.genome_name
+		else basename(select_first([genome_tsv, ref_fa_, chrsz_, 'None'])),
 
 	# read additional annotation data
 	File? tss_ = if defined(tss) then tss
@@ -713,6 +724,22 @@ workflow atac {
 		}
 	}
 
+	Boolean has_input_of_jsd = defined(blacklist_) &&
+		length(select_all(nodup_bam_))==num_rep		
+	if ( has_input_of_jsd && enable_jsd ) {
+		# fingerprint and JS-distance plot
+		call jsd { input :
+			nodup_bams = nodup_bam_,
+			blacklist_st = blacklist_,
+			mapq_thresh = mapq_thresh_,
+
+			cpu = jsd_cpu,
+			mem_mb = jsd_mem_mb,
+			time_hr = jsd_time_hr,
+			disks = jsd_disks,
+		}
+	}
+
 	Boolean has_input_of_call_peak_ppr1 = defined(pool_ta_pr1.ta_pooled)
 	Boolean has_output_of_call_peak_ppr1 = defined(peak_ppr1)
 	if ( has_input_of_call_peak_ppr1 && !has_output_of_call_peak_ppr1 &&
@@ -916,7 +943,7 @@ workflow atac {
 		pipeline_ver = pipeline_ver,
 		title = title,
 		description = description,
-		genome = basename(select_first([genome_tsv, ref_fa_, chrsz_, 'None'])),
+		genome = genome_name_,
 		multimapping = multimapping,
 		paired_ends = paired_end_,
 		pipeline_type = pipeline_type,
@@ -934,6 +961,9 @@ workflow atac {
 		lib_complexity_qcs = filter.lib_complexity_qc,
 		xcor_plots = xcor.plot_png,
 		xcor_scores = xcor.score,
+
+		jsd_plot = jsd.plot,
+		jsd_qcs = jsd.jsd_qcs,
 
 		frip_qcs = call_peak.frip_qc,
 		frip_qcs_pr1 = call_peak_pr1.frip_qc,
@@ -1246,6 +1276,35 @@ task xcor {
 		File plot_png = glob("*.cc.plot.png")[0]
 		File score = glob("*.cc.qc")[0]
 		Int fraglen = read_int(glob("*.cc.fraglen.txt")[0])
+	}
+	runtime {
+		cpu : cpu
+		memory : "${mem_mb} MB"
+		time : time_hr
+		disks : disks
+	}
+}
+
+task jsd {
+	Array[File?] nodup_bams
+	File blacklist
+	Float mapq_thresh
+
+	Int cpu
+	Int mem_mb
+	Int time_hr
+	String disks
+
+	command {
+		python $(which encode_task_jsd.py) \
+			${sep=' ' nodup_bams} \
+			${"--mapq-thresh "+ mapq_thresh} \
+			${"--blacklist "+ blacklist} \
+			${"--nth " + cpu}
+	}
+	output {
+		File plot = glob("*.png")[0]
+		Array[File] jsd_qcs = glob("*.jsd.qc")
 	}
 	runtime {
 		cpu : cpu
@@ -1681,6 +1740,8 @@ task qc_report {
 	Array[File?] lib_complexity_qcs
 	Array[File?] xcor_plots
 	Array[File?] xcor_scores
+	File? jsd_plot
+	Array[File]? jsd_qcs	
 	Array[File]? idr_plots
 	Array[File]? idr_plots_pr
 	File? idr_plot_ppr
@@ -1746,6 +1807,8 @@ task qc_report {
 			--xcor-scores ${sep="_:_" xcor_scores} \
 			--idr-plots ${sep="_:_" idr_plots} \
 			--idr-plots-pr ${sep="_:_" idr_plots_pr} \
+			${"--jsd-plot " + jsd_plot} \
+			--jsd-qcs ${sep='_:_' jsd_qcs} \
 			${"--idr-plot-ppr " + idr_plot_ppr} \
 			--frip-qcs ${sep="_:_" frip_qcs} \
 			--frip-qcs-pr1 ${sep="_:_" frip_qcs_pr1} \
@@ -1802,8 +1865,10 @@ task read_genome_tsv {
 	String? null_s
 	command <<<
 		# create empty files for all entries
+		touch genome_name
 		touch ref_fa bowtie2_idx_tar bwa_idx_tar chrsz gensz blacklist blacklist2
 		touch custom_aligner_idx_tar
+		touch ref_mito_fa
 		touch bowtie2_mito_idx_tar bwa_mito_idx_tar custom_aligner_mito_idx_tar
 		touch tss tss_enrich # for backward compatibility
 		touch dnase prom enh reg2map reg2map_bed roadmap_meta
@@ -1821,7 +1886,9 @@ task read_genome_tsv {
 		CODE
 	>>>
 	output {
+		String? genome_name = if size('genome_name')==0 then basename(genome_tsv) else read_string('genome_name')
 		String? ref_fa = if size('ref_fa')==0 then null_s else read_string('ref_fa')
+		String? ref_mito_fa = if size('ref_mito_fa')==0 then null_s else read_string('ref_mito_fa')
 		String? bwa_idx_tar = if size('bwa_idx_tar')==0 then null_s else read_string('bwa_idx_tar')
 		String? bwa_mito_idx_tar = if size('bwa_mito_idx_tar')==0 then null_s else read_string('bwa_mito_idx_tar')
 		String? bowtie2_idx_tar = if size('bowtie2_idx_tar')==0 then null_s else read_string('bowtie2_idx_tar')

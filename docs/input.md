@@ -26,12 +26,17 @@ All reference genome specific reference files/parameters can be defined in a sin
 Parameter|Type|Description
 ---------|-------|-----------
 `atac.genome_tsv`| File | Choose one of the TSV files listed below or build your own
+`atac.genome_name`| String | Name of genome (e.g. hg38, hg19, ...)
 `atac.ref_fa`| File | Reference FASTA file
-`atac.align_idx_tar`| File | Bowtie2 index TAR file (uncompressed) built from FASTA file
+`atac.ref_mito_fa`| File | Mito-only reference FASTA file
+`atac.bowtie2_idx_tar`| File | Bowtie2 index TAR file (uncompressed) built from FASTA file
+`atac.bowtie2_mito_idx_tar`| File | Mito-only Bowtie2 index TAR file (uncompressed) built from FASTA file
 `atac.custom_aligner_idx_tar` | File | Index TAR file (uncompressed) for your own aligner. See details about [how to use a custom aligner](#how-to-use-a-custom-aligner)
+`atac.custom_aligner_mito_idx_tar` | File | Mito-only index TAR file (uncompressed) for your own aligner. See details about [how to use a custom aligner](#how-to-use-a-custom-aligner)
 `atac.chrsz`| File | 2-col chromosome sizes file built from FASTA file with `faidx`
 `atac.blacklist`| File | 3-col BED file. Peaks overlapping these regions will be filtered out
 `atac.gensz`| String | MACS2's genome sizes (hs for human, mm for mouse or sum of 2nd col in chrsz)
+`atac.mito_chr_name`| String | Name of mitochondrial chromosome (e.g. chrM)
 
 Additional annotated genome data:
 
@@ -49,7 +54,7 @@ We currently provide TSV files for 4 genomes as shown in the below table. `GENOM
 
 Platform|Path/URI
 -|-
-Google Cloud Platform|`gs://encode-pipeline-genome-data/[GENOME]_google.tsv`
+Google Cloud Platform|`gs://encode-pipeline-genome-data/[GENOME]_gcp.tsv`
 Stanford Sherlock|`/home/groups/cherry/encode/pipeline_genome_data/[GENOME]_sherlock.tsv`
 Stanford SCG|`/reference/ENCODE/pipeline_genome_data/[GENOME]_scg.tsv`
 Local/SLURM/SGE|You need to [build](build_genome_database.md) or [download]() a genome database]. 
@@ -136,7 +141,7 @@ Parameter|Type | Default|Description
 
 Parameter|Default|Description
 ---------|-------|-----------
-`atac.mapq_thresh` | 30 for bwa, 255 for bowtie2 | Threshold for mapped reads quality (samtools view -q)
+`atac.mapq_thresh` | 30 for bwa, 255 for bowtie2 | Threshold for mapped reads quality (samtools view -q). If not defined, automatically determined according to aligner.
 `atac.dup_marker` | `picard` | Choose a dup marker between `picard` and `sambamba`. `picard` is recommended, use `sambamba` only when picard fails.
 `atac.no_dup_removal` | false | Skip dup removal in a BAM filtering stage.
 
@@ -165,6 +170,7 @@ Parameter|Default|Description
 `atac.enable_count_signal_track` | false | Enable count signal track generation
 `atac.keep_irregular_chr_in_bfilt_peak` | false | Keep irregular chromosome names. Use this for custom genomes without canonical chromosome names (chr1, chrX, ...)
 `atac.enable_preseq` | false | Disable preseq, which performs a yield prediction for reads
+`atac.enable_jsd` | true | Enable deeptools fingerprint (JS distance)
 `atac.enable_gc_bias` | true | Disable GC bias computation
 `atac.enable_compare_to_roadmap` | false | Enable comparing signals to epigenome roadmap
 
@@ -172,7 +178,6 @@ Parameter|Default|Description
 
 Parameter|Default|Description
 ---------|-------|-----------
-`atac.mito_chr_name` | `chrM` | Name of mito chromosome. THIS IS NOT A REG-EX! you can define only one chromosome name for mito.
 `atac.regex_filter_reads` | `chrM` | Regular expression to filter out reads with given chromosome name (1st column of BED/TAG-ALIGN). Any read with chr name that matches with this reg-ex pattern will be removed from outputs If your have changed the above parameter `atac.mito_chr_name` and still want to filter out mito reads then make sure that `atac.mito_chr_name` and `atac.regex_filter_reads` are the same
 
 ## Resource parameters
@@ -215,10 +220,10 @@ Parameter|Default
 
 Parameter|Default
 ---------|-------
-`atac.fingerprint_cpu` | 2
-`atac.fingerprint_mem_mb` | 12000
-`atac.fingerprint_time_hr` | 6
-`atac.fingerprint_disks` | `local-disk 100 HDD`
+`atac.jsd_cpu` | 2
+`atac.jsd_mem_mb` | 12000
+`atac.jsd_time_hr` | 6
+`atac.jsd_disks` | `local-disk 100 HDD`
 
 Parameter|Default
 ---------|-------

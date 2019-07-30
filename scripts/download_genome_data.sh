@@ -183,6 +183,7 @@ cd ${DEST_DIR}
 rm -f ${TSV}
 touch ${TSV}
 
+echo -e "genome_name\t${GENOME}" >> ${TSV}
 echo -e "ref_fa\t${DEST_DIR}/$(basename $REF_FA_PREFIX)" >> ${TSV}
 echo -e "ref_mito_fa\t${DEST_DIR}/$(basename $REF_MITO_FA_PREFIX)" >> ${TSV}
 echo -e "mito_chr_name\t${MITO_CHR_NAME}" >> ${TSV}

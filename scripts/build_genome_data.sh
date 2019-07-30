@@ -203,6 +203,7 @@ cd ${DEST_DIR}
 rm -f ${TSV}
 touch ${TSV}
 
+echo -e "genome_name\t${GENOME}" >> ${TSV}
 echo -e "ref_fa\t${DEST_DIR}/${REF_FA_PREFIX}.gz" >> ${TSV}
 echo -e "ref_mito_fa\t${DEST_DIR}/${REF_MITO_FA_PREFIX}.gz" >> ${TSV}
 if [[ ${MITO_CHR_NAME} != "" ]]; then

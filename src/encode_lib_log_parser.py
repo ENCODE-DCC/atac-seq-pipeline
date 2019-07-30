@@ -367,17 +367,17 @@ def parse_xcor_score(txt):
     return result
 
 MAP_KEY_DESC_JSD_QC = {
-    'pct_gen_enrich' : '% genome enriched',
+    'pct_gen_enrich' : '% Genome Enriched',
     'auc' : 'AUC',
-    'ch_div' : 'CHANCE divergence',
+    'ch_div' : 'CHANCE Divergence',
     'elbow_pt' : 'Elbow Point',
     'jsd' : 'JS Distance',
     'syn_auc' : 'Synthetic AUC',
     'syn_elbow_pt' : 'Synthetic Elbow Point',
     'syn_jsd' : 'Synthetic JS Distance',
-    # 'syn_x_intcpt' : 'Synthetic X-intercept',
-    # 'x_intcpt' : 'X-intercept',
-    # 'diff_enrich' : 'diff. enrichment',
+    'syn_x_intcpt' : 'Synthetic X-intercept',
+    'x_intcpt' : 'X-intercept',
+    'diff_enrich' : 'Diff. Enrichment',
 }
 
 def parse_jsd_qc(txt):
@@ -387,15 +387,24 @@ def parse_jsd_qc(txt):
         arr = f.readlines()[0].strip().split('\t')
     result['pct_gen_enrich'] = float(arr[0])*100.0
     result['auc'] = float(arr[1])
-    result['ch_div'] = float(arr[2])
-    result['elbow_pt'] = float(arr[3])
-    result['jsd'] = float(arr[4])
-    result['syn_auc'] = float(arr[5])
-    result['syn_elbow_pt'] = float(arr[6])
-    result['syn_jsd'] = float(arr[7])
-    # result['syn_x_intcpt'] = float(arr[8])
-    # result['x_intcpt'] = float(arr[9])
-    # result['diff_enrich'] = float(arr[10])
+    if len(arr) < 11:
+        result['elbow_pt'] = float(arr[2])
+        result['syn_auc'] = float(arr[3])
+        result['syn_elbow_pt'] = float(arr[4])
+        result['syn_jsd'] = float(arr[5])
+        result['syn_x_intcpt'] = float(arr[6])
+        result['x_intcpt'] = float(arr[7])
+        result['diff_enrich'] = float(arr[8])
+    else:
+        result['ch_div'] = float(arr[2])
+        result['elbow_pt'] = float(arr[3])
+        result['jsd'] = float(arr[4])
+        result['syn_auc'] = float(arr[5])
+        result['syn_elbow_pt'] = float(arr[6])
+        result['syn_jsd'] = float(arr[7])
+        result['syn_x_intcpt'] = float(arr[8])
+        result['x_intcpt'] = float(arr[9])
+        result['diff_enrich'] = float(arr[10])
     return result
 
 MAP_KEY_DESC_REPRODUCIBILITY_QC = {

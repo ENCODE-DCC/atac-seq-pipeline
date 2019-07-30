@@ -1,4 +1,10 @@
 {
+  "atac.jsd": {
+    "plot": {
+      "path": "qc/${basename}",
+      "table": "QC and logs/jensen-Shannon distance plot"
+    }
+  },
   "atac.bowtie2": {
     "bam": {
       "path": "align/rep${i+1}/${basename}",
