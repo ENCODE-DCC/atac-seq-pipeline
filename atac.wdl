@@ -3,7 +3,7 @@
 
 #CAPER docker quay.io/encode-dcc/atac-seq-pipeline:v1.4.2
 #CAPER singularity docker://quay.io/encode-dcc/atac-seq-pipeline:v1.4.2
-#CROO out_def https://storage.googleapis.com/encode-pipeline-output-definition/atac.out_def.json
+#CROO out_def https://storage.googleapis.com/encode-pipeline-output-definition/atac.croo.json
 
 workflow atac {
 	# pipeline version
