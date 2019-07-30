@@ -16,6 +16,7 @@
     "atac.multimapping" : 4,    
 
     "atac.auto_detect_adapter" : true,
+    "atac.enable_tss_enrich" : false,
 
     "atac.align_cpu" : 4,
     "atac.align_mem_mb" : 16000,

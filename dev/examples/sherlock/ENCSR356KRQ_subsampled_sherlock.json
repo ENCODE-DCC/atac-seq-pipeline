@@ -30,7 +30,7 @@
     "atac.multimapping" : 4,
 
     "atac.auto_detect_adapter" : true,
-    "atac.disable_preseq" : true,
+    "atac.enable_tss_enrich" : false,
 
     "atac.smooth_win" : 73,
     "atac.enable_idr" : true,

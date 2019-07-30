@@ -28,13 +28,13 @@
     "atac.paired_end" : true,
     "atac.multimapping" : 4,
     "atac.auto_detect_adapter" : true,
+    "atac.enable_tss_enrich" : false,
 
     "atac.enable_idr" : true,
     "atac.smooth_win" : 73,
     "atac.idr_thresh" : 0.05,
 
     "atac.enable_xcor" : true,
-    "atac.disable_ataqc" : true,
 
     "atac.title" : "ENCSR356KRQ (subsampled 1/400, chr19,M only)",
     "atac.description" : "ATAC-seq on primary keratinocytes in day 0.0 of differentiation"
