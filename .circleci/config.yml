@@ -96,6 +96,21 @@ jobs:
             ./test_atac.sh ENCSR889WQX_subsampled.json tmp_key.json ${TAG}
             python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'outputs'][u'atac.qc_json_ref_match']))" < ENCSR889WQX_subsampled.metadata.json
 
+  test_workflow_unrep_se:
+    <<: *machine_defaults
+    steps:
+      - checkout
+      - run: *make_tag
+      - run:
+          no_output_timeout: 300m
+          command: |
+            source ${BASH_ENV}
+            gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
+            cd dev/test/test_workflow/
+            echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_key.json
+            ./test_atac.sh ENCSR889WQX_subsampled_unrep.json tmp_key.json ${TAG}
+            python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'outputs'][u'atac.qc_json_ref_match']))" < ENCSR889WQX_subsampled.metadata.json
+
   test_workflow_pe:
     <<: *machine_defaults
     steps:
@@ -121,6 +136,9 @@ workflows:
           requires:
             - build
       - test_workflow_se:
+          requires:
+            - build
+      - test_workflow_unrep_se:
           requires:
             - build
       - test_workflow_pe:
