@@ -205,7 +205,7 @@ def pbc_qc_se(bam, mito_chr_name, out_dir):
         os.path.basename(strip_ext_bam(bam)))
     # strip extension appended in the previous step
     prefix = strip_ext(prefix,'dupmark') 
-    pbc_qc = '{}.pbc.qc'.format(prefix)
+    pbc_qc = '{}.lib_complexity.qc'.format(prefix)
 
     cmd2 = 'bedtools bamtobed -i {} | '
     cmd2 += 'awk \'BEGIN{{OFS="\\t"}}{{print $1,$2,$3,$6}}\' | '
@@ -225,7 +225,7 @@ def pbc_qc_se(bam, mito_chr_name, out_dir):
 def pbc_qc_pe(bam, mito_chr_name, nth, out_dir):
     prefix = os.path.join(out_dir,
         os.path.basename(strip_ext_bam(bam)))
-    pbc_qc = '{}.pbc.qc'.format(prefix)
+    pbc_qc = '{}.lib_complexity.qc'.format(prefix)
 
     nmsrt_bam = samtools_name_sort(bam, nth, out_dir)
     cmd3 = 'bedtools bamtobed -bedpe -i {} | '
