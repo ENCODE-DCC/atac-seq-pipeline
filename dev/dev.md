@@ -111,7 +111,6 @@ do
   gsutil cp $DIR_SRC/$G/*.chrM.fa.gz $DIR_TARGET/$G/
   gsutil cp $DIR_SRC/$G/bowtie2_index/*.chrM.* $DIR_TARGET/$G/bowtie2_index/
   gsutil cp $DIR_SRC/$G/bwa_index/*.chrM.* $DIR_TARGET/$G/bwa_index/
-  gsutil cp $DIR_SRC/$G/*.chrM.fa.gz $DIR_TARGET/$G/
 done
 gsutil cp *_gcp.tsv $DIR_TARGET/
 gsutil cp *_caper.tsv $DIR_TARGET/
@@ -128,7 +127,6 @@ do
   gsutil cp $DIR_SRC/$G/*.chrM.fa.gz $DIR_TARGET/$G/
   gsutil cp $DIR_SRC/$G/bowtie2_index/*.chrM.* $DIR_TARGET/$G/bowtie2_index/
   gsutil cp $DIR_SRC/$G/bwa_index/*.chrM.* $DIR_TARGET/$G/bwa_index/
-  gsutil cp $DIR_SRC/$G/*.chrM.fa.gz $DIR_TARGET/$G/
 done
 gsutil cp *_aws.tsv $DIR_TARGET/
 
@@ -145,7 +143,6 @@ do
   scp $DIR_SRC/$G/*.chrM.fa.gz $PREFIX:$DIR_TARGET/$G/
   scp $DIR_SRC/$G/bowtie2_index/*.chrM.* $PREFIX:$DIR_TARGET/$G/bowtie2_index/
   scp $DIR_SRC/$G/bwa_index/*.chrM.* $PREFIX:$DIR_TARGET/$G/bwa_index/
-  scp $DIR_SRC/$G/*.chrM.fa.gz $PREFIX:$DIR_TARGET/$G/
 done
 scp *_sherlock.tsv $PREFIX:$DIR_TARGET/
 
@@ -162,9 +159,38 @@ do
   scp $DIR_SRC/$G/*.chrM.fa.gz $PREFIX:$DIR_TARGET/$G/
   scp $DIR_SRC/$G/bowtie2_index/*.chrM.* $PREFIX:$DIR_TARGET/$G/bowtie2_index/
   scp $DIR_SRC/$G/bwa_index/*.chrM.* $PREFIX:$DIR_TARGET/$G/bwa_index/
-  scp $DIR_SRC/$G/*.chrM.fa.gz $PREFIX:$DIR_TARGET/$G/
 done
 scp *_scg.tsv $PREFIX:$DIR_TARGET/
+
+# LOG-IN ON ENCODE OFFICIAL DX (AWS) project 
+PLATFORM=dx
+DIR_TARGET=/pipeline-genome-data
+for G in "hg19" "mm9" "hg38" "mm10" "hg38_chr19_chrM" "mm10_chr19_chrM";
+do
+  #dx upload $DIR_SRC/$G/ataqc/* --path $DIR_TARGET/$G/ataqc/
+  dx upload $DIR_SRC/$G/*.chrM.fa.gz --path $DIR_TARGET/$G/
+  dx upload $DIR_SRC/$G/bowtie2_index/*.chrM.fa.tar --path $DIR_TARGET/$G/bowtie2_index/
+  dx upload $DIR_SRC/$G/bwa_index/*.chrM.fa.tar --path $DIR_TARGET/$G/bwa_index/
+done
+
+# REMOVE *.tsv files on DX (AWS) project dir /pipeline-genome-data
+# COPY NEW TSVs to it
+dx upload *_dx.tsv --path pipeline-genome-data/
+
+# LOG-IN ON ENCODE OFFICIAL DX (AZURE) project 
+PLATFORM=dx_azure
+DIR_TARGET=/pipeline-genome-data
+for G in "hg19" "mm9" "hg38" "mm10" "hg38_chr19_chrM" "mm10_chr19_chrM";
+do
+  #dx upload $DIR_SRC/$G/ataqc/* --path $DIR_TARGET/$G/ataqc/
+  dx upload $DIR_SRC/$G/*.chrM.fa.gz --path $DIR_TARGET/$G/
+  dx upload $DIR_SRC/$G/bowtie2_index/*.chrM.fa.tar --path $DIR_TARGET/$G/bowtie2_index/
+  dx upload $DIR_SRC/$G/bwa_index/*.chrM.fa.tar --path $DIR_TARGET/$G/bwa_index/
+done
+
+# REMOVE *.tsv files on DX (AZURE) project dir /pipeline-genome-data
+# COPY NEW TSVs to it
+dx upload *_dx_azure.tsv --path pipeline-genome-data/
 
 ```
 
