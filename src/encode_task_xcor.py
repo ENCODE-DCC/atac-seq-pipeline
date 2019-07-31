@@ -102,7 +102,7 @@ def xcor(ta, speak, mito_chr_name,
 
     # parse xcor_score and write fraglen (3rd column) to file
     cmd3 = 'echo {} > {}'.format(
-        parse_xcor_score(xcor_score)['est_frag_len'],
+        parse_xcor_score(xcor_score)['estimated_fragment_len'],
         fraglen_txt)
     run_shell_cmd(cmd3)
 
