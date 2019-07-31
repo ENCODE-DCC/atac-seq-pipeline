@@ -1,6 +1,6 @@
 # ENCODE DCC ATAC-Seq/DNase-Seq pipeline tester
 # Author: Jin Lee (leepc12@gmail.com)
-import "../../atac.wdl" as atac
+import "../../../atac.wdl" as atac
 import "compare_md5sum.wdl" as compare_md5sum
 
 workflow test_fraglen_stat_pe {

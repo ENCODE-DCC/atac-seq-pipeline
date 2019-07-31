@@ -1,6 +1,6 @@
 # ENCODE DCC ATAC-Seq/DNase-Seq pipeline tester for task trim_adapter
 # Author: Jin Lee (leepc12@gmail.com)
-import "../../atac.wdl" as atac
+import "../../../atac.wdl" as atac
 import "compare_md5sum.wdl" as compare_md5sum
 
 workflow test_trim_adapter {
