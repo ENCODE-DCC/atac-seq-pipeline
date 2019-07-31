@@ -528,7 +528,7 @@ def make_cat_replication(args, cat_root):
             peak_caller=args.peak_caller,
             extra_info=extra_info,
         ),
-        ex=parse_num_peak_qc,
+        parser=parse_num_peak_qc,
         map_key_desc=MAP_KEY_DESC_NUM_PEAK_QC,
         parent=cat_replication,
     )
