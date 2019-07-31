@@ -254,7 +254,7 @@ workflow atac {
 		else read_genome_tsv.mito_chr_name
 	String? genome_name_ = if defined(genome_name) then genome_name
 		else if defined(read_genome_tsv.genome_name) then read_genome_tsv.genome_name
-		else basename(select_first([genome_tsv, ref_fa_, chrsz_, 'None'])),
+		else basename(select_first([genome_tsv, ref_fa_, chrsz_, 'None']))
 
 	# read additional annotation data
 	File? tss_ = if defined(tss) then tss
@@ -637,7 +637,8 @@ workflow atac {
 				enh = enh_,
 			}
 		}
-		if ( defined(macs2_signal_track.pval_bw) ) {
+		if ( enable_compare_to_roadmap && defined(macs2_signal_track.pval_bw) &&
+			 defined(reg2map_) && defined(roadmap_meta_) ) {
 			call compare_signal_to_roadmap { input :
 				pval_bw = macs2_signal_track.pval_bw,
 				reg2map_bed = reg2map_bed_,
@@ -730,7 +731,7 @@ workflow atac {
 		# fingerprint and JS-distance plot
 		call jsd { input :
 			nodup_bams = nodup_bam_,
-			blacklist_st = blacklist_,
+			blacklist = blacklist_,
 			mapq_thresh = mapq_thresh_,
 
 			cpu = jsd_cpu,
@@ -1288,7 +1289,7 @@ task xcor {
 task jsd {
 	Array[File?] nodup_bams
 	File blacklist
-	Float mapq_thresh
+	Int mapq_thresh
 
 	Int cpu
 	Int mem_mb
