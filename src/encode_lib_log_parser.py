@@ -397,7 +397,7 @@ def parse_jsd_qc(txt):
         # with --JSDSample (control) only
         result['jsd'] = float(arr[6])
         result['syn_jsd'] = float(arr[7])
-        result['pct_genome_enrich'] = float(arr[8])*100.0
+        result['pct_genome_enrich'] = float(arr[8])
         result['diff_enrich'] = float(arr[9])
         result['ch_div'] = float(arr[10])
     else:
