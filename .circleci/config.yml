@@ -70,7 +70,8 @@ jobs:
             source ${BASH_ENV}
             cd dev/test/test_task/
             rm -rf atac-seq-pipeline-test-data
-            git clone https://github.com/ENCODE-DCC/atac-seq-pipeline-test-data
+            #git clone https://github.com/ENCODE-DCC/atac-seq-pipeline-test-data
+            gsutil -m cp -r gs://encode-pipeline-test-samples/encode-atac-seq-pipeline/atac-seq-pipeline-test-data .
             ./download_hg38_fasta_for_test_ataqc.sh
             for wdl in test_*.wdl
             do
