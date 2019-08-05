@@ -380,8 +380,8 @@ MAP_KEY_DESC_JSD_QC = {
     'diff_enrich' : 'Diff. Enrichment',
 }
 
-# deepTools 2.5.4 only
-# https://github.com/deeptools/deepTools/blob/c0318e7a6f4c6322a4fa55e502ff71d4f13acb36/deeptools/plotFingerprint.py#L421
+# deepTools 3.3.0 only
+# https://github.com/deeptools/deepTools/blob/master/deeptools/plotFingerprint.py#L454
 def parse_jsd_qc(txt):
     result = OrderedDict()
     if not txt: return result
@@ -393,13 +393,15 @@ def parse_jsd_qc(txt):
     result['syn_x_intercept'] = float(arr[3])
     result['elbow_pt'] = float(arr[4])
     result['syn_elbow_pt'] = float(arr[5])
-    if len(arr) > 6:
+    if len(arr) > 7:
         # with --JSDSample (control) only
         result['jsd'] = float(arr[6])
         result['syn_jsd'] = float(arr[7])
         result['pct_genome_enrich'] = float(arr[8])*100.0
         result['diff_enrich'] = float(arr[9])
         result['ch_div'] = float(arr[10])
+    else:
+        result['syn_jsd'] = float(arr[6])
     return result
 
 MAP_KEY_DESC_REPRODUCIBILITY_QC = {
