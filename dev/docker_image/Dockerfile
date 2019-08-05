@@ -119,7 +119,7 @@ RUN apt-get update && apt-get install -y \
 && rm -rf /var/lib/apt/lists/*
 
 # Install python packages for ATAQC (pysam, pybedtools, metaseq, pandas, jinja2)
-RUN pip install --no-cache-dir pysam==0.8.2.1 pybedtools==0.6.9 pandas==0.21.1 scikit-learn==0.20 metaseq==0.5.6 jinja2==2.10
+RUN pip install --no-cache-dir pysam==0.14.1 pybedtools==0.6.9 pandas==0.21.1 scikit-learn==0.20 metaseq==0.5.6 jinja2==2.10
 
 # Install gsl 1.16
 RUN wget http://gnu.mirror.vexxhost.com/gsl/gsl-1.16.tar.gz && tar -zxvf gsl-1.16.tar.gz && cd gsl-1.16 && ./configure && make && make install && cd .. && rm -rf gsl-1.16 gsl-1.16.tar.gz
@@ -139,15 +139,19 @@ RUN git clone https://github.com/ENCODE-DCC/kentUtils_bin_v377
 ENV PATH=${PATH}:/software/kentUtils_bin_v377/bin
 ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/software/kentUtils_bin_v377/lib
 
-# Install pyBigwig 0.2.8 (python2)
-RUN git clone --branch 0.2.8 --single-branch https://github.com/deeptools/pyBigWig && \
+# Install pyBigwig 0.3.11 (python2)
+RUN git clone --branch 0.3.11 --single-branch https://github.com/deeptools/pyBigWig && \
     cd pyBigWig && python setup.py install && cd ../ && rm -rf pyBigWig*
 
-# Install deeptools 2.5.4 (python2)
-RUN pip install --no-cache-dir --no-dependencies deeptools==2.5.4
+# Install deeptools 3.3.0 (python2)
+RUN pip install --no-cache-dir --no-dependencies deeptools==3.3.0 deeptoolsintervals==0.1.8 plotly==4.0.0 retrying==1.3.3
 
 # Install SAMstats 0.1.0 (Kundaje lab)
-RUN pip install --no-cache-dir SAMstats==0.1.0
+RUN pip install --no-cache-dir --no-dependencies SAMstats==0.1.0
+
+# Install Bwa 0.7.13
+RUN git clone --branch v0.7.13 --single-branch https://github.com/lh3/bwa.git && \
+    cd bwa && make && cp bwa /usr/local/bin/ && cd ../ && rm -rf bwa*
 
 # Prevent conflict with locally installed python outside of singularity container
 ENV PYTHONNOUSERSITE=True
@@ -156,7 +160,7 @@ ENV PYTHONNOUSERSITE=True
 # This COPY assumes the build context is the root of the atac-seq-pipeline repo
 # and it gets whatever is checked out plus local modifications
 # so the buildling command should:
-# cd [GIT_REPO_DIR] && docker build -f docker_images/pipeline/Dockerfile .
+# cd [GIT_REPO_DIR] && docker build -f dev/docker_image/Dockerfile .
 RUN mkdir -p atac-seq-pipeline/src
 COPY src atac-seq-pipeline/src/
 COPY atac.wdl atac-seq-pipeline/

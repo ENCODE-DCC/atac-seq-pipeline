@@ -1,0 +1,10 @@
+{
+    "test_jsd.se_nodup_bams" : [
+        "atac-seq-pipeline-test-data/input/se/nodup_bams/rep1/ENCFF439VSY.subsampled.400.trim.merged.nodup.bam"
+    ],
+    "test_jsd.se_blacklist" : "atac-seq-pipeline-test-data/genome_data/hg38_chr19_chrM/hg38.blacklist.bed.gz",
+
+    "test_jsd.ref_se_jsd_logs" : [
+        "atac-seq-pipeline-test-data/ref_output/test_jsd/se/x.qc"
+    ]
+}

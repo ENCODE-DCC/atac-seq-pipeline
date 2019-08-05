@@ -20,12 +20,12 @@ else
   NUM_TASK=1
 fi
 
-if [ -f "cromwell-38.jar" ]; then
+if [ -f "cromwell-42.jar" ]; then
   echo "Skip downloading cromwell."
 else
-  wget -N -c https://github.com/broadinstitute/cromwell/releases/download/38/cromwell-38.jar
+  wget -N -c https://github.com/broadinstitute/cromwell/releases/download/42/cromwell-42.jar
 fi
-CROMWELL_JAR=cromwell-38.jar
+CROMWELL_JAR=cromwell-42.jar
 BACKEND_CONF=../../backends/backend.conf
 BACKEND=Local
 EXTRA_PARAM="-Dbackend.providers.Local.config.concurrent-job-limit=${NUM_TASK}"
