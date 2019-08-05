@@ -72,6 +72,14 @@ Additional information about each genome:
 |hg19|UCSC|[GRCh37/hg19](http://hgdownload.cse.ucsc.edu/goldenpath/hg19/encodeDCC/referenceSequences/male.hg19.fa.gz)|
 |mm9|UCSC|[mm9, NCBI Build 37](<http://hgdownload.cse.ucsc.edu/goldenPath/mm9/bigZips/mm9.2bit>)|
 
+## How to download reference genome
+
+1. Choose `GENOME` from `hg19`, `hg38`, `mm9` and `mm10` and specify a destination directory.
+    ```bash
+    $ bash genome/download_genome_data.sh [GENOME] [DESTINATION_DIR]
+    ```
+2. Find a TSV file on the destination directory and use it for `"atac.genome_tsv"` in your input JSON.
+
 ## Input genomic data
 
 Choose endedness of your dataset first.
