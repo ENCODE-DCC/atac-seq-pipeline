@@ -10,6 +10,9 @@ from encode_lib_common import strip_ext_bam, ls_l, log, logging, mkdir_p, rm_f
 from encode_lib_genomic import remove_read_group, locate_picard
 import numpy as np
 import pandas as pd
+import matplotlib as mpl
+mpl.use('Agg')
+
 from matplotlib import pyplot as plt
 import warnings
 warnings.filterwarnings("ignore")

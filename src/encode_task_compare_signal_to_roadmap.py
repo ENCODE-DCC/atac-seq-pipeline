@@ -10,6 +10,9 @@ from encode_lib_common import strip_ext_bigwig, ls_l, log, logging, mkdir_p, rm_
 import numpy as np
 import pandas as pd
 import scipy.stats
+import matplotlib as mpl
+mpl.use('Agg')
+
 from matplotlib import pyplot as plt
 import warnings
 warnings.filterwarnings("ignore")
