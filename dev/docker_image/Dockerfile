@@ -146,8 +146,8 @@ RUN git clone --branch 0.3.11 --single-branch https://github.com/deeptools/pyBig
 # Install deeptools 3.3.0 (python2)
 RUN pip install --no-cache-dir --no-dependencies deeptools==3.3.0 deeptoolsintervals==0.1.8 plotly==4.0.0 retrying==1.3.3
 
-# Install SAMstats 0.1.0 (Kundaje lab)
-RUN pip install --no-cache-dir --no-dependencies SAMstats==0.1.0
+# Install SAMstats 0.2.0 (Kundaje lab)
+RUN pip install --no-cache-dir --no-dependencies SAMstats==0.2.0
 
 # Install Bwa 0.7.13
 RUN git clone --branch v0.7.13 --single-branch https://github.com/lh3/bwa.git && \
