@@ -50,8 +50,8 @@ cd ${CONDA_BIN}
 rm -f cromwell.jar
 ln -s ../share/cromwell/cromwell.jar
 
-# install SAMstats 0.2.0 (float div bug fixed)
-pip install --no-dependencies SAMstats==0.2.0
+# install SAMstats 0.2.1 (float div bug fixed)
+pip install --no-dependencies SAMstats==0.2.1
 
 # install deeptools 3.3.0
 pip install --no-dependencies deeptools==3.3.0 #deeptoolsintervals==0.1.8 pyBigWig==0.3.11 plotly retrying 
