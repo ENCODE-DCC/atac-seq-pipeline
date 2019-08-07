@@ -23,7 +23,7 @@ fi
 if [ -f "cromwell-42.jar" ]; then
   echo "Skip downloading cromwell."
 else
-  wget -N -c https://github.com/broadinstitute/cromwell/releases/download/42/cromwell-42.jar
+  wget -N -c https://storage.googleapis.com/encode-pipeline-test-samples/cromwell_jar/cromwell-42.jar
 fi
 CROMWELL_JAR=cromwell-42.jar
 BACKEND_CONF=../../backends/backend.conf
