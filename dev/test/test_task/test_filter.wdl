@@ -14,12 +14,12 @@ workflow test_filter {
 	String se_bam
 	String se_bam_no_multimapping
 
-	String ref_pe_nodup_bam
-	String ref_pe_nodup_bam_no_multimapping
-	String ref_pe_filt_bam
-	String ref_se_nodup_bam
-	String ref_se_nodup_bam_no_multimapping
-	String ref_se_filt_bam
+	String ref_pe_nodup_samstat_qc
+	String ref_pe_nodup_samstat_qc_no_multimapping
+	String ref_pe_filt_samstat_qc
+	String ref_se_nodup_samstat_qc
+	String ref_se_nodup_samstat_qc_no_multimapping
+	String ref_se_filt_samstat_qc
 	String mito_chr_name = 'chrM'
 
 	Int filter_cpu = 1
@@ -128,20 +128,20 @@ workflow test_filter {
 			'se_filter_no_dup_removal',
 		],
 		files = [
-			pe_filter.nodup_bam,
-			pe_filter_no_multimapping.nodup_bam,
-			pe_filter_no_dup_removal.nodup_bam,
-			se_filter.nodup_bam,
-			se_filter_no_multimapping.nodup_bam,
-			se_filter_no_dup_removal.nodup_bam,
+			pe_filter.samstat_qc,
+			pe_filter_no_multimapping.samstat_qc,
+			pe_filter_no_dup_removal.samstat_qc,
+			se_filter.samstat_qc,
+			se_filter_no_multimapping.samstat_qc,
+			se_filter_no_dup_removal.samstat_qc,
 		],
 		ref_files = [
-			ref_pe_nodup_bam,
-			ref_pe_nodup_bam_no_multimapping,
-			ref_pe_filt_bam,
-			ref_se_nodup_bam,
-			ref_se_nodup_bam_no_multimapping,
-			ref_se_filt_bam,
+			ref_pe_nodup_samstat_qc,
+			ref_pe_nodup_samstat_qc_no_multimapping,
+			ref_pe_filt_samstat_qc,
+			ref_se_nodup_samstat_qc,
+			ref_se_nodup_samstat_qc_no_multimapping,
+			ref_se_filt_samstat_qc,
 		],
 	}
 }
