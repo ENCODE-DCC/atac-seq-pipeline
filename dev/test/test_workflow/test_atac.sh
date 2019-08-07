@@ -44,7 +44,7 @@ java -Dconfig.file=backend_gcp_service_account.conf \
 -Dbackend.providers.google.config.genomics.auth=service-account \
 -Dbackend.providers.google.config.filesystems.gcs.auth=service-account \
 -jar ${CROMWELL_JAR} run \
-../../atac.wdl \
+../../../atac.wdl \
 -i ${INPUT} -o ${TMP_WF_OPT} -m ${METADATA}
  
 rm -f tmp_secret_key ${TMP_WF_OPT}
