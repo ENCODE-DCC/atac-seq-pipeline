@@ -153,6 +153,9 @@ RUN pip install --no-cache-dir --no-dependencies SAMstats==0.2.1 dill==0.3.0 mul
 RUN git clone --branch v0.7.13 --single-branch https://github.com/lh3/bwa.git && \
     cd bwa && make && cp bwa /usr/local/bin/ && cd ../ && rm -rf bwa*
 
+# Instal bx-python 0.8.4 (no pip install due to numpy hell in metaseq)
+RUN wget https://github.com/bxlab/bx-python/archive/v0.8.4.tar.gz && tar zxvf v0.8.4.tar.gz && cd bx-python-0.8.4/ && python setup.py install && cd .. && rm -rf bx-python-* v0.8.4.tar.gz
+
 # Prevent conflict with locally installed python outside of singularity container
 ENV PYTHONNOUSERSITE=True
 
