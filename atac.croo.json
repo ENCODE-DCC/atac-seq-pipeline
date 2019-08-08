@@ -417,31 +417,31 @@
   },
   "atac.idr": {
     "bfilt_idr_peak": {
-      "path": "peak/${basename.split('.')[0].replace('_','_vs_').replace('-','_vs_')}/${basename}",
-      "table": "Peak/${basename.split('.')[0].replace('_',' vs. ').replace('-',' vs. ').capitalize()}/Blacklist-filtered IDR peak"
+      "path": "peak/${basename.split('.')[0].replace('_vs_','_').replace('_','_vs_').replace('-','_vs_')}/${basename}",
+      "table": "Peak/${basename.split('.')[0].replace('_vs_','_').replace('_',' vs. ').replace('-',' vs. ').capitalize()}/Blacklist-filtered IDR peak"
     },
     "bfilt_idr_peak_bb": {
-      "path": "peak/${basename.split('.')[0].replace('_','_vs_').replace('-','_vs_')}/${basename}",
-      "table": "Peak/${basename.split('.')[0].replace('_',' vs. ').replace('-',' vs. ').capitalize()}/Blacklist-filtered IDR peak (BigBed)"
+      "path": "peak/${basename.split('.')[0].replace('_vs_','_').replace('_','_vs_').replace('-','_vs_')}/${basename}",
+      "table": "Peak/${basename.split('.')[0].replace('_vs_','_').replace('_',' vs. ').replace('-',' vs. ').capitalize()}/Blacklist-filtered IDR peak (BigBed)"
     },
     "bfilt_idr_peak_hammock": {
-      "path": "peak/${basename.split('.')[0].replace('_','_vs_').replace('-','_vs_')}/${basename}",
-      "table": "Peak/${basename.split('.')[0].replace('_',' vs. ').replace('-',' vs. ').capitalize()}/Blacklist-filtered IDR peak (hammock)"
+      "path": "peak/${basename.split('.')[0].replace('_vs_','_').replace('_','_vs_').replace('-','_vs_')}/${basename}",
+      "table": "Peak/${basename.split('.')[0].replace('_vs_','_').replace('_',' vs. ').replace('-',' vs. ').capitalize()}/Blacklist-filtered IDR peak (hammock)"
     },
     "idr_unthresholded_peak": {
-      "path": "peak/${basename.split('.')[0].replace('_','_vs_').replace('-','_vs_')}/${basename}",
-      "table": "Peak/${basename.split('.')[0].replace('_',' vs. ').replace('-',' vs. ').capitalize()}/Unthresholded raw IDR peak"
+      "path": "peak/${basename.split('.')[0].replace('_vs_','_').replace('_','_vs_').replace('-','_vs_')}/${basename}",
+      "table": "Peak/${basename.split('.')[0].replace('_vs_','_').replace('_',' vs. ').replace('-',' vs. ').capitalize()}/Unthresholded raw IDR peak"
     },
     "idr_plot": {
-      "path": "qc/${basename.split('.')[0].replace('_','_vs_').replace('-','_vs_')}/${basename}",
+      "path": "qc/${basename.split('.')[0].replace('_vs_','_').replace('_','_vs_').replace('-','_vs_')}/${basename}",
       "table": "QC and logs/${basename.split('.')[0].replace('_',' vs. ').replace('-',' vs. ').capitalize()}/IDR plot"
     },
     "idr_log": {
-      "path": "qc/${basename.split('.')[0].replace('_','_vs_').replace('-','_vs_')}/${basename}",
+      "path": "qc/${basename.split('.')[0].replace('_vs_','_').replace('_','_vs_').replace('-','_vs_')}/${basename}",
       "table": "QC and logs/${basename.split('.')[0].replace('_',' vs. ').replace('-',' vs. ').capitalize()}/IDR log"
     },
     "frip_qc": {
-      "path": "qc/${basename.split('.')[0].replace('_','_vs_').replace('-','_vs_')}/${basename}",
+      "path": "qc/${basename.split('.')[0].replace('_vs_','_').replace('_','_vs_').replace('-','_vs_')}/${basename}",
       "table": "QC and logs/${basename.split('.')[0].replace('_',' vs. ').replace('-',' vs. ').capitalize()}/Fraction of IDR peaks in reads"
     }
   },
@@ -507,19 +507,19 @@
   },
   "atac.overlap": {
     "bfilt_overlap_peak": {
-      "path": "peak/${basename.split('.')[0].replace('_','_vs_').replace('-','_vs_')}/${basename}",
-      "table": "Peak/${basename.split('.')[0].replace('_',' vs. ').replace('-',' vs. ').capitalize()}/Blacklist-filtered overlap peak"
+      "path": "peak/${basename.split('.')[0].replace('_vs_','_').replace('_','_vs_').replace('-','_vs_')}/${basename}",
+      "table": "Peak/${basename.split('.')[0].replace('_vs_','_').replace('_',' vs. ').replace('-',' vs. ').capitalize()}/Blacklist-filtered overlap peak"
     },
     "bfilt_overlap_peak_bb": {
-      "path": "peak/${basename.split('.')[0].replace('_','_vs_').replace('-','_vs_')}/${basename}",
-      "table": "Peak/${basename.split('.')[0].replace('_',' vs. ').replace('-',' vs. ').capitalize()}/Blacklist-filtered overlap peak (BigBed)"
+      "path": "peak/${basename.split('.')[0].replace('_vs_','_').replace('_','_vs_').replace('-','_vs_')}/${basename}",
+      "table": "Peak/${basename.split('.')[0].replace('_vs_','_').replace('_',' vs. ').replace('-',' vs. ').capitalize()}/Blacklist-filtered overlap peak (BigBed)"
     },
     "bfilt_overlap_peak_hammock": {
-      "path": "peak/${basename.split('.')[0].replace('_','_vs_').replace('-','_vs_')}/${basename}",
-      "table": "Peak/${basename.split('.')[0].replace('_',' vs. ').replace('-',' vs. ').capitalize()}/Blacklist-filtered overlap peak (hammock)"
+      "path": "peak/${basename.split('.')[0].replace('_vs_','_').replace('_','_vs_').replace('-','_vs_')}/${basename}",
+      "table": "Peak/${basename.split('.')[0].replace('_vs_','_').replace('_',' vs. ').replace('-',' vs. ').capitalize()}/Blacklist-filtered overlap peak (hammock)"
     },
     "frip_qc": {
-      "path": "qc/${basename.split('.')[0].replace('_','_vs_').replace('-','_vs_')}/${basename}",
+      "path": "qc/${basename.split('.')[0].replace('_vs_','_').replace('_','_vs_').replace('-','_vs_')}/${basename}",
       "table": "QC and logs/${basename.split('.')[0].replace('_',' vs. ').replace('-',' vs. ').capitalize()}/Fraction of overlap peaks in reads"
     }
   },
