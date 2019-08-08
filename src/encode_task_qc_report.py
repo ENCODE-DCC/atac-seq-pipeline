@@ -885,10 +885,16 @@ def main():
         # because it includes metadata like date, pipeline_ver, ...
         # we want to compare actual quality metrics only
         j.pop('general')
+        # exclude JSD (last 3 columns are random)
+        # JSD is tested in task level test.
+        if 'align_enrich' in j and 'jsd' in j['align_enrich']:
+            j['align_enrich'].pop('jsd')
         with open(args.qc_json_ref,'r') as fp:
             j_ref = json.load(fp, object_pairs_hook=OrderedDict)
             if 'general' in j_ref:
                 j_ref.pop("general")
+            if 'align_enrich' in j_ref and 'jsd' in j_ref['align_enrich']:
+                j_ref['align_enrich'].pop('jsd')
             match_qc_json_ref = j == j_ref
     else:
         match_qc_json_ref = False
