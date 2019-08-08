@@ -388,6 +388,21 @@ def make_cat_align(args, cat_root):
             if plot:
                 cat_fraglen.add_plot(plot, key=rep, size_pct=50)
 
+    cat_gc_bias = QCCategory(
+        'gc_bias',
+        html_head='<h2>Sequence quality metrics (GC bias)</h2>',
+        html_foot="""
+            <p>Open chromatin assays are known to have significant GC bias. Please take this
+            into consideration as necessary.</p><br>
+        """,
+        parent=cat_align
+    )
+    if args.gc_plots:
+        for i, plot in enumerate(args.gc_plots):
+            rep = 'rep' + str(i + 1)
+            if plot:
+                cat_gc_bias.add_plot(plot, key=rep, size_pct=60)
+
     return cat_align
 
 
@@ -820,21 +835,6 @@ def make_cat_etc(args, cat_root):
         html_head='<h1>Other quality metrics</h1><hr>',
         parent=cat_root
     )
-
-    cat_gc_bias = QCCategory(
-        'gc_bias',
-        html_head='<h2>Sequence quality metrics (GC bias)</h2>',
-        html_foot="""
-            <p>Open chromatin assays are known to have significant GC bias. Please take this
-            into consideration as necessary.</p><br>
-        """,
-        parent=cat_etc
-    )
-    if args.gc_plots:
-        for i, plot in enumerate(args.gc_plots):
-            rep = 'rep' + str(i + 1)
-            if plot:
-                cat_gc_bias.add_plot(plot, key=rep, size_pct=60)
 
     cat_roadmap = QCCategory(
         'roadmap',
