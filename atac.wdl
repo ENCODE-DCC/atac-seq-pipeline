@@ -628,7 +628,7 @@ workflow atac {
 				ref_fa = ref_fa_,
 			}
 		}
-		if ( defined(ta_) ) {
+		if ( defined(ta_) && defined(blacklist_) && defined(dnase_) && defined(prom_) && defined(enh_) ) {
 			call annot_enrich { input :
 				ta = ta_,
 				blacklist = blacklist_,
