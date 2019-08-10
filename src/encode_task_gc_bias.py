@@ -19,7 +19,6 @@ warnings.filterwarnings("ignore")
 
 def parse_arguments():
     parser = argparse.ArgumentParser(prog='ENCODE GC bias')
-    parser.add_argument('--read-len-log', type=str, help='Read length log file (from aligner task).')
     parser.add_argument('--nodup-bam', type=str, help='Raw BAM file (from task filter).')
     parser.add_argument('--ref-fa', type=str, help='Reference fasta file.')
     parser.add_argument('--out-dir', default='', type=str, help='Output directory.')
