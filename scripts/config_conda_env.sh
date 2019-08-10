@@ -56,11 +56,19 @@ pip install --no-dependencies SAMstats==0.2.1
 # install deeptools 3.3.0
 pip install --no-dependencies deeptools==3.3.0 #deeptoolsintervals==0.1.8 pyBigWig==0.3.11 plotly retrying 
 
+# upgrade phantompeakqualtools 1.2.0 -> 1.2.1 (to exclude negative peaks)
+cd ${CONDA_BIN}
+rm -f run_spp.R
+git clone --branch 1.2.1 https://github.com/kundajelab/phantompeakqualtools
+cp -f phantompeakqualtools/run_spp.R .
+chmod +x run_spp.R
+rm -rf phantompeakqualtools
+
 # make a soft link for picard.jar
 if [ -f ${CONDA_PREFIX}/bin/picard ]; then
   PICARD_JAR=../share/picard*/picard.jar
   chmod +rx ${PICARD_JAR}
-  cd ${CONDA_PREFIX}/bin && ln -s ${PICARD_JAR}
+  cd ${CONDA_PREFIX}/bin && rm -f picard.jar && ln -s ${PICARD_JAR}
 fi
 
 echo "=== Done."
