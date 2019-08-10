@@ -73,9 +73,9 @@ RUN pip install --no-cache-dir --no-dependencies macs2==2.1.1.20160309
 RUN git clone --branch 2.0.4.2 --single-branch https://github.com/kundajelab/idr && \
     cd idr && python3 setup.py install && cd ../ && rm -rf idr*
 
-# Install samtools 1.2
-RUN git clone --branch 1.2 --single-branch https://github.com/samtools/samtools.git && \
-    git clone --branch 1.2 --single-branch https://github.com/samtools/htslib.git && \
+# Install samtools 1.7
+RUN git clone --branch 1.7 --single-branch https://github.com/samtools/samtools.git && \
+    git clone --branch 1.7 --single-branch https://github.com/samtools/htslib.git && \
     cd samtools && make && make install && cd ../ && rm -rf samtools* htslib*
 
 # Install bedtools 2.26.0
@@ -99,9 +99,9 @@ RUN echo "r <- getOption('repos'); r['CRAN'] <- 'http://cran.r-project.org'; opt
 # Install R package spp 1.13 (required for phantompeakqualtools)
 RUN wget https://github.com/hms-dbmi/spp/archive/1.13.tar.gz && Rscript -e "install.packages('./1.13.tar.gz')" && rm -f 1.13.tar.gz
 
-# Install phantompeakqualtools 1.2
-RUN wget https://github.com/kundajelab/phantompeakqualtools/archive/1.2.tar.gz && tar -xvf 1.2.tar.gz && rm -f 1.2.tar.gz
-ENV PATH="/software/phantompeakqualtools-1.2:${PATH}"
+# Install phantompeakqualtools 1.2.1
+RUN wget https://github.com/kundajelab/phantompeakqualtools/archive/1.2.1.tar.gz && tar -xvf 1.2.1.tar.gz && rm -f 1.2.1.tar.gz
+ENV PATH="/software/phantompeakqualtools-1.2.1:${PATH}"
 
 # Install cutadapt 1.9.1
 RUN pip install --no-cache-dir --no-dependencies cutadapt==1.9.1 
