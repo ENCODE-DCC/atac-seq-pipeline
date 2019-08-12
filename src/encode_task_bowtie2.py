@@ -24,7 +24,7 @@ def parse_arguments():
                             FASTQs must be compressed with gzip (with .gz).')
     parser.add_argument('--paired-end', action="store_true",
                         help='Paired-end FASTQs.')
-    parser.add_argument('--multimapping', default=4, type=int,
+    parser.add_argument('--multimapping', default=0, type=int,
                         help='Multimapping reads (for bowtie2 -k(m+1). '
                              'This will be incremented in an actual bowtie2 command line'
                              'e.g. --multimapping 3 will be bowtie2 -k 4')
