@@ -4,7 +4,6 @@ import "../../../atac.wdl" as atac
 import "compare_md5sum.wdl" as compare_md5sum
 
 workflow test_gc_bias {
-	File read_len_log
 	File nodup_bam
 
 	File ref_fa
@@ -12,7 +11,6 @@ workflow test_gc_bias {
 	File ref_gc_log
 
 	call atac.gc_bias { input : 
-		read_len_log = read_len_log,
 		nodup_bam = nodup_bam,
 
 		ref_fa = ref_fa,
