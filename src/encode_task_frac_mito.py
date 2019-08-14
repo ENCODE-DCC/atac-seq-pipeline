@@ -39,19 +39,19 @@ def frac_mito(non_mito_samstat, mito_samstat, out_dir):
     non_mito_samstat_dict = parse_flagstat_qc(non_mito_samstat)
     mito_samstat_dict = parse_flagstat_qc(mito_samstat)
 
-    if 'total' in non_mito_samstat_dict:
+    if 'mapped' in non_mito_samstat_dict:
         # backward compatibility (old key name was 'total')
-        key_total = 'total'        
-    elif 'total_reads' in non_mito_samstat_dict:        
-        key_total = 'total_reads'
-    Rn = non_mito_samstat_dict[key_total]
+        key_mapped = 'mapped'
+    elif 'mapped_reads' in non_mito_samstat_dict:
+        key_mapped = 'mapped_reads'
+    Rn = non_mito_samstat_dict[key_mapped]
 
-    if 'total' in mito_samstat_dict:
+    if 'mapped' in mito_samstat_dict:
         # backward compatibility (old key name was 'total')
-        key_total = 'total'        
-    elif 'total_reads' in mito_samstat_dict:
-        key_total = 'total_reads'
-    Rm = mito_samstat_dict[key_total]
+        key_mapped = 'mapped'
+    elif 'mapped_reads' in mito_samstat_dict:
+        key_mapped = 'mapped_reads'
+    Rm = mito_samstat_dict[key_mapped]
 
     frac = float(Rm)/float(Rn + Rm)
     with open(frac_mito_qc, 'w') as fp:

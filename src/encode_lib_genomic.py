@@ -6,23 +6,55 @@
 import os
 from encode_lib_common import *
 
-
-def remove_mito_reads(bam, mito_chr_name, nth=1, out_dir=''):
+def remove_chrs_from_bam(bam, chrs, chrsz, nth=1, out_dir=''):
+    assert(len(chrs)>0)
     prefix = os.path.join(out_dir,
         os.path.basename(strip_ext_bam(bam)))
-    samtools_index(bam, nth)
-    non_mito_bam = '{}.non_mito.bam'.format(prefix)
+    suffix = 'no_{}'.format('_'.join(chrs))
+    final_bam = '{}.{}.bam'.format(prefix, suffix)
+    # tmp_bam = '{}.{}.tmp.bam'.format(prefix, suffix)
+    # tmp_header_sam = '{}.{}.header.tmp.sam'.format(prefix, suffix)
+    tmp_chrsz = '{}.{}.tmp.chrsz'.format(prefix, suffix)
 
-    cmd = 'samtools idxstats {bam} | cut -f 1 | '
-    cmd += 'grep -v -P "^{mito_chr_name}$" | xargs '
-    cmd += 'samtools view {bam} -@ {nth} -b > {non_mito_bam}'
-    cmd = cmd.format(
+    # make a temp chrsz file
+    cmd0 = 'zcat -f {chrsz} |'
+    cmd0 += 'grep -v -P \'^({chrs})\\s\' | '
+    cmd0 += 'awk \'BEGIN{{OFS="\\t"}} {{print $1,0,$2}}\' > {tmp_chrsz}'
+    cmd0 = cmd0.format(
+        chrsz=chrsz,
+        chrs='|'.join(chrs),
+        tmp_chrsz=tmp_chrsz)
+    run_shell_cmd(cmd0)
+
+    # remove chrs from BAM
+    cmd1 = 'samtools view -b -L {tmp_chrsz} {bam} -@ {nth} > {final_bam}'
+    cmd1 = cmd1.format(
+        tmp_chrsz=tmp_chrsz,
         bam=bam,
-        mito_chr_name=mito_chr_name,
         nth=nth,
-        non_mito_bam=non_mito_bam)
-    run_shell_cmd(cmd)
-    return non_mito_bam
+        final_bam=final_bam)
+        # tmp_bam=tmp_bam)
+    run_shell_cmd(cmd1)
+    rm_f(tmp_chrsz)
+
+    # # make a temp header
+    # cmd2 = 'samtools view -H {bam} > {tmp_header_sam}'
+    # cmd2 = cmd2.format(
+    #     bam=bam,
+    #     tmp_header_sam=tmp_header_sam)
+    # run_shell_cmd(cmd2)
+
+    # # update header
+    # cmd3 = 'samtools reheader {tmp_header_sam} {tmp_bam} > {final_bam}'
+    # cmd3 = cmd3.format(
+    #     tmp_header_sam=tmp_header_sam,
+    #     tmp_bam=tmp_bam,
+    #     final_bam=final_bam)
+    # run_shell_cmd(cmd3)
+
+    # rm_f([tmp_bam, tmp_header_sam, tmp_chrsz])
+
+    return final_bam
 
 def samstat(bam, nth=1, out_dir=''):
     prefix = os.path.join(out_dir,

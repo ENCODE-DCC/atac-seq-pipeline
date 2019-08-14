@@ -16,6 +16,9 @@ def parse_arguments():
                         help='Path for FASTQ R1')
     parser.add_argument('bam', type=str,
                         help='Path for BAM')
+    parser.add_argument('--chrsz', type=str,
+                        help='2-col chromosome sizes file. If not given then '
+                             'SAMstats on mito-free BAM will not be calcaulted.')
     parser.add_argument('--mito-chr-name', default='chrM',
                         help='Mito chromosome name.')
     parser.add_argument('--nth', type=int, default=1,
@@ -59,13 +62,16 @@ def main():
     log.info('SAMstat on raw BAM...')
     flagstat = samstat(args.bam, args.nth, args.out_dir)
 
-    log.info('SAMstat on non-mito BAM...')
-    non_mito_out_dir = os.path.join(args.out_dir, 'non_mito')
-    mkdir_p(non_mito_out_dir)
-    non_mito_bam = remove_mito_reads(args.bam, args.mito_chr_name,
-                                     args.nth, non_mito_out_dir)
-    non_mito_flagstat = samstat(non_mito_bam, args.nth,
-                                non_mito_out_dir)
+    if args.chrsz:
+        log.info('SAMstat on non-mito BAM...')
+        non_mito_out_dir = os.path.join(args.out_dir, 'non_mito')
+        mkdir_p(non_mito_out_dir)
+        non_mito_bam = remove_chrs_from_bam(args.bam, [args.mito_chr_name],
+                                            args.chrsz,
+                                            args.nth, non_mito_out_dir)
+        non_mito_flagstat = samstat(non_mito_bam, args.nth,
+                                    non_mito_out_dir)
+        rm_f(non_mito_bam)
 
     log.info('List all files in output directory...')
     ls_l(args.out_dir)

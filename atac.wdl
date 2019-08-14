@@ -64,6 +64,9 @@ workflow atac {
 	Boolean enable_count_signal_track = false # generate count signal track
 	Boolean enable_idr = true 		# enable IDR analysis on raw peaks
 	Boolean enable_preseq = false
+	Boolean enable_fraglen_stat = true
+	Boolean enable_tss_enrich = true
+	Boolean enable_annot_enrich = true
 	Boolean enable_jsd = true 		# enable JSD plot generation (deeptools fingerprint)
 	Boolean enable_compare_to_roadmap = false
 	Boolean enable_gc_bias = true
@@ -78,10 +81,11 @@ workflow atac {
 	Boolean no_dup_removal = false 	# keep all dups in final BAM
 	Int? mapq_thresh				# threshold for low MAPQ reads removal
 	Int mapq_thresh_bwa = 30
-	Int mapq_thresh_bowtie2 = 255
-	String regex_filter_reads = 'chrM' 	# Perl-style regular expression pattern for chr name to filter out reads
-									# those reads will be excluded from peak calling
-									# mito reads will be removed before peak-calling by default
+	Int mapq_thresh_bowtie2 = 30
+	Array[String] filter_chrs = ['chrM', 'MT']
+									# array of chromosomes to be removed from nodup/filt BAM
+									# chromosomes will be removed from both BAM header/contents
+									# e.g. (default: mito-chrs) ['chrM', 'MT']
 	Int subsample_reads = 0			# subsample TAGALIGN (0: no subsampling)
 	Int xcor_subsample_reads = 25000000 # subsample TAG-ALIGN for xcor only (not used for other downsteam analyses)
 
@@ -382,6 +386,7 @@ workflow atac {
 			call align { input :
 				aligner = aligner_,
 				mito_chr_name = mito_chr_name_,
+				chrsz = chrsz_,
 				custom_align_py = custom_align_py,
 				fastq_R1 = trim_merged_fastq_R1_,
 				fastq_R2 = trim_merged_fastq_R2_,
@@ -408,6 +413,7 @@ workflow atac {
 			call align as align_mito { input :
 				aligner = aligner_,
 				mito_chr_name = mito_chr_name_,
+				chrsz = chrsz_,
 				custom_align_py = custom_align_py,
 				fastq_R1 = trim_merged_fastq_R1_,
 				fastq_R2 = trim_merged_fastq_R2_,
@@ -440,6 +446,8 @@ workflow atac {
 				paired_end = paired_end_,
 				dup_marker = dup_marker,
 				mapq_thresh = mapq_thresh_,
+				filter_chrs = filter_chrs,
+				chrsz = chrsz_,
 				no_dup_removal = no_dup_removal,
 				multimapping = multimapping,
 				mito_chr_name = mito_chr_name_,
@@ -458,7 +466,6 @@ workflow atac {
 			call bam2ta { input :
 				bam = nodup_bam_,
 				disable_tn5_shift = if pipeline_type=='atac' then false else true,
-				regex_grep_v_ta = regex_filter_reads,
 				subsample = subsample_reads,
 				paired_end = paired_end_,
 				mito_chr_name = mito_chr_name_,
@@ -599,9 +606,8 @@ workflow atac {
 				chrsz = chrsz_,
 			}
 		}
-
 		# tasks factored out from ATAqC
-		if ( defined(nodup_bam_) && defined(tss_) && defined(align.read_len_log) ) {
+		if ( enable_tss_enrich && defined(nodup_bam_) && defined(tss_) && defined(align.read_len_log) ) {
 			call tss_enrich { input :
 				read_len_log = align.read_len_log,
 				nodup_bam = nodup_bam_,
@@ -609,7 +615,7 @@ workflow atac {
 				chrsz = chrsz_,
 			}
 		}
-		if ( paired_end_ && defined(nodup_bam_) ) {
+		if ( enable_fraglen_stat && paired_end_ && defined(nodup_bam_) ) {
 			call fraglen_stat_pe { input :
 				nodup_bam = nodup_bam_,
 			}
@@ -627,7 +633,7 @@ workflow atac {
 				ref_fa = ref_fa_,
 			}
 		}
-		if ( defined(ta_) && defined(blacklist_) && defined(dnase_) && defined(prom_) && defined(enh_) ) {
+		if ( enable_annot_enrich && defined(ta_) && defined(blacklist_) && defined(dnase_) && defined(prom_) && defined(enh_) ) {
 			call annot_enrich { input :
 				ta = ta_,
 				blacklist = blacklist_,
@@ -1064,6 +1070,7 @@ task trim_adapter {
 task align {
 	String aligner
 	String mito_chr_name
+	File chrsz			# 2-col chromosome sizes file
 	File? custom_align_py
 	File idx_tar		# reference index tar
 	File? fastq_R1 		# [read_end_id]
@@ -1096,6 +1103,7 @@ task align {
 		python $(which encode_task_post_align.py) \
 			${fastq_R1} $(ls *.bam) \
 			${"--mito-chr-name " + mito_chr_name} \
+			${"--chrsz " + chrsz} \
 			${"--nth " + cpu}
 	}
 	output {
@@ -1140,6 +1148,8 @@ task filter {
 	String dup_marker 			# picard.jar MarkDuplicates (picard) or 
 								# sambamba markdup (sambamba)
 	Int mapq_thresh				# threshold for low MAPQ reads removal
+	Array[String] filter_chrs 	# chrs to be removed from final (nodup/filt) BAM
+	File chrsz					# 2-col chromosome sizes file
 	Boolean no_dup_removal 		# no dupe reads removal when filtering BAM
 	String mito_chr_name
 	Int cpu
@@ -1154,6 +1164,8 @@ task filter {
 			${"--multimapping " + multimapping} \
 			${"--dup-marker " + dup_marker} \
 			${"--mapq-thresh " + mapq_thresh} \
+			--filter-chrs ${sep=' ' filter_chrs} \
+			${"--chrsz " + chrsz} \
 			${if no_dup_removal then "--no-dup-removal" else ""} \
 			${"--mito-chr-name " + mito_chr_name} \
 			${"--nth " + cpu}
@@ -1177,8 +1189,6 @@ task bam2ta {
 	File bam
 	Boolean paired_end
 	Boolean disable_tn5_shift 	# no tn5 shifting (it's for dnase-seq)
-	String regex_grep_v_ta   	# Perl-style regular expression pattern 
-                        		# to remove matching reads from TAGALIGN
 	String mito_chr_name 		# mito chromosome name
 	Int subsample 				# number of reads to subsample TAGALIGN
 								# this affects all downstream analysis
@@ -1192,7 +1202,6 @@ task bam2ta {
 			${bam} \
 			${if paired_end then "--paired-end" else ""} \
 			${if disable_tn5_shift then "--disable-tn5-shift" else ""} \
-			${if regex_grep_v_ta!="" then "--regex-grep-v-ta '"+regex_grep_v_ta+"'" else ""} \
 			${"--mito-chr-name " + mito_chr_name} \
 			${"--subsample " + subsample} \
 			${"--nth " + cpu}

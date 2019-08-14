@@ -17,9 +17,6 @@ def parse_arguments():
                         help='Disable TN5 shifting for DNase-Seq.')
     parser.add_argument('--mito-chr-name', default='chrM',
                         help='Mito chromosome name.')
-    parser.add_argument('--regex-grep-v-ta', default='chrM',
-                        help='Perl-style regular expression pattern \
-                        to remove matching reads from TAGALIGN.')
     parser.add_argument('--subsample', type=int, default=0,
                         help='Subsample TAGALIGN. \
                         This affects all downstream analysis.')
@@ -39,15 +36,13 @@ def parse_arguments():
     log.info(sys.argv)
     return args
 
-def bam2ta_se(bam, regex_grep_v_ta, out_dir):
+def bam2ta_se(bam, out_dir):
     prefix = os.path.join(out_dir,
         os.path.basename(strip_ext_bam(bam)))
     ta = '{}.tagAlign.gz'.format(prefix)
 
     cmd = 'bedtools bamtobed -i {} | '
     cmd += 'awk \'BEGIN{{OFS="\\t"}}{{$4="N";$5="1000";print $0}}\' | '
-    if regex_grep_v_ta:
-        cmd += 'grep -P -v \'^{}\\b\' | '.format(regex_grep_v_ta)
     cmd += 'gzip -nc > {}'
     cmd = cmd.format(
         bam,
@@ -55,7 +50,7 @@ def bam2ta_se(bam, regex_grep_v_ta, out_dir):
     run_shell_cmd(cmd)
     return ta
 
-def bam2ta_pe(bam, regex_grep_v_ta, nth, out_dir):
+def bam2ta_pe(bam, nth, out_dir):
     prefix = os.path.join(out_dir,
         os.path.basename(strip_ext_bam(bam)))
     ta = '{}.tagAlign.gz'.format(prefix)
@@ -77,8 +72,6 @@ def bam2ta_pe(bam, regex_grep_v_ta, nth, out_dir):
     cmd2 += '{{printf "%s\\t%s\\t%s\\tN\\t1000\\t%s\\n'
     cmd2 += '%s\\t%s\\t%s\\tN\\t1000\\t%s\\n",'
     cmd2 += '$1,$2,$3,$9,$4,$5,$6,$10}}\' | '
-    if regex_grep_v_ta:
-        cmd2 += 'grep -P -v \'^{}\\b\' | '.format(regex_grep_v_ta)
     cmd2 += 'gzip -nc > {}'
     cmd2 = cmd2.format(
         bedpe,
@@ -115,11 +108,9 @@ def main():
 
     log.info('Converting BAM to TAGALIGN...')
     if args.paired_end:
-        ta = bam2ta_pe(args.bam, args.regex_grep_v_ta,
-                        args.nth, args.out_dir)
+        ta = bam2ta_pe(args.bam, args.nth, args.out_dir)
     else:
-        ta = bam2ta_se(args.bam, args.regex_grep_v_ta,
-                        args.out_dir)
+        ta = bam2ta_se(args.bam, args.out_dir)
 
     if args.subsample:
         log.info('Subsampling TAGALIGN...')

@@ -149,7 +149,7 @@ Parameter|Type | Default|Description
 
 Parameter|Default|Description
 ---------|-------|-----------
-`atac.mapq_thresh` | 30 for bwa, 255 for bowtie2 | Threshold for mapped reads quality (samtools view -q). If not defined, automatically determined according to aligner.
+`atac.mapq_thresh` | 30 | Threshold for mapped reads quality (samtools view -q). If not defined, automatically determined according to aligner.
 `atac.dup_marker` | `picard` | Choose a dup marker between `picard` and `sambamba`. `picard` is recommended, use `sambamba` only when picard fails.
 `atac.no_dup_removal` | false | Skip dup removal in a BAM filtering stage.
 
@@ -177,9 +177,11 @@ Parameter|Default|Description
 `atac.enable_xcor` | false | Enable cross-correlation analysis
 `atac.enable_count_signal_track` | false | Enable count signal track generation
 `atac.keep_irregular_chr_in_bfilt_peak` | false | Keep irregular chromosome names. Use this for custom genomes without canonical chromosome names (chr1, chrX, ...)
-`atac.enable_preseq` | false | Disable preseq, which performs a yield prediction for reads
+`atac.enable_preseq` | false | Enable preseq, which performs a yield prediction for reads
 `atac.enable_jsd` | true | Enable deeptools fingerprint (JS distance)
-`atac.enable_gc_bias` | true | Disable GC bias computation
+`atac.enable_gc_bias` | true | Enable GC bias computation
+`atac.enable_tss_enrich` | true | Enable TSS enrichment computation
+`atac.enable_annot_enrich` | true | Enable Annotated region enrichment computation
 `atac.enable_compare_to_roadmap` | false | Enable comparing signals to epigenome roadmap
 
 ## Other optional parameters

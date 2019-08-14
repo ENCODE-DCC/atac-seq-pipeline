@@ -24,6 +24,10 @@ def parse_arguments():
                         help='Paired-end BAM.')
     parser.add_argument('--multimapping', default=0, type=int,
                         help='Multimapping reads.')
+    parser.add_argument('--filter-chrs', nargs='*',
+                        help='Chromosomes to be filtered for final (nodup/filt) BAM.')
+    parser.add_argument('--chrsz', type=str,
+                        help='2-col chromosome sizes file.')
     parser.add_argument('--mito-chr-name', default='chrM',
                         help='Mito chromosome name.')
     parser.add_argument('--nth', type=int, default=1,
@@ -209,7 +213,7 @@ def pbc_qc_se(bam, mito_chr_name, out_dir):
 
     cmd2 = 'bedtools bamtobed -i {} | '
     cmd2 += 'awk \'BEGIN{{OFS="\\t"}}{{print $1,$2,$3,$6}}\' | '
-    cmd2 += 'grep -v "^{}\\b" | sort | uniq -c | '
+    cmd2 += 'grep -v "^{}\\s" | sort | uniq -c | '
     cmd2 += 'awk \'BEGIN{{mt=0;m0=0;m1=0;m2=0}} ($1==1){{m1=m1+1}} '
     cmd2 += '($1==2){{m2=m2+1}} {{m0=m0+1}} {{mt=mt+$1}} END{{m1_m2=-1.0; '
     cmd2 += 'if(m2>0) m1_m2=m1/m2; m0_mt=0; if (mt>0) m0_mt=m0/mt; m1_m0=0; if (m0>0) m1_m0=m1/m0; '
@@ -230,7 +234,7 @@ def pbc_qc_pe(bam, mito_chr_name, nth, out_dir):
     nmsrt_bam = samtools_name_sort(bam, nth, out_dir)
     cmd3 = 'bedtools bamtobed -bedpe -i {} | '
     cmd3 += 'awk \'BEGIN{{OFS="\\t"}}{{print $1,$2,$4,$6,$9,$10}}\' | '
-    cmd3 += 'grep -v "^{}\\b" | sort | uniq -c | '
+    cmd3 += 'grep -v "^{}\\s" | sort | uniq -c | '
     cmd3 += 'awk \'BEGIN{{mt=0;m0=0;m1=0;m2=0}} ($1==1){{m1=m1+1}} '
     cmd3 += '($1==2){{m2=m2+1}} {{m0=m0+1}} {{mt=mt+$1}} END{{m1_m2=-1.0; '
     cmd3 += 'if(m2>0) m1_m2=m1/m2; m0_mt=0; if (mt>0) m0_mt=m0/mt; m1_m0=0; if (m0>0) m1_m0=m1/m0; '
@@ -293,11 +297,19 @@ def main():
         temp_files.append(dupmark_bam+'.bai')
     temp_files.append(dupmark_bam)
 
-    log.info('samtools index (nodup_bam)...')
-    nodup_bai = samtools_index(nodup_bam, args.nth, args.out_dir)
+    if len(args.filter_chrs) > 0:
+        final_bam = remove_chrs_from_bam(nodup_bam, args.filter_chrs,
+                                         args.chrsz, args.nth,
+                                         args.out_dir)
+        temp_files.append(nodup_bam)
+    else:
+        final_bam = nodup_bam
+
+    log.info('samtools index (final_bam)...')
+    nodup_bai = samtools_index(final_bam, args.nth, args.out_dir)
 
     log.info('samstat...')
-    nodup_samstat_qc = samstat(nodup_bam, args.nth, args.out_dir)
+    nodup_samstat_qc = samstat(final_bam, args.nth, args.out_dir)
 
     log.info('Generating PBC QC log...')
     if args.paired_end:
