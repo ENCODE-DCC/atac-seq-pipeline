@@ -2,7 +2,13 @@
   "atac.jsd": {
     "plot": {
       "path": "qc/${basename}",
-      "table": "QC and logs/jensen-Shannon distance plot"
+      "table": "QC and logs/Jensen-Shannon distance plot"
+    }
+  },
+  "atac.frac_mito": {
+    "frac_mito_qc": {
+      "path": "qc/${basename}",
+      "table": "QC and logs/Fraction of mitochondrial reads in raw BAM"
     }
   },
   "atac.bowtie2": {
