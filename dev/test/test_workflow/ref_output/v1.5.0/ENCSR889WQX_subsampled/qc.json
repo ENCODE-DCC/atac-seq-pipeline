@@ -1,6 +1,6 @@
 {
     "general": {
-        "date": "2019-08-07 19:07:31", 
+        "date": "2019-08-15 23:16:01", 
         "title": "ENCSR889WQX (subsampled 1/400 reads)", 
         "description": "ATAC-seq on Mus musculus C57BL/6 frontal cortex adult", 
         "pipeline_ver": "v1.5.0", 
@@ -92,23 +92,23 @@
         }, 
         "frac_mito": {
             "rep1": {
-                "non_mito_reads": 177017, 
-                "mito_reads": 200680, 
-                "frac_mito_reads": 0.531325374573
+                "non_mito_reads": 145557, 
+                "mito_reads": 58265, 
+                "frac_mito_reads": 0.285862173858
             }, 
             "rep2": {
-                "non_mito_reads": 161005, 
-                "mito_reads": 169465, 
-                "frac_mito_reads": 0.512799951584
+                "non_mito_reads": 156658, 
+                "mito_reads": 20424, 
+                "frac_mito_reads": 0.115336397827
             }
         }, 
         "nodup_samstat": {
             "rep1": {
-                "total_reads": 113125, 
+                "total_reads": 100171, 
                 "total_reads_qc_failed": 0, 
                 "duplicate_reads": 0, 
                 "duplicate_reads_qc_failed": 0, 
-                "mapped_reads": 113125, 
+                "mapped_reads": 100171, 
                 "mapped_reads_qc_failed": 0, 
                 "pct_mapped_reads": 100.0, 
                 "paired_reads": 0, 
@@ -129,11 +129,11 @@
                 "diff_chroms_qc_failed": 0
             }, 
             "rep2": {
-                "total_reads": 137049, 
+                "total_reads": 129266, 
                 "total_reads_qc_failed": 0, 
                 "duplicate_reads": 0, 
                 "duplicate_reads_qc_failed": 0, 
-                "mapped_reads": 137049, 
+                "mapped_reads": 129266, 
                 "mapped_reads_qc_failed": 0, 
                 "pct_mapped_reads": 100.0, 
                 "paired_reads": 0, 
@@ -274,32 +274,24 @@
                 "RSC": 1.164848
             }
         }, 
-        "tss_enrich": {
-            "rep1": {
-                "tss_enrich": 26.0431944331
-            }, 
-            "rep2": {
-                "tss_enrich": 17.0018059832
-            }
-        }, 
         "jsd": {
             "rep1": {
-                "auc": 0.00633135768739, 
-                "syn_auc": 0.355390235667, 
-                "x_intercept": 0.981760888082, 
-                "syn_x_intercept": 0.694158178666, 
-                "elbow_pt": 0.981818872542, 
-                "syn_elbow_pt": 0.694158178666, 
-                "syn_jsd": 0.521579562402
+                "auc": 0.00707643219502, 
+                "syn_auc": 0.348930761494, 
+                "x_intercept": 0.981408982393, 
+                "syn_x_intercept": 0.722833998906, 
+                "elbow_pt": 0.981468966317, 
+                "syn_elbow_pt": 0.722833998906, 
+                "syn_jsd": 0.507238831187
             }, 
             "rep2": {
-                "auc": 0.00914556337188, 
-                "syn_auc": 0.35749859938, 
-                "x_intercept": 0.977254095902, 
-                "syn_x_intercept": 0.684029106776, 
-                "elbow_pt": 0.977350070181, 
-                "syn_elbow_pt": 0.684029106776, 
-                "syn_jsd": 0.537146671107
+                "auc": 0.00965768539865, 
+                "syn_auc": 0.355742755378, 
+                "x_intercept": 0.976846205217, 
+                "syn_x_intercept": 0.692492206742, 
+                "elbow_pt": 0.976942179496, 
+                "syn_elbow_pt": 0.692492206742, 
+                "syn_jsd": 0.531658343471
             }
         }
     }, 

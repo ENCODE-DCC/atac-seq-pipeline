@@ -1,6 +1,6 @@
 {
     "general": {
-        "date": "2019-08-07 18:47:51", 
+        "date": "2019-08-15 22:52:08", 
         "title": "ENCSR889WQX (subsampled 1/400 reads, unrep)", 
         "description": "ATAC-seq on Mus musculus C57BL/6 frontal cortex adult", 
         "pipeline_ver": "v1.5.0", 
@@ -56,18 +56,18 @@
         }, 
         "frac_mito": {
             "rep1": {
-                "non_mito_reads": 177017, 
-                "mito_reads": 200680, 
-                "frac_mito_reads": 0.531325374573
+                "non_mito_reads": 145557, 
+                "mito_reads": 58265, 
+                "frac_mito_reads": 0.285862173858
             }
         }, 
         "nodup_samstat": {
             "rep1": {
-                "total_reads": 113125, 
+                "total_reads": 100171, 
                 "total_reads_qc_failed": 0, 
                 "duplicate_reads": 0, 
                 "duplicate_reads_qc_failed": 0, 
-                "mapped_reads": 113125, 
+                "mapped_reads": 100171, 
                 "mapped_reads_qc_failed": 0, 
                 "pct_mapped_reads": 100.0, 
                 "paired_reads": 0, 
@@ -176,20 +176,15 @@
                 "RSC": 1.053135
             }
         }, 
-        "tss_enrich": {
-            "rep1": {
-                "tss_enrich": 26.0431944331
-            }
-        }, 
         "jsd": {
             "rep1": {
-                "auc": 0.00633135768739, 
-                "syn_auc": 0.355390235667, 
-                "x_intercept": 0.981760888082, 
-                "syn_x_intercept": 0.694158178666, 
-                "elbow_pt": 0.981818872542, 
-                "syn_elbow_pt": 0.694158178666, 
-                "syn_jsd": 0.521579562402
+                "auc": 0.00707643219502, 
+                "syn_auc": 0.348930761494, 
+                "x_intercept": 0.981408982393, 
+                "syn_x_intercept": 0.722833998906, 
+                "elbow_pt": 0.981468966317, 
+                "syn_elbow_pt": 0.722833998906, 
+                "syn_jsd": 0.507238831187
             }
         }
     }, 

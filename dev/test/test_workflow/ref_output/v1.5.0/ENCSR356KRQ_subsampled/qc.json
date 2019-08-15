@@ -1,6 +1,6 @@
 {
     "general": {
-        "date": "2019-08-07 18:54:50", 
+        "date": "2019-08-15 23:00:26", 
         "title": "ENCSR356KRQ (subsampled 1/400 reads)", 
         "description": "ATAC-seq on primary keratinocytes in day 0.0 of differentiation", 
         "pipeline_ver": "v1.5.0", 
@@ -92,35 +92,35 @@
         }, 
         "frac_mito": {
             "rep1": {
-                "non_mito_reads": 676182, 
-                "mito_reads": 691166, 
-                "frac_mito_reads": 0.505479219628
+                "non_mito_reads": 665674, 
+                "mito_reads": 54279, 
+                "frac_mito_reads": 0.0753924214497
             }, 
             "rep2": {
-                "non_mito_reads": 827936, 
-                "mito_reads": 848854, 
-                "frac_mito_reads": 0.506237513344
+                "non_mito_reads": 817862, 
+                "mito_reads": 77218, 
+                "frac_mito_reads": 0.0862693837422
             }
         }, 
         "nodup_samstat": {
             "rep1": {
-                "total_reads": 488656, 
+                "total_reads": 456690, 
                 "total_reads_qc_failed": 0, 
                 "duplicate_reads": 0, 
                 "duplicate_reads_qc_failed": 0, 
-                "mapped_reads": 488656, 
+                "mapped_reads": 456690, 
                 "mapped_reads_qc_failed": 0, 
                 "pct_mapped_reads": 100.0, 
-                "paired_reads": 488656, 
+                "paired_reads": 456690, 
                 "paired_reads_qc_failed": 0, 
-                "read1": 244328, 
+                "read1": 228345, 
                 "read1_qc_failed": 0, 
-                "read2": 244328, 
+                "read2": 228345, 
                 "read2_qc_failed": 0, 
-                "properly_paired_reads": 488656, 
+                "properly_paired_reads": 456690, 
                 "properly_paired_reads_qc_failed": 0, 
                 "pct_properly_paired_reads": 100.0, 
-                "with_itself": 488656, 
+                "with_itself": 456690, 
                 "with_itself_qc_failed": 0, 
                 "singletons": 0, 
                 "singletons_qc_failed": 0, 
@@ -129,23 +129,23 @@
                 "diff_chroms_qc_failed": 0
             }, 
             "rep2": {
-                "total_reads": 589432, 
+                "total_reads": 545132, 
                 "total_reads_qc_failed": 0, 
                 "duplicate_reads": 0, 
                 "duplicate_reads_qc_failed": 0, 
-                "mapped_reads": 589432, 
+                "mapped_reads": 545132, 
                 "mapped_reads_qc_failed": 0, 
                 "pct_mapped_reads": 100.0, 
-                "paired_reads": 589432, 
+                "paired_reads": 545132, 
                 "paired_reads_qc_failed": 0, 
-                "read1": 294716, 
+                "read1": 272566, 
                 "read1_qc_failed": 0, 
-                "read2": 294716, 
+                "read2": 272566, 
                 "read2_qc_failed": 0, 
-                "properly_paired_reads": 589432, 
+                "properly_paired_reads": 545132, 
                 "properly_paired_reads_qc_failed": 0, 
                 "pct_properly_paired_reads": 100.0, 
-                "with_itself": 589432, 
+                "with_itself": 545132, 
                 "with_itself_qc_failed": 0, 
                 "singletons": 0, 
                 "singletons_qc_failed": 0, 
@@ -156,10 +156,10 @@
         }, 
         "frag_len_stat": {
             "rep1": {
-                "frac_reads_in_nfr": 0.516038971437, 
+                "frac_reads_in_nfr": 0.502546323759, 
                 "frac_reads_in_nfr_qc_pass": true, 
                 "frac_reads_in_nfr_qc_reason": "OK", 
-                "nfr_over_mono_nun_reads": 1.607099018, 
+                "nfr_over_mono_nun_reads": 1.53174762613, 
                 "nfr_over_mono_nun_reads_qc_pass": false, 
                 "nfr_over_mono_nun_reads_qc_reason": "out of range [2.5, inf]", 
                 "nfr_peak_exists": true, 
@@ -167,10 +167,10 @@
                 "di_nuc_peak_exists": true
             }, 
             "rep2": {
-                "frac_reads_in_nfr": 0.560406419661, 
+                "frac_reads_in_nfr": 0.546379911426, 
                 "frac_reads_in_nfr_qc_pass": true, 
                 "frac_reads_in_nfr_qc_reason": "OK", 
-                "nfr_over_mono_nun_reads": 1.89685008526, 
+                "nfr_over_mono_nun_reads": 1.80549371677, 
                 "nfr_over_mono_nun_reads_qc_pass": false, 
                 "nfr_over_mono_nun_reads_qc_reason": "out of range [2.5, inf]", 
                 "nfr_peak_exists": true, 
@@ -298,32 +298,24 @@
                 "RSC": 0.9593239
             }
         }, 
-        "tss_enrich": {
-            "rep1": {
-                "tss_enrich": 19.0606275018
-            }, 
-            "rep2": {
-                "tss_enrich": 16.7577054016
-            }
-        }, 
         "jsd": {
             "rep1": {
-                "auc": 0.0134252510187, 
-                "syn_auc": 0.437042745113, 
-                "x_intercept": 0.959066244947, 
-                "syn_x_intercept": 0.0356914927831, 
-                "elbow_pt": 0.959554075182, 
-                "syn_elbow_pt": 0.589807389174, 
-                "syn_jsd": 0.164772444939
+                "auc": 0.0142320911481, 
+                "syn_auc": 0.436476940643, 
+                "x_intercept": 0.95820054621, 
+                "syn_x_intercept": 0.0384447475553, 
+                "elbow_pt": 0.958702371575, 
+                "syn_elbow_pt": 0.605382822383, 
+                "syn_jsd": 0.100603994508
             }, 
             "rep2": {
-                "auc": 0.0157052329383, 
-                "syn_auc": 0.441842426063, 
-                "x_intercept": 0.952062682187, 
-                "syn_x_intercept": 0.0171878823553, 
-                "elbow_pt": 0.952814420582, 
-                "syn_elbow_pt": 0.604530125814, 
-                "syn_jsd": 0.176047986946
+                "auc": 0.0168592246709, 
+                "syn_auc": 0.441095296502, 
+                "x_intercept": 0.950953068332, 
+                "syn_x_intercept": 0.0195147400618, 
+                "elbow_pt": 0.951560856822, 
+                "syn_elbow_pt": 0.46798022493, 
+                "syn_jsd": 0.0950406532725
             }
         }
     }, 
