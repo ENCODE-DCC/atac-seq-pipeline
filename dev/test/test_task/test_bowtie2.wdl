@@ -9,6 +9,9 @@ workflow test_bowtie2 {
 	Array[String] pe_trimmed_fastqs
 	Array[String] se_trimmed_fastqs
 
+	String se_chrsz
+	String pe_chrsz
+
 	# we don't compare BAM because BAM's header includes date
 	# hence md5sums don't match all the time
 	String ref_pe_flagstat
@@ -33,6 +36,7 @@ workflow test_bowtie2 {
 		fastq_R2 = pe_trimmed_fastqs[1],
 		multimapping = multimapping,
 		paired_end = true,
+		chrsz = pe_chrsz,
 
 		cpu = bowtie2_cpu,
 		mem_mb = bowtie2_mem_mb,
@@ -47,6 +51,7 @@ workflow test_bowtie2 {
 		fastq_R2 = pe_trimmed_fastqs[1],
 		multimapping = 0,
 		paired_end = true,
+		chrsz = pe_chrsz,
 
 		cpu = bowtie2_cpu,
 		mem_mb = bowtie2_mem_mb,
@@ -60,6 +65,7 @@ workflow test_bowtie2 {
 		fastq_R1 = se_trimmed_fastqs[0],
 		multimapping = multimapping,
 		paired_end = false,
+		chrsz = se_chrsz,
 
 		cpu = bowtie2_cpu,
 		mem_mb = bowtie2_mem_mb,
@@ -73,6 +79,7 @@ workflow test_bowtie2 {
 		fastq_R1 = se_trimmed_fastqs[0],
 		multimapping = 0,
 		paired_end = false,
+		chrsz = se_chrsz,
 
 		cpu = bowtie2_cpu,
 		mem_mb = bowtie2_mem_mb,
