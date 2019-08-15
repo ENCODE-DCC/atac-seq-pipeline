@@ -9,6 +9,9 @@ workflow test_filter {
 	String dup_marker = 'picard'
 	Int mapq_thresh = 30
 
+	String se_chrsz
+	String pe_chrsz
+
 	String pe_bam
 	String pe_bam_no_multimapping
 	String se_bam
@@ -32,6 +35,8 @@ workflow test_filter {
 		multimapping = multimapping,
 		paired_end = true,
 		mito_chr_name = mito_chr_name,
+		chrsz = pe_chrsz,
+		filter_chrs = [mito_chr_name],
 
 		dup_marker = dup_marker,
 		mapq_thresh = mapq_thresh,
@@ -47,6 +52,8 @@ workflow test_filter {
 		multimapping = 0,
 		paired_end = true,
 		mito_chr_name = mito_chr_name,
+		chrsz = pe_chrsz,
+		filter_chrs = [mito_chr_name],
 
 		dup_marker = dup_marker,
 		mapq_thresh = mapq_thresh,
@@ -62,6 +69,8 @@ workflow test_filter {
 		multimapping = multimapping,
 		paired_end = true,
 		mito_chr_name = mito_chr_name,
+		chrsz = pe_chrsz,
+		filter_chrs = [mito_chr_name],
 
 		dup_marker = dup_marker,
 		mapq_thresh = mapq_thresh,
@@ -77,6 +86,8 @@ workflow test_filter {
 		multimapping = multimapping,
 		paired_end = false,
 		mito_chr_name = mito_chr_name,
+		chrsz = se_chrsz,
+		filter_chrs = [mito_chr_name],
 
 		dup_marker = dup_marker,
 		mapq_thresh = mapq_thresh,
@@ -92,6 +103,8 @@ workflow test_filter {
 		multimapping = 0,
 		paired_end = false,
 		mito_chr_name = mito_chr_name,
+		chrsz = se_chrsz,
+		filter_chrs = [mito_chr_name],
 
 		dup_marker = dup_marker,
 		mapq_thresh = mapq_thresh,
@@ -107,6 +120,8 @@ workflow test_filter {
 		multimapping = multimapping,
 		paired_end = false,
 		mito_chr_name = mito_chr_name,
+		chrsz = se_chrsz,
+		filter_chrs = [mito_chr_name],
 
 		dup_marker = dup_marker,
 		mapq_thresh = mapq_thresh,

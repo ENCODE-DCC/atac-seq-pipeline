@@ -5,7 +5,6 @@ import "compare_md5sum.wdl" as compare_md5sum
 
 workflow test_bam2ta {
 	Int bam2ta_subsample
-	String regex_filter_reads = 'chrM'
 
 	String pe_nodup_bam
 	String se_nodup_bam
@@ -28,7 +27,6 @@ workflow test_bam2ta {
 		disable_tn5_shift = false,
 		subsample = 0,
 		paired_end = true,
-		regex_grep_v_ta = regex_filter_reads,
 		mito_chr_name = mito_chr_name,
 
 		cpu = bam2ta_cpu,
@@ -41,7 +39,6 @@ workflow test_bam2ta {
 		disable_tn5_shift = true,
 		subsample = 0,
 		paired_end = true,
-		regex_grep_v_ta = regex_filter_reads,
 		mito_chr_name = mito_chr_name,
 
 		cpu = bam2ta_cpu,
@@ -54,7 +51,6 @@ workflow test_bam2ta {
 		disable_tn5_shift = false,
 		subsample = bam2ta_subsample,
 		paired_end = true,
-		regex_grep_v_ta = regex_filter_reads,
 		mito_chr_name = mito_chr_name,
 
 		cpu = bam2ta_cpu,
@@ -67,7 +63,6 @@ workflow test_bam2ta {
 		disable_tn5_shift = false,
 		subsample = 0,
 		paired_end = false,
-		regex_grep_v_ta = regex_filter_reads,
 		mito_chr_name = mito_chr_name,
 
 		cpu = bam2ta_cpu,
@@ -80,7 +75,6 @@ workflow test_bam2ta {
 		disable_tn5_shift = true,
 		subsample = 0,
 		paired_end = false,
-		regex_grep_v_ta = regex_filter_reads,
 		mito_chr_name = mito_chr_name,
 
 		cpu = bam2ta_cpu,
@@ -93,7 +87,6 @@ workflow test_bam2ta {
 		disable_tn5_shift = false,
 		subsample = bam2ta_subsample,
 		paired_end = false,
-		regex_grep_v_ta = regex_filter_reads,
 		mito_chr_name = mito_chr_name,
 
 		cpu = bam2ta_cpu,
