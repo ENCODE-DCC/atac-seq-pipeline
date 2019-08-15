@@ -188,7 +188,9 @@ Parameter|Default|Description
 
 Parameter|Default|Description
 ---------|-------|-----------
-`atac.regex_filter_reads` | `chrM` | Regular expression to filter out reads with given chromosome name (1st column of BED/TAG-ALIGN). Any read with chr name that matches with this reg-ex pattern will be removed from outputs If your have changed the above parameter `atac.mito_chr_name` and still want to filter out mito reads then make sure that `atac.mito_chr_name` and `atac.regex_filter_reads` are the same
+`atac.filter_chrs` | `["chrM", "MT"]` | Array of chromosome names to be filtered out from a final (filtered/nodup) BAM. Mitochondrial chromosomes are filtered out by default.
+
+> **WARNING**: If your custom genome's mitochondrial chromosome name is different from `chrM` or `MT`, then define your genome's correctly here. This parameter has nothing to do with mito-chromosome name parameter `atac.mito_chr_name`.
 
 ## Resource parameters
 
