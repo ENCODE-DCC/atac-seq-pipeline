@@ -107,7 +107,7 @@ Parameter|Description
 `atac.nodup_bams`| Array of filtered/deduped BAM file for each replicate.
 `atac.tas`| Array of TAG-ALIGN file for each replicate.
 
-You can mix up different data types for individual replicate/control replicate. For example, pipeline can start from FASTQs for rep1 and rep3, BAMs for rep2, NODUP_BAMs for rep4 and TAG-ALIGNs for rep5. You can define similarly for control replicates.
+You can mix up different data types for individual replicate. For example, pipeline can start from FASTQs for rep1 and rep3, BAMs for rep2, NODUP_BAMs for rep4 and TAG-ALIGNs for rep5.
 
 ```javascript
 {
