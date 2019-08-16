@@ -16,7 +16,7 @@ workflow test_frac_mito {
 
 	call compare_md5sum.compare_md5sum { input :
 		labels = [
-			'frac_mito',
+			'frac_mito', 
 		],
 		files = [
 			frac_mito.frac_mito_qc,
