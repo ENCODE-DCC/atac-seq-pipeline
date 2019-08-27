@@ -509,9 +509,9 @@ MAP_KEY_DESC_NUCLEOSOMAL_QC = {
     'frac_reads_in_nfr' : 'Fraction of reads in NFR',
     'frac_reads_in_nfr_qc_pass' : 'Fraction of reads in NFR (QC pass)',
     'frac_reads_in_nfr_qc_reason' : 'Fraction of reads in NFR (QC reason)',
-    'nfr_over_mono_nun_reads' : 'NFR / mono-nuc reads',
-    'nfr_over_mono_nun_reads_qc_pass' : 'NFR / mono-nuc reads (QC pass)',
-    'nfr_over_mono_nun_reads_qc_reason' : 'NFR / mono-nuc reads (QC reason)',
+    'nfr_over_mono_nuc_reads' : 'NFR / mono-nuc reads',
+    'nfr_over_mono_nuc_reads_qc_pass' : 'NFR / mono-nuc reads (QC pass)',
+    'nfr_over_mono_nuc_reads_qc_reason' : 'NFR / mono-nuc reads (QC reason)',
     'nfr_peak_exists' : 'Presence of NFR peak',
     'mono_nuc_peak_exists' : 'Presence of Mono-Nuc peak',
     'di_nuc_peak_exists' : 'Presence of Di-Nuc peak',
@@ -531,9 +531,9 @@ def parse_nucleosomal_qc(txt):
             result['frac_reads_in_nfr_qc_reason'] = arr[3]
 
         elif key == 'NFR / mono-nuc reads':
-            result['nfr_over_mono_nun_reads'] = to_float(arr[2])
-            result['nfr_over_mono_nun_reads_qc_pass'] = to_bool(arr[1])
-            result['nfr_over_mono_nun_reads_qc_reason'] = arr[3]
+            result['nfr_over_mono_nuc_reads'] = to_float(arr[2])
+            result['nfr_over_mono_nuc_reads_qc_pass'] = to_bool(arr[1])
+            result['nfr_over_mono_nuc_reads_qc_reason'] = arr[3]
 
         elif key == 'Presence of NFR peak':
             result['nfr_peak_exists'] = to_bool(arr[1])
