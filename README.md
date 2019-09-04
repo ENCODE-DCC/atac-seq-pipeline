@@ -48,20 +48,20 @@ We no longer recommend Conda for resolving dependencies and plan to phase out Co
 Make sure that you have configured Caper correctly.
 > **WARNING**: Do not run Caper on HPC login nodes. Your jobs can be killed.
 
-Run it. Due to `--deepcopy` all files (HTTP URLs) in `examples/caper/ENCSR356KRQ_subsampled.json` will be recursively copied into Caper's temporary folder (`--tmp-dir`).
+Run it. Note that by default all files (HTTP URLs) in `examples/caper/ENCSR356KRQ_subsampled.json` will be recursively copied into Caper's temporary folder (`--tmp-dir`). This behavior can be disabled by specifying the --no-deepcopy argument to `caper run`.
 ```bash
-$ caper run atac.wdl -i examples/caper/ENCSR356KRQ_subsampled.json --deepcopy --use-singularity
+$ caper run atac.wdl -i examples/caper/ENCSR356KRQ_subsampled.json --use-singularity
 ```
 
-If you use Docker then replace `--use-singularity` with `--use-docker`.
+If you use Docker, then you must first install docker on your machine and give the current user the correct permissions. You can check these permission's by executing `docker run hello-world` on the command line. Then run the following:
 ```bash
-$ caper run atac.wdl -i examples/caper/ENCSR356KRQ_subsampled.json --deepcopy --use-docker
+$ caper run atac.wdl -i examples/caper/ENCSR356KRQ_subsampled.json --docker quay.io/encode-dcc/atac-seq-pipeline:v1.4.2
 ```
 
-If you use Conda then remove `--use-singularity` from the command line and activate pipeline's Conda env before running a pipeline.
+If you use Conda then you must first correctly [configure the conda environment](docs/install_conda.md). Then activate pipeline's Conda env, and run the following:
 ```bash
 $ conda activate encode-atac-seq-pipeline
-$ caper run atac.wdl -i examples/caper/ENCSR356KRQ_subsampled.json --deepcopy
+$ caper run atac.wdl -i examples/caper/ENCSR356KRQ_subsampled.json
 ```
 
 To run it on an HPC (e.g. Stanford Sherlock and SCG). See details at [Caper's README](https://github.com/ENCODE-DCC/caper/blob/master/README.md#how-to-run-it-on-slurm-cluster).
