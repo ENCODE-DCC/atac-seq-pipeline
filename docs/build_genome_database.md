@@ -12,7 +12,8 @@
 
 2. Choose `[GENOME]` from `hg19`, `hg38`, `mm9` and `mm10` and specify a destination directory. This will take several hours. We recommend not to run this installer on a login node of your cluster. It will take >8GB memory and >2h time.
     ```bash
-    $ conda activate encode-atac-seq-pipeline
+    $ # source activate encode-atac-seq-pipeline  # for Conda < 4.6
+    $ conda activate encode-atac-seq-pipeline  # for Conda >= 4.6
     $ bash conda/build_genome_data.sh [GENOME] [DESTINATION_DIR]
     ```
 
