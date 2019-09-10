@@ -2,7 +2,6 @@
 # Stop on error
 set -e
 
-CONDA_ENV=encode-atac-seq-pipeline
 CONDA_ENV_PY3=encode-atac-seq-pipeline-python3
 
 SH_SCRIPT_DIR=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)
@@ -19,7 +18,6 @@ else
 fi
 
 echo "=== Installing additional packages for python2 env..."
-source activate ${CONDA_ENV}
   # all numpy packages in the conda-forge repo are linked to OpenBLAS,
   # which generate slightly different SVD results for finding summits in MACS2
   # according to cpu arch, num threads.
