@@ -7,6 +7,7 @@ import sys
 import os
 import argparse
 from encode_lib_genomic import *
+from encode_lib_blacklist_filter import blacklist_filter_bam
 
 def parse_arguments():
     parser = argparse.ArgumentParser(prog='ENCODE DCC Fingerprint/JSD plot.',
@@ -35,10 +36,16 @@ def parse_arguments():
 
 def fingerprint(bams, ctl_bam, blacklist, mapq_thresh, nth, out_dir):
     # make bam index (.bai) first
+    # filter bams with blacklist
+    filtered_bams = []
     for bam in bams:
-        samtools_index(bam, nth)
+        filtered_bam = blacklist_filter_bam(bam, blacklist, out_dir)
+        samtools_index(filtered_bam, nth)
+        filtered_bams.append(filtered_bam)
+    filtered_ctl_bam = None
     if ctl_bam:
-        samtools_index(ctl_bam, nth)
+        filtered_ctl_bam = blacklist_filter_bam(ctl_bam, blacklist, out_dir)
+        samtools_index(filtered_ctl_bam, nth)
 
     prefix = os.path.join(out_dir,
         os.path.basename(strip_ext_bam(bams[0])))
@@ -48,26 +55,24 @@ def fingerprint(bams, ctl_bam, blacklist, mapq_thresh, nth, out_dir):
     labels = []
     bam_paths = []
     jsd_qcs = []
-    for i, bam in enumerate(bams):
+    for i, bam in enumerate(filtered_bams):
         prefix_ = os.path.join(out_dir,
             os.path.basename(strip_ext_bam(bam)))
         jsd_qcs.append('rep{}.{}.jsd.qc'.format(i+1,prefix_))
         labels.append('rep{}'.format(i+1)) # repN
         bam_paths.append(bam)
     # add control
-    if ctl_bam:
+    if filtered_ctl_bam:
         labels.append('ctl1')
-        bam_paths.append(ctl_bam)
+        bam_paths.append(filtered_ctl_bam)
 
     cmd = 'LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 plotFingerprint -b {} '
-    if ctl_bam:
-        cmd += '--JSDsample {} '.format(ctl_bam)
+    if filtered_ctl_bam:
+        cmd += '--JSDsample {} '.format(filtered_ctl_bam)
     cmd += '--labels {} '
     cmd += '--outQualityMetrics {} '
     cmd += '--minMappingQuality {} '
     cmd += '-T "Fingerprints of different samples" '
-    if blacklist:
-        cmd += '--blackListFileName {} '.format(blacklist)
     cmd += '--numberOfProcessors {} '
     cmd += '--plotFile {}'
     cmd = cmd.format(
@@ -78,6 +83,11 @@ def fingerprint(bams, ctl_bam, blacklist, mapq_thresh, nth, out_dir):
         nth,
         plot_png)
     run_shell_cmd(cmd)
+
+    # remove intermediate files (blacklist-filtered BAM)
+    if filtered_ctl_bam:
+        rm_f(filtered_ctl_bam)
+    rm_f(filtered_bams)
 
     # parse tmp_log to get jsd_qc for each exp replicate
     with open(tmp_log,'r') as fp:

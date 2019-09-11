@@ -59,6 +59,27 @@ def blacklist_filter(peak, blacklist, keep_irregular_chr, out_dir):
         rm_f([tmp1, tmp2])
     return filtered
 
+def blacklist_filter_bam(bam, blacklist, out_dir):
+    prefix = os.path.join(out_dir, 
+        os.path.basename(strip_ext_bam(bam)))
+    filtered = '{}.bfilt.bam'.format(prefix)
+
+    if blacklist=='' or get_num_lines(blacklist)==0:
+        cmd = 'zcat -f {} | gzip -nc > {}'.format(bam, filtered)
+        run_shell_cmd(cmd)
+    else:
+        # due to bedtools bug when .gz is given for -a and -b
+        tmp2 = gunzip(blacklist, 'tmp2', out_dir)
+
+        cmd = 'bedtools intersect -nonamecheck -v -abam {} -b {} > {}'
+        cmd = cmd.format(
+            bam,
+            tmp2, # blacklist
+            filtered)
+        run_shell_cmd(cmd)
+        rm_f([tmp2])
+    return filtered
+
 def main():
     # read params
     args = parse_arguments()
