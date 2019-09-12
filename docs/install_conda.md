@@ -9,10 +9,9 @@
   $ conda/install_dependencies.sh
   ```
 
-3) Initialize Conda and re-login.
+3) Initialize Conda and re-login. Skip this step for Conda < 4.6
 
   ```bash
-  $ # do nothing for Conda < 4.6
   $ conda init bash  # for Conda >= 4.6
   $ exit
   ```

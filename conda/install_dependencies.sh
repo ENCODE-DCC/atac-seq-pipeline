@@ -30,6 +30,8 @@ if conda env list | grep -wq ${CONDA_ENV}; then
   exit 3
 fi
 
+export CONDA_RESTORE_FREE_CHANNEL=1
+
 echo "=== Installing packages for python3 env..."
 conda create -n ${CONDA_ENV_PY3} --file ${REQ_TXT_PY3} -y -c bioconda -c conda-forge -c defaults -c r
 
