@@ -60,7 +60,8 @@ $ caper run atac.wdl -i examples/caper/ENCSR356KRQ_subsampled.json --deepcopy --
 
 If you use Conda then remove `--use-singularity` from the command line and activate pipeline's Conda env before running a pipeline.
 ```bash
-$ conda activate encode-atac-seq-pipeline
+$ # source activate encode-atac-seq-pipeline  # for Conda < 4.6
+$ conda activate encode-atac-seq-pipeline  # for Conda >= 4.6
 $ caper run atac.wdl -i examples/caper/ENCSR356KRQ_subsampled.json --deepcopy
 ```
 

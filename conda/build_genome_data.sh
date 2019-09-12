@@ -15,27 +15,6 @@ if [[ "$#" -lt 2 ]]; then
   exit 2
 fi
 
-CONDA_ENV=encode-atac-seq-pipeline
-CONDA_ENV_PY3=encode-atac-seq-pipeline-python3
-
-if which conda; then
-  echo "=== Found Conda ($(conda --version))."
-else
-  echo "=== Conda does not exist on your system. Please install Conda first."
-  echo "=== https://conda.io/docs/user-guide/install/index.html#regular-installation"
-  exit 1
-fi
-
-if conda env list | grep -wq ${CONDA_ENV}; then
-  echo "=== Found Pipeline's Conda env (${CONDA_ENV})."
-else
-  echo "=== Pipeline's Conda env (${CONDA_ENV}) does not exist. Please install it first."
-  echo "=== Run install_dependencies.sh"
-  exit 2
-fi
-
-source activate ${CONDA_ENV}
-
 # pipeline specific params
 BUILD_BWT2_IDX=1
 BUILD_BWA_IDX=0
@@ -250,6 +229,5 @@ else
   echo -e "roadmap_meta\t${DEST_DIR}/ataqc/null" >> ${TSV}
 fi
 
-source deactivate
-
 echo "=== All done."
+
