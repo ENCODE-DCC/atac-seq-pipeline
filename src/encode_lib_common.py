@@ -134,7 +134,7 @@ def mkdir_p(dirname):
         os.makedirs(dirname)
 
 def untar(tar, out_dir):
-    cmd = 'tar xvf {} -C {}'.format(
+    cmd = 'tar xvf {} --no-same-owner -C {}'.format(
         tar,
         out_dir if out_dir else '.')
     run_shell_cmd(cmd)
