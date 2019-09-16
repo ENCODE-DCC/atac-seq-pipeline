@@ -1,168 +1,113 @@
 ############################################################
 # Dockerfile for ENCODE DCC atac-seq-pipeline
-# Based on Ubuntu 16.04
+# Based on Ubuntu 18.04.3
 ############################################################
 
-# IMPORTANT!
-# If you install python2/3 packages using pip/pip3
-#  and not sure about math library dependencies like BLAS and numpy,
-#  then install with --no-dependencies
+# Set the base image to Ubuntu 18.04.3
+#FROM ubuntu:18.04
+FROM ubuntu@sha256:d1d454df0f579c6be4d8161d227462d69e163a8ff9d20a847533989cf0c94d90
 
-# Set the base image to Ubuntu 16.04
-#FROM ubuntu:16.04
-FROM ubuntu@sha256:e4a134999bea4abb4a27bc437e6118fdddfb172e1b9d683129b74d254af51675
-
-# File Author / Maintainer
 MAINTAINER Jin Lee
 
-# Update the repository sources list
-# Install base packages: git, python2/3, java, R
+# to prevent time zone prompt
+ENV DEBIAN_FRONTEND=noninteractive
+
+# install softwares from apt repo
 RUN apt-get update && apt-get install -y \
-    libncurses5-dev \
-    libncursesw5-dev \
-    libcurl4-openssl-dev \
-    libfreetype6-dev \
-    zlib1g-dev \
-    python \
-    python-setuptools \
-    python-pip \
-    python3 \
-    python3-setuptools \
-    python3-pip \
-    git \
-    wget \
-    unzip \
-    ghostscript \
-    pkg-config \
-    libboost-dev \
-    r-base-core \
-    default-jre \
-    apt-transport-https \
-    tabix \
-&& rm -rf /var/lib/apt/lists/*
-
-# Install Intel MKL for BLAS
-RUN wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && rm -rf GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && sh -c 'echo deb https://apt.repos.intel.com/mkl all main > /etc/apt/sources.list.d/intel-mkl.list' && apt-get update && apt-get install intel-mkl-64bit-2018.0-033 -y && rm -rf /var/lib/apt/lists/*
-ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/opt/intel/compilers_and_libraries_2018.0.128/linux/mkl/lib/intel64_lin
-
-# Install basic python2/3 packages
-RUN pip install --no-cache-dir common python-dateutil cython==0.27.3 && \
-    pip3 install --no-cache-dir common python-dateutil cython==0.27.3
+    libncurses5-dev libcurl4-openssl-dev libfreetype6-dev zlib1g-dev \
+    python python-setuptools python-pip python3 python3-setuptools python3-pip \
+    git wget unzip ghostscript pkg-config libboost-dev \
+    default-jre apt-transport-https tabix \
+    r-base \
+    && rm -rf /var/lib/apt/lists/*
 
 # Make directory for all softwares
 RUN mkdir /software
 WORKDIR /software
 ENV PATH="/software:${PATH}"
 
-# Install numpy 1.11.3 (python2/3, linked with MKL)
-RUN git clone --branch v1.11.3 https://github.com/numpy/numpy && cd numpy && \
-    /bin/bash -c 'echo -e "[mkl]\nlibrary_dirs = /opt/intel/compilers_and_libraries_2018/linux/mkl/lib/intel64\ninclude_dirs = /opt/intel/compilers_and_libraries_2018/linux/mkl/include\nmkl_libs = mkl_rt\nlapack_libs =" > site.cfg' && python setup.py install && python3 setup.py install && cd ../ && rm -rf numpy*
+# Downgrade openssl to 1.0.2t (to get the same random number for SPR)
+RUN wget https://github.com/openssl/openssl/archive/OpenSSL_1_0_2t.tar.gz && tar zxvf OpenSSL_1_0_2t.tar.gz && cd openssl-OpenSSL_1_0_2t/ && ./config && make && make install && cd ../ && rm -rf openssl-OpenSSL_1_0_2t* && rm /usr/bin/openssl && ln -s /usr/local/ssl/bin/openssl /usr/bin/openssl
 
-# Install scipy 1.0.0 (python2/3)
-RUN git clone --branch v1.0.0 --single-branch https://github.com/scipy/scipy && \
-    cd scipy && python setup.py install && python3 setup.py install && cd ../ && rm -rf scipy*
+# Install system/math python packages (python3)
+RUN pip3 install --no-cache-dir jsondiff==1.1.1 common python-dateutil cython pandas==0.25.1 jinja2==2.10.1 matplotlib==3.1.1
 
-# Install matplotlib 1.5.1 (python2/3)
-RUN git clone --branch v1.5.1 --single-branch https://github.com/matplotlib/matplotlib && \
-    cd matplotlib && python setup.py install && python3 setup.py install && cd ../ && rm -rf matplotlib*
+# Install genomic python package (python3)
+RUN pip3 install --no-cache-dir pyBigwig==0.3.13 cutadapt==2.5 pyfaidx==0.5.5.2 pybedtools==0.8.0 pysam==0.15.3 deeptools==3.3.1
 
-# Install MACS2 2.1.1.20160309 (python2)
-RUN pip install --no-cache-dir --no-dependencies macs2==2.1.1.20160309
-
-# Install IDR 2.0.4.2 (python3)
-RUN git clone --branch 2.0.4.2 --single-branch https://github.com/kundajelab/idr && \
-    cd idr && python3 setup.py install && cd ../ && rm -rf idr*
-
-# Install samtools 1.7
-RUN git clone --branch 1.7 --single-branch https://github.com/samtools/samtools.git && \
-    git clone --branch 1.7 --single-branch https://github.com/samtools/htslib.git && \
-    cd samtools && make && make install && cd ../ && rm -rf samtools* htslib*
-
-# Install bedtools 2.26.0
-RUN git clone --branch v2.26.0 --single-branch https://github.com/arq5x/bedtools2.git && \
-    cd bedtools2 && make && make install && cd ../ && rm -rf bedtools2*
-
-# Install Picard 2.10.6
-RUN wget https://github.com/broadinstitute/picard/releases/download/2.10.6/picard.jar && chmod +x picard.jar
-
-# Install sambamba 0.6.6
-RUN wget https://github.com/lomereiter/sambamba/releases/download/v0.6.6/sambamba_v0.6.6_linux.tar.bz2 && tar -xvjf sambamba_v0.6.6_linux.tar.bz2 && mv sambamba_v0.6.6 sambamba && rm -rf sambamba_*
-
-# Install R packages
+# Install R packages including spp
 RUN echo "r <- getOption('repos'); r['CRAN'] <- 'http://cran.r-project.org'; options(repos = r);" > ~/.Rprofile && \
     Rscript -e "install.packages('snow')" && \
     Rscript -e "install.packages('snowfall')" && \
     Rscript -e "install.packages('bitops')" && \
     Rscript -e "install.packages('caTools')" && \
-    Rscript -e "source('http://bioconductor.org/biocLite.R'); biocLite('Rsamtools')"
+    Rscript -e "install.packages('Rcpp')" && \
+    Rscript -e "source('http://bioconductor.org/biocLite.R'); biocLite('Rsamtools')" && \
+    Rscript -e "install.packages('spp')"
 
-# Install R package spp 1.13 (required for phantompeakqualtools)
-RUN wget https://github.com/hms-dbmi/spp/archive/1.13.tar.gz && Rscript -e "install.packages('./1.13.tar.gz')" && rm -f 1.13.tar.gz
+# Install samtools 1.9
+RUN git clone --branch 1.9 --single-branch https://github.com/samtools/samtools.git && \
+    git clone --branch 1.9 --single-branch https://github.com/samtools/htslib.git && \
+    cd samtools && make && make install && cd ../ && rm -rf samtools* htslib*
 
-# Install phantompeakqualtools 1.2.1
-RUN wget https://github.com/kundajelab/phantompeakqualtools/archive/1.2.1.tar.gz && tar -xvf 1.2.1.tar.gz && rm -f 1.2.1.tar.gz
-ENV PATH="/software/phantompeakqualtools-1.2.1:${PATH}"
+# Install bedtools 2.29.0
+RUN git clone --branch v2.29.0 --single-branch https://github.com/arq5x/bedtools2.git && \
+    cd bedtools2 && make && make install && cd ../ && rm -rf bedtools2*
 
-# Install cutadapt 1.9.1
-RUN pip install --no-cache-dir --no-dependencies cutadapt==1.9.1 
+# Install Picard 2.20.7
+RUN wget https://github.com/broadinstitute/picard/releases/download/2.20.7/picard.jar && chmod +x picard.jar
 
-# Install Bowtie2 2.2.6
-RUN wget https://github.com/BenLangmead/bowtie2/releases/download/v2.2.6/bowtie2-2.2.6-linux-x86_64.zip && \
-    unzip bowtie2-2.2.6-linux-x86_64.zip && mv bowtie2*/bowtie2* . && rm -rf bowtie2-2.2.6*
-
-# Install pyfaidx (for building genome data)
-RUN pip install --no-cache-dir pyfaidx==0.4.7.1
-
-# Install some apt packages (liblzo2, libgsl2) for ATAQC
-RUN apt-get update && apt-get install -y \
-    liblzo2-dev \
-&& rm -rf /var/lib/apt/lists/*
-
-# Install python packages for ATAQC (pysam, pybedtools, metaseq, pandas, jinja2)
-RUN pip install --no-cache-dir pysam==0.14.1 pybedtools==0.6.9 pandas==0.21.1 scikit-learn==0.20 metaseq==0.5.6 jinja2==2.10
+# Install sambamba 0.6.6
+RUN wget https://github.com/lomereiter/sambamba/releases/download/v0.6.6/sambamba_v0.6.6_linux.tar.bz2 && tar -xvjf sambamba_v0.6.6_linux.tar.bz2 && mv sambamba_v0.6.6 sambamba && rm -rf sambamba_*
 
 # Install gsl 1.16
 RUN wget http://gnu.mirror.vexxhost.com/gsl/gsl-1.16.tar.gz && tar -zxvf gsl-1.16.tar.gz && cd gsl-1.16 && ./configure && make && make install && cd .. && rm -rf gsl-1.16 gsl-1.16.tar.gz
 ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib
 
-# Install preseq 2.0.3 for ATAQC (build from source)
+# Install preseq 2.0.3
 RUN git clone --branch v2.0.3 --single-branch --recursive https://github.com/smithlabcode/preseq preseq_2.0.3 && cd preseq_2.0.3 && make && cd ../ && mv preseq_2.0.3/preseq . && rm -rf preseq_2.0.3
 
-# Install bgzip/tabix for Wash U browser track (hammock type)
-#RUN apt-get update && apt-get install -y tabix && rm -rf /var/lib/apt/lists/*
+# Install Bowtie2 2.3.4.3
+RUN wget https://github.com/BenLangmead/bowtie2/releases/download/v2.3.4.3/bowtie2-2.3.4.3-linux-x86_64.zip && \
+    unzip bowtie2-2.3.4.3-linux-x86_64.zip && mv bowtie2*/bowtie2* . && rm -rf bowtie2-2.3.4.3*
 
-# Install python jsondiff
-RUN pip install --no-cache-dir jsondiff==1.1.1
+# Install Bwa 0.7.17
+RUN git clone --branch v0.7.17 --single-branch https://github.com/lh3/bwa.git && \
+    cd bwa && make && cp bwa /usr/local/bin/ && cd ../ && rm -rf bwa*
+
+# Install phantompeakqualtools 1.2.1
+RUN wget https://github.com/kundajelab/phantompeakqualtools/archive/1.2.1.tar.gz && tar -xvf 1.2.1.tar.gz && rm -f 1.2.1.tar.gz
+ENV PATH="/software/phantompeakqualtools-1.2.1:${PATH}"
+
+# Install SAMstats
+RUN pip3 install --no-cache-dir SAMstats==0.2.1
+
+# Install IDR 2.0.4.2
+RUN git clone --branch 2.0.4.2 --single-branch https://github.com/kundajelab/idr && \
+    cd idr && python3 setup.py install && cd ../ && rm -rf idr*
+
+# Install system/math python packages (python2)
+RUN pip2 install --no-cache-dir numpy matplotlib==2.2.4
+
+# Install genomic python packages (python2)
+RUN pip2 install --no-cache-dir macs2==2.1.2.1 metaseq==0.5.6
 
 # Install UCSC tools (v377)
 RUN git clone https://github.com/ENCODE-DCC/kentUtils_bin_v377
 ENV PATH=${PATH}:/software/kentUtils_bin_v377/bin
 ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/software/kentUtils_bin_v377/lib
 
-# Install pyBigwig 0.3.11 (python2)
-RUN git clone --branch 0.3.11 --single-branch https://github.com/deeptools/pyBigWig && \
-    cd pyBigWig && python setup.py install && cd ../ && rm -rf pyBigWig*
-
-# Install deeptools 3.3.0 (python2)
-RUN pip install --no-cache-dir --no-dependencies deeptools==3.3.0 deeptoolsintervals==0.1.8 plotly==4.0.0 retrying==1.3.3
-
-# Install SAMstats 0.2.1 (Kundaje lab)
-RUN pip install --no-cache-dir --no-dependencies SAMstats==0.2.1 dill==0.3.0 multiprocess==0.70.8 
-
-# oInstall Bwa 0.7.13
-RUN git clone --branch v0.7.13 --single-branch https://github.com/lh3/bwa.git && \
-    cd bwa && make && cp bwa /usr/local/bin/ && cd ../ && rm -rf bwa*
-
-# Instal bx-python 0.8.4 (no pip install due to numpy hell in metaseq)
-RUN wget https://github.com/bxlab/bx-python/archive/v0.8.4.tar.gz && tar zxvf v0.8.4.tar.gz && cd bx-python-0.8.4/ && python setup.py install && cd .. && rm -rf bx-python-* v0.8.4.tar.gz
-
 # Prevent conflict with locally installed python outside of singularity container
 ENV PYTHONNOUSERSITE=True
+
+# Disable multithreading for BLAS
+ENV OPENBLAS_NUM_THREADS=1
+ENV MKL_NUM_THREADS=1
 
 # Get ENCODE atac-seq-pipeline container repository
 # This COPY assumes the build context is the root of the atac-seq-pipeline repo
 # and it gets whatever is checked out plus local modifications
-# so the buildling command should:
+# so the buildling command should be:
 # cd [GIT_REPO_DIR] && docker build -f dev/docker_image/Dockerfile .
 RUN mkdir -p atac-seq-pipeline/src
 COPY src atac-seq-pipeline/src/
@@ -172,4 +117,3 @@ ENV PATH="/software/atac-seq-pipeline:/software/atac-seq-pipeline/src:${PATH}"
 # make some temporary directories
 RUN for i in $(seq 0 9); do mkdir -p /mnt/ext_$i; done
 
-#ENTRYPOINT ["/bin/bash","-c"]

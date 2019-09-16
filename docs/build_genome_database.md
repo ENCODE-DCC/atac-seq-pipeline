@@ -14,14 +14,15 @@
     $ bash Miniconda3-latest-Linux-x86_64.sh
     ```
 
-2. Install Conda dependencies.
+2. Install pipeline's Conda environment.
     ```bash
-    $ bash conda/uninstall_dependencies.sh  # to remove any existing pipeline env
-    $ bash conda/install_dependencies.sh
+    $ bash conda/uninstall_conda_env.sh  # to remove any existing pipeline env
+    $ bash conda/install_conda_env.sh
     ```
 
-3. Choose `[GENOME]` from `hg19`, `hg38`, `mm9` and `mm10` and specify a destination directory. This will take several hours. We recommend not to run this installer on a login node of your cluster. It will take >8GB memory and >2h time.
+3. Choose `GENOME` from `hg19`, `hg38`, `mm9` and `mm10` and specify a destination directory. This will take several hours. We recommend not to run this installer on a login node of your cluster. It will take >8GB memory and >2h time.
     ```bash
+    $ conda activate encode-atac-seq-pipeline
     $ bash conda/build_genome_data.sh [GENOME] [DESTINATION_DIR]
     ```
 

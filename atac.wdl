@@ -1046,7 +1046,7 @@ task trim_adapter {
 	Array[Array[String]] tmp_adapters = if paired_end then transpose([adapters_R1, adapters_R2])
 				else transpose([adapters_R1])
 	command {
-		python $(which encode_task_trim_adapter.py) \
+		python3 $(which encode_task_trim_adapter.py) \
 			${write_tsv(tmp_fastqs)} \
 			${"--adapter " + adapter} \
 			--adapters ${write_tsv(tmp_adapters)} \
@@ -1085,7 +1085,7 @@ task align {
 
 	command {
 		if [ "${aligner}" == "bowtie2" ]; then
-			python $(which encode_task_bowtie2.py) \
+			python3 $(which encode_task_bowtie2.py) \
 				${idx_tar} \
 				${fastq_R1} ${fastq_R2} \
 				${if paired_end then "--paired-end" else ""} \
@@ -1100,7 +1100,7 @@ task align {
 				${"--nth " + cpu}
 		fi
 
-		python $(which encode_task_post_align.py) \
+		python3 $(which encode_task_post_align.py) \
 			${fastq_R1} $(ls *.bam) \
 			${"--mito-chr-name " + mito_chr_name} \
 			${"--chrsz " + chrsz} \
@@ -1127,7 +1127,7 @@ task frac_mito {
 	File mito_samstat
 
 	command {
-		python $(which encode_task_frac_mito.py) \
+		python3 $(which encode_task_frac_mito.py) \
 			${non_mito_samstat} ${mito_samstat}
 	}
 	output {
@@ -1158,7 +1158,7 @@ task filter {
 	String disks
 
 	command {
-		python $(which encode_task_filter.py) \
+		python3 $(which encode_task_filter.py) \
 			${bam} \
 			${if paired_end then "--paired-end" else ""} \
 			${"--multimapping " + multimapping} \
@@ -1198,7 +1198,7 @@ task bam2ta {
 	String disks
 
 	command {
-		python $(which encode_task_bam2ta.py) \
+		python3 $(which encode_task_bam2ta.py) \
 			${bam} \
 			${if paired_end then "--paired-end" else ""} \
 			${if disable_tn5_shift then "--disable-tn5-shift" else ""} \
@@ -1224,7 +1224,7 @@ task spr { # make two self pseudo replicates
 	Int mem_mb
 
 	command {
-		python $(which encode_task_spr.py) \
+		python3 $(which encode_task_spr.py) \
 			${ta} \
 			${if paired_end then "--paired-end" else ""}
 	}
@@ -1245,7 +1245,7 @@ task pool_ta {
 	Array[File?] tas 	# TAG-ALIGNs to be merged
 
 	command {
-		python $(which encode_task_pool_ta.py) \
+		python3 $(which encode_task_pool_ta.py) \
 			${sep=' ' tas}
 	}
 	output {
@@ -1272,7 +1272,7 @@ task xcor {
 	String disks
 
 	command {
-		python $(which encode_task_xcor.py) \
+		python3 $(which encode_task_xcor.py) \
 			${ta} \
 			${if paired_end then "--paired-end" else ""} \
 			${"--mito-chr-name " + mito_chr_name} \
@@ -1305,7 +1305,7 @@ task jsd {
 	String disks
 
 	command {
-		python $(which encode_task_jsd.py) \
+		python3 $(which encode_task_jsd.py) \
 			${sep=' ' nodup_bams} \
 			${"--mapq-thresh "+ mapq_thresh} \
 			${"--blacklist "+ blacklist} \
@@ -1328,7 +1328,7 @@ task count_signal_track {
 	File chrsz			# 2-col chromosome sizes file
 
 	command {
-		python $(which encode_task_count_signal_track.py) \
+		python3 $(which encode_task_count_signal_track.py) \
 			${ta} \
 			${"--chrsz " + chrsz}
 	}
@@ -1366,7 +1366,7 @@ task call_peak {
 
 	command {
 		if [ "${peak_caller}" == "macs2" ]; then
-			python $(which encode_task_macs2_atac.py) \
+			python3 $(which encode_task_macs2_atac.py) \
 				${ta} \
 				${"--gensz " + gensz} \
 				${"--chrsz " + chrsz} \
@@ -1383,7 +1383,7 @@ task call_peak {
 				${"--smooth-win "+ smooth_win}
 		fi
 
-		python $(which encode_task_post_call_peak_atac.py) \
+		python3 $(which encode_task_post_call_peak_atac.py) \
 			$(ls *Peak.gz) \
 			${"--ta " + ta} \
 			${if keep_irregular_chr_in_bfilt_peak then "--keep-irregular-chr" else ""} \
@@ -1425,7 +1425,7 @@ task macs2_signal_track {
 	String disks
 
 	command {
-		python $(which encode_task_macs2_signal_track_atac.py) \
+		python3 $(which encode_task_macs2_signal_track_atac.py) \
 			${ta} \
 			${"--gensz "+ gensz} \
 			${"--chrsz " + chrsz} \
@@ -1461,7 +1461,7 @@ task idr {
 	command {
 		${if defined(ta) then "" else "touch null.frip.qc"}
 		touch null
-		python $(which encode_task_idr.py) \
+		python3 $(which encode_task_idr.py) \
 			${peak1} ${peak2} ${peak_pooled} \
 			${"--prefix " + prefix} \
 			${"--idr-thresh " + idr_thresh} \
@@ -1505,7 +1505,7 @@ task overlap {
 	command {
 		${if defined(ta) then "" else "touch null.frip.qc"}
 		touch null 
-		python $(which encode_task_overlap.py) \
+		python3 $(which encode_task_overlap.py) \
 			${peak1} ${peak2} ${peak_pooled} \
 			${"--prefix " + prefix} \
 			${"--peak-type " + peak_type} \
@@ -1544,7 +1544,7 @@ task reproducibility {
 	Boolean	keep_irregular_chr_in_bfilt_peak
 
 	command {
-		python $(which encode_task_reproducibility.py) \
+		python3 $(which encode_task_reproducibility.py) \
 			${sep=' ' peaks} \
 			--peaks-pr ${sep=' ' peaks_pr} \
 			${"--peak-ppr "+ peak_ppr} \
@@ -1584,7 +1584,7 @@ task preseq {
 
 	File? null_f
 	command {
-		python $(which encode_task_preseq.py) \
+		python3 $(which encode_task_preseq.py) \
 			${if paired_end then "--paired-end" else ""} \
 			${"--bam " + bam}
 	}
@@ -1611,7 +1611,7 @@ task annot_enrich {
 	File? enh
 
 	command {
-		python $(which encode_task_annot_enrich.py) \
+		python3 $(which encode_task_annot_enrich.py) \
 			${"--ta " + ta} \
 			${"--blacklist " + blacklist} \
 			${"--dnase " + dnase} \
@@ -1636,7 +1636,7 @@ task tss_enrich {
 	File chrsz
 
 	command {
-		python $(which encode_task_tss_enrich.py) \
+		python2 $(which encode_task_tss_enrich.py) \
 			${"--read-len-log " + read_len_log} \
 			${"--nodup-bam " + nodup_bam} \
 			${"--chrsz " + chrsz} \
@@ -1661,7 +1661,7 @@ task fraglen_stat_pe {
 	File nodup_bam
 
 	command {
-		python $(which encode_task_fraglen_stat_pe.py) \
+		python3 $(which encode_task_fraglen_stat_pe.py) \
 			${"--nodup-bam " + nodup_bam}
 	}
 	output {
@@ -1681,7 +1681,7 @@ task gc_bias {
 	File ref_fa
 
 	command {
-		python $(which encode_task_gc_bias.py) \
+		python3 $(which encode_task_gc_bias.py) \
 			${"--nodup-bam " + nodup_bam} \
 			${"--ref-fa " + ref_fa}
 	}
@@ -1704,7 +1704,7 @@ task compare_signal_to_roadmap {
 	File roadmap_meta
 
 	command {
-		python $(which encode_task_compare_signal_to_roadmap.py) \
+		python3 $(which encode_task_compare_signal_to_roadmap.py) \
 			${"--bigwig " + pval_bw} \
 			${"--reg2map-bed " + reg2map_bed} \
 			${"--reg2map " + reg2map} \
@@ -1792,7 +1792,7 @@ task qc_report {
 	File? qc_json_ref
 
 	command {
-		python $(which encode_task_qc_report.py) \
+		python3 $(which encode_task_qc_report.py) \
 			${"--pipeline-ver " + pipeline_ver} \
 			${"--title '" + sub(title,"'","_") + "'"} \
 			${"--desc '" + sub(description,"'","_") + "'"} \
