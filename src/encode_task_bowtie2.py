@@ -148,7 +148,14 @@ def main():
             args.out_dir)
     
     log.info('Removing temporary files...')
+    print(temp_files)
     rm_f(temp_files)
+
+    log.info('Showing align log...')
+    run_shell_cmd('cat {}'.format(align_log))
+
+    log.info('Checking if BAM file is empty...')
+    assert(int(run_shell_cmd('samtools view -c {}'.format(bam))))
 
     log.info('List all files in output directory...')
     ls_l(args.out_dir)
