@@ -9,10 +9,10 @@ FROM ubuntu@sha256:d1d454df0f579c6be4d8161d227462d69e163a8ff9d20a847533989cf0c94
 
 MAINTAINER Jin Lee
 
-# to prevent time zone prompt
+# To prevent time zone prompt
 ENV DEBIAN_FRONTEND=noninteractive
 
-# install softwares from apt repo
+# Install softwares from apt repo
 RUN apt-get update && apt-get install -y \
     libncurses5-dev libcurl4-openssl-dev libfreetype6-dev zlib1g-dev \
     python python-setuptools python-pip python3 python3-setuptools python3-pip \
@@ -41,9 +41,13 @@ RUN echo "r <- getOption('repos'); r['CRAN'] <- 'http://cran.r-project.org'; opt
     Rscript -e "install.packages('snowfall')" && \
     Rscript -e "install.packages('bitops')" && \
     Rscript -e "install.packages('caTools')" && \
-    Rscript -e "install.packages('Rcpp')" && \
-    Rscript -e "source('http://bioconductor.org/biocLite.R'); biocLite('Rsamtools')" && \
-    Rscript -e "install.packages('spp')"
+    Rscript -e "install.packages('Rcpp')"
+
+# Install bioconductor and Rsamtools which is required by spp package
+RUN Rscript -e "source('http://bioconductor.org/biocLite.R'); biocLite('Rsamtools')"
+
+# Install r-spp 1.15 (1.13 in Conda env)
+RUN wget https://github.com/hms-dbmi/spp/archive/1.15.tar.gz && Rscript -e "install.packages('./1.15.tar.gz')" && rm -f https://github.com/hms-dbmi/spp/archive/1.15.tar.gz
 
 # Install samtools 1.9
 RUN git clone --branch 1.9 --single-branch https://github.com/samtools/samtools.git && \
