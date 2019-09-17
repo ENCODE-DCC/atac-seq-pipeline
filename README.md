@@ -41,28 +41,28 @@ You can also run our pipeline on DNAnexus without using Caper or Cromwell. There
 
 ## Conda
 
-We no longer recommend Conda for resolving dependencies and plan to phase out Conda support. Instead we recommend using Docker or Singularity. You can install Singularity and use it for our pipeline with Caper (by adding `--use-singularity` to command line arguments). Please see [this instruction](docs/install_conda.md).
+We no longer recommend Conda for resolving dependencies and plan to phase out Conda support. Instead we recommend using Docker or Singularity. You can install Singularity and use it for our pipeline with Caper (by adding `--singularity` to command line arguments). Please see [this instruction](docs/install_conda.md).
 
 ## Tutorial
 
 Make sure that you have configured Caper correctly.
 > **WARNING**: Do not run Caper on HPC login nodes. Your jobs can be killed.
 
-Run it. Due to `--deepcopy` all files (HTTP URLs) in `examples/caper/ENCSR356KRQ_subsampled.json` will be recursively copied into Caper's temporary folder (`--tmp-dir`).
+All files (HTTP URLs) in `examples/caper/ENCSR356KRQ_subsampled.json` will be recursively copied into Caper's temporary folder (`--tmp-dir`).
 ```bash
-$ caper run atac.wdl -i examples/caper/ENCSR356KRQ_subsampled.json --deepcopy --use-singularity
+$ caper run atac.wdl -i examples/caper/ENCSR356KRQ_subsampled.json --singularity
 ```
 
-If you use Docker then replace `--use-singularity` with `--use-docker`.
+If you use Docker then replace `--singularity` with `--docker`.
 ```bash
-$ caper run atac.wdl -i examples/caper/ENCSR356KRQ_subsampled.json --deepcopy --use-docker
+$ caper run atac.wdl -i examples/caper/ENCSR356KRQ_subsampled.json --docker
 ```
 
-If you use Conda then remove `--use-singularity` from the command line and activate pipeline's Conda env before running a pipeline.
+If you use Conda then remove `--singularity` from the command line and activate pipeline's Conda env before running a pipeline.
 ```bash
 $ # source activate encode-atac-seq-pipeline  # for Conda < 4.6
 $ conda activate encode-atac-seq-pipeline  # for Conda >= 4.6
-$ caper run atac.wdl -i examples/caper/ENCSR356KRQ_subsampled.json --deepcopy
+$ caper run atac.wdl -i examples/caper/ENCSR356KRQ_subsampled.json
 ```
 
 To run it on an HPC (e.g. Stanford Sherlock and SCG). See details at [Caper's README](https://github.com/ENCODE-DCC/caper/blob/master/README.md#how-to-run-it-on-slurm-cluster).
