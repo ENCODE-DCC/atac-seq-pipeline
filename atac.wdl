@@ -1366,7 +1366,7 @@ task call_peak {
 
 	command {
 		if [ "${peak_caller}" == "macs2" ]; then
-			python3 $(which encode_task_macs2_atac.py) \
+			python2 $(which encode_task_macs2_atac.py) \
 				${ta} \
 				${"--gensz " + gensz} \
 				${"--chrsz " + chrsz} \
