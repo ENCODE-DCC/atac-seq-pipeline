@@ -47,7 +47,7 @@ def get_picard_complexity_metrics(aligned_bam, prefix):
     # Extract the actual estimated library size
     header_seen = False
     est_library_size = 0
-    with open(out_file, 'rb') as fp:
+    with open(out_file, 'r') as fp:
         for line in fp:
             if header_seen:
                 est_library_size = int(float(line.strip().split()[-1]))
