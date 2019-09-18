@@ -1,6 +1,6 @@
 {
     "general": {
-        "date": "2019-09-17 03:41:18",
+        "date": "2019-09-18 05:42:32",
         "title": "ENCSR889WQX (subsampled 1/400 reads, unrep)",
         "description": "ATAC-seq on Mus musculus C57BL/6 frontal cortex adult",
         "pipeline_ver": "v1.5.0",
@@ -105,10 +105,10 @@
         "reproducibility": {
             "overlap": {
                 "Nt": 0,
-                "N1": 52557,
+                "N1": 52555,
                 "Np": 0,
-                "N_opt": 52557,
-                "N_consv": 52557,
+                "N_opt": 52555,
+                "N_consv": 52555,
                 "opt_set": "rep1-pr1_vs_rep1-pr2",
                 "consv_set": "rep1-pr1_vs_rep1-pr2",
                 "rescue_ratio": 0.0,
@@ -117,10 +117,10 @@
             },
             "idr": {
                 "Nt": 0,
-                "N1": 34,
+                "N1": 33,
                 "Np": 0,
-                "N_opt": 34,
-                "N_consv": 34,
+                "N_opt": 33,
+                "N_consv": 33,
                 "opt_set": "rep1-pr1_vs_rep1-pr2",
                 "consv_set": "rep1-pr1_vs_rep1-pr2",
                 "rescue_ratio": 0.0,
@@ -130,7 +130,7 @@
         },
         "num_peaks": {
             "rep1": {
-                "num_peaks": 59254
+                "num_peaks": 59268
             }
         }
     },
@@ -140,25 +140,25 @@
                 "min_size": 73.0,
                 "25_pct": 73.0,
                 "50_pct": 73.0,
-                "75_pct": 23657.5,
+                "75_pct": 23626.25,
                 "max_size": 90736658.0,
-                "mean": 40573.925237114796
+                "mean": 40564.68757170817
             },
             "idr_opt": {
-                "min_size": 112.0,
-                "25_pct": 232.5,
-                "50_pct": 334.5,
-                "75_pct": 529.0,
-                "max_size": 163708.0,
-                "mean": 8125.970588235294
+                "min_size": 73.0,
+                "25_pct": 228.0,
+                "50_pct": 315.0,
+                "75_pct": 400.0,
+                "max_size": 702.0,
+                "mean": 336.030303030303
             },
             "overlap_opt": {
                 "min_size": 73.0,
                 "25_pct": 73.0,
                 "50_pct": 73.0,
-                "75_pct": 30813.0,
+                "75_pct": 30793.5,
                 "max_size": 90736658.0,
-                "mean": 44684.03327815515
+                "mean": 44683.28594805442
             }
         }
     },
@@ -192,23 +192,23 @@
         "frac_reads_in_peaks": {
             "macs2": {
                 "rep1": {
-                    "frip": 0.967615377704126
+                    "frip": 0.9688532609238203
                 },
                 "rep1-pr1": {
-                    "frip": 0.9658786886555125
+                    "frip": 0.9661182765643094
                 },
                 "rep1-pr2": {
-                    "frip": 0.9763801537386443
+                    "frip": 0.9765798143156633
                 }
             },
             "overlap": {
                 "rep1-pr1_vs_rep1-pr2": {
-                    "frip": 0.8950294995557596
+                    "frip": 0.8953190045023011
                 }
             },
             "idr": {
                 "rep1-pr1_vs_rep1-pr2": {
-                    "frip": 0.009483782731529085
+                    "frip": 0.009443851014764752
                 }
             }
         },
