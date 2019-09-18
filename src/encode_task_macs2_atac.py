@@ -65,7 +65,7 @@ def macs2(ta, chrsz, gensz, pval_thresh, smooth_win, cap_num_peak,
     run_shell_cmd(cmd0)
 
     cmd1 = 'LC_COLLATE=C sort -k 8gr,8gr "{}"_peaks.narrowPeak | '
-    cmd1 += 'awk \'BEGIN{{OFS="\\t"}}{{$4="Peak_"NR; if ($2<0) $2=0; if ($3<0) $3=0; if ($10==-1) $10=$2+round(($3-$2)/2.0); print $0}}\' > {}'
+    cmd1 += 'awk \'BEGIN{{OFS="\\t"}}{{$4="Peak_"NR; if ($2<0) $2=0; if ($3<0) $3=0; if ($10==-1) $10=$2+int(($3-$2+1)/2.0); print $0}}\' > {}'
     cmd1 = cmd1.format(
         prefix,
         npeak_tmp)
