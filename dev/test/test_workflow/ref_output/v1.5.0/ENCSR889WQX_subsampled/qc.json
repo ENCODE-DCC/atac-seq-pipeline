@@ -1,6 +1,6 @@
 {
     "general": {
-        "date": "2019-09-17 03:50:49",
+        "date": "2019-09-18 07:33:13",
         "title": "ENCSR889WQX (subsampled 1/400 reads)",
         "description": "ATAC-seq on Mus musculus C57BL/6 frontal cortex adult",
         "pipeline_ver": "v1.5.0",
@@ -178,38 +178,38 @@
     "replication": {
         "reproducibility": {
             "overlap": {
-                "Nt": 129926,
-                "N1": 52557,
-                "N2": 72231,
-                "Np": 126304,
-                "N_opt": 129926,
-                "N_consv": 129926,
+                "Nt": 129950,
+                "N1": 52555,
+                "N2": 72240,
+                "Np": 126326,
+                "N_opt": 129950,
+                "N_consv": 129950,
                 "opt_set": "rep1_vs_rep2",
                 "consv_set": "rep1_vs_rep2",
-                "rescue_ratio": 1.0286768431720295,
-                "self_consistency_ratio": 1.3743364347280096,
+                "rescue_ratio": 1.0286876810791128,
+                "self_consistency_ratio": 1.3745599847778518,
                 "reproducibility": "pass"
             },
             "idr": {
-                "Nt": 110,
-                "N1": 34,
-                "N2": 28,
-                "Np": 97,
-                "N_opt": 110,
-                "N_consv": 110,
+                "Nt": 100,
+                "N1": 33,
+                "N2": 33,
+                "Np": 95,
+                "N_opt": 100,
+                "N_consv": 100,
                 "opt_set": "rep1_vs_rep2",
                 "consv_set": "rep1_vs_rep2",
-                "rescue_ratio": 1.134020618556701,
-                "self_consistency_ratio": 1.2142857142857142,
+                "rescue_ratio": 1.0526315789473684,
+                "self_consistency_ratio": 1.0,
                 "reproducibility": "pass"
             }
         },
         "num_peaks": {
             "rep1": {
-                "num_peaks": 59254
+                "num_peaks": 59268
             },
             "rep2": {
-                "num_peaks": 89808
+                "num_peaks": 89812
             }
         }
     },
@@ -219,33 +219,33 @@
                 "min_size": 73.0,
                 "25_pct": 73.0,
                 "50_pct": 73.0,
-                "75_pct": 23657.5,
+                "75_pct": 23626.25,
                 "max_size": 90736658.0,
-                "mean": 40573.925237114796
+                "mean": 40564.68757170817
             },
             "rep2": {
                 "min_size": 73.0,
                 "25_pct": 73.0,
                 "50_pct": 73.0,
-                "75_pct": 3764.25,
+                "75_pct": 3762.5,
                 "max_size": 90721383.0,
-                "mean": 25464.25424238375
+                "mean": 25463.111633189328
             },
             "idr_opt": {
                 "min_size": 73.0,
-                "25_pct": 129.75,
-                "50_pct": 226.0,
-                "75_pct": 344.0,
-                "max_size": 127899.0,
-                "mean": 2183.9636363636364
+                "25_pct": 128.25,
+                "50_pct": 227.0,
+                "75_pct": 344.5,
+                "max_size": 33135.0,
+                "mean": 1104.66
             },
             "overlap_opt": {
                 "min_size": 73.0,
                 "25_pct": 73.0,
                 "50_pct": 73.0,
-                "75_pct": 2399.0,
+                "75_pct": 2388.0,
                 "max_size": 73391956.0,
-                "mean": 14308.301132952603
+                "mean": 14305.08323970758
             }
         }
     },
@@ -299,59 +299,59 @@
         "frac_reads_in_peaks": {
             "macs2": {
                 "rep1": {
-                    "frip": 0.967615377704126
+                    "frip": 0.9688532609238203
                 },
                 "rep2": {
-                    "frip": 0.9948323611777266
+                    "frip": 0.9949251930128572
                 },
                 "rep1-pr1": {
-                    "frip": 0.9658786886555125
+                    "frip": 0.9661182765643094
                 },
                 "rep2-pr1": {
-                    "frip": 0.9894326427676264
+                    "frip": 0.9898658579982362
                 },
                 "rep1-pr2": {
-                    "frip": 0.9763801537386443
+                    "frip": 0.9765798143156633
                 },
                 "rep2-pr2": {
-                    "frip": 0.9917998545634583
+                    "frip": 0.9918462704810236
                 },
                 "pooled": {
                     "frip": 0.9792317716846018
                 },
                 "pooled-pr1": {
-                    "frip": 0.9803868583233815
+                    "frip": 0.9803694244196689
                 },
                 "pooled-pr2": {
-                    "frip": 0.9904112693735944
+                    "frip": 0.9904025523457521
                 }
             },
             "overlap": {
                 "rep1_vs_rep2": {
-                    "frip": 0.7677140129970319
+                    "frip": 0.7677575979462772
                 },
                 "rep1-pr1_vs_rep1-pr2": {
-                    "frip": 0.8950294995557596
+                    "frip": 0.8953190045023011
                 },
                 "rep2-pr1_vs_rep2-pr2": {
-                    "frip": 0.8503705537418965
+                    "frip": 0.8505252734671144
                 },
                 "pooled-pr1_vs_pooled-pr2": {
-                    "frip": 0.7509294490426566
+                    "frip": 0.7509948264665246
                 }
             },
             "idr": {
                 "rep1_vs_rep2": {
-                    "frip": 0.010072481770594978
+                    "frip": 0.009867632509141943
                 },
                 "rep1-pr1_vs_rep1-pr2": {
-                    "frip": 0.009483782731529085
+                    "frip": 0.009443851014764752
                 },
                 "rep2-pr1_vs_rep2-pr2": {
-                    "frip": 0.0035508176937477758
+                    "frip": 0.0037596893227917626
                 },
                 "pooled-pr1_vs_pooled-pr2": {
-                    "frip": 0.007997838186517432
+                    "frip": 0.007993479691592899
                 }
             }
         },
