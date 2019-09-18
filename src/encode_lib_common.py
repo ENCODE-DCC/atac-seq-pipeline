@@ -103,14 +103,14 @@ def human_readable_number(num):
     for unit in ['','K','M','G','T','P']:
         if abs(num) < 1000:
             return '{}{}'.format(num, unit)
-        num /= 1000
+        num = int(num/1000.0)
     return '{}{}'.format(num, 'E')
 
 def human_readable_filesize(num):
     for unit in ['','KB','MB','GB','TB','PB']:
         if abs(num) < 1024.0:
             return '{}{}'.format(num, unit)
-        num /= 1024.0
+        num = int(num/1024.0)
     return '{}{}'.format(num, 'EB')
 
 def read_tsv(tsv):
