@@ -39,6 +39,11 @@
   $ bash scripts/install_conda_env.sh
   ```
 
+> **WARNING**: DO NOT PROCEED TO RUN PIPELINES UNTIL YOU SEE THE FOLLOWING SUCCESS MESSAGE OR PIPELINE WILL NOT WORK.
+  ```bash
+  === All done successfully ===
+  ```
+
 6) Activate pipeline's Conda environment before running a pipeline.
   ```bash
   $ conda activate encode-atac-seq-pipeline
