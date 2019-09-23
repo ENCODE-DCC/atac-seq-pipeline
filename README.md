@@ -14,7 +14,7 @@ The ATAC-seq pipeline protocol definition is [here](https://docs.google.com/docu
 * **User-friendly HTML report**: tabulated quality metrics including alignment/peak statistics and FRiP along with many useful plots (IDR/cross-correlation measures).
   - Examples: [HTML](https://storage.googleapis.com/encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR889WQX/example_output/qc.html), [JSON](docs/example_output/v1.1.5/qc.json)
 * **ATAqC**: Annotation-based analysis including TSS enrichment and comparison to Roadmap DNase.
-* **Genomes**: Pre-built database for hg38, hg19, mm10, mm9 and additional support for custom genomes.
+* **Genomes**: Genome database downloader/builder for hg38, hg19, mm10, mm9 and [builder](docs/build_genome_database.md) for user's custom genomes.
 
 ## Installation
 
