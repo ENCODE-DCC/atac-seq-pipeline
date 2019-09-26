@@ -94,7 +94,7 @@ RUN git clone --branch 2.0.4.2 --single-branch https://github.com/kundajelab/idr
 RUN pip2 install --no-cache-dir numpy matplotlib==2.2.4
 
 # Install genomic python packages (python2)
-RUN pip2 install --no-cache-dir macs2==2.1.2.1 metaseq==0.5.6
+RUN pip2 install --no-cache-dir macs2==2.1.3.3 metaseq==0.5.6
 
 # Install UCSC tools (v377)
 RUN git clone https://github.com/ENCODE-DCC/kentUtils_bin_v377
