@@ -1,7 +1,7 @@
 # ENCODE DCC ATAC-Seq/DNase-Seq pipeline tester for task filter
 # Author: Jin Lee (leepc12@gmail.com)
-import "../../../atac.wdl" as atac
-import "compare_md5sum.wdl" as compare_md5sum
+import '../../../atac.wdl' as atac
+import 'compare_md5sum.wdl' as compare_md5sum
 
 workflow test_filter {
 	Int multimapping
@@ -28,7 +28,7 @@ workflow test_filter {
 	Int filter_cpu = 1
 	Int filter_mem_mb = 20000
 	Int filter_time_hr = 24
-	String filter_disks = "local-disk 100 HDD"
+	String filter_disks = 'local-disk 100 HDD'
 
 	call atac.filter as pe_filter { input :
 		bam = pe_bam,

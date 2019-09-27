@@ -1,7 +1,7 @@
 # ENCODE DCC ATAC-Seq/DNase-Seq pipeline tester for task trim_adapter
 # Author: Jin Lee (leepc12@gmail.com)
-import "../../../atac.wdl" as atac
-import "compare_md5sum.wdl" as compare_md5sum
+import '../../../atac.wdl' as atac
+import 'compare_md5sum.wdl' as compare_md5sum
 
 workflow test_trim_adapter {
 	String cutadapt_param
@@ -19,7 +19,7 @@ workflow test_trim_adapter {
 	Int trim_adapter_cpu = 1
 	Int trim_adapter_mem_mb = 12000
 	Int trim_adapter_time_hr = 24
-	String trim_adapter_disks = "local-disk 100 HDD"
+	String trim_adapter_disks = 'local-disk 100 HDD'
 
 	# pe: with adapters input, w/o auto detection
 	call atac.trim_adapter as pe_trim_adapter { input :

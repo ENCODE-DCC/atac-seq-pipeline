@@ -1,7 +1,7 @@
 # ENCODE DCC ATAC-Seq/DNase-Seq pipeline tester
 # Author: Jin Lee (leepc12@gmail.com)
-import "../../../atac.wdl" as atac
-import "compare_md5sum.wdl" as compare_md5sum
+import '../../../atac.wdl' as atac
+import 'compare_md5sum.wdl' as compare_md5sum
 
 workflow test_xcor {
 	Int xcor_subsample
@@ -19,7 +19,7 @@ workflow test_xcor {
 	Int xcor_cpu = 1
 	Int xcor_mem_mb = 16000
 	Int xcor_time_hr = 6
-	String xcor_disks = "local-disk 100 HDD"
+	String xcor_disks = 'local-disk 100 HDD'
 
 	call atac.xcor as pe_xcor { input :
 		ta = pe_ta,

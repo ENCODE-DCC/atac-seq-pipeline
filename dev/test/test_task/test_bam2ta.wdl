@@ -1,7 +1,7 @@
 # ENCODE DCC ATAC-Seq/DNase-Seq pipeline tester
 # Author: Jin Lee (leepc12@gmail.com)
-import "../../../atac.wdl" as atac
-import "compare_md5sum.wdl" as compare_md5sum
+import '../../../atac.wdl' as atac
+import 'compare_md5sum.wdl' as compare_md5sum
 
 workflow test_bam2ta {
 	Int bam2ta_subsample
@@ -20,7 +20,7 @@ workflow test_bam2ta {
 	Int bam2ta_cpu = 1
 	Int bam2ta_mem_mb = 10000
 	Int bam2ta_time_hr = 6
-	String bam2ta_disks = "local-disk 100 HDD"
+	String bam2ta_disks = 'local-disk 100 HDD'
 
 	call atac.bam2ta as pe_bam2ta { input :
 		bam = pe_nodup_bam,

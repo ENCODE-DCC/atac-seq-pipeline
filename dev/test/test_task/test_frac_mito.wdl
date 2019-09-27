@@ -1,7 +1,7 @@
 # ENCODE DCC ATAC-Seq/DNase-Seq pipeline tester for task frac_mito
 # Author: Jin Lee (leepc12@gmail.com)
-import "../../../atac.wdl" as atac
-import "compare_md5sum.wdl" as compare_md5sum
+import '../../../atac.wdl' as atac
+import 'compare_md5sum.wdl' as compare_md5sum
 
 workflow test_frac_mito {
 	File non_mito_samstat

@@ -1,7 +1,7 @@
 # ENCODE DCC ATAC-Seq/DNase-Seq pipeline tester for task bowtie2
 # Author: Jin Lee (leepc12@gmail.com)
-import "../../../atac.wdl" as atac
-import "compare_md5sum.wdl" as compare_md5sum
+import '../../../atac.wdl' as atac
+import 'compare_md5sum.wdl' as compare_md5sum
 
 workflow test_bowtie2 {
 	Int multimapping
@@ -26,7 +26,7 @@ workflow test_bowtie2 {
 	Int bowtie2_cpu = 1
 	Int bowtie2_mem_mb = 20000
 	Int bowtie2_time_hr = 48
-	String bowtie2_disks = "local-disk 100 HDD"
+	String bowtie2_disks = 'local-disk 100 HDD'
 
 	call atac.align as pe_bowtie2 { input :
 		aligner = 'bowtie2',

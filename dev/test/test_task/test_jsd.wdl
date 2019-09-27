@@ -1,7 +1,7 @@
 # ENCODE DCC atac-Seq pipeline tester for task jsd
 # Author: Jin Lee (leepc12@gmail.com)
-import "../../../atac.wdl" as atac
-import "compare_md5sum.wdl" as compare_md5sum
+import '../../../atac.wdl' as atac
+import 'compare_md5sum.wdl' as compare_md5sum
 
 workflow test_jsd {
 	Array[File] se_nodup_bams
@@ -16,7 +16,7 @@ workflow test_jsd {
 	Int jsd_cpu = 1
 	Int jsd_mem_mb = 12000
 	Int jsd_time_hr = 6
-	String jsd_disks = "local-disk 100 HDD"
+	String jsd_disks = 'local-disk 100 HDD'
 
 	call atac.jsd as se_jsd { input :
 		nodup_bams = se_nodup_bams,
@@ -74,6 +74,6 @@ task take_8_cols {
 		cut -f 1-8 ${f} > out.txt
 	}
 	output {
-		File out = "out.txt"
+		File out = 'out.txt'
 	}
 }

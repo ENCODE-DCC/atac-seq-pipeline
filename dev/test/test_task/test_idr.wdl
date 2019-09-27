@@ -1,7 +1,7 @@
 # ENCODE DCC ATAC-Seq/DNase-Seq pipeline tester
 # Author: Jin Lee (leepc12@gmail.com)
-import "../../../atac.wdl" as atac
-import "compare_md5sum.wdl" as compare_md5sum
+import '../../../atac.wdl' as atac
+import 'compare_md5sum.wdl' as compare_md5sum
 
 workflow test_idr {
 	Float idr_thresh
@@ -19,7 +19,7 @@ workflow test_idr {
 	String se_chrsz
 
 	call atac.idr as se_idr { input : 
-		prefix = "rep1-rep2",
+		prefix = 'rep1-rep2',
 		peak1 = se_peak_rep1,
 		peak2 = se_peak_rep2,
 		peak_pooled = se_peak_pooled,
