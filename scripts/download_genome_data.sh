@@ -23,7 +23,7 @@ echo "=== Creating destination directory and TSV file..."
 mkdir -p ${DEST_DIR}
 cd ${DEST_DIR}
 
-if [[ $GENOME == "hg19" ]]; then
+if [[ "${GENOME}" == "hg19" ]]; then
   REF_FA="http://hgdownload.cse.ucsc.edu/goldenpath/hg19/encodeDCC/referenceSequences/male.hg19.fa.gz"
   REF_MITO_FA="https://storage.googleapis.com/encode-pipeline-genome-data/hg19/male.hg19.chrM.fa.gz"
   CHRSZ="https://storage.googleapis.com/encode-pipeline-genome-data/hg19/hg19.chrom.sizes"
@@ -41,7 +41,7 @@ if [[ $GENOME == "hg19" ]]; then
   REG2MAP="https://storage.googleapis.com/encode-pipeline-genome-data/hg19/ataqc/dnase_avgs_reg2map_p10_merged_named.pvals.gz"
   ROADMAP_META="https://storage.googleapis.com/encode-pipeline-genome-data/hg19/ataqc/eid_to_mnemonic.txt"
 
-elif [[ $GENOME == "mm9" ]]; then
+elif [[ "${GENOME}" == "mm9" ]]; then
   REF_FA="https://storage.googleapis.com/encode-pipeline-genome-data/mm9/mm9.fa.gz"
   REF_MITO_FA="https://storage.googleapis.com/encode-pipeline-genome-data/mm9/mm9.chrM.fa.gz"
   CHRSZ="https://storage.googleapis.com/encode-pipeline-genome-data/mm9/mm9.chrom.sizes"
@@ -60,7 +60,7 @@ elif [[ $GENOME == "mm9" ]]; then
   REG2MAP="https://storage.googleapis.com/encode-pipeline-genome-data/mm9/ataqc/dnase_avgs_merged_named.fseq.vals.gz"
   ROADMAP_META="https://storage.googleapis.com/encode-pipeline-genome-data/mm9/ataqc/accession_to_name.txt"
 
-elif [[ $GENOME == "hg38" ]]; then
+elif [[ "${GENOME}" == "hg38" ]]; then
   REF_FA="https://www.encodeproject.org/files/GRCh38_no_alt_analysis_set_GCA_000001405.15/@@download/GRCh38_no_alt_analysis_set_GCA_000001405.15.fasta.gz"
   REF_MITO_FA="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/GRCh38_no_alt_analysis_set_GCA_000001405.15.chrM.fa.gz"
   CHRSZ="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/hg38.chrom.sizes"
@@ -79,7 +79,7 @@ elif [[ $GENOME == "hg38" ]]; then
   REG2MAP="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/ataqc/hg38_dnase_avg_fseq_signal_formatted.txt.gz"
   ROADMAP_META="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/ataqc/hg38_dnase_avg_fseq_signal_metadata.txt"
 
-elif [[ $GENOME == "mm10" ]]; then
+elif [[ "${GENOME}" == "mm10" ]]; then
   REF_FA="https://www.encodeproject.org/files/mm10_no_alt_analysis_set_ENCODE/@@download/mm10_no_alt_analysis_set_ENCODE.fasta.gz"
   REF_MITO_FA="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/mm10_no_alt_analysis_set_ENCODE.chrM.fa.gz"
   CHRSZ="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/mm10.chrom.sizes"
@@ -98,7 +98,7 @@ elif [[ $GENOME == "mm10" ]]; then
   REG2MAP="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/ataqc/mm10_dnase_avg_fseq_signal_formatted.txt.gz"
   ROADMAP_META="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/ataqc/mm10_dnase_avg_fseq_signal_metadata.txt"
 
-elif [[ $GENOME == "hg38_chr19_chrM" ]]; then
+elif [[ "${GENOME}" == "hg38_chr19_chrM" ]]; then
   REF_FA="https://storage.googleapis.com/encode-pipeline-genome-data/hg38_chr19_chrM/GRCh38_no_alt_analysis_set_GCA_000001405.15.chr19_chrM.fasta.gz"
   REF_MITO_FA="https://storage.googleapis.com/encode-pipeline-genome-data/hg38_chr19_chrM/GRCh38_no_alt_analysis_set_GCA_000001405.15.chr19_chrM.chrM.fa.gz"
   CHRSZ="https://storage.googleapis.com/encode-pipeline-genome-data/hg38_chr19_chrM/hg38_chr19_chrM.chrom.sizes"
@@ -117,7 +117,7 @@ elif [[ $GENOME == "hg38_chr19_chrM" ]]; then
   REG2MAP="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/ataqc/hg38_dnase_avg_fseq_signal_formatted.txt.gz"
   ROADMAP_META="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/ataqc/hg38_dnase_avg_fseq_signal_metadata.txt"
 
-elif [[ $GENOME == "mm10_chr19_chrM" ]]; then
+elif [[ "${GENOME}" == "mm10_chr19_chrM" ]]; then
   REF_FA="https://storage.googleapis.com/encode-pipeline-genome-data/mm10_chr19_chrM/mm10_no_alt_analysis_set_ENCODE.chr19_chrM.fasta.gz"
   REF_MITO_FA="https://storage.googleapis.com/encode-pipeline-genome-data/mm10_chr19_chrM/mm10_no_alt_analysis_set_ENCODE.chr19_chrM.chrM.fa.gz"
   CHRSZ="https://storage.googleapis.com/encode-pipeline-genome-data/mm10_chr19_chrM/mm10_chr19_chrM.chrom.sizes"
@@ -137,11 +137,11 @@ elif [[ $GENOME == "mm10_chr19_chrM" ]]; then
   ROADMAP_META="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/ataqc/mm10_dnase_avg_fseq_signal_metadata.txt"
 fi
 
-if [[ ${REF_FA} == "" ]]; then
+if [[ -z "${REF_FA}" ]]; then
   echo "Error: unsupported genome $GENOME"
   exit 1
 fi
-if [[ ${MITO_CHR_NAME} == "" ]]; then
+if [[ -z "${MITO_CHR_NAME}" ]]; then
   echo "Error: Mitochondrial chromosome name must be defined"
   exit 1
 fi
@@ -149,7 +149,7 @@ fi
 echo "=== Downloading files..."
 wget -c -O $(basename ${REF_FA}) ${REF_FA}
 wget -c -O $(basename ${REF_MITO_FA}) ${REF_MITO_FA}
-if [[ ${BLACKLIST} != "" ]]; then wget -N -c ${BLACKLIST}; fi
+if [[ ! -z "${BLACKLIST}" ]]; then wget -N -c ${BLACKLIST}; fi
 
 echo "=== Processing reference fasta file..."
 REF_FA_PREFIX=$(basename ${REF_FA})
@@ -163,8 +163,8 @@ CHRSZ=$(basename ${CHRSZ})
 echo "=== Determinig gensz..."
 cd ${DEST_DIR}
 GENSZ=$(cat ${CHRSZ} | awk '{sum+=$2} END{print sum}')
-if [[ $GENOME == hg* ]]; then GENSZ=hs; fi
-if [[ $GENOME == mm* ]]; then GENSZ=mm; fi
+if [[ "${GENOME}" == hg* ]]; then GENSZ=hs; fi
+if [[ "${GENOME}" == mm* ]]; then GENSZ=mm; fi
 
 echo "=== Downloading bowtie2 index..."
 mkdir -p ${DEST_DIR}/bowtie2_index
@@ -200,31 +200,31 @@ cd ${DEST_DIR}
 mkdir -p ataqc
 cd ataqc
 
-if [[ ${TSS} != "" ]]; then
+if [[ ! -z "${TSS}" ]]; then
   wget -N -c ${TSS}
   echo -e "tss\t${DEST_DIR}/ataqc/$(basename ${TSS})" >> ${TSV}
 fi
-if [[ ${DNASE} != "" ]]; then
+if [[ ! -z "${DNASE}" ]]; then
   wget -N -c ${DNASE}
   echo -e "dnase\t${DEST_DIR}/ataqc/$(basename ${DNASE})" >> ${TSV}
 fi
-if [[ ${PROM} != "" ]]; then
+if [[ ! -z "${PROM}" ]]; then
   wget -N -c ${PROM}
   echo -e "prom\t${DEST_DIR}/ataqc/$(basename ${PROM})" >> ${TSV}
 fi
-if [[ ${ENH} != "" ]]; then
+if [[ ! -z "${ENH}" ]]; then
   wget -N -c ${ENH}
   echo -e "enh\t${DEST_DIR}/ataqc/$(basename ${ENH})" >> ${TSV}
 fi
-if [[ ${REG2MAP} != "" ]]; then
+if [[ ! -z "${REG2MAP}" ]]; then
   wget -N -c ${REG2MAP}
   echo -e "reg2map\t${DEST_DIR}/ataqc/$(basename ${REG2MAP})" >> ${TSV}
 fi
-if [[ ${REG2MAP_BED} != "" ]]; then
+if [[ ! -z "${REG2MAP_BED}" ]]; then
   wget -N -c ${REG2MAP_BED}
   echo -e "reg2map_bed\t${DEST_DIR}/ataqc/$(basename ${REG2MAP_BED})" >> ${TSV}
 fi
-if [[ ${ROADMAP_META} != "" ]]; then
+if [[ ! -z "${ROADMAP_META}" ]]; then
   wget -N -c ${ROADMAP_META}
   echo -e "roadmap_meta\t${DEST_DIR}/ataqc/$(basename ${ROADMAP_META})" >> ${TSV}
 fi
