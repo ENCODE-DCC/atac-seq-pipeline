@@ -35,9 +35,6 @@ def run():
     doFlowcellID=False
 
     doStdOut=True
-#    doStdOut=False
-#    if '-stdout' in sys.argv:
-#        doStdOut = True
 
     if '-flowcellID' in sys.argv:
         doFlowcellID=True
