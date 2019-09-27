@@ -9,11 +9,8 @@
 import sys
 import os
 
-# try:
-# 	import psyco
-# 	psyco.full()
-# except:
-# 	pass
+READS_LOG_INTERVAL=5000000
+MILLION=1000000
 
 def run():
 
@@ -80,9 +77,6 @@ def run():
         else:
             print('will replace',  oldstring, 'with', newstring, 'in read IDs')
 
-    i=0 
-    shorter=0
-
     if doStdOut:
         pass
     else:
@@ -101,6 +95,9 @@ def run():
         doStdIn = True
 
     line = 'line'
+
+    i=0
+    shorter=0
 
     if dotrim5:
         i=1
@@ -139,11 +136,11 @@ def run():
                 scores=line[trim5:len(line)].strip()
                 scores=scores[0:trim]
                 j=j+1
-                if j % 5000000 == 0:
+                if j % READS_LOG_INTERVAL == 0:
                     if doStdOut:
                         pass
                     else:
-                        print(str(j/1000000) + 'M reads processed')
+                        print(str(j/MILLION) + 'M reads processed')
                 if doMax: 
                     sequence=sequence.replace('.','N')
                 else:
@@ -185,11 +182,11 @@ def run():
             if i==2:
                 i=3
                 j=j+1
-                if j % 5000000 == 0:
+                if j % READS_LOG_INTERVAL == 0:
                     if doStdOut:
                         pass
                     else:
-                        print(str(j/1000000) + 'M reads processed')
+                        print(str(j/MILLION) + 'M reads processed')
                 if doMax: 
                     sequence=line
                 else:
