@@ -6,7 +6,7 @@
 
 This pipeline is designed for automated end-to-end quality control and processing of ATAC-seq and DNase-seq data. The pipeline can be run on compute clusters with job submission engines as well as on stand alone machines. It inherently makes uses of parallelized/distributed computing. Pipeline installation is also easy as most dependencies are automatically installed. The pipeline can be run end-to-end, starting from raw FASTQ files all the way to peak calling and signal track generation using a single caper submit command. One can also start the pipeline from intermediate stages (for example, using alignment files as input). The pipeline supports both single-end and paired-end data as well as replicated or non-replicated datasets. The outputs produced by the pipeline include 1) formatted HTML reports that include quality control measures specifically designed for ATAC-seq and DNase-seq data, 2) analysis of reproducibility, 3) stringent and relaxed thresholding of peaks, 4) fold-enrichment and pvalue signal tracks. The pipeline also supports detailed error reporting and allows for easy resumption of interrupted runs. It has been tested on some human, mouse and yeast ATAC-seq datasets as well as on human and mouse DNase-seq datasets.
 
-The ATAC-seq pipeline protocol definition is [here](https://docs.google.com/document/d/1f0Cm4vRyDQDu0bMehHD7P7KOMxTOP-HiNoIvL1VcBt8/edit?usp=sharing). Some parts of the ATAC-seq pipeline were developed in collaboration with Jason Buenrostro, Alicia Schep and Will Greenleaf at Stanford.
+The ATAC-seq pipeline protocol specification is [here](https://docs.google.com/document/d/1f0Cm4vRyDQDu0bMehHD7P7KOMxTOP-HiNoIvL1VcBt8/edit?usp=sharing). Some parts of the ATAC-seq pipeline were developed in collaboration with Jason Buenrostro, Alicia Schep and Will Greenleaf at Stanford.
 
 ### Features
 
@@ -36,13 +36,13 @@ The ATAC-seq pipeline protocol definition is [here](https://docs.google.com/docu
 
 ## Running a pipeline locally with Caper
 
-1) Prepare an input JSON file. We will use a subsampled example input JSON based on URLs. Caper will automatically download all fastqs and reference human genome data recursively.
+1) Prepare an input JSON file. Caper will automatically download all fastqs and reference human genome data defined in this JSON file recursively.
 	```bash
 	$ INPUT_JSON=https://storage.googleapis.com/encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ_subsampled_caper.json
 	```
 
 2-1) **Conda**: Run a workflow with Conda. Make sure that you have followed [this instruction](docs/install_conda.md) to install Conda and its environments.
-	> **WARNING**: We no longer recommend Conda for resolving dependencies and plan to phase out Conda support. Instead we recommend using Docker or Singularity. You can install Singularity and use it for our pipeline with Caper (by adding `--singularity` to command line arguments).
+	> **WARNING**: We no longer recommend Conda for resolving dependencies and plan to phase out Conda support. Instead we recommend using Docker or Singularity. You can install Singularity and use it for this pipeline with Caper (by adding `--singularity` to command line arguments).
 
 	```bash
 	$ conda activate encode-atac-seq-pipeline
@@ -73,14 +73,14 @@ Caper uses the cromwell workflow execution engine to run the workflow on the pla
 
 ## Running a pipeline on DNAnexus
 
-You can also run our pipeline on DNAnexus without using Caper or Cromwell. There are two ways to build a workflow on DNAnexus based on our WDL.
+You can also run this pipeline on DNAnexus without using Caper or Cromwell. There are two ways to build a workflow on DNAnexus based on our WDL.
 
 1) [dxWDL CLI](docs/tutorial_dx_cli.md)
 2) [DNAnexus Web UI](docs/tutorial_dx_web.md)
 
 ## Input JSON file
 
-An input JSON file includes all genomic data files, input parameters and metadata for running pipelines. Always use absolute paths in an input JSON.
+An input JSON file specifies all the input parameters and files that are necessary for successfully running this pipeline. This includes a specification of the path to the genome reference files and the raw data fastq file. Please make sure to specify absolute paths rather than relative paths in your input JSON files.
 
 [Input JSON file specification](docs/input.md)
 
