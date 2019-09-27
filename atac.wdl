@@ -105,43 +105,43 @@ workflow atac {
 	Int trim_adapter_cpu = 2
 	Int trim_adapter_mem_mb = 12000
 	Int trim_adapter_time_hr = 24
-	String trim_adapter_disks = "local-disk 100 HDD"
+	String trim_adapter_disks = 'local-disk 100 HDD'
 
 	Int align_cpu = 4
 	Int align_mem_mb = 20000
 	Int align_time_hr = 48
-	String align_disks = "local-disk 200 HDD"
+	String align_disks = 'local-disk 200 HDD'
 
 	Int filter_cpu = 2
 	Int filter_mem_mb = 20000
 	Int filter_time_hr = 24
-	String filter_disks = "local-disk 400 HDD"
+	String filter_disks = 'local-disk 400 HDD'
 
 	Int bam2ta_cpu = 2
 	Int bam2ta_mem_mb = 10000
 	Int bam2ta_time_hr = 6
-	String bam2ta_disks = "local-disk 100 HDD"
+	String bam2ta_disks = 'local-disk 100 HDD'
 
 	Int spr_mem_mb = 16000
 
 	Int jsd_cpu = 2
 	Int jsd_mem_mb = 12000
 	Int jsd_time_hr = 6
-	String jsd_disks = "local-disk 200 HDD"
+	String jsd_disks = 'local-disk 200 HDD'
 
 	Int xcor_cpu = 2
 	Int xcor_mem_mb = 16000
 	Int xcor_time_hr = 6
-	String xcor_disks = "local-disk 100 HDD"
+	String xcor_disks = 'local-disk 100 HDD'
 
 	Int call_peak_cpu = 1
 	Int call_peak_mem_mb = 16000
 	Int call_peak_time_hr = 24
-	String call_peak_disks = "local-disk 200 HDD"
+	String call_peak_disks = 'local-disk 200 HDD'
 
 	Int macs2_signal_track_mem_mb = 16000
 	Int macs2_signal_track_time_hr = 24
-	String macs2_signal_track_disks = "local-disk 200 HDD"
+	String macs2_signal_track_disks = 'local-disk 200 HDD'
 
 	Int preseq_mem_mb = 16000
 
@@ -815,7 +815,7 @@ workflow atac {
 			# pair.right = 0-based index of 2nd replicate
 			# Naive overlap on every pair of true replicates
 			call overlap { input :
-				prefix = 'rep'+(pair.left+1)+"_vs_rep"+(pair.right+1),
+				prefix = 'rep'+(pair.left+1)+'_vs_rep'+(pair.right+1),
 				peak1 = peak_[pair.left],
 				peak2 = peak_[pair.right],
 				peak_pooled = peak_pooled_,
@@ -834,7 +834,7 @@ workflow atac {
 			# pair.right = 0-based index of 2nd replicate
 			# IDR on every pair of true replicates
 			call idr { input :
-				prefix = 'rep'+(pair.left+1)+"_vs_rep"+(pair.right+1),
+				prefix = 'rep'+(pair.left+1)+'_vs_rep'+(pair.right+1),
 				peak1 = peak_[pair.left],
 				peak2 = peak_[pair.right],
 				peak_pooled = peak_pooled_,
@@ -853,7 +853,7 @@ workflow atac {
 	if ( !align_only && !true_rep_only ) {
 		scatter( i in range(num_rep) ) {
 			call overlap as overlap_pr { input :
-				prefix = "rep"+(i+1)+"-pr1_vs_rep"+(i+1)+"-pr2",
+				prefix = 'rep'+(i+1)+'-pr1_vs_rep'+(i+1)+'-pr2',
 				peak1 = peak_pr1_[i],
 				peak2 = peak_pr2_[i],
 				peak_pooled = peak_[i],
@@ -870,7 +870,7 @@ workflow atac {
 		scatter( i in range(num_rep) ) {
 			# IDR on pseduo replicates
 			call idr as idr_pr { input :
-				prefix = "rep"+(i+1)+"-pr1_vs_rep"+(i+1)+"-pr2",
+				prefix = 'rep'+(i+1)+'-pr1_vs_rep'+(i+1)+'-pr2',
 				peak1 = peak_pr1_[i],
 				peak2 = peak_pr2_[i],
 				peak_pooled = peak_[i],
@@ -888,7 +888,7 @@ workflow atac {
 	if ( !align_only && !true_rep_only && num_rep>1 ) {
 		# Naive overlap on pooled pseudo replicates
 		call overlap as overlap_ppr { input :
-			prefix = "pooled-pr1_vs_pooled-pr2",
+			prefix = 'pooled-pr1_vs_pooled-pr2',
 			peak1 = peak_ppr1_,
 			peak2 = peak_ppr2_,
 			peak_pooled = peak_pooled_,
@@ -903,7 +903,7 @@ workflow atac {
 	if ( !align_only && !true_rep_only && num_rep>1 ) {
 		# IDR on pooled pseduo replicates
 		call idr as idr_ppr { input :
-			prefix = "pooled-pr1_vs_pooled-pr2",
+			prefix = 'pooled-pr1_vs_pooled-pr2',
 			peak1 = peak_ppr1_,
 			peak2 = peak_ppr2_,
 			peak_pooled = peak_pooled_,
@@ -1048,20 +1048,20 @@ task trim_adapter {
 	command {
 		python3 $(which encode_task_trim_adapter.py) \
 			${write_tsv(tmp_fastqs)} \
-			${"--adapter " + adapter} \
+			${'--adapter ' + adapter} \
 			--adapters ${write_tsv(tmp_adapters)} \
-			${if paired_end then "--paired-end" else ""} \
-			${if auto_detect_adapter then "--auto-detect-adapter" else ""} \
+			${if paired_end then '--paired-end' else ''} \
+			${if auto_detect_adapter then '--auto-detect-adapter' else ''} \
 			--cutadapt-param ' ${cutadapt_param}' \
-			${"--nth " + cpu}
+			${'--nth ' + cpu}
 	}
 	output {
-		File trim_merged_fastq_R1 = glob("R1/*.fastq.gz")[0]
-		File? trim_merged_fastq_R2 = if paired_end then glob("R2/*.fastq.gz")[0] else null_f
+		File trim_merged_fastq_R1 = glob('R1/*.fastq.gz')[0]
+		File? trim_merged_fastq_R2 = if paired_end then glob('R2/*.fastq.gz')[0] else null_f
 	}
 	runtime {
 		cpu : cpu
-		memory : "${mem_mb} MB"
+		memory : '${mem_mb} MB'
 		time : time_hr
 		disks : disks
 	}
@@ -1084,38 +1084,38 @@ task align {
 	String disks
 
 	command {
-		if [ "${aligner}" == "bowtie2" ]; then
+		if [ '${aligner}' == 'bowtie2' ]; then
 			python3 $(which encode_task_bowtie2.py) \
 				${idx_tar} \
 				${fastq_R1} ${fastq_R2} \
-				${if paired_end then "--paired-end" else ""} \
-				${"--multimapping " + multimapping} \
-				${"--nth " + cpu}
+				${if paired_end then '--paired-end' else ''} \
+				${'--multimapping ' + multimapping} \
+				${'--nth ' + cpu}
 		else
 			python3 ${custom_align_py} \
 				${idx_tar} \
 				${fastq_R1} ${fastq_R2} \
-				${if paired_end then "--paired-end" else ""} \
-				${"--multimapping " + multimapping} \
-				${"--nth " + cpu}
+				${if paired_end then '--paired-end' else ''} \
+				${'--multimapping ' + multimapping} \
+				${'--nth ' + cpu}
 		fi
 
 		python3 $(which encode_task_post_align.py) \
 			${fastq_R1} $(ls *.bam) \
-			${"--mito-chr-name " + mito_chr_name} \
-			${"--chrsz " + chrsz} \
-			${"--nth " + cpu}
+			${'--mito-chr-name ' + mito_chr_name} \
+			${'--chrsz ' + chrsz} \
+			${'--nth ' + cpu}
 	}
 	output {
-		File bam = glob("*.bam")[0]
-		File bai = glob("*.bai")[0]
-		File samstat_qc = glob("*.samstats.qc")[0]
-		File non_mito_samstat_qc = glob("non_mito/*.samstats.qc")[0]
-		File read_len_log = glob("*.read_length.txt")[0]
+		File bam = glob('*.bam')[0]
+		File bai = glob('*.bai')[0]
+		File samstat_qc = glob('*.samstats.qc')[0]
+		File non_mito_samstat_qc = glob('non_mito/*.samstats.qc')[0]
+		File read_len_log = glob('*.read_length.txt')[0]
 	}
 	runtime {
 		cpu : cpu
-		memory : "${mem_mb} MB"
+		memory : '${mem_mb} MB'
 		time : time_hr
 		disks : disks
 		preemptible: 0
@@ -1131,13 +1131,13 @@ task frac_mito {
 			${non_mito_samstat} ${mito_samstat}
 	}
 	output {
-		File frac_mito_qc = glob("*.frac_mito.qc")[0]
+		File frac_mito_qc = glob('*.frac_mito.qc')[0]
 	}
 	runtime {
 		cpu : 1
-		memory : "8000 MB"
+		memory : '8000 MB'
 		time : 1
-		disks : "local-disk 100 HDD"
+		disks : 'local-disk 100 HDD'
 	}
 }
 
@@ -1160,26 +1160,26 @@ task filter {
 	command {
 		python3 $(which encode_task_filter.py) \
 			${bam} \
-			${if paired_end then "--paired-end" else ""} \
-			${"--multimapping " + multimapping} \
-			${"--dup-marker " + dup_marker} \
-			${"--mapq-thresh " + mapq_thresh} \
+			${if paired_end then '--paired-end' else ''} \
+			${'--multimapping ' + multimapping} \
+			${'--dup-marker ' + dup_marker} \
+			${'--mapq-thresh ' + mapq_thresh} \
 			--filter-chrs ${sep=' ' filter_chrs} \
-			${"--chrsz " + chrsz} \
-			${if no_dup_removal then "--no-dup-removal" else ""} \
-			${"--mito-chr-name " + mito_chr_name} \
-			${"--nth " + cpu}
+			${'--chrsz ' + chrsz} \
+			${if no_dup_removal then '--no-dup-removal' else ''} \
+			${'--mito-chr-name ' + mito_chr_name} \
+			${'--nth ' + cpu}
 	}
 	output {
-		File nodup_bam = glob("*.bam")[0]
-		File nodup_bai = glob("*.bai")[0]
-		File samstat_qc = glob("*.samstats.qc")[0]
-		File dup_qc = glob("*.dup.qc")[0]
-		File lib_complexity_qc = glob("*.lib_complexity.qc")[0]
+		File nodup_bam = glob('*.bam')[0]
+		File nodup_bai = glob('*.bai')[0]
+		File samstat_qc = glob('*.samstats.qc')[0]
+		File dup_qc = glob('*.dup.qc')[0]
+		File lib_complexity_qc = glob('*.lib_complexity.qc')[0]
 	}
 	runtime {
 		cpu : cpu
-		memory : "${mem_mb} MB"
+		memory : '${mem_mb} MB'
 		time : time_hr
 		disks : disks
 	}
@@ -1200,18 +1200,18 @@ task bam2ta {
 	command {
 		python3 $(which encode_task_bam2ta.py) \
 			${bam} \
-			${if paired_end then "--paired-end" else ""} \
-			${if disable_tn5_shift then "--disable-tn5-shift" else ""} \
-			${"--mito-chr-name " + mito_chr_name} \
-			${"--subsample " + subsample} \
-			${"--nth " + cpu}
+			${if paired_end then '--paired-end' else ''} \
+			${if disable_tn5_shift then '--disable-tn5-shift' else ''} \
+			${'--mito-chr-name ' + mito_chr_name} \
+			${'--subsample ' + subsample} \
+			${'--nth ' + cpu}
 	}
 	output {
-		File ta = glob("*.tagAlign.gz")[0]
+		File ta = glob('*.tagAlign.gz')[0]
 	}
 	runtime {
 		cpu : cpu
-		memory : "${mem_mb} MB"
+		memory : '${mem_mb} MB'
 		time : time_hr
 		disks : disks
 	}
@@ -1226,17 +1226,17 @@ task spr { # make two self pseudo replicates
 	command {
 		python3 $(which encode_task_spr.py) \
 			${ta} \
-			${if paired_end then "--paired-end" else ""}
+			${if paired_end then '--paired-end' else ''}
 	}
 	output {
-		File ta_pr1 = glob("*.pr1.tagAlign.gz")[0]
-		File ta_pr2 = glob("*.pr2.tagAlign.gz")[0]
+		File ta_pr1 = glob('*.pr1.tagAlign.gz')[0]
+		File ta_pr2 = glob('*.pr2.tagAlign.gz')[0]
 	}
 	runtime {
 		cpu : 1
-		memory : "${mem_mb} MB"
+		memory : '${mem_mb} MB'
 		time : 1
-		disks : "local-disk 50 HDD"
+		disks : 'local-disk 50 HDD'
 	}
 }
 
@@ -1249,13 +1249,13 @@ task pool_ta {
 			${sep=' ' tas}
 	}
 	output {
-		File ta_pooled = glob("*.tagAlign.gz")[0]
+		File ta_pooled = glob('*.tagAlign.gz')[0]
 	}
 	runtime {
 		cpu : 1
-		memory : "4000 MB"
+		memory : '4000 MB'
 		time : 1
-		disks : "local-disk 50 HDD"
+		disks : 'local-disk 50 HDD'
 	}
 }
 
@@ -1274,21 +1274,21 @@ task xcor {
 	command {
 		python3 $(which encode_task_xcor.py) \
 			${ta} \
-			${if paired_end then "--paired-end" else ""} \
-			${"--mito-chr-name " + mito_chr_name} \
-			${"--subsample " + subsample} \
+			${if paired_end then '--paired-end' else ''} \
+			${'--mito-chr-name ' + mito_chr_name} \
+			${'--subsample ' + subsample} \
 			--speak=0 \
-			${"--nth " + cpu}
+			${'--nth ' + cpu}
 	}
 	output {
-		File plot_pdf = glob("*.cc.plot.pdf")[0]
-		File plot_png = glob("*.cc.plot.png")[0]
-		File score = glob("*.cc.qc")[0]
-		Int fraglen = read_int(glob("*.cc.fraglen.txt")[0])
+		File plot_pdf = glob('*.cc.plot.pdf')[0]
+		File plot_png = glob('*.cc.plot.png')[0]
+		File score = glob('*.cc.qc')[0]
+		Int fraglen = read_int(glob('*.cc.fraglen.txt')[0])
 	}
 	runtime {
 		cpu : cpu
-		memory : "${mem_mb} MB"
+		memory : '${mem_mb} MB'
 		time : time_hr
 		disks : disks
 	}
@@ -1307,17 +1307,17 @@ task jsd {
 	command {
 		python3 $(which encode_task_jsd.py) \
 			${sep=' ' nodup_bams} \
-			${"--mapq-thresh "+ mapq_thresh} \
-			${"--blacklist "+ blacklist} \
-			${"--nth " + cpu}
+			${'--mapq-thresh '+ mapq_thresh} \
+			${'--blacklist '+ blacklist} \
+			${'--nth ' + cpu}
 	}
 	output {
-		File plot = glob("*.png")[0]
-		Array[File] jsd_qcs = glob("*.jsd.qc")
+		File plot = glob('*.png')[0]
+		Array[File] jsd_qcs = glob('*.jsd.qc')
 	}
 	runtime {
 		cpu : cpu
-		memory : "${mem_mb} MB"
+		memory : '${mem_mb} MB'
 		time : time_hr
 		disks : disks
 	}
@@ -1330,17 +1330,17 @@ task count_signal_track {
 	command {
 		python3 $(which encode_task_count_signal_track.py) \
 			${ta} \
-			${"--chrsz " + chrsz}
+			${'--chrsz ' + chrsz}
 	}
 	output {
-		File pos_bw = glob("*.positive.bigwig")[0]
-		File neg_bw = glob("*.negative.bigwig")[0]
+		File pos_bw = glob('*.positive.bigwig')[0]
+		File neg_bw = glob('*.negative.bigwig')[0]
 	}
 	runtime {
 		cpu : 1
-		memory : "8000 MB"
+		memory : '8000 MB'
 		time : 4
-		disks : "local-disk 50 HDD"
+		disks : 'local-disk 50 HDD'
 	}
 }
 
@@ -1365,48 +1365,48 @@ task call_peak {
 	String disks
 
 	command {
-		if [ "${peak_caller}" == "macs2" ]; then
+		if [ '${peak_caller}' == 'macs2' ]; then
 			python2 $(which encode_task_macs2_atac.py) \
 				${ta} \
-				${"--gensz " + gensz} \
-				${"--chrsz " + chrsz} \
-				${"--cap-num-peak " + cap_num_peak} \
-				${"--pval-thresh "+ pval_thresh} \
-				${"--smooth-win "+ smooth_win}
+				${'--gensz ' + gensz} \
+				${'--chrsz ' + chrsz} \
+				${'--cap-num-peak ' + cap_num_peak} \
+				${'--pval-thresh '+ pval_thresh} \
+				${'--smooth-win '+ smooth_win}
 		else
 			python ${custom_call_peak_py} \
 				${ta} \
-				${"--gensz " + gensz} \
-				${"--chrsz " + chrsz} \
-				${"--cap-num-peak " + cap_num_peak} \
-				${"--pval-thresh "+ pval_thresh} \
-				${"--smooth-win "+ smooth_win}
+				${'--gensz ' + gensz} \
+				${'--chrsz ' + chrsz} \
+				${'--cap-num-peak ' + cap_num_peak} \
+				${'--pval-thresh '+ pval_thresh} \
+				${'--smooth-win '+ smooth_win}
 		fi
 
 		python3 $(which encode_task_post_call_peak_atac.py) \
 			$(ls *Peak.gz) \
-			${"--ta " + ta} \
-			${if keep_irregular_chr_in_bfilt_peak then "--keep-irregular-chr" else ""} \
-			${"--chrsz " + chrsz} \
-			${"--peak-type " + peak_type} \
-			${"--blacklist " + blacklist}
+			${'--ta ' + ta} \
+			${if keep_irregular_chr_in_bfilt_peak then '--keep-irregular-chr' else ''} \
+			${'--chrsz ' + chrsz} \
+			${'--peak-type ' + peak_type} \
+			${'--blacklist ' + blacklist}
 	}
 	output {
 		# generated by custom_call_peak_py
-		File peak = glob("*[!.][!b][!f][!i][!l][!t]."+peak_type+".gz")[0]
+		File peak = glob('*[!.][!b][!f][!i][!l][!t].'+peak_type+'.gz')[0]
 		# generated by post_call_peak py
-		File bfilt_peak = glob("*.bfilt."+peak_type+".gz")[0]
-		File bfilt_peak_bb = glob("*.bfilt."+peak_type+".bb")[0]
-		File bfilt_peak_hammock = glob("*.bfilt."+peak_type+".hammock.gz*")[0]
-		File bfilt_peak_hammock_tbi = glob("*.bfilt."+peak_type+".hammock.gz*")[1]
-		File frip_qc = glob("*.frip.qc")[0]
-		File peak_region_size_qc = glob("*.peak_region_size.qc")[0]
-		File peak_region_size_plot = glob("*.peak_region_size.png")[0]
-		File num_peak_qc = glob("*.num_peak.qc")[0]
+		File bfilt_peak = glob('*.bfilt.'+peak_type+'.gz')[0]
+		File bfilt_peak_bb = glob('*.bfilt.'+peak_type+'.bb')[0]
+		File bfilt_peak_hammock = glob('*.bfilt.'+peak_type+'.hammock.gz*')[0]
+		File bfilt_peak_hammock_tbi = glob('*.bfilt.'+peak_type+'.hammock.gz*')[1]
+		File frip_qc = glob('*.frip.qc')[0]
+		File peak_region_size_qc = glob('*.peak_region_size.qc')[0]
+		File peak_region_size_plot = glob('*.peak_region_size.png')[0]
+		File num_peak_qc = glob('*.num_peak.qc')[0]
 	}
 	runtime {
 		cpu : if peak_caller == 'macs2' then 1 else cpu
-		memory : "${mem_mb} MB"
+		memory : '${mem_mb} MB'
 		time : time_hr
 		disks : disks
 	}
@@ -1427,18 +1427,18 @@ task macs2_signal_track {
 	command {
 		python3 $(which encode_task_macs2_signal_track_atac.py) \
 			${ta} \
-			${"--gensz "+ gensz} \
-			${"--chrsz " + chrsz} \
-			${"--pval-thresh "+ pval_thresh} \
-			${"--smooth-win "+ smooth_win}
+			${'--gensz '+ gensz} \
+			${'--chrsz ' + chrsz} \
+			${'--pval-thresh '+ pval_thresh} \
+			${'--smooth-win '+ smooth_win}
 	}
 	output {
-		File pval_bw = glob("*.pval.signal.bigwig")[0]
-		File fc_bw = glob("*.fc.signal.bigwig")[0]
+		File pval_bw = glob('*.pval.signal.bigwig')[0]
+		File fc_bw = glob('*.fc.signal.bigwig')[0]
 	}
 	runtime {
 		cpu : 1
-		memory : "${mem_mb} MB"
+		memory : '${mem_mb} MB'
 		time : time_hr
 		disks : disks
 	}
@@ -1459,35 +1459,35 @@ task idr {
 	String rank
 
 	command {
-		${if defined(ta) then "" else "touch null.frip.qc"}
+		${if defined(ta) then '' else 'touch null.frip.qc'}
 		touch null
 		python3 $(which encode_task_idr.py) \
 			${peak1} ${peak2} ${peak_pooled} \
-			${"--prefix " + prefix} \
-			${"--idr-thresh " + idr_thresh} \
-			${"--peak-type " + peak_type} \
+			${'--prefix ' + prefix} \
+			${'--idr-thresh ' + idr_thresh} \
+			${'--peak-type ' + peak_type} \
 			--idr-rank ${rank} \
-			${"--chrsz " + chrsz} \
-			${"--blacklist "+ blacklist} \
-			${if keep_irregular_chr_in_bfilt_peak then "--keep-irregular-chr" else ""} \
-			${"--ta " + ta}
+			${'--chrsz ' + chrsz} \
+			${'--blacklist '+ blacklist} \
+			${if keep_irregular_chr_in_bfilt_peak then '--keep-irregular-chr' else ''} \
+			${'--ta ' + ta}
 	}
 	output {
-		File idr_peak = glob("*[!.][!b][!f][!i][!l][!t]."+peak_type+".gz")[0]
-		File bfilt_idr_peak = glob("*.bfilt."+peak_type+".gz")[0]
-		File bfilt_idr_peak_bb = glob("*.bfilt."+peak_type+".bb")[0]
-		File bfilt_idr_peak_hammock = glob("*.bfilt."+peak_type+".hammock.gz*")[0]
-		File bfilt_idr_peak_hammock_tbi = glob("*.bfilt."+peak_type+".hammock.gz*")[1]
-		File idr_plot = glob("*.txt.png")[0]
-		File idr_unthresholded_peak = glob("*.txt.gz")[0]
-		File idr_log = glob("*.idr*.log")[0]
-		File frip_qc = if defined(ta) then glob("*.frip.qc")[0] else glob("null")[0]
+		File idr_peak = glob('*[!.][!b][!f][!i][!l][!t].'+peak_type+'.gz')[0]
+		File bfilt_idr_peak = glob('*.bfilt.'+peak_type+'.gz')[0]
+		File bfilt_idr_peak_bb = glob('*.bfilt.'+peak_type+'.bb')[0]
+		File bfilt_idr_peak_hammock = glob('*.bfilt.'+peak_type+'.hammock.gz*')[0]
+		File bfilt_idr_peak_hammock_tbi = glob('*.bfilt.'+peak_type+'.hammock.gz*')[1]
+		File idr_plot = glob('*.txt.png')[0]
+		File idr_unthresholded_peak = glob('*.txt.gz')[0]
+		File idr_log = glob('*.idr*.log')[0]
+		File frip_qc = if defined(ta) then glob('*.frip.qc')[0] else glob('null')[0]
 	}
 	runtime {
 		cpu : 1
-		memory : "8000 MB"
+		memory : '8000 MB'
 		time : 1
-		disks : "local-disk 50 HDD"
+		disks : 'local-disk 50 HDD'
 	}
 }
 
@@ -1503,31 +1503,31 @@ task overlap {
 	String peak_type
 
 	command {
-		${if defined(ta) then "" else "touch null.frip.qc"}
+		${if defined(ta) then '' else 'touch null.frip.qc'}
 		touch null 
 		python3 $(which encode_task_overlap.py) \
 			${peak1} ${peak2} ${peak_pooled} \
-			${"--prefix " + prefix} \
-			${"--peak-type " + peak_type} \
-			${"--chrsz " + chrsz} \
-			${"--blacklist "+ blacklist} \
+			${'--prefix ' + prefix} \
+			${'--peak-type ' + peak_type} \
+			${'--chrsz ' + chrsz} \
+			${'--blacklist '+ blacklist} \
 			--nonamecheck \
-			${if keep_irregular_chr_in_bfilt_peak then "--keep-irregular-chr" else ""} \
-			${"--ta " + ta}
+			${if keep_irregular_chr_in_bfilt_peak then '--keep-irregular-chr' else ''} \
+			${'--ta ' + ta}
 	}
 	output {
-		File overlap_peak = glob("*[!.][!b][!f][!i][!l][!t]."+peak_type+".gz")[0]
-		File bfilt_overlap_peak = glob("*.bfilt."+peak_type+".gz")[0]
-		File bfilt_overlap_peak_bb = glob("*.bfilt."+peak_type+".bb")[0]
-		File bfilt_overlap_peak_hammock = glob("*.bfilt."+peak_type+".hammock.gz*")[0]
-		File bfilt_overlap_peak_hammock_tbi = glob("*.bfilt."+peak_type+".hammock.gz*")[1]
-		File frip_qc = if defined(ta) then glob("*.frip.qc")[0] else glob("null")[0]
+		File overlap_peak = glob('*[!.][!b][!f][!i][!l][!t].'+peak_type+'.gz')[0]
+		File bfilt_overlap_peak = glob('*.bfilt.'+peak_type+'.gz')[0]
+		File bfilt_overlap_peak_bb = glob('*.bfilt.'+peak_type+'.bb')[0]
+		File bfilt_overlap_peak_hammock = glob('*.bfilt.'+peak_type+'.hammock.gz*')[0]
+		File bfilt_overlap_peak_hammock_tbi = glob('*.bfilt.'+peak_type+'.hammock.gz*')[1]
+		File frip_qc = if defined(ta) then glob('*.frip.qc')[0] else glob('null')[0]
 	}
 	runtime {
 		cpu : 1
-		memory : "4000 MB"
+		memory : '4000 MB'
 		time : 1
-		disks : "local-disk 50 HDD"
+		disks : 'local-disk 50 HDD'
 	}
 }
 
@@ -1547,32 +1547,32 @@ task reproducibility {
 		python3 $(which encode_task_reproducibility.py) \
 			${sep=' ' peaks} \
 			--peaks-pr ${sep=' ' peaks_pr} \
-			${"--peak-ppr "+ peak_ppr} \
+			${'--peak-ppr '+ peak_ppr} \
 			--prefix ${prefix} \
-			${"--peak-type " + peak_type} \
-			${if keep_irregular_chr_in_bfilt_peak then "--keep-irregular-chr" else ""} \
-			${"--chrsz " + chrsz}
+			${'--peak-type ' + peak_type} \
+			${if keep_irregular_chr_in_bfilt_peak then '--keep-irregular-chr' else ''} \
+			${'--chrsz ' + chrsz}
 	}
 	output {
-		File optimal_peak = glob("*optimal_peak.*.gz")[0]
-		File optimal_peak_bb = glob("*optimal_peak.*.bb")[0]
-		File optimal_peak_hammock = glob("*optimal_peak.*.hammock.gz*")[0]
-		File optimal_peak_hammock_tbi = glob("*optimal_peak.*.hammock.gz*")[1]
-		File conservative_peak = glob("*conservative_peak.*.gz")[0]
-		File conservative_peak_bb = glob("*conservative_peak.*.bb")[0]
-		File conservative_peak_hammock = glob("*conservative_peak.*.hammock.gz*")[0]
-		File conservative_peak_hammock_tbi = glob("*conservative_peak.*.hammock.gz*")[1]
-		File reproducibility_qc = glob("*reproducibility.qc")[0]
+		File optimal_peak = glob('*optimal_peak.*.gz')[0]
+		File optimal_peak_bb = glob('*optimal_peak.*.bb')[0]
+		File optimal_peak_hammock = glob('*optimal_peak.*.hammock.gz*')[0]
+		File optimal_peak_hammock_tbi = glob('*optimal_peak.*.hammock.gz*')[1]
+		File conservative_peak = glob('*conservative_peak.*.gz')[0]
+		File conservative_peak_bb = glob('*conservative_peak.*.bb')[0]
+		File conservative_peak_hammock = glob('*conservative_peak.*.hammock.gz*')[0]
+		File conservative_peak_hammock_tbi = glob('*conservative_peak.*.hammock.gz*')[1]
+		File reproducibility_qc = glob('*reproducibility.qc')[0]
 		# QC metrics for optimal peak
-		File peak_region_size_qc = glob("*.peak_region_size.qc")[0]
-		File peak_region_size_plot = glob("*.peak_region_size.png")[0]
-		File num_peak_qc = glob("*.num_peak.qc")[0]
+		File peak_region_size_qc = glob('*.peak_region_size.qc')[0]
+		File peak_region_size_plot = glob('*.peak_region_size.png')[0]
+		File num_peak_qc = glob('*.num_peak.qc')[0]
 	}
 	runtime {
 		cpu : 1
-		memory : "4000 MB"
+		memory : '4000 MB'
 		time : 1
-		disks : "local-disk 50 HDD"
+		disks : 'local-disk 50 HDD'
 	}
 }
 
@@ -1585,20 +1585,20 @@ task preseq {
 	File? null_f
 	command {
 		python3 $(which encode_task_preseq.py) \
-			${if paired_end then "--paired-end" else ""} \
-			${"--bam " + bam}
+			${if paired_end then '--paired-end' else ''} \
+			${'--bam ' + bam}
 	}
 	output {
 		File? picard_est_lib_size_qc = if paired_end then 
 			glob('*.picard_est_lib_size.qc')[0] else null_f
-		File preseq_plot = glob("*.preseq.png")[0]
-		File preseq_log = glob("*.preseq.log")[0]
+		File preseq_plot = glob('*.preseq.png')[0]
+		File preseq_log = glob('*.preseq.log')[0]
 	}
 	runtime {
 		cpu : 1
-		memory : "${mem_mb} MB"
+		memory : '${mem_mb} MB'
 		time : 1
-		disks : "local-disk 100 HDD"
+		disks : 'local-disk 100 HDD'
 	}
 }
 
@@ -1612,20 +1612,20 @@ task annot_enrich {
 
 	command {
 		python3 $(which encode_task_annot_enrich.py) \
-			${"--ta " + ta} \
-			${"--blacklist " + blacklist} \
-			${"--dnase " + dnase} \
-			${"--prom " + prom} \
-			${"--enh " + enh}
+			${'--ta ' + ta} \
+			${'--blacklist ' + blacklist} \
+			${'--dnase ' + dnase} \
+			${'--prom ' + prom} \
+			${'--enh ' + enh}
 	}
 	output {
-		File annot_enrich_qc = glob("*.annot_enrich.qc")[0]
+		File annot_enrich_qc = glob('*.annot_enrich.qc')[0]
 	}
 	runtime {
 		cpu : 1
-		memory : "8000 MB"
+		memory : '8000 MB'
 		time : 1
-		disks : "local-disk 100 HDD"
+		disks : 'local-disk 100 HDD'
 	}
 }
 
@@ -1637,22 +1637,22 @@ task tss_enrich {
 
 	command {
 		python2 $(which encode_task_tss_enrich.py) \
-			${"--read-len-log " + read_len_log} \
-			${"--nodup-bam " + nodup_bam} \
-			${"--chrsz " + chrsz} \
-			${"--tss " + tss}
+			${'--read-len-log ' + read_len_log} \
+			${'--nodup-bam ' + nodup_bam} \
+			${'--chrsz ' + chrsz} \
+			${'--tss ' + tss}
 	}
 	output {
-		File tss_plot = glob("*.tss_enrich.png")[0]
-		File tss_large_plot = glob("*.large_tss_enrich.png")[0]
-		File tss_enrich_qc = glob("*.tss_enrich.qc")[0]
+		File tss_plot = glob('*.tss_enrich.png')[0]
+		File tss_large_plot = glob('*.large_tss_enrich.png')[0]
+		File tss_enrich_qc = glob('*.tss_enrich.qc')[0]
 		Float tss_enrich = read_float(tss_enrich_qc)
 	}
 	runtime {
 		cpu : 1
-		memory : "8000 MB"
+		memory : '8000 MB'
 		time : 1
-		disks : "local-disk 100 HDD"
+		disks : 'local-disk 100 HDD'
 	}
 }
 
@@ -1662,17 +1662,17 @@ task fraglen_stat_pe {
 
 	command {
 		python3 $(which encode_task_fraglen_stat_pe.py) \
-			${"--nodup-bam " + nodup_bam}
+			${'--nodup-bam ' + nodup_bam}
 	}
 	output {
-		File nucleosomal_qc = glob("*nucleosomal.qc")[0]
-		File fraglen_dist_plot = glob("*fraglen_dist.png")[0]
+		File nucleosomal_qc = glob('*nucleosomal.qc')[0]
+		File fraglen_dist_plot = glob('*fraglen_dist.png')[0]
 	}
 	runtime {
 		cpu : 1
-		memory : "8000 MB"
+		memory : '8000 MB'
 		time : 1
-		disks : "local-disk 100 HDD"
+		disks : 'local-disk 100 HDD'
 	}
 }
 
@@ -1682,18 +1682,18 @@ task gc_bias {
 
 	command {
 		python3 $(which encode_task_gc_bias.py) \
-			${"--nodup-bam " + nodup_bam} \
-			${"--ref-fa " + ref_fa}
+			${'--nodup-bam ' + nodup_bam} \
+			${'--ref-fa ' + ref_fa}
 	}
 	output {
-		File gc_plot = glob("*.gc_plot.png")[0]
-		File gc_log = glob("*.gc.txt")[0]
+		File gc_plot = glob('*.gc_plot.png')[0]
+		File gc_log = glob('*.gc.txt')[0]
 	}
 	runtime {
 		cpu : 1
-		memory : "8000 MB"
+		memory : '8000 MB'
 		time : 1
-		disks : "local-disk 100 HDD"
+		disks : 'local-disk 100 HDD'
 	}
 }
 
@@ -1705,20 +1705,20 @@ task compare_signal_to_roadmap {
 
 	command {
 		python3 $(which encode_task_compare_signal_to_roadmap.py) \
-			${"--bigwig " + pval_bw} \
-			${"--reg2map-bed " + reg2map_bed} \
-			${"--reg2map " + reg2map} \
-			${"--roadmap-meta " + roadmap_meta}
+			${'--bigwig ' + pval_bw} \
+			${'--reg2map-bed ' + reg2map_bed} \
+			${'--reg2map ' + reg2map} \
+			${'--roadmap-meta ' + roadmap_meta}
 	}
 	output {
-		File roadmap_compare_plot = glob("*roadmap_compare_plot.png")[0]
-		File roadmap_compare_log = glob("*roadmap_compare.log")[0]
+		File roadmap_compare_plot = glob('*roadmap_compare_plot.png')[0]
+		File roadmap_compare_log = glob('*roadmap_compare.log')[0]
 	}
 	runtime {
 		cpu : 1
-		memory : "8000 MB"
+		memory : '8000 MB'
 		time : 1
-		disks : "local-disk 100 HDD"
+		disks : 'local-disk 100 HDD'
 	}
 }
 
@@ -1793,76 +1793,76 @@ task qc_report {
 
 	command {
 		python3 $(which encode_task_qc_report.py) \
-			${"--pipeline-ver " + pipeline_ver} \
+			${'--pipeline-ver ' + pipeline_ver} \
 			${"--title '" + sub(title,"'","_") + "'"} \
 			${"--desc '" + sub(description,"'","_") + "'"} \
-			${"--genome " + genome} \
-			${"--multimapping " + multimapping} \
-			--paired-ends ${sep=" " paired_ends} \
+			${'--genome ' + genome} \
+			${'--multimapping ' + multimapping} \
+			--paired-ends ${sep=' ' paired_ends} \
 			--pipeline-type ${pipeline_type} \
 			--aligner ${aligner} \
 			--peak-caller ${peak_caller} \
-			${"--cap-num-peak " + cap_num_peak} \
+			${'--cap-num-peak ' + cap_num_peak} \
 			--idr-thresh ${idr_thresh} \
 			--pval-thresh ${pval_thresh} \
-			--frac-mito-qcs ${sep="_:_" frac_mito_qcs} \
-			--samstat-qcs ${sep="_:_" samstat_qcs} \
-			--nodup-samstat-qcs ${sep="_:_" nodup_samstat_qcs} \
-			--dup-qcs ${sep="_:_" dup_qcs} \
-			--lib-complexity-qcs ${sep="_:_" lib_complexity_qcs} \
-			--xcor-plots ${sep="_:_" xcor_plots} \
-			--xcor-scores ${sep="_:_" xcor_scores} \
-			--idr-plots ${sep="_:_" idr_plots} \
-			--idr-plots-pr ${sep="_:_" idr_plots_pr} \
-			${"--jsd-plot " + jsd_plot} \
+			--frac-mito-qcs ${sep='_:_' frac_mito_qcs} \
+			--samstat-qcs ${sep='_:_' samstat_qcs} \
+			--nodup-samstat-qcs ${sep='_:_' nodup_samstat_qcs} \
+			--dup-qcs ${sep='_:_' dup_qcs} \
+			--lib-complexity-qcs ${sep='_:_' lib_complexity_qcs} \
+			--xcor-plots ${sep='_:_' xcor_plots} \
+			--xcor-scores ${sep='_:_' xcor_scores} \
+			--idr-plots ${sep='_:_' idr_plots} \
+			--idr-plots-pr ${sep='_:_' idr_plots_pr} \
+			${'--jsd-plot ' + jsd_plot} \
 			--jsd-qcs ${sep='_:_' jsd_qcs} \
-			${"--idr-plot-ppr " + idr_plot_ppr} \
-			--frip-qcs ${sep="_:_" frip_qcs} \
-			--frip-qcs-pr1 ${sep="_:_" frip_qcs_pr1} \
-			--frip-qcs-pr2 ${sep="_:_" frip_qcs_pr2} \
-			${"--frip-qc-pooled " + frip_qc_pooled} \
-			${"--frip-qc-ppr1 " + frip_qc_ppr1} \
-			${"--frip-qc-ppr2 " + frip_qc_ppr2} \
-			--frip-idr-qcs ${sep="_:_" frip_idr_qcs} \
-			--frip-idr-qcs-pr ${sep="_:_" frip_idr_qcs_pr} \
-			${"--frip-idr-qc-ppr " + frip_idr_qc_ppr} \
-			--frip-overlap-qcs ${sep="_:_" frip_overlap_qcs} \
-			--frip-overlap-qcs-pr ${sep="_:_" frip_overlap_qcs_pr} \
-			${"--frip-overlap-qc-ppr " + frip_overlap_qc_ppr} \
-			${"--idr-reproducibility-qc " + idr_reproducibility_qc} \
-			${"--overlap-reproducibility-qc " + overlap_reproducibility_qc} \
-			--annot-enrich-qcs ${sep="_:_" annot_enrich_qcs} \
-			--tss-enrich-qcs ${sep="_:_" tss_enrich_qcs} \
-			--tss-large-plots ${sep="_:_" tss_large_plots} \
-			--roadmap-compare-plots ${sep="_:_" roadmap_compare_plots} \
-			--fraglen-dist-plots ${sep="_:_" fraglen_dist_plots} \
-			--fraglen-nucleosomal-qcs ${sep="_:_" fraglen_nucleosomal_qcs} \
-			--gc-plots ${sep="_:_" gc_plots} \
-			--preseq-plots ${sep="_:_" preseq_plots} \
-			--picard-est-lib-size-qcs ${sep="_:_" picard_est_lib_size_qcs} \
-			--peak-region-size-qcs ${sep="_:_" peak_region_size_qcs} \
-			--peak-region-size-plots ${sep="_:_" peak_region_size_plots} \
-			--num-peak-qcs ${sep="_:_" num_peak_qcs} \
-			${"--idr-opt-peak-region-size-qc " + idr_opt_peak_region_size_qc} \
-			${"--idr-opt-peak-region-size-plot " + idr_opt_peak_region_size_plot} \
-			${"--idr-opt-num-peak-qc " + idr_opt_num_peak_qc} \
-			${"--overlap-opt-peak-region-size-qc " + overlap_opt_peak_region_size_qc} \
-			${"--overlap-opt-peak-region-size-plot " + overlap_opt_peak_region_size_plot} \
-			${"--overlap-opt-num-peak-qc " + overlap_opt_num_peak_qc} \
+			${'--idr-plot-ppr ' + idr_plot_ppr} \
+			--frip-qcs ${sep='_:_' frip_qcs} \
+			--frip-qcs-pr1 ${sep='_:_' frip_qcs_pr1} \
+			--frip-qcs-pr2 ${sep='_:_' frip_qcs_pr2} \
+			${'--frip-qc-pooled ' + frip_qc_pooled} \
+			${'--frip-qc-ppr1 ' + frip_qc_ppr1} \
+			${'--frip-qc-ppr2 ' + frip_qc_ppr2} \
+			--frip-idr-qcs ${sep='_:_' frip_idr_qcs} \
+			--frip-idr-qcs-pr ${sep='_:_' frip_idr_qcs_pr} \
+			${'--frip-idr-qc-ppr ' + frip_idr_qc_ppr} \
+			--frip-overlap-qcs ${sep='_:_' frip_overlap_qcs} \
+			--frip-overlap-qcs-pr ${sep='_:_' frip_overlap_qcs_pr} \
+			${'--frip-overlap-qc-ppr ' + frip_overlap_qc_ppr} \
+			${'--idr-reproducibility-qc ' + idr_reproducibility_qc} \
+			${'--overlap-reproducibility-qc ' + overlap_reproducibility_qc} \
+			--annot-enrich-qcs ${sep='_:_' annot_enrich_qcs} \
+			--tss-enrich-qcs ${sep='_:_' tss_enrich_qcs} \
+			--tss-large-plots ${sep='_:_' tss_large_plots} \
+			--roadmap-compare-plots ${sep='_:_' roadmap_compare_plots} \
+			--fraglen-dist-plots ${sep='_:_' fraglen_dist_plots} \
+			--fraglen-nucleosomal-qcs ${sep='_:_' fraglen_nucleosomal_qcs} \
+			--gc-plots ${sep='_:_' gc_plots} \
+			--preseq-plots ${sep='_:_' preseq_plots} \
+			--picard-est-lib-size-qcs ${sep='_:_' picard_est_lib_size_qcs} \
+			--peak-region-size-qcs ${sep='_:_' peak_region_size_qcs} \
+			--peak-region-size-plots ${sep='_:_' peak_region_size_plots} \
+			--num-peak-qcs ${sep='_:_' num_peak_qcs} \
+			${'--idr-opt-peak-region-size-qc ' + idr_opt_peak_region_size_qc} \
+			${'--idr-opt-peak-region-size-plot ' + idr_opt_peak_region_size_plot} \
+			${'--idr-opt-num-peak-qc ' + idr_opt_num_peak_qc} \
+			${'--overlap-opt-peak-region-size-qc ' + overlap_opt_peak_region_size_qc} \
+			${'--overlap-opt-peak-region-size-plot ' + overlap_opt_peak_region_size_plot} \
+			${'--overlap-opt-num-peak-qc ' + overlap_opt_num_peak_qc} \
 			--out-qc-html qc.html \
 			--out-qc-json qc.json \
-			${"--qc-json-ref " + qc_json_ref}
+			${'--qc-json-ref ' + qc_json_ref}
 	}
 	output {
 		File report = glob('*qc.html')[0]
 		File qc_json = glob('*qc.json')[0]
-		Boolean qc_json_ref_match = read_string("qc_json_ref_match.txt")=="True"
+		Boolean qc_json_ref_match = read_string('qc_json_ref_match.txt')=='True'
 	}
 	runtime {
 		cpu : 1
-		memory : "4000 MB"
+		memory : '4000 MB'
 		time : 1
-		disks : "local-disk 50 HDD"		
+		disks : 'local-disk 50 HDD'		
 	}
 }
 
@@ -1883,7 +1883,7 @@ task read_genome_tsv {
 
 		python <<CODE
 		import os
-		with open("${genome_tsv}",'r') as fp:
+		with open('${genome_tsv}','r') as fp:
 			for line in fp:
 				arr = line.strip('\n').split('\t')
 				if arr:
@@ -1919,16 +1919,16 @@ task read_genome_tsv {
 	}
 	runtime {
 		cpu : 1
-		memory : "4000 MB"
+		memory : '4000 MB'
 		time : 1
-		disks : "local-disk 50 HDD"		
+		disks : 'local-disk 50 HDD'		
 	}
 }
 
 task raise_exception {
 	String msg
 	command {
-		echo "Exception raised: ${msg}" >&2
+		echo 'Exception raised: ${msg}' >&2
 		ERROR_EXCEPTION_RAISED
 	}
 	output {

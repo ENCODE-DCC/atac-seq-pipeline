@@ -13,7 +13,7 @@ task compare_md5sum {
 		def md5sum(filename, blocksize=65536):
 		    hash = hashlib.md5()
 		    with open(filename, 'rb') as f:
-		        for block in iter(lambda: f.read(blocksize), b""):
+		        for block in iter(lambda: f.read(blocksize), b''):
 		            hash.update(block)
 		    return hash.hexdigest()
 
@@ -85,8 +85,8 @@ task compare_md5sum {
 	}
 	runtime {
 		cpu : 1
-		memory : "4000 MB"
+		memory : '4000 MB'
 		time : 1
-		disks : "local-disk 50 HDD"		
+		disks : 'local-disk 50 HDD'
 	}
 }
