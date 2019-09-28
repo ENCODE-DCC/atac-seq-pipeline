@@ -3,6 +3,9 @@
 # ENCODE preseq wrapper
 # Author: Daniel Kim, Jin Lee (leepc12@gmail.com)
 
+import warnings
+import numpy as np
+from matplotlib import pyplot as plt
 import sys
 import os
 import argparse
@@ -11,22 +14,23 @@ from encode_lib_genomic import remove_read_group, locate_picard
 import matplotlib as mpl
 mpl.use('Agg')
 
-from matplotlib import pyplot as plt
-import numpy as np
-import warnings
 warnings.filterwarnings("ignore")
+
 
 def parse_arguments():
     parser = argparse.ArgumentParser(prog='ENCODE preseq')
-    parser.add_argument('--paired-end', action="store_true", help='Paired-end BAM.')
-    parser.add_argument('--bam', type=str, help='Raw BAM file.')    
-    parser.add_argument('--out-dir', default='', type=str, help='Output directory.')
+    parser.add_argument('--paired-end', action="store_true",
+                        help='Paired-end BAM.')
+    parser.add_argument('--bam', type=str, help='Raw BAM file.')
+    parser.add_argument('--out-dir', default='', type=str,
+                        help='Output directory.')
     parser.add_argument('--log-level', default='INFO', help='Log level',
-                        choices=['NOTSET','DEBUG','INFO','WARNING','CRITICAL','ERROR','CRITICAL'])
+                        choices=['NOTSET', 'DEBUG', 'INFO', 'WARNING', 'CRITICAL', 'ERROR', 'CRITICAL'])
     args = parser.parse_args()
     log.setLevel(args.log_level)
     log.info(sys.argv)
     return args
+
 
 def get_picard_complexity_metrics(aligned_bam, prefix):
     '''
@@ -40,8 +44,8 @@ def get_picard_complexity_metrics(aligned_bam, prefix):
                       'USE_JDK_DEFLATER=TRUE USE_JDK_INFLATER=TRUE '
                       'VERBOSITY=ERROR '
                       'QUIET=TRUE && rm -rf tmp_java').format(aligned_bam,
-                                           out_file,
-                                           locate_picard())
+                                                              out_file,
+                                                              locate_picard())
     os.system(get_gc_metrics)
 
     # Extract the actual estimated library size
@@ -57,6 +61,7 @@ def get_picard_complexity_metrics(aligned_bam, prefix):
 
     return est_library_size
 
+
 def run_preseq(bam_w_dups, prefix):
     '''
     Runs preseq. Look at preseq data output to get PBC/NRF.
@@ -71,12 +76,13 @@ def run_preseq(bam_w_dups, prefix):
     preseq_log = '{0}.preseq.log'.format(prefix)
     preseq = ('preseq lc_extrap '
               '-P -B -o {0} {1}.sorted.bam -seed 1 -v 2> {2}').format(preseq_data,
-                                                              prefix,
-                                                              preseq_log)
+                                                                      prefix,
+                                                                      preseq_log)
     logging.info(preseq)
     os.system(preseq)
     os.system('rm {0}.sorted.bam'.format(prefix))
     return preseq_data, preseq_log
+
 
 def get_preseq_plot(data_file, prefix):
     '''
@@ -109,6 +115,7 @@ def get_preseq_plot(data_file, prefix):
 
     return plot_img
 
+
 def main():
     # read params
     args = parse_arguments()
@@ -118,13 +125,14 @@ def main():
         args.out_dir,
         os.path.basename(strip_ext_bam(ALIGNED_BAM)))
     RG_FREE_ALIGNED_BAM = remove_read_group(ALIGNED_BAM)
-    # Library complexity: Preseq results, NRF, PBC1, PBC2    
+    # Library complexity: Preseq results, NRF, PBC1, PBC2
     if args.paired_end:
         picard_est_lib_size = get_picard_complexity_metrics(RG_FREE_ALIGNED_BAM,
-                                                                OUTPUT_PREFIX)
+                                                            OUTPUT_PREFIX)
     else:
         picard_est_lib_size = None
-    preseq_data, preseq_log = run_preseq(ALIGNED_BAM, OUTPUT_PREFIX) # SORTED BAM
+    preseq_data, preseq_log = run_preseq(
+        ALIGNED_BAM, OUTPUT_PREFIX)  # SORTED BAM
 
     preseq_plot = get_preseq_plot(preseq_data, OUTPUT_PREFIX)
 
@@ -141,5 +149,6 @@ def main():
 
     log.info('All done.')
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     main()

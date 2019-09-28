@@ -8,14 +8,15 @@ import os
 import argparse
 from encode_lib_common import *
 
+
 def parse_arguments():
     parser = argparse.ArgumentParser(prog='ENCODE DCC TAGALIGN pooler.',
-                                        description='')
+                                     description='')
     parser.add_argument('tas', nargs='+', type=str,
                         help='List of TAGALIGNs to be pooled.')
     parser.add_argument('--out-dir', default='', type=str,
-                            help='Output directory.')
-    parser.add_argument('--log-level', default='INFO', 
+                        help='Output directory.')
+    parser.add_argument('--log-level', default='INFO',
                         choices=['NOTSET', 'DEBUG', 'INFO',
                                  'WARNING', 'CRITICAL', 'ERROR',
                                  'CRITICAL'],
@@ -26,10 +27,11 @@ def parse_arguments():
     log.info(sys.argv)
     return args
 
+
 def pool_ta(tas, out_dir):
-    if len(tas)>1:
+    if len(tas) > 1:
         prefix = os.path.join(out_dir,
-            os.path.basename(strip_ext_ta(tas[0])))
+                              os.path.basename(strip_ext_ta(tas[0])))
         pooled_ta = '{}.pooled.tagAlign.gz'.format(prefix)
 
         cmd = 'zcat -f {} | gzip -nc > {}'
@@ -40,6 +42,7 @@ def pool_ta(tas, out_dir):
         return pooled_ta
     else:
         return make_hard_link(tas[0], out_dir)
+
 
 def main():
     # read params
@@ -56,5 +59,6 @@ def main():
 
     log.info('All done.')
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     main()

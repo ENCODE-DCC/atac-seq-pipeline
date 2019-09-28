@@ -8,9 +8,10 @@ import os
 import argparse
 from encode_lib_common import *
 
+
 def parse_arguments():
     parser = argparse.ArgumentParser(prog='ENCODE spp call_peak',
-                                        description='')
+                                     description='')
     parser.add_argument('tas', type=str, nargs=2,
                         help='Path for TAGALIGN file and control TAGALIGN file.')
     parser.add_argument('--chrsz', type=str,
@@ -23,7 +24,7 @@ def parse_arguments():
                         help='Number of threads to parallelize.')
     parser.add_argument('--out-dir', default='', type=str,
                         help='Output directory.')
-    parser.add_argument('--log-level', default='INFO', 
+    parser.add_argument('--log-level', default='INFO',
                         choices=['NOTSET', 'DEBUG', 'INFO',
                                  'WARNING', 'CRITICAL', 'ERROR',
                                  'CRITICAL'],
@@ -34,13 +35,14 @@ def parse_arguments():
     log.info(sys.argv)
     return args
 
+
 def spp(ta, ctl_ta, fraglen, cap_num_peak, nth, out_dir):
     basename_ta = os.path.basename(strip_ext_ta(ta))
     basename_ctl_ta = os.path.basename(strip_ext_ta(ctl_ta))
     basename_prefix = '{}_x_{}'.format(basename_ta, basename_ctl_ta)
-    if len(basename_prefix) > 200: # UNIX cannot have filename > 255
+    if len(basename_prefix) > 200:  # UNIX cannot have filename > 255
         basename_prefix = '{}_x_control'.format(basename_ta)
-    nth_param = '-p={}'.format(nth) if nth<2 else ''
+    nth_param = '-p={}'.format(nth) if nth < 2 else ''
     prefix = os.path.join(out_dir, basename_prefix)
     rpeak = '{}.{}.regionPeak.gz'.format(
         prefix,
@@ -72,6 +74,7 @@ def spp(ta, ctl_ta, fraglen, cap_num_peak, nth, out_dir):
 
     return rpeak
 
+
 def main():
     # read params
     args = parse_arguments()
@@ -80,8 +83,8 @@ def main():
     mkdir_p(args.out_dir)
 
     log.info('Calling peaks with spp...')
-    rpeak = spp(args.tas[0], args.tas[1], 
-        args.fraglen, args.cap_num_peak, args.nth, args.out_dir)
+    rpeak = spp(args.tas[0], args.tas[1],
+                args.fraglen, args.cap_num_peak, args.nth, args.out_dir)
 
     log.info('Checking if output is empty...')
     assert_file_not_empty(rpeak)
@@ -91,5 +94,6 @@ def main():
 
     log.info('All done.')
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     main()

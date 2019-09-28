@@ -9,6 +9,7 @@ import argparse
 from encode_lib_common import *
 from encode_lib_log_parser import parse_flagstat_qc
 
+
 def parse_arguments():
     parser = argparse.ArgumentParser(
         prog='ENCODE frac mito',
@@ -18,8 +19,8 @@ def parse_arguments():
     parser.add_argument('mito_samstat', type=str,
                         help='Path for SAMstats log file (mito only)')
     parser.add_argument('--out-dir', default='', type=str,
-                            help='Output directory.')
-    parser.add_argument('--log-level', default='INFO', 
+                        help='Output directory.')
+    parser.add_argument('--log-level', default='INFO',
                         choices=['NOTSET', 'DEBUG', 'INFO',
                                  'WARNING', 'CRITICAL', 'ERROR',
                                  'CRITICAL'],
@@ -29,6 +30,7 @@ def parse_arguments():
     log.setLevel(args.log_level)
     log.info(sys.argv)
     return args
+
 
 def frac_mito(non_mito_samstat, mito_samstat, out_dir):
     prefix = os.path.join(
@@ -62,6 +64,7 @@ def frac_mito(non_mito_samstat, mito_samstat, out_dir):
 
     return frac_mito_qc
 
+
 def main():
     # read params
     args = parse_arguments()
@@ -77,5 +80,6 @@ def main():
 
     log.info('All done.')
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     main()

@@ -8,9 +8,10 @@ import os
 import argparse
 from encode_lib_common import *
 
+
 def parse_arguments():
     parser = argparse.ArgumentParser(prog='ENCODE DCC MACS2 signal track',
-                                        description='')
+                                     description='')
     parser.add_argument('ta', type=str,
                         help='Path for TAGALIGN file.')
     parser.add_argument('--chrsz', type=str,
@@ -24,7 +25,7 @@ def parse_arguments():
                         help='Smoothing window size.')
     parser.add_argument('--out-dir', default='', type=str,
                         help='Output directory.')
-    parser.add_argument('--log-level', default='INFO', 
+    parser.add_argument('--log-level', default='INFO',
                         choices=['NOTSET', 'DEBUG', 'INFO',
                                  'WARNING', 'CRITICAL', 'ERROR',
                                  'CRITICAL'],
@@ -35,9 +36,10 @@ def parse_arguments():
     log.info(sys.argv)
     return args
 
+
 def macs2_signal_track(ta, chrsz, gensz, pval_thresh, smooth_win, out_dir):
     prefix = os.path.join(out_dir,
-        os.path.basename(strip_ext_ta(ta)))
+                          os.path.basename(strip_ext_ta(ta)))
     fc_bigwig = '{}.fc.signal.bigwig'.format(prefix)
     pval_bigwig = '{}.pval.signal.bigwig'.format(prefix)
     # temporary files
@@ -67,27 +69,27 @@ def macs2_signal_track(ta, chrsz, gensz, pval_thresh, smooth_win, out_dir):
     cmd3 += '-c "{}"_control_lambda.bdg '
     cmd3 += '--o-prefix "{}" -m FE '
     cmd3 = cmd3.format(
-        prefix, 
-        prefix, 
+        prefix,
+        prefix,
         prefix)
     run_shell_cmd(cmd3)
 
     cmd4 = 'bedtools slop -i "{}"_FE.bdg -g {} -b 0 | '
     cmd4 += 'bedClip stdin {} {}'
     cmd4 = cmd4.format(
-        prefix, 
-        chrsz, 
-        chrsz, 
+        prefix,
+        chrsz,
+        chrsz,
         fc_bedgraph)
     run_shell_cmd(cmd4)
-  
+
     # sort and remove any overlapping regions in bedgraph by comparing two lines in a row
     cmd5 = 'LC_COLLATE=C sort -k1,1 -k2,2n {} | ' \
         'awk \'BEGIN{{OFS="\\t"}}{{if (NR==1 || NR>1 && (prev_chr!=$1 '\
         '|| prev_chr==$1 && prev_chr_e<=$2)) ' \
         '{{print $0}}; prev_chr=$1; prev_chr_e=$3;}}\' > {}'.format(
-        fc_bedgraph,
-        fc_bedgraph_srt)
+            fc_bedgraph,
+            fc_bedgraph_srt)
     run_shell_cmd(cmd5)
     rm_f(fc_bedgraph)
 
@@ -101,7 +103,7 @@ def macs2_signal_track(ta, chrsz, gensz, pval_thresh, smooth_win, out_dir):
 
     # sval counts the number of tags per million in the (compressed) BED file
     sval = float(get_num_lines(ta))/1000000.0
-    
+
     cmd7 = 'macs2 bdgcmp -t "{}"_treat_pileup.bdg '
     cmd7 += '-c "{}"_control_lambda.bdg '
     cmd7 += '--o-prefix {} -m ppois -S {}'
@@ -126,8 +128,8 @@ def macs2_signal_track(ta, chrsz, gensz, pval_thresh, smooth_win, out_dir):
         'awk \'BEGIN{{OFS="\\t"}}{{if (NR==1 || NR>1 && (prev_chr!=$1 '\
         '|| prev_chr==$1 && prev_chr_e<=$2)) ' \
         '{{print $0}}; prev_chr=$1; prev_chr_e=$3;}}\' > {}'.format(
-        pval_bedgraph,
-        pval_bedgraph_srt)
+            pval_bedgraph,
+            pval_bedgraph_srt)
     run_shell_cmd(cmd9)
     rm_f(pval_bedgraph)
 
@@ -138,12 +140,13 @@ def macs2_signal_track(ta, chrsz, gensz, pval_thresh, smooth_win, out_dir):
         pval_bigwig)
     run_shell_cmd(cmd10)
     rm_f(pval_bedgraph_srt)
-    
+
     # remove temporary files
     temp_files.append("{}_*".format(prefix))
     rm_f(temp_files)
 
     return fc_bigwig, pval_bigwig
+
 
 def main():
     # read params
@@ -162,5 +165,6 @@ def main():
 
     log.info('All done.')
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     main()

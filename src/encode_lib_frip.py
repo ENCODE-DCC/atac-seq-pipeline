@@ -8,9 +8,10 @@ import os
 import argparse
 from encode_lib_common import *
 
+
 def parse_arguments():
     parser = argparse.ArgumentParser(prog='ENCODE DCC FRiP.',
-                                        description='')
+                                     description='')
     parser.add_argument('peak', type=str,
                         help='Peak file.')
     parser.add_argument('ta', type=str,
@@ -23,7 +24,7 @@ def parse_arguments():
                         If given, do shifted FRiP (for ChIP-Seq).')
     parser.add_argument('--out-dir', default='', type=str,
                         help='Output directory.')
-    parser.add_argument('--log-level', default='INFO', 
+    parser.add_argument('--log-level', default='INFO',
                         choices=['NOTSET', 'DEBUG', 'INFO',
                                  'WARNING', 'CRITICAL', 'ERROR',
                                  'CRITICAL'],
@@ -33,23 +34,24 @@ def parse_arguments():
     log.info(sys.argv)
     return args
 
+
 def frip(ta, peak, out_dir):
-    prefix = os.path.join(out_dir, 
-        os.path.basename(strip_ext(peak)))
+    prefix = os.path.join(out_dir,
+                          os.path.basename(strip_ext(peak)))
     frip_qc = '{}.frip.qc'.format(prefix)
-    
-    if get_num_lines(peak)==0:
+
+    if get_num_lines(peak) == 0:
         val1 = 0.0
         tmp_files = []
     else:
         # due to bedtools bug when .gz is given for -a and -b
         tmp1 = gunzip(ta, 'tmp1', out_dir)
-        tmp2 = gunzip(peak, 'tmp2', out_dir)    
+        tmp2 = gunzip(peak, 'tmp2', out_dir)
 
         cmd = 'bedtools intersect -nonamecheck -a {} -b {} -wa -u | wc -l'
         cmd = cmd.format(
-            tmp1, # ta
-            tmp2) # peak
+            tmp1,  # ta
+            tmp2)  # peak
         val1 = run_shell_cmd(cmd)
         tmp_files = [tmp1, tmp2]
     val2 = get_num_lines(ta)
@@ -57,17 +59,18 @@ def frip(ta, peak, out_dir):
     rm_f(tmp_files)
     return frip_qc
 
+
 def frip_shifted(ta, peak, chrsz, fraglen, out_dir):
-    prefix = os.path.join(out_dir, 
-        os.path.basename(strip_ext(peak)))
+    prefix = os.path.join(out_dir,
+                          os.path.basename(strip_ext(peak)))
     frip_qc = '{}.frip.qc'.format(prefix)
     half_fraglen = (fraglen+1)/2
 
-    if get_num_lines(peak)==0:
+    if get_num_lines(peak) == 0:
         val1 = 0.0
     else:
         # due to bedtools bug when .gz is given for -a and -b
-        tmp2 = gunzip(peak, 'tmp2', out_dir)    
+        tmp2 = gunzip(peak, 'tmp2', out_dir)
 
         cmd = 'bedtools slop -i {} -g {} '
         cmd += '-s -l {} -r {} | '
@@ -79,12 +82,13 @@ def frip_shifted(ta, peak, chrsz, fraglen, out_dir):
             chrsz,
             -half_fraglen,
             half_fraglen,
-            tmp2) # peak
+            tmp2)  # peak
         val1 = run_shell_cmd(cmd)
         rm_f(tmp2)
     val2 = get_num_lines(ta)
     write_txt(frip_qc, str(float(val1)/float(val2)))
     return frip_qc
+
 
 def main():
     # read params
@@ -93,8 +97,8 @@ def main():
     mkdir_p(args.out_dir)
 
     if args.fraglen:
-        frip_qc = frip_shifted(args.ta, args.peak, 
-            args.chrsz, args.fraglen, args.out_dir)
+        frip_qc = frip_shifted(args.ta, args.peak,
+                               args.chrsz, args.fraglen, args.out_dir)
     else:
         frip_qc = frip(args.ta, args.peak, args.out_dir)
 
@@ -103,5 +107,6 @@ def main():
 
     log.info('All done.')
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     main()

@@ -3,6 +3,12 @@
 # ENCODE DCC TSS enrich wrapper
 # Author: Daniel Kim, Jin Lee (leepc12@gmail.com)
 
+import warnings
+import pybedtools
+import numpy as np
+import metaseq
+from matplotlib import mlab
+from matplotlib import pyplot as plt
 import sys
 import os
 import argparse
@@ -11,23 +17,22 @@ from encode_lib_genomic import remove_read_group, samtools_index
 import matplotlib as mpl
 mpl.use('Agg')
 
-from matplotlib import pyplot as plt
-from matplotlib import mlab
-import metaseq
-import numpy as np
-import pybedtools
-import warnings
 warnings.filterwarnings("ignore")
+
 
 def parse_arguments():
     parser = argparse.ArgumentParser(prog='ENCODE TSS enrichment.')
-    parser.add_argument('--read-len-log', type=str, help='Read length log file (from aligner task).')
-    parser.add_argument('--nodup-bam', type=str, help='Raw BAM file (from task filter).')
-    parser.add_argument('--chrsz', type=str, help='2-col chromosome sizes file.')
+    parser.add_argument('--read-len-log', type=str,
+                        help='Read length log file (from aligner task).')
+    parser.add_argument('--nodup-bam', type=str,
+                        help='Raw BAM file (from task filter).')
+    parser.add_argument('--chrsz', type=str,
+                        help='2-col chromosome sizes file.')
     parser.add_argument('--tss', type=str, help='TSS definition bed file.')
-    parser.add_argument('--out-dir', default='', type=str, help='Output directory.')
+    parser.add_argument('--out-dir', default='', type=str,
+                        help='Output directory.')
     parser.add_argument('--log-level', default='INFO', help='Log level',
-                        choices=['NOTSET','DEBUG','INFO','WARNING','CRITICAL','ERROR','CRITICAL'])
+                        choices=['NOTSET', 'DEBUG', 'INFO', 'WARNING', 'CRITICAL', 'ERROR', 'CRITICAL'])
     args = parser.parse_args()
     log.setLevel(args.log_level)
     log.info(sys.argv)
@@ -52,17 +57,18 @@ def make_tss_plot(bam_file, tss, prefix, chromsizes, read_len, bins=400, bp_edge
     tss_ext = tss.slop(b=bp_edge, g=chromsizes)
 
     # Load the bam file
-    bam = metaseq.genomic_signal(bam_file, 'bam') # Need to shift reads and just get ends, just load bed file?
-    bam_array = bam.array(tss_ext, bins=bins, shift_width = -read_len/2, # Shift to center the read on the cut site
+    # Need to shift reads and just get ends, just load bed file?
+    bam = metaseq.genomic_signal(bam_file, 'bam')
+    bam_array = bam.array(tss_ext, bins=bins, shift_width=-read_len/2,  # Shift to center the read on the cut site
                           processes=processes, stranded=True)
 
     # Actually first build an "ends" file
     #get_ends = '''zcat {0} | awk -F '\t' 'BEGIN {{OFS="\t"}} {{if ($6 == "-") {{$2=$3-1; print}} else {{$3=$2+1; print}} }}' | gzip -c > {1}_ends.bed.gz'''.format(bed_file, prefix)
-    #print(get_ends)
-    #os.system(get_ends)
+    # print(get_ends)
+    # os.system(get_ends)
 
     #bed_reads = metaseq.genomic_signal('{0}_ends.bed.gz'.format(prefix), 'bed')
-    #bam_array = bed_reads.array(tss_ext, bins=bins,
+    # bam_array = bed_reads.array(tss_ext, bins=bins,
     #                      processes=processes, stranded=True)
 
     # Normalization (Greenleaf style): Find the avg height
@@ -128,12 +134,12 @@ def main():
     args = parse_arguments()
 
     CHROMSIZES = args.chrsz
-    TSS = args.tss if args.tss and os.path.basename(args.tss)!='null' else ''
+    TSS = args.tss if args.tss and os.path.basename(args.tss) != 'null' else ''
     FINAL_BAM = args.nodup_bam
     OUTPUT_PREFIX = os.path.join(
         args.out_dir,
         os.path.basename(strip_ext_bam(FINAL_BAM)))
-    samtools_index(FINAL_BAM) # make an index first
+    samtools_index(FINAL_BAM)  # make an index first
     RG_FREE_FINAL_BAM = remove_read_group(FINAL_BAM)
 
     log.info('Initializing and making output directory...')
@@ -142,7 +148,7 @@ def main():
     # Also get read length
     # read_len = get_read_length(FASTQ)
     if args.read_len_log:
-        with open(args.read_len_log,'r') as fp:
+        with open(args.read_len_log, 'r') as fp:
             read_len = int(fp.read().strip())
     else:
         read_len = None
@@ -150,11 +156,11 @@ def main():
     # Enrichments: V plot for enrichment
     # Use final to avoid duplicates
     tss_plot, tss_large_plot, tss_enrich_qc = \
-            make_tss_plot(FINAL_BAM, 
-                          TSS,
-                          OUTPUT_PREFIX,
-                          CHROMSIZES,
-                          read_len)
+        make_tss_plot(FINAL_BAM,
+                      TSS,
+                      OUTPUT_PREFIX,
+                      CHROMSIZES,
+                      read_len)
 
     # remove temporary files
     rm_f(RG_FREE_FINAL_BAM)
@@ -164,5 +170,6 @@ def main():
 
     log.info('All done.')
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     main()

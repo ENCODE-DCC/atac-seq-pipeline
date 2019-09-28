@@ -3,6 +3,8 @@
 # ENCODE DCC compare signal to roadmap wrapper
 # Author: Daniel Kim, Jin Lee (leepc12@gmail.com)
 
+import warnings
+from matplotlib import pyplot as plt
 import sys
 import os
 import argparse
@@ -14,20 +16,22 @@ import scipy.stats
 import matplotlib as mpl
 mpl.use('Agg')
 
-from matplotlib import pyplot as plt
-import warnings
 warnings.filterwarnings("ignore")
+
 
 def parse_arguments():
     parser = argparse.ArgumentParser(prog='ENCODE compare signal to roadmap')
-    parser.add_argument('--bigwig', type=str, help='BIGWIG file (from task macs2).')
+    parser.add_argument('--bigwig', type=str,
+                        help='BIGWIG file (from task macs2).')
     parser.add_argument('--reg2map', type=str, help='Reg2map file.')
     parser.add_argument('--reg2map-bed', type=str, help='Reg2map bed file.')
-    parser.add_argument('--roadmap-meta', type=str, help='Roadmap metadata file.')
-    parser.add_argument('--out-dir', default='', type=str, help='Output directory.')
+    parser.add_argument('--roadmap-meta', type=str,
+                        help='Roadmap metadata file.')
+    parser.add_argument('--out-dir', default='', type=str,
+                        help='Output directory.')
     parser.add_argument('--log-level', default='INFO', help='Log level',
                         choices=['NOTSET', 'DEBUG', 'INFO', 'WARNING',
-                                 'CRITICAL','ERROR','CRITICAL'])
+                                 'CRITICAL', 'ERROR', 'CRITICAL'])
     args = parser.parse_args()
     log.setLevel(args.log_level)
     log.info(sys.argv)
@@ -48,7 +52,7 @@ def compare_to_roadmap(bw_file, regions_file, reg2map_file,
     # First get the signal vals for the peak regions
     # remember to use a UCSC formatted bed file for regions
     bw_average_over_bed = 'bigWigAverageOverBed {0} {1} {2}'.format(
-                            bw_file, regions_file, out_file)
+        bw_file, regions_file, out_file)
     logging.info(bw_average_over_bed)
     os.system(bw_average_over_bed)
 
@@ -83,7 +87,7 @@ def compare_to_roadmap(bw_file, regions_file, reg2map_file,
 
     # Plot results
     pos = np.array(range(ncol)) + 0.5
-    fig = plt.figure(figsize=(5,int(ncol/4)))
+    fig = plt.figure(figsize=(5, int(ncol/4)))
     plt.barh(pos, sorted_results['corr'], align='center', height=1.0)
     plt.yticks(pos, sorted_results['mnemonic'].tolist(), fontsize=7)
     plt.xlabel('Spearmans correlation')
@@ -99,6 +103,7 @@ def compare_to_roadmap(bw_file, regions_file, reg2map_file,
 
     return plot_img
 
+
 def main():
     # read params
     args = parse_arguments()
@@ -107,9 +112,12 @@ def main():
         args.out_dir,
         os.path.basename(strip_ext_bigwig(BIGWIG)))
 
-    REG2MAP_BED = args.reg2map_bed if args.reg2map_bed and os.path.basename(args.reg2map_bed)!='null' else DNASE
-    REG2MAP = args.reg2map if args.reg2map and os.path.basename(args.reg2map)!='null' else ''
-    ROADMAP_META = args.roadmap_meta if args.roadmap_meta and os.path.basename(args.roadmap_meta)!='null' else ''
+    REG2MAP_BED = args.reg2map_bed if args.reg2map_bed and os.path.basename(
+        args.reg2map_bed) != 'null' else DNASE
+    REG2MAP = args.reg2map if args.reg2map and os.path.basename(
+        args.reg2map) != 'null' else ''
+    ROADMAP_META = args.roadmap_meta if args.roadmap_meta and os.path.basename(
+        args.roadmap_meta) != 'null' else ''
 
     log.info('Initializing and making output directory...')
     mkdir_p(args.out_dir)
@@ -122,5 +130,6 @@ def main():
 
     log.info('All done.')
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     main()

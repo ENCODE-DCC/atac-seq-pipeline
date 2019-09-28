@@ -12,9 +12,10 @@ from encode_lib_genomic import peak_to_bigbed, peak_to_hammock
 from encode_lib_blacklist_filter import blacklist_filter
 from encode_lib_frip import frip, frip_shifted
 
+
 def parse_arguments():
     parser = argparse.ArgumentParser(prog='ENCODE DCC IDR.',
-                        description='NarrowPeak or RegionPeak only.')
+                                     description='NarrowPeak or RegionPeak only.')
     parser.add_argument('peak1', type=str,
                         help='Peak file 1.')
     parser.add_argument('peak2', type=str,
@@ -24,17 +25,18 @@ def parse_arguments():
     parser.add_argument('--prefix', default='idr', type=str,
                         help='Prefix basename for output IDR peak.')
     parser.add_argument('--peak-type', type=str, required=True,
-                        choices=['narrowPeak','regionPeak','broadPeak','gappedPeak'],
+                        choices=['narrowPeak', 'regionPeak',
+                                 'broadPeak', 'gappedPeak'],
                         help='Peak file type.')
     parser.add_argument('--idr-thresh', default=0.1, type=float,
                         help='IDR threshold.')
     parser.add_argument('--idr-rank', default='p.value', type=str,
-                        choices=['p.value','q.value','signal.value'],
+                        choices=['p.value', 'q.value', 'signal.value'],
                         help='IDR ranking method.')
     parser.add_argument('--blacklist', type=str, required=True,
                         help='Blacklist BED file.')
     parser.add_argument('--keep-irregular-chr', action="store_true",
-                        help='Keep reads with non-canonical chromosome names.')    
+                        help='Keep reads with non-canonical chromosome names.')
     parser.add_argument('--ta', type=str,
                         help='TAGALIGN file for FRiP.')
     parser.add_argument('--chrsz', type=str,
@@ -44,7 +46,7 @@ def parse_arguments():
                         If given, do shifted FRiP (for ChIP-Seq).')
     parser.add_argument('--out-dir', default='', type=str,
                         help='Output directory.')
-    parser.add_argument('--log-level', default='INFO', 
+    parser.add_argument('--log-level', default='INFO',
                         choices=['NOTSET', 'DEBUG', 'INFO',
                                  'WARNING', 'CRITICAL', 'ERROR',
                                  'CRITICAL'],
@@ -57,19 +59,22 @@ def parse_arguments():
     log.info(sys.argv)
     return args
 
+
 def get_npeak_col_by_rank(rank):
-    if rank=='signal.value':
+    if rank == 'signal.value':
         return 7
-    elif rank=='p.value':
+    elif rank == 'p.value':
         return 8
-    elif rank=='q.value':
+    elif rank == 'q.value':
         return 9
     else:
         raise Exception('Invalid score ranking method')
 
-# only for narrowPeak (or regionPeak) type 
+# only for narrowPeak (or regionPeak) type
+
+
 def idr(basename_prefix, peak1, peak2, peak_pooled, peak_type,
-    thresh, rank, out_dir):
+        thresh, rank, out_dir):
     prefix = os.path.join(out_dir, basename_prefix)
     prefix += '.idr{}'.format(thresh)
     idr_peak = '{}.{}.gz'.format(prefix, peak_type)
@@ -95,7 +100,7 @@ def idr(basename_prefix, peak1, peak2, peak_pooled, peak_type,
 
     col = get_npeak_col_by_rank(rank)
     neg_log10_thresh = -math.log10(thresh)
-    # LC_COLLATE=C 
+    # LC_COLLATE=C
     cmd2 = 'awk \'BEGIN{{OFS="\\t"}} $12>={} '
     cmd2 += '{{if ($2<0) $2=0; '
     cmd2 += 'print $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12}}\' {} '
@@ -124,6 +129,7 @@ def idr(basename_prefix, peak1, peak2, peak_pooled, peak_type,
     rm_f('{}.*.noalternatesummitpeaks.png'.format(prefix))
     return idr_peak, idr_plot, idr_out_gz, idr_stdout
 
+
 def main():
     # read params
     args = parse_arguments()
@@ -133,38 +139,40 @@ def main():
 
     log.info('Do IDR...')
     idr_peak, idr_plot, idr_out_gz, idr_stdout = idr(
-        args.prefix, 
+        args.prefix,
         args.peak1, args.peak2, args.peak_pooled, args.peak_type,
         args.idr_thresh, args.idr_rank, args.out_dir)
 
     log.info('Blacklist-filtering peaks...')
     bfilt_idr_peak = blacklist_filter(
-            idr_peak, args.blacklist, args.keep_irregular_chr, args.out_dir)
+        idr_peak, args.blacklist, args.keep_irregular_chr, args.out_dir)
 
     log.info('Checking if output is empty...')
     assert_file_not_empty(bfilt_idr_peak)
 
     log.info('Converting peak to bigbed...')
-    peak_to_bigbed(bfilt_idr_peak, args.peak_type, args.chrsz, args.keep_irregular_chr, args.out_dir)
+    peak_to_bigbed(bfilt_idr_peak, args.peak_type, args.chrsz,
+                   args.keep_irregular_chr, args.out_dir)
 
     log.info('Converting peak to hammock...')
     peak_to_hammock(bfilt_idr_peak, args.keep_irregular_chr, args.out_dir)
 
-    if args.ta: # if TAG-ALIGN is given
-        if args.fraglen: # chip-seq
+    if args.ta:  # if TAG-ALIGN is given
+        if args.fraglen:  # chip-seq
             log.info('Shifted FRiP with fragment length...')
-            frip_qc = frip_shifted( args.ta, bfilt_idr_peak,
-                args.chrsz, args.fraglen, args.out_dir)
-        else: # atac-seq
+            frip_qc = frip_shifted(args.ta, bfilt_idr_peak,
+                                   args.chrsz, args.fraglen, args.out_dir)
+        else:  # atac-seq
             log.info('FRiP without fragment length...')
-            frip_qc = frip( args.ta, bfilt_idr_peak, args.out_dir)
+            frip_qc = frip(args.ta, bfilt_idr_peak, args.out_dir)
     else:
         frip_qc = '/dev/null'
 
     log.info('List all files in output directory...')
     ls_l(args.out_dir)
-   
+
     log.info('All done.')
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     main()

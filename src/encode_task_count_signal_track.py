@@ -8,16 +8,17 @@ import os
 import argparse
 from encode_lib_common import *
 
+
 def parse_arguments():
     parser = argparse.ArgumentParser(prog='ENCODE DCC Count signal track generation',
-                                        description='')
+                                     description='')
     parser.add_argument('ta', type=str,
                         help='Path for TAGALIGN file.')
     parser.add_argument('--chrsz', type=str,
                         help='2-col chromosome sizes file.')
     parser.add_argument('--out-dir', default='', type=str,
                         help='Output directory.')
-    parser.add_argument('--log-level', default='INFO', 
+    parser.add_argument('--log-level', default='INFO',
                         choices=['NOTSET', 'DEBUG', 'INFO',
                                  'WARNING', 'CRITICAL', 'ERROR',
                                  'CRITICAL'],
@@ -26,6 +27,7 @@ def parse_arguments():
     log.setLevel(args.log_level)
     log.info(sys.argv)
     return args
+
 
 def count_signal_track(ta, chrsz, out_dir):
     prefix = os.path.join(out_dir, os.path.basename(strip_ext_ta(ta)))
@@ -49,7 +51,7 @@ def count_signal_track(ta, chrsz, out_dir):
 
     cmd3 = 'bedGraphToBigWig {} {} {}'
     cmd3 = cmd3.format(pos_bedgraph, chrsz, pos_bw)
-    run_shell_cmd(cmd3)    
+    run_shell_cmd(cmd3)
 
     cmd4 = 'bedGraphToBigWig {} {} {}'
     cmd4 = cmd4.format(neg_bedgraph, chrsz, neg_bw)
@@ -62,6 +64,7 @@ def count_signal_track(ta, chrsz, out_dir):
 
     return pos_bw, neg_bw
 
+
 def main():
     # read params
     args = parse_arguments()
@@ -70,13 +73,13 @@ def main():
     mkdir_p(args.out_dir)
 
     log.info('Generating count signal tracks...')
-    pos_bw, neg_bw = count_signal_track( args.ta, args.chrsz, args.out_dir)
+    pos_bw, neg_bw = count_signal_track(args.ta, args.chrsz, args.out_dir)
 
     log.info('List all files in output directory...')
     ls_l(args.out_dir)
 
     log.info('All done.')
 
-if __name__=='__main__':
-    main()
 
+if __name__ == '__main__':
+    main()

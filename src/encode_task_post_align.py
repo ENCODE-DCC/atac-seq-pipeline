@@ -9,9 +9,10 @@ import argparse
 from encode_lib_common import mkdir_p
 from encode_lib_genomic import *
 
+
 def parse_arguments():
     parser = argparse.ArgumentParser(prog='ENCODE post align',
-                                        description='')
+                                     description='')
     parser.add_argument('fastq', type=str,
                         help='Path for FASTQ R1')
     parser.add_argument('bam', type=str,
@@ -24,8 +25,8 @@ def parse_arguments():
     parser.add_argument('--nth', type=int, default=1,
                         help='Number of threads to parallelize.')
     parser.add_argument('--out-dir', default='', type=str,
-                            help='Output directory.')
-    parser.add_argument('--log-level', default='INFO', 
+                        help='Output directory.')
+    parser.add_argument('--log-level', default='INFO',
                         choices=['NOTSET', 'DEBUG', 'INFO',
                                  'WARNING', 'CRITICAL', 'ERROR',
                                  'CRITICAL'],
@@ -33,17 +34,19 @@ def parse_arguments():
     args = parser.parse_args()
 
     log.setLevel(args.log_level)
-    log.info(sys.argv)    
+    log.info(sys.argv)
     return args
+
 
 def make_read_length_file(fastq, out_dir):
     basename = os.path.basename(strip_ext_fastq(fastq))
     prefix = os.path.join(out_dir, basename)
     txt = '{}.read_length.txt'.format(prefix)
     read_length = get_read_length(fastq)
-    with open(txt,'w') as fp:
+    with open(txt, 'w') as fp:
         fp.write(str(read_length))
     return txt
+
 
 def main():
     # read params
@@ -55,7 +58,7 @@ def main():
     # generate read length file
     log.info('Generating read length file...')
     R1_read_length_file = make_read_length_file(
-                            args.fastq, args.out_dir)
+        args.fastq, args.out_dir)
 
     log.info('Running samtools index...')
     bai = samtools_index(args.bam, args.nth, args.out_dir)
@@ -79,5 +82,6 @@ def main():
 
     log.info('All done.')
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     main()

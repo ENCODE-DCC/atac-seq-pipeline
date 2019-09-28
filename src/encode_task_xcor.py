@@ -9,9 +9,10 @@ import argparse
 from encode_lib_genomic import *
 from encode_lib_log_parser import parse_xcor_score
 
+
 def parse_arguments():
     parser = argparse.ArgumentParser(prog='ENCODE DCC cross-correlation analysis.',
-                                        description='')
+                                     description='')
     parser.add_argument('ta', type=str,
                         help='Path for TAGALIGN file.')
     parser.add_argument('--mito-chr-name', default='chrM',
@@ -20,7 +21,7 @@ def parse_arguments():
                         help='Subsample TAGALIGN.')
     parser.add_argument('--speak', type=int, default=-1,
                         help='User-defined cross-corr. peak strandshift \
-                        (-speak= in run_spp.R). Disabled if -1.')    
+                        (-speak= in run_spp.R). Disabled if -1.')
     parser.add_argument('--exclusion-range-min', type=int,
                         help='User-defined exclusion range minimum used for '
                              '-x=${xcor_exclusion_range_min}:${xcor_exclusion_range_max}')
@@ -35,7 +36,7 @@ def parse_arguments():
                         help='Number of threads to parallelize.')
     parser.add_argument('--out-dir', default='', type=str,
                         help='Output directory.')
-    parser.add_argument('--log-level', default='INFO', 
+    parser.add_argument('--log-level', default='INFO',
                         choices=['NOTSET', 'DEBUG', 'INFO',
                                  'WARNING', 'CRITICAL', 'ERROR',
                                  'CRITICAL'],
@@ -71,7 +72,7 @@ def xcor(ta, speak, mito_chr_name,
          nth, out_dir, chip_seq_type=None,
          exclusion_range_min=None, exclusion_range_max=None):
     prefix = os.path.join(out_dir,
-        os.path.basename(strip_ext_ta(ta)))
+                          os.path.basename(strip_ext_ta(ta)))
     xcor_plot_pdf = '{}.cc.plot.pdf'.format(prefix)
     xcor_score = '{}.cc.qc'.format(prefix)
     fraglen_txt = '{}.cc.fraglen.txt'.format(prefix)
@@ -94,7 +95,7 @@ def xcor(ta, speak, mito_chr_name,
         mito_chr_name,
         xcor_plot_pdf,
         xcor_score,
-        '-speak={}'.format(speak) if speak>=0 else '')
+        '-speak={}'.format(speak) if speak >= 0 else '')
     run_shell_cmd(cmd1)
 
     cmd2 = 'sed -r \'s/,[^\\t]+//g\' -i {}'
@@ -110,6 +111,7 @@ def xcor(ta, speak, mito_chr_name,
     xcor_plot_png = pdf2png(xcor_plot_pdf, out_dir)
     return xcor_plot_pdf, xcor_plot_png, xcor_score, fraglen_txt
 
+
 def main():
     # read params
     args = parse_arguments()
@@ -117,7 +119,7 @@ def main():
     mkdir_p(args.out_dir)
 
     # declare temp arrays
-    temp_files = [] # files to deleted later at the end
+    temp_files = []  # files to deleted later at the end
 
     log.info('Subsampling TAGALIGN for xcor...')
     if args.paired_end:
@@ -141,5 +143,6 @@ def main():
 
     log.info('All done.')
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     main()

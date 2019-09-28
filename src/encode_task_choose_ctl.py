@@ -8,9 +8,10 @@ import os
 import argparse
 from encode_lib_common import *
 
+
 def parse_arguments():
     parser = argparse.ArgumentParser(prog='ENCODE DCC Choose control.',
-                        description='Choose appropriate control for each IP replicate.\
+                                     description='Choose appropriate control for each IP replicate.\
                         ctl_for_repN.tagAlign.gz will be generated for each IP replicate \
                         on --out-dir.')
     parser.add_argument('--tas', type=str, nargs='+', required=True,
@@ -27,7 +28,7 @@ def parse_arguments():
                         help='Always use pooled control for all IP replicates.')
     parser.add_argument('--out-dir', default='', type=str,
                         help='Output directory.')
-    parser.add_argument('--log-level', default='INFO', 
+    parser.add_argument('--log-level', default='INFO',
                         choices=['NOTSET', 'DEBUG', 'INFO',
                                  'WARNING', 'CRITICAL', 'ERROR',
                                  'CRITICAL'],
@@ -37,6 +38,7 @@ def parse_arguments():
     log.setLevel(args.log_level)
     log.info(sys.argv)
     return args
+
 
 def main():
     # read params
@@ -49,11 +51,11 @@ def main():
     # reproducibility QC
     log.info('Choosing appropriate control for each IP replicate...')
     ctl_ta_idx = [0]*len(args.tas)
-    if len(args.ctl_tas)==1: # if only one control, use it for all replicates
+    if len(args.ctl_tas) == 1:  # if only one control, use it for all replicates
         pass
-    elif args.always_use_pooled_ctl: # if --always-use-pooled-ctl, then always use pooled control
+    elif args.always_use_pooled_ctl:  # if --always-use-pooled-ctl, then always use pooled control
         ctl_ta_idx = [-1]*len(args.tas)
-    else: 
+    else:
         # if multiple controls, check # of lines in replicate/control tagaligns and apply ctl_depth_ratio
         # num lines in tagaligns
         nlines = [get_num_lines(ta) for ta in args.tas]
@@ -63,25 +65,26 @@ def main():
         # check every num lines in every pair of control tagaligns
         # if ratio of two entries in any pair > ctl_depth_ratio then use pooled control for all
         use_pooled_ctl = False
-        for i in range(len(nlines_ctl)): 
-            for j in range(i+1,len(nlines_ctl)):
+        for i in range(len(nlines_ctl)):
+            for j in range(i+1, len(nlines_ctl)):
                 if nlines_ctl[i]/float(nlines_ctl[j]) > args.ctl_depth_ratio or \
-                    nlines_ctl[j]/float(nlines_ctl[i]) > args.ctl_depth_ratio:
+                        nlines_ctl[j]/float(nlines_ctl[i]) > args.ctl_depth_ratio:
                     use_pooled_ctl = True
                     log.info('Number of reads in controls differ by a factor of {}. Using pooled controls.'.format(
                         args.ctl_depth_ratio))
                     break
 
         if use_pooled_ctl:
-            ctl_ta_idx = [-1]*len(args.tas) # use pooled control for all exp replicates
+            # use pooled control for all exp replicates
+            ctl_ta_idx = [-1]*len(args.tas)
         else:
             for i in range(len(args.tas)):
-                if i>len(args.ctl_tas)-1:
-                    ctl_ta_idx[i] = -1 # use pooled control
+                if i > len(args.ctl_tas)-1:
+                    ctl_ta_idx[i] = -1  # use pooled control
                 elif nlines_ctl[i] < nlines[i]:
                     log.info('Fewer reads in control {} than experiment replicate {}. Using pooled control for replicate {}.'.format(
                         i+1, i+1, i+1))
-                    ctl_ta_idx[i] = -1 # use pooled control
+                    ctl_ta_idx[i] = -1  # use pooled control
                 else:
                     ctl_ta_idx[i] = i
 
@@ -91,17 +94,19 @@ def main():
     log.info('Writing ctl_for_repN.tagAlign.gz files...')
     for i, ctl_id in enumerate(ctl_ta_idx):
         rep_id = i+1
-        dest = os.path.join(args.out_dir, 'ctl_for_rep{}.tagAlign.gz'.format(rep_id))
-        if ctl_id==-1:
+        dest = os.path.join(
+            args.out_dir, 'ctl_for_rep{}.tagAlign.gz'.format(rep_id))
+        if ctl_id == -1:
             src = args.ctl_ta_pooled[0]
         else:
             src = args.ctl_tas[ctl_id]
         copy_f_to_f(src, dest)
-    
+
     log.info('List all files in output directory...')
     ls_l(args.out_dir)
 
     log.info('All done.')
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     main()

@@ -8,9 +8,10 @@ import os
 import argparse
 from encode_lib_common import *
 
+
 def parse_arguments(debug=False):
     parser = argparse.ArgumentParser(prog='ENCODE DCC fastq merger.',
-                                        description='')
+                                     description='')
     parser.add_argument('fastqs', nargs='+', type=str,
                         help='TSV file path or list of FASTQs. \
                             FASTQs must be compressed with gzip (with .gz). \
@@ -21,8 +22,8 @@ def parse_arguments(debug=False):
     parser.add_argument('--nth', type=int, default=1,
                         help='Number of threads to parallelize.')
     parser.add_argument('--out-dir', default='', type=str,
-                            help='Output directory.')
-    parser.add_argument('--log-level', default='INFO', 
+                        help='Output directory.')
+    parser.add_argument('--log-level', default='INFO',
                         choices=['NOTSET', 'DEBUG', 'INFO',
                                  'WARNING', 'CRITICAL', 'ERROR',
                                  'CRITICAL'],
@@ -31,32 +32,34 @@ def parse_arguments(debug=False):
 
     # parse fastqs command line
     if args.fastqs[0].endswith('.gz') or args.fastqs[0].endswith('.fastq') or \
-        args.fastqs[0].endswith('.fq'): # it's fastq
-        args.fastqs = [[f] for f in args.fastqs] # make it a matrix
-    else: # it's TSV
+            args.fastqs[0].endswith('.fq'):  # it's fastq
+        args.fastqs = [[f] for f in args.fastqs]  # make it a matrix
+    else:  # it's TSV
         args.fastqs = read_tsv(args.fastqs[0])
 
     for i, fastqs in enumerate(args.fastqs):
-        if args.paired_end and len(fastqs)!=2:
+        if args.paired_end and len(fastqs) != 2:
             raise argparse.ArgumentTypeError(
                 'Need 2 fastqs per replicate for paired end.')
-        if not args.paired_end and len(fastqs)!=1:
+        if not args.paired_end and len(fastqs) != 1:
             raise argparse.ArgumentTypeError(
                 'Need 1 fastq per replicate for single end.')
-            
+
     log.setLevel(args.log_level)
     log.info(sys.argv)
     return args
 
 # make merged fastqs on $out_dir/R1, $out_dir/R2
+
+
 def merge_fastqs(fastqs, end, out_dir):
     out_dir = os.path.join(out_dir, end)
     mkdir_p(out_dir)
     prefix = os.path.join(out_dir,
-        os.path.basename(strip_ext_fastq(fastqs[0])))
+                          os.path.basename(strip_ext_fastq(fastqs[0])))
     merged = '{}.merged.fastq.gz'.format(prefix)
 
-    if len(fastqs)>1:
+    if len(fastqs) > 1:
         cmd = 'zcat -f {} | gzip -nc > {}'.format(
             ' '.join(fastqs),
             merged)
@@ -64,6 +67,7 @@ def merge_fastqs(fastqs, end, out_dir):
         return merged
     else:
         return hard_link(fastqs[0], merged)
+
 
 def main():
     # read params
@@ -92,5 +96,6 @@ def main():
 
     log.info('All done.')
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     main()

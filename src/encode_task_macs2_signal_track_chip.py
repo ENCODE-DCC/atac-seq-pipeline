@@ -8,9 +8,10 @@ import os
 import argparse
 from encode_lib_common import *
 
+
 def parse_arguments():
     parser = argparse.ArgumentParser(prog='ENCODE DCC MACS2 signal track',
-                                        description='')
+                                     description='')
     parser.add_argument('tas', type=str, nargs='+',
                         help='Path for TAGALIGN file (first) and control TAGALIGN file (second; optional).')
     parser.add_argument('--fraglen', type=int, required=True,
@@ -26,24 +27,25 @@ def parse_arguments():
                         help='P-Value threshold.')
     parser.add_argument('--out-dir', default='', type=str,
                         help='Output directory.')
-    parser.add_argument('--log-level', default='INFO', 
+    parser.add_argument('--log-level', default='INFO',
                         choices=['NOTSET', 'DEBUG', 'INFO',
                                  'WARNING', 'CRITICAL', 'ERROR',
                                  'CRITICAL'],
                         help='Log level')
     args = parser.parse_args()
-    if len(args.tas)==1:
+    if len(args.tas) == 1:
         args.tas.append('')
     log.setLevel(args.log_level)
     log.info(sys.argv)
     return args
+
 
 def macs2_signal_track(ta, ctl_ta, chrsz, gensz, pval_thresh, shift, fraglen, out_dir):
     basename_ta = os.path.basename(strip_ext_ta(ta))
     if ctl_ta:
         basename_ctl_ta = os.path.basename(strip_ext_ta(ctl_ta))
         basename_prefix = '{}_x_{}'.format(basename_ta, basename_ctl_ta)
-        if len(basename_prefix) > 200: # UNIX cannot have len(filename) > 255
+        if len(basename_prefix) > 200:  # UNIX cannot have len(filename) > 255
             basename_prefix = '{}_x_control'.format(basename_ta)
     else:
         basename_prefix = basename_ta
@@ -75,8 +77,8 @@ def macs2_signal_track(ta, ctl_ta, chrsz, gensz, pval_thresh, shift, fraglen, ou
     cmd3 += '-c "{}"_control_lambda.bdg '
     cmd3 += '--o-prefix "{}" -m FE '
     cmd3 = cmd3.format(
-        prefix, 
-        prefix, 
+        prefix,
+        prefix,
         prefix)
     run_shell_cmd(cmd3)
 
@@ -84,9 +86,9 @@ def macs2_signal_track(ta, ctl_ta, chrsz, gensz, pval_thresh, shift, fraglen, ou
     cmd4 += 'awk \'{{if ($3 != -1) print $0}}\' |'
     cmd4 += 'bedClip stdin {} {}'
     cmd4 = cmd4.format(
-        prefix, 
-        chrsz, 
-        chrsz, 
+        prefix,
+        chrsz,
+        chrsz,
         fc_bedgraph)
     run_shell_cmd(cmd4)
 
@@ -95,8 +97,8 @@ def macs2_signal_track(ta, ctl_ta, chrsz, gensz, pval_thresh, shift, fraglen, ou
         'awk \'BEGIN{{OFS="\\t"}}{{if (NR==1 || NR>1 && (prev_chr!=$1 || '\
         'prev_chr==$1 && prev_chr_e<=$2)) ' \
         '{{print $0}}; prev_chr=$1; prev_chr_e=$3;}}\' > {}'.format(
-        fc_bedgraph,
-        fc_bedgraph_srt)
+            fc_bedgraph,
+            fc_bedgraph_srt)
     run_shell_cmd(cmd5)
     rm_f(fc_bedgraph)
 
@@ -110,7 +112,7 @@ def macs2_signal_track(ta, ctl_ta, chrsz, gensz, pval_thresh, shift, fraglen, ou
 
     # sval counts the number of tags per million in the (compressed) BED file
     sval = float(get_num_lines(ta))/1000000.0
-    
+
     cmd7 = 'macs2 bdgcmp -t "{}"_treat_pileup.bdg '
     cmd7 += '-c "{}"_control_lambda.bdg '
     cmd7 += '--o-prefix {} -m ppois -S {}'
@@ -136,8 +138,8 @@ def macs2_signal_track(ta, ctl_ta, chrsz, gensz, pval_thresh, shift, fraglen, ou
         'awk \'BEGIN{{OFS="\\t"}}{{if (NR==1 || NR>1 && (prev_chr!=$1 || '\
         'prev_chr==$1 && prev_chr_e<=$2)) ' \
         '{{print $0}}; prev_chr=$1; prev_chr_e=$3;}}\' > {}'.format(
-        pval_bedgraph,
-        pval_bedgraph_srt)
+            pval_bedgraph,
+            pval_bedgraph_srt)
     run_shell_cmd(cmd9)
     rm_f(pval_bedgraph)
 
@@ -148,12 +150,13 @@ def macs2_signal_track(ta, ctl_ta, chrsz, gensz, pval_thresh, shift, fraglen, ou
         pval_bigwig)
     run_shell_cmd(cmd10)
     rm_f(pval_bedgraph_srt)
-    
+
     # remove temporary files
     temp_files.append("{}_*".format(prefix))
     rm_f(temp_files)
 
     return fc_bigwig, pval_bigwig
+
 
 def main():
     # read params
@@ -172,5 +175,6 @@ def main():
 
     log.info('All done.')
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     main()

@@ -8,16 +8,17 @@ import os
 import argparse
 from encode_lib_common import *
 
+
 def parse_arguments():
     parser = argparse.ArgumentParser(prog='ENCODE DCC pseudo replicator.',
-                                        description='')
+                                     description='')
     parser.add_argument('ta', type=str,
                         help='Path for TAGALIGN file.')
     parser.add_argument('--paired-end', action="store_true",
                         help='Paired-end TAGALIGN.')
     parser.add_argument('--out-dir', default='', type=str,
-                            help='Output directory.')
-    parser.add_argument('--log-level', default='INFO', 
+                        help='Output directory.')
+    parser.add_argument('--log-level', default='INFO',
                         choices=['NOTSET', 'DEBUG', 'INFO',
                                  'WARNING', 'CRITICAL', 'ERROR',
                                  'CRITICAL'],
@@ -28,15 +29,16 @@ def parse_arguments():
     log.info(sys.argv)
     return args
 
+
 def spr_se(ta, out_dir):
     prefix = os.path.join(out_dir,
-        os.path.basename(strip_ext_ta(ta)))
+                          os.path.basename(strip_ext_ta(ta)))
     tmp_pr1 = '{}.00'.format(prefix)
     tmp_pr2 = '{}.01'.format(prefix)
     ta_pr1 = '{}.pr1.tagAlign.gz'.format(prefix)
     ta_pr2 = '{}.pr2.tagAlign.gz'.format(prefix)
     nlines = int((get_num_lines(ta)+1)/2)
-    
+
     # bash-only
     cmd1 = 'zcat {} | shuf --random-source=<(openssl enc -aes-256-ctr -pass pass:$(zcat -f {} | wc -c) -nosalt </dev/zero 2>/dev/null) | '
     cmd1 += 'split -d -l {} - {}.'
@@ -62,9 +64,10 @@ def spr_se(ta, out_dir):
     rm_f([tmp_pr1, tmp_pr2])
     return ta_pr1, ta_pr2
 
+
 def spr_pe(ta, out_dir):
     prefix = os.path.join(out_dir,
-        os.path.basename(strip_ext_ta(ta)))
+                          os.path.basename(strip_ext_ta(ta)))
     tmp_pr1 = '{}.00'.format(prefix)
     tmp_pr2 = '{}.01'.format(prefix)
     ta_pr1 = '{}.pr1.tagAlign.gz'.format(prefix)
@@ -107,6 +110,7 @@ def spr_pe(ta, out_dir):
     rm_f([tmp_pr1, tmp_pr2])
     return ta_pr1, ta_pr2
 
+
 def main():
     # read params
     args = parse_arguments()
@@ -128,5 +132,6 @@ def main():
 
     log.info('All done.')
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     main()

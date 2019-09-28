@@ -8,9 +8,10 @@ import os
 import argparse
 from encode_lib_genomic import *
 
+
 def parse_arguments():
     parser = argparse.ArgumentParser(prog='ENCODE DCC BAM 2 TAGALIGN.',
-                                        description='')
+                                     description='')
     parser.add_argument('bam', type=str,
                         help='Path for BAM file.')
     parser.add_argument('--disable-tn5-shift', action="store_true",
@@ -23,10 +24,10 @@ def parse_arguments():
     parser.add_argument('--paired-end', action="store_true",
                         help='Paired-end BAM')
     parser.add_argument('--out-dir', default='', type=str,
-                            help='Output directory.')
+                        help='Output directory.')
     parser.add_argument('--nth', type=int, default=1,
                         help='Number of threads to parallelize.')
-    parser.add_argument('--log-level', default='INFO', 
+    parser.add_argument('--log-level', default='INFO',
                         choices=['NOTSET', 'DEBUG', 'INFO',
                                  'WARNING', 'CRITICAL', 'ERROR',
                                  'CRITICAL'],
@@ -37,9 +38,10 @@ def parse_arguments():
     log.info(sys.argv)
     return args
 
+
 def bam2ta_se(bam, out_dir):
     prefix = os.path.join(out_dir,
-        os.path.basename(strip_ext_bam(bam)))
+                          os.path.basename(strip_ext_bam(bam)))
     ta = '{}.tagAlign.gz'.format(prefix)
 
     cmd = 'bedtools bamtobed -i {} | '
@@ -51,9 +53,10 @@ def bam2ta_se(bam, out_dir):
     run_shell_cmd(cmd)
     return ta
 
+
 def bam2ta_pe(bam, nth, out_dir):
     prefix = os.path.join(out_dir,
-        os.path.basename(strip_ext_bam(bam)))
+                          os.path.basename(strip_ext_bam(bam)))
     ta = '{}.tagAlign.gz'.format(prefix)
     # intermediate files
     bedpe = '{}.bedpe.gz'.format(prefix)
@@ -81,9 +84,10 @@ def bam2ta_pe(bam, nth, out_dir):
     rm_f(bedpe)
     return ta
 
+
 def tn5_shift_ta(ta, out_dir):
     prefix = os.path.join(out_dir,
-        os.path.basename(strip_ext_ta(ta)))
+                          os.path.basename(strip_ext_ta(ta)))
     shifted_ta = '{}.tn5.tagAlign.gz'.format(prefix)
 
     cmd = 'zcat -f {} | '
@@ -97,6 +101,7 @@ def tn5_shift_ta(ta, out_dir):
     run_shell_cmd(cmd)
     return shifted_ta
 
+
 def main():
     # read params
     args = parse_arguments()
@@ -105,7 +110,7 @@ def main():
     mkdir_p(args.out_dir)
 
     # declare temp arrays
-    temp_files = [] # files to deleted later at the end
+    temp_files = []  # files to deleted later at the end
 
     log.info('Converting BAM to TAGALIGN...')
     if args.paired_end:
@@ -143,5 +148,6 @@ def main():
 
     log.info('All done.')
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     main()

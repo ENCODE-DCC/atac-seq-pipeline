@@ -9,9 +9,10 @@ import re
 import argparse
 from encode_lib_genomic import *
 
+
 def parse_arguments():
     parser = argparse.ArgumentParser(prog='ENCODE DCC bowtie2 aligner.',
-                                        description='')
+                                     description='')
     parser.add_argument('bowtie2_index_prefix_or_tar', type=str,
                         help='Path for prefix (or a tarball .tar) \
                             for reference bowtie2 index. \
@@ -31,8 +32,8 @@ def parse_arguments():
     parser.add_argument('--nth', type=int, default=1,
                         help='Number of threads to parallelize.')
     parser.add_argument('--out-dir', default='', type=str,
-                            help='Output directory.')
-    parser.add_argument('--log-level', default='INFO', 
+                        help='Output directory.')
+    parser.add_argument('--log-level', default='INFO',
                         choices=['NOTSET', 'DEBUG', 'INFO',
                                  'WARNING', 'CRITICAL', 'ERROR',
                                  'CRITICAL'],
@@ -40,17 +41,18 @@ def parse_arguments():
     args = parser.parse_args()
 
     # check if fastqs have correct dimension
-    if args.paired_end and len(args.fastqs)!=2:
+    if args.paired_end and len(args.fastqs) != 2:
         raise argparse.ArgumentTypeError('Need 2 fastqs for paired end.')
-    if not args.paired_end and len(args.fastqs)!=1:
+    if not args.paired_end and len(args.fastqs) != 1:
         raise argparse.ArgumentTypeError('Need 1 fastq for single end.')
 
     log.setLevel(args.log_level)
-    log.info(sys.argv)    
+    log.info(sys.argv)
     return args
 
-def bowtie2_se(fastq, ref_index_prefix, 
-        multimapping, nth, out_dir):
+
+def bowtie2_se(fastq, ref_index_prefix,
+               multimapping, nth, out_dir):
     basename = os.path.basename(strip_ext_fastq(fastq))
     prefix = os.path.join(out_dir, basename)
     bam = '{}.bam'.format(prefix)
@@ -72,8 +74,9 @@ def bowtie2_se(fastq, ref_index_prefix,
     run_shell_cmd(cmd2)
     return bam, align_log
 
-def bowtie2_pe(fastq1, fastq2, ref_index_prefix, 
-        multimapping, nth, out_dir):
+
+def bowtie2_pe(fastq1, fastq2, ref_index_prefix,
+               multimapping, nth, out_dir):
     basename = os.path.basename(strip_ext_fastq(fastq1))
     prefix = os.path.join(out_dir, basename)
     bam = '{}.bam'.format(prefix)
@@ -98,12 +101,14 @@ def bowtie2_pe(fastq1, fastq2, ref_index_prefix,
     run_shell_cmd(cmd2)
     return bam, align_log
 
-def chk_bowtie2_index(prefix):    
+
+def chk_bowtie2_index(prefix):
     index_1 = '{}.1.bt2'.format(prefix)
     index_2 = '{}.1.bt2l'.format(prefix)
     if not (os.path.exists(index_1) or os.path.exists(index_2)):
-        raise Exception("Bowtie2 index does not exists. "+
-            "Prefix = {}".format(prefix))
+        raise Exception("Bowtie2 index does not exists. " +
+                        "Prefix = {}".format(prefix))
+
 
 def main():
     # read params
@@ -113,7 +118,7 @@ def main():
     mkdir_p(args.out_dir)
 
     # declare temp arrays
-    temp_files = [] # files to deleted later at the end
+    temp_files = []  # files to deleted later at the end
 
     # if bowtie2 index is tarball then unpack it
     if args.bowtie2_index_prefix_or_tar.endswith('.tar'):
@@ -137,17 +142,17 @@ def main():
     log.info('Running bowtie2...')
     if args.paired_end:
         bam, align_log = bowtie2_pe(
-            args.fastqs[0], args.fastqs[1], 
+            args.fastqs[0], args.fastqs[1],
             bowtie2_index_prefix,
             args.multimapping, args.nth,
             args.out_dir)
     else:
         bam, align_log = bowtie2_se(
-            args.fastqs[0], 
+            args.fastqs[0],
             bowtie2_index_prefix,
             args.multimapping, args.nth,
             args.out_dir)
-    
+
     log.info('Removing temporary files...')
     print(temp_files)
     rm_f(temp_files)
@@ -164,5 +169,6 @@ def main():
 
     log.info('All done.')
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     main()

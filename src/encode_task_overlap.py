@@ -11,9 +11,10 @@ from encode_lib_genomic import peak_to_bigbed, peak_to_hammock
 from encode_lib_blacklist_filter import blacklist_filter
 from encode_lib_frip import frip, frip_shifted
 
+
 def parse_arguments():
     parser = argparse.ArgumentParser(prog='ENCODE DCC Naive overlap.',
-                        description='NarrowPeak or RegionPeak only.')
+                                     description='NarrowPeak or RegionPeak only.')
     parser.add_argument('peak1', type=str,
                         help='Peak 1.')
     parser.add_argument('peak2', type=str,
@@ -23,7 +24,8 @@ def parse_arguments():
     parser.add_argument('--prefix', default='overlap', type=str,
                         help='Prefix basename for output overlap peak.')
     parser.add_argument('--peak-type', type=str, required=True,
-                        choices=['narrowPeak','regionPeak','broadPeak','gappedPeak'],
+                        choices=['narrowPeak', 'regionPeak',
+                                 'broadPeak', 'gappedPeak'],
                         help='Peak file type.')
     parser.add_argument('--nonamecheck', action='store_true',
                         help='bedtools intersect -nonamecheck. \
@@ -32,7 +34,7 @@ def parse_arguments():
     parser.add_argument('--blacklist', type=str, required=True,
                         help='Blacklist BED file.')
     parser.add_argument('--keep-irregular-chr', action="store_true",
-                        help='Keep reads with non-canonical chromosome names.')    
+                        help='Keep reads with non-canonical chromosome names.')
     parser.add_argument('--ta', type=str,
                         help='TAGALIGN file for FRiP.')
     parser.add_argument('--chrsz', type=str,
@@ -42,7 +44,7 @@ def parse_arguments():
                         If given, do shifted FRiP (for ChIP-Seq).')
     parser.add_argument('--out-dir', default='', type=str,
                         help='Output directory.')
-    parser.add_argument('--log-level', default='INFO', 
+    parser.add_argument('--log-level', default='INFO',
                         choices=['NOTSET', 'DEBUG', 'INFO',
                                  'WARNING', 'CRITICAL', 'ERROR',
                                  'CRITICAL'],
@@ -55,14 +57,16 @@ def parse_arguments():
     log.info(sys.argv)
     return args
 
-# only for narrowPeak (or regionPeak) type 
-def naive_overlap(basename_prefix, peak1, peak2, peak_pooled, peak_type, 
-    nonamecheck, out_dir):
+# only for narrowPeak (or regionPeak) type
+
+
+def naive_overlap(basename_prefix, peak1, peak2, peak_pooled, peak_type,
+                  nonamecheck, out_dir):
     prefix = os.path.join(out_dir, basename_prefix)
     prefix += '.overlap'
     overlap_peak = '{}.{}.gz'.format(prefix, peak_type)
 
-    nonamecheck_param = '-nonamecheck' if nonamecheck else  ''
+    nonamecheck_param = '-nonamecheck' if nonamecheck else ''
     # narrowpeak, regionpeak only
     awk_param = '{s1=$3-$2; s2=$13-$12; '
     awk_param += 'if (($21/s1 >= 0.5) || ($21/s2 >= 0.5)) {print $0}}'
@@ -73,8 +77,8 @@ def naive_overlap(basename_prefix, peak1, peak2, peak_pooled, peak_type,
     tmp2 = gunzip(peak2, 'tmp2', out_dir)
     tmp_pooled = gunzip(peak_pooled, 'tmp_pooled', out_dir)
 
-    # Find pooled peaks that overlap peak1 and peak2 
-    # where overlap is defined as the fractional overlap 
+    # Find pooled peaks that overlap peak1 and peak2
+    # where overlap is defined as the fractional overlap
     # wrt any one of the overlapping peak pairs >= 0.5
     cmd1 = 'intersectBed {} -wo '
     cmd1 += '-a {} -b {} | '
@@ -86,18 +90,19 @@ def naive_overlap(basename_prefix, peak1, peak2, peak_pooled, peak_type,
     cmd1 += 'cut -f {} | sort | uniq | gzip -nc > {}'
     cmd1 = cmd1.format(
         nonamecheck_param,
-        tmp_pooled, # peak_pooled
-        tmp1, # peak1
+        tmp_pooled,  # peak_pooled
+        tmp1,  # peak1
         awk_param,
         cut_param,
         nonamecheck_param,
-        tmp2, # peak2
+        tmp2,  # peak2
         awk_param,
         cut_param,
         overlap_peak)
     run_shell_cmd(cmd1)
-    rm_f([tmp1,tmp2,tmp_pooled])
+    rm_f([tmp1, tmp2, tmp_pooled])
     return overlap_peak
+
 
 def main():
     # read params
@@ -108,30 +113,31 @@ def main():
 
     log.info('Do naive overlap...')
     overlap_peak = naive_overlap(
-        args.prefix, args.peak1, args.peak2, args.peak_pooled, 
+        args.prefix, args.peak1, args.peak2, args.peak_pooled,
         args.peak_type, args.nonamecheck, args.out_dir)
 
     log.info('Blacklist-filtering peaks...')
     bfilt_overlap_peak = blacklist_filter(
-            overlap_peak, args.blacklist, args.keep_irregular_chr, args.out_dir)
+        overlap_peak, args.blacklist, args.keep_irregular_chr, args.out_dir)
 
     log.info('Checking if output is empty...')
     assert_file_not_empty(bfilt_overlap_peak)
 
     log.info('Converting peak to bigbed...')
-    peak_to_bigbed(bfilt_overlap_peak, args.peak_type, args.chrsz, args.keep_irregular_chr, args.out_dir)
+    peak_to_bigbed(bfilt_overlap_peak, args.peak_type,
+                   args.chrsz, args.keep_irregular_chr, args.out_dir)
 
     log.info('Converting peak to hammock...')
     peak_to_hammock(bfilt_overlap_peak, args.keep_irregular_chr, args.out_dir)
 
-    if args.ta: # if TAG-ALIGN is given
-        if args.fraglen: # chip-seq
+    if args.ta:  # if TAG-ALIGN is given
+        if args.fraglen:  # chip-seq
             log.info('Shifted FRiP with fragment length...')
-            frip_qc = frip_shifted( args.ta, bfilt_overlap_peak,
-                args.chrsz, args.fraglen, args.out_dir)
-        else: # atac-seq
+            frip_qc = frip_shifted(args.ta, bfilt_overlap_peak,
+                                   args.chrsz, args.fraglen, args.out_dir)
+        else:  # atac-seq
             log.info('FRiP without fragment length...')
-            frip_qc = frip( args.ta, bfilt_overlap_peak, args.out_dir)
+            frip_qc = frip(args.ta, bfilt_overlap_peak, args.out_dir)
     else:
         frip_qc = '/dev/null'
 
@@ -140,5 +146,6 @@ def main():
 
     log.info('All done.')
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     main()
