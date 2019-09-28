@@ -6,7 +6,8 @@
 import sys
 import os
 import argparse
-from encode_lib_common import strip_ext_bigwig, ls_l, log, logging, mkdir_p, rm_f
+from encode_lib_common import strip_ext_bigwig, ls_l, log
+from encode_lib_common import logging, mkdir_p, rm_f
 import numpy as np
 import pandas as pd
 import scipy.stats
@@ -25,7 +26,8 @@ def parse_arguments():
     parser.add_argument('--roadmap-meta', type=str, help='Roadmap metadata file.')
     parser.add_argument('--out-dir', default='', type=str, help='Output directory.')
     parser.add_argument('--log-level', default='INFO', help='Log level',
-                        choices=['NOTSET','DEBUG','INFO','WARNING','CRITICAL','ERROR','CRITICAL'])
+                        choices=['NOTSET', 'DEBUG', 'INFO', 'WARNING',
+                                 'CRITICAL','ERROR','CRITICAL'])
     args = parser.parse_args()
     log.setLevel(args.log_level)
     log.info(sys.argv)

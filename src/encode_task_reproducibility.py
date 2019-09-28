@@ -34,8 +34,9 @@ def parse_arguments():
     parser.add_argument('--out-dir', default='', type=str,
                         help='Output directory.')
     parser.add_argument('--log-level', default='INFO', 
-                        choices=['NOTSET','DEBUG','INFO',
-                            'WARNING','CRITICAL','ERROR','CRITICAL'],
+                        choices=['NOTSET', 'DEBUG', 'INFO',
+                                 'WARNING', 'CRITICAL', 'ERROR',
+                                 'CRITICAL'],
                         help='Log level')
     args = parser.parse_args()
     if len(args.peaks_pr)!=infer_n_from_nC2(len(args.peaks)):

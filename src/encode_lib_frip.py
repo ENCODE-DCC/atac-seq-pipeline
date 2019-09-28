@@ -24,11 +24,11 @@ def parse_arguments():
     parser.add_argument('--out-dir', default='', type=str,
                         help='Output directory.')
     parser.add_argument('--log-level', default='INFO', 
-                        choices=['NOTSET','DEBUG','INFO',
-                            'WARNING','CRITICAL','ERROR','CRITICAL'],
+                        choices=['NOTSET', 'DEBUG', 'INFO',
+                                 'WARNING', 'CRITICAL', 'ERROR',
+                                 'CRITICAL'],
                         help='Log level')
     args = parser.parse_args()
-
     log.setLevel(args.log_level)
     log.info(sys.argv)
     return args

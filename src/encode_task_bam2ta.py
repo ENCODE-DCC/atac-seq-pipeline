@@ -27,8 +27,9 @@ def parse_arguments():
     parser.add_argument('--nth', type=int, default=1,
                         help='Number of threads to parallelize.')
     parser.add_argument('--log-level', default='INFO', 
-                        choices=['NOTSET','DEBUG','INFO',
-                            'WARNING','CRITICAL','ERROR','CRITICAL'],
+                        choices=['NOTSET', 'DEBUG', 'INFO',
+                                 'WARNING', 'CRITICAL', 'ERROR',
+                                 'CRITICAL'],
                         help='Log level')
     args = parser.parse_args()
 

@@ -8,20 +8,20 @@ import os
 import argparse
 from encode_lib_common import *
 
+
 def parse_arguments():
-    parser = argparse.ArgumentParser(prog='ENCODE DCC Blacklist filter.',
-                                        description='')
-    parser.add_argument('peak', type=str,
-                        help='Peak file.')
+    parser = argparse.ArgumentParser(prog='ENCODE DCC Blacklist filter.')
+    parser.add_argument('peak', type=str, help='Peak file.')
     parser.add_argument('--blacklist', type=str, required=True,
                         help='Blacklist BED file.')
     parser.add_argument('--keep-irregular-chr', action="store_true",
-                        help='Keep reads with non-canonical chromosome names.')    
+                        help='Keep reads with non-canonical chromosome names.')
     parser.add_argument('--out-dir', default='', type=str,
-                        help='Output directory.')    
-    parser.add_argument('--log-level', default='INFO', 
-                        choices=['NOTSET','DEBUG','INFO',
-                            'WARNING','CRITICAL','ERROR','CRITICAL'],
+                        help='Output directory.')
+    parser.add_argument('--log-level', default='INFO',
+                        choices=['NOTSET', 'DEBUG', 'INFO',
+                                 'WARNING', 'CRITICAL', 'ERROR',
+                                 'CRITICAL'],
                         help='Log level')
     args = parser.parse_args()
     if args.blacklist.endswith('null'):
@@ -31,8 +31,10 @@ def parse_arguments():
     log.info(sys.argv)
     return args
 
+
 def blacklist_filter(peak, blacklist, keep_irregular_chr, out_dir):
-    prefix = os.path.join(out_dir, 
+    prefix = os.path.join(
+        out_dir,
         os.path.basename(strip_ext(peak)))
     peak_ext = get_ext(peak)
     filtered = '{}.bfilt.{}.gz'.format(prefix, peak_ext)
