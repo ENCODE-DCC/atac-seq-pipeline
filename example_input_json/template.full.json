@@ -16,28 +16,13 @@
     "atac.fastqs_rep2_R1" : [ "rep2_R1_L1.fastq.gz", "rep2_R1_L2.fastq.gz" ],
     "atac.fastqs_rep2_R2" : [ "rep2_R2_L1.fastq.gz", "rep2_R2_L2.fastq.gz" ],
 
+    "atac.auto_detect_adapter" : false,
     "atac.adapter" : "AATTCCGG",
     "atac.adapters_rep1_R1" : [ "AATTCCGG", "AATTCCGG", "AATTCCGG" ],
     "atac.adapters_rep1_R2" : [ "AATTCCGG", "AATTCCGG" ],
     "atac.adapters_rep2_R1" : [ "AATTCCGG", "AATTCCGG", "AATTCCGG" ],
     "atac.adapters_rep2_R2" : [ "AATTCCGG", "AATTCCGG" ],
-    "atac.auto_detect_adapter" : false,
     "atac.cutadapt_param" : "-e 0.1 -m 5",
-
-    "atac.bams" : [
-        "raw_rep1.bam",
-        "raw_rep2.bam"
-    ],
-
-    "atac.nodup_bams" : [
-        "nodup_rep1.bam",
-        "nodup_rep2.bam"
-    ],
-
-    "atac.tas" : [
-        "rep1.tagAlign.gz",
-        "rep2.tagAlign.gz"
-    ],
 
     "atac.multimapping" : 4,
 
