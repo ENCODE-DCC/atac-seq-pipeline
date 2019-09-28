@@ -266,14 +266,12 @@ def make_cat_align(args, cat_root):
     )
     if args.samstat_qcs:
         for i, qc in enumerate(args.samstat_qcs):
-            rep = 'rep' + str(i + 1)
             if qc:
-                cat_align_samstat.add_log(qc, key=rep)
+                cat_align_samstat.add_log(qc, key='rep' + str(i + 1))
     if args.ctl_samstat_qcs:
         for i, qc in enumerate(args.ctl_samstat_qcs):
-            ctl = 'ctl' + str(i + 1)
             if qc:
-                cat_align_samstat.add_log(qc, key=ctl)
+                cat_align_samstat.add_log(qc, key='ctl' + str(i + 1))
 
     cat_align_dup = QCCategory(
         'dup',
@@ -295,14 +293,12 @@ def make_cat_align(args, cat_root):
     )
     if args.dup_qcs:
         for i, qc in enumerate(args.dup_qcs):
-            rep = 'rep' + str(i + 1)
             if qc:
-                cat_align_dup.add_log(qc, key=rep)
+                cat_align_dup.add_log(qc, key='rep' + str(i + 1))
     if args.ctl_dup_qcs:
         for i, qc in enumerate(args.ctl_dup_qcs):
-            ctl = 'ctl' + str(i + 1)
             if qc:
-                cat_align_dup.add_log(qc, key=ctl)
+                cat_align_dup.add_log(qc, key='ctl' + str(i + 1))
 
     cat_align_frac_mito = QCCategory(
         'frac_mito',
@@ -313,14 +309,12 @@ def make_cat_align(args, cat_root):
     )
     if args.frac_mito_qcs:
         for i, qc in enumerate(args.frac_mito_qcs):
-            rep = 'rep' + str(i + 1)
             if qc:
-                cat_align_frac_mito.add_log(qc, key=rep)
+                cat_align_frac_mito.add_log(qc, key='rep' + str(i + 1))
     if args.ctl_frac_mito_qcs:
         for i, qc in enumerate(args.ctl_frac_mito_qcs):
-            ctl = 'ctl' + str(i + 1)
             if qc:
-                cat_align_frac_mito.add_log(qc, key=ctl)
+                cat_align_frac_mito.add_log(qc, key='ctl' + str(i + 1))
 
     cat_align_preseq = QCCategory(
         'preseq',
@@ -334,9 +328,9 @@ def make_cat_align(args, cat_root):
     )
     if args.preseq_plots:
         for i, plot in enumerate(args.preseq_plots):
-            rep = 'rep' + str(i + 1)
             if plot:
-                cat_align_preseq.add_plot(plot, key=rep, size_pct=50)
+                cat_align_preseq.add_plot(plot,
+                                          key='rep' + str(i + 1), size_pct=50)
 
     cat_align_nodup_samstat = QCCategory(
         'nodup_samstat',
@@ -350,14 +344,12 @@ def make_cat_align(args, cat_root):
     )
     if args.nodup_samstat_qcs:
         for i, qc in enumerate(args.nodup_samstat_qcs):
-            rep = 'rep' + str(i + 1)
             if qc:
-                cat_align_nodup_samstat.add_log(qc, key=rep)
+                cat_align_nodup_samstat.add_log(qc, key='rep' + str(i + 1))
     if args.ctl_nodup_samstat_qcs:
         for i, qc in enumerate(args.ctl_nodup_samstat_qcs):
-            ctl = 'ctl' + str(i + 1)
             if qc:
-                cat_align_nodup_samstat.add_log(qc, key=ctl)
+                cat_align_nodup_samstat.add_log(qc, key='ctl' + str(i + 1))
 
     cat_fraglen = QCCategory(
         'frag_len_stat',
@@ -379,14 +371,13 @@ def make_cat_align(args, cat_root):
 
     if args.fraglen_nucleosomal_qcs:
         for i, qc in enumerate(args.fraglen_nucleosomal_qcs):
-            rep = 'rep' + str(i + 1)
             if qc:
-                cat_fraglen.add_log(qc, key=rep)
+                cat_fraglen.add_log(qc, key='rep' + str(i + 1))
     if args.fraglen_dist_plots:
         for i, plot in enumerate(args.fraglen_dist_plots):
-            rep = 'rep' + str(i + 1)
             if plot:
-                cat_fraglen.add_plot(plot, key=rep, size_pct=50)
+                cat_fraglen.add_plot(plot,
+                                     key='rep' + str(i + 1), size_pct=50)
 
     cat_gc_bias = QCCategory(
         'gc_bias',
@@ -399,9 +390,9 @@ def make_cat_align(args, cat_root):
     )
     if args.gc_plots:
         for i, plot in enumerate(args.gc_plots):
-            rep = 'rep' + str(i + 1)
             if plot:
-                cat_gc_bias.add_plot(plot, key=rep, size_pct=60)
+                cat_gc_bias.add_plot(plot,
+                                     key='rep' + str(i + 1), size_pct=60)
 
     return cat_align
 
@@ -447,14 +438,12 @@ def make_cat_lib_complexity(args, cat_root):
     )
     if args.lib_complexity_qcs:
         for i, qc in enumerate(args.lib_complexity_qcs):
-            rep = 'rep' + str(i + 1)
             if qc:
-                cat_lc_lib_complexity.add_log(qc, key=rep)
+                cat_lc_lib_complexity.add_log(qc, key='rep' + str(i + 1))
     if args.ctl_lib_complexity_qcs:
         for i, qc in enumerate(args.ctl_lib_complexity_qcs):
-            ctl = 'ctl' + str(i + 1)
             if qc:
-                cat_lc_lib_complexity.add_log(qc, key=ctl)
+                cat_lc_lib_complexity.add_log(qc, key='ctl' + str(i + 1))
 
     cat_lc_lib_size = QCCategory(
         'lib_size',
@@ -464,9 +453,8 @@ def make_cat_lib_complexity(args, cat_root):
     )
     if args.picard_est_lib_size_qcs:
         for i, qc in enumerate(args.picard_est_lib_size_qcs):
-            rep = 'rep' + str(i + 1)
             if qc:
-                cat_lc_lib_size.add_log(qc, key=rep)
+                cat_lc_lib_size.add_log(qc, key='rep' + str(i + 1))
 
     return cat_lc
 
@@ -485,18 +473,18 @@ def make_cat_replication(args, cat_root):
     if args.idr_plots:
         num_rep = infer_n_from_nC2(len(args.idr_plots))
         for i, plot in enumerate(args.idr_plots):
-            rep = infer_pair_label_from_idx(num_rep, i)
             if plot:
-                cat_idr.add_plot(plot, key=rep)
+                cat_idr.add_plot(
+                    plot,
+                    key=infer_pair_label_from_idx(num_rep, i))
     if args.idr_plots_pr:
         for i, plot in enumerate(args.idr_plots_pr):
-            rep = 'rep{X}-pr1_vs_rep{X}-pr2'.format(X=i+1)
             if plot:
-                cat_idr.add_plot(plot, key=rep)
+                cat_idr.add_plot(
+                    plot,
+                    key='rep{X}-pr1_vs_rep{X}-pr2'.format(X=i+1))
     if args.idr_plot_ppr:
-        plot = args.idr_plot_ppr[0]
-        rep = 'pooled-pr1_vs_pooled-pr2'
-        cat_idr.add_plot(plot, key=rep)
+        cat_idr.add_plot(args.idr_plot_ppr[0], key='pooled-pr1_vs_pooled-pr2')
 
     cat_reproducibility = QCCategory(
         'reproducibility',
@@ -549,10 +537,8 @@ def make_cat_replication(args, cat_root):
     )
     if args.num_peak_qcs:
         for i, qc in enumerate(args.num_peak_qcs):
-            # rep = args.peak_caller + '_rep' + str(i+1)
-            rep = 'rep' + str(i+1)
             if qc:
-                cat_num_peak.add_log(qc, key=rep)
+                cat_num_peak.add_log(qc, key='rep' + str(i + 1))
 
     return cat_replication
 
@@ -574,31 +560,26 @@ def make_cat_peak_stat(args, cat_root):
     )
     if args.peak_region_size_qcs:
         for i, qc in enumerate(args.peak_region_size_qcs):
-            rep = 'rep' + str(i+1)
             if qc:
-                cat_peak_region_size.add_log(qc, key=rep)
+                cat_peak_region_size.add_log(qc, key='rep' + str(i + 1))
     if args.idr_opt_peak_region_size_qc:
         qc = args.idr_opt_peak_region_size_qc[0]
-        rep = 'idr_opt'
-        cat_peak_region_size.add_log(qc, key=rep)
+        cat_peak_region_size.add_log(qc, key='idr_opt')
     if args.overlap_opt_peak_region_size_qc:
         qc = args.overlap_opt_peak_region_size_qc[0]
-        rep = 'overlap_opt'
-        cat_peak_region_size.add_log(qc, key=rep)
+        cat_peak_region_size.add_log(qc, key='overlap_opt')
     # plots
     if args.peak_region_size_plots:
         for i, plot in enumerate(args.peak_region_size_plots):
-            rep = 'rep' + str(i+1)
             if plot:
-                cat_peak_region_size.add_plot(plot, key=rep, size_pct=35)
+                cat_peak_region_size.add_plot(plot, key='rep' + str(i + 1),
+                                              size_pct=35)
     if args.idr_opt_peak_region_size_plot:
         plot = args.idr_opt_peak_region_size_plot[0]
-        rep = 'idr_opt'
-        cat_peak_region_size.add_plot(plot, key=rep, size_pct=35)
+        cat_peak_region_size.add_plot(plot, key='idr_opt', size_pct=35)
     if args.overlap_opt_peak_region_size_plot:
         plot = args.overlap_opt_peak_region_size_plot[0]
-        rep = 'overlap_opt'
-        cat_peak_region_size.add_plot(plot, key=rep, size_pct=35)
+        cat_peak_region_size.add_plot(plot, key='overlap_opt', size_pct=35)
 
     return cat_peak_stat
 
@@ -629,9 +610,8 @@ def make_cat_align_enrich(args, cat_root):
     )
     if args.xcor_scores:
         for i, qc in enumerate(args.xcor_scores):
-            rep = 'rep' + str(i + 1)
             if qc:
-                cat_xcor.add_log(qc, key=rep)
+                cat_xcor.add_log(qc, key='rep' + str(i + 1))
     # trivial subcategory to show table legend before plots
     cat_xcor_plot = QCCategory(
         'xcor_plot',
@@ -639,9 +619,8 @@ def make_cat_align_enrich(args, cat_root):
     )
     if args.xcor_plots:
         for i, plot in enumerate(args.xcor_plots):
-            rep = 'rep' + str(i + 1)
             if plot:
-                cat_xcor_plot.add_plot(plot, key=rep, size_pct=60)
+                cat_xcor_plot.add_plot(plot, key='rep' + str(i + 1), size_pct=60)
 
     cat_tss_enrich = QCCategory(
         'tss_enrich',
@@ -658,15 +637,13 @@ def make_cat_align_enrich(args, cat_root):
 
     if args.tss_enrich_qcs:
         for i, qc in enumerate(args.tss_enrich_qcs):
-            rep = 'rep' + str(i + 1)
             if qc:
-                cat_tss_enrich.add_log(qc, key=rep)
+                cat_tss_enrich.add_log(qc, key='rep' + str(i + 1))
 
     if args.tss_large_plots:
         for i, plot in enumerate(args.tss_large_plots):
-            rep = 'rep' + str(i + 1)
             if plot:
-                cat_tss_enrich.add_plot(plot, key=rep)
+                cat_tss_enrich.add_plot(plot, key='rep' + str(i + 1))
 
     cat_jsd = QCCategory(
         'jsd',
@@ -680,9 +657,8 @@ def make_cat_align_enrich(args, cat_root):
         cat_jsd.add_plot(plot, size_pct=40)
     if args.jsd_qcs:
         for i, qc in enumerate(args.jsd_qcs):
-            rep = 'rep' + str(i + 1)
             if qc:
-                cat_jsd.add_log(qc, key=rep)
+                cat_jsd.add_log(qc, key='rep' + str(i + 1))
 
     return cat_align_enrich
 
@@ -730,31 +706,22 @@ def make_cat_peak_enrich(args, cat_root):
     )
     if args.frip_qcs:
         for i, qc in enumerate(args.frip_qcs):
-            rep = 'rep' + str(i + 1)
             if qc:
-                cat_frip_call_peak.add_log(qc, key=rep)
+                cat_frip_call_peak.add_log(qc, key='rep' + str(i + 1))
     if args.frip_qcs_pr1:
         for i, qc in enumerate(args.frip_qcs_pr1):
-            rep = 'rep' + str(i + 1) + '-pr1'
             if qc:
-                cat_frip_call_peak.add_log(qc, key=rep)
+                cat_frip_call_peak.add_log(qc, key='rep' + str(i + 1) + '-pr1')
     if args.frip_qcs_pr2:
         for i, qc in enumerate(args.frip_qcs_pr2):
-            rep = 'rep' + str(i + 1) + '-pr2'
             if qc:
-                cat_frip_call_peak.add_log(qc, key=rep)
+                cat_frip_call_peak.add_log(qc, key='rep' + str(i + 1) + '-pr2')
     if args.frip_qc_pooled:
-        qc = args.frip_qc_pooled[0]
-        rep = 'pooled'
-        cat_frip_call_peak.add_log(qc, key=rep)
+        cat_frip_call_peak.add_log(args.frip_qc_pooled[0], key='pooled')
     if args.frip_qc_ppr1:
-        qc = args.frip_qc_ppr1[0]
-        rep = 'pooled-pr1'
-        cat_frip_call_peak.add_log(qc, key=rep)
+        cat_frip_call_peak.add_log(args.frip_qc_ppr1[0], key='pooled-pr1')
     if args.frip_qc_ppr2:
-        qc = args.frip_qc_ppr2[0]
-        rep = 'pooled-pr2'
-        cat_frip_call_peak.add_log(qc, key=rep)
+        cat_frip_call_peak.add_log(args.frip_qc_ppr2[0], key='pooled-pr2')
 
     # overlap
     cat_frip_overlap = QCCategory(
@@ -767,18 +734,17 @@ def make_cat_peak_enrich(args, cat_root):
     if args.frip_overlap_qcs:
         num_rep = infer_n_from_nC2(len(args.frip_overlap_qcs))
         for i, qc in enumerate(args.frip_overlap_qcs):
-            rep = infer_pair_label_from_idx(num_rep, i)
             if qc:
-                cat_frip_overlap.add_log(qc, key=rep)
+                cat_frip_overlap.add_log(
+                    qc, key=infer_pair_label_from_idx(num_rep, i))
     if args.frip_overlap_qcs_pr:
         for i, qc in enumerate(args.frip_overlap_qcs_pr):
-            rep = 'rep{X}-pr1_vs_rep{X}-pr2'.format(X=i+1)
             if qc:
-                cat_frip_overlap.add_log(qc, key=rep)
+                cat_frip_overlap.add_log(
+                    qc, key='rep{X}-pr1_vs_rep{X}-pr2'.format(X=i + 1))
     if args.frip_overlap_qc_ppr:
-        qc = args.frip_overlap_qc_ppr[0]
-        rep = 'pooled-pr1_vs_pooled-pr2'
-        cat_frip_overlap.add_log(qc, key=rep)
+        cat_frip_overlap.add_log(args.frip_overlap_qc_ppr[0],
+                                 key='pooled-pr1_vs_pooled-pr2')
 
     # IDR
     cat_frip_idr = QCCategory(
@@ -791,18 +757,17 @@ def make_cat_peak_enrich(args, cat_root):
     if args.frip_idr_qcs:
         num_rep = infer_n_from_nC2(len(args.frip_idr_qcs))
         for i, qc in enumerate(args.frip_idr_qcs):
-            rep = infer_pair_label_from_idx(num_rep, i)
             if qc:
-                cat_frip_idr.add_log(qc, key=rep)
+                cat_frip_idr.add_log(
+                    qc, key=infer_pair_label_from_idx(num_rep, i))
     if args.frip_idr_qcs_pr:
         for i, qc in enumerate(args.frip_idr_qcs_pr):
-            rep = 'rep{X}-pr1_vs_rep{X}-pr2'.format(X=i+1)
             if qc:
-                cat_frip_idr.add_log(qc, key=rep)
+                cat_frip_idr.add_log(
+                    qc, key='rep{X}-pr1_vs_rep{X}-pr2'.format(X=i+1))
     if args.frip_idr_qc_ppr:
-        qc = args.frip_idr_qc_ppr[0]
-        rep = 'pooled-pr1_vs_pooled-pr2'
-        cat_frip_idr.add_log(qc, key=rep)
+        cat_frip_idr.add_log(args.frip_idr_qc_ppr[0],
+                             key='pooled-pr1_vs_pooled-pr2')
 
     cat_annot_enrich = QCCategory(
         'frac_reads_in_annot',
@@ -823,9 +788,8 @@ def make_cat_peak_enrich(args, cat_root):
 
     if args.annot_enrich_qcs:
         for i, qc in enumerate(args.annot_enrich_qcs):
-            rep = 'rep' + str(i+1)
             if qc:
-                cat_annot_enrich.add_log(qc, key=rep)
+                cat_annot_enrich.add_log(qc, key='rep' + str(i+1))
 
     return cat_peak_enrich
 
@@ -849,9 +813,8 @@ def make_cat_etc(args, cat_root):
     )
     if args.roadmap_compare_plots:
         for i, plot in enumerate(args.roadmap_compare_plots):
-            rep = 'rep' + str(i + 1)
             if plot:
-                cat_roadmap.add_plot(plot, key=rep, size_pct=50)
+                cat_roadmap.add_plot(plot, key='rep' + str(i + 1), size_pct=50)
 
     return cat_etc
 
