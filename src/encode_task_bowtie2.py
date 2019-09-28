@@ -155,7 +155,8 @@ def main():
     run_shell_cmd('cat {}'.format(align_log))
 
     log.info('Checking if BAM file is empty...')
-    assert(int(run_shell_cmd('samtools view -c {}'.format(bam))))
+    if not int(run_shell_cmd('samtools view -c {}'.format(bam))):
+        raise ValueError('BAM file is empty, no reads found.')
 
     log.info('List all files in output directory...')
     ls_l(args.out_dir)
