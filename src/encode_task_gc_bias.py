@@ -8,8 +8,10 @@ from matplotlib import pyplot as plt
 import sys
 import os
 import argparse
-from encode_lib_common import strip_ext_bam, ls_l, log, logging, mkdir_p, rm_f
-from encode_lib_genomic import remove_read_group, locate_picard
+from encode_lib_common import (
+    strip_ext_bam, ls_l, log, logging, rm_f)
+from encode_lib_genomic import (
+    remove_read_group, locate_picard)
 import numpy as np
 import pandas as pd
 import matplotlib as mpl
@@ -26,7 +28,8 @@ def parse_arguments():
     parser.add_argument('--out-dir', default='', type=str,
                         help='Output directory.')
     parser.add_argument('--log-level', default='INFO', help='Log level',
-                        choices=['NOTSET', 'DEBUG', 'INFO', 'WARNING', 'CRITICAL', 'ERROR', 'CRITICAL'])
+                        choices=['NOTSET', 'DEBUG', 'INFO', 'WARNING',
+                                 'CRITICAL', 'ERROR', 'CRITICAL'])
     args = parser.parse_args()
     log.setLevel(args.log_level)
     log.info(sys.argv)
@@ -116,7 +119,7 @@ def main():
                                              REF,
                                              OUTPUT_PREFIX)
     # will generate PNG format from gc_out
-    gc_plot_png = plot_gc(gc_out, OUTPUT_PREFIX)
+    plot_gc(gc_out, OUTPUT_PREFIX)
 
     rm_f(RG_FREE_FINAL_BAM)
 

@@ -6,15 +6,20 @@
 import sys
 import os
 import argparse
-from encode_lib_genomic import *
+from encode_lib_common import (
+    log, ls_l, mkdir_p, rm_f, run_shell_cmd, strip_ext_bam)
+from encode_lib_genomic import (
+    samtools_index)
+
 from encode_lib_blacklist_filter import blacklist_filter_bam
 
 
 def parse_arguments():
-    parser = argparse.ArgumentParser(prog='ENCODE DCC Fingerprint/JSD plot.',
-                                     description='')
-    parser.add_argument('bams', nargs='+', type=str,
-                        help='List of paths for filtered experiment BAM files.')
+    parser = argparse.ArgumentParser(
+        prog='ENCODE DCC Fingerprint/JSD plot.')
+    parser.add_argument(
+        'bams', nargs='+', type=str,
+        help='List of paths for filtered experiment BAM files.')
     parser.add_argument('--ctl-bam', type=str, default='',
                         help='Path for filtered control BAM file.')
     parser.add_argument('--blacklist', type=str, default='',
@@ -112,9 +117,6 @@ def main():
 
     log.info('Initializing and making output directory...')
     mkdir_p(args.out_dir)
-
-    # declare temp arrays
-    temp_files = []  # files to deleted later at the end
 
     log.info('Plotting Fingerprint on BAMs and calculating JSD...')
     plot_png, jsd_qcs = fingerprint(

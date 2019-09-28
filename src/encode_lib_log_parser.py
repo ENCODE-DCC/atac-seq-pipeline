@@ -196,7 +196,8 @@ def parse_flagstat_qc(txt):
         result['properly_paired_reads_qc_failed'] = int(
             paired_properly_qc_failed)
     if paired_properly_pct:
-        if 'nan' not in paired_properly_pct and 'N/A' not in paired_properly_pct \
+        if 'nan' not in paired_properly_pct and \
+                'N/A' not in paired_properly_pct \
                 and 'NA' not in paired_properly_pct:
             if '%' in paired_properly_pct:
                 paired_properly_pct = paired_properly_pct.replace('%', '')
@@ -355,7 +356,8 @@ def parse_lib_complexity_qc(txt):
 MAP_KEY_DESC_XCOR_SCORE = {
     'subsampled_reads': 'Number of Subsampled Reads',
     'estimated_fragment_len': 'Estimated Fragment Length',
-    'corr_estimated_fragment_len': 'Cross-correlation at Estimated Fragment Length',
+    'corr_estimated_fragment_len':
+        'Cross-correlation at Estimated Fragment Length',
     'phantom_peak': 'Phantom Peak',
     'corr_phantom_peak': 'Cross-correlation at Phantom Peak',
     'argmin_corr': 'Argmin of Cross-correlation',
@@ -651,20 +653,6 @@ def to_float(var):
         return float(var)
     except ValueError:
         return None
-
-
-def to_number(var):
-    """Convert to number or return None
-    """
-    try:
-        if '.' in var:
-            raise ValueError
-        return int(var)
-    except ValueError:
-        try:
-            return float(var)
-        except ValueError:
-            return None
 
 
 def to_bool(var):

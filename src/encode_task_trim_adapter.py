@@ -8,7 +8,9 @@ import os
 import argparse
 import copy
 from detect_adapter import detect_most_likely_adapter
-from encode_lib_common import *
+from encode_lib_common import (
+    hard_link, log, ls_l, mkdir_p, read_tsv, rm_f,
+    run_shell_cmd, strip_ext_fastq)
 
 
 def parse_arguments(debug=False):
@@ -19,19 +21,23 @@ def parse_arguments(debug=False):
                             FASTQs must be compressed with gzip (with .gz). \
                             Use TSV for multiple fastqs to be merged later. \
                             row=merge_id, col=end_id).')
-    parser.add_argument('--auto-detect-adapter', action='store_true',
-                        help='Automatically detect/trim adapters \
-                            (supported system: Illumina, Nextera and smallRNA).')
-    parser.add_argument('--cutadapt-param', type=str, default='-e 0.1 -m 5',
-                        help='Parameters for cutadapt \
-                            (default: -e 0.1 -m 5; err_rate=0.1, min_trim_len=5).')
-    parser.add_argument('--adapter', type=str,
-                        help='One adapter to use for all fastqs. '
-                        'This will override individual adapters defined in --adapters.')
-    parser.add_argument('--adapters', nargs='+', type=str,
-                        help='TSV file path or list of adapter strings. \
-                            Use TSV for multiple fastqs to be merged later. \
-                            row=merge_id, col=end_id).')
+    parser.add_argument(
+        '--auto-detect-adapter', action='store_true',
+        help='Automatically detect/trim adapters \
+             (supported system: Illumina, Nextera and smallRNA).')
+    parser.add_argument(
+        '--cutadapt-param', type=str, default='-e 0.1 -m 5',
+        help='Parameters for cutadapt '
+             '(default: -e 0.1 -m 5; err_rate=0.1, min_trim_len=5).')
+    parser.add_argument(
+        '--adapter', type=str,
+        help='One adapter to use for all fastqs. '
+        'This will override individual adapters defined in --adapters.')
+    parser.add_argument(
+        '--adapters', nargs='+', type=str,
+        help='TSV file path or list of adapter strings. '
+             'Use TSV for multiple fastqs to be merged later. '
+             'row=merge_id, col=end_id).')
     parser.add_argument('--paired-end', action="store_true",
                         help='Paired-end FASTQs.')
     parser.add_argument('--nth', type=int, default=1,
@@ -177,8 +183,9 @@ def main():
                     not (adapters[0] and adapters[1]):
                 args.adapters[i][0] = detect_most_likely_adapter(fastqs[0])
                 args.adapters[i][1] = detect_most_likely_adapter(fastqs[1])
-                log.info('Detected adapters for merge_id={}, R1: {}, R2: {}'.format(
-                    i+1, args.adapters[i][0], args.adapters[i][1]))
+                log.info('Detected adapters for merge_id={}, '
+                         'R1: {}, R2: {}'.format(
+                            i+1, args.adapters[i][0], args.adapters[i][1]))
         else:
             if not args.adapter and args.auto_detect_adapter and \
                     not adapters[0]:
@@ -213,10 +220,10 @@ def main():
 
     log.info('Merging fastqs...')
     log.info('R1 to be merged: {}'.format(trimmed_fastqs_R1))
-    R1_merged = merge_fastqs(trimmed_fastqs_R1, 'R1', args.out_dir)
+    merge_fastqs(trimmed_fastqs_R1, 'R1', args.out_dir)
     if args.paired_end:
         log.info('R2 to be merged: {}'.format(trimmed_fastqs_R2))
-        R2_merged = merge_fastqs(trimmed_fastqs_R2, 'R2', args.out_dir)
+        merge_fastqs(trimmed_fastqs_R2, 'R2', args.out_dir)
 
     temp_files.extend(trimmed_fastqs_R1)
     temp_files.extend(trimmed_fastqs_R2)

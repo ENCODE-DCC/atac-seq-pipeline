@@ -6,7 +6,8 @@
 import sys
 import os
 import argparse
-from encode_lib_common import *
+from encode_lib_common import (
+    log, ls_l, mkdir_p, strip_ext)
 from encode_lib_log_parser import parse_flagstat_qc
 
 
@@ -71,9 +72,9 @@ def main():
     log.info('Initializing and making output directory...')
     mkdir_p(args.out_dir)
 
-    frac_mito_qc = frac_mito(args.non_mito_samstat,
-                             args.mito_samstat,
-                             args.out_dir)
+    frac_mito(args.non_mito_samstat,
+              args.mito_samstat,
+              args.out_dir)
 
     log.info('List all files in output directory...')
     ls_l(args.out_dir)

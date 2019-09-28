@@ -11,8 +11,10 @@ from matplotlib import pyplot as plt
 import sys
 import os
 import argparse
-from encode_lib_common import strip_ext_bam, ls_l, log, logging, mkdir_p, rm_f
-from encode_lib_genomic import remove_read_group, locate_picard
+from encode_lib_common import (
+    strip_ext_bam, ls_l, log, rm_f)
+from encode_lib_genomic import (
+    remove_read_group, locate_picard)
 import matplotlib as mpl
 mpl.use('Agg')
 
@@ -87,7 +89,8 @@ def parse_arguments():
     parser.add_argument('--out-dir', default='', type=str,
                         help='Output directory.')
     parser.add_argument('--log-level', default='INFO', help='Log level',
-                        choices=['NOTSET', 'DEBUG', 'INFO', 'WARNING', 'CRITICAL', 'ERROR', 'CRITICAL'])
+                        choices=['NOTSET', 'DEBUG', 'INFO', 'WARNING',
+                                 'CRITICAL', 'ERROR', 'CRITICAL'])
     args = parser.parse_args()
     log.setLevel(args.log_level)
     log.info(sys.argv)
@@ -108,7 +111,7 @@ def get_insert_distribution(final_bam, prefix):
     '''
     Calls Picard CollectInsertSizeMetrics
     '''
-    logging.info('insert size distribution...')
+    log.info('insert size distribution...')
     insert_data = '{0}.inserts.hist_data.log'.format(prefix)
     insert_plot = '{0}.inserts.hist_graph.pdf'.format(prefix)
     graph_insert_dist = ('java -Xmx6G -XX:ParallelGCThreads=1 -jar '
@@ -121,7 +124,7 @@ def get_insert_distribution(final_bam, prefix):
                                                              insert_data,
                                                              insert_plot,
                                                              locate_picard())
-    logging.info(graph_insert_dist)
+    log.info(graph_insert_dist)
     os.system(graph_insert_dist)
     return insert_data, insert_plot
 
@@ -154,10 +157,12 @@ def fragment_length_qc(data, prefix):
     # peak locations
     pos_start_val = data[0, 0]  # this may be greater than 0
     peaks = find_peaks_cwt(data[:, 1], np.array([25]))
-    nuc_range_metrics = [('Presence of NFR peak', 20 - pos_start_val, 90 - pos_start_val),
-                         ('Presence of Mono-Nuc peak', 120 -
-                          pos_start_val, 250 - pos_start_val),
-                         ('Presence of Di-Nuc peak', 300 - pos_start_val, 500 - pos_start_val)]
+    nuc_range_metrics = [
+        ('Presence of NFR peak', 20 - pos_start_val, 90 - pos_start_val),
+        ('Presence of Mono-Nuc peak',
+         120 - pos_start_val, 250 - pos_start_val),
+        ('Presence of Di-Nuc peak',
+         300 - pos_start_val, 500 - pos_start_val)]
     for range_metric in nuc_range_metrics:
         results.append(QCHasElementInRange(*range_metric)(peaks))
 
@@ -165,7 +170,8 @@ def fragment_length_qc(data, prefix):
     with open(out, 'w') as fp:
         for elem in results:
             fp.write(
-                '\t'.join([elem.metric, str(elem.qc_pass), elem.message]) + '\n')
+                '\t'.join(
+                    [elem.metric, str(elem.qc_pass), elem.message]) + '\n')
 
     return out
 
@@ -208,10 +214,9 @@ def main():
     insert_data, insert_plot = get_insert_distribution(RG_FREE_FINAL_BAM,
                                                        OUTPUT_PREFIX)
     # Also need to run n-nucleosome estimation
-    nucleosomal_qc = fragment_length_qc(read_picard_histogram(insert_data),
-                                        OUTPUT_PREFIX)
-
-    fraglen_dist_plot = fragment_length_plot(insert_data, OUTPUT_PREFIX)
+    fragment_length_qc(read_picard_histogram(insert_data),
+                       OUTPUT_PREFIX)
+    fragment_length_plot(insert_data, OUTPUT_PREFIX)
 
     rm_f(RG_FREE_FINAL_BAM)
 

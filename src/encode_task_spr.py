@@ -6,12 +6,14 @@
 import sys
 import os
 import argparse
-from encode_lib_common import *
+from encode_lib_common import (
+    assert_file_not_empty, get_num_lines, log, ls_l, mkdir_p, rm_f,
+    run_shell_cmd, strip_ext_ta)
 
 
 def parse_arguments():
-    parser = argparse.ArgumentParser(prog='ENCODE DCC pseudo replicator.',
-                                     description='')
+    parser = argparse.ArgumentParser(
+        prog='ENCODE DCC pseudo replicator.')
     parser.add_argument('ta', type=str,
                         help='Path for TAGALIGN file.')
     parser.add_argument('--paired-end', action="store_true",
@@ -40,7 +42,9 @@ def spr_se(ta, out_dir):
     nlines = int((get_num_lines(ta)+1)/2)
 
     # bash-only
-    cmd1 = 'zcat {} | shuf --random-source=<(openssl enc -aes-256-ctr -pass pass:$(zcat -f {} | wc -c) -nosalt </dev/zero 2>/dev/null) | '
+    cmd1 = 'zcat {} | shuf --random-source=<(openssl enc '
+    cmd1 += '-aes-256-ctr -pass pass:$(zcat -f {} | wc -c) '
+    cmd1 += '-nosalt </dev/zero 2>/dev/null) | '
     cmd1 += 'split -d -l {} - {}.'
     cmd1 = cmd1.format(
         ta,
@@ -76,7 +80,9 @@ def spr_pe(ta, out_dir):
 
     # bash-only
     cmd1 = 'zcat -f {} | sed \'N;s/\\n/\\t/\' | '
-    cmd1 += 'shuf --random-source=<(openssl enc -aes-256-ctr -pass pass:$(zcat -f {} | wc -c) -nosalt </dev/zero 2>/dev/null) | '
+    cmd1 += 'shuf --random-source=<(openssl enc -aes-256-ctr '
+    cmd1 += '-pass pass:$(zcat -f {} | wc -c) '
+    cmd1 += '-nosalt </dev/zero 2>/dev/null) | '
     cmd1 += 'split -d -l {} - {}.'
     cmd1 = cmd1.format(
         ta,

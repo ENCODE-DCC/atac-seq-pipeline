@@ -5,9 +5,12 @@
 
 import sys
 import os
-import re
 import argparse
-from encode_lib_genomic import *
+from encode_lib_common import (
+    get_num_lines, log, ls_l, mkdir_p, rm_f, run_shell_cmd, strip_ext_fastq,
+    strip_ext_tar, untar)
+from encode_lib_genomic import (
+    get_read_length)
 
 
 def parse_arguments():
@@ -23,8 +26,9 @@ def parse_arguments():
     parser.add_argument('fastqs', nargs='+', type=str,
                         help='List of FASTQs (R1 and R2). \
                             FASTQs must be compressed with gzip (with .gz).')
-    parser.add_argument('--use-bwa-mem-for-pe', action="store_true",
-                        help='Use "bwa mem" for paired end dataset with read length >=70bp.')
+    parser.add_argument(
+        '--use-bwa-mem-for-pe', action="store_true",
+        help='Use "bwa mem" for paired end dataset with read length >=70bp.')
     parser.add_argument('--paired-end', action="store_true",
                         help='Paired-end FASTQs.')
     parser.add_argument('--nth', type=int, default=1,
@@ -111,8 +115,10 @@ def bwa_pe(fastq1, fastq2, ref_index_prefix, nth, use_bwa_mem_for_pe, out_dir):
         temp_files.extend([sai1, sai2, sam])
     run_shell_cmd(cmd)
 
-    cmd2 = 'zcat -f {} | awk \'BEGIN {{FS="\\t" ; OFS="\\t"}} ! /^@/ && $6!="*" '
-    cmd2 += '{{ cigar=$6; gsub("[0-9]+D","",cigar); n = split(cigar,vals,"[A-Z]"); s = 0; '
+    cmd2 = 'zcat -f {} | '
+    cmd2 += 'awk \'BEGIN {{FS="\\t" ; OFS="\\t"}} ! /^@/ && $6!="*" '
+    cmd2 += '{{ cigar=$6; gsub("[0-9]+D","",cigar); '
+    cmd2 += 'n = split(cigar,vals,"[A-Z]"); s = 0; '
     cmd2 += 'for (i=1;i<=n;i++) s=s+vals[i]; seqlen=length($10); '
     cmd2 += 'if (s!=seqlen) print $1"\\t"; }}\' | '
     cmd2 += 'sort | uniq > {}'
@@ -178,11 +184,15 @@ def main():
     # bwa
     log.info('Running bwa...')
     if args.paired_end:
-        bam = bwa_pe(args.fastqs[0], args.fastqs[1],
-                     bwa_index_prefix, args.nth, args.use_bwa_mem_for_pe, args.out_dir)
+        bam = bwa_pe(
+            args.fastqs[0], args.fastqs[1],
+            bwa_index_prefix, args.nth, args.use_bwa_mem_for_pe,
+            args.out_dir)
     else:
-        bam = bwa_se(args.fastqs[0],
-                     bwa_index_prefix, args.nth, args.out_dir)
+        bam = bwa_se(
+            args.fastqs[0],
+            bwa_index_prefix, args.nth,
+            args.out_dir)
 
     log.info('Removing temporary files...')
     rm_f(temp_files)

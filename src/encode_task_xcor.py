@@ -6,13 +6,17 @@
 import sys
 import os
 import argparse
-from encode_lib_genomic import *
+from encode_lib_common import (
+    log, ls_l, mkdir_p, pdf2png, rm_f, run_shell_cmd,
+    strip_ext_ta)
+from encode_lib_genomic import (
+    subsample_ta_pe, subsample_ta_se)
 from encode_lib_log_parser import parse_xcor_score
 
 
 def parse_arguments():
-    parser = argparse.ArgumentParser(prog='ENCODE DCC cross-correlation analysis.',
-                                     description='')
+    parser = argparse.ArgumentParser(
+        prog='ENCODE DCC cross-correlation analysis.')
     parser.add_argument('ta', type=str,
                         help='Path for TAGALIGN file.')
     parser.add_argument('--mito-chr-name', default='chrM',
@@ -24,10 +28,12 @@ def parse_arguments():
                         (-speak= in run_spp.R). Disabled if -1.')
     parser.add_argument('--exclusion-range-min', type=int,
                         help='User-defined exclusion range minimum used for '
-                             '-x=${xcor_exclusion_range_min}:${xcor_exclusion_range_max}')
+                             '-x=${xcor_exclusion_range_min}:'
+                             '${xcor_exclusion_range_max}')
     parser.add_argument('--exclusion-range-max', type=int,
                         help='User-defined exclusion range maximum used for '
-                             '-x=${xcor_exclusion_range_min}:${xcor_exclusion_range_max}')
+                             '-x=${xcor_exclusion_range_min}:'
+                             '${xcor_exclusion_range_max}')
     parser.add_argument('--chip-seq-type', choices=['tf', 'histone'],
                         help='Type of ChIP-seq pipeline (histone of tf)')
     parser.add_argument('--paired-end', action="store_true",
@@ -124,10 +130,12 @@ def main():
     log.info('Subsampling TAGALIGN for xcor...')
     if args.paired_end:
         ta_subsampled = subsample_ta_pe(
-            args.ta, args.subsample, True, args.mito_chr_name, True, args.out_dir)
+            args.ta, args.subsample, True,
+            args.mito_chr_name, True, args.out_dir)
     else:
         ta_subsampled = subsample_ta_se(
-            args.ta, args.subsample, True, args.mito_chr_name, args.out_dir)
+            args.ta, args.subsample, True,
+            args.mito_chr_name, args.out_dir)
     temp_files.append(ta_subsampled)
 
     log.info('Cross-correlation analysis...')

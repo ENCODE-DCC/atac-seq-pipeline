@@ -6,7 +6,9 @@
 import sys
 import os
 import argparse
-from encode_lib_common import *
+from encode_lib_common import (
+    assert_file_not_empty, human_readable_number,
+    log, ls_l, mkdir_p, rm_f, run_shell_cmd, strip_ext_ta)
 
 
 def parse_arguments():

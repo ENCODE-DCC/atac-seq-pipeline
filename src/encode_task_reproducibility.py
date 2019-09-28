@@ -6,13 +6,18 @@
 import sys
 import os
 import argparse
-from encode_lib_common import *
-from encode_lib_genomic import peak_to_bigbed, peak_to_hammock, get_region_size_metrics, get_num_peaks
+from encode_lib_common import (
+    copy_f_to_f, get_num_lines, infer_n_from_nC2,
+    infer_pair_label_from_idx, log, make_hard_link, mkdir_p)
+from encode_lib_genomic import (
+    peak_to_bigbed, peak_to_hammock, get_region_size_metrics,
+    get_num_peaks)
 
 
 def parse_arguments():
-    parser = argparse.ArgumentParser(prog='ENCODE DCC reproducibility QC.',
-                                     description='IDR peak or overlap peak only.')
+    parser = argparse.ArgumentParser(
+        prog='ENCODE DCC reproducibility QC.',
+        description='IDR peak or overlap peak only.')
     parser.add_argument('peaks', type=str, nargs='*',
                         help='List of peak files \
                         from true replicates in a sorted order. \
@@ -59,7 +64,8 @@ def main():
     log.info('Reproducibility QC...')
     # description for variables
     # N: list of number of peaks in peak files from pseudo replicates
-    # Nt: top number of peaks in peak files from true replicates (rep-x_vs_rep-y)
+    # Nt: top number of peaks in peak files
+    #     from true replicates (rep-x_vs_rep-y)
     # Np: number of peaks in peak files from pooled pseudo replicate
     N = [get_num_lines(peak) for peak in args.peaks_pr]
     if len(args.peaks):
@@ -172,7 +178,7 @@ def main():
         optimal_peak_file)
 
     log.info('Calculating number of peaks (optimal)...')
-    num_peak_qc = get_num_peaks(optimal_peak_file)
+    get_num_peaks(optimal_peak_file)
 
     log.info('All done.')
 

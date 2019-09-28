@@ -4,11 +4,23 @@
 # Author: Jin Lee (leepc12@gmail.com)
 
 import sys
-import os
 import json
 import argparse
-from encode_lib_common import *
-from encode_lib_log_parser import *
+from encode_lib_common import (
+    infer_n_from_nC2, infer_pair_label_from_idx, log, now,
+    run_shell_cmd, write_txt)
+from encode_lib_log_parser import (
+    MAP_KEY_DESC_ANNOT_ENRICH_QC, MAP_KEY_DESC_DUP_QC, MAP_KEY_DESC_FLAGSTAT_QC,
+    MAP_KEY_DESC_FRAC_MITO_QC, MAP_KEY_DESC_FRIP_QC, MAP_KEY_DESC_JSD_QC,
+    MAP_KEY_DESC_LIB_COMPLEXITY_QC, MAP_KEY_DESC_NUCLEOSOMAL_QC,
+    MAP_KEY_DESC_NUM_PEAK_QC, MAP_KEY_DESC_PEAK_REGION_SIZE_QC,
+    MAP_KEY_DESC_PICARD_EST_LIB_SIZE_QC, MAP_KEY_DESC_REPRODUCIBILITY_QC,
+    MAP_KEY_DESC_TSS_ENRICH_QC, MAP_KEY_DESC_XCOR_SCORE)
+from encode_lib_log_parser import (
+    parse_annot_enrich_qc, parse_dup_qc, parse_flagstat_qc, parse_frac_mito_qc,
+    parse_frip_qc, parse_jsd_qc, parse_lib_complexity_qc, parse_nucleosomal_qc,
+    parse_num_peak_qc, parse_peak_region_size_qc, parse_picard_est_lib_size_qc,
+    parse_reproducibility_qc, parse_tss_enrich_qc, parse_xcor_score)
 from encode_lib_qc_category import QCCategory
 from collections import OrderedDict
 
@@ -299,7 +311,7 @@ def make_cat_align(args, cat_root):
             <li>not primary alignment (0x100)</li>
             <li>read fails platform/vendor quality checks (0x200)</li>
             <li>read is PCR or optical duplicate (0x400)</li>
-            </ul></p></div><br>        
+            </ul></p></div><br>
         """,
         parser=parse_dup_qc,
         map_key_desc=MAP_KEY_DESC_DUP_QC,
@@ -368,7 +380,7 @@ def make_cat_align(args, cat_root):
     cat_fraglen = QCCategory(
         'frag_len_stat',
         html_head='<h2>Fragment length statistics</h2>',
-        html_foot="""        
+        html_foot="""
             <p>Open chromatin assays show distinct fragment length enrichments, as the cut
             sites are only in open chromatin and not in nucleosomes. As such, peaks
             representing different n-nucleosomal (ex mono-nucleosomal, di-nucleosomal)
@@ -423,7 +435,7 @@ def make_cat_lib_complexity(args, cat_root):
         html_head='<h2>Library complexity (filtered non-mito BAM)</h2>',
         html_foot="""
             <div id='help-lib_complexity'>
-            <p>Mitochondrial reads are filtered out by default. 
+            <p>Mitochondrial reads are filtered out by default.
             The non-redundant fraction (NRF) is the fraction of non-redundant mapped reads
             in a dataset; it is the ratio between the number of positions in the genome
             that uniquely mapped reads map to and the total number of uniquely mappable

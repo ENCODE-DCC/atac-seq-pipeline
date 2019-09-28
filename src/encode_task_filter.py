@@ -6,17 +6,23 @@
 import sys
 import os
 import argparse
-from encode_lib_genomic import *
+from encode_lib_common import (
+    copy_f_to_dir, log, ls_l, mkdir_p, rm_f, run_shell_cmd, strip_ext,
+    strip_ext_bam)
+from encode_lib_genomic import (
+    locate_picard, remove_chrs_from_bam, samstat, samtools_index,
+    samtools_name_sort)
 
 
 def parse_arguments():
-    parser = argparse.ArgumentParser(prog='ENCODE DCC filter.',
-                                     description='')
+    parser = argparse.ArgumentParser(
+        prog='ENCODE DCC filter.')
     parser.add_argument('bam', type=str,
                         help='Path for raw BAM file.')
-    parser.add_argument('--dup-marker', type=str, choices=['picard', 'sambamba'],
-                        default='picard',
-                        help='Dupe marker for filtering mapped reads in BAM.')
+    parser.add_argument(
+        '--dup-marker', type=str, choices=['picard', 'sambamba'],
+        default='picard',
+        help='Dupe marker for filtering mapped reads in BAM.')
     parser.add_argument('--mapq-thresh', default=30, type=int,
                         help='Threshold for low MAPQ reads removal.')
     parser.add_argument('--no-dup-removal', action="store_true",
@@ -25,8 +31,9 @@ def parse_arguments():
                         help='Paired-end BAM.')
     parser.add_argument('--multimapping', default=0, type=int,
                         help='Multimapping reads.')
-    parser.add_argument('--filter-chrs', nargs='*',
-                        help='Chromosomes to be filtered for final (nodup/filt) BAM.')
+    parser.add_argument(
+        '--filter-chrs', nargs='*',
+        help='Chromosomes to be filtered for final (nodup/filt) BAM.')
     parser.add_argument('--chrsz', type=str,
                         help='2-col chromosome sizes file.')
     parser.add_argument('--mito-chr-name', default='chrM',
@@ -224,8 +231,10 @@ def pbc_qc_se(bam, mito_chr_name, out_dir):
     cmd2 += 'awk \'BEGIN{{OFS="\\t"}}{{print $1,$2,$3,$6}}\' | '
     cmd2 += 'grep -v "^{}\\s" | sort | uniq -c | '
     cmd2 += 'awk \'BEGIN{{mt=0;m0=0;m1=0;m2=0}} ($1==1){{m1=m1+1}} '
-    cmd2 += '($1==2){{m2=m2+1}} {{m0=m0+1}} {{mt=mt+$1}} END{{m1_m2=-1.0; '
-    cmd2 += 'if(m2>0) m1_m2=m1/m2; m0_mt=0; if (mt>0) m0_mt=m0/mt; m1_m0=0; if (m0>0) m1_m0=m1/m0; '
+    cmd2 += '($1==2){{m2=m2+1}} {{m0=m0+1}} '
+    cmd2 += '{{mt=mt+$1}} END{{m1_m2=-1.0; '
+    cmd2 += 'if(m2>0) m1_m2=m1/m2; m0_mt=0; '
+    cmd2 += 'if (mt>0) m0_mt=m0/mt; m1_m0=0; if (m0>0) m1_m0=m1/m0; '
     cmd2 += 'printf "%d\\t%d\\t%d\\t%d\\t%f\\t%f\\t%f\\n",'
     cmd2 += 'mt,m0,m1,m2,m0_mt,m1_m0,m1_m2}}\' > {}'
     cmd2 = cmd2.format(
@@ -247,7 +256,8 @@ def pbc_qc_pe(bam, mito_chr_name, nth, out_dir):
     cmd3 += 'grep -v "^{}\\s" | sort | uniq -c | '
     cmd3 += 'awk \'BEGIN{{mt=0;m0=0;m1=0;m2=0}} ($1==1){{m1=m1+1}} '
     cmd3 += '($1==2){{m2=m2+1}} {{m0=m0+1}} {{mt=mt+$1}} END{{m1_m2=-1.0; '
-    cmd3 += 'if(m2>0) m1_m2=m1/m2; m0_mt=0; if (mt>0) m0_mt=m0/mt; m1_m0=0; if (m0>0) m1_m0=m1/m0; '
+    cmd3 += 'if(m2>0) m1_m2=m1/m2; m0_mt=0; '
+    cmd3 += 'if (mt>0) m0_mt=m0/mt; m1_m0=0; if (m0>0) m1_m0=m1/m0; '
     cmd3 += 'printf "%d\\t%d\\t%d\\t%d\\t%f\\t%f\\t%f\\n"'
     cmd3 += ',mt,m0,m1,m2,m0_mt,m1_m0,m1_m2}}\' > {}'
     cmd3 = cmd3.format(
@@ -317,17 +327,17 @@ def main():
         final_bam = nodup_bam
 
     log.info('samtools index (final_bam)...')
-    nodup_bai = samtools_index(final_bam, args.nth, args.out_dir)
+    samtools_index(final_bam, args.nth, args.out_dir)
 
     log.info('samstat...')
-    nodup_samstat_qc = samstat(final_bam, args.nth, args.out_dir)
+    samstat(final_bam, args.nth, args.out_dir)
 
     log.info('Generating PBC QC log...')
     if args.paired_end:
-        pbc_qc = pbc_qc_pe(dupmark_bam, args.mito_chr_name, args.nth,
-                           args.out_dir)
+        pbc_qc_pe(dupmark_bam, args.mito_chr_name, args.nth,
+                  args.out_dir)
     else:
-        pbc_qc = pbc_qc_se(dupmark_bam, args.mito_chr_name, args.out_dir)
+        pbc_qc_se(dupmark_bam, args.mito_chr_name, args.out_dir)
 
     log.info('samtools index (raw bam)...')
     bam = copy_f_to_dir(args.bam, args.out_dir)

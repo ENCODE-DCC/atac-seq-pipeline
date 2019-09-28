@@ -5,9 +5,10 @@
 
 import sys
 import os
-import re
 import argparse
-from encode_lib_genomic import *
+from encode_lib_common import (
+    log, ls_l, mkdir_p, rm_f, run_shell_cmd, strip_ext_fastq, strip_ext_tar,
+    untar)
 
 
 def parse_arguments():
@@ -25,10 +26,11 @@ def parse_arguments():
                             FASTQs must be compressed with gzip (with .gz).')
     parser.add_argument('--paired-end', action="store_true",
                         help='Paired-end FASTQs.')
-    parser.add_argument('--multimapping', default=0, type=int,
-                        help='Multimapping reads (for bowtie2 -k(m+1). '
-                             'This will be incremented in an actual bowtie2 command line'
-                             'e.g. --multimapping 3 will be bowtie2 -k 4')
+    parser.add_argument(
+        '--multimapping', default=0, type=int,
+        help='Multimapping reads (for bowtie2 -k(m+1). '
+             'This will be incremented in an actual bowtie2 command line'
+             'e.g. --multimapping 3 will be bowtie2 -k 4')
     parser.add_argument('--nth', type=int, default=1,
                         help='Number of threads to parallelize.')
     parser.add_argument('--out-dir', default='', type=str,
@@ -59,7 +61,8 @@ def bowtie2_se(fastq, ref_index_prefix,
     align_log = '{}.align.log'.format(prefix)
 
     cmd = 'bowtie2 {} --mm --threads {} -x {} -U {} 2> {} '
-    cmd += '| samtools view -Su /dev/stdin | samtools sort /dev/stdin -o {} -T {}'
+    cmd += '| samtools view -Su /dev/stdin '
+    cmd += '| samtools sort /dev/stdin -o {} -T {}'
     cmd = cmd.format(
         '-k {}'.format(multimapping+1) if multimapping else '',
         nth,
@@ -80,12 +83,12 @@ def bowtie2_pe(fastq1, fastq2, ref_index_prefix,
     basename = os.path.basename(strip_ext_fastq(fastq1))
     prefix = os.path.join(out_dir, basename)
     bam = '{}.bam'.format(prefix)
-    bai = '{}.bam.bai'.format(prefix)
     align_log = '{}.align.log'.format(prefix)
 
     cmd = 'bowtie2 {} -X2000 --mm --threads {} -x {} '
     cmd += '-1 {} -2 {} 2>{} | '
-    cmd += 'samtools view -Su /dev/stdin | samtools sort /dev/stdin -o {} -T {}'
+    cmd += 'samtools view -Su /dev/stdin | '
+    cmd += 'samtools sort /dev/stdin -o {} -T {}'
     cmd = cmd.format(
         '-k {}'.format(multimapping+1) if multimapping else '',
         nth,

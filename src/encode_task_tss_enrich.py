@@ -12,8 +12,10 @@ from matplotlib import pyplot as plt
 import sys
 import os
 import argparse
-from encode_lib_common import strip_ext_bam, ls_l, log, logging, mkdir_p, rm_f
-from encode_lib_genomic import remove_read_group, samtools_index
+from encode_lib_common import (
+    strip_ext_bam, ls_l, log, logging, mkdir_p, rm_f)
+from encode_lib_genomic import (
+    remove_read_group, samtools_index)
 import matplotlib as mpl
 mpl.use('Agg')
 
@@ -32,14 +34,16 @@ def parse_arguments():
     parser.add_argument('--out-dir', default='', type=str,
                         help='Output directory.')
     parser.add_argument('--log-level', default='INFO', help='Log level',
-                        choices=['NOTSET', 'DEBUG', 'INFO', 'WARNING', 'CRITICAL', 'ERROR', 'CRITICAL'])
+                        choices=['NOTSET', 'DEBUG', 'INFO', 'WARNING',
+                                 'CRITICAL', 'ERROR', 'CRITICAL'])
     args = parser.parse_args()
     log.setLevel(args.log_level)
     log.info(sys.argv)
     return args
 
 
-def make_tss_plot(bam_file, tss, prefix, chromsizes, read_len, bins=400, bp_edge=2000,
+def make_tss_plot(bam_file, tss, prefix, chromsizes,
+                  read_len, bins=400, bp_edge=2000,
                   processes=8, greenleaf_norm=True):
     '''
     Take bootstraps, generate tss plots, and get a mean and
@@ -59,18 +63,9 @@ def make_tss_plot(bam_file, tss, prefix, chromsizes, read_len, bins=400, bp_edge
     # Load the bam file
     # Need to shift reads and just get ends, just load bed file?
     bam = metaseq.genomic_signal(bam_file, 'bam')
-    bam_array = bam.array(tss_ext, bins=bins, shift_width=-read_len/2,  # Shift to center the read on the cut site
+    # Shift to center the read on the cut site
+    bam_array = bam.array(tss_ext, bins=bins, shift_width=-read_len/2,
                           processes=processes, stranded=True)
-
-    # Actually first build an "ends" file
-    #get_ends = '''zcat {0} | awk -F '\t' 'BEGIN {{OFS="\t"}} {{if ($6 == "-") {{$2=$3-1; print}} else {{$3=$2+1; print}} }}' | gzip -c > {1}_ends.bed.gz'''.format(bed_file, prefix)
-    # print(get_ends)
-    # os.system(get_ends)
-
-    #bed_reads = metaseq.genomic_signal('{0}_ends.bed.gz'.format(prefix), 'bed')
-    # bam_array = bed_reads.array(tss_ext, bins=bins,
-    #                      processes=processes, stranded=True)
-
     # Normalization (Greenleaf style): Find the avg height
     # at the end bins and take fold change over that
     if greenleaf_norm:

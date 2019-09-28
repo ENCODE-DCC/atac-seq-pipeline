@@ -4,7 +4,14 @@
 # Author: Jin Lee (leepc12@gmail.com)
 
 import os
-from encode_lib_common import *
+import gzip
+import re
+import subprocess
+
+from encode_lib_common import (
+    get_num_lines, get_peak_type, human_readable_number,
+    rm_f, run_shell_cmd, strip_ext, strip_ext_bam,
+    strip_ext_peak, strip_ext_ta)
 
 
 def remove_chrs_from_bam(bam, chrs, chrsz, nth=1, out_dir=''):
@@ -79,7 +86,6 @@ def samtools_index(bam, nth=1, out_dir=''):
     run_shell_cmd(cmd)
     if os.path.abspath(out_dir) != \
             os.path.abspath(os.path.dirname(bam)):
-        cmd2 = 'mv {} {}'.format(bai, out_dir)
         return os.path.join(out_dir, os.path.basename(bai))
     else:
         return bai
@@ -91,7 +97,6 @@ def sambamba_index(bam, nth, out_dir=''):
     run_shell_cmd(cmd)
     if os.path.abspath(out_dir) != \
             os.path.abspath(os.path.dirname(bam)):
-        cmd2 = 'mv {} {}'.format(bai, out_dir)
         return os.path.join(out_dir, os.path.basename(bai))
     else:
         return bai
@@ -200,7 +205,8 @@ def locate_picard():
                 msg += 'cannot be found.'
                 raise Exception(msg)
         except:
-            msg = 'Cannot find picard.jar or conda installation of Picard tools'
+            msg = 'Cannot find picard.jar or conda installation '\
+                  'of Picard tools'
             raise Exception(msg)
 
 
@@ -219,7 +225,9 @@ def subsample_ta_se(ta, subsample, non_mito, mito_chr_name, out_dir):
         # cmd += 'awk \'{{if ($1!="'+mito_chr_name+'") print $0}}\' | '
         cmd += 'grep -v \'^'+mito_chr_name+'\\b\' | '
     if subsample > 0:
-        cmd += 'shuf -n {} --random-source=<(openssl enc -aes-256-ctr -pass pass:$(zcat -f {} | wc -c) -nosalt </dev/zero 2>/dev/null) | '
+        cmd += 'shuf -n {} --random-source=<(openssl enc -aes-256-ctr '
+        cmd += '-pass pass:$(zcat -f {} | wc -c) -nosalt '
+        cmd += '</dev/zero 2>/dev/null) | '
         cmd += 'gzip -nc > {}'
         cmd = cmd.format(
             ta,
@@ -253,7 +261,9 @@ def subsample_ta_pe(ta, subsample, non_mito, mito_chr_name, r1_only, out_dir):
         cmd0 += 'grep -v \'^'+mito_chr_name+'\\b\' | '
     cmd0 += 'sed \'N;s/\\n/\\t/\' '
     if subsample > 0:
-        cmd0 += '| shuf -n {} --random-source=<(openssl enc -aes-256-ctr -pass pass:$(zcat -f {} | wc -c) -nosalt </dev/zero 2>/dev/null) > {}'
+        cmd0 += '| shuf -n {} --random-source=<(openssl enc -aes-256-ctr '
+        cmd0 += '-pass pass:$(zcat -f {} | wc -c) -nosalt '
+        cmd0 += '</dev/zero 2>/dev/null) > {}'
         cmd0 = cmd0.format(
             ta,
             subsample,
@@ -316,7 +326,8 @@ def peak_to_hammock(peak, keep_irregular_chr, out_dir):
 
                 if peak_type == 'narrowPeak' or peak_type == 'regionPeak':
                     fout.write(
-                        '{0[0]}\t{0[1]}\t{0[2]}\tscorelst:[{0[6]},{0[7]},{0[8]}],id:{1},'.format(lst, id))
+                        '{0[0]}\t{0[1]}\t{0[2]}\tscorelst:[{0[6]},{0[7]},'
+                        '{0[8]}],id:{1},'.format(lst, id))
                     if len(lst[3]) > 1:
                         fout.write('name:"'+lst[3]+'",')
                     if lst[5] != '.':
@@ -325,7 +336,9 @@ def peak_to_hammock(peak, keep_irregular_chr, out_dir):
                         fout.write('sbstroke:['+lst[9]+']')
                 elif peak_type == 'gappedPeak':
                     fout.write(
-                        '{0[0]}\t{0[1]}\t{0[2]}\tscorelst:[{0[12]},{0[13]},{0[14]}],id:{1},struct:{{thin:[[{0[1]},{0[2]}]],thick:['.format(lst, id))
+                        '{0[0]}\t{0[1]}\t{0[2]}\tscorelst:[{0[12]},{0[13]},'
+                        '{0[14]}],id:{1},struct:{{thin:[[{0[1]},{0[2]}]],'
+                        'thick:['.format(lst, id))
                     a = int(lst[1])
                     sizes = lst[10].split(',')
                     starts = lst[11].split(',')
@@ -340,7 +353,8 @@ def peak_to_hammock(peak, keep_irregular_chr, out_dir):
                         fout.write('strand:"'+lst[5]+'",')
                 elif peak_type == 'broadPeak':
                     fout.write(
-                        '{0[0]}\t{0[1]}\t{0[2]}\tscorelst:[{0[6]},{0[7]}],id:{1},'.format(lst, id))
+                        '{0[0]}\t{0[1]}\t{0[2]}\tscorelst:[{0[6]},{0[7]}],'
+                        'id:{1},'.format(lst, id))
                     if len(lst[3]) > 1:
                         fout.write('name:"'+lst[3]+'",')
                     if lst[5] != '.':
@@ -439,7 +453,8 @@ def peak_to_bigbed(peak, peak_type, chrsz, keep_irregular_chr, out_dir):
         cmd1 = "cat {} > {}".format(chrsz, chrsz_tmp)
     run_shell_cmd(cmd1)
     cmd2 = "zcat -f {} | LC_COLLATE=C sort -k1,1 -k2,2n | "
-    cmd2 += 'awk \'BEGIN{{OFS="\\t"}} {{if ($5>1000) $5=1000; if ($5<0) $5=0; print $0}}\' > {}'
+    cmd2 += 'awk \'BEGIN{{OFS="\\t"}} {{if ($5>1000) $5=1000; '
+    cmd2 += 'if ($5<0) $5=0; print $0}}\' > {}'
     cmd2 = cmd2.format(peak, bigbed_tmp)
     run_shell_cmd(cmd2)
     cmd3 = "bedClip {} {} {}".format(bigbed_tmp, chrsz_tmp, bigbed_tmp2)

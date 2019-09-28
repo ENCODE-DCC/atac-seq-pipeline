@@ -4,10 +4,11 @@
 
 import sys
 import os
-import re
 import argparse
-from encode_lib_common import mkdir_p
-from encode_lib_genomic import *
+from encode_lib_common import (
+    mkdir_p, log, ls_l, rm_f, strip_ext_fastq)
+from encode_lib_genomic import (
+    get_read_length, remove_chrs_from_bam, samstat, samtools_index)
 
 
 def parse_arguments():
@@ -17,9 +18,10 @@ def parse_arguments():
                         help='Path for FASTQ R1')
     parser.add_argument('bam', type=str,
                         help='Path for BAM')
-    parser.add_argument('--chrsz', type=str,
-                        help='2-col chromosome sizes file. If not given then '
-                             'SAMstats on mito-free BAM will not be calcaulted.')
+    parser.add_argument(
+        '--chrsz', type=str,
+        help='2-col chromosome sizes file. If not given then '
+             'SAMstats on mito-free BAM will not be calcaulted.')
     parser.add_argument('--mito-chr-name', default='chrM',
                         help='Mito chromosome name.')
     parser.add_argument('--nth', type=int, default=1,
@@ -57,14 +59,14 @@ def main():
 
     # generate read length file
     log.info('Generating read length file...')
-    R1_read_length_file = make_read_length_file(
+    make_read_length_file(
         args.fastq, args.out_dir)
 
     log.info('Running samtools index...')
-    bai = samtools_index(args.bam, args.nth, args.out_dir)
+    samtools_index(args.bam, args.nth, args.out_dir)
 
     log.info('SAMstat on raw BAM...')
-    flagstat = samstat(args.bam, args.nth, args.out_dir)
+    samstat(args.bam, args.nth, args.out_dir)
 
     if args.chrsz:
         log.info('SAMstat on non-mito BAM...')
@@ -73,8 +75,7 @@ def main():
         non_mito_bam = remove_chrs_from_bam(args.bam, [args.mito_chr_name],
                                             args.chrsz,
                                             args.nth, non_mito_out_dir)
-        non_mito_flagstat = samstat(non_mito_bam, args.nth,
-                                    non_mito_out_dir)
+        samstat(non_mito_bam, args.nth, non_mito_out_dir)
         rm_f(non_mito_bam)
 
     log.info('List all files in output directory...')

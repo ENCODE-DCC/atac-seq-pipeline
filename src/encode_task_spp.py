@@ -6,14 +6,17 @@
 import sys
 import os
 import argparse
-from encode_lib_common import *
+from encode_lib_common import (
+    assert_file_not_empty, human_readable_number, log,
+    ls_l, mkdir_p, rm_f, run_shell_cmd, strip_ext_ta)
 
 
 def parse_arguments():
-    parser = argparse.ArgumentParser(prog='ENCODE spp call_peak',
-                                     description='')
-    parser.add_argument('tas', type=str, nargs=2,
-                        help='Path for TAGALIGN file and control TAGALIGN file.')
+    parser = argparse.ArgumentParser(
+        prog='ENCODE spp call_peak')
+    parser.add_argument(
+        'tas', type=str, nargs=2,
+        help='Path for TAGALIGN file and control TAGALIGN file.')
     parser.add_argument('--chrsz', type=str,
                         help='2-col chromosome sizes file.')
     parser.add_argument('--fraglen', type=int, required=True,
@@ -64,7 +67,8 @@ def spp(ta, ctl_ta, fraglen, cap_num_peak, nth, out_dir):
 
     # if we have scientific representation of chr coord. then convert it to int
     cmd1 = 'zcat -f {} | awk \'BEGIN{{OFS="\\t"}}'
-    cmd1 += '{{if ($2<0) $2=0; print $1,int($2),int($3),$4,$5,$6,$7,$8,$9,$10;}}\' | '
+    cmd1 += '{{if ($2<0) $2=0; '
+    cmd1 += 'print $1,int($2),int($3),$4,$5,$6,$7,$8,$9,$10;}}\' | '
     cmd1 += 'gzip -f -nc > {}'
     cmd1 = cmd1.format(
         rpeak_tmp,

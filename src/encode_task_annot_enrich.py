@@ -6,9 +6,9 @@
 import sys
 import os
 import argparse
-from encode_lib_common import run_shell_cmd, strip_ext_ta
-from encode_lib_common import ls_l, get_num_lines, log, logging
-from encode_lib_common import mkdir_p, rm_f
+from encode_lib_common import (
+    run_shell_cmd, strip_ext_ta,
+    ls_l, get_num_lines, log)
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -27,7 +27,8 @@ def parse_arguments():
     parser.add_argument('--out-dir', default='', type=str,
                         help='Output directory.')
     parser.add_argument('--log-level', default='INFO', help='Log level',
-                        choices=['NOTSET', 'DEBUG', 'INFO', 'WARNING', 'CRITICAL', 'ERROR', 'CRITICAL'])
+                        choices=['NOTSET', 'DEBUG', 'INFO', 'WARNING',
+                                 'CRITICAL', 'ERROR', 'CRITICAL'])
     args = parser.parse_args()
     log.setLevel(args.log_level)
     log.info(sys.argv)
@@ -43,8 +44,6 @@ def get_fract_reads_in_regions(reads_bed, regions_bed):
     cmd += "bedtools merge -i stdin | "
     cmd += "bedtools intersect -u -nonamecheck -a {} -b stdin | "
     cmd += "wc -l"
-    #cmd += "bedtools intersect -c -nonamecheck -a stdin -b {} | "
-    #cmd += "awk '{{ sum+=$4 }} END {{ print sum }}'"
     cmd = cmd.format(regions_bed, reads_bed)
     intersect_read_count = int(run_shell_cmd(cmd))
     total_read_count = get_num_lines(reads_bed)

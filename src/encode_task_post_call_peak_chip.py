@@ -5,8 +5,10 @@
 import sys
 import os
 import argparse
-from encode_lib_common import *
-from encode_lib_genomic import peak_to_bigbed, peak_to_hammock, get_region_size_metrics, get_num_peaks
+from encode_lib_common import (
+    assert_file_not_empty, log, ls_l, mkdir_p)
+from encode_lib_genomic import (
+peak_to_bigbed, peak_to_hammock, get_region_size_metrics, get_num_peaks)
 from encode_lib_blacklist_filter import blacklist_filter
 from encode_lib_frip import frip_shifted
 

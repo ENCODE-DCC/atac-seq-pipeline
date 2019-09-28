@@ -6,7 +6,11 @@
 import sys
 import os
 import argparse
-from encode_lib_genomic import *
+from encode_lib_common import (
+    assert_file_not_empty, log, ls_l, mkdir_p, rm_f, run_shell_cmd,
+    strip_ext_bam, strip_ext_ta)
+from encode_lib_genomic import (
+    samtools_name_sort, subsample_ta_pe, subsample_ta_se)
 
 
 def parse_arguments():
@@ -122,10 +126,12 @@ def main():
         log.info('Subsampling TAGALIGN...')
         if args.paired_end:
             subsampled_ta = subsample_ta_pe(
-                ta, args.subsample, False, args.mito_chr_name, False, args.out_dir)
+                ta, args.subsample, False,
+                args.mito_chr_name, False, args.out_dir)
         else:
             subsampled_ta = subsample_ta_se(
-                ta, args.subsample, False, args.mito_chr_name, args.out_dir)
+                ta, args.subsample, False,
+                args.mito_chr_name, args.out_dir)
         temp_files.append(ta)
     else:
         subsampled_ta = ta

@@ -6,7 +6,9 @@
 import sys
 import os
 import argparse
-from encode_lib_common import *
+from encode_lib_common import (
+    get_num_lines, gunzip, log, ls_l, mkdir_p, rm_f,
+    run_shell_cmd, strip_ext, write_txt)
 
 
 def parse_arguments():
@@ -97,10 +99,10 @@ def main():
     mkdir_p(args.out_dir)
 
     if args.fraglen:
-        frip_qc = frip_shifted(args.ta, args.peak,
-                               args.chrsz, args.fraglen, args.out_dir)
+        frip_shifted(args.ta, args.peak,
+                     args.chrsz, args.fraglen, args.out_dir)
     else:
-        frip_qc = frip(args.ta, args.peak, args.out_dir)
+        frip(args.ta, args.peak, args.out_dir)
 
     log.info('List all files in output directory...')
     ls_l(args.out_dir)

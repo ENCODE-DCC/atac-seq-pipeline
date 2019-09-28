@@ -7,15 +7,18 @@ import sys
 import os
 import argparse
 import math
-from encode_lib_common import *
-from encode_lib_genomic import peak_to_bigbed, peak_to_hammock
+from encode_lib_common import (
+    assert_file_not_empty, log, ls_l, mkdir_p, rm_f, run_shell_cmd)
+from encode_lib_genomic import (
+    peak_to_bigbed, peak_to_hammock)
 from encode_lib_blacklist_filter import blacklist_filter
 from encode_lib_frip import frip, frip_shifted
 
 
 def parse_arguments():
-    parser = argparse.ArgumentParser(prog='ENCODE DCC IDR.',
-                                     description='NarrowPeak or RegionPeak only.')
+    parser = argparse.ArgumentParser(
+        prog='ENCODE DCC IDR.',
+        description='NarrowPeak or RegionPeak only.')
     parser.add_argument('peak1', type=str,
                         help='Peak file 1.')
     parser.add_argument('peak2', type=str,
@@ -160,13 +163,11 @@ def main():
     if args.ta:  # if TAG-ALIGN is given
         if args.fraglen:  # chip-seq
             log.info('Shifted FRiP with fragment length...')
-            frip_qc = frip_shifted(args.ta, bfilt_idr_peak,
-                                   args.chrsz, args.fraglen, args.out_dir)
+            frip_shifted(args.ta, bfilt_idr_peak,
+                         args.chrsz, args.fraglen, args.out_dir)
         else:  # atac-seq
             log.info('FRiP without fragment length...')
-            frip_qc = frip(args.ta, bfilt_idr_peak, args.out_dir)
-    else:
-        frip_qc = '/dev/null'
+            frip(args.ta, bfilt_idr_peak, args.out_dir)
 
     log.info('List all files in output directory...')
     ls_l(args.out_dir)

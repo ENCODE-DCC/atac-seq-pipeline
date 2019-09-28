@@ -8,8 +8,8 @@ from matplotlib import pyplot as plt
 import sys
 import os
 import argparse
-from encode_lib_common import strip_ext_bigwig, ls_l, log
-from encode_lib_common import logging, mkdir_p, rm_f
+from encode_lib_common import (
+    strip_ext_bigwig, ls_l, log, mkdir_p)
 import numpy as np
 import pandas as pd
 import scipy.stats
@@ -23,6 +23,7 @@ def parse_arguments():
     parser = argparse.ArgumentParser(prog='ENCODE compare signal to roadmap')
     parser.add_argument('--bigwig', type=str,
                         help='BIGWIG file (from task macs2).')
+    parser.add_argument('--dnase', type=str, help='DNase file.')
     parser.add_argument('--reg2map', type=str, help='Reg2map file.')
     parser.add_argument('--reg2map-bed', type=str, help='Reg2map bed file.')
     parser.add_argument('--roadmap-meta', type=str,
@@ -53,7 +54,7 @@ def compare_to_roadmap(bw_file, regions_file, reg2map_file,
     # remember to use a UCSC formatted bed file for regions
     bw_average_over_bed = 'bigWigAverageOverBed {0} {1} {2}'.format(
         bw_file, regions_file, out_file)
-    logging.info(bw_average_over_bed)
+    log.info(bw_average_over_bed)
     os.system(bw_average_over_bed)
 
     # Read the file back in
@@ -74,7 +75,7 @@ def compare_to_roadmap(bw_file, regions_file, reg2map_file,
                                                   sample_mean0_col)
             results.loc[i] = [roadmap_i.name, spearman_corr[0]]
             s = '{0}\t{1}'.format(roadmap_i.name, spearman_corr)
-            logging.info(s)
+            log.info(s)
             fp.write(s + '\n')
 
     # Read in metadata to make the chart more understandable
@@ -108,6 +109,7 @@ def main():
     # read params
     args = parse_arguments()
     BIGWIG = args.bigwig
+    DNASE = args.dnase
     OUTPUT_PREFIX = os.path.join(
         args.out_dir,
         os.path.basename(strip_ext_bigwig(BIGWIG)))
@@ -122,8 +124,8 @@ def main():
     log.info('Initializing and making output directory...')
     mkdir_p(args.out_dir)
 
-    roadmap_compare_plot = compare_to_roadmap(BIGWIG, REG2MAP_BED, REG2MAP,
-                                              ROADMAP_META, OUTPUT_PREFIX)
+    compare_to_roadmap(BIGWIG, REG2MAP_BED, REG2MAP,
+                       ROADMAP_META, OUTPUT_PREFIX)
 
     log.info('List all files in output directory...')
     ls_l(args.out_dir)

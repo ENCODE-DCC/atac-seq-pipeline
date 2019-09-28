@@ -6,17 +6,20 @@
 import sys
 import os
 import argparse
-from encode_lib_common import *
+from encode_lib_common import (
+    hard_link, log, ls_l, mkdir_p, read_tsv, run_shell_cmd,
+    strip_ext_fastq)
 
 
 def parse_arguments(debug=False):
     parser = argparse.ArgumentParser(prog='ENCODE DCC fastq merger.',
                                      description='')
-    parser.add_argument('fastqs', nargs='+', type=str,
-                        help='TSV file path or list of FASTQs. \
-                            FASTQs must be compressed with gzip (with .gz). \
-                            Use TSV for multiple fastqs to be merged later. \
-                            row=merge_id, col=end_id).')
+    parser.add_argument(
+        'fastqs', nargs='+', type=str,
+        help='TSV file path or list of FASTQs. '
+             'FASTQs must be compressed with gzip (with .gz). '
+             'Use TSV for multiple fastqs to be merged later. '
+             'row=merge_id, col=end_id).')
     parser.add_argument('--paired-end', action="store_true",
                         help='Paired-end FASTQs.')
     parser.add_argument('--nth', type=int, default=1,
@@ -86,10 +89,10 @@ def main():
 
     log.info('Merging fastqs...')
     log.info('R1 to be merged: {}'.format(fastqs_R1))
-    R1_merged = merge_fastqs(fastqs_R1, 'R1', args.out_dir)
+    merge_fastqs(fastqs_R1, 'R1', args.out_dir)
     if args.paired_end:
         log.info('R2 to be merged: {}'.format(fastqs_R2))
-        R2_merged = merge_fastqs(fastqs_R2, 'R2', args.out_dir)
+        merge_fastqs(fastqs_R2, 'R2', args.out_dir)
 
     log.info('List all files in output directory...')
     ls_l(args.out_dir)

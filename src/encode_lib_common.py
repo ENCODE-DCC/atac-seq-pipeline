@@ -7,12 +7,12 @@ import sys
 import os
 import re
 import csv
-import gzip
 import logging
 import subprocess
 import math
 import signal
 import time
+import argparse
 
 logging.basicConfig(
     format='[%(asctime)s %(levelname)s] %(message)s',
@@ -58,12 +58,12 @@ def strip_ext_rpeak(rpeak):
 
 def strip_ext_gpeak(gpeak):
     return re.sub(r'\.(gappedPeak|GappedPeak)\.gz$', '',
-                  str(npeak))
+                  str(gpeak))
 
 
 def strip_ext_bpeak(bpeak):
     return re.sub(r'\.(broadPeak|BroadPeak)\.gz$', '',
-                  str(npeak))
+                  str(bpeak))
 
 
 def get_peak_type(peak):
@@ -91,8 +91,9 @@ def strip_ext_peak(peak):  # returns a tuple (peak_type, stripped_filename)
     elif peak_type == 'gappedPeak':
         return strip_ext_gpeak(peak)
     else:
-        raise Exception('Unsupported peak type for stripping extension {}'.format(
-            peak))
+        raise Exception(
+            'Unsupported peak type for stripping '
+            'extension {}'.format(peak))
 
 
 def strip_ext_bigwig(bw):
@@ -269,19 +270,20 @@ def pdf2png(pdf, out_dir):
 
 
 def run_shell_cmd(cmd):
-    p = subprocess.Popen(['/bin/bash', '-o', 'pipefail'],  # to catch error in pipe
-                         stdin=subprocess.PIPE,
-                         stdout=subprocess.PIPE,
-                         stderr=subprocess.PIPE,
-                         universal_newlines=True,
-                         preexec_fn=os.setsid)  # to make a new process with a new PGID
+    p = subprocess.Popen(
+        ['/bin/bash', '-o', 'pipefail'],  # to catch error in pipe
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        universal_newlines=True,
+        preexec_fn=os.setsid)  # to make a new process with a new PGID
     pid = p.pid
     pgid = os.getpgid(pid)
     log.info('run_shell_cmd: PID={}, PGID={}, CMD={}'.format(pid, pgid, cmd))
     stdout, stderr = p.communicate(cmd)
     rc = p.returncode
-    err_str = 'PID={}, PGID={}, RC={}\nSTDERR={}\nSTDOUT={}'.format(pid, pgid, rc,
-                                                                    stderr.strip(), stdout.strip())
+    err_str = 'PID={}, PGID={}, RC={}\nSTDERR={}\nSTDOUT={}'.format(
+        pid, pgid, rc, stderr.strip(), stdout.strip())
     if rc:
         # kill all child processes
         try:

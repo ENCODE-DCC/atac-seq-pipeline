@@ -9,11 +9,25 @@ from collections import OrderedDict
 from base64 import b64encode
 
 
+def to_number(var):
+    """Convert to number or return None
+    """
+    try:
+        if '.' in var:
+            raise ValueError
+        return int(var)
+    except ValueError:
+        try:
+            return float(var)
+        except ValueError:
+            return None
+
+
 class QCLog(object):
     """Parse a QC text file and convert it into a Python dict.
 
        TSV (number of columns >= 1) can be converted without a parser function.
-       First column will be key name and the rest of columns will be 
+       First column will be key name and the rest of columns will be
        values.
 
        For other QC log types, specify a parser function.
@@ -97,23 +111,13 @@ class QCPlot(object):
           <figcaption style="text-align:center">{caption}</figcaption>
         </figure>
         '''
-        return html.format(img_type=self._img_type,
-                           size_pct=self._size_pct,
-                           encoded=self._encoded,
-                           caption='' if self._caption is None else self._caption)
+        return html.format(
+            img_type=self._img_type,
+            size_pct=self._size_pct,
+            encoded=self._encoded,
+            caption='' if self._caption is None else self._caption)
 
     def __encode(self):
-        if self._plot_file.lower().endswith('.png'):
-            img_type = 'png'
-        elif self._plot_file.lower().endswith('.gif'):
-            img_type = 'gif'
-        elif self._plot_file.lower().endswith('.jpg'):
-            img_type = 'jpg'
-        elif self._plot_file.lower().endswith('.bmp'):
-            img_type = 'bmp'
-        else:
-            raise Exception('Unsupported plot type')
-
         self._encoded = b64encode(
             open(self._plot_file, 'rb').read()).decode("utf-8")
 
@@ -133,7 +137,7 @@ class QCCategory(object):
                           For example of samtools flagstat
                           'mapped_qc_failed' : 'Mapped(QC-failed)'
 
-            parser: use it as default parser for all children QC logs                    
+            parser: use it as default parser for all children QC logs
         """
         self._cat_name = cat_name
         self._html_head = html_head
@@ -194,7 +198,7 @@ class QCCategory(object):
     def __qc_logs_to_html(self):
         """Print HTML only if there are contents to be shown
         Make an HTML table of qc_logs. For example,
-                 rep1    rep2    
+                 rep1    rep2
         -------+-------+--------
         key1   | val1  | val1
         """

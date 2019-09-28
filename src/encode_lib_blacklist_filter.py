@@ -6,7 +6,9 @@
 import sys
 import os
 import argparse
-from encode_lib_common import *
+from encode_lib_common import (
+    get_ext, get_num_lines, gunzip, log, mkdir_p,
+    rm_f, run_shell_cmd, strip_ext, strip_ext_bam)
 
 
 def parse_arguments():
@@ -39,7 +41,8 @@ def blacklist_filter(peak, blacklist, keep_irregular_chr, out_dir):
     peak_ext = get_ext(peak)
     filtered = '{}.bfilt.{}.gz'.format(prefix, peak_ext)
 
-    if get_num_lines(peak) == 0 or blacklist == '' or get_num_lines(blacklist) == 0:
+    if get_num_lines(peak) == 0 or blacklist == '' \
+            or get_num_lines(blacklist) == 0:
         cmd = 'zcat -f {} | gzip -nc > {}'.format(peak, filtered)
         run_shell_cmd(cmd)
     else:
@@ -94,7 +97,7 @@ def main():
 
     # reproducibility QC
     log.info('Filtering peak with blacklist...')
-    filtered = blacklist_filter(
+    blacklist_filter(
         args.peak, args.blacklist,
         args.keep_irregular_chr, args.out_dir)
 

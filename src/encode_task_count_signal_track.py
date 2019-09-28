@@ -6,12 +6,13 @@
 import sys
 import os
 import argparse
-from encode_lib_common import *
+from encode_lib_common import (
+    log, ls_l, mkdir_p, rm_f, run_shell_cmd, strip_ext_ta)
 
 
 def parse_arguments():
-    parser = argparse.ArgumentParser(prog='ENCODE DCC Count signal track generation',
-                                     description='')
+    parser = argparse.ArgumentParser(
+        prog='ENCODE DCC Count signal track generation')
     parser.add_argument('ta', type=str,
                         help='Path for TAGALIGN file.')
     parser.add_argument('--chrsz', type=str,

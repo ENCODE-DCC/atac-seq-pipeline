@@ -9,8 +9,10 @@ from matplotlib import pyplot as plt
 import sys
 import os
 import argparse
-from encode_lib_common import strip_ext_bam, ls_l, log, logging, mkdir_p, rm_f
-from encode_lib_genomic import remove_read_group, locate_picard
+from encode_lib_common import (
+    strip_ext_bam, ls_l, log, logging, rm_f)
+from encode_lib_genomic import (
+    remove_read_group, locate_picard)
 import matplotlib as mpl
 mpl.use('Agg')
 
@@ -25,7 +27,8 @@ def parse_arguments():
     parser.add_argument('--out-dir', default='', type=str,
                         help='Output directory.')
     parser.add_argument('--log-level', default='INFO', help='Log level',
-                        choices=['NOTSET', 'DEBUG', 'INFO', 'WARNING', 'CRITICAL', 'ERROR', 'CRITICAL'])
+                        choices=['NOTSET', 'DEBUG', 'INFO', 'WARNING',
+                                 'CRITICAL', 'ERROR', 'CRITICAL'])
     args = parser.parse_args()
     log.setLevel(args.log_level)
     log.info(sys.argv)
@@ -38,14 +41,15 @@ def get_picard_complexity_metrics(aligned_bam, prefix):
     '''
     # remove redundant (or malformed) info (read group) from bam
     out_file = '{0}.picardcomplexity.qc'.format(prefix)
-    get_gc_metrics = ('mkdir -p tmp_java && java -Djava.io.tmpdir=$PWD/tmp_java -Xmx6G -XX:ParallelGCThreads=1 -jar '
-                      '{2} '
-                      'EstimateLibraryComplexity INPUT={0} OUTPUT={1} '
-                      'USE_JDK_DEFLATER=TRUE USE_JDK_INFLATER=TRUE '
-                      'VERBOSITY=ERROR '
-                      'QUIET=TRUE && rm -rf tmp_java').format(aligned_bam,
-                                                              out_file,
-                                                              locate_picard())
+    get_gc_metrics = (
+        'mkdir -p tmp_java && java -Djava.io.tmpdir=$PWD/tmp_java '
+        '-Xmx6G -XX:ParallelGCThreads=1 -jar '
+        '{2} '
+        'EstimateLibraryComplexity INPUT={0} OUTPUT={1} '
+        'USE_JDK_DEFLATER=TRUE USE_JDK_INFLATER=TRUE '
+        'VERBOSITY=ERROR '
+        'QUIET=TRUE && rm -rf tmp_java').format(
+        aligned_bam, out_file, locate_picard())
     os.system(get_gc_metrics)
 
     # Extract the actual estimated library size
@@ -75,9 +79,8 @@ def run_preseq(bam_w_dups, prefix):
     preseq_data = '{0}.preseq.dat'.format(prefix)
     preseq_log = '{0}.preseq.log'.format(prefix)
     preseq = ('preseq lc_extrap '
-              '-P -B -o {0} {1}.sorted.bam -seed 1 -v 2> {2}').format(preseq_data,
-                                                                      prefix,
-                                                                      preseq_log)
+              '-P -B -o {0} {1}.sorted.bam -seed 1 -v 2> {2}').format(
+              preseq_data, prefix, preseq_log)
     logging.info(preseq)
     os.system(preseq)
     os.system('rm {0}.sorted.bam'.format(prefix))
@@ -127,14 +130,14 @@ def main():
     RG_FREE_ALIGNED_BAM = remove_read_group(ALIGNED_BAM)
     # Library complexity: Preseq results, NRF, PBC1, PBC2
     if args.paired_end:
-        picard_est_lib_size = get_picard_complexity_metrics(RG_FREE_ALIGNED_BAM,
-                                                            OUTPUT_PREFIX)
+        picard_est_lib_size = get_picard_complexity_metrics(
+            RG_FREE_ALIGNED_BAM, OUTPUT_PREFIX)
     else:
         picard_est_lib_size = None
     preseq_data, preseq_log = run_preseq(
         ALIGNED_BAM, OUTPUT_PREFIX)  # SORTED BAM
 
-    preseq_plot = get_preseq_plot(preseq_data, OUTPUT_PREFIX)
+    get_preseq_plot(preseq_data, OUTPUT_PREFIX)
 
     # write picard_est_lib_size to file
     if picard_est_lib_size is not None:

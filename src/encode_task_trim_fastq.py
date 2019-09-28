@@ -6,12 +6,14 @@
 import sys
 import os
 import argparse
-from encode_lib_common import *
+from encode_lib_common import (
+    assert_file_not_empty, copy_f_to_f, log, ls_l, mkdir_p,
+    run_shell_cmd, strip_ext_fastq)
 
 
 def parse_arguments(debug=False):
-    parser = argparse.ArgumentParser(prog='ENCODE DCC fastq merger.',
-                                     description='')
+    parser = argparse.ArgumentParser(
+        prog='ENCODE DCC fastq merger.')
     parser.add_argument('fastq', type=str,
                         help='FASTQ to be trimmed.')
     parser.add_argument('--trim-bp', type=int, default=50,
@@ -40,7 +42,9 @@ def trim_fastq(fastq, trim_bp, out_dir):
     run_shell_cmd(cmd)
 
     # if shorter than trim_bp
-    cmd2 = 'zcat -f {} | (grep \'sequences shorter than desired length\' || true) | wc -l'.format(
+    cmd2 = 'zcat -f {} | (grep \'sequences shorter than desired length\' '
+    cmd2 += '|| true) | wc -l'
+    cmd2 = cmd2.format(
         trimmed)
     if int(run_shell_cmd(cmd2)) > 0:
         copy_f_to_f(fastq, trimmed)
