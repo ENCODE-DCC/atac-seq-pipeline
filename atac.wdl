@@ -343,6 +343,18 @@ workflow atac {
 		else length(peaks)
 	Int num_rep = num_rep_peak
 
+	# sanity check for inputs
+	if ( num_rep == 0 ) {
+		call raise_exception as error_input_data  { input:
+			msg = 'No FASTQ/BAM/TAG-ALIGN/PEAK defined in your input JSON. Check if your FASTQs are defined as "atac.fastqs_repX_RY". DO NOT MISS suffix _R1 even for single ended FASTQ.'
+		}
+	}
+	if ( !defined(chrsz_) ) {
+		call raise_exception as error_genome_database { input:
+			msg = 'No genome database found in your input JSON. Did you define "atac.genome_tsv" correctly?'
+		}
+	}
+
 	# align each replicate
 	scatter(i in range(num_rep)) {
 		# to override endedness definition for individual replicate
@@ -731,8 +743,8 @@ workflow atac {
 	}
 
 	Boolean has_input_of_jsd = defined(blacklist_) &&
-		length(select_all(nodup_bam_))==num_rep		
-	if ( has_input_of_jsd && enable_jsd ) {
+		length(select_all(nodup_bam_))==num_rep
+	if ( has_input_of_jsd && num_rep > 0 && enable_jsd ) {
 		# fingerprint and JS-distance plot
 		call jsd { input :
 			nodup_bams = nodup_bam_,
@@ -918,7 +930,7 @@ workflow atac {
 	}
 
 	# reproducibility QC for overlap/IDR peaks
-	if ( !align_only && !true_rep_only ) {
+	if ( !align_only && !true_rep_only && num_rep > 0 ) {
 		# reproducibility QC for overlapping peaks
 		call reproducibility as reproducibility_overlap { input :
 			prefix = 'overlap',
@@ -931,7 +943,7 @@ workflow atac {
 		}
 	}
 
-	if ( !align_only && !true_rep_only && enable_idr ) {
+	if ( !align_only && !true_rep_only && num_rep > 0 && enable_idr ) {
 		# reproducibility QC for IDR peaks
 		call reproducibility as reproducibility_idr { input :
 			prefix = 'idr',
@@ -1046,6 +1058,17 @@ task trim_adapter {
 	Array[Array[String]] tmp_adapters = if paired_end then transpose([adapters_R1, adapters_R2])
 				else transpose([adapters_R1])
 	command {
+		# check if pipeline dependencies can be found
+		if [[ -z "$(which encode_task_trim_adapter.py 2> /dev/null || true)" ]]
+		then
+		  echo -e "\n* Error: pipeline dependencies not found." 1>&2
+		  echo 'Conda users: Did you install Conda and environment correctly (scripts/install_conda_env.sh)?' 1>&2
+		  echo 'GCP/AWS/Docker users: Did you add --docker flag to Caper command line arg?' 1>&2
+		  echo 'Singularity users: Did you add --singularity flag to Caper command line arg?' 1>&2
+		  echo -e "\n" 1>&2
+		  EXCEPTION_RAISED
+		fi
+
 		python3 $(which encode_task_trim_adapter.py) \
 			${write_tsv(tmp_fastqs)} \
 			${'--adapter ' + adapter} \
@@ -1918,6 +1941,7 @@ task read_genome_tsv {
 		String? roadmap_meta = if size('roadmap_meta')==0 then null_s else read_string('roadmap_meta')
 	}
 	runtime {
+		maxRetries : 0
 		cpu : 1
 		memory : '4000 MB'
 		time : 1
@@ -1928,10 +1952,13 @@ task read_genome_tsv {
 task raise_exception {
 	String msg
 	command {
-		echo 'Exception raised: ${msg}' >&2
-		ERROR_EXCEPTION_RAISED
+		echo -e "\n* Error: ${msg}\n" >&2
+		EXCEPTION_RAISED
 	}
 	output {
 		String error_msg = '${msg}'
+	}
+	runtime {
+		maxRetries : 0
 	}
 }
