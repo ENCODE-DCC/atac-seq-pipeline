@@ -3,6 +3,8 @@
 # ENCODE DCC TSS enrich wrapper
 # Author: Daniel Kim, Jin Lee (leepc12@gmail.com)
 
+import matplotlib as mpl
+mpl.use('Agg')
 import pybedtools
 import numpy as np
 from matplotlib import mlab
@@ -14,8 +16,6 @@ from encode_lib_common import (
     strip_ext_bam, ls_l, log, logging, mkdir_p, rm_f)
 from encode_lib_genomic import (
     remove_read_group, samtools_index)
-import matplotlib as mpl
-mpl.use('Agg')
 import metaseq
 import warnings
 warnings.filterwarnings("ignore")
