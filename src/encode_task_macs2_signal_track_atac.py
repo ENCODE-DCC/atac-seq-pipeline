@@ -82,7 +82,8 @@ def macs2_signal_track(ta, chrsz, gensz, pval_thresh, smooth_win, out_dir):
   
     # sort and remove any overlapping regions in bedgraph by comparing two lines in a row
     cmd5 = 'LC_COLLATE=C sort -k1,1 -k2,2n {} | ' \
-        'awk \'BEGIN{{OFS="\\t"}}{{if (NR==1 || NR>1 && (prev_chr!=$1 || prev_chr==$1 && prev_chr_e<=$2)) ' \
+        'awk \'BEGIN{{OFS="\\t"}}{{if (NR==1 || NR>1 && (prev_chr!=$1 '\
+        '|| prev_chr==$1 && prev_chr_e<=$2)) ' \
         '{{print $0}}; prev_chr=$1; prev_chr_e=$3;}}\' > {}'.format(
         fc_bedgraph,
         fc_bedgraph_srt)
@@ -121,7 +122,8 @@ def macs2_signal_track(ta, chrsz, gensz, pval_thresh, smooth_win, out_dir):
 
     # sort and remove any overlapping regions in bedgraph by comparing two lines in a row
     cmd9 = 'LC_COLLATE=C sort -k1,1 -k2,2n {} | ' \
-        'awk \'BEGIN{{OFS="\\t"}}{{if (NR==1 || NR>1 && (prev_chr!=$1 || prev_chr==$1 && prev_chr_e<=$2)) ' \
+        'awk \'BEGIN{{OFS="\\t"}}{{if (NR==1 || NR>1 && (prev_chr!=$1 '\
+        '|| prev_chr==$1 && prev_chr_e<=$2)) ' \
         '{{print $0}}; prev_chr=$1; prev_chr_e=$3;}}\' > {}'.format(
         pval_bedgraph,
         pval_bedgraph_srt)
