@@ -3,10 +3,8 @@
 # ENCODE DCC TSS enrich wrapper
 # Author: Daniel Kim, Jin Lee (leepc12@gmail.com)
 
-import warnings
 import pybedtools
 import numpy as np
-import metaseq
 from matplotlib import mlab
 from matplotlib import pyplot as plt
 import sys
@@ -18,7 +16,8 @@ from encode_lib_genomic import (
     remove_read_group, samtools_index)
 import matplotlib as mpl
 mpl.use('Agg')
-
+import metaseq
+import warnings
 warnings.filterwarnings("ignore")
 
 
