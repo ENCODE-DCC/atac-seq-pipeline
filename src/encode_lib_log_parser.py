@@ -82,6 +82,7 @@ def parse_flagstat_qc(txt):
     diff_chroms = ''
     diff_chroms_qc_failed = ''
 
+    delimiter_pass_fail = ' + '
     with open(txt, 'r') as f:
         for line in f:
             if ' total ' in line:
@@ -90,19 +91,19 @@ def parse_flagstat_qc(txt):
                 else:
                     tmp1 = line.split(' total ')
                 line1 = tmp1[0]
-                tmp1 = line1.split(' + ')
+                tmp1 = line1.split(delimiter_pass_fail)
                 total = tmp1[0]
                 total_qc_failed = tmp1[1]
             if ' duplicates' in line:
                 tmp2 = line.split(' duplicates')
                 line2 = tmp2[0]
-                tmp2 = line2.split(' + ')
+                tmp2 = line2.split(delimiter_pass_fail)
                 duplicates = tmp2[0]
                 duplicates_qc_failed = tmp2[1]
             if ' mapped (' in line:
                 tmp3 = line.split(' mapped (')
                 line3_1 = tmp3[0]
-                tmp3_1 = line3_1.split(' + ')
+                tmp3_1 = line3_1.split(delimiter_pass_fail)
                 mapped = tmp3_1[0]
                 mapped_qc_failed = tmp3_1[1]
                 line3_2 = tmp3[1]
@@ -111,25 +112,25 @@ def parse_flagstat_qc(txt):
             if ' paired in sequencing' in line:
                 tmp2 = line.split(' paired in sequencing')
                 line2 = tmp2[0]
-                tmp2 = line2.split(' + ')
+                tmp2 = line2.split(delimiter_pass_fail)
                 paired = tmp2[0]
                 paired_qc_failed = tmp2[1]
             if ' read1' in line:
                 tmp2 = line.split(' read1')
                 line2 = tmp2[0]
-                tmp2 = line2.split(' + ')
+                tmp2 = line2.split(delimiter_pass_fail)
                 read1 = tmp2[0]
                 read1_qc_failed = tmp2[1]
             if ' read2' in line:
                 tmp2 = line.split(' read2')
                 line2 = tmp2[0]
-                tmp2 = line2.split(' + ')
+                tmp2 = line2.split(delimiter_pass_fail)
                 read2 = tmp2[0]
                 read2_qc_failed = tmp2[1]
             if ' properly paired (' in line:
                 tmp3 = line.split(' properly paired (')
                 line3_1 = tmp3[0]
-                tmp3_1 = line3_1.split(' + ')
+                tmp3_1 = line3_1.split(delimiter_pass_fail)
                 paired_properly = tmp3_1[0]
                 paired_properly_qc_failed = tmp3_1[1]
                 line3_2 = tmp3[1]
@@ -138,13 +139,13 @@ def parse_flagstat_qc(txt):
             if ' with itself and mate mapped' in line:
                 tmp3 = line.split(' with itself and mate mapped')
                 line3_1 = tmp3[0]
-                tmp3_1 = line3_1.split(' + ')
+                tmp3_1 = line3_1.split(delimiter_pass_fail)
                 with_itself = tmp3_1[0]
                 with_itself_qc_failed = tmp3_1[1]
             if ' singletons (' in line:
                 tmp3 = line.split(' singletons (')
                 line3_1 = tmp3[0]
-                tmp3_1 = line3_1.split(' + ')
+                tmp3_1 = line3_1.split(delimiter_pass_fail)
                 singletons = tmp3_1[0]
                 singletons_qc_failed = tmp3_1[1]
                 line3_2 = tmp3[1]
@@ -153,7 +154,7 @@ def parse_flagstat_qc(txt):
             if ' with mate mapped to a different chr' in line:
                 tmp3 = line.split(' with mate mapped to a different chr')
                 line3_1 = tmp3[0]
-                tmp3_1 = line3_1.split(' + ')
+                tmp3_1 = line3_1.split(delimiter_pass_fail)
                 diff_chroms = tmp3_1[0]
                 diff_chroms_qc_failed = tmp3_1[1]
     if total:
