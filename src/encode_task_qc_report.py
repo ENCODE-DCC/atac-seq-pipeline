@@ -428,34 +428,42 @@ def make_cat_lib_complexity(args, cat_root):
         parent=cat_root
     )
 
+    html_head_lib_complexity = """
+        <div id='help-lib_complexity'>
+        <p>Mitochondrial reads are filtered out by default.
+        The non-redundant fraction (NRF) is the fraction of non-redundant mapped reads
+        in a dataset; it is the ratio between the number of positions in the genome
+        that uniquely mapped reads map to and the total number of uniquely mappable
+        reads. The NRF should be > 0.8. The PBC1 is the ratio of genomic locations
+        with EXACTLY one read pair over the genomic locations with AT LEAST one read
+        pair. PBC1 is the primary measure, and the PBC1 should be close to 1.
+        Provisionally 0-0.5 is severe bottlenecking, 0.5-0.8 is moderate bottlenecking,
+        0.8-0.9 is mild bottlenecking, and 0.9-1.0 is no bottlenecking. The PBC2 is
+        the ratio of genomic locations with EXACTLY one read pair over the genomic
+        locations with EXACTLY two read pairs. The PBC2 should be significantly
+        greater than 1. {pipeline_specific_info}
+        </p><br>
+        <p>NRF (non redundant fraction) <br>
+        PBC1 (PCR Bottleneck coefficient 1) <br>
+        PBC2 (PCR Bottleneck coefficient 2) <br>
+        PBC1 is the primary measure. Provisionally <br>
+        <ul>
+        <li>0-0.5 is severe bottlenecking</li>
+        <li>0.5-0.8 is moderate bottlenecking </li>
+        <li>0.8-0.9 is mild bottlenecking </li>
+        <li>0.9-1.0 is no bottlenecking </li>
+        </ul></p></div><br>
+    """.format(
+        pipeline_specific_info="""See more details at
+        <a href="https://www.encodeproject.org/chip-seq/transcription_factor/#standards">
+        the ENCODE portal standard for ChIP-Seq pipeline</a>
+        """ if args.pipeline_type in ('tf', 'histone') else ''
+        )
+
     cat_lc_lib_complexity = QCCategory(
         'lib_complexity',
         html_head='<h2>Library complexity (filtered non-mito BAM)</h2>',
-        html_foot="""
-            <div id='help-lib_complexity'>
-            <p>Mitochondrial reads are filtered out by default.
-            The non-redundant fraction (NRF) is the fraction of non-redundant mapped reads
-            in a dataset; it is the ratio between the number of positions in the genome
-            that uniquely mapped reads map to and the total number of uniquely mappable
-            reads. The NRF should be > 0.8. The PBC1 is the ratio of genomic locations
-            with EXACTLY one read pair over the genomic locations with AT LEAST one read
-            pair. PBC1 is the primary measure, and the PBC1 should be close to 1.
-            Provisionally 0-0.5 is severe bottlenecking, 0.5-0.8 is moderate bottlenecking,
-            0.8-0.9 is mild bottlenecking, and 0.9-1.0 is no bottlenecking. The PBC2 is
-            the ratio of genomic locations with EXACTLY one read pair over the genomic
-            locations with EXACTLY two read pairs. The PBC2 should be significantly
-            greater than 1.</p><br>
-            <p>NRF (non redundant fraction) <br>
-            PBC1 (PCR Bottleneck coefficient 1) <br>
-            PBC2 (PCR Bottleneck coefficient 2) <br>
-            PBC1 is the primary measure. Provisionally <br>
-            <ul>
-            <li>0-0.5 is severe bottlenecking</li>
-            <li>0.5-0.8 is moderate bottlenecking </li>
-            <li>0.8-0.9 is mild bottlenecking </li>
-            <li>0.9-1.0 is no bottlenecking </li>
-            </ul></p></div><br>
-        """,
+        html_foot=html_head_lib_complexity,
         parser=parse_lib_complexity_qc,
         map_key_desc=MAP_KEY_DESC_LIB_COMPLEXITY_QC,
         parent=cat_lc
