@@ -530,7 +530,7 @@ def get_region_size_metrics(peak_file, out_dir='.'):
     peak_df = pd.read_table(peak_file, compression='gzip', header=None)
 
     # Subtract third column from second to get summary
-    region_sizes = peak_df.ix[:, 2] - peak_df.ix[:, 1]
+    region_sizes = peak_df.iloc[:, 2] - peak_df.iloc[:, 1]
 
     # Summarize and store in ordered dict
     peak_summary_stats = region_sizes.describe()
