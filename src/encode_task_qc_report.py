@@ -221,7 +221,7 @@ def split_entries_and_extend(l, delim='_:_'):
 
 def str2bool(s):
     s = s.lower()
-    if s not in ('false', 'true', 'False', 'True'):
+    if s not in ('false', 'true'):
         raise ValueError('Not a valid boolean string')
     return s == 'true'
 
