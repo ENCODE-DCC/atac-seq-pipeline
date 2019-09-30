@@ -557,7 +557,7 @@ def get_region_size_metrics(peak_file, out_dir='.'):
             fp.write(key + '\t' + str(val) + '\n')
 
     plt.plot(bincenters, y, '-')
-    filename = peak_file.split('/')[-1]
+    filename = os.path.basename(peak_file)
     ax.set_title('Peak width distribution for {0}'.format(filename))
 
     # write to plot file
