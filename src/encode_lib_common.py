@@ -233,6 +233,24 @@ def make_hard_link(f, out_dir):  # hard-link 'f' to 'out_dir'/'f'
     return linked
 
 
+def soft_link(f, link):  # soft-link 'f' to 'link'
+    # UNIX only
+    if os.path.abspath(f) == os.path.abspath(link):
+        raise Exception('Trying to soft-link itself. {}'.format(f))
+    os.symlink(f, link)
+    return link
+
+
+def make_soft_link(f, out_dir):  # soft-link 'f' to 'out_dir'/'f'
+    # UNIX only
+    if os.path.dirname(f) == os.path.dirname(out_dir):
+        raise Exception('Trying to soft-link itself. {}'.format(f))
+    linked = os.path.join(out_dir, os.path.basename(f))
+    rm_f(linked)
+    os.symlink(f, linked)
+    return linked
+
+
 def copy_f_to_f(f, dest):  # copy 'f' to 'out_dir'/'f'
     if os.path.abspath(f) == os.path.abspath(dest):
         raise Exception('Trying to copy to itself. {}'.format(f))
