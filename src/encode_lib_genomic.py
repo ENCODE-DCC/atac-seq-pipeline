@@ -15,13 +15,13 @@ from encode_lib_common import (
 
 
 def remove_chrs_from_bam(bam, chrs, chrsz, nth=1, out_dir=''):
-    assert(len(chrs) > 0)
+    if len(chrs) == 1:
+        raise ValueError('There must be at least one chromosome, zero found.')
+
     prefix = os.path.join(out_dir,
                           os.path.basename(strip_ext_bam(bam)))
     suffix = 'no_{}'.format('_'.join(chrs))
     final_bam = '{}.{}.bam'.format(prefix, suffix)
-    # tmp_bam = '{}.{}.tmp.bam'.format(prefix, suffix)
-    # tmp_header_sam = '{}.{}.header.tmp.sam'.format(prefix, suffix)
     tmp_chrsz = '{}.{}.tmp.chrsz'.format(prefix, suffix)
 
     # make a temp chrsz file
@@ -41,26 +41,8 @@ def remove_chrs_from_bam(bam, chrs, chrsz, nth=1, out_dir=''):
         bam=bam,
         nth=nth,
         final_bam=final_bam)
-    # tmp_bam=tmp_bam)
     run_shell_cmd(cmd1)
     rm_f(tmp_chrsz)
-
-    # # make a temp header
-    # cmd2 = 'samtools view -H {bam} > {tmp_header_sam}'
-    # cmd2 = cmd2.format(
-    #     bam=bam,
-    #     tmp_header_sam=tmp_header_sam)
-    # run_shell_cmd(cmd2)
-
-    # # update header
-    # cmd3 = 'samtools reheader {tmp_header_sam} {tmp_bam} > {final_bam}'
-    # cmd3 = cmd3.format(
-    #     tmp_header_sam=tmp_header_sam,
-    #     tmp_bam=tmp_bam,
-    #     final_bam=final_bam)
-    # run_shell_cmd(cmd3)
-
-    # rm_f([tmp_bam, tmp_header_sam, tmp_chrsz])
 
     return final_bam
 
