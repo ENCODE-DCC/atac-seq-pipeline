@@ -399,11 +399,11 @@ MAP_KEY_DESC_JSD_QC = {
     'diff_enrich': 'Diff. Enrichment',
 }
 
-# deepTools 3.3.0 only
-# https://github.com/deeptools/deepTools/blob/master/deeptools/plotFingerprint.py#L454
-
 
 def parse_jsd_qc(txt):
+    """Works for JSD log from deepTools >= 3.0
+    https://github.com/deeptools/deepTools/blob/master/deeptools/plotFingerprint.py#L454
+    """
     result = OrderedDict()
     if not txt:
         return result
