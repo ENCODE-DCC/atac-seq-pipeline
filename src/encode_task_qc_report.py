@@ -184,8 +184,6 @@ def parse_arguments():
         if type(eval('args.{}'.format(a))) == list:
             exec('args.{} = split_entries_and_extend(args.{})'.format(a, a))
 
-    print("__DEBUG__", args.paired_ends)
-
     if args.paired_ends is None:
         if args.paired_end:
             args.paired_ends = [True]*20
