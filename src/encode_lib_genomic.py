@@ -15,7 +15,7 @@ from encode_lib_common import (
 
 
 def remove_chrs_from_bam(bam, chrs, chrsz, nth=1, out_dir=''):
-    if len(chrs) == 1:
+    if len(chrs) == 0:
         raise ValueError('There must be at least one chromosome, zero found.')
 
     prefix = os.path.join(out_dir,
