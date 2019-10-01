@@ -181,8 +181,9 @@ def parse_arguments():
 
     # parse with a special delimiter "_:_"
     for a in vars(args):
-        if type(eval('args.{}'.format(a))) == list:
-            exec('args.{} = split_entries_and_extend(args.{})'.format(a, a))
+        value = getattr(args, a)
+        if isinstance(value, list):
+            setattr(args, a, split_entries_and_extend(value))
 
     if args.paired_ends is None:
         if args.paired_end:
