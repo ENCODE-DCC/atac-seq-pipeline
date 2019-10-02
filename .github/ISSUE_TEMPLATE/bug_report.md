@@ -12,12 +12,19 @@ A clear and concise description of what the problem is.
 
 **OS/Platform and dependencies**
 - OS or Platform: [e.g. Ubuntu 16.04, Google Cloud, Stanford Sherlock/SCG cluster, ...]
-- Cromwell/dxWDL version: [e.g. `cromwell-34.jar`, `dxWDL-78.jar`]
 - Conda version: If you have used Conda (`$ conda --version`).
-- singularity version: If you have used singularity (`$ singularity --version`).
+- Caper version
+- If not using Caper
+  - Cromwell/dxWDL version: [e.g. `cromwell-42.jar`, `dxWDL-78.jar`]
 
 **Attach error logs**
-For Cromwell users only.
+Caper users:
+Caper automatically run troubleshooter for failed workflows. If not and If you ran a Caper server and then get workflow_id of your failed workflow with `caper list`. Or directory use a `metadata.json` file on Cromwell's output directory
+```
+$ caper troubleshoot [WORKFLOW_ID_OR_METADATA_JSON_FILE]
+```
+
+Non-Caper users:
 1) Move to your working directory where you ran a pipeline. You should be able to find a directory named `cromwell-executions/` which includes all outputs and logs for debugging.
 
 2) Run the following command line to print all non-empty STDERR outputs. This will be greatly helpful for developers to figure out the problem. Copy-paste its output to the issue page.

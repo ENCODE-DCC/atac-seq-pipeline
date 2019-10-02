@@ -26,7 +26,7 @@
     $ bash conda/build_genome_data.sh [GENOME] [DESTINATION_DIR]
     ```
 
-4. Find a TSV file on the destination directory and use it for `"atac.genome_tsv"` in your input JSON.
+3. Find a TSV file on the destination directory and use it for `"atac.genome_tsv"` in your input JSON.
 
 
 ## How to build genome database for your own genome
