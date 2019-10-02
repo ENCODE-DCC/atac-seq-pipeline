@@ -1,0 +1,11 @@
+{
+    "test_xcor.pe_ta" : "atac-seq-pipeline-test-data/input/pe/tas/rep1/ENCFF341MYG.subsampled.400.trim.merged.nodup.tn5.tagAlign.gz",
+    "test_xcor.se_ta" : "atac-seq-pipeline-test-data/input/se/tas/rep1/ENCFF439VSY.subsampled.400.trim.merged.nodup.tn5.tagAlign.gz",
+
+    "test_xcor.ref_pe_xcor_log" : "atac-seq-pipeline-test-data/ref_output/test_xcor/pe/ENCFF341MYG.subsampled.400.trim.merged.nodup.tn5.no_chrM.R1.25M.cc.qc",
+    "test_xcor.ref_pe_xcor_log_subsample" : "atac-seq-pipeline-test-data/ref_output/test_xcor/pe/subsample/ENCFF341MYG.subsampled.400.trim.merged.nodup.tn5.no_chrM.R1.5K.cc.qc",
+    "test_xcor.ref_se_xcor_log" : "atac-seq-pipeline-test-data/ref_output/test_xcor/se/ENCFF439VSY.subsampled.400.trim.merged.nodup.tn5.25M.cc.qc",
+    "test_xcor.ref_se_xcor_log_subsample" : "atac-seq-pipeline-test-data/ref_output/test_xcor/se/subsample/ENCFF439VSY.subsampled.400.trim.merged.nodup.tn5.no_chrM.5K.cc.qc",
+
+    "test_xcor.xcor_subsample" : 5000
+}

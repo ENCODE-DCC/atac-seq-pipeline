@@ -1,0 +1,21 @@
+{
+    "test_bowtie2.pe_bowtie2_idx_tar" : "atac-seq-pipeline-test-data/genome_data/hg38_chr19_chrM/bowtie2_index/GRCh38_no_alt_analysis_set_GCA_000001405.15.chr19_chrM.fasta.tar",
+    "test_bowtie2.se_bowtie2_idx_tar" : "atac-seq-pipeline-test-data/genome_data/mm10_chr19_chrM/bowtie2_index/mm10_no_alt_analysis_set_ENCODE.chr19_chrM.fasta.tar",
+
+    "test_bowtie2.se_chrsz" : "atac-seq-pipeline-test-data/genome_data/mm10_chr19_chrM/mm10_chr19_chrM.chrom.sizes",
+    "test_bowtie2.pe_chrsz" : "atac-seq-pipeline-test-data/genome_data/hg38_chr19_chrM/hg38_chr19_chrM.chrom.sizes",
+
+    "test_bowtie2.pe_trimmed_fastqs" : [
+        "atac-seq-pipeline-test-data/input/pe/trimmed_fastqs/rep1/merge_fastqs_R1_ENCFF341MYG.subsampled.400.trim.merged.fastq.gz",
+        "atac-seq-pipeline-test-data/input/pe/trimmed_fastqs/rep1/merge_fastqs_R2_ENCFF248EJF.subsampled.400.trim.merged.fastq.gz"
+    ],
+    "test_bowtie2.se_trimmed_fastqs" : [
+        "atac-seq-pipeline-test-data/input/se/trimmed_fastqs/rep1/merge_fastqs_R1_ENCFF439VSY.subsampled.400.trim.merged.fastq.gz"
+    ],
+    "test_bowtie2.ref_pe_flagstat" : "atac-seq-pipeline-test-data/ref_output/test_bowtie2/pe/multimapping/merge_fastqs_R1_ENCFF341MYG.subsampled.400.trim.merged.samstats.qc",
+    "test_bowtie2.ref_pe_flagstat_no_multimapping" : "atac-seq-pipeline-test-data/ref_output/test_bowtie2/pe/no_multimapping/merge_fastqs_R1_ENCFF341MYG.subsampled.400.trim.merged.samstats.qc",
+    "test_bowtie2.ref_se_flagstat" : "atac-seq-pipeline-test-data/ref_output/test_bowtie2/se/multimapping/merge_fastqs_R1_ENCFF439VSY.subsampled.400.trim.merged.samstats.qc",
+    "test_bowtie2.ref_se_flagstat_no_multimapping" : "atac-seq-pipeline-test-data/ref_output/test_bowtie2/se/no_multimapping/merge_fastqs_R1_ENCFF439VSY.subsampled.400.trim.merged.samstats.qc",
+
+    "test_bowtie2.multimapping" : 4
+}

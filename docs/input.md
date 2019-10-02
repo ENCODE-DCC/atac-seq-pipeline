@@ -1,6 +1,6 @@
 # Input JSON
 
-An input JSON file includes all genomic data files, parameters and metadata for running pipelines. Our pipeline will use default values if they are not defined in an input JSON file. We provide a set of template JSON files: [minimum](../examples/template.json) and [full](../examples/template.full.json). We recommend to use a minimum template instead of full one. A full template includes all parameters of the pipeline with default values defined.
+An input JSON file includes all genomic data files, parameters and metadata for running pipelines. Our pipeline will use default values if they are not defined in an input JSON file. We provide a set of template JSON files: [minimum](../example_input_json/template.json) and [full](../example_input_json/template.full.json). We recommend to use a minimum template instead of full one. A full template includes all parameters of the pipeline with default values defined.
 
 Please read through the following step-by-step instruction to compose a input JSON file.
 
@@ -26,13 +26,19 @@ All reference genome specific reference files/parameters can be defined in a sin
 Parameter|Type|Description
 ---------|-------|-----------
 `atac.genome_tsv`| File | Choose one of the TSV files listed below or build your own
+`atac.genome_name`| String | Name of genome (e.g. hg38, hg19, ...)
 `atac.ref_fa`| File | Reference FASTA file
+`atac.ref_mito_fa`| File | Mito-only reference FASTA file
 `atac.bowtie2_idx_tar`| File | Bowtie2 index TAR file (uncompressed) built from FASTA file
+`atac.bowtie2_mito_idx_tar`| File | Mito-only Bowtie2 index TAR file (uncompressed) built from FASTA file
+`atac.custom_aligner_idx_tar` | File | Index TAR file (uncompressed) for your own aligner. See details about [how to use a custom aligner](#how-to-use-a-custom-aligner)
+`atac.custom_aligner_mito_idx_tar` | File | Mito-only index TAR file (uncompressed) for your own aligner. See details about [how to use a custom aligner](#how-to-use-a-custom-aligner)
 `atac.chrsz`| File | 2-col chromosome sizes file built from FASTA file with `faidx`
 `atac.blacklist`| File | 3-col BED file. Peaks overlapping these regions will be filtered out
 `atac.gensz`| String | MACS2's genome sizes (hs for human, mm for mouse or sum of 2nd col in chrsz)
+`atac.mito_chr_name`| String | Name of mitochondrial chromosome (e.g. chrM)
 
-Additional reference genome data for ATAqC:
+Additional annotated genome data:
 
 Parameter|Type|Description
 ---------|-------|-----------
@@ -48,7 +54,7 @@ We currently provide TSV files for 4 genomes as shown in the below table. `GENOM
 
 Platform|Path/URI
 -|-
-Google Cloud Platform|`gs://encode-pipeline-genome-data/[GENOME]_google.tsv`
+Google Cloud Platform|`gs://encode-pipeline-genome-data/[GENOME]_gcp.tsv`
 Stanford Sherlock|`/home/groups/cherry/encode/pipeline_genome_data/[GENOME]_sherlock.tsv`
 Stanford SCG|`/reference/ENCODE/pipeline_genome_data/[GENOME]_scg.tsv`
 Local/SLURM/SGE|You need to [build](build_genome_database.md) or [download]() a genome database]. 
@@ -65,6 +71,14 @@ Additional information about each genome:
 |mm10|ENCODE|[mm10_no_alt_analysis_set_ENCODE](https://www.encodeproject.org/files/mm10_no_alt_analysis_set_ENCODE/@@download/mm10_no_alt_analysis_set_ENCODE.fasta.gz)|
 |hg19|UCSC|[GRCh37/hg19](http://hgdownload.cse.ucsc.edu/goldenpath/hg19/encodeDCC/referenceSequences/male.hg19.fa.gz)|
 |mm9|UCSC|[mm9, NCBI Build 37](<http://hgdownload.cse.ucsc.edu/goldenPath/mm9/bigZips/mm9.2bit>)|
+
+## How to download reference genome
+
+1. Choose `GENOME` from `hg19`, `hg38`, `mm9` and `mm10` and specify a destination directory.
+    ```bash
+    $ bash genome/download_genome_data.sh [GENOME] [DESTINATION_DIR]
+    ```
+2. Find a TSV file on the destination directory and use it for `"atac.genome_tsv"` in your input JSON.
 
 ## Input genomic data
 
@@ -93,7 +107,7 @@ Parameter|Description
 `atac.nodup_bams`| Array of filtered/deduped BAM file for each replicate.
 `atac.tas`| Array of TAG-ALIGN file for each replicate.
 
-You can mix up different data types for individual replicate/control replicate. For example, pipeline can start from FASTQs for rep1 and rep3, BAMs for rep2, NODUP_BAMs for rep4 and TAG-ALIGNs for rep5. You can define similarly for control replicates.
+You can mix up different data types for individual replicate. For example, pipeline can start from FASTQs for rep1 and rep3, BAMs for rep2, NODUP_BAMs for rep4 and TAG-ALIGNs for rep5.
 
 ```javascript
 {
@@ -126,17 +140,16 @@ Parameter|Default|Description
 
 ## Optional mapping parameters
 
-Parameter|Default|Description
----------|-------|-----------
-`atac.multimapping` | 4 | Multimapping reads
-`atac.bowtie2_param_pe` | `-X2000 --mm --local` | bowtie2 parameters for each read-endedness (paired-end). See bowtie2 --help for details.
-`atac.bowtie2_param_se` | `--local` | bowtie2 parameters for each read-endedness (single-ended). See bowtie2 --help for details.
+Parameter|Type | Default|Description
+---------|----|---|-----------
+`atac.multimapping` | Int | 4 | Multimapping reads
+`atac.custom_align_py` | File | | Python script for your custom aligner. See details about [how to use a custom aligner](#how-to-use-a-custom-aligner)
 
 ## Optional filtering parameters
 
 Parameter|Default|Description
 ---------|-------|-----------
-`atac.mapq_thresh` | 30 | Threshold for mapped reads quality (samtools view -q)
+`atac.mapq_thresh` | 30 | Threshold for mapped reads quality (samtools view -q). If not defined, automatically determined according to aligner.
 `atac.dup_marker` | `picard` | Choose a dup marker between `picard` and `sambamba`. `picard` is recommended, use `sambamba` only when picard fails.
 `atac.no_dup_removal` | false | Skip dup removal in a BAM filtering stage.
 
@@ -155,6 +168,7 @@ Parameter|Default|Description
 `atac.pval_thresh` | 0.01 | P-value threshold for MACS2 (macs2 callpeak -p)
 `atac.enable_idr` | true | Enable IDR (irreproducible discovery rate)
 `atac.idr_thresh` | 0.05 | Threshold for IDR
+`atac.custom_call_peak_py` | File | Python script for your custom peak caller. See details about [how to use a custom peak caller](#how-to-use-a-peak-caller)
 
 ## Optional pipeline flags
 
@@ -163,20 +177,26 @@ Parameter|Default|Description
 `atac.enable_xcor` | false | Enable cross-correlation analysis
 `atac.enable_count_signal_track` | false | Enable count signal track generation
 `atac.keep_irregular_chr_in_bfilt_peak` | false | Keep irregular chromosome names. Use this for custom genomes without canonical chromosome names (chr1, chrX, ...)
-`atac.disable_ataqc` | false | Disable ATAqC (including all annotation-based analyses in it)
+`atac.enable_preseq` | false | Enable preseq, which performs a yield prediction for reads
+`atac.enable_jsd` | true | Enable deeptools fingerprint (JS distance)
+`atac.enable_gc_bias` | true | Enable GC bias computation
+`atac.enable_tss_enrich` | true | Enable TSS enrichment computation
+`atac.enable_annot_enrich` | true | Enable Annotated region enrichment computation
+`atac.enable_compare_to_roadmap` | false | Enable comparing signals to epigenome roadmap
 
 ## Other optional parameters
 
 Parameter|Default|Description
 ---------|-------|-----------
-`atac.mito_chr_name` | `chrM` | Name of mito chromosome. THIS IS NOT A REG-EX! you can define only one chromosome name for mito.
-`atac.regex_filter_reads` | `chrM` | Regular expression to filter out reads with given chromosome name (1st column of BED/TAG-ALIGN). Any read with chr name that matches with this reg-ex pattern will be removed from outputs If your have changed the above parameter `atac.mito_chr_name` and still want to filter out mito reads then make sure that `atac.mito_chr_name` and `atac.regex_filter_reads` are the same
+`atac.filter_chrs` | `["chrM", "MT"]` | Array of chromosome names to be filtered out from a final (filtered/nodup) BAM. Mitochondrial chromosomes are filtered out by default.
+
+> **WARNING**: If your custom genome's mitochondrial chromosome name is different from `chrM` or `MT`, then define it correctly here. This parameter has nothing to do with a mito-chromosome name parameter `atac.mito_chr_name`. Changing `atac.mito_chr_name` does not affect this parameter.
 
 ## Resource parameters
 
 > **WARNING**: It is recommened not to change the following parameters unless you get resource-related errors for a certain task and you want to increase resources for such task. The following parameters are provided for users who want to run our pipeline with Caper's `local` on HPCs and 2).
 
-Resources defined here are PER REPLICATE. Therefore, total number of cores will be approximately `atac.bowtie2_cpu` x `NUMBER_OF_REPLICATES because bowtie2 is a bottlenecking task of the pipeline. Use this total number of cores if you manually `qsub` or `sbatch` your job (using local mode of Caper). `disks` is used for Google Cloud and DNAnexus only.
+Resources defined here are PER REPLICATE. Therefore, total number of cores will be approximately `atac.align_cpu` x `NUMBER_OF_REPLICATES because `align` is a bottlenecking task of the pipeline. Use this total number of cores if you manually `qsub` or `sbatch` your job (using local mode of Caper). `disks` is used for Google Cloud and DNAnexus only.
 
 Parameter|Default
 ---------|-------
@@ -187,10 +207,10 @@ Parameter|Default
 
 Parameter|Default
 ---------|-------
-`atac.bowtie2_cpu` | 4
-`atac.bowtie2_mem_mb` | 20000
-`atac.bowtie2_time_hr` | 48
-`atac.bowtie2_disks` | `local-disk 100 HDD`
+`atac.align_cpu` | 4
+`atac.align_mem_mb` | 20000
+`atac.align_time_hr` | 48
+`atac.align_disks` | `local-disk 100 HDD`
 
 Parameter|Default
 ---------|-------
@@ -212,10 +232,10 @@ Parameter|Default
 
 Parameter|Default
 ---------|-------
-`atac.fingerprint_cpu` | 2
-`atac.fingerprint_mem_mb` | 12000
-`atac.fingerprint_time_hr` | 6
-`atac.fingerprint_disks` | `local-disk 100 HDD`
+`atac.jsd_cpu` | 2
+`atac.jsd_mem_mb` | 12000
+`atac.jsd_time_hr` | 6
+`atac.jsd_disks` | `local-disk 100 HDD`
 
 Parameter|Default
 ---------|-------
@@ -226,16 +246,158 @@ Parameter|Default
 
 Parameter|Default
 ---------|-------
-`atac.macs2_mem_mb` | 16000
-`atac.macs2_time_hr` | 24
-`atac.macs2_disks` | `local-disk 100 HDD`
-
-Make sure that ataqc_mem_java_mb < ataqc_mem_mb
+`atac.call_peak_cpu` | 1
+`atac.call_peak_mem_mb` | 16000
+`atac.call_peak_time_hr` | 24
+`atac.call_peak_disks` | `local-disk 100 HDD`
 
 Parameter|Default
 ---------|-------
-`atac.ataqc_mem_mb` | 16000
-`atac.ataqc_mem_java_mb` | 15000
-`atac.ataqc_time_hr` | 24
-`atac.ataqc_disks` | `local-disk 200 HDD`
+`atac.macs2_signal_track_mem_mb` | 16000
+`atac.macs2_signal_track_time_hr` | 24
+`atac.macs2_signal_track_disks` | `local-disk 100 HDD`
 
+Parameter|Default
+---------|-------
+`atac.preseq_mem_mb` | 16000
+
+## How to use a custom aligner
+
+ENCODE ATAC-Seq pipeline currently supports `bowtie2` only. In order to use your own aligner you need to define the following parameters first. You can define `custom_aligner_idx_tar` either in your input JSON file or in your genome TSV file. Such index TAR file should be an uncompressed TAR file without any directory structured.
+
+Parameter|Type|Description
+---------|-------|-----------
+`atac.custom_aligner_idx_tar` | File | Index TAR file (uncompressed) for your own aligner
+`atac.custom_align_py` | File | Python script for your custom aligner
+
+Here is a template for `custom_align.py`:
+
+```python
+#!/usr/bin/env python
+
+import os
+import argparse
+
+def parse_arguments():
+    parser = argparse.ArgumentParser(prog='ENCODE template aligner')
+    parser.add_argument('index_prefix_or_tar', type=str,
+                        help='Path for prefix (or a tarball .tar) \
+                            for reference aligner index. \
+                            Tar ball must be packed without compression \
+                            and directory by using command line \
+                            "tar cvf [TAR] [TAR_PREFIX].*')
+    parser.add_argument('fastqs', nargs='+', type=str,
+                        help='List of FASTQs (R1 and R2). \
+                            FASTQs must be compressed with gzip (with .gz).')
+    parser.add_argument('--paired-end', action="store_true",
+                        help='Paired-end FASTQs.')
+    parser.add_argument('--multimapping', default=4, type=int,
+                        help='Multimapping reads')
+    parser.add_argument('--nth', type=int, default=1,
+                        help='Number of threads to parallelize.')
+    parser.add_argument('--out-dir', default='', type=str,
+                            help='Output directory.')
+    args = parser.parse_args()
+
+    # check if fastqs have correct dimension
+    if args.paired_end and len(args.fastqs)!=2:
+        raise argparse.ArgumentTypeError('Need 2 fastqs for paired end.')
+    if not args.paired_end and len(args.fastqs)!=1:
+        raise argparse.ArgumentTypeError('Need 1 fastq for single end.')
+
+    return args
+
+def align(fastq_R1, fastq_R2, ref_index_prefix, multimapping, nth, out_dir):
+    basename = os.path.basename(os.path.splitext(fastq_R1)[0])    
+    prefix = os.path.join(out_dir, basename)
+    bam = '{}.bam'.format(prefix)
+
+    # map your fastqs somehow
+    os.system('touch {}'.format(bam))
+
+    return bam
+
+def main():
+    # read params
+    args = parse_arguments()
+   
+    # unpack index somehow on CWD
+    os.system('tar xvf {}'.format(args.index_prefix_or_tar))
+
+    bam = align(args.fastqs[0],
+                args.fastqs[1] if args.paired_end else None,
+                args.index_prefix_or_tar,
+                args.multimapping,
+                args.nth,
+                args.out_dir)
+
+if __name__=='__main__':
+    main()
+
+```
+
+> **IMPORTANT**: Your custom python script should generate ONLY one `*.bam` file. For example, if there are two `.bam` files then pipeline will just pick the first one in an alphatical order.
+
+## How to use a custom peak caller
+
+Parameter|Type|Default|Description
+---------|-------|-----------
+`atac.peak_type` | String | `narrowPeak` | Only ENCODE peak types are supported: `narrowPeak`, `broadPeak` and `gappedPeak`
+`atac.custom_call_peak_py` | File | | Python script for your custom peak caller
+
+The file extension of your output peak file must be consitent with the `peak_type` you chose. For example, if you have chosen `narrowPeak` as `peak_type` then your output peak file should be `*.narrowPeak.gz`.
+
+Here is a template for `custom_call_peak.py`:
+
+```python
+#!/usr/bin/env python
+
+import os
+import argparse
+
+def parse_arguments():
+    parser = argparse.ArgumentParser(prog='ENCODE template call_peak')
+    parser.add_argument('ta', type=str,
+                        help='Path for TAGALIGN file')
+    parser.add_argument('--fraglen', type=int, required=True,
+                        help='Fragment length.')
+    parser.add_argument('--shift', type=int, default=0,
+                        help='macs2 callpeak --shift.')
+    parser.add_argument('--chrsz', type=str,
+                        help='2-col chromosome sizes file.')
+    parser.add_argument('--gensz', type=str,
+                        help='Genome size (sum of entries in 2nd column of \
+                            chr. sizes file, or hs for human, ms for mouse).')
+    parser.add_argument('--pval-thresh', default=0.01, type=float,
+                        help='P-Value threshold.')
+    parser.add_argument('--cap-num-peak', default=500000, type=int,
+                        help='Capping number of peaks by taking top N peaks.')
+    parser.add_argument('--out-dir', default='', type=str,
+                        help='Output directory.')
+    args = parser.parse_args()
+    return args
+
+def call_peak(ta, chrsz, gensz, pval_thresh, shift, fraglen, cap_num_peak, out_dir):
+    basename_ta = os.path.basename(os.path.splitext(ta)[0])
+    basename_prefix = basename_ta
+
+    prefix = os.path.join(out_dir, basename_prefix)
+    npeak = '{}.narrowPeak.gz'.format(prefix)
+
+    os.system('touch {}'.format(npeak))
+
+    return npeak
+
+def main():
+    # read params
+    args = parse_arguments()
+
+    npeak = call_peak(
+        args.ta, args.chrsz, args.gensz, args.pval_thresh,
+        args.shift, args.fraglen, args.cap_num_peak, args.out_dir)
+
+if __name__=='__main__':
+    main()
+```
+
+> **IMPORTANT**: Your custom python script should generate ONLY one `*.*Peak.gz` file. For example, if there are `*.narrowPeak.gz` and `*.broadPeak.gz` files pipeline will just pick the first one in an alphatical order.

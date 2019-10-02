@@ -1,0 +1,5 @@
+{
+    "test_frac_mito.non_mito_samstat" : "atac-seq-pipeline-test-data/input/pe/samstat_qcs/ENCFF341MYG.subsampled.400.trim.merged.non_mito.samstats.qc",
+    "test_frac_mito.mito_samstat" : "atac-seq-pipeline-test-data/input/pe/samstat_qcs/ENCFF341MYG.subsampled.400.trim.merged.samstats.qc",
+    "test_frac_mito.ref_frac_mito_qc" : "atac-seq-pipeline-test-data/ref_output/test_frac_mito/ENCFF341MYG.subsampled.400.trim.merged.frac_mito.qc"
+}

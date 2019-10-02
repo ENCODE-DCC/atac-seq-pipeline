@@ -1,0 +1,55 @@
+# repos: bioconda, r
+
+python ==3.6.6  # 3.7.4 didn't work with Conda >= 4.7
+
+idr ==2.0.4.2
+tabix
+samtools ==1.9
+htslib ==1.9
+sambamba ==0.6.6
+bedtools ==2.29.0
+picard ==2.20.7
+
+ucsc-fetchchromsizes ==357  # 377 in docker/singularity image
+ucsc-wigtobigwig ==357
+ucsc-bedgraphtobigwig ==357
+ucsc-bigwiginfo ==357
+ucsc-bedclip ==357
+ucsc-bedtobigbed ==357
+ucsc-twobittofa ==357
+ucsc-bigWigAverageOverBed ==357
+
+r ==3.2.2  # 3.4.4 in docker/singularity image
+r-snow
+r-snowfall
+r-bitops
+r-catools
+bioconductor-rsamtools
+r-spp ==1.13  # 1.15 in docker/singularity image
+
+bwa ==0.7.17
+bowtie2 ==2.3.4.3
+pysam ==0.15.3
+pybedtools ==0.8.0
+phantompeakqualtools ==1.2.1
+pybigwig ==0.3.13
+openssl ==1.0.2t  # important to get the same random value
+deeptools ==3.3.1
+cutadapt ==2.5
+preseq ==2.0.3
+pyfaidx ==0.5.5.2
+
+jsondiff ==1.1.1
+libgcc
+requests
+ncurses
+gnuplot
+
+numpy
+scipy
+pandas
+jinja2
+gsl
+matplotlib
+
+java-jdk

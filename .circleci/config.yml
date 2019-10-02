@@ -51,11 +51,11 @@ jobs:
           name: build image
           command: |
             source ${BASH_ENV}
-            export DOCKER_CACHE_TAG=test-v1.4.1
+            export DOCKER_CACHE_TAG=new-test-v1.5.0
             echo "pulling ${DOCKER_CACHE_TAG}!"
             docker pull quay.io/encode-dcc/atac-seq-pipeline:${DOCKER_CACHE_TAG}
             docker login -u=${QUAY_ROBOT_USER} -p=${QUAY_ROBOT_USER_TOKEN} quay.io
-            docker build --cache-from quay.io/encode-dcc/atac-seq-pipeline:${DOCKER_CACHE_TAG} --build-arg GIT_COMMIT_HASH=${CIRCLE_SHA1} --build-arg BRANCH=${CIRCLE_BRANCH} --build-arg BUILD_TAG=${TAG} -t $TAG -f docker_image/Dockerfile .
+            docker build --cache-from quay.io/encode-dcc/atac-seq-pipeline:${DOCKER_CACHE_TAG} --build-arg GIT_COMMIT_HASH=${CIRCLE_SHA1} --build-arg BRANCH=${CIRCLE_BRANCH} --build-arg BUILD_TAG=${TAG} -t $TAG -f dev/docker_image/Dockerfile .
             docker push ${TAG}
             # docker push quay.io/encode-dcc/atac-seq-pipeline:template
             docker logout
@@ -68,9 +68,10 @@ jobs:
           no_output_timeout: 300m
           command: |
             source ${BASH_ENV}
-            cd test/test_task/
+            cd dev/test/test_task/
             rm -rf atac-seq-pipeline-test-data
-            git clone https://github.com/ENCODE-DCC/atac-seq-pipeline-test-data
+            export BOTO_CONFIG=/dev/null
+            gsutil -m cp -r gs://encode-pipeline-test-samples/encode-atac-seq-pipeline/atac-seq-pipeline-test-data .
             ./download_hg38_fasta_for_test_ataqc.sh
             for wdl in test_*.wdl
             do
@@ -91,10 +92,25 @@ jobs:
           command: |
             source ${BASH_ENV}
             gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
-            cd test/test_workflow/
+            cd dev/test/test_workflow/
             echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_key.json
             ./test_atac.sh ENCSR889WQX_subsampled.json tmp_key.json ${TAG}
             python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'outputs'][u'atac.qc_json_ref_match']))" < ENCSR889WQX_subsampled.metadata.json
+
+  test_workflow_unrep_se:
+    <<: *machine_defaults
+    steps:
+      - checkout
+      - run: *make_tag
+      - run:
+          no_output_timeout: 300m
+          command: |
+            source ${BASH_ENV}
+            gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
+            cd dev/test/test_workflow/
+            echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_key.json
+            ./test_atac.sh ENCSR889WQX_subsampled_unrep.json tmp_key.json ${TAG}
+            python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'outputs'][u'atac.qc_json_ref_match']))" < ENCSR889WQX_subsampled_unrep.metadata.json
 
   test_workflow_pe:
     <<: *machine_defaults
@@ -106,7 +122,7 @@ jobs:
           command: |
             source ${BASH_ENV}
             gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
-            cd test/test_workflow/
+            cd dev/test/test_workflow/
             echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_key.json
             ./test_atac.sh ENCSR356KRQ_subsampled.json tmp_key.json ${TAG}
             python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'outputs'][u'atac.qc_json_ref_match']))" < ENCSR356KRQ_subsampled.metadata.json
@@ -121,6 +137,9 @@ workflows:
           requires:
             - build
       - test_workflow_se:
+          requires:
+            - build
+      - test_workflow_unrep_se:
           requires:
             - build
       - test_workflow_pe:

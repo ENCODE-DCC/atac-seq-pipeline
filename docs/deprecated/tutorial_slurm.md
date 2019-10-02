@@ -44,7 +44,7 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
 
 7. Run a pipeline for the test sample. Try without partition and account settings first. If your cluster requires to specify any of them then add one to the command line.
     ```bash
-    $ sbatch --partition [YOUR_PARTITION] --account [YOUR_ACCOUNT] examples/local/ENCSR356KRQ_subsampled_slurm_conda.sh
+    $ sbatch --partition [YOUR_PARTITION] --account [YOUR_ACCOUNT] dev/examples/local/ENCSR356KRQ_subsampled_slurm_conda.sh
     ```
 
 ## For singularity users
@@ -56,12 +56,12 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
 
 7. Pull a singularity container for the pipeline. This will pull pipeline's docker container first and build a singularity one on `~/.singularity`.
     ```bash
-    $ mkdir -p ~/.singularity && cd ~/.singularity && SINGULARITY_CACHEDIR=~/.singularity SINGULARITY_PULLFOLDER=~/.singularity singularity pull --name atac-seq-pipeline-v1.4.2.simg -F docker://quay.io/encode-dcc/atac-seq-pipeline:v1.4.2
+    $ mkdir -p ~/.singularity && cd ~/.singularity && SINGULARITY_CACHEDIR=~/.singularity SINGULARITY_PULLFOLDER=~/.singularity singularity pull --name atac-seq-pipeline-dev-v1.5.0.simg -F docker://quay.io/encode-dcc/atac-seq-pipeline:dev-v1.5.0
     ```
 
 8. Run a pipeline for the test sample. If your cluster requires to specify any of them then add one to the command line.
     ```bash
-    $ sbatch --partition [YOUR_PARTITION] --account [YOUR_ACCOUNT] examples/local/ENCSR356KRQ_subsampled_slurm_singularity.sh
+    $ sbatch --partition [YOUR_PARTITION] --account [YOUR_ACCOUNT] dev/examples/local/ENCSR356KRQ_subsampled_slurm_singularity.sh
     ```
 
 ## For all users
@@ -70,15 +70,15 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
 
 9. See full specification for [input JSON file](input.md).
 
-10. You can resume a failed pipeline from where it left off by using `PIPELINE_METADATA`(`metadata.json`) file. This file is created for each pipeline run. See [here](../utils/resumer/README.md) for details. Once you get a new input JSON file from the resumer, then edit your shell script (`examples/local/ENCSR356KRQ_subsampled_slurm_*.sh`) to use it `INPUT=resume.[FAILED_WORKFLOW_ID].json` instead of `INPUT=examples/...`.
+10. You can resume a failed pipeline from where it left off by using `PIPELINE_METADATA`(`metadata.json`) file. This file is created for each pipeline run. See [here](../utils/resumer/README.md) for details. Once you get a new input JSON file from the resumer, then edit your shell script (`dev/examples/local/ENCSR356KRQ_subsampled_slurm_*.sh`) to use it `INPUT=resume.[FAILED_WORKFLOW_ID].json` instead of `INPUT=dev/examples/...`.
 
 ## For singularity users
 
-11. IF YOU WANT TO RUN PIPELINES WITH YOUR OWN INPUT DATA/GENOME DATABASE, PLEASE ADD THEIR DIRECTORIES TO `workflow_opts/slurm.json`. For example, you have input FASTQs on `/your/input/fastqs/` and genome database installed on `/your/genome/database/` then add `/your/` to `singularity_bindpath`. You can also define multiple directories there. It's comma-separated.
+11. IF YOU WANT TO RUN PIPELINES WITH YOUR OWN INPUT DATA/GENOME DATABASE, PLEASE ADD THEIR DIRECTORIES TO `dev/workflow_opts/slurm.json`. For example, you have input FASTQs on `/your/input/fastqs/` and genome database installed on `/your/genome/database/` then add `/your/` to `singularity_bindpath`. You can also define multiple directories there. It's comma-separated.
     ```javascript
     {
         "default_runtime_attributes" : {
-            "singularity_container" : "~/.singularity/atac-seq-pipeline-v1.4.2.simg",
+            "singularity_container" : "~/.singularity/atac-seq-pipeline-dev-v1.5.0.simg",
             "singularity_bindpath" : "/your/,YOUR_OWN_DATA_DIR1,YOUR_OWN_DATA_DIR2,..."
         }
     }
