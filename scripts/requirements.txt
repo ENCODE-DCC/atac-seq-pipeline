@@ -44,6 +44,7 @@ libgcc
 requests
 ncurses
 gnuplot
+ghostscript
 
 numpy
 scipy
