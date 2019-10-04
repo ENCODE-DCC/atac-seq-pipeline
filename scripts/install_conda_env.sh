@@ -82,6 +82,9 @@ ${CONDA_BIN}/pip install --no-dependencies SAMstats==0.2.1
 # install pyhocon for caper
 ${CONDA_BIN}/pip install pyhocon
 
+# install caper and croo
+${CONDA_BIN}/pip install caper croo
+
 echo "=== Updating pipeline's Conda environments ==="
 cd ${CONDA_BIN}
 chmod u+rx ${SRC_DIR}/*.py
