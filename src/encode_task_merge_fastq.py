@@ -7,7 +7,7 @@ import sys
 import os
 import argparse
 from encode_lib_common import (
-    hard_link, log, ls_l, mkdir_p, read_tsv, run_shell_cmd,
+    soft_link, log, ls_l, mkdir_p, read_tsv, run_shell_cmd,
     strip_ext_fastq)
 
 
@@ -69,7 +69,7 @@ def merge_fastqs(fastqs, end, out_dir):
         run_shell_cmd(cmd)
         return merged
     else:
-        return hard_link(fastqs[0], merged)
+        return soft_link(fastqs[0], merged)
 
 
 def main():
