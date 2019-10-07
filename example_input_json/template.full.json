@@ -44,7 +44,7 @@
     "atac.enable_count_signal_track" : false,
     "atac.keep_irregular_chr_in_bfilt_peak" : false,        
 
-    "atac.regex_filter_reads" : "chrM",
+    "atac.filter_chrs" : ["chrM", "MT"],
 
     "atac.enable_preseq" : false,
     "atac.enable_compare_to_roadmap" : false,
