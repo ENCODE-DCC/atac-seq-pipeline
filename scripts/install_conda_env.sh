@@ -69,10 +69,7 @@ echo "unset OLD_R_HOME" >> ${CONDA_DEACTIVATE_SH}
 echo "unset OLD_R_LIBS" >> ${CONDA_DEACTIVATE_SH}
 
 # hack around the need for both python2 and python3 in the same environment
-# we will keep this workaround until MACS2 and metaseq are ported to python3.
 cd ${CONDA_BIN}
-rm -f macs2 python2
-ln -s ../../${CONDA_ENV_PY2}/bin/macs2
 ln -s ../../${CONDA_ENV_PY2}/bin/python2
 
 # install SAMstats 0.2.1
