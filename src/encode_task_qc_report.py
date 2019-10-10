@@ -58,6 +58,12 @@ def parse_arguments():
                         help='IDR threshold.')
     parser.add_argument('--pval-thresh', type=float,
                         help='pValue threshold for MACS2 peak caller.')
+    parser.add_argument('--xcor-pe-trim-bp', type=int,
+                        help='FASTQs are trimmed to this for cross-correlation '
+                             'analysis only.')
+    parser.add_argument('--xcor-subsample-reads', type=int,
+                        help='Subsampled TAG-ALIGNs to this depth for cross-correlation '
+                             'analysis only.')
     parser.add_argument('--samstat-qcs', type=str, nargs='*',
                         help='List of samstat QC (raw BAM) files per replicate.')
     parser.add_argument('--nodup-samstat-qcs', type=str, nargs='*',
@@ -268,7 +274,8 @@ def make_cat_root(args):
         ('aligner', args.aligner),
         ('peak_caller', args.peak_caller),
     ])
-    if args.ctl_paired_ends:
+    if args.ctl_paired_ends \
+            and args.pipeline_type not in ('atac', 'dnase'):
         d_general['ctl_paired_end'] = args.ctl_paired_ends
     cat_root.add_log(d_general, key='general')
 
@@ -626,20 +633,37 @@ def make_cat_align_enrich(args, cat_root):
         parent=cat_root
     )
 
+    if args.pipeline_type in ('tf', 'histone'):
+        html_foot_xcor = """
+            <br><p>Performed on subsampled ({xcor_subsample_reads}) reads mapped from FASTQs that are trimmed to {xcor_pe_trim_bp}.
+            Such FASTQ trimming and subsampling reads are for cross-corrleation analysis only. 
+            Untrimmed FASTQs are used for all the other analyses.</p>
+            <div id='help-xcor'><p>
+            NOTE1: For SE datasets, reads from replicates are randomly subsampled to {xcor_subsample_reads}.<br>
+            NOTE2: For PE datasets, the first end (R1) of each read-pair is selected and trimmed to {xcor_pe_trim_bp} the reads are then randomly subsampled to {xcor_subsample_reads}.<br>
+        """.format(
+            xcor_subsample_reads=args.xcor_subsample_reads,
+            xcor_pe_trim_bp=args.xcor_pe_trim_bp,
+        )
+    else:
+        html_foot_xcor = """
+            <br><p>Performed on subsampled ({xcor_subsample_reads}) reads.
+            Such FASTQ trimming is for cross-corrleation analysis only.</p>
+            <div id='help-xcor'><p>
+        """.format(
+            xcor_subsample_reads=args.xcor_subsample_reads
+        )
+    html_foot_xcor += """<ul>
+        <li>Normalized strand cross-correlation coefficient (NSC) = col9 in outFile </li>
+        <li>Relative strand cross-correlation coefficient (RSC) = col10 in outFile </li>
+        <li>Estimated fragment length = col3 in outFile, take the top value </li>
+        </ul></p></div><br>
+    """
+
     cat_xcor = QCCategory(
         'xcor_score',
         html_head='<h2>Strand cross-correlation measures</h2>',
-        html_foot="""
-            <br><p>Performed on subsampled reads</p>
-            <div id='help-xcor'><p>
-            NOTE1: For SE datasets, reads from replicates are randomly subsampled.<br>
-            NOTE2: For PE datasets, the first end of each read-pair is selected and the reads are then randomly subsampled.<br>
-            <ul>
-            <li>Normalized strand cross-correlation coefficient (NSC) = col9 in outFile </li>
-            <li>Relative strand cross-correlation coefficient (RSC) = col10 in outFile </li>
-            <li>Estimated fragment length = col3 in outFile, take the top value </li>
-            </ul></p></div><br>
-        """,
+        html_foot=html_foot_xcor,
         parser=parse_xcor_score,
         map_key_desc=MAP_KEY_DESC_XCOR_SCORE,
         parent=cat_align_enrich,

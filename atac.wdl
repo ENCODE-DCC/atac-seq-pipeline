@@ -490,11 +490,39 @@ workflow atac {
 		}
 		File? ta_ = if has_output_of_bam2ta then tas[i] else bam2ta.ta
 
-		Boolean has_input_of_xcor = has_output_of_bam2ta || defined(bam2ta.ta)
+		Boolean has_input_of_xcor = has_output_of_align || defined(align.bam)
 		if ( has_input_of_xcor && enable_xcor ) {
+			call filter as filter_no_dedup { input :
+				bam = bam_,
+				paired_end = paired_end_,
+				dup_marker = dup_marker,
+				mapq_thresh = mapq_thresh_,
+				filter_chrs = filter_chrs,
+				chrsz = chrsz_,
+				no_dup_removal = true,
+				multimapping = multimapping,
+				mito_chr_name = mito_chr_name_,
+
+				cpu = filter_cpu,
+				mem_mb = filter_mem_mb,
+				time_hr = filter_time_hr,
+				disks = filter_disks,
+			}
+			call bam2ta as bam2ta_no_dedup { input :
+				bam = filter_no_dedup.nodup_bam,  # output name is nodup but it's not deduped
+				disable_tn5_shift = if pipeline_type=='atac' then false else true,
+				subsample = 0,
+				paired_end = paired_end_,
+				mito_chr_name = mito_chr_name_,
+
+				cpu = bam2ta_cpu,
+				mem_mb = bam2ta_mem_mb,
+				time_hr = bam2ta_time_hr,
+				disks = bam2ta_disks,
+			}
 			# subsample tagalign (non-mito) and cross-correlation analysis
 			call xcor { input :
-				ta = ta_,
+				ta = bam2ta_no_dedup.ta,
 				subsample = xcor_subsample_reads,
 				paired_end = paired_end_,
 				mito_chr_name = mito_chr_name_,
@@ -970,7 +998,8 @@ workflow atac {
 		cap_num_peak = cap_num_peak_,
 		idr_thresh = idr_thresh,
 		pval_thresh = pval_thresh,
-		
+		xcor_subsample_reads = xcor_subsample_reads,
+
 		samstat_qcs = align.samstat_qc,
 		nodup_samstat_qcs = filter.samstat_qc,
 
@@ -1762,6 +1791,7 @@ task qc_report {
 	Int cap_num_peak
 	Float idr_thresh
 	Float pval_thresh
+	Int xcor_subsample_reads
 	# QCs
 	Array[File?] frac_mito_qcs
 	Array[File?] samstat_qcs
@@ -1828,6 +1858,7 @@ task qc_report {
 			${'--cap-num-peak ' + cap_num_peak} \
 			--idr-thresh ${idr_thresh} \
 			--pval-thresh ${pval_thresh} \
+			--xcor-subsample-reads ${xcor_subsample_reads} \
 			--frac-mito-qcs ${sep='_:_' frac_mito_qcs} \
 			--samstat-qcs ${sep='_:_' samstat_qcs} \
 			--nodup-samstat-qcs ${sep='_:_' nodup_samstat_qcs} \
