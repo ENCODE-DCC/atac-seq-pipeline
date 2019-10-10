@@ -12,7 +12,7 @@ import sys
 import os
 import argparse
 from encode_lib_common import (
-    strip_ext_bam, ls_l, log, rm_f)
+    strip_ext_bam, ls_l, log, rm_f, pdf2png)
 from encode_lib_genomic import (
     remove_read_group, locate_picard)
 import matplotlib as mpl
@@ -194,8 +194,12 @@ def fragment_length_plot(data_file, prefix, peaks=None):
 
     # plot_img = BytesIO()
     # fig.savefig(plot_img, format='png')
+    plot_pdf = prefix + '.fraglen_dist.pdf'
     plot_png = prefix + '.fraglen_dist.png'
-    fig.savefig(plot_png, format='png')
+
+    fig.savefig(plot_pdf, format='pdf')
+    pdf2png(plot_pdf, os.path.dirname(plot_pdf))
+    rm_f(plot_pdf)
 
     return plot_png
 
