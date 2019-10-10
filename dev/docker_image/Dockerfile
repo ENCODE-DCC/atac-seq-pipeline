@@ -112,15 +112,18 @@ ENV PYTHONNOUSERSITE=True
 ENV OPENBLAS_NUM_THREADS=1
 ENV MKL_NUM_THREADS=1
 
+# make some temporary directories
+RUN mkdir -p /mnt/ext_{0..9}
+
+# make pipeline src directory to store py's
+RUN mkdir -p atac-seq-pipeline/src
+ENV PATH="/software/atac-seq-pipeline:/software/atac-seq-pipeline/src:${PATH}"
+
 # Get ENCODE atac-seq-pipeline container repository
 # This COPY assumes the build context is the root of the atac-seq-pipeline repo
 # and it gets whatever is checked out plus local modifications
 # so the buildling command should be:
 # cd [GIT_REPO_DIR] && docker build -f dev/docker_image/Dockerfile .
-RUN mkdir -p atac-seq-pipeline/src
 COPY src atac-seq-pipeline/src/
 COPY atac.wdl atac-seq-pipeline/
-ENV PATH="/software/atac-seq-pipeline:/software/atac-seq-pipeline/src:${PATH}"
 
-# make some temporary directories
-RUN mkdir -p /mnt/ext_{0..9}
