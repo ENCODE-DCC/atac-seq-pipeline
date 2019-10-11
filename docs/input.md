@@ -114,7 +114,7 @@ You can mix up different data types for individual replicate. For example, pipel
     "atac.fastqs_rep1_R1" : ["rep1.fastq.gz"],
     "atac.fastqs_rep3_R1" : ["rep3.fastq.gz"],
     "atac.bams" : [null, "rep2.bam", null, null, null],
-    "atac.nodup_bams" : [null, "rep2.bam", null, "rep4.nodup.bam", null],
+    "atac.nodup_bams" : [null, null, null, "rep4.nodup.bam", null],
     "atac.tas" : [null, null, null, null, "rep5.tagAlign.gz"]
 }
 ```
@@ -197,13 +197,6 @@ Parameter|Default|Description
 > **WARNING**: It is recommened not to change the following parameters unless you get resource-related errors for a certain task and you want to increase resources for such task. The following parameters are provided for users who want to run our pipeline with Caper's `local` on HPCs and 2).
 
 Resources defined here are PER REPLICATE. Therefore, total number of cores will be approximately `atac.align_cpu` x `NUMBER_OF_REPLICATES because `align` is a bottlenecking task of the pipeline. Use this total number of cores if you manually `qsub` or `sbatch` your job (using local mode of Caper). `disks` is used for Google Cloud and DNAnexus only.
-
-Parameter|Default
----------|-------
-`atac.trim_adapter_cpu` | 2
-`atac.trim_adapter_mem_mb` | 12000
-`atac.trim_adapter_time_hr` | 24
-`atac.trim_adapter_disks` | `local-disk 100 HDD`
 
 Parameter|Default
 ---------|-------

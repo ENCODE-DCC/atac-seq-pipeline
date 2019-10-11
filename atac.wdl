@@ -102,11 +102,6 @@ workflow atac {
 	# resources
 	#	these variables will be automatically ignored if they are not supported by platform
 	# 	"disks" is for cloud platforms (Google Cloud Platform, DNAnexus) only
-	Int trim_adapter_cpu = 2
-	Int trim_adapter_mem_mb = 12000
-	Int trim_adapter_time_hr = 24
-	String trim_adapter_disks = 'local-disk 100 HDD'
-
 	Int align_cpu = 4
 	Int align_mem_mb = 20000
 	Int align_time_hr = 48
@@ -199,8 +194,6 @@ workflow atac {
 	Array[String] adapters_rep10_R2 = []
 
 	# other input types (bam, nodup_bam, ta). they are per replicate
-	Array[File?] trim_merged_fastqs_R1 = []
-	Array[File?] trim_merged_fastqs_R2 = [] 
 	Array[File?] bams = []
 	Array[File?] nodup_bams = []
 	Array[File?] tas = []
@@ -331,9 +324,7 @@ workflow atac {
 	# temporary variables to get number of replicates
 	# 	WDLic implementation of max(A,B,C,...)
 	Int num_rep_fastq = length(fastqs_R1)
-	Int num_rep_trim_merged_fastq = if length(trim_merged_fastqs_R1)<num_rep_fastq then num_rep_fastq
-		else length(trim_merged_fastqs_R1)
-	Int num_rep_bam = if length(bams)<num_rep_trim_merged_fastq then num_rep_trim_merged_fastq
+	Int num_rep_bam = if length(bams)<num_rep_fastq then num_rep_fastq
 		else length(bams)
 	Int num_rep_nodup_bam = if length(nodup_bams)<num_rep_bam then num_rep_bam
 		else length(nodup_bams)
@@ -362,12 +353,10 @@ workflow atac {
 		Boolean? paired_end_ = if !defined(paired_end) && i<length(paired_ends) then paired_ends[i]
 			else paired_end
 
-		Boolean has_input_of_trim_adapter = i<length(fastqs_R1) && length(fastqs_R1[i])>0		
-		Boolean has_output_of_trim_adapter = i<length(trim_merged_fastqs_R1) &&
-			defined(trim_merged_fastqs_R1[i])
-		# skip if we already have output of this step
-		if ( has_input_of_trim_adapter && !has_output_of_trim_adapter ) {
-			call trim_adapter { input :
+		Boolean has_input_of_align = i<length(fastqs_R1) && length(fastqs_R1[i])>0
+		Boolean has_output_of_align = i<length(bams) && defined(bams[i])
+		if ( has_input_of_align && !has_output_of_align ) {
+			call align { input :
 				fastqs_R1 = fastqs_R1[i],
 				fastqs_R2 = fastqs_R2[i],
 				adapter = adapter,
@@ -376,33 +365,11 @@ workflow atac {
 				paired_end = paired_end_,
 				auto_detect_adapter = auto_detect_adapter,
 				cutadapt_param = cutadapt_param,
-				# resource
-				cpu = trim_adapter_cpu,
-				mem_mb = trim_adapter_mem_mb,
-				time_hr = trim_adapter_time_hr,
-				disks = trim_adapter_disks,
-			}
-		}
-		File? trim_merged_fastq_R1_ = if has_output_of_trim_adapter
-			then trim_merged_fastqs_R1[i]
-			else trim_adapter.trim_merged_fastq_R1
-		File? trim_merged_fastq_R2_ = if i<length(trim_merged_fastqs_R2) &&
-			defined(trim_merged_fastqs_R2[i])
-			then trim_merged_fastqs_R2[i]
-			else trim_adapter.trim_merged_fastq_R2
 
-		Boolean has_input_of_align = has_output_of_trim_adapter ||
-			defined(trim_adapter.trim_merged_fastq_R1)
-		Boolean has_output_of_align = i<length(bams) && defined(bams[i])
-		if ( has_input_of_align && !has_output_of_align ) {
-			call align { input :
 				aligner = aligner_,
 				mito_chr_name = mito_chr_name_,
 				chrsz = chrsz_,
 				custom_align_py = custom_align_py,
-				fastq_R1 = trim_merged_fastq_R1_,
-				fastq_R2 = trim_merged_fastq_R2_,
-				paired_end = paired_end_,
 				multimapping = multimapping,
 				idx_tar = if aligner=='bwa' then bwa_idx_tar_
 					else if aligner=='bowtie2' then bowtie2_idx_tar_
@@ -423,13 +390,19 @@ workflow atac {
 			 defined(custom_aligner_mito_idx_tar_))
 		if ( has_input_of_align_mito ) {
 			call align as align_mito { input :
+				fastqs_R1 = fastqs_R1[i],
+				fastqs_R2 = fastqs_R2[i],
+				adapter = adapter,
+				adapters_R1 = adapters_R1[i],
+				adapters_R2 = adapters_R2[i],
+				paired_end = paired_end_,
+				auto_detect_adapter = auto_detect_adapter,
+				cutadapt_param = cutadapt_param,
+
 				aligner = aligner_,
 				mito_chr_name = mito_chr_name_,
 				chrsz = chrsz_,
 				custom_align_py = custom_align_py,
-				fastq_R1 = trim_merged_fastq_R1_,
-				fastq_R2 = trim_merged_fastq_R2_,
-				paired_end = paired_end_,
 				multimapping = multimapping,
 				idx_tar = if aligner=='bwa' then bwa_mito_idx_tar_
 					else if aligner=='bowtie2' then bowtie2_mito_idx_tar_
@@ -1062,8 +1035,8 @@ workflow atac {
 	}
 }
 
-# trim adapters and merge trimmed fastqs
-task trim_adapter { 
+task align {
+	# for task trim_adapter
 	Array[File] fastqs_R1 		# [merge_id]
 	Array[File] fastqs_R2
 
@@ -1074,14 +1047,22 @@ task trim_adapter {
 	Boolean paired_end
 	Boolean auto_detect_adapter
 	String cutadapt_param 
+
+	# for task align
+	String aligner
+	String mito_chr_name
+	File chrsz			# 2-col chromosome sizes file
+	File? custom_align_py
+	File idx_tar		# reference index tar or tar.gz
+	Int multimapping
+
 	# resource
 	Int cpu
 	Int mem_mb
 	Int time_hr
 	String disks
 
-	# tmp vars
-	File? null_f
+	# tmp vars for task trim_adapter
 	Array[Array[File]] tmp_fastqs = if paired_end then transpose([fastqs_R1, fastqs_R2])
 				else transpose([fastqs_R1])
 	Array[Array[String]] tmp_adapters = if paired_end then transpose([adapters_R1, adapters_R2])
@@ -1091,13 +1072,15 @@ task trim_adapter {
 		if [[ -z "$(which encode_task_trim_adapter.py 2> /dev/null || true)" ]]
 		then
 		  echo -e "\n* Error: pipeline dependencies not found." 1>&2
-		  echo 'Conda users: Did you install Conda and environment correctly (scripts/install_conda_env.sh)?' 1>&2
+		  echo 'Conda users: Did you activate Conda environment (conda activate encode-atac-seq-pipeline)?' 1>&2
+		  echo '    Or did you install Conda and environment correctly (bash scripts/install_conda_env.sh)?' 1>&2
 		  echo 'GCP/AWS/Docker users: Did you add --docker flag to Caper command line arg?' 1>&2
 		  echo 'Singularity users: Did you add --singularity flag to Caper command line arg?' 1>&2
 		  echo -e "\n" 1>&2
 		  EXCEPTION_RAISED
 		fi
 
+		# trim adapter
 		python3 $(which encode_task_trim_adapter.py) \
 			${write_tsv(tmp_fastqs)} \
 			${'--adapter ' + adapter} \
@@ -1106,59 +1089,36 @@ task trim_adapter {
 			${if auto_detect_adapter then '--auto-detect-adapter' else ''} \
 			--cutadapt-param ' ${cutadapt_param}' \
 			${'--nth ' + cpu}
-	}
-	output {
-		File trim_merged_fastq_R1 = glob('R1/*.fastq.gz')[0]
-		File? trim_merged_fastq_R2 = if paired_end then glob('R2/*.fastq.gz')[0] else null_f
-	}
-	runtime {
-		cpu : cpu
-		memory : '${mem_mb} MB'
-		time : time_hr
-		disks : disks
-	}
-}
 
-task align {
-	String aligner
-	String mito_chr_name
-	File chrsz			# 2-col chromosome sizes file
-	File? custom_align_py
-	File idx_tar		# reference index tar
-	File? fastq_R1 		# [read_end_id]
-	File? fastq_R2
-	Boolean paired_end
-	Int multimapping
-
-	Int cpu
-	Int mem_mb
-	Int time_hr
-	String disks
-
-	command {
+		# align on trimmed/merged fastqs
 		if [ '${aligner}' == 'bowtie2' ]; then
 			python3 $(which encode_task_bowtie2.py) \
 				${idx_tar} \
-				${fastq_R1} ${fastq_R2} \
+				R1/*.fastq.gz \
+				${if paired_end then 'R2/*.fastq.gz' else ''} \
 				${if paired_end then '--paired-end' else ''} \
 				${'--multimapping ' + multimapping} \
 				${'--nth ' + cpu}
 		else
 			python3 ${custom_align_py} \
 				${idx_tar} \
-				${fastq_R1} ${fastq_R2} \
+				R1/*.fastq.gz \
+				${if paired_end then 'R2/*.fastq.gz' else ''} \
 				${if paired_end then '--paired-end' else ''} \
 				${'--multimapping ' + multimapping} \
 				${'--nth ' + cpu}
 		fi
 
 		python3 $(which encode_task_post_align.py) \
-			${fastq_R1} $(ls *.bam) \
+			R1/*.fastq.gz $(ls *.bam) \
 			${'--mito-chr-name ' + mito_chr_name} \
 			${'--chrsz ' + chrsz} \
 			${'--nth ' + cpu}
+		rm -rf R1 R2
 	}
 	output {
+
+
 		File bam = glob('*.bam')[0]
 		File bai = glob('*.bai')[0]
 		File samstat_qc = glob('*.samstats.qc')[0]
