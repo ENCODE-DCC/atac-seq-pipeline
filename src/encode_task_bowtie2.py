@@ -124,7 +124,8 @@ def main():
     temp_files = []  # files to deleted later at the end
 
     # if bowtie2 index is tarball then unpack it
-    if args.bowtie2_index_prefix_or_tar.endswith('.tar'):
+    if args.bowtie2_index_prefix_or_tar.endswith('.tar') or \
+            args.bowtie2_index_prefix_or_tar.endswith('.tar.gz'):
         log.info('Unpacking bowtie2 index tar...')
         tar = args.bowtie2_index_prefix_or_tar
         # untar

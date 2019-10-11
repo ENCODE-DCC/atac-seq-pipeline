@@ -34,7 +34,7 @@ def strip_ext_bam(bam):
 
 
 def strip_ext_tar(tar):
-    return re.sub(r'\.tar$', '', str(tar))
+    return re.sub(r'\.(tar|tar\.gz)$', '', str(tar))
 
 
 def strip_ext_ta(ta):
@@ -157,9 +157,16 @@ def mkdir_p(dirname):
 
 
 def untar(tar, out_dir):
-    cmd = 'tar xvf {} --no-same-owner -C {}'.format(
+    if tar.endswith('.gz'):
+        cmd = 'tar zxvf {} --no-same-owner -C {}'.format(
+            tar,
+            out_dir if out_dir else '.')
+    else:
+        cmd = 'tar xvf {} --no-same-owner -C {}'
+    cmd = cmd.format(
         tar,
-        out_dir if out_dir else '.')
+        out_dir if out_dir else '.'
+    )
     run_shell_cmd(cmd)
 
 

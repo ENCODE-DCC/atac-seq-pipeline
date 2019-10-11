@@ -166,7 +166,8 @@ def main():
     temp_files = []  # files to deleted later at the end
 
     # if bwa index is tarball then unpack it
-    if args.bwa_index_prefix_or_tar.endswith('.tar'):
+    if args.bwa_index_prefix_or_tar.endswith('.tar') or \
+            args.bwa_index_prefix_or_tar.endswith('.tar.gz'):
         log.info('Unpacking bwa index tar...')
         tar = args.bwa_index_prefix_or_tar
         # untar
