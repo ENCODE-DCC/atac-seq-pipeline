@@ -6,11 +6,13 @@ import 'compare_md5sum.wdl' as compare_md5sum
 workflow test_bowtie2 {
 	Int multimapping
 
-	Array[String] pe_trimmed_fastqs
-	Array[String] se_trimmed_fastqs
+	Array[String] pe_fastqs_R1
+	Array[String] pe_fastqs_R2
+	Array[String] se_fastqs_R1
 
 	String se_chrsz
 	String pe_chrsz
+	String cutadapt_param = '-e 0.1 -m 5'
 
 	# we don't compare BAM because BAM's header includes date
 	# hence md5sums don't match all the time
@@ -32,11 +34,15 @@ workflow test_bowtie2 {
 		aligner = 'bowtie2',
 		idx_tar = pe_bowtie2_idx_tar,
 		mito_chr_name = 'chrM',
-		fastq_R1 = pe_trimmed_fastqs[0],
-		fastq_R2 = pe_trimmed_fastqs[1],
+		fastqs_R1 = pe_fastqs_R1,
+		fastqs_R2 = pe_fastqs_R2,
+		adapters_R1 = [],
+		adapters_R2 = [],
+		cutadapt_param = cutadapt_param,
 		multimapping = multimapping,
 		paired_end = true,
 		chrsz = pe_chrsz,
+		auto_detect_adapter = true,
 
 		cpu = bowtie2_cpu,
 		mem_mb = bowtie2_mem_mb,
@@ -47,11 +53,15 @@ workflow test_bowtie2 {
 		aligner = 'bowtie2',
 		idx_tar = pe_bowtie2_idx_tar,
 		mito_chr_name = 'chrM',
-		fastq_R1 = pe_trimmed_fastqs[0],
-		fastq_R2 = pe_trimmed_fastqs[1],
+		fastqs_R1 = pe_fastqs_R1,
+		fastqs_R2 = pe_fastqs_R2,
+		adapters_R1 = [],
+		adapters_R2 = [],
+		cutadapt_param = cutadapt_param,
 		multimapping = 0,
 		paired_end = true,
 		chrsz = pe_chrsz,
+		auto_detect_adapter = true,
 
 		cpu = bowtie2_cpu,
 		mem_mb = bowtie2_mem_mb,
@@ -62,10 +72,15 @@ workflow test_bowtie2 {
 		aligner = 'bowtie2',
 		idx_tar = se_bowtie2_idx_tar,
 		mito_chr_name = 'chrM',
-		fastq_R1 = se_trimmed_fastqs[0],
+		fastqs_R1 = se_fastqs_R1,
+		fastqs_R2 = [],
+		adapters_R1 = [],
+		adapters_R2 = [],
+		cutadapt_param = cutadapt_param,
 		multimapping = multimapping,
 		paired_end = false,
 		chrsz = se_chrsz,
+		auto_detect_adapter = true,
 
 		cpu = bowtie2_cpu,
 		mem_mb = bowtie2_mem_mb,
@@ -76,10 +91,15 @@ workflow test_bowtie2 {
 		aligner = 'bowtie2',
 		idx_tar = se_bowtie2_idx_tar,
 		mito_chr_name = 'chrM',
-		fastq_R1 = se_trimmed_fastqs[0],
+		fastqs_R1 = se_fastqs_R1,
+		fastqs_R2 = [],
+		adapters_R1 = [],
+		adapters_R2 = [],
+		cutadapt_param = cutadapt_param,
 		multimapping = 0,
 		paired_end = false,
 		chrsz = se_chrsz,
+		auto_detect_adapter = true,
 
 		cpu = bowtie2_cpu,
 		mem_mb = bowtie2_mem_mb,
