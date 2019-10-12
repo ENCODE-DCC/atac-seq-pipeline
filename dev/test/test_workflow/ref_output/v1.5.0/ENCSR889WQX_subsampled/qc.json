@@ -1,0 +1,369 @@
+{
+    "general": {
+        "date": "2019-10-10 06:16:19",
+        "title": "ENCSR889WQX (subsampled 1/400 reads)",
+        "description": "ATAC-seq on Mus musculus C57BL/6 frontal cortex adult",
+        "pipeline_ver": "dev-v1.5.0",
+        "pipeline_type": "atac",
+        "genome": "mm10",
+        "paired_end": [
+            false,
+            false
+        ],
+        "aligner": "bowtie2",
+        "peak_caller": "macs2"
+    },
+    "align": {
+        "samstat": {
+            "rep1": {
+                "total_reads": 200680,
+                "total_reads_qc_failed": 0,
+                "duplicate_reads": 0,
+                "duplicate_reads_qc_failed": 0,
+                "mapped_reads": 169220,
+                "mapped_reads_qc_failed": 0,
+                "pct_mapped_reads": 84.3,
+                "paired_reads": 0,
+                "paired_reads_qc_failed": 0,
+                "read1": 0,
+                "read1_qc_failed": 0,
+                "read2": 0,
+                "read2_qc_failed": 0,
+                "properly_paired_reads": 0,
+                "properly_paired_reads_qc_failed": 0,
+                "pct_properly_paired_reads": 0.0,
+                "with_itself": 0,
+                "with_itself_qc_failed": 0,
+                "singletons": 0,
+                "singletons_qc_failed": 0,
+                "pct_singletons": 0.0,
+                "diff_chroms": 0,
+                "diff_chroms_qc_failed": 0
+            },
+            "rep2": {
+                "total_reads": 169465,
+                "total_reads_qc_failed": 0,
+                "duplicate_reads": 0,
+                "duplicate_reads_qc_failed": 0,
+                "mapped_reads": 165118,
+                "mapped_reads_qc_failed": 0,
+                "pct_mapped_reads": 97.39999999999999,
+                "paired_reads": 0,
+                "paired_reads_qc_failed": 0,
+                "read1": 0,
+                "read1_qc_failed": 0,
+                "read2": 0,
+                "read2_qc_failed": 0,
+                "properly_paired_reads": 0,
+                "properly_paired_reads_qc_failed": 0,
+                "pct_properly_paired_reads": 0.0,
+                "with_itself": 0,
+                "with_itself_qc_failed": 0,
+                "singletons": 0,
+                "singletons_qc_failed": 0,
+                "pct_singletons": 0.0,
+                "diff_chroms": 0,
+                "diff_chroms_qc_failed": 0
+            }
+        },
+        "dup": {
+            "rep1": {
+                "unpaired_reads": 152179,
+                "paired_reads": 0,
+                "unmapped_reads": 0,
+                "unpaired_duplicate_reads": 39054,
+                "paired_duplicate_reads": 0,
+                "paired_optical_duplicate_reads": 0,
+                "pct_duplicate_reads": 25.663200000000003
+            },
+            "rep2": {
+                "unpaired_reads": 146770,
+                "paired_reads": 0,
+                "unmapped_reads": 0,
+                "unpaired_duplicate_reads": 9721,
+                "paired_duplicate_reads": 0,
+                "paired_optical_duplicate_reads": 0,
+                "pct_duplicate_reads": 6.6233
+            }
+        },
+        "frac_mito": {
+            "rep1": {
+                "non_mito_reads": 145557,
+                "mito_reads": 58265,
+                "frac_mito_reads": 0.2858621738575816
+            },
+            "rep2": {
+                "non_mito_reads": 156658,
+                "mito_reads": 20424,
+                "frac_mito_reads": 0.11533639782699541
+            }
+        },
+        "nodup_samstat": {
+            "rep1": {
+                "total_reads": 100171,
+                "total_reads_qc_failed": 0,
+                "duplicate_reads": 0,
+                "duplicate_reads_qc_failed": 0,
+                "mapped_reads": 100171,
+                "mapped_reads_qc_failed": 0,
+                "pct_mapped_reads": 100.0,
+                "paired_reads": 0,
+                "paired_reads_qc_failed": 0,
+                "read1": 0,
+                "read1_qc_failed": 0,
+                "read2": 0,
+                "read2_qc_failed": 0,
+                "properly_paired_reads": 0,
+                "properly_paired_reads_qc_failed": 0,
+                "pct_properly_paired_reads": 0.0,
+                "with_itself": 0,
+                "with_itself_qc_failed": 0,
+                "singletons": 0,
+                "singletons_qc_failed": 0,
+                "pct_singletons": 0.0,
+                "diff_chroms": 0,
+                "diff_chroms_qc_failed": 0
+            },
+            "rep2": {
+                "total_reads": 129266,
+                "total_reads_qc_failed": 0,
+                "duplicate_reads": 0,
+                "duplicate_reads_qc_failed": 0,
+                "mapped_reads": 129266,
+                "mapped_reads_qc_failed": 0,
+                "pct_mapped_reads": 100.0,
+                "paired_reads": 0,
+                "paired_reads_qc_failed": 0,
+                "read1": 0,
+                "read1_qc_failed": 0,
+                "read2": 0,
+                "read2_qc_failed": 0,
+                "properly_paired_reads": 0,
+                "properly_paired_reads_qc_failed": 0,
+                "pct_properly_paired_reads": 0.0,
+                "with_itself": 0,
+                "with_itself_qc_failed": 0,
+                "singletons": 0,
+                "singletons_qc_failed": 0,
+                "pct_singletons": 0.0,
+                "diff_chroms": 0,
+                "diff_chroms_qc_failed": 0
+            }
+        }
+    },
+    "lib_complexity": {
+        "lib_complexity": {
+            "rep1": {
+                "total_fragments": 106386,
+                "distinct_fragments": 102715,
+                "positions_with_one_read": 953,
+                "NRF": 0.965494,
+                "PBC1": 0.983118,
+                "PBC2": 105.961175
+            },
+            "rep2": {
+                "total_fragments": 130823,
+                "distinct_fragments": 129539,
+                "positions_with_one_read": 481,
+                "NRF": 0.990185,
+                "PBC1": 0.994172,
+                "PBC2": 267.742204
+            }
+        }
+    },
+    "replication": {
+        "reproducibility": {
+            "overlap": {
+                "Nt": 129926,
+                "N1": 52557,
+                "N2": 72231,
+                "Np": 126304,
+                "N_opt": 129926,
+                "N_consv": 129926,
+                "opt_set": "rep1_vs_rep2",
+                "consv_set": "rep1_vs_rep2",
+                "rescue_ratio": 1.0286768431720295,
+                "self_consistency_ratio": 1.3743364347280096,
+                "reproducibility": "pass"
+            },
+            "idr": {
+                "Nt": 110,
+                "N1": 34,
+                "N2": 28,
+                "Np": 97,
+                "N_opt": 110,
+                "N_consv": 110,
+                "opt_set": "rep1_vs_rep2",
+                "consv_set": "rep1_vs_rep2",
+                "rescue_ratio": 1.134020618556701,
+                "self_consistency_ratio": 1.2142857142857142,
+                "reproducibility": "pass"
+            }
+        },
+        "num_peaks": {
+            "rep1": {
+                "num_peaks": 59254
+            },
+            "rep2": {
+                "num_peaks": 89808
+            }
+        }
+    },
+    "peak_stat": {
+        "peak_region_size": {
+            "rep1": {
+                "min_size": 73.0,
+                "25_pct": 73.0,
+                "50_pct": 73.0,
+                "75_pct": 23657.5,
+                "max_size": 90736658.0,
+                "mean": 40573.925237114796
+            },
+            "rep2": {
+                "min_size": 73.0,
+                "25_pct": 73.0,
+                "50_pct": 73.0,
+                "75_pct": 3764.25,
+                "max_size": 90721383.0,
+                "mean": 25464.25424238375
+            },
+            "idr_opt": {
+                "min_size": 73.0,
+                "25_pct": 129.75,
+                "50_pct": 226.0,
+                "75_pct": 344.0,
+                "max_size": 127899.0,
+                "mean": 2183.9636363636364
+            },
+            "overlap_opt": {
+                "min_size": 73.0,
+                "25_pct": 73.0,
+                "50_pct": 73.0,
+                "75_pct": 2399.0,
+                "max_size": 73391956.0,
+                "mean": 14308.301132952603
+            }
+        }
+    },
+    "align_enrich": {
+        "xcor_score": {
+            "rep1": {
+                "subsampled_reads": 106386,
+                "estimated_fragment_len": 0,
+                "corr_estimated_fragment_len": 0.110898430603936,
+                "phantom_peak": 40,
+                "corr_phantom_peak": 0.09838674,
+                "argmin_corr": 1500,
+                "min_corr": 0.05274063,
+                "NSC": 2.102713,
+                "RSC": 1.274102
+            },
+            "rep2": {
+                "subsampled_reads": 130823,
+                "estimated_fragment_len": 0,
+                "corr_estimated_fragment_len": 0.0362351579264935,
+                "phantom_peak": 40,
+                "corr_phantom_peak": 0.03107848,
+                "argmin_corr": 1500,
+                "min_corr": 0.01692928,
+                "NSC": 2.140384,
+                "RSC": 1.36445
+            }
+        },
+        "jsd": {
+            "rep1": {
+                "auc": 0.006981851163169619,
+                "syn_auc": 0.3490716655445621,
+                "x_intercept": 0.9814936272490592,
+                "syn_x_intercept": 0.7222442131844256,
+                "elbow_pt": 0.9815576147075173,
+                "syn_elbow_pt": 0.7222442131844256,
+                "syn_jsd": 0.5037803679992278
+            },
+            "rep2": {
+                "auc": 0.009721624071846572,
+                "syn_auc": 0.35636839840010115,
+                "x_intercept": 0.9767185631616203,
+                "syn_x_intercept": 0.6895083892164195,
+                "elbow_pt": 0.9767685533635407,
+                "syn_elbow_pt": 0.6895083892164195,
+                "syn_jsd": 0.530254063525575
+            }
+        }
+    },
+    "peak_enrich": {
+        "frac_reads_in_peaks": {
+            "macs2": {
+                "rep1": {
+                    "frip": 0.967615377704126
+                },
+                "rep2": {
+                    "frip": 0.9948323611777266
+                },
+                "rep1-pr1": {
+                    "frip": 0.9658786886555125
+                },
+                "rep2-pr1": {
+                    "frip": 0.9894326427676264
+                },
+                "rep1-pr2": {
+                    "frip": 0.9763801537386443
+                },
+                "rep2-pr2": {
+                    "frip": 0.9917998545634583
+                },
+                "pooled": {
+                    "frip": 0.9792317716846018
+                },
+                "pooled-pr1": {
+                    "frip": 0.9803868583233815
+                },
+                "pooled-pr2": {
+                    "frip": 0.9904112693735944
+                }
+            },
+            "overlap": {
+                "rep1_vs_rep2": {
+                    "frip": 0.7677140129970319
+                },
+                "rep1-pr1_vs_rep1-pr2": {
+                    "frip": 0.8950294995557596
+                },
+                "rep2-pr1_vs_rep2-pr2": {
+                    "frip": 0.8503705537418965
+                },
+                "pooled-pr1_vs_pooled-pr2": {
+                    "frip": 0.7509294490426566
+                }
+            },
+            "idr": {
+                "rep1_vs_rep2": {
+                    "frip": 0.010072481770594978
+                },
+                "rep1-pr1_vs_rep1-pr2": {
+                    "frip": 0.009483782731529085
+                },
+                "rep2-pr1_vs_rep2-pr2": {
+                    "frip": 0.0035508176937477758
+                },
+                "pooled-pr1_vs_pooled-pr2": {
+                    "frip": 0.007997838186517432
+                }
+            }
+        },
+        "frac_reads_in_annot": {
+            "rep1": {
+                "fri_dhs": 0.5494404568188398,
+                "fri_blacklist": 0.0029249982529873917,
+                "fri_prom": 0.1243673318625151,
+                "fri_enh": 0.42355571971928
+            },
+            "rep2": {
+                "fri_dhs": 0.5862098308913404,
+                "fri_blacklist": 0.0016168211285256758,
+                "fri_prom": 0.14931227082140702,
+                "fri_enh": 0.4369594479600204
+            }
+        }
+    }
+}

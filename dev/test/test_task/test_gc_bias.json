@@ -1,0 +1,8 @@
+{
+    "test_gc_bias.paired_end" : true,
+    "test_gc_bias.ref_fa" : "GRCh38_no_alt_analysis_set_GCA_000001405.15.fasta.gz",
+    "test_gc_bias.nodup_bam" : "atac-seq-pipeline-test-data/input/pe/ataqc/ENCFF341MYG.subsampled.400.trim.merged.nodup.bam",
+
+    "test_gc_bias.ref_gc_plot" : "atac-seq-pipeline-test-data/ref_output/test_gc_bias/ENCFF341MYG.subsampled.400.trim.merged.nodup.gc.gc_plot.png",
+    "test_gc_bias.ref_gc_log" : "atac-seq-pipeline-test-data/ref_output/test_gc_bias/ENCFF341MYG.subsampled.400.trim.merged.nodup.gc.txt"
+}

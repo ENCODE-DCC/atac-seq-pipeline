@@ -1,0 +1,15 @@
+{
+    "test_jsd.se_nodup_bams" : [
+        "atac-seq-pipeline-test-data/input/se/nodup_bams/rep1/ENCFF439VSY.subsampled.400.trim.merged.nodup.bam"
+    ],
+    "test_jsd.se_blacklist" : "atac-seq-pipeline-test-data/genome_data/mm10_chr19_chrM/mm10.blacklist.bed.gz",
+
+    "test_jsd.se_fake_blacklist" : "atac-seq-pipeline-test-data/input/se/fake_blacklist/mm10.whole_chr19.blacklist.bed.gz",
+
+    "test_jsd.ref_se_jsd_logs" : [
+        "atac-seq-pipeline-test-data/ref_output/test_jsd/rep1.ENCFF439VSY.subsampled.400.trim.merged.nodup.bfilt.jsd.qc"
+    ],
+    "test_jsd.ref_se_jsd_fake_blacklist_logs" : [
+        "atac-seq-pipeline-test-data/ref_output/test_jsd/fake_blacklist/rep1.ENCFF439VSY.subsampled.400.trim.merged.nodup.bfilt.jsd.qc"
+    ]
+}

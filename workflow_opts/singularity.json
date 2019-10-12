@@ -1,5 +1,0 @@
-{
-    "default_runtime_attributes" : {
-        "singularity_container" : "~/.singularity/atac-seq-pipeline-v1.4.2.simg"
-    }
-}

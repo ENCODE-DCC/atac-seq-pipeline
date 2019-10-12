@@ -112,7 +112,7 @@ def recursively_read_qc_jsons(search_dir, qc_json_file_basename,
 def read_2col_tsv(tsv): # tsv (key \t val) -> map (key:val)
     if tsv:
         with open(tsv) as fp:
-            tsv = csv.reader(fp, delimiter='\t')
+            tsv = dict(csv.reader(fp, delimiter='\t'))
             return {row : tsv[row] for row in tsv}
     else:
         return None

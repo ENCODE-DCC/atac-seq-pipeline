@@ -1,0 +1,4 @@
+{
+    "atac.pipeline_type" : "atac",
+    "atac.genome_tsv" : "dx://project-F6K911Q9xyfgJ36JFzv03Z5J:pipeline-genome-data/hg38_dx_azure.tsv"
+}

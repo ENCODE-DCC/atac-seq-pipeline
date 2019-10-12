@@ -1,6 +1,0 @@
-{
-    "default_runtime_attributes" : {
-        "sge_pe" : "shm",
-        "singularity_container" : "~/.singularity/atac-seq-pipeline-v1.4.2.simg"
-    }
-}

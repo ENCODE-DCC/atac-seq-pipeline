@@ -1,0 +1,9 @@
+{
+    "test_tss_enrich.tss" : "atac-seq-pipeline-test-data/genome_data/hg38/ataqc/hg38_gencode_tss_unique.bed.gz",
+    "test_tss_enrich.chrsz" : "atac-seq-pipeline-test-data/genome_data/hg38/hg38.chrom.sizes",
+    
+    "test_tss_enrich.read_len_log" : "atac-seq-pipeline-test-data/input/pe/ataqc/ENCFF341MYG.subsampled.400.trim.merged.read_length.txt",
+    "test_tss_enrich.nodup_bam" : "atac-seq-pipeline-test-data/input/pe/ataqc/ENCFF341MYG.subsampled.400.trim.merged.nodup.bam",
+
+    "test_tss_enrich.ref_tss_enrich_qc" : "atac-seq-pipeline-test-data/ref_output/test_tss_enrich/ENCFF341MYG.subsampled.400.trim.merged.nodup.tss_enrich.qc"
+}
