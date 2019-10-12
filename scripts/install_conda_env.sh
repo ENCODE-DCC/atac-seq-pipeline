@@ -12,8 +12,8 @@ SRC_DIR=${SH_SCRIPT_DIR}/../src
 conda --version  # check if conda exists
 
 echo "=== Installing pipeline's Conda environments ==="
-conda create -n ${CONDA_ENV_PY3} --file ${REQ_TXT_PY3} -y -c bioconda -c r
-conda create -n ${CONDA_ENV_PY2} --file ${REQ_TXT_PY2} -y -c bioconda -c conda-forge
+conda create -n ${CONDA_ENV_PY3} --file ${REQ_TXT_PY3} -y -c defaults -c r -c bioconda -c conda-forge
+conda create -n ${CONDA_ENV_PY2} --file ${REQ_TXT_PY2} -y -c defaults -c r -c bioconda -c conda-forge
 
 echo "=== Configuring for pipeline's Conda environments ==="
 CONDA_PREFIX_PY3=$(conda env list | grep -P "\b${CONDA_ENV_PY3}\s" | awk '{if (NF==3) print $3; else print $2}')
@@ -69,18 +69,8 @@ echo "unset OLD_R_HOME" >> ${CONDA_DEACTIVATE_SH}
 echo "unset OLD_R_LIBS" >> ${CONDA_DEACTIVATE_SH}
 
 # hack around the need for both python2 and python3 in the same environment
-# we will keep this workaround until MACS2 and metaseq are ported to python3.
 cd ${CONDA_BIN}
-rm -f macs2 python2
-ln -s ../../${CONDA_ENV_PY2}/bin/macs2
 ln -s ../../${CONDA_ENV_PY2}/bin/python2
-
-# install SAMstats 0.2.1
-# we will keep this until SAMstats is added to bioconda
-${CONDA_BIN}/pip install --no-dependencies SAMstats==0.2.1
-
-# install pyhocon for caper
-${CONDA_BIN}/pip install pyhocon
 
 echo "=== Updating pipeline's Conda environments ==="
 cd ${CONDA_BIN}

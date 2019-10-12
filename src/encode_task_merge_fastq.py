@@ -7,7 +7,7 @@ import sys
 import os
 import argparse
 from encode_lib_common import (
-    hard_link, log, ls_l, mkdir_p, read_tsv, run_shell_cmd,
+    copy_f_to_f, log, ls_l, mkdir_p, read_tsv, run_shell_cmd,
     strip_ext_fastq)
 
 
@@ -52,10 +52,10 @@ def parse_arguments(debug=False):
     log.info(sys.argv)
     return args
 
-# make merged fastqs on $out_dir/R1, $out_dir/R2
-
 
 def merge_fastqs(fastqs, end, out_dir):
+    """make merged fastqs on $out_dir/R1, $out_dir/R2
+    """
     out_dir = os.path.join(out_dir, end)
     mkdir_p(out_dir)
     prefix = os.path.join(out_dir,
@@ -69,7 +69,7 @@ def merge_fastqs(fastqs, end, out_dir):
         run_shell_cmd(cmd)
         return merged
     else:
-        return hard_link(fastqs[0], merged)
+        return copy_f_to_f(fastqs[0], merged)
 
 
 def main():

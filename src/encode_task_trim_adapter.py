@@ -9,7 +9,7 @@ import argparse
 import copy
 from detect_adapter import detect_most_likely_adapter
 from encode_lib_common import (
-    hard_link, log, ls_l, mkdir_p, read_tsv, rm_f,
+    copy_f_to_dir, copy_f_to_f, log, ls_l, mkdir_p, read_tsv, rm_f,
     run_shell_cmd, strip_ext_fastq)
 
 
@@ -106,11 +106,7 @@ def trim_adapter_se(fastq, adapter, adapter_for_all, cutadapt_param, out_dir):
         run_shell_cmd(cmd)
         return trimmed
     else:
-        # make hard link
-        linked = os.path.join(out_dir,
-                              os.path.basename(fastq))
-        os.link(fastq, linked)
-        return linked
+        return copy_f_to_dir(fastq, out_dir)
 
 
 def trim_adapter_pe(fastq1, fastq2, adapter1, adapter2, adapter_for_all,
@@ -132,19 +128,14 @@ def trim_adapter_pe(fastq1, fastq2, adapter1, adapter2, adapter_for_all,
         run_shell_cmd(cmd)
         return [trimmed1, trimmed2]
     else:
-        # make hard link
-        linked1 = os.path.join(out_dir,
-                               os.path.basename(fastq1))
-        linked2 = os.path.join(out_dir,
-                               os.path.basename(fastq2))
-        os.link(fastq1, linked1)
-        os.link(fastq2, linked2)
-        return [linked1, linked2]
-
-# make merged fastqs on $out_dir/R1, $out_dir/R2
+        fq1 = copy_f_to_dir(fastq1, out_dir)
+        fq2 = copy_f_to_dir(fastq2, out_dir)
+        return [fq1, fq2]
 
 
 def merge_fastqs(fastqs, end, out_dir):
+    """make merged fastqs on $out_dir/R1, $out_dir/R2
+    """
     out_dir = os.path.join(out_dir, end)
     mkdir_p(out_dir)
     prefix = os.path.join(out_dir,
@@ -158,7 +149,7 @@ def merge_fastqs(fastqs, end, out_dir):
         run_shell_cmd(cmd)
         return merged
     else:
-        return hard_link(fastqs[0], merged)
+        return copy_f_to_f(fastqs[0], merged)
 
 
 def main():

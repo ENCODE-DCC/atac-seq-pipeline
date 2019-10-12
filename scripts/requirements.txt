@@ -1,12 +1,14 @@
-# repos: bioconda, r
+# for python3
+# conda repos: defaults, r, bioconda, conda-forge
 
-python ==3.6.6  # 3.7.4 didn't work with Conda >= 4.7
+nomkl  # using MKL can change MACS2 output randomly on different platforms
 
 idr ==2.0.4.2
 tabix
 samtools ==1.9
 htslib ==1.9
 sambamba ==0.6.6
+samstats ==0.2.1
 bedtools ==2.29.0
 picard ==2.20.7
 
@@ -33,17 +35,20 @@ pysam ==0.15.3
 pybedtools ==0.8.0
 phantompeakqualtools ==1.2.1
 pybigwig ==0.3.13
-openssl ==1.0.2t  # important to get the same random value
+openssl ==1.0.2t  # important to get the same random seed for "shuf"
 deeptools ==3.3.1
 cutadapt ==2.5
 preseq ==2.0.3
 pyfaidx ==0.5.5.2
+
+macs2 ==2.2.4
 
 jsondiff ==1.1.1
 libgcc
 requests
 ncurses
 gnuplot
+ghostscript
 
 numpy
 scipy
@@ -53,3 +58,6 @@ gsl
 matplotlib
 
 java-jdk
+
+caper
+croo
