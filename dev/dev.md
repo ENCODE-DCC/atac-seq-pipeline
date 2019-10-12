@@ -2,8 +2,8 @@
 
 ## Command line for version change
 ```bash
-PREV_VER=dev-v1.5.0.1
-NEW_VER=v1.5.0
+PREV_VER=v1.5.0
+NEW_VER=dev-v1.5.1
 for f in $(grep -rl ${PREV_VER} --include=*.{wdl,md,sh})
 do
   sed -i "s/${PREV_VER}/${NEW_VER}/g" ${f}
@@ -24,7 +24,7 @@ Run the following command line locally to build out DX workflows for this pipeli
 
 ```bash
 # version
-VER=dev-v1.5.0.1
+VER=v1.5.0
 DOCKER=quay.io/encode-dcc/atac-seq-pipeline:$VER
 
 # general
@@ -67,8 +67,5 @@ java -jar ~/dxWDL-0.79.1.jar compile atac.wdl -project "ENCODE Uniform Processin
 
 # test sample
 java -jar ~/dxWDL-0.79.1.jar compile atac.wdl -project "ENCODE Uniform Processing Pipelines Azure" -extras <(echo "{\"default_runtime_attributes\":{\"docker\":\"${DOCKER}\"}}") -f -folder /ATAC-seq/workflows/$VER/test_ENCSR356KRQ_subsampled -defaults example_input_json/dx_azure/ENCSR356KRQ_subsampled_dx_azure.json
-
-# test sample (single rep)
-java -jar ~/dxWDL-0.79.1.jar compile atac.wdl -project "ENCODE Uniform Processing Pipelines Azure" -extras <(echo "{\"default_runtime_attributes\":{\"docker\":\"${DOCKER}\"}}") -f -folder /ATAC-seq/workflows/$VER/test_ENCSR356KRQ_subsampled_rep1 -defaults example_input_json/dx_azure/ENCSR356KRQ_subsampled_rep1_dx_azure.json
 
 ```
