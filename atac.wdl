@@ -1068,6 +1068,8 @@ task align {
 	Array[Array[String]] tmp_adapters = if paired_end then transpose([adapters_R1, adapters_R2])
 				else transpose([adapters_R1])
 	command {
+		set -e
+
 		# check if pipeline dependencies can be found
 		if [[ -z "$(which encode_task_trim_adapter.py 2> /dev/null || true)" ]]
 		then
@@ -1077,7 +1079,7 @@ task align {
 		  echo 'GCP/AWS/Docker users: Did you add --docker flag to Caper command line arg?' 1>&2
 		  echo 'Singularity users: Did you add --singularity flag to Caper command line arg?' 1>&2
 		  echo -e "\n" 1>&2
-		  EXCEPTION_RAISED
+		  exit 3
 		fi
 
 		# trim adapter
@@ -1377,6 +1379,8 @@ task call_peak {
 	String disks
 
 	command {
+		set -e
+
 		if [ '${peak_caller}' == 'macs2' ]; then
 			python3 $(which encode_task_macs2_atac.py) \
 				${ta} \
@@ -1944,7 +1948,7 @@ task raise_exception {
 	String msg
 	command {
 		echo -e "\n* Error: ${msg}\n" >&2
-		EXCEPTION_RAISED
+		exit 2
 	}
 	output {
 		String error_msg = '${msg}'
