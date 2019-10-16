@@ -49,6 +49,7 @@ requests
 ncurses
 gnuplot
 ghostscript
+wget
 
 numpy
 scipy
