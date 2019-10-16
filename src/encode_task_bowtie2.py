@@ -5,6 +5,7 @@
 
 import sys
 import os
+import re
 import argparse
 from encode_lib_common import (
     log, ls_l, mkdir_p, rm_f, run_shell_cmd, strip_ext_fastq, strip_ext_tar,
@@ -18,9 +19,8 @@ def parse_arguments():
                         help='Path for prefix (or a tarball .tar) \
                             for reference bowtie2 index. \
                             Prefix must be like [PREFIX].1.bt2*. \
-                            Tar ball must be packed without compression \
-                            and directory by using command line \
-                            "tar cvf [TAR] [TAR_PREFIX].*.bt2*".')
+                            TAR ball can have any [PREFIX] but it should not \
+                            have a directory structure in it.')
     parser.add_argument('fastqs', nargs='+', type=str,
                         help='List of FASTQs (R1 and R2). \
                             FASTQs must be compressed with gzip (with .gz).')
@@ -113,6 +113,21 @@ def chk_bowtie2_index(prefix):
                         "Prefix = {}".format(prefix))
 
 
+def find_bowtie2_index_prefix(d):
+    """
+    Returns:
+        prefix of BWA index. e.g. returns PREFIX if PREFIX.sa exists
+    Args:
+        d: directory to search for .sa file
+    """
+    if d == '':
+        d = '.'
+    for f in os.listdir(d):
+        if f.endswith('.1.bt2') or f.endswith('.1.bt2l'):
+            return re.sub('\.1\.(bt2|bt2l)$', '', f)
+    return None
+
+
 def main():
     # read params
     args = parse_arguments()
@@ -130,11 +145,8 @@ def main():
         tar = args.bowtie2_index_prefix_or_tar
         # untar
         untar(tar, args.out_dir)
-        bowtie2_index_prefix = os.path.join(
-            args.out_dir, os.path.basename(strip_ext_tar(tar)))
-        temp_files.append('{}.*.bt2'.format(
-            bowtie2_index_prefix))
-        temp_files.append('{}.*.bt2l'.format(
+        bowtie2_index_prefix = find_bowtie2_index_prefix(args.out_dir)
+        temp_files.append('{}*'.format(
             bowtie2_index_prefix))
     else:
         bowtie2_index_prefix = args.bowtie2_index_prefix_or_tar
