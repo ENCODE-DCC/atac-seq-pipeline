@@ -17,8 +17,9 @@ if [[ "$#" -lt 2 ]]; then
   exit 2
 fi
 
-# pipeline specific params
+# parameters for building aligner indices
 BUILD_BWT2_IDX=1
+BUILD_BWT2_NTHREADS=2
 BUILD_BWA_IDX=0
 
 GENOME=$1
@@ -122,8 +123,8 @@ if [[ -z "${MITO_CHR_NAME}" ]]; then
 fi
 
 echo "=== Downloading files..."
-wget -c -O $(basename ${REF_FA}) ${REF_FA}
 if [[ ! -z "${BLACKLIST}" ]]; then wget -N -c ${BLACKLIST}; fi
+wget -c -O $(basename ${REF_FA}) ${REF_FA}
 
 echo "=== Processing reference fasta file..."
 if [[ ${REF_FA} == *.gz ]]; then 
@@ -132,13 +133,14 @@ if [[ ${REF_FA} == *.gz ]]; then
 elif [[ ${REF_FA} == *.bz2 ]]; then
   REF_FA_PREFIX=$(basename ${REF_FA} .bz2)
   bzip2 -d -f -c ${REF_FA_PREFIX}.bz2 > ${REF_FA_PREFIX}
+  gzip -nc ${REF_FA_PREFIX} > ${REF_FA_PREFIX}.gz
 elif [[ ${REF_FA} == *.2bit ]]; then
   REF_FA_PREFIX=$(basename ${REF_FA} .2bit).fa
   twoBitToFa $(basename ${REF_FA}) ${REF_FA_PREFIX}
+  gzip -nc ${REF_FA_PREFIX} > ${REF_FA_PREFIX}.gz
 else
   REF_FA_PREFIX=$(basename ${REF_FA})  
 fi
-gzip -nc ${REF_FA_PREFIX} > ${REF_FA_PREFIX}.gz
 
 echo "=== Generating fasta index and chrom.sizes file..."
 cd ${DEST_DIR}
@@ -158,7 +160,10 @@ GENSZ=$(cat $CHRSZ | awk '{sum+=$2} END{print sum}')
 if [[ "${GENOME}" == hg* ]]; then GENSZ=hs; fi
 if [[ "${GENOME}" == mm* ]]; then GENSZ=mm; fi
 
-if [[ ${BUILD_BWT2_IDX} == 1 ]]; then
+# how to make a tar ball without permission,user,timestamp info
+# https://stackoverflow.com/a/54908072
+
+if [[ "${BUILD_BWT2_IDX}" == 1 ]]; then
   echo "=== Building bowtie2 index..."
   mkdir -p ${DEST_DIR}/bowtie2_index
   cd ${DEST_DIR}/bowtie2_index
@@ -166,37 +171,51 @@ if [[ ${BUILD_BWT2_IDX} == 1 ]]; then
   # whole chr
   rm -f ${REF_FA_PREFIX}
   ln -s ../${REF_FA_PREFIX} ${REF_FA_PREFIX}
-  if [[ ! -f ${REF_FA_PREFIX}.rev.1.bt2 ]]; then
-    bowtie2-build ${REF_FA_PREFIX} ${REF_FA_PREFIX}
-    tar cvf ${REF_FA_PREFIX}.tar ${REF_FA_PREFIX}.*.bt2
-  fi
+  bowtie2-build ${REF_FA_PREFIX} ${REF_FA_PREFIX} --threads ${BUILD_BWT2_NTHREADS}
+  rm -f ${REF_FA_PREFIX}
+  tar cvf ${REF_FA_PREFIX}.tar ${REF_FA_PREFIX}.*.bt2 --sort=name --owner=root:0 --group=root:0 --mtime="UTC 2019-01-01"
+  gzip -n ${REF_FA_PREFIX}.tar
+  rm -f ${REF_FA_PREFIX}.*.bt2
+
   # mito chr only
   rm -f ${REF_MITO_FA_PREFIX}
   ln -s ../${REF_MITO_FA_PREFIX} ${REF_MITO_FA_PREFIX}
-  if [[ ! -f ${REF_MITO_FA_PREFIX}.rev.1.bt2 ]]; then
-    bowtie2-build ${REF_MITO_FA_PREFIX} ${REF_MITO_FA_PREFIX}
-    tar cvf ${REF_MITO_FA_PREFIX}.tar ${REF_MITO_FA_PREFIX}.*.bt2
-  fi
-
+  bowtie2-build ${REF_MITO_FA_PREFIX} ${REF_MITO_FA_PREFIX} --threads ${BUILD_BWT2_NTHREADS}
+  rm -f ${REF_MITO_FA_PREFIX}
+  tar cvf ${REF_MITO_FA_PREFIX}.tar ${REF_MITO_FA_PREFIX}.*.bt2 --sort=name --owner=root:0 --group=root:0 --mtime="UTC 2019-01-01"
+  gzip -n ${REF_MITO_FA_PREFIX}.tar
+  rm -f ${REF_MITO_FA_PREFIX}.*.bt2
 fi
 
-if [[ ${BUILD_BWA_IDX} == 1 ]]; then
+if [[ "${BUILD_BWA_IDX}" == 1 ]]; then
   echo "=== Building bwa index..."
   mkdir -p ${DEST_DIR}/bwa_index
   cd ${DEST_DIR}/bwa_index
-  rm -f ${REF_FA_PREFIX}
 
+  # whole chr
+  rm -f ${REF_FA_PREFIX}
   ln -s ../${REF_FA_PREFIX} ${REF_FA_PREFIX}
-  if [[ ! -f ${REF_FA_PREFIX}.sa ]]; then
-    bwa index ${REF_FA_PREFIX}
-    tar cvf ${REF_FA_PREFIX}.tar ${REF_FA_PREFIX}.*
-  fi
+  bwa index ${REF_FA_PREFIX}
+  rm -f ${REF_FA_PREFIX}
+  tar cvf ${REF_FA_PREFIX}.tar ${REF_FA_PREFIX}.* --sort=name --owner=root:0 --group=root:0 --mtime="UTC 2019-01-01"
+  gzip -n ${REF_FA_PREFIX}.tar
+  rm -f ${REF_FA_PREFIX}.amb ${REF_FA_PREFIX}.ann ${REF_FA_PREFIX}.bwt
+  rm -f ${REF_FA_PREFIX}.pac ${REF_FA_PREFIX}.sa
+
+  # mito chr only
+  rm -f ${REF_MITO_FA_PREFIX}
   ln -s ../${REF_MITO_FA_PREFIX} ${REF_MITO_FA_PREFIX}
-  if [[ ! -f ${REF_MITO_FA_PREFIX}.sa ]]; then
-    bwa index ${REF_MITO_FA_PREFIX}
-    tar cvf ${REF_MITO_FA_PREFIX}.tar ${REF_MITO_FA_PREFIX}.*
-  fi
+  bwa index ${REF_MITO_FA_PREFIX}
+  rm -f ${REF_MITO_FA_PREFIX}
+  tar cvf ${REF_MITO_FA_PREFIX}.tar ${REF_MITO_FA_PREFIX}.* --sort=name --owner=root:0 --group=root:0 --mtime="UTC 2019-01-01"
+  gzip -n ${REF_MITO_FA_PREFIX}.tar
+  rm -f ${REF_MITO_FA_PREFIX}.amb ${REF_MITO_FA_PREFIX}.ann ${REF_MITO_FA_PREFIX}.bwt
+  rm -f ${REF_MITO_FA_PREFIX}.pac ${REF_MITO_FA_PREFIX}.sa
 fi
+
+echo "=== Removing temporary files..."
+cd ${DEST_DIR}
+rm -f ${REF_FA_PREFIX} ${REF_MITO_FA_PREFIX}
 
 echo "=== Creating TSV file... (${TSV})"
 cd ${DEST_DIR}
