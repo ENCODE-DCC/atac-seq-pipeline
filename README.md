@@ -63,7 +63,7 @@ You can also run this pipeline on DNAnexus without using Caper or Cromwell. Ther
 
 ## How to organize outputs
 
-Install [Croo](https://github.com/ENCODE-DCC/croo#installation). Make sure that you have python3(> 3.4.1) installed on your system. Find a `metadata.json` on Caper's output directory.
+Install [Croo](https://github.com/ENCODE-DCC/croo#installation). **You can skip this installation if you have installed pipeline's Conda environment and activated it**. Make sure that you have python3(> 3.4.1) installed on your system. Find a `metadata.json` on Caper's output directory.
 
 ```bash
 $ pip install croo
