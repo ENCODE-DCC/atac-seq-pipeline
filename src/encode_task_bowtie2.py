@@ -118,12 +118,14 @@ def find_bowtie2_index_prefix(d):
     Returns:
         prefix of BWA index. e.g. returns PREFIX if PREFIX.sa exists
     Args:
-        d: directory to search for .sa file
+        d: directory to search for .1.bt2 or .1.bt2l file
     """
     if d == '':
         d = '.'
     for f in os.listdir(d):
-        if f.endswith('.1.bt2') or f.endswith('.1.bt2l'):
+        if f.endswith('.rev.1.bt2') or f.endswith('.rev.1.bt2l'):
+            return re.sub('\.rev\.1\.(bt2|bt2l)$', '', f)
+        elif f.endswith('.1.bt2') or f.endswith('.1.bt2l'):
             return re.sub('\.1\.(bt2|bt2l)$', '', f)
     return None
 
