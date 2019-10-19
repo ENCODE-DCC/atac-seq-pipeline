@@ -49,6 +49,7 @@
     elif [[ $GENOME == "YOUR_OWN_GENOME" ]]; then
       REF_FA="URL_FOR_YOUR_FASTA_OR_2BIT"
       BLACKLIST= # leave it empty if you don't have it
+      MITO_CHR_NAME= # name for mitochondrial chromosome in reference genome, e.g. chrM, MT
 
     ...
     ```
