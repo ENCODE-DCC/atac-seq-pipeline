@@ -291,7 +291,7 @@ def make_cat_align(args, cat_root):
 
     cat_align_samstat = QCCategory(
         'samstat',
-        html_head='<h2>SAMstat (raw BAM)</h2>',
+        html_head='<h2>SAMstat (raw unfiltered BAM)</h2>',
         parser=parse_flagstat_qc,
         map_key_desc=MAP_KEY_DESC_FLAGSTAT_QC,
         parent=cat_align
@@ -307,7 +307,7 @@ def make_cat_align(args, cat_root):
 
     cat_align_dup = QCCategory(
         'dup',
-        html_head='<h2>Marking duplicates (filtered BAMs)</h2>',
+        html_head='<h2>Marking duplicates (filtered BAM)</h2>',
         html_foot="""
             <div id='help-filter'>
             Filtered out (samtools view -F 1804):
@@ -334,7 +334,7 @@ def make_cat_align(args, cat_root):
 
     cat_align_frac_mito = QCCategory(
         'frac_mito',
-        html_head='<h2>Fraction of mitochondrial reads</h2>',
+        html_head='<h2>Fraction of mitochondrial reads (unfiltered BAM)</h2>',
         parser=parse_frac_mito_qc,
         map_key_desc=MAP_KEY_DESC_FRAC_MITO_QC,
         parent=cat_align
@@ -385,7 +385,7 @@ def make_cat_align(args, cat_root):
 
     cat_fraglen = QCCategory(
         'frag_len_stat',
-        html_head='<h2>Fragment length statistics</h2>',
+        html_head='<h2>Fragment length statistics (filtered/deduped BAM)</h2>',
         html_foot="""
             <p>Open chromatin assays show distinct fragment length enrichments, as the cut
             sites are only in open chromatin and not in nucleosomes. As such, peaks
@@ -413,7 +413,7 @@ def make_cat_align(args, cat_root):
 
     cat_gc_bias = QCCategory(
         'gc_bias',
-        html_head='<h2>Sequence quality metrics (GC bias)</h2>',
+        html_head='<h2>Sequence quality metrics (filtered/deduped BAM)</h2>',
         html_foot="""
             <p>Open chromatin assays are known to have significant GC bias. Please take this
             into consideration as necessary.</p><br>
@@ -634,6 +634,7 @@ def make_cat_align_enrich(args, cat_root):
     )
 
     if args.pipeline_type in ('tf', 'histone'):
+        html_head_xcor = '<h2>Strand cross-correlation measures (trimmed/filtered SE BAM)</h2>',
         html_foot_xcor = """
             <br><p>Performed on subsampled ({xcor_subsample_reads}) reads mapped from FASTQs that are trimmed to {xcor_pe_trim_bp}.
             Such FASTQ trimming and subsampling reads are for cross-corrleation analysis only. 
@@ -646,6 +647,7 @@ def make_cat_align_enrich(args, cat_root):
             xcor_pe_trim_bp=args.xcor_pe_trim_bp,
         )
     else:
+        html_head_xcor = '<h2>Strand cross-correlation measures (filtered BAM)</h2>',
         html_foot_xcor = """
             <br><p>Performed on subsampled ({xcor_subsample_reads}) reads.
             Such FASTQ trimming is for cross-corrleation analysis only.</p>
@@ -662,7 +664,7 @@ def make_cat_align_enrich(args, cat_root):
 
     cat_xcor = QCCategory(
         'xcor_score',
-        html_head='<h2>Strand cross-correlation measures</h2>',
+        html_head=html_head_xcor,
         html_foot=html_foot_xcor,
         parser=parse_xcor_score,
         map_key_desc=MAP_KEY_DESC_XCOR_SCORE,
@@ -684,7 +686,7 @@ def make_cat_align_enrich(args, cat_root):
 
     cat_tss_enrich = QCCategory(
         'tss_enrich',
-        html_head='<h2>TSS enrichment</h2>',
+        html_head='<h2>TSS enrichment (filtered/deduped BAM)</h2>',
         html_foot="""
             <p>Open chromatin assays should show enrichment in open chromatin sites, such as
             TSS's. An average TSS enrichment in human (hg19) is above 6. A strong TSS enrichment is
@@ -707,7 +709,7 @@ def make_cat_align_enrich(args, cat_root):
 
     cat_jsd = QCCategory(
         'jsd',
-        html_head='<h2>Jensen-Shannon distance</h2>',
+        html_head='<h2>Jensen-Shannon distance (filtered/deduped BAM)</h2>',
         parser=parse_jsd_qc,
         map_key_desc=MAP_KEY_DESC_JSD_QC,
         parent=cat_align_enrich
