@@ -634,7 +634,7 @@ def make_cat_align_enrich(args, cat_root):
     )
 
     if args.pipeline_type in ('tf', 'histone'):
-        html_head_xcor = '<h2>Strand cross-correlation measures (trimmed/filtered SE BAM)</h2>',
+        html_head_xcor = '<h2>Strand cross-correlation measures (trimmed/filtered SE BAM)</h2>'
         html_foot_xcor = """
             <br><p>Performed on subsampled ({xcor_subsample_reads}) reads mapped from FASTQs that are trimmed to {xcor_pe_trim_bp}.
             Such FASTQ trimming and subsampling reads are for cross-corrleation analysis only. 
@@ -647,7 +647,7 @@ def make_cat_align_enrich(args, cat_root):
             xcor_pe_trim_bp=args.xcor_pe_trim_bp,
         )
     else:
-        html_head_xcor = '<h2>Strand cross-correlation measures (filtered BAM)</h2>',
+        html_head_xcor = '<h2>Strand cross-correlation measures (filtered BAM)</h2>'
         html_foot_xcor = """
             <br><p>Performed on subsampled ({xcor_subsample_reads}) reads.
             Such FASTQ trimming is for cross-corrleation analysis only.</p>
