@@ -37,6 +37,8 @@ Parameter|Type|Description
 `atac.blacklist`| File | 3-col BED file. Peaks overlapping these regions will be filtered out
 `atac.gensz`| String | MACS2's genome sizes (hs for human, mm for mouse or sum of 2nd col in chrsz)
 `atac.mito_chr_name`| String | Name of mitochondrial chromosome (e.g. chrM)
+`atac.regex_bfilt_peak_chr_name`| String | Perl style reg-ex to keep peaks on selected chromosomes only matching with this pattern (default: `chr[\dXY]+`. This will keep chr1, chr2, ... chrX and chrY in `.bfilt.` peaks file. chrM is not included here)
+
 
 Additional annotated genome data:
 
@@ -176,7 +178,6 @@ Parameter|Default|Description
 ---------|-------|-----------
 `atac.enable_xcor` | false | Enable cross-correlation analysis
 `atac.enable_count_signal_track` | false | Enable count signal track generation
-`atac.keep_irregular_chr_in_bfilt_peak` | false | Keep irregular chromosome names. Use this for custom genomes without canonical chromosome names (chr1, chrX, ...)
 `atac.enable_preseq` | false | Enable preseq, which performs a yield prediction for reads
 `atac.enable_jsd` | true | Enable deeptools fingerprint (JS distance)
 `atac.enable_gc_bias` | true | Enable GC bias computation

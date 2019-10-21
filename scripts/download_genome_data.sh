@@ -27,6 +27,8 @@ mkdir -p ${DEST_DIR}
 cd ${DEST_DIR}
 
 if [[ "${GENOME}" == "hg19" ]]; then
+  REGEX_BFILT_PEAK_CHR_NAME="chr[\dXY]+"
+  MITO_CHR_NAME="chrM"
   REF_FA="http://hgdownload.cse.ucsc.edu/goldenpath/hg19/encodeDCC/referenceSequences/male.hg19.fa.gz"
   REF_MITO_FA="https://storage.googleapis.com/encode-pipeline-genome-data/hg19/male.hg19.chrM.fa.gz"
   CHRSZ="https://storage.googleapis.com/encode-pipeline-genome-data/hg19/hg19.chrom.sizes"
@@ -35,7 +37,6 @@ if [[ "${GENOME}" == "hg19" ]]; then
   BWA_IDX="https://storage.googleapis.com/encode-pipeline-genome-data/hg19/bwa_index/male.hg19.fa.tar"
   BWA_MITO_IDX="https://storage.googleapis.com/encode-pipeline-genome-data/hg19/bwa_index/male.hg19.chrM.fa.tar"
   BLACKLIST="https://storage.googleapis.com/encode-pipeline-genome-data/hg19/wgEncodeDacMapabilityConsensusExcludable.bed.gz"
-  MITO_CHR_NAME="chrM"
 
   TSS="https://storage.googleapis.com/encode-pipeline-genome-data/hg19/ataqc/hg19_gencode_tss_unique.bed.gz"
   DNASE="https://storage.googleapis.com/encode-pipeline-genome-data/hg19/ataqc/reg2map_honeybadger2_dnase_all_p10_ucsc.bed.gz"
@@ -45,6 +46,8 @@ if [[ "${GENOME}" == "hg19" ]]; then
   ROADMAP_META="https://storage.googleapis.com/encode-pipeline-genome-data/hg19/ataqc/eid_to_mnemonic.txt"
 
 elif [[ "${GENOME}" == "mm9" ]]; then
+  REGEX_BFILT_PEAK_CHR_NAME="chr[\dXY]+"
+  MITO_CHR_NAME="chrM"
   REF_FA="https://storage.googleapis.com/encode-pipeline-genome-data/mm9/mm9.fa.gz"
   REF_MITO_FA="https://storage.googleapis.com/encode-pipeline-genome-data/mm9/mm9.chrM.fa.gz"
   CHRSZ="https://storage.googleapis.com/encode-pipeline-genome-data/mm9/mm9.chrom.sizes"
@@ -53,7 +56,6 @@ elif [[ "${GENOME}" == "mm9" ]]; then
   BWA_IDX="https://storage.googleapis.com/encode-pipeline-genome-data/mm9/bwa_index/mm9.fa.tar"
   BWA_MITO_IDX="https://storage.googleapis.com/encode-pipeline-genome-data/mm9/bwa_index/mm9.chrM.fa.tar"
   BLACKLIST="https://storage.googleapis.com/encode-pipeline-genome-data/mm9/mm9-blacklist.bed.gz"
-  MITO_CHR_NAME="chrM"
 
   TSS="https://storage.googleapis.com/encode-pipeline-genome-data/mm9/ataqc/mm9_gencode_tss_unique.bed.gz"
   DNASE="https://storage.googleapis.com/encode-pipeline-genome-data/mm9/ataqc/mm9_univ_dhs_ucsc.from_mm10.bed.gz"
@@ -64,12 +66,13 @@ elif [[ "${GENOME}" == "mm9" ]]; then
   ROADMAP_META="https://storage.googleapis.com/encode-pipeline-genome-data/mm9/ataqc/accession_to_name.txt"
 
 elif [[ "${GENOME}" == "hg38" ]]; then
+  REGEX_BFILT_PEAK_CHR_NAME="chr[\dXY]+"
+  MITO_CHR_NAME="chrM"
   REF_FA="https://www.encodeproject.org/files/GRCh38_no_alt_analysis_set_GCA_000001405.15/@@download/GRCh38_no_alt_analysis_set_GCA_000001405.15.fasta.gz"
   REF_MITO_FA="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/GRCh38_no_alt_analysis_set_GCA_000001405.15.chrM.fa.gz"
   CHRSZ="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/hg38.chrom.sizes"
   BWT2_MITO_IDX="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/bowtie2_index/GRCh38_no_alt_analysis_set_GCA_000001405.15.chrM.fa.tar"
   BWA_MITO_IDX="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/bwa_index/GRCh38_no_alt_analysis_set_GCA_000001405.15.chrM.fa.tar"
-  MITO_CHR_NAME="chrM"
   if [[ "${VER}" == "v2" ]]; then
     BWT2_IDX="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/bowtie2_index/ENCFF110MCL.tar.gz"
     BWA_IDX="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/bwa_index/ENCFF643CGH.tar.gz"
@@ -89,12 +92,13 @@ elif [[ "${GENOME}" == "hg38" ]]; then
   ROADMAP_META="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/ataqc/hg38_dnase_avg_fseq_signal_metadata.txt"
 
 elif [[ "${GENOME}" == "mm10" ]]; then
+  REGEX_BFILT_PEAK_CHR_NAME="chr[\dXY]+"
+  MITO_CHR_NAME="chrM"
   REF_FA="https://www.encodeproject.org/files/mm10_no_alt_analysis_set_ENCODE/@@download/mm10_no_alt_analysis_set_ENCODE.fasta.gz"
   REF_MITO_FA="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/mm10_no_alt_analysis_set_ENCODE.chrM.fa.gz"
   CHRSZ="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/mm10.chrom.sizes"
   BWT2_MITO_IDX="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/bowtie2_index/mm10_no_alt_analysis_set_ENCODE.chrM.fa.tar"
   BWA_MITO_IDX="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/bwa_index/mm10_no_alt_analysis_set_ENCODE.chrM.fa.tar"
-  MITO_CHR_NAME="chrM"
   if [[ "${VER}" == "v2" ]]; then
     BWT2_IDX="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/bowtie2_index/ENCFF309GLL.tar.gz"
     BWA_IDX="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/bwa_index/ENCFF018NEO.tar.gz"
@@ -113,6 +117,8 @@ elif [[ "${GENOME}" == "mm10" ]]; then
   ROADMAP_META="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/ataqc/mm10_dnase_avg_fseq_signal_metadata.txt"
 
 elif [[ "${GENOME}" == "hg38_chr19_chrM" ]]; then
+  REGEX_BFILT_PEAK_CHR_NAME="chr[\dXY]+"
+  MITO_CHR_NAME="chrM"
   REF_FA="https://storage.googleapis.com/encode-pipeline-genome-data/hg38_chr19_chrM/GRCh38_no_alt_analysis_set_GCA_000001405.15.chr19_chrM.fasta.gz"
   REF_MITO_FA="https://storage.googleapis.com/encode-pipeline-genome-data/hg38_chr19_chrM/GRCh38_no_alt_analysis_set_GCA_000001405.15.chr19_chrM.chrM.fa.gz"
   CHRSZ="https://storage.googleapis.com/encode-pipeline-genome-data/hg38_chr19_chrM/hg38_chr19_chrM.chrom.sizes"
@@ -120,7 +126,6 @@ elif [[ "${GENOME}" == "hg38_chr19_chrM" ]]; then
   BWT2_MITO_IDX="https://storage.googleapis.com/encode-pipeline-genome-data/hg38_chr19_chrM/bowtie2_index/GRCh38_no_alt_analysis_set_GCA_000001405.15.chr19_chrM.chrM.fa.tar"
   BWA_IDX="https://storage.googleapis.com/encode-pipeline-genome-data/hg38_chr19_chrM/bwa_index/GRCh38_no_alt_analysis_set_GCA_000001405.15.chr19_chrM.fasta.tar"
   BWA_MITO_IDX="https://storage.googleapis.com/encode-pipeline-genome-data/hg38_chr19_chrM/bwa_index/GRCh38_no_alt_analysis_set_GCA_000001405.15.chr19_chrM.chrM.fa.tar"
-  MITO_CHR_NAME="chrM"
   if [[ "${VER}" == "v2" ]]; then
     BLACKLIST="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/ENCFF419RSJ.bed.gz"
     TSS="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/ataqc/tss.pc.gencode.v29.bed.gz"
@@ -136,6 +141,8 @@ elif [[ "${GENOME}" == "hg38_chr19_chrM" ]]; then
   ROADMAP_META="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/ataqc/hg38_dnase_avg_fseq_signal_metadata.txt"
 
 elif [[ "${GENOME}" == "mm10_chr19_chrM" ]]; then
+  REGEX_BFILT_PEAK_CHR_NAME="chr[\dXY]+"
+  MITO_CHR_NAME="chrM"
   REF_FA="https://storage.googleapis.com/encode-pipeline-genome-data/mm10_chr19_chrM/mm10_no_alt_analysis_set_ENCODE.chr19_chrM.fasta.gz"
   REF_MITO_FA="https://storage.googleapis.com/encode-pipeline-genome-data/mm10_chr19_chrM/mm10_no_alt_analysis_set_ENCODE.chr19_chrM.chrM.fa.gz"
   CHRSZ="https://storage.googleapis.com/encode-pipeline-genome-data/mm10_chr19_chrM/mm10_chr19_chrM.chrom.sizes"
@@ -143,7 +150,6 @@ elif [[ "${GENOME}" == "mm10_chr19_chrM" ]]; then
   BWT2_MITO_IDX="https://storage.googleapis.com/encode-pipeline-genome-data/mm10_chr19_chrM/bowtie2_index/mm10_no_alt_analysis_set_ENCODE.chr19_chrM.chrM.fa.tar"
   BWA_IDX="https://storage.googleapis.com/encode-pipeline-genome-data/mm10_chr19_chrM/bwa_index/mm10_no_alt_analysis_set_ENCODE.chr19_chrM.fasta.tar"
   BWA_MITO_IDX="https://storage.googleapis.com/encode-pipeline-genome-data/mm10_chr19_chrM/bwa_index/mm10_no_alt_analysis_set_ENCODE.chr19_chrM.chrM.fa.tar"
-  MITO_CHR_NAME="chrM"
   if [[ "${VER}" == "v2" ]]; then
     BLACKLIST="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/ENCFF547MET.bed.gz"
   else
@@ -166,6 +172,11 @@ if [[ -z "${MITO_CHR_NAME}" ]]; then
   echo "Error: Mitochondrial chromosome name must be defined"
   exit 1
 fi
+if [[ -z "${REGEX_BFILT_PEAK_CHR_NAME}" ]]; then
+  echo "Error: Perl style reg-ex for filtering peaks must be defined"
+  exit 1
+fi
+
 
 echo "=== Downloading files..."
 wget -c -O $(basename ${REF_FA}) ${REF_FA}
@@ -208,6 +219,7 @@ echo -e "genome_name\t${GENOME}" >> ${TSV}
 echo -e "ref_fa\t${DEST_DIR}/$(basename $REF_FA_PREFIX)" >> ${TSV}
 echo -e "ref_mito_fa\t${DEST_DIR}/$(basename $REF_MITO_FA_PREFIX)" >> ${TSV}
 echo -e "mito_chr_name\t${MITO_CHR_NAME}" >> ${TSV}
+printf "regex_bfilt_peak_chr_name\t%s\n" "${REGEX_BFILT_PEAK_CHR_NAME}" >> ${TSV}
 echo -e "blacklist\t${DEST_DIR}/$(basename ${BLACKLIST})" >> ${TSV};
 echo -e "chrsz\t${DEST_DIR}/$(basename ${CHRSZ})" >> ${TSV}
 echo -e "gensz\t${GENSZ}" >> ${TSV}

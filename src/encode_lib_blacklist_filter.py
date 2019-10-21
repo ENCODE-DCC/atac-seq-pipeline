@@ -14,10 +14,11 @@ from encode_lib_common import (
 def parse_arguments():
     parser = argparse.ArgumentParser(prog='ENCODE DCC Blacklist filter.')
     parser.add_argument('peak', type=str, help='Peak file.')
-    parser.add_argument('--blacklist', type=str, required=True,
+    parser.add_argument('--blacklist', type=str,
                         help='Blacklist BED file.')
-    parser.add_argument('--keep-irregular-chr', action="store_true",
-                        help='Keep reads with non-canonical chromosome names.')
+    parser.add_argument('--regex-bfilt-peak-chr-name',
+                        help='Keep chromosomes matching this pattern only '
+                             'in .bfilt. peak files.')
     parser.add_argument('--out-dir', default='', type=str,
                         help='Output directory.')
     parser.add_argument('--log-level', default='INFO',
@@ -26,7 +27,7 @@ def parse_arguments():
                                  'CRITICAL'],
                         help='Log level')
     args = parser.parse_args()
-    if args.blacklist.endswith('null'):
+    if args.blacklist is None or args.blacklist.endswith('null'):
         args.blacklist = ''
 
     log.setLevel(args.log_level)
@@ -34,16 +35,22 @@ def parse_arguments():
     return args
 
 
-def blacklist_filter(peak, blacklist, keep_irregular_chr, out_dir):
+def blacklist_filter(peak, blacklist, regex_bfilt_peak_chr_name, out_dir):
     prefix = os.path.join(
         out_dir,
         os.path.basename(strip_ext(peak)))
     peak_ext = get_ext(peak)
     filtered = '{}.bfilt.{}.gz'.format(prefix, peak_ext)
 
-    if get_num_lines(peak) == 0 or blacklist == '' \
+    if blacklist is None or blacklist == '' or get_num_lines(peak) == 0 \
             or get_num_lines(blacklist) == 0:
-        cmd = 'zcat -f {} | gzip -nc > {}'.format(peak, filtered)
+        cmd = 'zcat -f {} | '
+        cmd += 'grep -P \'{}\\b\' | '
+        cmd += 'gzip -nc > {}'
+        cmd = cmd.format(
+            peak,
+            regex_bfilt_peak_chr_name,
+            filtered)
         run_shell_cmd(cmd)
     else:
         # due to bedtools bug when .gz is given for -a and -b
@@ -53,12 +60,12 @@ def blacklist_filter(peak, blacklist, keep_irregular_chr, out_dir):
         cmd = 'bedtools intersect -nonamecheck -v -a {} -b {} | '
         cmd += 'awk \'BEGIN{{OFS="\\t"}} '
         cmd += '{{if ($5>1000) $5=1000; print $0}}\' | '
-        if not keep_irregular_chr:
-            cmd += 'grep -P \'chr[\\dXY]+\\b\' | '
+        cmd += 'grep -P \'{}\\b\' | '
         cmd += 'gzip -nc > {}'
         cmd = cmd.format(
             tmp1,  # peak
             tmp2,  # blacklist
+            regex_bfilt_peak_chr_name, # regex
             filtered)
         run_shell_cmd(cmd)
         rm_f([tmp1, tmp2])
