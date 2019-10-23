@@ -45,7 +45,7 @@ This document describes instruction for the item 1).
     ```bash
     $ PROJECT=[YOUR_PROJECT_NAME]
     $ OUT_FOLDER=/test_sample_atac_ENCSR356KRQ_subsampled
-    $ DOCKER=quay.io/encode-dcc/atac-seq-pipeline:dev-v1.5.1
+    $ DOCKER=quay.io/encode-dcc/atac-seq-pipeline:v1.5.1
 
     $ java -jar dxWDL-0.77.jar compile atac.wdl -project ${PROJECT} -f -folder ${OUT_FOLDER} -defaults ${INPUT} -extras <(echo "{\"default_runtime_attributes\":{\"docker\":\"${DOCKER}\"}}")
     ```
