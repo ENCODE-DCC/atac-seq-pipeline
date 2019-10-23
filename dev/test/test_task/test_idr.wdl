@@ -18,6 +18,8 @@ workflow test_idr {
 	String se_blacklist
 	String se_chrsz
 
+	String regex_bfilt_peak_chr_name = 'chr[\\dXY]+'
+
 	call atac.idr as se_idr { input : 
 		prefix = 'rep1-rep2',
 		peak1 = se_peak_rep1,
@@ -28,7 +30,7 @@ workflow test_idr {
 		rank = 'p.value',
 		blacklist = se_blacklist,
 		chrsz = se_chrsz,
-		keep_irregular_chr_in_bfilt_peak = false,
+		regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name,
 		ta = se_ta_pooled,
 	}
 
