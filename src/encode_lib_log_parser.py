@@ -9,8 +9,8 @@ from collections import OrderedDict
 
 
 MAP_KEY_DESC_FRAC_MITO_QC = {
-    'non_mito_reads': 'Rm = Number of Non-mitochondrial Reads',
-    'mito_reads': 'Rn = Number of Mitochondrial Reads',
+    'non_mito_reads': 'Rn = Number of Non-mitochondrial Reads',
+    'mito_reads': 'Rm = Number of Mitochondrial Reads',
     'frac_mito_reads': 'Rm/(Rn+Rm) = Frac. of mitochondrial reads'
 }
 

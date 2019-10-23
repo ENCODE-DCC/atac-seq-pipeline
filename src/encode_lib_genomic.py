@@ -279,7 +279,7 @@ def subsample_ta_pe(ta, subsample, non_mito, mito_chr_name, r1_only, out_dir):
 # convert encode peak file to hammock (for Wash U browser track)
 
 
-def peak_to_hammock(peak, keep_irregular_chr, out_dir):
+def peak_to_hammock(peak, out_dir):
     peak_type = get_peak_type(peak)
     prefix = os.path.join(out_dir, os.path.basename(
         strip_ext_peak(peak)))
@@ -295,8 +295,6 @@ def peak_to_hammock(peak, keep_irregular_chr, out_dir):
         cmd2 = 'touch {}'.format(hammock_gz_tbi)
     else:
         cmd = "zcat -f {} | "
-        if not keep_irregular_chr:
-            cmd += "sed '/^\(chr\)/!d' | "
         cmd += "LC_COLLATE=C sort -k1,1V -k2,2n > {}"
         cmd = cmd.format(peak, hammock_tmp)
         run_shell_cmd(cmd)
@@ -357,7 +355,7 @@ def peak_to_hammock(peak, keep_irregular_chr, out_dir):
     return (hammock_gz, hammock_gz_tbi)
 
 
-def peak_to_bigbed(peak, peak_type, chrsz, keep_irregular_chr, out_dir):
+def peak_to_bigbed(peak, peak_type, chrsz, out_dir):
     prefix = os.path.join(out_dir,
                           os.path.basename(strip_ext(peak)))
     bigbed = '{}.{}.bb'.format(prefix, peak_type)
@@ -428,11 +426,7 @@ def peak_to_bigbed(peak, peak_type, chrsz, keep_irregular_chr, out_dir):
     with open(as_file, 'w') as fp:
         fp.write(as_file_contents)
 
-    if not keep_irregular_chr:
-        cmd1 = "cat {} | grep -P 'chr[\\dXY]+\\b' > {}".format(
-            chrsz, chrsz_tmp)
-    else:
-        cmd1 = "cat {} > {}".format(chrsz, chrsz_tmp)
+    cmd1 = "cat {} > {}".format(chrsz, chrsz_tmp)
     run_shell_cmd(cmd1)
     cmd2 = "zcat -f {} | LC_COLLATE=C sort -k1,1 -k2,2n | "
     cmd2 += 'awk \'BEGIN{{OFS="\\t"}} {{if ($5>1000) $5=1000; '

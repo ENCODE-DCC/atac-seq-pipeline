@@ -1,6 +1,6 @@
 {
     "atac.pipeline_type" : "atac",
-    "atac.genome_tsv" : "/home/groups/cherry/encode/pipeline_genome_data/hg38_sherlock.tsv",
+    "atac.genome_tsv" : "/home/groups/cherry/encode/pipeline_genome_data/genome_tsv/v1/hg38_sherlock.tsv",
     "atac.fastqs_rep1_R1" : [
         "/home/groups/cherry/encode/pipeline_test_samples/encode-atac-seq-pipeline/ENCSR356KRQ/fastq/rep1/pair1/ENCFF341MYG.fastq.gz",
         "/home/groups/cherry/encode/pipeline_test_samples/encode-atac-seq-pipeline/ENCSR356KRQ/fastq/rep1/pair1/ENCFF106QGY.fastq.gz"
