@@ -16,8 +16,6 @@ workflow test_overlap {
 	String se_blacklist
 	String se_chrsz
 
-	String regex_bfilt_peak_chr_name = 'chr[\\dXY]+'
-
 	call atac.overlap as se_overlap { input :
 		prefix = 'rep1-rep2',
 		peak1 = se_peak_rep1,
@@ -25,7 +23,7 @@ workflow test_overlap {
 		peak_pooled = se_peak_pooled,
 		peak_type = 'narrowPeak',
 		blacklist = se_blacklist,
-		regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name,
+		keep_irregular_chr_in_bfilt_peak = false,
 		chrsz = se_chrsz,
 		ta = se_ta_pooled,
 	}
