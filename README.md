@@ -16,7 +16,18 @@ The ATAC-seq pipeline protocol specification is [here](https://docs.google.com/d
 
 ## Installation
 
-1) Git clone this pipeline.
+1) [Install Caper](https://github.com/ENCODE-DCC/caper#installation). Caper is a python wrapper for [Cromwell](https://github.com/broadinstitute/cromwell).
+
+	> **IMPORTANT**: Make sure that you have python3(> 3.4.1) installed on your system.
+
+	```bash
+	$ pip install caper  # use pip3 if it doesn't work
+	```
+
+2) Follow [Caper's README](https://github.com/ENCODE-DCC/caper) carefully. Find an instruction for your platform.
+	> **IMPORTANT**: Configure your Caper configuration file `~/.caper/default.conf` correctly for your platform.
+
+3) Git clone this pipeline.
 	> **IMPORTANT*: use `~/atac-seq-pipeline/atac.wdl` as `[WDL]` in Caper's documentation.
 
 	```bash
@@ -24,19 +35,8 @@ The ATAC-seq pipeline protocol specification is [here](https://docs.google.com/d
 	$ git clone https://github.com/ENCODE-DCC/atac-seq-pipeline
 	```
 
-2) Install pipeline's [Conda environment](docs/install_conda.md) if you want to use Conda instead of Docker/Singularity. Conda is recommneded on local computer and HPCs (e.g. Stanford Sherlock/SCG).
+4) Install pipeline's [Conda environment](docs/install_conda.md) if you want to use Conda instead of Docker/Singularity. Conda is recommneded on local computer and HPCs (e.g. Stanford Sherlock/SCG). Use 
 	> **IMPORTANT*: use `encode-atac-seq-pipeline` as `[PIPELINE_CONDA_ENV]` in Caper's documentation.
-
-
-3) **Skip this step if you have installed pipeline's Conda environment**. Caper is already included in the Conda environment. [Install Caper](https://github.com/ENCODE-DCC/caper#installation). Caper is a python wrapper for [Cromwell](https://github.com/broadinstitute/cromwell).
-	> **IMPORTANT**: Make sure that you have python3(> 3.4.1) installed on your system.
-
-	```bash
-	$ pip install caper  # use pip3 if it doesn't work
-	```
-
-4) Follow [Caper's README](https://github.com/ENCODE-DCC/caper) carefully. Find an instruction for your platform.
-	> **IMPORTANT**: Configure your Caper configuration file `~/.caper/default.conf` correctly for your platform.
 
 ## Test input JSON file
 
@@ -63,7 +63,7 @@ You can also run this pipeline on DNAnexus without using Caper or Cromwell. Ther
 
 ## How to organize outputs
 
-Install [Croo](https://github.com/ENCODE-DCC/croo#installation). **You can skip this installation if you have installed pipeline's Conda environment and activated it**. Make sure that you have python3(> 3.4.1) installed on your system. Find a `metadata.json` on Caper's output directory.
+Install [Croo](https://github.com/ENCODE-DCC/croo#installation). Make sure that you have python3(> 3.4.1) installed on your system. Find a `metadata.json` on Caper's output directory.
 
 ```bash
 $ pip install croo

@@ -38,7 +38,6 @@ workflow atac {
 	File? blacklist 				# blacklist BED (peaks overlapping will be filtered out)
 	File? blacklist2 				# 2nd blacklist (will be merged with 1st one)
 	String? mito_chr_name
-	String? regex_bfilt_peak_chr_name
 	String? gensz 					# genome sizes (hs for human, mm for mouse or sum of 2nd col in chrsz)
 	File? tss 						# TSS BED file
 	File? dnase 					# open chromatin region BED file
@@ -95,7 +94,11 @@ workflow atac {
 	Float pval_thresh = 0.01		# p.value threshold for peak caller
 	Int smooth_win = 73				# size of smoothing window for peak caller
 	Float idr_thresh = 0.05			# IDR threshold
-
+	Boolean keep_irregular_chr_in_bfilt_peak = false 
+									# peaks with irregular chr name will not be filtered out
+									# 	in bfilt_peak (blacklist filtered peak) file
+									# 	(e.g. chr1_AABBCC, AABR07024382.1, ...)
+									# 	reg-ex pattern for "regular" chr name is chr[\dXY]+\b
 	# resources
 	#	these variables will be automatically ignored if they are not supported by platform
 	# 	"disks" is for cloud platforms (Google Cloud Platform, DNAnexus) only
@@ -246,8 +249,6 @@ workflow atac {
 		else blacklist2_
 	String? mito_chr_name_ = if defined(mito_chr_name) then mito_chr_name
 		else read_genome_tsv.mito_chr_name
-	String? regex_bfilt_peak_chr_name_ = if defined(regex_bfilt_peak_chr_name) then regex_bfilt_peak_chr_name
-		else read_genome_tsv.regex_bfilt_peak_chr_name
 	String? genome_name_ = if defined(genome_name) then genome_name
 		else if defined(read_genome_tsv.genome_name) then read_genome_tsv.genome_name
 		else basename(select_first([genome_tsv, ref_fa_, chrsz_, 'None']))
@@ -537,7 +538,7 @@ workflow atac {
 				pval_thresh = pval_thresh,
 				smooth_win = smooth_win,
 				blacklist = blacklist_,
-				regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
+				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 
 				cpu = call_peak_cpu,
 				mem_mb = call_peak_mem_mb,
@@ -572,7 +573,7 @@ workflow atac {
 				pval_thresh = pval_thresh,
 				smooth_win = smooth_win,
 				blacklist = blacklist_,
-				regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
+				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 
 				cpu = call_peak_cpu,
 				mem_mb = call_peak_mem_mb,
@@ -599,7 +600,7 @@ workflow atac {
 				pval_thresh = pval_thresh,
 				smooth_win = smooth_win,
 				blacklist = blacklist_,
-				regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
+				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 
 				cpu = call_peak_cpu,
 				mem_mb = call_peak_mem_mb,
@@ -708,7 +709,7 @@ workflow atac {
 			pval_thresh = pval_thresh,
 			smooth_win = smooth_win,
 			blacklist = blacklist_,
-			regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
+			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 
 			cpu = call_peak_cpu,
 			mem_mb = call_peak_mem_mb,
@@ -774,7 +775,7 @@ workflow atac {
 			pval_thresh = pval_thresh,
 			smooth_win = smooth_win,
 			blacklist = blacklist_,
-			regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
+			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 
 			cpu = call_peak_cpu,
 			mem_mb = call_peak_mem_mb,
@@ -801,7 +802,7 @@ workflow atac {
 			pval_thresh = pval_thresh,
 			smooth_win = smooth_win,
 			blacklist = blacklist_,
-			regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
+			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 
 			cpu = call_peak_cpu,
 			mem_mb = call_peak_mem_mb,
@@ -834,7 +835,7 @@ workflow atac {
 				peak_type = peak_type_,
 				blacklist = blacklist_,
 				chrsz = chrsz_,
-				regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
+				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 				ta = pool_ta.ta_pooled,
 			}
 		}
@@ -855,7 +856,7 @@ workflow atac {
 				rank = idr_rank_,
 				blacklist = blacklist_,
 				chrsz = chrsz_,
-				regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
+				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 				ta = pool_ta.ta_pooled,
 			}
 		}
@@ -872,7 +873,7 @@ workflow atac {
 				peak_type = peak_type_,
 				blacklist = blacklist_,
 				chrsz = chrsz_,
-				regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
+				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 				ta = ta_[i],
 			}
 		}
@@ -891,7 +892,7 @@ workflow atac {
 				rank = idr_rank_,
 				blacklist = blacklist_,
 				chrsz = chrsz_,
-				regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
+				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 				ta = ta_[i],
 			}
 		}
@@ -907,7 +908,7 @@ workflow atac {
 			peak_type = peak_type_,
 			blacklist = blacklist_,
 			chrsz = chrsz_,
-			regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
+			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 			ta = pool_ta.ta_pooled,
 		}
 	}
@@ -924,7 +925,7 @@ workflow atac {
 			rank = idr_rank_,
 			blacklist = blacklist_,
 			chrsz = chrsz_,
-			regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
+			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 			ta = pool_ta.ta_pooled,
 		}
 	}
@@ -939,6 +940,7 @@ workflow atac {
 			peak_ppr = overlap_ppr.bfilt_overlap_peak,
 			peak_type = peak_type_,
 			chrsz = chrsz_,
+			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 		}
 	}
 
@@ -951,6 +953,7 @@ workflow atac {
 			peak_ppr = idr_ppr.bfilt_idr_peak,
 			peak_type = peak_type_,
 			chrsz = chrsz_,
+			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 		}
 	}
 
@@ -1065,8 +1068,6 @@ task align {
 	Array[Array[String]] tmp_adapters = if paired_end then transpose([adapters_R1, adapters_R2])
 				else transpose([adapters_R1])
 	command {
-		set -e
-
 		# check if pipeline dependencies can be found
 		if [[ -z "$(which encode_task_trim_adapter.py 2> /dev/null || true)" ]]
 		then
@@ -1076,7 +1077,7 @@ task align {
 		  echo 'GCP/AWS/Docker users: Did you add --docker flag to Caper command line arg?' 1>&2
 		  echo 'Singularity users: Did you add --singularity flag to Caper command line arg?' 1>&2
 		  echo -e "\n" 1>&2
-		  exit 3
+		  EXCEPTION_RAISED
 		fi
 
 		# trim adapter
@@ -1368,7 +1369,7 @@ task call_peak {
 	Float pval_thresh  	# p.value threshold
 	Int smooth_win 		# size of smoothing window
 	File? blacklist 	# blacklist BED to filter raw peaks
-	String? regex_bfilt_peak_chr_name
+	Boolean	keep_irregular_chr_in_bfilt_peak
 
 	Int cpu
 	Int mem_mb
@@ -1376,8 +1377,6 @@ task call_peak {
 	String disks
 
 	command {
-		set -e
-
 		if [ '${peak_caller}' == 'macs2' ]; then
 			python3 $(which encode_task_macs2_atac.py) \
 				${ta} \
@@ -1464,7 +1463,7 @@ task idr {
 	File peak_pooled
 	Float idr_thresh
 	File? blacklist 	# blacklist BED to filter raw peaks
-	String regex_bfilt_peak_chr_name
+	Boolean	keep_irregular_chr_in_bfilt_peak
 	# parameters to compute FRiP
 	File? ta			# to calculate FRiP
 	File chrsz			# 2-col chromosome sizes file
@@ -1510,7 +1509,7 @@ task overlap {
 	File peak2
 	File peak_pooled
 	File? blacklist 	# blacklist BED to filter raw peaks
-	String regex_bfilt_peak_chr_name
+	Boolean	keep_irregular_chr_in_bfilt_peak
 	File? ta		# to calculate FRiP
 	File chrsz			# 2-col chromosome sizes file
 	String peak_type
@@ -1554,6 +1553,7 @@ task reproducibility {
 	File? peak_ppr			# Peak file from pooled pseudo replicate.
 	String peak_type
 	File chrsz			# 2-col chromosome sizes file
+	Boolean	keep_irregular_chr_in_bfilt_peak
 
 	command {
 		python3 $(which encode_task_reproducibility.py) \
@@ -1562,6 +1562,7 @@ task reproducibility {
 			${'--peak-ppr '+ peak_ppr} \
 			--prefix ${prefix} \
 			${'--peak-type ' + peak_type} \
+			${if keep_irregular_chr_in_bfilt_peak then '--keep-irregular-chr' else ''} \
 			${'--chrsz ' + chrsz}
 	}
 	output {
@@ -1893,7 +1894,6 @@ task read_genome_tsv {
 		touch tss tss_enrich # for backward compatibility
 		touch dnase prom enh reg2map reg2map_bed roadmap_meta
 		touch mito_chr_name
-		touch regex_bfilt_peak_chr_name
 
 		python <<CODE
 		import os
@@ -1921,8 +1921,6 @@ task read_genome_tsv {
 		String? blacklist = if size('blacklist')==0 then null_s else read_string('blacklist')
 		String? blacklist2 = if size('blacklist2')==0 then null_s else read_string('blacklist2')
 		String? mito_chr_name = if size('mito_chr_name')==0 then null_s else read_string('mito_chr_name')
-		String? regex_bfilt_peak_chr_name = if size('regex_bfilt_peak_chr_name')==0 then 'chr[\\dXY]+'
-			else read_string('regex_bfilt_peak_chr_name')
 		# optional data
 		String? tss = if size('tss')!=0 then read_string('tss')
 			else if size('tss_enrich')!=0 then read_string('tss_enrich') else null_s
@@ -1946,7 +1944,7 @@ task raise_exception {
 	String msg
 	command {
 		echo -e "\n* Error: ${msg}\n" >&2
-		exit 2
+		EXCEPTION_RAISED
 	}
 	output {
 		String error_msg = '${msg}'

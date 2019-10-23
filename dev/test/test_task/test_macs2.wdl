@@ -19,8 +19,6 @@ workflow test_macs2 {
 	String se_chrsz
 	String se_gensz
 
-	String regex_bfilt_peak_chr_name = 'chr[\\dXY]+'
-
 	Int macs2_mem_mb = 16000
 	Int macs2_time_hr = 24
 	String macs2_disks = 'local-disk 100 HDD'
@@ -35,7 +33,7 @@ workflow test_macs2 {
 		pval_thresh = pval_thresh,
 		smooth_win = smooth_win,
 		blacklist = se_blacklist,
-		regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name,
+		keep_irregular_chr_in_bfilt_peak = false,
 
 		cpu = 1,
 		mem_mb = macs2_mem_mb,

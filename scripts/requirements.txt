@@ -49,8 +49,6 @@ requests
 ncurses
 gnuplot
 ghostscript
-wget
-pyopenssl  # for caper/croo to presign bucket URIs
 
 numpy
 scipy
