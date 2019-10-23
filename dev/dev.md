@@ -2,7 +2,7 @@
 
 ## Command line for version change
 ```bash
-PREV_VER=dev-v1.5.1
+PREV_VER=v1.5.0
 NEW_VER=dev-v1.5.1
 for f in $(grep -rl ${PREV_VER} --include=*.{wdl,md,sh})
 do
@@ -24,7 +24,7 @@ Run the following command line locally to build out DX workflows for this pipeli
 
 ```bash
 # version
-VER=dev-v1.5.1
+VER=v1.5.0
 DOCKER=quay.io/encode-dcc/atac-seq-pipeline:$VER
 
 # general

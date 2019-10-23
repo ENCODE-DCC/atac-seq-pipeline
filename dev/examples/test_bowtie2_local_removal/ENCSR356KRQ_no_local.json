@@ -1,6 +1,6 @@
 {
     "atac.pipeline_type" : "atac",
-    "atac.genome_tsv" : "gs://encode-pipeline-genome-data/genome_tsv/v1/hg38_google.tsv",
+    "atac.genome_tsv" : "gs://encode-pipeline-genome-data/hg38_google.tsv",
 
     "atac.align_param_se" : "",
     "atac.align_param_pe" : "-X2000 --mm",
