@@ -19,6 +19,7 @@ workflow test_reproducibility {
 		peak_ppr = se_overlap_peak_ppr,
 		peak_type = 'narrowPeak',
 		chrsz = se_chrsz,		
+		keep_irregular_chr_in_bfilt_peak = false,
 	}
 
 	call compare_md5sum.compare_md5sum { input :
