@@ -37,6 +37,8 @@ Parameter|Type|Description
 `atac.blacklist`| File | 3-col BED file. Peaks overlapping these regions will be filtered out
 `atac.gensz`| String | MACS2's genome sizes (hs for human, mm for mouse or sum of 2nd col in chrsz)
 `atac.mito_chr_name`| String | Name of mitochondrial chromosome (e.g. chrM)
+`atac.regex_bfilt_peak_chr_name`| String | Perl style reg-ex to keep peaks on selected chromosomes only matching with this pattern (default: `chr[\dXY]+`. This will keep chr1, chr2, ... chrX and chrY in `.bfilt.` peaks file. chrM is not included here)
+
 
 Additional annotated genome data:
 
@@ -54,14 +56,14 @@ We currently provide TSV files for 4 genomes as shown in the below table. `GENOM
 
 Platform|Path/URI
 -|-
-Google Cloud Platform|`gs://encode-pipeline-genome-data/[GENOME]_gcp.tsv`
-Stanford Sherlock|`/home/groups/cherry/encode/pipeline_genome_data/[GENOME]_sherlock.tsv`
-Stanford SCG|`/reference/ENCODE/pipeline_genome_data/[GENOME]_scg.tsv`
+Google Cloud Platform|`gs://encode-pipeline-genome-data/genome_tsv/v1/[GENOME]_gcp.tsv`
+Stanford Sherlock|`/home/groups/cherry/encode/pipeline_genome_data/genome_tsv/v1/[GENOME]_sherlock.tsv`
+Stanford SCG|`/reference/ENCODE/pipeline_genome_data/genome_tsv/v1/[GENOME]_scg.tsv`
 Local/SLURM/SGE|You need to [build](build_genome_database.md) or [download]() a genome database]. 
-DNAnexus (CLI)|`dx://project-BKpvFg00VBPV975PgJ6Q03v6:pipeline-genome-data/[GENOME]_dx.tsv`
-DNAnexus (CLI, Azure)|`dx://project-F6K911Q9xyfgJ36JFzv03Z5J:pipeline-genome-data/[GENOME]_dx_azure.tsv`
-DNAnexus (Web)|Choose `[GENOME]_dx.tsv` from [here](https://platform.DNAnexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/pipeline-genome-data)
-DNAnexus (Web, Azure)|Choose `[GENOME]_dx.tsv` from [here](https://platform.DNAnexus.com/projects/F6K911Q9xyfgJ36JFzv03Z5J/data/pipeline-genome-data)
+DNAnexus (CLI)|`dx://project-BKpvFg00VBPV975PgJ6Q03v6:pipeline-genome-data/genome_tsv/v1/[GENOME]_dx.tsv`
+DNAnexus (CLI, Azure)|`dx://project-F6K911Q9xyfgJ36JFzv03Z5J:pipeline-genome-data/genome_tsv/v1/[GENOME]_dx_azure.tsv`
+DNAnexus (Web)|Choose `[GENOME]_dx.tsv` from [here](https://platform.DNAnexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/pipeline-genome-data/genome_tsv/v1)
+DNAnexus (Web, Azure)|Choose `[GENOME]_dx.tsv` from [here](https://platform.DNAnexus.com/projects/F6K911Q9xyfgJ36JFzv03Z5J/data/pipeline-genome-data/genome_tsv/v1)
 
 Additional information about each genome:
 
@@ -176,7 +178,6 @@ Parameter|Default|Description
 ---------|-------|-----------
 `atac.enable_xcor` | false | Enable cross-correlation analysis
 `atac.enable_count_signal_track` | false | Enable count signal track generation
-`atac.keep_irregular_chr_in_bfilt_peak` | false | Keep irregular chromosome names. Use this for custom genomes without canonical chromosome names (chr1, chrX, ...)
 `atac.enable_preseq` | false | Enable preseq, which performs a yield prediction for reads
 `atac.enable_jsd` | true | Enable deeptools fingerprint (JS distance)
 `atac.enable_gc_bias` | true | Enable GC bias computation

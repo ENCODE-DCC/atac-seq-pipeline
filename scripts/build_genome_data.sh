@@ -17,9 +17,13 @@ if [[ "$#" -lt 2 ]]; then
   exit 2
 fi
 
-# pipeline specific params
+# parameters for building aligner indices
 BUILD_BWT2_IDX=1
+BUILD_BWT2_NTHREADS=2
 BUILD_BWA_IDX=0
+
+# parameters for genome database version (v1: <ENCODE4, v2: >=ENCODE4)
+VER=v1
 
 GENOME=$1
 DEST_DIR=$(cd $(dirname $2) && pwd -P)/$(basename $2)
@@ -30,6 +34,7 @@ mkdir -p ${DEST_DIR}
 cd ${DEST_DIR}
 
 if [[ "${GENOME}" == "hg19" ]]; then
+  REGEX_BFILT_PEAK_CHR_NAME="chr[\dXY]+"
   MITO_CHR_NAME="chrM"
   REF_FA="http://hgdownload.cse.ucsc.edu/goldenpath/hg19/encodeDCC/referenceSequences/male.hg19.fa.gz"
   BLACKLIST="http://hgdownload.cse.ucsc.edu/goldenpath/hg19/encodeDCC/wgEncodeMapability/wgEncodeDacMapabilityConsensusExcludable.bed.gz"
@@ -42,6 +47,7 @@ if [[ "${GENOME}" == "hg19" ]]; then
   ROADMAP_META="https://storage.googleapis.com/encode-pipeline-genome-data/hg19/ataqc/eid_to_mnemonic.txt"
 
 elif [[ "${GENOME}" == "mm9" ]]; then
+  REGEX_BFILT_PEAK_CHR_NAME="chr[\dXY]+"
   MITO_CHR_NAME="chrM"
   REF_FA="http://hgdownload.cse.ucsc.edu/goldenPath/mm9/bigZips/mm9.2bit"
   BLACKLIST="https://storage.googleapis.com/encode-pipeline-genome-data/mm9/mm9-blacklist.bed.gz"
@@ -55,11 +61,17 @@ elif [[ "${GENOME}" == "mm9" ]]; then
   ROADMAP_META="https://storage.googleapis.com/encode-pipeline-genome-data/mm9/ataqc/accession_to_name.txt"
 
 elif [[ "${GENOME}" == "hg38" ]]; then
+  REGEX_BFILT_PEAK_CHR_NAME="chr[\dXY]+"
   MITO_CHR_NAME="chrM"
   REF_FA="https://www.encodeproject.org/files/GRCh38_no_alt_analysis_set_GCA_000001405.15/@@download/GRCh38_no_alt_analysis_set_GCA_000001405.15.fasta.gz"
-  BLACKLIST="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/hg38.blacklist.bed.gz"
+  if [[ "${VER}" == "v2" ]]; then
+    BLACKLIST="https://www.encodeproject.org/files/ENCFF419RSJ/@@download/ENCFF419RSJ.bed.gz"
+    TSS="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/ataqc/tss.pc.gencode.v29.bed.gz"
+  else
+    BLACKLIST="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/hg38.blacklist.bed.gz"
+    TSS="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/ataqc/hg38_gencode_tss_unique.bed.gz"
+  fi
   # optional data
-  TSS="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/ataqc/hg38_gencode_tss_unique.bed.gz"
   DNASE="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/ataqc/reg2map_honeybadger2_dnase_all_p10_ucsc.hg19_to_hg38.bed.gz"
   PROM="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/ataqc/reg2map_honeybadger2_dnase_prom_p2.hg19_to_hg38.bed.gz"
   ENH="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/ataqc/reg2map_honeybadger2_dnase_enh_p2.hg19_to_hg38.bed.gz"
@@ -68,9 +80,14 @@ elif [[ "${GENOME}" == "hg38" ]]; then
   ROADMAP_META="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/ataqc/hg38_dnase_avg_fseq_signal_metadata.txt"
 
 elif [[ "${GENOME}" == "mm10" ]]; then
+  REGEX_BFILT_PEAK_CHR_NAME="chr[\dXY]+"
   MITO_CHR_NAME="chrM"
   REF_FA="https://www.encodeproject.org/files/mm10_no_alt_analysis_set_ENCODE/@@download/mm10_no_alt_analysis_set_ENCODE.fasta.gz"
-  BLACKLIST="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/mm10.blacklist.bed.gz"
+  if [[ "${VER}" == "v2" ]]; then
+    BLACKLIST="https://www.encodeproject.org/files/ENCFF547MET/@@download/ENCFF547MET.bed.gz"
+  else
+    BLACKLIST="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/mm10.blacklist.bed.gz"
+  fi
   # optional data
   TSS="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/ataqc/mm10_gencode_tss_unique.bed.gz"
   DNASE="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/ataqc/mm10_univ_dhs_ucsc.bed.gz"
@@ -81,11 +98,17 @@ elif [[ "${GENOME}" == "mm10" ]]; then
   ROADMAP_META="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/ataqc/mm10_dnase_avg_fseq_signal_metadata.txt"
 
 elif [[ "${GENOME}" == "hg38_chr19_chrM" ]]; then
+  REGEX_BFILT_PEAK_CHR_NAME="chr[\dXY]+"
   MITO_CHR_NAME="chrM"
   REF_FA="https://storage.googleapis.com/encode-pipeline-genome-data/hg38_chr19_chrM/GRCh38_no_alt_analysis_set_GCA_000001405.15.chr19_chrM.fasta.gz"
-  BLACKLIST="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/hg38.blacklist.bed.gz"
+  if [[ "${VER}" == "v2" ]]; then
+    BLACKLIST="https://www.encodeproject.org/files/ENCFF419RSJ/@@download/ENCFF419RSJ.bed.gz"
+    TSS="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/ataqc/tss.pc.gencode.v29.bed.gz"
+  else
+    BLACKLIST="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/hg38.blacklist.bed.gz"
+    TSS="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/ataqc/hg38_gencode_tss_unique.bed.gz"
+  fi
   # optional data
-  TSS="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/ataqc/hg38_gencode_tss_unique.bed.gz"
   DNASE="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/ataqc/reg2map_honeybadger2_dnase_all_p10_ucsc.hg19_to_hg38.bed.gz"
   PROM="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/ataqc/reg2map_honeybadger2_dnase_prom_p2.hg19_to_hg38.bed.gz"
   ENH="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/ataqc/reg2map_honeybadger2_dnase_enh_p2.hg19_to_hg38.bed.gz"
@@ -94,9 +117,14 @@ elif [[ "${GENOME}" == "hg38_chr19_chrM" ]]; then
   ROADMAP_META="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/ataqc/hg38_dnase_avg_fseq_signal_metadata.txt"
 
 elif [[ "${GENOME}" == "mm10_chr19_chrM" ]]; then
+  REGEX_BFILT_PEAK_CHR_NAME="chr[\dXY]+"
   MITO_CHR_NAME="chrM"
   REF_FA="https://storage.googleapis.com/encode-pipeline-genome-data/mm10_chr19_chrM/mm10_no_alt_analysis_set_ENCODE.chr19_chrM.fasta.gz"
-  BLACKLIST="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/mm10.blacklist.bed.gz"
+  if [[ "${VER}" == "v2" ]]; then
+    BLACKLIST="https://www.encodeproject.org/files/ENCFF547MET/@@download/ENCFF547MET.bed.gz"
+  else
+    BLACKLIST="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/mm10.blacklist.bed.gz"
+  fi
   # optional data
   TSS="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/ataqc/mm10_gencode_tss_unique.bed.gz"
   DNASE="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/ataqc/mm10_univ_dhs_ucsc.bed.gz"
@@ -107,9 +135,19 @@ elif [[ "${GENOME}" == "mm10_chr19_chrM" ]]; then
   ROADMAP_META="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/ataqc/mm10_dnase_avg_fseq_signal_metadata.txt"
 
 elif [[ "${GENOME}" == "YOUR_OWN_GENOME" ]]; then
+  # Perl style regular expression to keep regular chromosomes only.
+  # this reg-ex will be applied to peaks after blacklist filtering (b-filt) with "grep -P".
+  # so that b-filt peak file (.bfilt.*Peak.gz) will only have chromosomes matching with this pattern
+  # this reg-ex will work even without a blacklist.
+  # you will still be able to find a .bfilt. peak file
+  REGEX_BFILT_PEAK_CHR_NAME="chr[\dXY]+"
+  # mitochondrial chromosome name (e.g. chrM, MT)
   MITO_CHR_NAME="chrM"
-  REF_FA="URL_FOR_YOUR_FASTA_OR_2BIT"
-  BLACKLIST= # leave it empty if you don't have it
+  # URL for your reference FASTA (fasta, fasta.gz, fa, fa.gz, 2bit)
+  REF_FA="https://some.where.com/your.genome.fa.gz"
+  # 3-col blacklist BED file to filter out overlapping peaks from b-filt peak file (.bfilt.*Peak.gz file).
+  # leave it empty if you don't have one
+  BLACKLIST=
 fi
 
 if [[ -z "${REF_FA}" ]]; then
@@ -120,10 +158,14 @@ if [[ -z "${MITO_CHR_NAME}" ]]; then
   echo "Error: Mitochondrial chromosome name must be defined"
   exit 1
 fi
+if [[ -z "${REGEX_BFILT_PEAK_CHR_NAME}" ]]; then
+  echo "Error: Perl style reg-ex for filtering peaks must be defined"
+  exit 1
+fi
 
 echo "=== Downloading files..."
-wget -c -O $(basename ${REF_FA}) ${REF_FA}
 if [[ ! -z "${BLACKLIST}" ]]; then wget -N -c ${BLACKLIST}; fi
+wget -c -O $(basename ${REF_FA}) ${REF_FA}
 
 echo "=== Processing reference fasta file..."
 if [[ ${REF_FA} == *.gz ]]; then 
@@ -132,13 +174,14 @@ if [[ ${REF_FA} == *.gz ]]; then
 elif [[ ${REF_FA} == *.bz2 ]]; then
   REF_FA_PREFIX=$(basename ${REF_FA} .bz2)
   bzip2 -d -f -c ${REF_FA_PREFIX}.bz2 > ${REF_FA_PREFIX}
+  gzip -nc ${REF_FA_PREFIX} > ${REF_FA_PREFIX}.gz
 elif [[ ${REF_FA} == *.2bit ]]; then
   REF_FA_PREFIX=$(basename ${REF_FA} .2bit).fa
   twoBitToFa $(basename ${REF_FA}) ${REF_FA_PREFIX}
+  gzip -nc ${REF_FA_PREFIX} > ${REF_FA_PREFIX}.gz
 else
   REF_FA_PREFIX=$(basename ${REF_FA})  
 fi
-gzip -nc ${REF_FA_PREFIX} > ${REF_FA_PREFIX}.gz
 
 echo "=== Generating fasta index and chrom.sizes file..."
 cd ${DEST_DIR}
@@ -158,7 +201,10 @@ GENSZ=$(cat $CHRSZ | awk '{sum+=$2} END{print sum}')
 if [[ "${GENOME}" == hg* ]]; then GENSZ=hs; fi
 if [[ "${GENOME}" == mm* ]]; then GENSZ=mm; fi
 
-if [[ ${BUILD_BWT2_IDX} == 1 ]]; then
+# how to make a tar ball without permission,user,timestamp info
+# https://stackoverflow.com/a/54908072
+
+if [[ "${BUILD_BWT2_IDX}" == 1 ]]; then
   echo "=== Building bowtie2 index..."
   mkdir -p ${DEST_DIR}/bowtie2_index
   cd ${DEST_DIR}/bowtie2_index
@@ -166,37 +212,51 @@ if [[ ${BUILD_BWT2_IDX} == 1 ]]; then
   # whole chr
   rm -f ${REF_FA_PREFIX}
   ln -s ../${REF_FA_PREFIX} ${REF_FA_PREFIX}
-  if [[ ! -f ${REF_FA_PREFIX}.rev.1.bt2 ]]; then
-    bowtie2-build ${REF_FA_PREFIX} ${REF_FA_PREFIX}
-    tar cvf ${REF_FA_PREFIX}.tar ${REF_FA_PREFIX}.*.bt2
-  fi
+  bowtie2-build ${REF_FA_PREFIX} ${REF_FA_PREFIX} --threads ${BUILD_BWT2_NTHREADS}
+  rm -f ${REF_FA_PREFIX}
+  tar cvf ${REF_FA_PREFIX}.tar ${REF_FA_PREFIX}.*.bt2 --sort=name --owner=root:0 --group=root:0 --mtime="UTC 2019-01-01"
+  gzip -n ${REF_FA_PREFIX}.tar
+  rm -f ${REF_FA_PREFIX}.*.bt2
+
   # mito chr only
   rm -f ${REF_MITO_FA_PREFIX}
   ln -s ../${REF_MITO_FA_PREFIX} ${REF_MITO_FA_PREFIX}
-  if [[ ! -f ${REF_MITO_FA_PREFIX}.rev.1.bt2 ]]; then
-    bowtie2-build ${REF_MITO_FA_PREFIX} ${REF_MITO_FA_PREFIX}
-    tar cvf ${REF_MITO_FA_PREFIX}.tar ${REF_MITO_FA_PREFIX}.*.bt2
-  fi
-
+  bowtie2-build ${REF_MITO_FA_PREFIX} ${REF_MITO_FA_PREFIX} --threads ${BUILD_BWT2_NTHREADS}
+  rm -f ${REF_MITO_FA_PREFIX}
+  tar cvf ${REF_MITO_FA_PREFIX}.tar ${REF_MITO_FA_PREFIX}.*.bt2 --sort=name --owner=root:0 --group=root:0 --mtime="UTC 2019-01-01"
+  gzip -n ${REF_MITO_FA_PREFIX}.tar
+  rm -f ${REF_MITO_FA_PREFIX}.*.bt2
 fi
 
-if [[ ${BUILD_BWA_IDX} == 1 ]]; then
+if [[ "${BUILD_BWA_IDX}" == 1 ]]; then
   echo "=== Building bwa index..."
   mkdir -p ${DEST_DIR}/bwa_index
   cd ${DEST_DIR}/bwa_index
-  rm -f ${REF_FA_PREFIX}
 
+  # whole chr
+  rm -f ${REF_FA_PREFIX}
   ln -s ../${REF_FA_PREFIX} ${REF_FA_PREFIX}
-  if [[ ! -f ${REF_FA_PREFIX}.sa ]]; then
-    bwa index ${REF_FA_PREFIX}
-    tar cvf ${REF_FA_PREFIX}.tar ${REF_FA_PREFIX}.*
-  fi
+  bwa index ${REF_FA_PREFIX}
+  rm -f ${REF_FA_PREFIX}
+  tar cvf ${REF_FA_PREFIX}.tar ${REF_FA_PREFIX}.* --sort=name --owner=root:0 --group=root:0 --mtime="UTC 2019-01-01"
+  gzip -n ${REF_FA_PREFIX}.tar
+  rm -f ${REF_FA_PREFIX}.amb ${REF_FA_PREFIX}.ann ${REF_FA_PREFIX}.bwt
+  rm -f ${REF_FA_PREFIX}.pac ${REF_FA_PREFIX}.sa
+
+  # mito chr only
+  rm -f ${REF_MITO_FA_PREFIX}
   ln -s ../${REF_MITO_FA_PREFIX} ${REF_MITO_FA_PREFIX}
-  if [[ ! -f ${REF_MITO_FA_PREFIX}.sa ]]; then
-    bwa index ${REF_MITO_FA_PREFIX}
-    tar cvf ${REF_MITO_FA_PREFIX}.tar ${REF_MITO_FA_PREFIX}.*
-  fi
+  bwa index ${REF_MITO_FA_PREFIX}
+  rm -f ${REF_MITO_FA_PREFIX}
+  tar cvf ${REF_MITO_FA_PREFIX}.tar ${REF_MITO_FA_PREFIX}.* --sort=name --owner=root:0 --group=root:0 --mtime="UTC 2019-01-01"
+  gzip -n ${REF_MITO_FA_PREFIX}.tar
+  rm -f ${REF_MITO_FA_PREFIX}.amb ${REF_MITO_FA_PREFIX}.ann ${REF_MITO_FA_PREFIX}.bwt
+  rm -f ${REF_MITO_FA_PREFIX}.pac ${REF_MITO_FA_PREFIX}.sa
 fi
+
+echo "=== Removing temporary files..."
+cd ${DEST_DIR}
+rm -f ${REF_FA_PREFIX} ${REF_MITO_FA_PREFIX}
 
 echo "=== Creating TSV file... (${TSV})"
 cd ${DEST_DIR}
@@ -206,9 +266,8 @@ touch ${TSV}
 echo -e "genome_name\t${GENOME}" >> ${TSV}
 echo -e "ref_fa\t${DEST_DIR}/${REF_FA_PREFIX}.gz" >> ${TSV}
 echo -e "ref_mito_fa\t${DEST_DIR}/${REF_MITO_FA_PREFIX}.gz" >> ${TSV}
-if [[ ! -z "${MITO_CHR_NAME}" ]]; then
-  echo -e "mito_chr_name\t${MITO_CHR_NAME}" >> ${TSV}
-fi
+echo -e "mito_chr_name\t${MITO_CHR_NAME}" >> ${TSV}
+printf "regex_bfilt_peak_chr_name\t%s\n" "${REGEX_BFILT_PEAK_CHR_NAME}" >> ${TSV}
 if [[ ! -z "${BLACKLIST}" ]]; then
   echo -e "blacklist\t${DEST_DIR}/$(basename ${BLACKLIST})" >> ${TSV};
 fi

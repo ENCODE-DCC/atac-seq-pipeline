@@ -36,10 +36,11 @@ def parse_arguments():
     parser.add_argument('--idr-rank', default='p.value', type=str,
                         choices=['p.value', 'q.value', 'signal.value'],
                         help='IDR ranking method.')
-    parser.add_argument('--blacklist', type=str, required=True,
+    parser.add_argument('--blacklist', type=str,
                         help='Blacklist BED file.')
-    parser.add_argument('--keep-irregular-chr', action="store_true",
-                        help='Keep reads with non-canonical chromosome names.')
+    parser.add_argument('--regex-bfilt-peak-chr-name',
+                        help='Keep chromosomes matching this pattern only '
+                             'in .bfilt. peak files.')
     parser.add_argument('--ta', type=str,
                         help='TAGALIGN file for FRiP.')
     parser.add_argument('--chrsz', type=str,
@@ -55,7 +56,7 @@ def parse_arguments():
                                  'CRITICAL'],
                         help='Log level')
     args = parser.parse_args()
-    if args.blacklist.endswith('/dev/null'):
+    if args.blacklist is None or args.blacklist.endswith('null'):
         args.blacklist = ''
 
     log.setLevel(args.log_level)
@@ -148,17 +149,17 @@ def main():
 
     log.info('Blacklist-filtering peaks...')
     bfilt_idr_peak = blacklist_filter(
-        idr_peak, args.blacklist, args.keep_irregular_chr, args.out_dir)
+        idr_peak, args.blacklist, args.regex_bfilt_peak_chr_name, args.out_dir)
 
     log.info('Checking if output is empty...')
     assert_file_not_empty(bfilt_idr_peak)
 
     log.info('Converting peak to bigbed...')
     peak_to_bigbed(bfilt_idr_peak, args.peak_type, args.chrsz,
-                   args.keep_irregular_chr, args.out_dir)
+                   args.out_dir)
 
     log.info('Converting peak to hammock...')
-    peak_to_hammock(bfilt_idr_peak, args.keep_irregular_chr, args.out_dir)
+    peak_to_hammock(bfilt_idr_peak, args.out_dir)
 
     if args.ta:  # if TAG-ALIGN is given
         if args.fraglen:  # chip-seq
