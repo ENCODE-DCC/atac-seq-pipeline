@@ -12,7 +12,7 @@ workflow test_tss_enrich {
 	File ref_tss_enrich_qc
 
 	call atac.tss_enrich { input : 
-		read_len_log = read_len_log,
+		read_len = read_int(read_len_log),
 		nodup_bam = nodup_bam,
 		chrsz = chrsz,
 		tss = tss,
