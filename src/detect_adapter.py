@@ -13,7 +13,7 @@ adapters = {
 
 
 def open_gz(fname):
-    return gzip.open(fname) if fname.endswith('.gz') else open(fname, 'r')
+    return gzip.open(fname) if fname.endswith('.gz') else open(fname, 'rb')
 
 
 def detect_adapters_and_cnts(fname, max_n_lines=1000000):
