@@ -56,7 +56,7 @@
     "atac.align_cpu" : 4,
     "atac.align_mem_mb" : 20000,
     "atac.align_time_hr" : 48,
-    "atac.align_disks" : "local-disk 200 HDD",
+    "atac.align_disks" : "local-disk 400 HDD",
 
     "atac.filter_cpu" : 2,
     "atac.filter_mem_mb" : 20000,

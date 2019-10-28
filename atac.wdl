@@ -102,7 +102,7 @@ workflow atac {
 	Int align_cpu = 4
 	Int align_mem_mb = 20000
 	Int align_time_hr = 48
-	String align_disks = 'local-disk 200 HDD'
+	String align_disks = 'local-disk 400 HDD'
 
 	Int filter_cpu = 2
 	Int filter_mem_mb = 20000

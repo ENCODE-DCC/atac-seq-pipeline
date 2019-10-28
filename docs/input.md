@@ -212,14 +212,14 @@ Parameter|Default
 `atac.align_cpu` | 4
 `atac.align_mem_mb` | 20000
 `atac.align_time_hr` | 48
-`atac.align_disks` | `local-disk 100 HDD`
+`atac.align_disks` | `local-disk 400 HDD`
 
 Parameter|Default
 ---------|-------
 `atac.filter_cpu` | 2
 `atac.filter_mem_mb` | 20000
 `atac.filter_time_hr` | 24
-`atac.filter_disks` | `local-disk 100 HDD`
+`atac.filter_disks` | `local-disk 400 HDD`
 
 Parameter|Default
 ---------|-------
@@ -237,7 +237,7 @@ Parameter|Default
 `atac.jsd_cpu` | 2
 `atac.jsd_mem_mb` | 12000
 `atac.jsd_time_hr` | 6
-`atac.jsd_disks` | `local-disk 100 HDD`
+`atac.jsd_disks` | `local-disk 200 HDD`
 
 Parameter|Default
 ---------|-------
@@ -251,13 +251,13 @@ Parameter|Default
 `atac.call_peak_cpu` | 1
 `atac.call_peak_mem_mb` | 16000
 `atac.call_peak_time_hr` | 24
-`atac.call_peak_disks` | `local-disk 100 HDD`
+`atac.call_peak_disks` | `local-disk 200 HDD`
 
 Parameter|Default
 ---------|-------
 `atac.macs2_signal_track_mem_mb` | 16000
 `atac.macs2_signal_track_time_hr` | 24
-`atac.macs2_signal_track_disks` | `local-disk 100 HDD`
+`atac.macs2_signal_track_disks` | `local-disk 200 HDD`
 
 Parameter|Default
 ---------|-------
