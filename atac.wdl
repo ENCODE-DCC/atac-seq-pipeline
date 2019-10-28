@@ -195,6 +195,9 @@ workflow atac {
 	Array[File?] nodup_bams = []
 	Array[File?] tas = []
 
+	# optional read length array. used it pipeline starts from BAM or TA
+	Array[Int?] read_len = [] 		# [rep_id]. read length for each rep
+
 	# other input types (peak)
 	Array[File?] peaks = []			# per replicate
 	Array[File?] peaks_pr1 = []		# per replicate. do not define if true_rep_only==true
@@ -622,9 +625,13 @@ workflow atac {
 			}
 		}
 		# tasks factored out from ATAqC
-		if ( enable_tss_enrich && defined(nodup_bam_) && defined(tss_) && defined(align.read_len_log) ) {
+		Boolean has_input_of_tss_enrich = defined(nodup_bam_) && defined(tss_) && (
+			defined(align.read_len_log) || i<length(read_len) && defined(read_len[i]) )
+		if ( enable_tss_enrich && has_input_of_tss_enrich ) {
+			Int? read_len_ = if i<length(read_len) && defined(read_len[i]) then read_len[i]
+				else read_int(align.read_len_log)
 			call tss_enrich { input :
-				read_len_log = align.read_len_log,
+				read_len = read_len_,
 				nodup_bam = nodup_bam_,
 				tss = tss_,
 				chrsz = chrsz_,
@@ -1119,8 +1126,6 @@ task align {
 		rm -rf R1 R2
 	}
 	output {
-
-
 		File bam = glob('*.bam')[0]
 		File bai = glob('*.bai')[0]
 		File samstat_qc = glob('*.samstats.qc')[0]
@@ -1645,14 +1650,14 @@ task annot_enrich {
 }
 
 task tss_enrich {
-	File read_len_log
+	Int? read_len
 	File nodup_bam
 	File tss
 	File chrsz
 
 	command {
 		python2 $(which encode_task_tss_enrich.py) \
-			${'--read-len-log ' + read_len_log} \
+			${'--read-len ' + read_len} \
 			${'--nodup-bam ' + nodup_bam} \
 			${'--chrsz ' + chrsz} \
 			${'--tss ' + tss}

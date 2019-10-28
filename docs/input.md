@@ -185,6 +185,14 @@ Parameter|Default|Description
 `atac.enable_annot_enrich` | true | Enable Annotated region enrichment computation
 `atac.enable_compare_to_roadmap` | false | Enable comparing signals to epigenome roadmap
 
+## Optional parameter for TSS enrichment
+
+Our pipeline automatically estimates read length from FASTQs, but `atac.read_len` will override those estimated ones. You need to define `atac.read_len` if you start from BAMs and want to get a TSS enrichment plot.
+
+Parameter|Type | Description
+---------|-----|-----------
+`atac.read_len` | `Array[Int]` | Read length for each replicate. 
+
 ## Other optional parameters
 
 Parameter|Default|Description
