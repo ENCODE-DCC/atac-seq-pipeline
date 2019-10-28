@@ -17,6 +17,9 @@ def parse_arguments():
                         help='List of TAGALIGNs to be pooled.')
     parser.add_argument('--out-dir', default='', type=str,
                         help='Output directory.')
+    parser.add_argument('--col',
+                        help='Number of columns to keep in a pooled TAGALIGN. '
+                             'Keep all columns if not defined.')
     parser.add_argument('--log-level', default='INFO',
                         choices=['NOTSET', 'DEBUG', 'INFO',
                                  'WARNING', 'CRITICAL', 'ERROR',
@@ -29,13 +32,16 @@ def parse_arguments():
     return args
 
 
-def pool_ta(tas, out_dir):
+def pool_ta(tas, col, out_dir):
     if len(tas) > 1:
         prefix = os.path.join(out_dir,
                               os.path.basename(strip_ext_ta(tas[0])))
         pooled_ta = '{}.pooled.tagAlign.gz'.format(prefix)
 
-        cmd = 'zcat -f {} | gzip -nc > {}'
+        cmd = 'zcat -f {} | '
+        if col is not None:
+            cmd += 'cut -f 1-{} | '.format(col)
+        cmd += 'gzip -nc > {}'
         cmd = cmd.format(
             ' '.join(tas),
             pooled_ta)
@@ -53,7 +59,7 @@ def main():
     mkdir_p(args.out_dir)
 
     log.info('Pooling TAGALIGNs...')
-    pool_ta(args.tas, args.out_dir)
+    pool_ta(args.tas, args.col, args.out_dir)
 
     log.info('List all files in output directory...')
     ls_l(args.out_dir)
