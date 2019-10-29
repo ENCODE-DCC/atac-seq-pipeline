@@ -26,7 +26,7 @@ else
   wget -N -c https://storage.googleapis.com/encode-pipeline-test-samples/cromwell_jar/cromwell-42.jar
 fi
 CROMWELL_JAR=cromwell-42.jar
-BACKEND_CONF=../../backends/backend.conf
+BACKEND_CONF=backend.conf
 BACKEND=Local
 EXTRA_PARAM="-Dbackend.providers.Local.config.concurrent-job-limit=${NUM_TASK}"
 PREFIX=$(basename ${WDL} .wdl)
