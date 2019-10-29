@@ -48,12 +48,6 @@ An input JSON file specifies all the input parameters and files that are necessa
 
 [Input JSON file specification](docs/input.md)
 
-## Running a pipeline without Caper
-
-> **WARNING**: This method has been deprecated. There are many unfixed known bugs. We no longer support it.
-
-Caper uses the cromwell workflow execution engine to run the workflow on the platform you specify. While we recommend you use caper, if you want to run cromwell directly without caper you can learn about that [here](docs/deprecated/OLD_METHOD.md).
-
 ## Running a pipeline on DNAnexus
 
 You can also run this pipeline on DNAnexus without using Caper or Cromwell. There are two ways to build a workflow on DNAnexus based on our WDL.
