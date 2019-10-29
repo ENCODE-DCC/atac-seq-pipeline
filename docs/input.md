@@ -263,6 +263,18 @@ Parameter|Default
 ---------|-------
 `atac.preseq_mem_mb` | 16000
 
+> **IMPORTANT**: If you see memory Java errors, check the following resource parameters.
+
+There are special parameters to control maximum Java heap memory (e.g. `java -Xmx4G`) for Picard tools. They are strings including size units. Such string will be directly appended to Java's parameter `-Xmx`.
+
+Parameter|Default
+---------|-------
+`atac.filter_picard_java_heap` | `4G`
+`atac.preseq_picard_java_heap` | `6G`
+`atac.fraglen_stat_picard_java_heap` | `6G`
+`atac.gc_bias_picard_java_heap` | `6G`
+
+
 ## How to use a custom aligner
 
 ENCODE ATAC-Seq pipeline currently supports `bowtie2` only. In order to use your own aligner you need to define the following parameters first. You can define `custom_aligner_idx_tar` either in your input JSON file or in your genome TSV file. Such index TAR file should be an uncompressed TAR file without any directory structured.

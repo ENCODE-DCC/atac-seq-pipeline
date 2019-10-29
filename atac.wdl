@@ -137,6 +137,11 @@ workflow atac {
 
 	Int preseq_mem_mb = 16000
 
+	String filter_picard_java_heap = '4G'
+	String preseq_picard_java_heap = '6G'
+	String fraglen_stat_picard_java_heap = '6G'
+	String gc_bias_picard_java_heap = '6G'
+
 	# input file definition
 	# supported types: fastq, bam, nodup_bam (or filtered bam), ta (tagAlign), peak
 	# 	pipeline can start from any type of inputs
@@ -444,6 +449,7 @@ workflow atac {
 
 				cpu = filter_cpu,
 				mem_mb = filter_mem_mb,
+				picard_java_heap = filter_picard_java_heap,
 				time_hr = filter_time_hr,
 				disks = filter_disks,
 			}
@@ -483,6 +489,7 @@ workflow atac {
 
 				cpu = filter_cpu,
 				mem_mb = filter_mem_mb,
+				picard_java_heap = filter_picard_java_heap,
 				time_hr = filter_time_hr,
 				disks = filter_disks,
 			}
@@ -640,6 +647,7 @@ workflow atac {
 		if ( enable_fraglen_stat && paired_end_ && defined(nodup_bam_) ) {
 			call fraglen_stat_pe { input :
 				nodup_bam = nodup_bam_,
+				picard_java_heap = fraglen_stat_picard_java_heap,				
 			}
 		}
 		if ( enable_preseq && defined(bam_) ) {
@@ -647,12 +655,14 @@ workflow atac {
 				bam = bam_,
 				paired_end = paired_end_,
 				mem_mb = preseq_mem_mb,
+				picard_java_heap = preseq_picard_java_heap,
 			}
 		}
 		if ( enable_gc_bias && defined(nodup_bam_) && defined(ref_fa_) ) {
 			call gc_bias { input :
 				nodup_bam = nodup_bam_,
 				ref_fa = ref_fa_,
+				picard_java_heap = gc_bias_picard_java_heap,
 			}
 		}
 		if ( enable_annot_enrich && defined(ta_) && defined(blacklist_) && defined(dnase_) && defined(prom_) && defined(enh_) ) {
@@ -1171,8 +1181,10 @@ task filter {
 	File chrsz					# 2-col chromosome sizes file
 	Boolean no_dup_removal 		# no dupe reads removal when filtering BAM
 	String mito_chr_name
+
 	Int cpu
 	Int mem_mb
+	String picard_java_heap
 	Int time_hr
 	String disks
 
@@ -1187,7 +1199,8 @@ task filter {
 			${'--chrsz ' + chrsz} \
 			${if no_dup_removal then '--no-dup-removal' else ''} \
 			${'--mito-chr-name ' + mito_chr_name} \
-			${'--nth ' + cpu}
+			${'--nth ' + cpu} \
+			${'--picard-java-heap ' + picard_java_heap}
 	}
 	output {
 		File nodup_bam = glob('*.bam')[0]
@@ -1601,12 +1614,14 @@ task preseq {
 	Boolean paired_end
 
 	Int mem_mb
+	String picard_java_heap	
 
 	File? null_f
 	command {
 		python3 $(which encode_task_preseq.py) \
 			${if paired_end then '--paired-end' else ''} \
-			${'--bam ' + bam}
+			${'--bam ' + bam} \
+			${'--picard-java-heap ' + picard_java_heap}
 	}
 	output {
 		File? picard_est_lib_size_qc = if paired_end then 
@@ -1680,9 +1695,12 @@ task fraglen_stat_pe {
 	# for PE only
 	File nodup_bam
 
+	String picard_java_heap
+
 	command {
 		python3 $(which encode_task_fraglen_stat_pe.py) \
-			${'--nodup-bam ' + nodup_bam}
+			${'--nodup-bam ' + nodup_bam} \
+			${'--picard-java-heap ' + picard_java_heap}
 	}
 	output {
 		File nucleosomal_qc = glob('*nucleosomal.qc')[0]
@@ -1700,10 +1718,13 @@ task gc_bias {
 	File nodup_bam
 	File ref_fa
 
+	String picard_java_heap
+
 	command {
 		python3 $(which encode_task_gc_bias.py) \
 			${'--nodup-bam ' + nodup_bam} \
-			${'--ref-fa ' + ref_fa}
+			${'--ref-fa ' + ref_fa} \
+			${'--picard-java-heap ' + picard_java_heap}
 	}
 	output {
 		File gc_plot = glob('*.gc_plot.png')[0]

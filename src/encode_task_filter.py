@@ -40,6 +40,9 @@ def parse_arguments():
                         help='Mito chromosome name.')
     parser.add_argument('--nth', type=int, default=1,
                         help='Number of threads to parallelize.')
+    parser.add_argument('--picard-java-heap',
+                        help='Picard\'s Java max. heap: java -jar picard.jar '
+                             '-Xmx[MAX_HEAP]')
     parser.add_argument('--out-dir', default='', type=str,
                         help='Output directory.')
     parser.add_argument('--log-level', default='INFO',
@@ -144,15 +147,19 @@ def rm_unmapped_lowq_reads_pe(bam, multimapping, mapq_thresh, nth, out_dir):
     return filt_bam
 
 
-def mark_dup_picard(bam, out_dir):  # shared by both se and pe
+def mark_dup_picard(bam, out_dir, java_heap=None):  # shared by both se and pe
     prefix = os.path.join(out_dir,
                           os.path.basename(strip_ext_bam(bam)))
     # strip extension appended in the previous step
     prefix = strip_ext(prefix, 'filt')
     dupmark_bam = '{}.dupmark.bam'.format(prefix)
     dup_qc = '{}.dup.qc'.format(prefix)
+    if java_heap is None:
+        java_heap_param = '-Xmx4G'
+    else:
+        java_heap_param = '-Xmx{}'.format(java_heap)
 
-    cmd = 'java -Xmx4G -XX:ParallelGCThreads=1 -jar '
+    cmd = 'java {} -XX:ParallelGCThreads=1 -jar '.format(java_heap_param)
     cmd += locate_picard()
     cmd += ' MarkDuplicates '
     # cmd = 'picard MarkDuplicates '
@@ -295,7 +302,7 @@ def main():
     log.info('Marking dupes with {}...'.format(args.dup_marker))
     if args.dup_marker == 'picard':
         dupmark_bam, dup_qc = mark_dup_picard(
-            filt_bam, args.out_dir)
+            filt_bam, args.out_dir, args.picard_java_heap)
     elif args.dup_marker == 'sambamba':
         dupmark_bam, dup_qc = mark_dup_sambamba(
             filt_bam, args.nth, args.out_dir)

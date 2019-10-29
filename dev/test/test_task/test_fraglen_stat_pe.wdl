@@ -10,6 +10,7 @@ workflow test_fraglen_stat_pe {
 
 	call atac.fraglen_stat_pe { input : 
 		nodup_bam = nodup_bam,
+		picard_java_heap = '4G',
 	}
 
 	call compare_md5sum.compare_md5sum { input :

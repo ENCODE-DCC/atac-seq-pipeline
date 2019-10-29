@@ -83,5 +83,10 @@
     "atac.macs2_signal_track_time_hr" : 24,
     "atac.macs2_signal_track_disks" : "local-disk 200 HDD",
 
-    "atac.preseq_mem_mb" : 16000
+    "atac.preseq_mem_mb" : 16000,
+
+    "atac.filter_picard_java_heap" : "4G",
+    "atac.preseq_picard_java_heap" : "6G",
+    "atac.fraglen_stat_picard_java_heap" : "6G",
+    "atac.gc_bias_picard_java_heap" : "6G"
 }

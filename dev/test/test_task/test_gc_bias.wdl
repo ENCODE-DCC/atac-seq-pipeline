@@ -12,8 +12,8 @@ workflow test_gc_bias {
 
 	call atac.gc_bias { input : 
 		nodup_bam = nodup_bam,
-
 		ref_fa = ref_fa,
+		picard_java_heap = '4G',
 	}
 
 	call remove_comments_from_gc_log { input :
