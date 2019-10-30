@@ -44,9 +44,12 @@ Use `https://storage.googleapis.com/encode-pipeline-test-samples/encode-atac-seq
 
 ## Input JSON file
 
+> **IMPORTANT**: DO NOT BLINDLY USE A TEMPLATE/EXAMPLE INPUT JSON. READ THROUGH THE FOLLOWING GUIDE TO MAKE A CORRECT INPUT JSON FILE.
+
 An input JSON file specifies all the input parameters and files that are necessary for successfully running this pipeline. This includes a specification of the path to the genome reference files and the raw data fastq file. Please make sure to specify absolute paths rather than relative paths in your input JSON files.
 
-[Input JSON file specification](docs/input.md)
+	- [Input JSON file specification (short)](docs/input_short.md)
+	- [Input JSON file specification (long)](docs/input.md)
 
 ## Running a pipeline on DNAnexus
 
