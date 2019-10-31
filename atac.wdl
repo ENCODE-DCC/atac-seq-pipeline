@@ -1,13 +1,13 @@
 # ENCODE ATAC-Seq/DNase-Seq pipeline
 # Author: Jin Lee (leepc12@gmail.com)
 
-#CAPER docker quay.io/encode-dcc/atac-seq-pipeline:dev-v1.5.2
-#CAPER singularity docker://quay.io/encode-dcc/atac-seq-pipeline:dev-v1.5.2
+#CAPER docker quay.io/encode-dcc/atac-seq-pipeline:v1.5.2
+#CAPER singularity docker://quay.io/encode-dcc/atac-seq-pipeline:v1.5.2
 #CROO out_def https://storage.googleapis.com/encode-pipeline-output-definition/atac.croo.json
 
 workflow atac {
 	# pipeline version
-	String pipeline_ver = 'dev-v1.5.2'
+	String pipeline_ver = 'v1.5.2'
 
 	# general sample information
 	String title = 'Untitled'
@@ -1421,7 +1421,7 @@ task call_peak {
 		python3 $(which encode_task_post_call_peak_atac.py) \
 			$(ls *Peak.gz) \
 			${'--ta ' + ta} \
-			${'--regex-bfilt-peak-chr-name "' + regex_bfilt_peak_chr_name + '"'} \
+			${'--regex-bfilt-peak-chr-name \'' + regex_bfilt_peak_chr_name + '\''} \
 			${'--chrsz ' + chrsz} \
 			${'--peak-type ' + peak_type} \
 			${'--blacklist ' + blacklist}
@@ -1504,7 +1504,7 @@ task idr {
 			--idr-rank ${rank} \
 			${'--chrsz ' + chrsz} \
 			${'--blacklist '+ blacklist} \
-			${'--regex-bfilt-peak-chr-name "' + regex_bfilt_peak_chr_name + '"'} \
+			${'--regex-bfilt-peak-chr-name \'' + regex_bfilt_peak_chr_name + '\''} \
 			${'--ta ' + ta}
 	}
 	output {
@@ -1547,7 +1547,7 @@ task overlap {
 			${'--chrsz ' + chrsz} \
 			${'--blacklist '+ blacklist} \
 			--nonamecheck \
-			${'--regex-bfilt-peak-chr-name "' + regex_bfilt_peak_chr_name + '"'} \
+			${'--regex-bfilt-peak-chr-name \'' + regex_bfilt_peak_chr_name + '\''} \
 			${'--ta ' + ta}
 	}
 	output {

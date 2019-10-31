@@ -15,8 +15,8 @@ This document describes instruction for the item 2).
 
 3. Move to one of the following workflow directories according to the platform you have chosen for your project (AWS or Azure). These DX workflows are pre-built with all parameters defined.
 
-* [AWS test workflow](https://platform.DNAnexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/ATAC-seq/workflows/dev-v1.5.2/test_ENCSR356KRQ_subsampled)
-* [Azure test workflow](https://platform.DNAnexus.com/projects/F6K911Q9xyfgJ36JFzv03Z5J/data/ATAC-seq/workflows/dev-v1.5.2/test_ENCSR356KRQ_subsampled)
+* [AWS test workflow](https://platform.DNAnexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/ATAC-seq/workflows): Use `[LATEST_VER]/test_ENCSR356KRQ_subsampled`.
+* [Azure test workflow](https://platform.DNAnexus.com/projects/F6K911Q9xyfgJ36JFzv03Z5J/data/ATAC-seq/workflows): Use `[LATEST_VER]/test_ENCSR356KRQ_subsampled`.
 
 4. Copy it to your project by right-clicking on the DX workflow `atac` and choose "Copy". 
 
@@ -39,23 +39,24 @@ This document describes instruction for the item 2).
 
 1. DNAnexus allows only one copy of a workflow per project. The example workflow in the previous section is pre-built for the subsampled test sample [ENCSR356KRQ](https://www.encodeproject.org/experiments/ENCSR356KRQ/) with all parameters defined already.
 
-2. Copy one of the following workflows according to the platform you have chosen for your project (AWS or Azure).
-* [AWS general](https://platform.DNAnexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/ATAC-seq/workflows/dev-v1.5.2/general) without pre-defined reference genome.
-* [AWS hg38](https://platform.DNAnexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/ATAC-seq/workflows/dev-v1.5.2/hg38) with pre-defined hg38 reference genome.
-* [AWS hg19](https://platform.DNAnexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/ATAC-seq/workflows/dev-v1.5.2/hg19) with pre-defined hg19 reference genome.
-* [AWS mm10](https://platform.DNAnexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/ATAC-seq/workflows/dev-v1.5.2/mm10) with pre-defined mm10 reference genome.
-* [AWS mm9](https://platform.DNAnexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/ATAC-seq/workflows/dev-v1.5.2/mm9) with pre-defined mm9 reference genome.
-* [Azure general](https://platform.DNAnexus.com/projects/F6K911Q9xyfgJ36JFzv03Z5J/data/ATAC-seq/workflows/dev-v1.5.2/general) without pre-defined reference genome.
-* [Azure hg38](https://platform.DNAnexus.com/projects/F6K911Q9xyfgJ36JFzv03Z5J/data/ATAC-seq/workflows/dev-v1.5.2/hg38) with pre-defined hg38 reference genome.
-* [Azure hg19](https://platform.DNAnexus.com/projects/F6K911Q9xyfgJ36JFzv03Z5J/data/ATAC-seq/workflows/dev-v1.5.2/hg19) with pre-defined hg19 reference genome.
-* [Azure mm10](https://platform.DNAnexus.com/projects/F6K911Q9xyfgJ36JFzv03Z5J/data/ATAC-seq/workflows/dev-v1.5.2/mm10) with pre-defined mm10 reference genome.
-* [Azure mm9](https://platform.DNAnexus.com/projects/F6K911Q9xyfgJ36JFzv03Z5J/data/ATAC-seq/workflows/dev-v1.5.2/mm9) with pre-defined mm9 reference genome.
+2. Choose your main platform (AWS or Azure). Move to [ENCODE ATAC-seq pipeline repository for AWS](https://platform.dnanexus.com/projects/F6K911Q9xyfgJ36JFzv03Z5J/data/ATAC-seq/workflows) or [ENCODE ATAC-seq pipeline repository for Azure](https://platform.DNAnexus.com/projects/F6K911Q9xyfgJ36JFzv03Z5J/data/ATAC-seq/workflows).
 
-3. Click on the DX workflow `atac`.
+3. Choose a folder with the latest available version.
 
-4. Specify your input files (FASTQs, BAMs, TAG-ALIGNs, ...) on the top left. For example, click on the item "fastqs_rep1_R1" and choose your R1 FASTQ file for replicate 1. See details [here](input.md) for other input types.
+4. Copy one of the following workflows according to the platform you have chosen for your project.
+> **IMPORTANT**: Make sure that you have chosen a correct platform (AWS or Azure) for your project.
 
-5. Choose a reference genome. See details [here](input.md).
+  * general: General workflow without pre-defined reference genome.
+  * hg38: Worfklow with pre-defined hg38 reference genome.
+  * hg19: Worfklow with pre-defined hg19 reference genome.
+  * mm10: Worfklow with pre-defined mm10 reference genome.
+  * mm9: Worfklow with pre-defined mm9 reference genome.
 
-6. Click on "Run as Analysis..." and you will be automatically redirected to the "Monitor" tab.
+5. Click on the DX workflow `atac`.
+
+6. Specify your input files (FASTQs, BAMs, TAG-ALIGNs, ...) on the top left. For example, click on the item "fastqs_rep1_R1" and choose your R1 FASTQ file for replicate 1. See details [here](input.md) for other input types.
+
+7. Choose a reference genome. See details [here](input.md).
+
+8. Click on "Run as Analysis..." and you will be automatically redirected to the "Monitor" tab.
 
