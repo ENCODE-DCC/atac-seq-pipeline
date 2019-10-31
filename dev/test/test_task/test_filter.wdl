@@ -44,6 +44,7 @@ workflow test_filter {
 
 		cpu = filter_cpu,
 		mem_mb = filter_mem_mb,
+		picard_java_heap = '4G',
 		time_hr = filter_time_hr,
 		disks = filter_disks,
 	}
@@ -61,6 +62,7 @@ workflow test_filter {
 
 		cpu = filter_cpu,
 		mem_mb = filter_mem_mb,
+		picard_java_heap = '4G',
 		time_hr = filter_time_hr,
 		disks = filter_disks,
 	}
@@ -78,6 +80,7 @@ workflow test_filter {
 
 		cpu = filter_cpu,
 		mem_mb = filter_mem_mb,
+		picard_java_heap = '4G',
 		time_hr = filter_time_hr,
 		disks = filter_disks,
 	}
@@ -95,6 +98,7 @@ workflow test_filter {
 
 		cpu = filter_cpu,
 		mem_mb = filter_mem_mb,
+		picard_java_heap = '4G',
 		time_hr = filter_time_hr,
 		disks = filter_disks,
 	}
@@ -112,6 +116,7 @@ workflow test_filter {
 
 		cpu = filter_cpu,
 		mem_mb = filter_mem_mb,
+		picard_java_heap = '4G',
 		time_hr = filter_time_hr,
 		disks = filter_disks,
 	}
@@ -129,6 +134,7 @@ workflow test_filter {
 
 		cpu = filter_cpu,
 		mem_mb = filter_mem_mb,
+		picard_java_heap = '4G',
 		time_hr = filter_time_hr,
 		disks = filter_disks,
 	}

@@ -66,11 +66,11 @@ def parse_arguments(debug=False):
             args.adapters = [[a] for a in args.adapters]  # make it a matrix
 
     # if adapter not given
-    if not args.adapters:  # fill empty string in adapter list
+    if args.adapter or not args.adapters:  # fill empty string in adapter list
         args.adapters = copy.deepcopy(args.fastqs)
         for i, adapters in enumerate(args.adapters):
             for j, adapter in enumerate(adapters):
-                args.adapters[i][j] = ''
+                args.adapters[i][j] = args.adapter if args.adapter else ''
 
     # check if fastqs, adapers have same/correct dimension
     if len(args.adapters) != len(args.fastqs):

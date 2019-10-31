@@ -384,21 +384,25 @@
   "atac.macs2_signal_track": {
     "pval_bw": {
       "path": "signal/rep${i+1}/${basename}",
-      "table": "Signal/Replicate ${i+1}/MACS2 signal track (p-val)"
+      "table": "Signal/Replicate ${i+1}/MACS2 signal track (p-val)",
+      "ucsc_track": "track type=bigWig name=\"MACS2 p-val (rep${i+1})\" priority=${i+1} smoothingWindow=off maxHeightPixels=80:60:40 color=255,0,0 autoScale=off viewLimits=0:40 visibility=full"
     },
     "fc_bw": {
       "path": "signal/rep${i+1}/${basename}",
-      "table": "Signal/Replicate ${i+1}/MACS2 signal track (fold-enrichment)"
+      "table": "Signal/Replicate ${i+1}/MACS2 signal track (fold-enrichment)",
+      "ucsc_track": "track type=bigWig name=\"MACS2 fc (rep${i+1})\" priority=${i+1} smoothingWindow=off maxHeightPixels=80:60:40 color=255,0,0 autoScale=off viewLimits=0:40 visibility=full"
     }
   },
   "atac.macs2_signal_track_pooled": {
     "pval_bw": {
       "path": "signal/pooled-rep/${basename}",
-      "table": "Signal/Pooled replicate/MACS2 signal track (p-val)"
+      "table": "Signal/Pooled replicate/MACS2 signal track (p-val)",
+      "ucsc_track": "track type=bigWig name=\"MACS2 p-val (pooled)\" priority=0 smoothingWindow=off maxHeightPixels=80:60:40 color=255,0,0 autoScale=off viewLimits=0:40 visibility=full"
     },
     "fc_bw": {
       "path": "signal/pooled-rep/${basename}",
-      "table": "Signal/Pooled replicate/MACS2 signal track (fold-enrichment)"
+      "table": "Signal/Pooled replicate/MACS2 signal track (fold-enrichment)",
+      "ucsc_track": "track type=bigWig name=\"MACS2 fc (pooled)\" priority=0 smoothingWindow=off maxHeightPixels=80:60:40 color=255,0,0 autoScale=off viewLimits=0:40 visibility=full"
     }
   },
   "atac.count_signal_track": {
@@ -572,7 +576,8 @@
     },
     "optimal_peak_bb": {
       "path": "peak/idr_reproducibility/${basename}",
-      "table": "Peak/IDR reproducibility/Optimal peak (BigBed)"
+      "table": "Peak/IDR reproducibility/Optimal peak (BigBed)",
+      "ucsc_track": "track type=bigBed name=\"Optimal IDR peak\" priority=100 color=0,0,255 visibility=full"
     },
     "optimal_peak_hammock": {
       "path": "peak/idr_reproducibility/${basename}",
@@ -584,7 +589,8 @@
     },
     "conservative_peak_bb": {
       "path": "peak/idr_reproducibility/${basename}",
-      "table": "Peak/IDR reproducibility/Conservative peak (BigBed)"
+      "table": "Peak/IDR reproducibility/Conservative peak (BigBed)",
+      "ucsc_track": "track type=bigBed name=\"Conservative IDR peak\" priority=100 color=0,0,255 visibility=full"
     },
     "conservative_peak_hammock": {
       "path": "peak/idr_reproducibility/${basename}",
@@ -602,7 +608,8 @@
     },
     "optimal_peak_bb": {
       "path": "peak/overlap_reproducibility/${basename}",
-      "table": "Peak/Overlap reproducibility/Optimal peak (BigBed)"
+      "table": "Peak/Overlap reproducibility/Optimal peak (BigBed)",
+      "ucsc_track": "track type=bigBed name=\"Optimal overlap peak\" priority=100 color=0,0,255 visibility=full"
     },
     "optimal_peak_hammock": {
       "path": "peak/overlap_reproducibility/${basename}",
@@ -614,7 +621,8 @@
     },
     "conservative_peak_bb": {
       "path": "peak/overlap_reproducibility/${basename}",
-      "table": "Peak/Overlap reproducibility/Conservative peak (BigBed)"
+      "table": "Peak/Overlap reproducibility/Conservative peak (BigBed)",
+      "ucsc_track": "track type=bigBed name=\"Conservative overlap peak\" priority=100 color=0,0,255 visibility=full"
     },
     "conservative_peak_hammock": {
       "path": "peak/overlap_reproducibility/${basename}",
