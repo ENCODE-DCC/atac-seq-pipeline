@@ -44,15 +44,12 @@ Use `https://storage.googleapis.com/encode-pipeline-test-samples/encode-atac-seq
 
 ## Input JSON file
 
+> **IMPORTANT**: DO NOT BLINDLY USE A TEMPLATE/EXAMPLE INPUT JSON. READ THROUGH THE FOLLOWING GUIDE TO MAKE A CORRECT INPUT JSON FILE.
+
 An input JSON file specifies all the input parameters and files that are necessary for successfully running this pipeline. This includes a specification of the path to the genome reference files and the raw data fastq file. Please make sure to specify absolute paths rather than relative paths in your input JSON files.
 
-[Input JSON file specification](docs/input.md)
-
-## Running a pipeline without Caper
-
-> **WARNING**: This method has been deprecated. There are many unfixed known bugs. We no longer support it.
-
-Caper uses the cromwell workflow execution engine to run the workflow on the platform you specify. While we recommend you use caper, if you want to run cromwell directly without caper you can learn about that [here](docs/deprecated/OLD_METHOD.md).
+1) [Input JSON file specification (short)](docs/input_short.md)
+2) [Input JSON file specification (long)](docs/input.md)
 
 ## Running a pipeline on DNAnexus
 
@@ -69,5 +66,3 @@ Install [Croo](https://github.com/ENCODE-DCC/croo#installation). **You can skip 
 $ pip install croo
 $ croo [METADATA_JSON_FILE]
 ```
-
-There is another [useful tool](utils/qc_jsons_to_tsv/README.md) to make a spreadsheet of QC metrics from multiple workflows. This tool recursively finds and parses all `qc.json` (pipeline's [final output](docs/example_output/v1.1.5/qc.json)) found from a specified root directory. It generates a TSV file that has all quality metrics tabulated in rows for each experiment and replicate. This tool also estimates overall quality of a sample by [a criteria definition JSON file](utils/qc_jsons_to_tsv/criteria.default.json) which can be a good guideline for QC'ing experiments.

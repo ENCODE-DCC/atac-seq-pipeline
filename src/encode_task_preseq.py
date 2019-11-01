@@ -24,6 +24,9 @@ def parse_arguments():
     parser.add_argument('--paired-end', action="store_true",
                         help='Paired-end BAM.')
     parser.add_argument('--bam', type=str, help='Raw BAM file.')
+    parser.add_argument('--picard-java-heap',
+                        help='Picard\'s Java max. heap: java -jar picard.jar '
+                             '-Xmx[MAX_HEAP]')
     parser.add_argument('--out-dir', default='', type=str,
                         help='Output directory.')
     parser.add_argument('--log-level', default='INFO', help='Log level',
@@ -35,21 +38,25 @@ def parse_arguments():
     return args
 
 
-def get_picard_complexity_metrics(aligned_bam, prefix):
+def get_picard_complexity_metrics(aligned_bam, prefix, java_heap=None):
     '''
     Picard EsimateLibraryComplexity
     '''
     # remove redundant (or malformed) info (read group) from bam
     out_file = '{0}.picardcomplexity.qc'.format(prefix)
+    if java_heap is None:
+        java_heap_param = '-Xmx6G'
+    else:
+        java_heap_param = '-Xmx{}'.format(java_heap)
     get_gc_metrics = (
         'mkdir -p tmp_java && java -Djava.io.tmpdir=$PWD/tmp_java '
-        '-Xmx6G -XX:ParallelGCThreads=1 -jar '
+        '{3} -XX:ParallelGCThreads=1 -jar '
         '{2} '
         'EstimateLibraryComplexity INPUT={0} OUTPUT={1} '
         'USE_JDK_DEFLATER=TRUE USE_JDK_INFLATER=TRUE '
         'VERBOSITY=ERROR '
         'QUIET=TRUE && rm -rf tmp_java').format(
-        aligned_bam, out_file, locate_picard())
+        aligned_bam, out_file, locate_picard(), java_heap_param)
     os.system(get_gc_metrics)
 
     # Extract the actual estimated library size
@@ -128,10 +135,11 @@ def main():
         args.out_dir,
         os.path.basename(strip_ext_bam(ALIGNED_BAM)))
     RG_FREE_ALIGNED_BAM = remove_read_group(ALIGNED_BAM)
+    JAVA_HEAP = args.picard_java_heap
     # Library complexity: Preseq results, NRF, PBC1, PBC2
     if args.paired_end:
         picard_est_lib_size = get_picard_complexity_metrics(
-            RG_FREE_ALIGNED_BAM, OUTPUT_PREFIX)
+            RG_FREE_ALIGNED_BAM, OUTPUT_PREFIX, JAVA_HEAP)
     else:
         picard_est_lib_size = None
     preseq_data, preseq_log = run_preseq(

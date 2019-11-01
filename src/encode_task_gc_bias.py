@@ -25,6 +25,9 @@ def parse_arguments():
     parser.add_argument('--nodup-bam', type=str,
                         help='Raw BAM file (from task filter).')
     parser.add_argument('--ref-fa', type=str, help='Reference fasta file.')
+    parser.add_argument('--picard-java-heap',
+                        help='Picard\'s Java max. heap: java -jar picard.jar '
+                             '-Xmx[MAX_HEAP]')
     parser.add_argument('--out-dir', default='', type=str,
                         help='Output directory.')
     parser.add_argument('--log-level', default='INFO', help='Log level',
@@ -36,7 +39,7 @@ def parse_arguments():
     return args
 
 
-def get_gc(qsorted_bam_file, reference_fasta, prefix):
+def get_gc(qsorted_bam_file, reference_fasta, prefix, java_heap=None):
     '''
     Uses picard tools (CollectGcBiasMetrics). Note that the reference
     MUST be the same fasta file that generated the bowtie indices.
@@ -47,7 +50,11 @@ def get_gc(qsorted_bam_file, reference_fasta, prefix):
     output_file = '{0}.gc.txt'.format(prefix)
     plot_file = '{0}.gcPlot.pdf'.format(prefix)
     summary_file = '{0}.gcSummary.txt'.format(prefix)
-    get_gc_metrics = ('java -Xmx6G -XX:ParallelGCThreads=1 -jar '
+    if java_heap is None:
+        java_heap_param = '-Xmx6G'
+    else:
+        java_heap_param = '-Xmx{}'.format(java_heap)
+    get_gc_metrics = ('java {6} -XX:ParallelGCThreads=1 -jar '
                       '{5} '
                       'CollectGcBiasMetrics R={0} I={1} O={2} '
                       'USE_JDK_DEFLATER=TRUE USE_JDK_INFLATER=TRUE '
@@ -58,7 +65,8 @@ def get_gc(qsorted_bam_file, reference_fasta, prefix):
                                                 output_file,
                                                 plot_file,
                                                 summary_file,
-                                                locate_picard())
+                                                locate_picard(),
+                                                java_heap_param)
     logging.info(get_gc_metrics)
     os.system(get_gc_metrics)
     return output_file, plot_file, summary_file
@@ -114,10 +122,12 @@ def main():
         args.out_dir,
         os.path.basename(strip_ext_bam(FINAL_BAM)))
     RG_FREE_FINAL_BAM = remove_read_group(FINAL_BAM)
+    JAVA_HEAP = args.picard_java_heap
 
     gc_out, gc_plot_pdf, gc_summary = get_gc(RG_FREE_FINAL_BAM,
                                              REF,
-                                             OUTPUT_PREFIX)
+                                             OUTPUT_PREFIX,
+                                             JAVA_HEAP)
     # will generate PNG format from gc_out
     plot_gc(gc_out, OUTPUT_PREFIX)
 

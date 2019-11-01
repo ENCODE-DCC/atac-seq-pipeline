@@ -86,6 +86,9 @@ def parse_arguments():
     parser = argparse.ArgumentParser(prog='ENCODE fragment length stat')
     parser.add_argument('--nodup-bam', type=str,
                         help='Raw BAM file (from task filter).')
+    parser.add_argument('--picard-java-heap',
+                        help='Picard\'s Java max. heap: java -jar picard.jar '
+                             '-Xmx[MAX_HEAP]')
     parser.add_argument('--out-dir', default='', type=str,
                         help='Output directory.')
     parser.add_argument('--log-level', default='INFO', help='Log level',
@@ -107,14 +110,18 @@ def read_picard_histogram(data_file):
     return data
 
 
-def get_insert_distribution(final_bam, prefix):
+def get_insert_distribution(final_bam, prefix, java_heap=None):
     '''
     Calls Picard CollectInsertSizeMetrics
     '''
     log.info('insert size distribution...')
     insert_data = '{0}.inserts.hist_data.log'.format(prefix)
     insert_plot = '{0}.inserts.hist_graph.pdf'.format(prefix)
-    graph_insert_dist = ('java -Xmx6G -XX:ParallelGCThreads=1 -jar '
+    if java_heap is None:
+        java_heap_param = '-Xmx6G'
+    else:
+        java_heap_param = '-Xmx{}'.format(java_heap)
+    graph_insert_dist = ('java {4} -XX:ParallelGCThreads=1 -jar '
                          '{3} '
                          'CollectInsertSizeMetrics '
                          'INPUT={0} OUTPUT={1} H={2} '
@@ -123,7 +130,8 @@ def get_insert_distribution(final_bam, prefix):
                          'W=1000 STOP_AFTER=5000000').format(final_bam,
                                                              insert_data,
                                                              insert_plot,
-                                                             locate_picard())
+                                                             locate_picard(),
+                                                             java_heap_param)
     log.info(graph_insert_dist)
     os.system(graph_insert_dist)
     return insert_data, insert_plot
@@ -213,10 +221,12 @@ def main():
         args.out_dir,
         os.path.basename(strip_ext_bam(FINAL_BAM)))
     RG_FREE_FINAL_BAM = remove_read_group(FINAL_BAM)
+    JAVA_HEAP = args.picard_java_heap
 
     # Insert size distribution - CAN'T GET THIS FOR SE FILES
     insert_data, insert_plot = get_insert_distribution(RG_FREE_FINAL_BAM,
-                                                       OUTPUT_PREFIX)
+                                                       OUTPUT_PREFIX,
+                                                       JAVA_HEAP)
     # Also need to run n-nucleosome estimation
     fragment_length_qc(read_picard_histogram(insert_data),
                        OUTPUT_PREFIX)

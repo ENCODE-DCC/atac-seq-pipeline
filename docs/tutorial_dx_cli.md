@@ -43,11 +43,12 @@ This document describes instruction for the item 1).
 
 7. Compile `atac.wdl` with an input JSON for the SUBSAMPLED (1/400) paired-end sample of [ENCSR356KRQ](https://www.encodeproject.org/experiments/ENCSR356KRQ/).
     ```bash
+    $ WDL=atac.wdl
     $ PROJECT=[YOUR_PROJECT_NAME]
     $ OUT_FOLDER=/test_sample_atac_ENCSR356KRQ_subsampled
-    $ DOCKER=quay.io/encode-dcc/atac-seq-pipeline:v1.5.1
+    $ DOCKER=$(cat ${WDL} | grep "#CAPER docker" | awk '{print $3}')
 
-    $ java -jar dxWDL-0.77.jar compile atac.wdl -project ${PROJECT} -f -folder ${OUT_FOLDER} -defaults ${INPUT} -extras <(echo "{\"default_runtime_attributes\":{\"docker\":\"${DOCKER}\"}}")
+    $ java -jar dxWDL-0.77.jar compile ${WDL} -project ${PROJECT} -f -folder ${OUT_FOLDER} -defaults ${INPUT} -extras <(echo "{\"default_runtime_attributes\":{\"docker\":\"${DOCKER}\"}}")
     ```
 
 8. Go to DNAnexus [project page](https://platform.DNAnexus.com/projects) and click on your project.

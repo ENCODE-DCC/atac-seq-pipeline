@@ -25,6 +25,9 @@ def parse_arguments():
     parser = argparse.ArgumentParser(prog='ENCODE TSS enrichment.')
     parser.add_argument('--read-len-log', type=str,
                         help='Read length log file (from aligner task).')
+    parser.add_argument('--read-len', type=int,
+                        help='Read length (integer). This is ignored if '
+                             '--read-len-log is defined.')
     parser.add_argument('--nodup-bam', type=str,
                         help='Raw BAM file (from task filter).')
     parser.add_argument('--chrsz', type=str,
@@ -36,6 +39,10 @@ def parse_arguments():
                         choices=['NOTSET', 'DEBUG', 'INFO', 'WARNING',
                                  'CRITICAL', 'ERROR', 'CRITICAL'])
     args = parser.parse_args()
+
+    if args.read_len_log is None and args.read_len is None:
+        raise ValueError('Either --read-len-log or --read-len must be defined.')
+
     log.setLevel(args.log_level)
     log.info(sys.argv)
     return args
@@ -144,6 +151,8 @@ def main():
     if args.read_len_log:
         with open(args.read_len_log, 'r') as fp:
             read_len = int(fp.read().strip())
+    elif args.read_len:
+        read_len = args.read_len
     else:
         read_len = None
 
