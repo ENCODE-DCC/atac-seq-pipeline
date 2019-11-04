@@ -44,7 +44,6 @@
 
     "atac.enable_xcor" : false,
     "atac.enable_count_signal_track" : false,
-    "atac.keep_irregular_chr_in_bfilt_peak" : false,        
 
     "atac.filter_chrs" : ["chrM", "MT"],
 
