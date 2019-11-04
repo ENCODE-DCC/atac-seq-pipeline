@@ -16,6 +16,8 @@
     "atac.fastqs_rep2_R1" : [ "rep2_R1_L1.fastq.gz", "rep2_R1_L2.fastq.gz" ],
     "atac.fastqs_rep2_R2" : [ "rep2_R2_L1.fastq.gz", "rep2_R2_L2.fastq.gz" ],
 
+    "atac.read_len" : [],
+
     "atac.auto_detect_adapter" : false,
     "atac.adapter" : "AATTCCGG",
     "atac.adapters_rep1_R1" : [ "AATTCCGG", "AATTCCGG", "AATTCCGG" ],
@@ -54,7 +56,7 @@
     "atac.align_cpu" : 4,
     "atac.align_mem_mb" : 20000,
     "atac.align_time_hr" : 48,
-    "atac.align_disks" : "local-disk 200 HDD",
+    "atac.align_disks" : "local-disk 400 HDD",
 
     "atac.filter_cpu" : 2,
     "atac.filter_mem_mb" : 20000,
@@ -81,5 +83,10 @@
     "atac.macs2_signal_track_time_hr" : 24,
     "atac.macs2_signal_track_disks" : "local-disk 200 HDD",
 
-    "atac.preseq_mem_mb" : 16000
+    "atac.preseq_mem_mb" : 16000,
+
+    "atac.filter_picard_java_heap" : "4G",
+    "atac.preseq_picard_java_heap" : "6G",
+    "atac.fraglen_stat_picard_java_heap" : "6G",
+    "atac.gc_bias_picard_java_heap" : "6G"
 }

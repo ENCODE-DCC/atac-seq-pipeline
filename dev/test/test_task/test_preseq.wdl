@@ -14,8 +14,8 @@ workflow test_preseq {
 	call atac.preseq { input : 
 		paired_end = paired_end,
 		bam = bam,
-
 		mem_mb = 4000,
+		picard_java_heap = '4G',
 	}
 
 	call compare_md5sum.compare_md5sum { input :

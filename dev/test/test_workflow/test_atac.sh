@@ -8,7 +8,7 @@ fi
 if [ $# -gt 2 ]; then
   DOCKER_IMAGE=$3
 else
-  DOCKER_IMAGE=quay.io/encode-dcc/atac-seq-pipeline:test-v1.5.1
+  DOCKER_IMAGE="conda"
 fi
 INPUT=$1
 GCLOUD_SERVICE_ACCOUNT_SECRET_JSON_FILE=$2
@@ -31,6 +31,11 @@ cat > $TMP_WF_OPT << EOM
     }
 }
 EOM
+if [ $DOCKER_IMAGE == 'conda' ]; then
+  WF_OPT=
+else
+  WF_OPT="-o ${TMP_WF_OPT}"
+fi
 
 METADATA=${PREFIX}.metadata.json # metadata
 RESULT=${PREFIX}.result.txt # output
@@ -45,6 +50,6 @@ java -Dconfig.file=backend_gcp_service_account.conf \
 -Dbackend.providers.google.config.filesystems.gcs.auth=service-account \
 -jar ${CROMWELL_JAR} run \
 ../../../atac.wdl \
--i ${INPUT} -o ${TMP_WF_OPT} -m ${METADATA}
+-i ${INPUT} ${WF_OPT} -m ${METADATA}
  
 rm -f tmp_secret_key ${TMP_WF_OPT}

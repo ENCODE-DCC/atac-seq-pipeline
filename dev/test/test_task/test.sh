@@ -12,7 +12,7 @@ INPUT=$2
 if [ $# -gt 2 ]; then
   DOCKER_IMAGE=$3
 else
-  DOCKER_IMAGE=quay.io/encode-dcc/atac-seq-pipeline:test-v1.5.1
+  DOCKER_IMAGE="conda"
 fi
 if [ $# -gt 3 ]; then
   NUM_TASK=$4
@@ -26,7 +26,7 @@ else
   wget -N -c https://storage.googleapis.com/encode-pipeline-test-samples/cromwell_jar/cromwell-42.jar
 fi
 CROMWELL_JAR=cromwell-42.jar
-BACKEND_CONF=../../backends/backend.conf
+BACKEND_CONF=backend.conf
 BACKEND=Local
 EXTRA_PARAM="-Dbackend.providers.Local.config.concurrent-job-limit=${NUM_TASK}"
 PREFIX=$(basename ${WDL} .wdl)
