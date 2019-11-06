@@ -270,6 +270,14 @@
         }
     },
     "align_enrich": {
+        "tss_enrich": {
+            "rep1": {
+                "tss_enrich": 19.06062750181121
+            },
+            "rep2": {
+                "tss_enrich": 16.757705401589984
+            }
+        },
         "xcor_score": {
             "rep1": {
                 "subsampled_reads": 228557,
