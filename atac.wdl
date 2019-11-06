@@ -633,12 +633,11 @@ workflow atac {
 		}
 		# tasks factored out from ATAqC
 		Boolean has_input_of_tss_enrich = defined(nodup_bam_) && defined(tss_) && (
-			defined(align.read_len_log) || i<length(read_len) && defined(read_len[i]) )
+			defined(align.read_len) || i<length(read_len) && defined(read_len[i]) )
 		if ( enable_tss_enrich && has_input_of_tss_enrich ) {
-			Int? read_len_ = if i<length(read_len) && defined(read_len[i]) then read_len[i]
-				else read_int(align.read_len_log)
 			call tss_enrich { input :
-				read_len = read_len_,
+				read_len = if i<length(read_len) && defined(read_len[i]) then read_len[i]
+					else align.read_len,
 				nodup_bam = nodup_bam_,
 				tss = tss_,
 				chrsz = chrsz_,
@@ -1141,6 +1140,7 @@ task align {
 		File samstat_qc = glob('*.samstats.qc')[0]
 		File non_mito_samstat_qc = glob('non_mito/*.samstats.qc')[0]
 		File read_len_log = glob('*.read_length.txt')[0]
+		Int read_len = read_int(read_len_log)
 	}
 	runtime {
 		cpu : cpu
