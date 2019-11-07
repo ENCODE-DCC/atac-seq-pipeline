@@ -127,6 +127,22 @@ jobs:
             ./test_atac.sh ENCSR356KRQ_subsampled.json tmp_key.json ${TAG}
             python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'outputs'][u'atac.qc_json_ref_match']))" < ENCSR356KRQ_subsampled.metadata.json
 
+  test_workflow_pe_start_from_bam:
+    <<: *machine_defaults
+    steps:
+      - checkout
+      - run: *make_tag
+      - run:
+          no_output_timeout: 300m
+          command: |
+            source ${BASH_ENV}
+            gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
+            cd dev/test/test_workflow/
+            echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_key.json
+            ./test_atac.sh ENCSR356KRQ_subsampled_start_from_bam.json tmp_key.json ${TAG}
+            python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'outputs'][u'atac.qc_json_ref_match']))" < ENCSR356KRQ_subsampled_start_from_bam.metadata.json
+
+
 # Define workflow here
 workflows:
   version: 2
@@ -143,5 +159,8 @@ workflows:
           requires:
             - build
       - test_workflow_pe:
+          requires:
+            - build
+      - test_workflow_pe_start_from_bam:
           requires:
             - build

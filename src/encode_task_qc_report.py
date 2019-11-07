@@ -191,21 +191,11 @@ def parse_arguments():
         if isinstance(value, list):
             setattr(args, a, split_entries_and_extend(value))
 
-    if args.paired_ends is None:
-        if args.paired_end:
-            args.paired_ends = [True]*20
-        else:
-            args.paired_ends = [False]*20
-    else:
+    if args.paired_ends is not None:
         for i, _ in enumerate(args.paired_ends):
             args.paired_ends[i] = str2bool(args.paired_ends[i])
 
-    if args.ctl_paired_ends is None:
-        if args.ctl_paired_end:
-            args.ctl_paired_ends = [True]*20
-        else:
-            args.ctl_paired_ends = args.paired_ends
-    else:
+    if args.ctl_paired_ends is not None:
         for i, _ in enumerate(args.ctl_paired_ends):
             args.ctl_paired_ends[i] = str2bool(args.ctl_paired_ends[i])
 
@@ -250,8 +240,7 @@ MAP_KEY_DESC_GENERAL = {
     'aligner': 'Aligner',
     'peak_caller': 'Peak caller',
     'genome': 'Genome',
-    'paired_end': 'Paired-end per replicate',
-    'ctl_paired_end': 'Control paired-end per replicate',
+    'seq_endedness': 'Sequencing endedness'
 }
 
 
@@ -270,13 +259,16 @@ def make_cat_root(args):
         ('pipeline_ver', args.pipeline_ver),
         ('pipeline_type', args.pipeline_type),
         ('genome', args.genome),
-        ('paired_end', args.paired_ends),
         ('aligner', args.aligner),
+        ('seq_endedness', OrderedDict()),
         ('peak_caller', args.peak_caller),
     ])
-    if args.ctl_paired_ends \
-            and args.pipeline_type not in ('atac', 'dnase'):
-        d_general['ctl_paired_end'] = args.ctl_paired_ends
+    if args.paired_ends is not None:
+        for i, paired_end in enumerate(args.paired_ends):
+            d_general['seq_endedness']['rep{}'.format(i + 1)] = {'paired_end': paired_end}
+    if args.ctl_paired_ends is not None:
+        for i, paired_end in enumerate(args.ctl_paired_ends):
+            d_general['seq_endedness']['ctl{}'.format(i + 1)] = {'paired_end': paired_end}
     cat_root.add_log(d_general, key='general')
 
     return cat_root
