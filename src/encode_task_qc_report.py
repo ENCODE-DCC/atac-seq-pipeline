@@ -240,7 +240,7 @@ MAP_KEY_DESC_GENERAL = {
     'aligner': 'Aligner',
     'peak_caller': 'Peak caller',
     'genome': 'Genome',
-    'read_end': 'Read end'
+    'seq_endedness': 'Sequencing endedness'
 }
 
 
@@ -260,15 +260,15 @@ def make_cat_root(args):
         ('pipeline_type', args.pipeline_type),
         ('genome', args.genome),
         ('aligner', args.aligner),
-        ('read_end', OrderedDict()),
+        ('seq_endedness', OrderedDict()),
         ('peak_caller', args.peak_caller),
     ])
     if args.paired_ends is not None:
         for i, paired_end in enumerate(args.paired_ends):
-            d_general['read_end']['rep{}'.format(i + 1)] = {'paired_end': paired_end}
+            d_general['seq_endedness']['rep{}'.format(i + 1)] = {'paired_end': paired_end}
     if args.ctl_paired_ends is not None:
         for i, paired_end in enumerate(args.ctl_paired_ends):
-            d_general['read_end']['ctl{}'.format(i + 1)] = {'paired_end': paired_end}
+            d_general['seq_endedness']['ctl{}'.format(i + 1)] = {'paired_end': paired_end}
     cat_root.add_log(d_general, key='general')
 
     return cat_root
