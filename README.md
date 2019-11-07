@@ -17,7 +17,7 @@ The ATAC-seq pipeline protocol specification is [here](https://docs.google.com/d
 ## Installation
 
 1) Git clone this pipeline.
-	> **IMPORTANT*: use `~/atac-seq-pipeline/atac.wdl` as `[WDL]` in Caper's documentation.
+	> **IMPORTANT**: use `~/atac-seq-pipeline/atac.wdl` as `[WDL]` in Caper's documentation.
 
 	```bash
 	$ cd
