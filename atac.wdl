@@ -1,13 +1,13 @@
 # ENCODE ATAC-Seq/DNase-Seq pipeline
 # Author: Jin Lee (leepc12@gmail.com)
 
-#CAPER docker quay.io/encode-dcc/atac-seq-pipeline:v1.5.2
-#CAPER singularity docker://quay.io/encode-dcc/atac-seq-pipeline:v1.5.2
+#CAPER docker quay.io/encode-dcc/atac-seq-pipeline:dev-v1.5.3
+#CAPER singularity docker://quay.io/encode-dcc/atac-seq-pipeline:dev-v1.5.3
 #CROO out_def https://storage.googleapis.com/encode-pipeline-output-definition/atac.croo.json
 
 workflow atac {
 	# pipeline version
-	String pipeline_ver = 'v1.5.2'
+	String pipeline_ver = 'dev-v1.5.3'
 
 	# general sample information
 	String title = 'Untitled'
