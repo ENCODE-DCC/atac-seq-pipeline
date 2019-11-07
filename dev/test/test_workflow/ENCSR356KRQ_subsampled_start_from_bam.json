@@ -1,0 +1,15 @@
+{
+    "atac.qc_report.qc_json_ref" : "gs://encode-pipeline-test-samples/encode-atac-seq-pipeline/ref_output/v1.5.0/ENCSR356KRQ_subsampled_start_from_bam/qc.json",
+    "atac.pipeline_type" : "atac",
+    "atac.genome_tsv" : "gs://encode-pipeline-genome-data/genome_tsv/v1/hg38_gcp.tsv",
+    "atac.read_len" : [76, 76],
+    "atac.nodup_bams" : [
+        "gs://encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ/bam_subsampled/rep1/ENCFF341MYG.subsampled.400.trim.merged.nodup.no_chrM_MT.bam",
+        "gs://encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ/bam_subsampled/rep2/ENCFF641SFZ.subsampled.400.trim.merged.nodup.no_chrM_MT.bam"
+    ],
+    "atac.paired_end" : true,
+    "atac.auto_detect_adapter" : true,
+    "atac.enable_xcor" : true,
+    "atac.title" : "ENCSR356KRQ (subsampled 1/400 reads, starting from BAM)",
+    "atac.description" : "ATAC-seq on primary keratinocytes in day 0.0 of differentiation"
+}
