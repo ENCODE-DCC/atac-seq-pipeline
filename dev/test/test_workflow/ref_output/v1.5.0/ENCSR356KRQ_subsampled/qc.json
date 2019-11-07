@@ -1,16 +1,20 @@
 {
     "general": {
-        "date": "2019-10-10 06:20:41",
+        "date": "2019-11-07 02:13:22",
         "title": "ENCSR356KRQ (subsampled 1/400 reads)",
         "description": "ATAC-seq on primary keratinocytes in day 0.0 of differentiation",
-        "pipeline_ver": "dev-v1.5.0",
+        "pipeline_ver": "dev-v1.5.3",
         "pipeline_type": "atac",
         "genome": "hg38",
-        "paired_end": [
-            true,
-            true
-        ],
         "aligner": "bowtie2",
+        "seq_endedness": {
+            "rep1": {
+                "paired_end": true
+            },
+            "rep2": {
+                "paired_end": true
+            }
+        },
         "peak_caller": "macs2"
     },
     "align": {
@@ -270,14 +274,6 @@
         }
     },
     "align_enrich": {
-        "tss_enrich": {
-            "rep1": {
-                "tss_enrich": 19.06062750181121
-            },
-            "rep2": {
-                "tss_enrich": 16.757705401589984
-            }
-        },
         "xcor_score": {
             "rep1": {
                 "subsampled_reads": 228557,
@@ -300,6 +296,14 @@
                 "min_corr": 0.006548108,
                 "NSC": 1.918698,
                 "RSC": 0.973006
+            }
+        },
+        "tss_enrich": {
+            "rep1": {
+                "tss_enrich": 19.06062750181121
+            },
+            "rep2": {
+                "tss_enrich": 16.757705401589984
             }
         },
         "jsd": {
