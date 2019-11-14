@@ -2,6 +2,8 @@
 
 An input JSON file includes all genomic data files, parameters and metadata for running pipelines. Our pipeline will use default values if they are not defined in an input JSON file. We provide a set of template JSON files: [minimum](../example_input_json/template.json) and [full](../example_input_json/template.full.json). We recommend to use a minimum template instead of full one. A full template includes all parameters of the pipeline with default values defined.
 
+>**IMPORTANT**: ALWAYS USE ABSOLUTE PATHS.
+
 # Checklist
 
 Mandatory parameters:

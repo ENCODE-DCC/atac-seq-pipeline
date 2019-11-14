@@ -4,6 +4,8 @@ An input JSON file includes all genomic data files, parameters and metadata for 
 
 Please read through the following step-by-step instruction to compose a input JSON file.
 
+>**IMPORTANT**: ALWAYS USE ABSOLUTE PATHS.
+
 ## Pipeline metadata
 
 Parameter|Description
