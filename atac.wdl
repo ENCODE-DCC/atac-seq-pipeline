@@ -1444,6 +1444,7 @@ task call_peak {
 		memory : '${mem_mb} MB'
 		time : time_hr
 		disks : disks
+		preemptible: 0
 	}
 }
 
@@ -1476,6 +1477,7 @@ task macs2_signal_track {
 		memory : '${mem_mb} MB'
 		time : time_hr
 		disks : disks
+		preemptible: 0
 	}
 }
 
