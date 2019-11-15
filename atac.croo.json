@@ -709,6 +709,200 @@
       "table": "QC and logs/Final QC JSON file"
     }
   },
+  "inputs": {
+    "atac.fastqs_rep1_R1": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR1 (${i+1})\"]",
+      "subgraph": "cluster_rep1"
+    },
+    "atac.fastqs_rep1_R2": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR2 (${i+1})\"]",
+      "subgraph": "cluster_rep1"
+    },
+    "atac.fastqs_rep2_R1": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR1 (${i+1})\"]",
+      "subgraph": "cluster_rep2"
+    },
+    "atac.fastqs_rep2_R2": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR2 (${i+1})\"]",
+      "subgraph": "cluster_rep2"
+    },
+    "atac.fastqs_rep3_R1": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR1 (${i+1})\"]",
+      "subgraph": "cluster_rep3"
+    },
+    "atac.fastqs_rep3_R2": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR2 (${i+1})\"]",
+      "subgraph": "cluster_rep3"
+    },
+    "atac.fastqs_rep4_R1": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR1 (${i+1})\"]",
+      "subgraph": "cluster_rep4"
+    },
+    "atac.fastqs_rep4_R2": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR2 (${i+1})\"]",
+      "subgraph": "cluster_rep4"
+    },
+    "atac.fastqs_rep5_R1": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR1 (${i+1})\"]",
+      "subgraph": "cluster_rep5"
+    },
+    "atac.fastqs_rep5_R2": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR2 (${i+1})\"]",
+      "subgraph": "cluster_rep5"
+    },
+    "atac.fastqs_rep6_R1": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR1 (${i+1})\"]",
+      "subgraph": "cluster_rep6"
+    },
+    "atac.fastqs_rep6_R2": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR2 (${i+1})\"]",
+      "subgraph": "cluster_rep6"
+    },
+    "atac.fastqs_rep7_R1": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR1 (${i+1})\"]",
+      "subgraph": "cluster_rep7"
+    },
+    "atac.fastqs_rep7_R2": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR2 (${i+1})\"]",
+      "subgraph": "cluster_rep7"
+    },
+    "atac.fastqs_rep8_R1": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR1 (${i+1})\"]",
+      "subgraph": "cluster_rep8"
+    },
+    "atac.fastqs_rep8_R2": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR2 (${i+1})\"]",
+      "subgraph": "cluster_rep8"
+    },
+    "atac.fastqs_rep9_R1": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR1 (${i+1})\"]",
+      "subgraph": "cluster_rep9"
+    },
+    "atac.fastqs_rep9_R2": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR2 (${i+1})\"]",
+      "subgraph": "cluster_rep9"
+    },
+    "atac.fastqs_rep10_R1": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR1 (${i+1})\"]",
+      "subgraph": "cluster_rep10"
+    },
+    "atac.fastqs_rep10_R2": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR2 (${i+1})\"]",
+      "subgraph": "cluster_rep10"
+    },
+    "atac.ctl_fastqs_rep1_R1": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR1 (${i+1})\"]",
+      "subgraph": "cluster_ctl1"
+    },
+    "atac.ctl_fastqs_rep1_R2": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR2 (${i+1})\"]",
+      "subgraph": "cluster_ctl1"
+    },
+    "atac.ctl_fastqs_rep2_R1": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR1 (${i+1})\"]",
+      "subgraph": "cluster_ctl2"
+    },
+    "atac.ctl_fastqs_rep2_R2": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR2 (${i+1})\"]",
+      "subgraph": "cluster_ctl2"
+    },
+    "atac.ctl_fastqs_rep3_R1": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR1 (${i+1})\"]",
+      "subgraph": "cluster_ctl3"
+    },
+    "atac.ctl_fastqs_rep3_R2": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR2 (${i+1})\"]",
+      "subgraph": "cluster_ctl3"
+    },
+    "atac.ctl_fastqs_rep4_R1": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR1 (${i+1})\"]",
+      "subgraph": "cluster_ctl4"
+    },
+    "atac.ctl_fastqs_rep4_R2": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR2 (${i+1})\"]",
+      "subgraph": "cluster_ctl4"
+    },
+    "atac.ctl_fastqs_rep5_R1": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR1 (${i+1})\"]",
+      "subgraph": "cluster_ctl5"
+    },
+    "atac.ctl_fastqs_rep5_R2": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR2 (${i+1})\"]",
+      "subgraph": "cluster_ctl5"
+    },
+    "atac.ctl_fastqs_rep6_R1": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR1 (${i+1})\"]",
+      "subgraph": "cluster_ctl6"
+    },
+    "atac.ctl_fastqs_rep6_R2": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR2 (${i+1})\"]",
+      "subgraph": "cluster_ctl6"
+    },
+    "atac.ctl_fastqs_rep7_R1": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR1 (${i+1})\"]",
+      "subgraph": "cluster_ctl7"
+    },
+    "atac.ctl_fastqs_rep7_R2": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR2 (${i+1})\"]",
+      "subgraph": "cluster_ctl7"
+    },
+    "atac.ctl_fastqs_rep8_R1": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR1 (${i+1})\"]",
+      "subgraph": "cluster_ctl8"
+    },
+    "atac.ctl_fastqs_rep8_R2": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR2 (${i+1})\"]",
+      "subgraph": "cluster_ctl8"
+    },
+    "atac.ctl_fastqs_rep9_R1": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR1 (${i+1})\"]",
+      "subgraph": "cluster_ctl9"
+    },
+    "atac.ctl_fastqs_rep9_R2": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR2 (${i+1})\"]",
+      "subgraph": "cluster_ctl9"
+    },
+    "atac.ctl_fastqs_rep10_R1": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR1 (${i+1})\"]",
+      "subgraph": "cluster_ctl10"
+    },
+    "atac.ctl_fastqs_rep10_R2": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR2 (${i+1})\"]",
+      "subgraph": "cluster_ctl10"
+    },
+    "atac.bams": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"BAM\"]",
+      "subgraph": "cluster_rep${i+1}"
+    },
+    "atac.nodup_bams": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"Filt/deduped\nBAM\"]",
+      "subgraph": "cluster_rep${i+1}"
+    },
+    "atac.tas": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"TAG-ALIGN\"]",
+      "subgraph": "cluster_rep${i+1}"
+    },
+    "atac.ctl_bams": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"BAM\"]",
+      "subgraph": "cluster_ctl${i+1}"
+    },
+    "atac.ctl_nodup_bams": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"Filt/deduped\nBAM\"]",
+      "subgraph": "cluster_ctl${i+1}"
+    },
+    "atac.ctl_tas": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"TAG-ALIGN\"]",
+      "subgraph": "cluster_ctl${i+1}"
+    },
+    "atac.peaks": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"Peak\"]",
+      "subgraph": "cluster_rep${i+1}"
+    },
+    "atac.peak_pooled": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"Peak\"]",
+      "subgraph": "cluster_pooled_rep"
+    }
+  },
   "task_graph_template": {
     "graph [rankdir=LR nodesep=0.1 ranksep=0.3]": null,
     "node [shape=box fontsize=9 margin=0.05 penwidth=0.5 height=0 fillcolor=lightcyan color=darkgrey style=filled]": null,
