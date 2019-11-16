@@ -1,13 +1,13 @@
 # ENCODE ATAC-Seq/DNase-Seq pipeline
 # Author: Jin Lee (leepc12@gmail.com)
 
-#CAPER docker quay.io/encode-dcc/atac-seq-pipeline:v1.5.3
-#CAPER singularity docker://quay.io/encode-dcc/atac-seq-pipeline:v1.5.3
+#CAPER docker quay.io/encode-dcc/atac-seq-pipeline:v1.5.4
+#CAPER singularity docker://quay.io/encode-dcc/atac-seq-pipeline:v1.5.4
 #CROO out_def https://storage.googleapis.com/encode-pipeline-output-definition/atac.croo.json
 
 workflow atac {
 	# pipeline version
-	String pipeline_ver = 'v1.5.3'
+	String pipeline_ver = 'v1.5.4'
 
 	# general sample information
 	String title = 'Untitled'
@@ -133,7 +133,7 @@ workflow atac {
 
 	Int macs2_signal_track_mem_mb = 16000
 	Int macs2_signal_track_time_hr = 24
-	String macs2_signal_track_disks = 'local-disk 200 HDD'
+	String macs2_signal_track_disks = 'local-disk 400 HDD'
 
 	Int preseq_mem_mb = 16000
 
@@ -1444,6 +1444,7 @@ task call_peak {
 		memory : '${mem_mb} MB'
 		time : time_hr
 		disks : disks
+		preemptible: 0
 	}
 }
 
@@ -1476,6 +1477,7 @@ task macs2_signal_track {
 		memory : '${mem_mb} MB'
 		time : time_hr
 		disks : disks
+		preemptible: 0
 	}
 }
 
