@@ -2,7 +2,8 @@
   "atac.jsd": {
     "plot": {
       "path": "qc/${basename}",
-      "table": "QC and logs/Jensen-Shannon distance plot"
+      "table": "QC and logs/Jensen-Shannon distance plot",
+      "node": "[shape=oval style=\"filled\" fillcolor=gainsboro fontsize=6 margin=0 label=\"JSD\nPlot\"]"
     }
   },
   "atac.frac_mito": {
@@ -28,7 +29,9 @@
   "atac.align": {
     "bam": {
       "path": "align/rep${i+1}/${basename}",
-      "table": "Alignment/Replicate ${i+1}/Raw BAM from aligner"
+      "table": "Alignment/Replicate ${i+1}/Raw BAM from aligner",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"BAM\"]",
+      "subgraph": "cluster_rep${i+1}"
     },
     "flagstat_qc": {
       "path": "qc/rep${i+1}/${basename}",
@@ -36,7 +39,9 @@
     },
     "samstat_qc": {
       "path": "qc/rep${i+1}/${basename}",
-      "table": "QC and logs/Replicate ${i+1}/SAMstats log for Raw BAM"
+      "table": "QC and logs/Replicate ${i+1}/SAMstats log for Raw BAM",
+      "node": "[shape=oval style=\"filled\" fillcolor=gainsboro fontsize=6 margin=0 label=\"SAMstats\nQC\"]",
+      "subgraph": "cluster_rep${i+1}"
     },
     "read_len_log": {
       "path": "qc/rep${i+1}/${basename}",
@@ -46,11 +51,19 @@
   "atac.filter": {
     "nodup_bam": {
       "path": "align/rep${i+1}/${basename}",
-      "table": "Alignment/Replicate ${i+1}/Filtered BAM"
+      "table": "Alignment/Replicate ${i+1}/Filtered BAM",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"Filt/deduped\nBAM\"]",
+      "subgraph": "cluster_rep${i+1}"
     },
     "flagstat_qc": {
       "path": "qc/rep${i+1}/${basename}",
       "table": "QC and logs/Replicate ${i+1}/Samtools flagstat log for filtered BAM"
+    },
+    "samstat_qc": {
+      "path": "qc/rep${i+1}/${basename}",
+      "table": "QC and logs/Replicate ${i+1}/SAMstats log for filtered BAM",
+      "node": "[shape=oval style=\"filled\" fillcolor=gainsboro fontsize=6 margin=0 label=\"SAMstats\nQC\"]",
+      "subgraph": "cluster_rep${i+1}"
     },
     "dup_qc": {
       "path": "qc/rep${i+1}/${basename}",
@@ -58,11 +71,14 @@
     },
     "pbc_qc": {
       "path": "qc/rep${i+1}/${basename}",
-      "table": "QC and logs/Replicate ${i+1}/PBC QC for filtered BAM"
+      "table": "QC and logs/Replicate ${i+1}/PBC QC for filtered BAM",
+      "subgraph": "cluster_rep${i+1}"
     },
     "lib_complexity_qc": {
       "path": "qc/rep${i+1}/${basename}",
-      "table": "QC and logs/Replicate ${i+1}/Library complexity QC for filtered BAM"
+      "table": "QC and logs/Replicate ${i+1}/Library complexity QC for filtered BAM",
+      "node": "[shape=oval style=\"filled\" fillcolor=gainsboro fontsize=6 margin=0 label=\"LibCmplx\nQC\"]",
+      "subgraph": "cluster_rep${i+1}"
     },
     "mito_dup_log": {
       "path": "qc/rep${i+1}/${basename}",
@@ -72,7 +88,9 @@
   "atac.bam2ta": {
     "ta": {
       "path": "align/rep${i+1}/${basename}",
-      "table": "Alignment/Replicate ${i+1}/TAG-ALIGN"
+      "table": "Alignment/Replicate ${i+1}/TAG-ALIGN",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"TAG-ALIGN\"]",
+      "subgraph": "cluster_rep${i+1}"
     }
   },
   "atac.spr": {
@@ -88,7 +106,9 @@
   "atac.pool_ta": {
     "ta_pooled": {
       "path": "align/pooled-rep/${basename}",
-      "table": "Alignment/Pooled replicate/TAG-ALIGN"
+      "table": "Alignment/Pooled replicate/TAG-ALIGN",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"TAG-ALIGN\"]",
+      "subgraph": "cluster_pooled_rep"
     }
   },
   "atac.pool_ta_pr1": {
@@ -106,7 +126,9 @@
   "atac.xcor": {
     "plot_png": {
       "path": "qc/rep${i+1}/${basename}",
-      "table": "QC and logs/Replicate ${i+1}/Cross-correlation Plot"
+      "table": "QC and logs/Replicate ${i+1}/Cross-correlation Plot",
+      "node": "[shape=oval style=\"filled\" fillcolor=gainsboro fontsize=6 margin=0 label=\"XCOR\nPlot\"]",
+      "subgraph": "cluster_rep${i+1}"
     },
     "score": {
       "path": "qc/rep${i+1}/${basename}",
@@ -250,19 +272,23 @@
     }
   },
   "atac.call_peak": {
-    "npeak": {
+    "peak": {
       "path": "peak/rep${i+1}/${basename}",
-      "table": "Peak/Replicate ${i+1}/Raw narrowpeak"
+      "table": "Peak/Replicate ${i+1}/Raw narrowpeak",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"Peak\"]",
+      "subgraph": "cluster_rep${i+1}"
     },
-    "bfilt_npeak": {
+    "bfilt_peak": {
       "path": "peak/rep${i+1}/${basename}",
-      "table": "Peak/Replicate ${i+1}/Blacklist-filtered narrowpeak"
+      "table": "Peak/Replicate ${i+1}/Blacklist-filtered narrowpeak",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"Peak\n(bfilt)\"]",
+      "subgraph": "cluster_rep${i+1}"
     },
-    "bfilt_npeak_bb": {
+    "bfilt_peak_bb": {
       "path": "peak/rep${i+1}/${basename}",
       "table": "Peak/Replicate ${i+1}/Blacklist-filtered narrowpeak (BigBed)"
     },
-    "bfilt_npeak_hammock": {
+    "bfilt_peak_hammock": {
       "path": "peak/rep${i+1}/${basename}",
       "table": "Peak/Replicate ${i+1}/Blacklist-filtered narrowpeak (hammock)"
     },
@@ -272,19 +298,19 @@
     }
   },
   "atac.call_peak_pr1": {
-    "npeak": {
+    "peak": {
       "path": "peak/rep${i+1}/pseudorep1/${basename}",
       "table": "Peak/Replicate ${i+1}/Pseudoreplicate 1/Raw narrowpeak"
     },
-    "bfilt_npeak": {
+    "bfilt_peak": {
       "path": "peak/rep${i+1}/pseudorep1/${basename}",
       "table": "Peak/Replicate ${i+1}/Pseudoreplicate 1/Blacklist-filtered narrowpeak"
     },
-    "bfilt_npeak_bb": {
+    "bfilt_peak_bb": {
       "path": "peak/rep${i+1}/pseudorep1/${basename}",
       "table": "Peak/Replicate ${i+1}/Pseudoreplicate 1/Blacklist-filtered narrowpeak (BigBed)"
     },
-    "bfilt_npeak_hammock": {
+    "bfilt_peak_hammock": {
       "path": "peak/rep${i+1}/pseudorep1/${basename}",
       "table": "Peak/Replicate ${i+1}/Pseudoreplicate 1/Blacklist-filtered narrowpeak (hammock)"
     },
@@ -294,19 +320,19 @@
     }
   },
   "atac.call_peak_pr2": {
-    "npeak": {
+    "peak": {
       "path": "peak/rep${i+1}/pseudorep2/${basename}",
       "table": "Peak/Replicate ${i+1}/Pseudoreplicate 2/Raw narrowpeak"
     },
-    "bfilt_npeak": {
+    "bfilt_peak": {
       "path": "peak/rep${i+1}/pseudorep2/${basename}",
       "table": "Peak/Replicate ${i+1}/Pseudoreplicate 2/Blacklist-filtered narrowpeak"
     },
-    "bfilt_npeak_bb": {
+    "bfilt_peak_bb": {
       "path": "peak/rep${i+1}/pseudorep2/${basename}",
       "table": "Peak/Replicate ${i+1}/Pseudoreplicate 2/Blacklist-filtered narrowpeak (BigBed)"
     },
-    "bfilt_npeak_hammock": {
+    "bfilt_peak_hammock": {
       "path": "peak/rep${i+1}/pseudorep2/${basename}",
       "table": "Peak/Replicate ${i+1}/Pseudoreplicate 2/Blacklist-filtered narrowpeak (hammock)"
     },
@@ -316,19 +342,23 @@
     }
   },
   "atac.call_peak_pooled": {
-    "npeak": {
+    "peak": {
       "path": "peak/pooled-rep/${basename}",
-      "table": "Peak/Pooled replicate/Raw narrowpeak"
+      "table": "Peak/Pooled replicate/Raw narrowpeak",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"Peak\"]",
+      "subgraph": "cluster_pooled_rep"
     },
-    "bfilt_npeak": {
+    "bfilt_peak": {
       "path": "peak/pooled-rep/${basename}",
-      "table": "Peak/Pooled replicate/Blacklist-filtered narrowpeak"
+      "table": "Peak/Pooled replicate/Blacklist-filtered narrowpeak",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"Peak\n(bfilt)\"]",
+      "subgraph": "cluster_pooled_rep"
     },
-    "bfilt_npeak_bb": {
+    "bfilt_peak_bb": {
       "path": "peak/pooled-rep/${basename}",
       "table": "Peak/Pooled replicate/Blacklist-filtered narrowpeak (BigBed)"
     },
-    "bfilt_npeak_hammock": {
+    "bfilt_peak_hammock": {
       "path": "peak/pooled-rep/${basename}",
       "table": "Peak/Pooled replicate/Blacklist-filtered narrowpeak (hammock)"
     },
@@ -338,19 +368,19 @@
     }
   },
   "atac.call_peak_ppr1": {
-    "npeak": {
+    "peak": {
       "path": "peak/pooled-rep/pseudorep1/${basename}",
       "table": "Peak/Pooled replicate/Pseudoreplicate 1/Raw narrowpeak"
     },
-    "bfilt_npeak": {
+    "bfilt_peak": {
       "path": "peak/pooled-rep/pseudorep1/${basename}",
       "table": "Peak/Pooled replicate/Pseudoreplicate 1/Blacklist-filtered narrowpeak"
     },
-    "bfilt_npeak_bb": {
+    "bfilt_peak_bb": {
       "path": "peak/pooled-rep/pseudorep1/${basename}",
       "table": "Peak/Pooled replicate/Pseudoreplicate 1/Blacklist-filtered narrowpeak (BigBed)"
     },
-    "bfilt_npeak_hammock": {
+    "bfilt_peak_hammock": {
       "path": "peak/pooled-rep/pseudorep1/${basename}",
       "table": "Peak/Pooled replicate/Pseudoreplicate 1/Blacklist-filtered narrowpeak (hammock)"
     },
@@ -360,19 +390,19 @@
     }
   },
   "atac.call_peak_ppr2": {
-    "npeak": {
+    "peak": {
       "path": "peak/pooled-rep/pseudorep2/${basename}",
       "table": "Peak/Pooled replicate/Pseudoreplicate 2/Raw narrowpeak"
     },
-    "bfilt_npeak": {
+    "bfilt_peak": {
       "path": "peak/pooled-rep/pseudorep2/${basename}",
       "table": "Peak/Pooled replicate/Pseudoreplicate 2/Blacklist-filtered narrowpeak"
     },
-    "bfilt_npeak_bb": {
+    "bfilt_peak_bb": {
       "path": "peak/pooled-rep/pseudorep2/${basename}",
       "table": "Peak/Pooled replicate/Pseudoreplicate 2/Blacklist-filtered narrowpeak (BigBed)"
     },
-    "bfilt_npeak_hammock": {
+    "bfilt_peak_hammock": {
       "path": "peak/pooled-rep/pseudorep2/${basename}",
       "table": "Peak/Pooled replicate/Pseudoreplicate 2/Blacklist-filtered narrowpeak (hammock)"
     },
@@ -385,50 +415,67 @@
     "pval_bw": {
       "path": "signal/rep${i+1}/${basename}",
       "table": "Signal/Replicate ${i+1}/MACS2 signal track (p-val)",
-      "ucsc_track": "track type=bigWig name=\"MACS2 p-val (rep${i+1})\" priority=${i+1} smoothingWindow=off maxHeightPixels=80:60:40 color=255,0,0 autoScale=off viewLimits=0:40 visibility=full"
+      "ucsc_track": "track type=bigWig name=\"MACS2 p-val (rep${i+1})\" priority=${i+1} smoothingWindow=off maxHeightPixels=80:60:40 color=255,0,0 autoScale=off viewLimits=0:40 visibility=full",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"BW\np-val\"]",
+      "subgraph": "cluster_rep${i+1}"
     },
     "fc_bw": {
       "path": "signal/rep${i+1}/${basename}",
       "table": "Signal/Replicate ${i+1}/MACS2 signal track (fold-enrichment)",
-      "ucsc_track": "track type=bigWig name=\"MACS2 fc (rep${i+1})\" priority=${i+1} smoothingWindow=off maxHeightPixels=80:60:40 color=255,0,0 autoScale=off viewLimits=0:40 visibility=full"
+      "ucsc_track": "track type=bigWig name=\"MACS2 fc (rep${i+1})\" priority=${i+1} smoothingWindow=off maxHeightPixels=80:60:40 color=255,0,0 autoScale=off viewLimits=0:40 visibility=full",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"BW\nFC\"]",
+      "subgraph": "cluster_rep${i+1}"
     }
   },
   "atac.macs2_signal_track_pooled": {
     "pval_bw": {
       "path": "signal/pooled-rep/${basename}",
       "table": "Signal/Pooled replicate/MACS2 signal track (p-val)",
-      "ucsc_track": "track type=bigWig name=\"MACS2 p-val (pooled)\" priority=0 smoothingWindow=off maxHeightPixels=80:60:40 color=255,0,0 autoScale=off viewLimits=0:40 visibility=full"
+      "ucsc_track": "track type=bigWig name=\"MACS2 p-val (pooled)\" priority=0 smoothingWindow=off maxHeightPixels=80:60:40 color=255,0,0 autoScale=off viewLimits=0:40 visibility=full",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"BW\np-val\"]",
+      "subgraph": "cluster_pooled_rep"
     },
     "fc_bw": {
       "path": "signal/pooled-rep/${basename}",
       "table": "Signal/Pooled replicate/MACS2 signal track (fold-enrichment)",
-      "ucsc_track": "track type=bigWig name=\"MACS2 fc (pooled)\" priority=0 smoothingWindow=off maxHeightPixels=80:60:40 color=255,0,0 autoScale=off viewLimits=0:40 visibility=full"
+      "ucsc_track": "track type=bigWig name=\"MACS2 fc (pooled)\" priority=0 smoothingWindow=off maxHeightPixels=80:60:40 color=255,0,0 autoScale=off viewLimits=0:40 visibility=full",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"BW\nFC\"]",
+      "subgraph": "cluster_pooled_rep"
     }
   },
   "atac.count_signal_track": {
     "pos_bw": {
       "path": "signal/rep${i+1}/${basename}",
-      "table": "Signal/Replicate ${i+1}/Count signal track (positive)"
+      "table": "Signal/Replicate ${i+1}/Count signal track (positive)",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"Count +\nSignal\"]",
+      "subgraph": "cluster_rep${i+1}"
     },
     "neg_bw": {
       "path": "signal/rep${i+1}/${basename}",
-      "table": "Signal/Replicate ${i+1}/Count signal track (negative)"
+      "table": "Signal/Replicate ${i+1}/Count signal track (negative)",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"Count -\nSignal\"]",
+      "subgraph": "cluster_pooled_rep"
     }
   },
   "atac.count_signal_track_pooled": {
     "pos_bw": {
       "path": "signal/pooled-rep/${basename}",
-      "table": "Signal/Pooled replicate/Count signal track (positive)"
+      "table": "Signal/Pooled replicate/Count signal track (positive)",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"Count +\nSignal\"]",
+      "subgraph": "cluster_rep${i+1}"
     },
     "neg_bw": {
       "path": "signal/pooled-rep/${basename}",
-      "table": "Signal/Pooled replicate/Count signal track (negative)"
+      "table": "Signal/Pooled replicate/Count signal track (negative)",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"Count -\nSignal\"]",
+      "subgraph": "cluster_pooled_rep"
     }
   },
   "atac.idr": {
     "bfilt_idr_peak": {
       "path": "peak/${basename.split('.')[0].replace('_vs_','_').replace('_','_vs_').replace('-','_vs_')}/${basename}",
-      "table": "Peak/${basename.split('.')[0].replace('_vs_','_').replace('_',' vs. ').replace('-',' vs. ').capitalize()}/Blacklist-filtered IDR peak"
+      "table": "Peak/${basename.split('.')[0].replace('_vs_','_').replace('_',' vs. ').replace('-',' vs. ').capitalize()}/Blacklist-filtered IDR peak",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"IDR NPeak\n${basename.split('.')[0]}\"]"
     },
     "bfilt_idr_peak_bb": {
       "path": "peak/${basename.split('.')[0].replace('_vs_','_').replace('_','_vs_').replace('-','_vs_')}/${basename}",
@@ -444,7 +491,8 @@
     },
     "idr_plot": {
       "path": "qc/${basename.split('.')[0].replace('_vs_','_').replace('_','_vs_').replace('-','_vs_')}/${basename}",
-      "table": "QC and logs/${basename.split('.')[0].replace('_',' vs. ').replace('-',' vs. ').capitalize()}/IDR plot"
+      "table": "QC and logs/${basename.split('.')[0].replace('_',' vs. ').replace('-',' vs. ').capitalize()}/IDR plot",
+      "node": "[shape=oval style=\"filled\" fillcolor=gainsboro fontsize=6 margin=0 label=\"IDR Plot\n${basename.split('.')[0]}\"]"
     },
     "idr_log": {
       "path": "qc/${basename.split('.')[0].replace('_vs_','_').replace('_','_vs_').replace('-','_vs_')}/${basename}",
@@ -458,7 +506,8 @@
   "atac.idr_ppr": {
     "bfilt_idr_peak": {
       "path": "peak/pooled-pseudorep1_vs_2/${basename}",
-      "table": "Peak/Pooled pseudoreplicate 1 vs. 2/Blacklist-filtered IDR peak"
+      "table": "Peak/Pooled pseudoreplicate 1 vs. 2/Blacklist-filtered IDR peak",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"IDR Peak\nppr\"]"
     },
     "bfilt_idr_peak_bb": {
       "path": "peak/pooled-pseudorep1_vs_2/${basename}",
@@ -474,7 +523,8 @@
     },
     "idr_plot": {
       "path": "qc/pooled-pseudorep1_vs_2/${basename}",
-      "table": "QC and logs/Pooled pseudoreplicate 1 vs. 2/IDR plot"
+      "table": "QC and logs/Pooled pseudoreplicate 1 vs. 2/IDR plot",
+      "node": "[shape=oval style=\"filled\" fillcolor=gainsboro fontsize=6 margin=0 label=\"IDR Plot\nppr\"]"
     },
     "idr_log": {
       "path": "qc/pooled-pseudorep1_vs_2/${basename}",
@@ -518,7 +568,8 @@
   "atac.overlap": {
     "bfilt_overlap_peak": {
       "path": "peak/${basename.split('.')[0].replace('_vs_','_').replace('_','_vs_').replace('-','_vs_')}/${basename}",
-      "table": "Peak/${basename.split('.')[0].replace('_vs_','_').replace('_',' vs. ').replace('-',' vs. ').capitalize()}/Blacklist-filtered overlap peak"
+      "table": "Peak/${basename.split('.')[0].replace('_vs_','_').replace('_',' vs. ').replace('-',' vs. ').capitalize()}/Blacklist-filtered overlap peak",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"Overlap Peak\n${basename.split('.')[0]}\"]"
     },
     "bfilt_overlap_peak_bb": {
       "path": "peak/${basename.split('.')[0].replace('_vs_','_').replace('_','_vs_').replace('-','_vs_')}/${basename}",
@@ -536,7 +587,8 @@
   "atac.overlap_ppr": {
     "bfilt_overlap_peak": {
       "path": "peak/pooled-pseudorep1_vs_2/${basename}",
-      "table": "Peak/Pooled pseudoreplicate 1 vs. 2/Blacklist-filtered overlap peak"
+      "table": "Peak/Pooled pseudoreplicate 1 vs. 2/Blacklist-filtered overlap peak",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"Overlap Peak\nppr\"]"
     },
     "bfilt_overlap_peak_bb": {
       "path": "peak/pooled-pseudorep1_vs_2/${basename}",
@@ -572,7 +624,8 @@
   "atac.reproducibility_idr": {
     "optimal_peak": {
       "path": "peak/idr_reproducibility/${basename}",
-      "table": "Peak/IDR reproducibility/Optimal peak"
+      "table": "Peak/IDR reproducibility/Optimal peak",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"IDR Peak\noptimal\"]"
     },
     "optimal_peak_bb": {
       "path": "peak/idr_reproducibility/${basename}",
@@ -598,13 +651,15 @@
     },
     "reproducibility_qc": {
       "path": "qc/${basename}",
-      "table": "QC and logs/Reproducibility QC for overlap peaks"
+      "table": "QC and logs/Reproducibility QC for overlap peaks",
+      "node": "[shape=oval style=\"filled\" fillcolor=gainsboro fontsize=6 margin=0 label=\"IDR\nreproducibility\"]"
     }
   },
   "atac.reproducibility_overlap": {
     "optimal_peak": {
       "path": "peak/overlap_reproducibility/${basename}",
-      "table": "Peak/Overlap reproducibility/Optimal peak"
+      "table": "Peak/Overlap reproducibility/Optimal peak",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"Overlap Peak\noptimal\"]"
     },
     "optimal_peak_bb": {
       "path": "peak/overlap_reproducibility/${basename}",
@@ -630,7 +685,8 @@
     },
     "reproducibility_qc": {
       "path": "qc/${basename}",
-      "table": "QC and logs/Reproducibility QC for IDR peaks"
+      "table": "QC and logs/Reproducibility QC for IDR peaks",
+      "node": "[shape=oval style=\"filled\" fillcolor=gainsboro fontsize=6 margin=0 label=\"Overlap\nreproducibility\"]"
     }
   },
   "atac.ataqc": {
@@ -652,5 +708,226 @@
       "path": "qc/${basename}",
       "table": "QC and logs/Final QC JSON file"
     }
+  },
+  "inputs": {
+    "atac.fastqs_rep1_R1": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR1 (${i+1})\"]",
+      "subgraph": "cluster_rep1"
+    },
+    "atac.fastqs_rep1_R2": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR2 (${i+1})\"]",
+      "subgraph": "cluster_rep1"
+    },
+    "atac.fastqs_rep2_R1": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR1 (${i+1})\"]",
+      "subgraph": "cluster_rep2"
+    },
+    "atac.fastqs_rep2_R2": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR2 (${i+1})\"]",
+      "subgraph": "cluster_rep2"
+    },
+    "atac.fastqs_rep3_R1": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR1 (${i+1})\"]",
+      "subgraph": "cluster_rep3"
+    },
+    "atac.fastqs_rep3_R2": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR2 (${i+1})\"]",
+      "subgraph": "cluster_rep3"
+    },
+    "atac.fastqs_rep4_R1": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR1 (${i+1})\"]",
+      "subgraph": "cluster_rep4"
+    },
+    "atac.fastqs_rep4_R2": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR2 (${i+1})\"]",
+      "subgraph": "cluster_rep4"
+    },
+    "atac.fastqs_rep5_R1": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR1 (${i+1})\"]",
+      "subgraph": "cluster_rep5"
+    },
+    "atac.fastqs_rep5_R2": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR2 (${i+1})\"]",
+      "subgraph": "cluster_rep5"
+    },
+    "atac.fastqs_rep6_R1": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR1 (${i+1})\"]",
+      "subgraph": "cluster_rep6"
+    },
+    "atac.fastqs_rep6_R2": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR2 (${i+1})\"]",
+      "subgraph": "cluster_rep6"
+    },
+    "atac.fastqs_rep7_R1": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR1 (${i+1})\"]",
+      "subgraph": "cluster_rep7"
+    },
+    "atac.fastqs_rep7_R2": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR2 (${i+1})\"]",
+      "subgraph": "cluster_rep7"
+    },
+    "atac.fastqs_rep8_R1": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR1 (${i+1})\"]",
+      "subgraph": "cluster_rep8"
+    },
+    "atac.fastqs_rep8_R2": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR2 (${i+1})\"]",
+      "subgraph": "cluster_rep8"
+    },
+    "atac.fastqs_rep9_R1": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR1 (${i+1})\"]",
+      "subgraph": "cluster_rep9"
+    },
+    "atac.fastqs_rep9_R2": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR2 (${i+1})\"]",
+      "subgraph": "cluster_rep9"
+    },
+    "atac.fastqs_rep10_R1": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR1 (${i+1})\"]",
+      "subgraph": "cluster_rep10"
+    },
+    "atac.fastqs_rep10_R2": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR2 (${i+1})\"]",
+      "subgraph": "cluster_rep10"
+    },
+    "atac.ctl_fastqs_rep1_R1": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR1 (${i+1})\"]",
+      "subgraph": "cluster_ctl1"
+    },
+    "atac.ctl_fastqs_rep1_R2": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR2 (${i+1})\"]",
+      "subgraph": "cluster_ctl1"
+    },
+    "atac.ctl_fastqs_rep2_R1": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR1 (${i+1})\"]",
+      "subgraph": "cluster_ctl2"
+    },
+    "atac.ctl_fastqs_rep2_R2": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR2 (${i+1})\"]",
+      "subgraph": "cluster_ctl2"
+    },
+    "atac.ctl_fastqs_rep3_R1": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR1 (${i+1})\"]",
+      "subgraph": "cluster_ctl3"
+    },
+    "atac.ctl_fastqs_rep3_R2": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR2 (${i+1})\"]",
+      "subgraph": "cluster_ctl3"
+    },
+    "atac.ctl_fastqs_rep4_R1": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR1 (${i+1})\"]",
+      "subgraph": "cluster_ctl4"
+    },
+    "atac.ctl_fastqs_rep4_R2": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR2 (${i+1})\"]",
+      "subgraph": "cluster_ctl4"
+    },
+    "atac.ctl_fastqs_rep5_R1": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR1 (${i+1})\"]",
+      "subgraph": "cluster_ctl5"
+    },
+    "atac.ctl_fastqs_rep5_R2": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR2 (${i+1})\"]",
+      "subgraph": "cluster_ctl5"
+    },
+    "atac.ctl_fastqs_rep6_R1": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR1 (${i+1})\"]",
+      "subgraph": "cluster_ctl6"
+    },
+    "atac.ctl_fastqs_rep6_R2": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR2 (${i+1})\"]",
+      "subgraph": "cluster_ctl6"
+    },
+    "atac.ctl_fastqs_rep7_R1": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR1 (${i+1})\"]",
+      "subgraph": "cluster_ctl7"
+    },
+    "atac.ctl_fastqs_rep7_R2": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR2 (${i+1})\"]",
+      "subgraph": "cluster_ctl7"
+    },
+    "atac.ctl_fastqs_rep8_R1": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR1 (${i+1})\"]",
+      "subgraph": "cluster_ctl8"
+    },
+    "atac.ctl_fastqs_rep8_R2": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR2 (${i+1})\"]",
+      "subgraph": "cluster_ctl8"
+    },
+    "atac.ctl_fastqs_rep9_R1": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR1 (${i+1})\"]",
+      "subgraph": "cluster_ctl9"
+    },
+    "atac.ctl_fastqs_rep9_R2": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR2 (${i+1})\"]",
+      "subgraph": "cluster_ctl9"
+    },
+    "atac.ctl_fastqs_rep10_R1": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR1 (${i+1})\"]",
+      "subgraph": "cluster_ctl10"
+    },
+    "atac.ctl_fastqs_rep10_R2": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR2 (${i+1})\"]",
+      "subgraph": "cluster_ctl10"
+    },
+    "atac.bams": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"BAM\"]",
+      "subgraph": "cluster_rep${i+1}"
+    },
+    "atac.nodup_bams": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"Filt/deduped\nBAM\"]",
+      "subgraph": "cluster_rep${i+1}"
+    },
+    "atac.tas": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"TAG-ALIGN\"]",
+      "subgraph": "cluster_rep${i+1}"
+    },
+    "atac.ctl_bams": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"BAM\"]",
+      "subgraph": "cluster_ctl${i+1}"
+    },
+    "atac.ctl_nodup_bams": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"Filt/deduped\nBAM\"]",
+      "subgraph": "cluster_ctl${i+1}"
+    },
+    "atac.ctl_tas": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"TAG-ALIGN\"]",
+      "subgraph": "cluster_ctl${i+1}"
+    },
+    "atac.peaks": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"Peak\"]",
+      "subgraph": "cluster_rep${i+1}"
+    },
+    "atac.peak_pooled": {
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"Peak\"]",
+      "subgraph": "cluster_pooled_rep"
+    }
+  },
+  "task_graph_template": {
+    "graph [rankdir=LR nodesep=0.1 ranksep=0.3]": null,
+    "node [shape=box fontsize=9 margin=0.05 penwidth=0.5 height=0 fillcolor=lightcyan color=darkgrey style=filled]": null,
+    "edge [arrowsize=0.5 color=darkgrey penwidth=0.5]": null,
+    "subgraph cluster_pooled_rep":{"style": "\"filled, dashed\"", "fontsize": "9", "color": "darkgrey", "penwidth": "0.5", "fillcolor": "oldlace", "labeljust": "\"l\"", "label": "\"Pooled replicate\""},
+    "subgraph cluster_rep1":  {"style": "\"filled, dashed\"", "fontsize": "9", "color": "darkgrey", "penwidth": "0.5", "fillcolor": "honeydew", "labeljust": "\"l\"", "label": "\"Replicate 1\""},
+    "subgraph cluster_rep2":  {"style": "\"filled, dashed\"", "fontsize": "9", "color": "darkgrey", "penwidth": "0.5", "fillcolor": "honeydew", "labeljust": "\"l\"", "label": "\"Replicate 2\""},
+    "subgraph cluster_rep3":  {"style": "\"filled, dashed\"", "fontsize": "9", "color": "darkgrey", "penwidth": "0.5", "fillcolor": "honeydew", "labeljust": "\"l\"", "label": "\"Replicate 3\""},
+    "subgraph cluster_rep4":  {"style": "\"filled, dashed\"", "fontsize": "9", "color": "darkgrey", "penwidth": "0.5", "fillcolor": "honeydew", "labeljust": "\"l\"", "label": "\"Replicate 4\""},
+    "subgraph cluster_rep5":  {"style": "\"filled, dashed\"", "fontsize": "9", "color": "darkgrey", "penwidth": "0.5", "fillcolor": "honeydew", "labeljust": "\"l\"", "label": "\"Replicate 5\""},
+    "subgraph cluster_rep6":  {"style": "\"filled, dashed\"", "fontsize": "9", "color": "darkgrey", "penwidth": "0.5", "fillcolor": "honeydew", "labeljust": "\"l\"", "label": "\"Replicate 6\""},
+    "subgraph cluster_rep7":  {"style": "\"filled, dashed\"", "fontsize": "9", "color": "darkgrey", "penwidth": "0.5", "fillcolor": "honeydew", "labeljust": "\"l\"", "label": "\"Replicate 7\""},
+    "subgraph cluster_rep8":  {"style": "\"filled, dashed\"", "fontsize": "9", "color": "darkgrey", "penwidth": "0.5", "fillcolor": "honeydew", "labeljust": "\"l\"", "label": "\"Replicate 8\""},
+    "subgraph cluster_rep9":  {"style": "\"filled, dashed\"", "fontsize": "9", "color": "darkgrey", "penwidth": "0.5", "fillcolor": "honeydew", "labeljust": "\"l\"", "label": "\"Replicate 9\""},
+    "subgraph cluster_rep10": {"style": "\"filled, dashed\"", "fontsize": "9", "color": "darkgrey", "penwidth": "0.5", "fillcolor": "honeydew", "labeljust": "\"l\"", "label": "\"Replicate 10\""},
+    "subgraph cluster_pooled_ctl":{"style": "\"filled, dashed\"", "fontsize": "9", "color": "darkgrey", "penwidth": "0.5", "fillcolor": "oldlace", "labeljust": "\"l\"", "label": "\"Pooled control\""},
+    "subgraph cluster_ctl1":  {"style": "\"filled, dashed\"", "fontsize": "9", "color": "darkgrey", "penwidth": "0.5", "fillcolor": "honeydew", "labeljust": "\"l\"", "label": "\"Control 1\""},
+    "subgraph cluster_ctl2":  {"style": "\"filled, dashed\"", "fontsize": "9", "color": "darkgrey", "penwidth": "0.5", "fillcolor": "honeydew", "labeljust": "\"l\"", "label": "\"Control 2\""},
+    "subgraph cluster_ctl3":  {"style": "\"filled, dashed\"", "fontsize": "9", "color": "darkgrey", "penwidth": "0.5", "fillcolor": "honeydew", "labeljust": "\"l\"", "label": "\"Control 3\""},
+    "subgraph cluster_ctl4":  {"style": "\"filled, dashed\"", "fontsize": "9", "color": "darkgrey", "penwidth": "0.5", "fillcolor": "honeydew", "labeljust": "\"l\"", "label": "\"Control 4\""},
+    "subgraph cluster_ctl5":  {"style": "\"filled, dashed\"", "fontsize": "9", "color": "darkgrey", "penwidth": "0.5", "fillcolor": "honeydew", "labeljust": "\"l\"", "label": "\"Control 5\""},
+    "subgraph cluster_ctl6":  {"style": "\"filled, dashed\"", "fontsize": "9", "color": "darkgrey", "penwidth": "0.5", "fillcolor": "honeydew", "labeljust": "\"l\"", "label": "\"Control 6\""},
+    "subgraph cluster_ctl7":  {"style": "\"filled, dashed\"", "fontsize": "9", "color": "darkgrey", "penwidth": "0.5", "fillcolor": "honeydew", "labeljust": "\"l\"", "label": "\"Control 7\""},
+    "subgraph cluster_ctl8":  {"style": "\"filled, dashed\"", "fontsize": "9", "color": "darkgrey", "penwidth": "0.5", "fillcolor": "honeydew", "labeljust": "\"l\"", "label": "\"Control 8\""},
+    "subgraph cluster_ctl9":  {"style": "\"filled, dashed\"", "fontsize": "9", "color": "darkgrey", "penwidth": "0.5", "fillcolor": "honeydew", "labeljust": "\"l\"", "label": "\"Control 9\""},
+    "subgraph cluster_ctl10": {"style": "\"filled, dashed\"", "fontsize": "9", "color": "darkgrey", "penwidth": "0.5", "fillcolor": "honeydew", "labeljust": "\"l\"", "label": "\"Control 10\""}
   }
 }
