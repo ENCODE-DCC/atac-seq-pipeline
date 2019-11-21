@@ -147,12 +147,13 @@ def main():
         args.peak1, args.peak2, args.peak_pooled, args.peak_type,
         args.idr_thresh, args.idr_rank, args.out_dir)
 
+    log.info('Checking if output is empty...')
+    assert_file_not_empty(idr_peak, help=
+        'No IDR peaks found. IDR threshold might be too stringent?')
+
     log.info('Blacklist-filtering peaks...')
     bfilt_idr_peak = blacklist_filter(
         idr_peak, args.blacklist, args.regex_bfilt_peak_chr_name, args.out_dir)
-
-    log.info('Checking if output is empty...')
-    assert_file_not_empty(bfilt_idr_peak)
 
     log.info('Converting peak to bigbed...')
     peak_to_bigbed(bfilt_idr_peak, args.peak_type, args.chrsz,
