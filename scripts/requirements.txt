@@ -51,6 +51,8 @@ gnuplot
 ghostscript
 wget
 pyopenssl  # for caper/croo to presign bucket URIs
+grep
+tar
 
 numpy
 scipy
