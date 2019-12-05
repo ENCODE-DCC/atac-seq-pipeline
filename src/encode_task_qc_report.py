@@ -6,6 +6,7 @@
 import sys
 import json
 import argparse
+from collections import OrderedDict
 from encode_lib_common import (
     infer_n_from_nC2, infer_pair_label_from_idx, log, now,
     run_shell_cmd, write_txt)
