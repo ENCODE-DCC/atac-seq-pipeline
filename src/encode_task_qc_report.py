@@ -22,7 +22,6 @@ from encode_lib_log_parser import (
     parse_num_peak_qc, parse_peak_region_size_qc, parse_picard_est_lib_size_qc,
     parse_reproducibility_qc, parse_tss_enrich_qc, parse_xcor_score)
 from encode_lib_qc_category import QCCategory
-from collections import OrderedDict
 
 
 def parse_arguments():
@@ -252,7 +251,7 @@ def make_cat_root(args):
     )
 
     # add general information dict to cat_root
-    d_general = OrderedDict([
+    d_general = dict([
         ('date', now()),
         ('title', args.title),
         ('description', args.desc),
@@ -260,7 +259,7 @@ def make_cat_root(args):
         ('pipeline_type', args.pipeline_type),
         ('genome', args.genome),
         ('aligner', args.aligner),
-        ('seq_endedness', OrderedDict()),
+        ('seq_endedness', {}),
         ('peak_caller', args.peak_caller),
     ])
     if args.paired_ends is not None:

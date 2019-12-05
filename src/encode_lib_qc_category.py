@@ -5,7 +5,6 @@ ENCODE QC log/plot to HTML converter
 Author: Jin Lee (leepc12@gmail.com)
 """
 
-from collections import OrderedDict
 from base64 import b64encode
 
 
@@ -52,7 +51,7 @@ class QCLog(object):
             return
 
         if self._parser is None:
-            d = OrderedDict()
+            d = {}
             # can parse TSV
             with open(self._log_file, 'r') as fp:
                 lines = fp.read().strip('\n')
@@ -144,8 +143,8 @@ class QCCategory(object):
         self._html_foot = html_foot
         self._parser = parser
         self._map_key_desc = map_key_desc
-        self._qc_logs = OrderedDict()
-        self._qc_plots = OrderedDict()
+        self._qc_logs = {}
+        self._qc_plots = {}
         self._child_categories = []
         if parent is not None:
             parent.add_category(self)
@@ -171,7 +170,7 @@ class QCCategory(object):
     def to_dict(self):
         """Convert into dict. Plots will be ignored.
         """
-        d = OrderedDict()
+        d = {}
         for key, qc_log in self._qc_logs.items():
             d_ = qc_log.to_dict()
             if len(d_) > 0:
@@ -219,11 +218,10 @@ class QCCategory(object):
         header += '</th><th bgcolor="#EEEEEE">'.join(arr) + '</th></tr>\n'
 
         # declared as dict but will be used as set with empty values
-        all_keys = OrderedDict()
+        all_keys = {}
         # contents
         for qc_log_k, qc_log_val in self._qc_logs.items():
-            # print(qc_log_k, qc_log_val.to_dict())
-            new_keys = OrderedDict.fromkeys(
+            new_keys = dict.fromkeys(
                 k for k in qc_log_val.to_dict() if k not in all_keys.keys())
             for new_key in new_keys:
                 all_keys[new_key] = None
