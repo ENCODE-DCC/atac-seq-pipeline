@@ -55,7 +55,7 @@ if __name__ == "__main__":
             pass
         else:
             # Discard if there are more than the alignment cutoff
-            if len(current_reads) >= alignment_cutoff:
+            if len(current_reads) > alignment_cutoff:
                 current_reads = [line]
                 current_qname = read_elems[0]
             elif len(current_reads) > 0:
