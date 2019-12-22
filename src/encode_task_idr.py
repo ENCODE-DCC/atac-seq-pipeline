@@ -149,7 +149,8 @@ def main():
 
     log.info('Checking if output is empty...')
     assert_file_not_empty(idr_peak, help=
-        'No IDR peaks found. IDR threshold might be too stringent?')
+        'No IDR peaks found. IDR threshold might be too stringent '
+        'or replicates have very poor concordance.')
 
     log.info('Blacklist-filtering peaks...')
     bfilt_idr_peak = blacklist_filter(
