@@ -19,10 +19,6 @@
       "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"BAM\"]",
       "subgraph": "cluster_rep${i+1}"
     },
-    "flagstat_qc": {
-      "path": "qc/rep${i+1}/${basename}",
-      "table": "QC and logs/Replicate ${i+1}/Samtools flagstat for Raw BAM"
-    },
     "samstat_qc": {
       "path": "qc/rep${i+1}/${basename}",
       "table": "QC and logs/Replicate ${i+1}/SAMstats log for Raw BAM",
@@ -41,10 +37,6 @@
       "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"Filt/deduped\\nBAM\"]",
       "subgraph": "cluster_rep${i+1}"
     },
-    "flagstat_qc": {
-      "path": "qc/rep${i+1}/${basename}",
-      "table": "QC and logs/Replicate ${i+1}/Samtools flagstat log for filtered BAM"
-    },
     "samstat_qc": {
       "path": "qc/rep${i+1}/${basename}",
       "table": "QC and logs/Replicate ${i+1}/SAMstats log for filtered BAM",
@@ -54,11 +46,6 @@
     "dup_qc": {
       "path": "qc/rep${i+1}/${basename}",
       "table": "QC and logs/Replicate ${i+1}/Dup QC for filtered BAM"
-    },
-    "pbc_qc": {
-      "path": "qc/rep${i+1}/${basename}",
-      "table": "QC and logs/Replicate ${i+1}/PBC QC for filtered BAM",
-      "subgraph": "cluster_rep${i+1}"
     },
     "lib_complexity_qc": {
       "path": "qc/rep${i+1}/${basename}",
