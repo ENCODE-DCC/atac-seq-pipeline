@@ -279,12 +279,12 @@ fi
 echo -e "chrsz\t${DEST_DIR}/$(basename ${CHRSZ})" >> ${TSV}
 echo -e "gensz\t${GENSZ}" >> ${TSV}
 if [[ ${BUILD_BWT2_IDX} == 1 ]]; then
-  echo -e "bowtie2_idx_tar\t${DEST_DIR}/bowtie2_index/${REF_FA_PREFIX}.tar" >> ${TSV}
-  echo -e "bowtie2_mito_idx_tar\t${DEST_DIR}/bowtie2_index/${REF_MITO_FA_PREFIX}.tar" >> ${TSV}
+  echo -e "bowtie2_idx_tar\t${DEST_DIR}/bowtie2_index/${REF_FA_PREFIX}.tar.gz" >> ${TSV}
+  echo -e "bowtie2_mito_idx_tar\t${DEST_DIR}/bowtie2_index/${REF_MITO_FA_PREFIX}.tar.gz" >> ${TSV}
 fi
 if [[ ${BUILD_BWA_IDX} == 1 ]]; then
-  echo -e "bwa_idx_tar\t${DEST_DIR}/bwa_index/${REF_FA_PREFIX}.tar" >> ${TSV}
-  echo -e "bwa_mito_idx_tar\t${DEST_DIR}/bwa_index/${REF_MITO_FA_PREFIX}.tar" >> ${TSV}
+  echo -e "bwa_idx_tar\t${DEST_DIR}/bwa_index/${REF_FA_PREFIX}.tar.gz" >> ${TSV}
+  echo -e "bwa_mito_idx_tar\t${DEST_DIR}/bwa_index/${REF_MITO_FA_PREFIX}.tar.gz" >> ${TSV}
 fi
 
 echo "=== Downloading ATAQC file... (${TSV})"
