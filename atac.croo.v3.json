@@ -12,20 +12,6 @@
       "table": "QC and logs/Fraction of mitochondrial reads in raw BAM"
     }
   },
-  "atac.bowtie2": {
-    "bam": {
-      "path": "align/rep${i+1}/${basename}",
-      "table": "Alignment/Replicate ${i+1}/Raw BAM from bowtie2"
-    },
-    "flagstat_qc": {
-      "path": "qc/rep${i+1}/${basename}",
-      "table": "QC and logs/Replicate ${i+1}/Samtools flagstat for Raw BAM"
-    },
-    "read_len_log": {
-      "path": "qc/rep${i+1}/${basename}",
-      "table": "QC and logs/Replicate ${i+1}/Read length"
-    }
-  },
   "atac.align": {
     "bam": {
       "path": "align/rep${i+1}/${basename}",
@@ -137,138 +123,6 @@
     "fraglen": {
       "path": "qc/rep${i+1}/${basename}",
       "table": "QC and logs/Replicate ${i+1}/Estimated fragment length"
-    }
-  },
-  "atac.macs2": {
-    "npeak": {
-      "path": "peak/rep${i+1}/${basename}",
-      "table": "Peak/Replicate ${i+1}/Raw MACS2 narrowpeak"
-    },
-    "bfilt_npeak": {
-      "path": "peak/rep${i+1}/${basename}",
-      "table": "Peak/Replicate ${i+1}/Blacklist-filtered MACS2 narrowpeak"
-    },
-    "bfilt_npeak_bb": {
-      "path": "peak/rep${i+1}/${basename}",
-      "table": "Peak/Replicate ${i+1}/Blacklist-filtered MACS2 narrowpeak (BigBed)"
-    },
-    "bfilt_npeak_hammock": {
-      "path": "peak/rep${i+1}/${basename}",
-      "table": "Peak/Replicate ${i+1}/Blacklist-filtered MACS2 narrowpeak (hammock)"
-    },
-    "frip_qc": {
-      "path": "qc/rep${i+1}/${basename}",
-      "table": "QC and logs/Replicate ${i+1}/Fraction of MACS2 peaks in reads"
-    }
-  },
-  "atac.macs2_pr1": {
-    "npeak": {
-      "path": "peak/rep${i+1}/pseudorep1/${basename}",
-      "table": "Peak/Replicate ${i+1}/Pseudoreplicate 1/Raw MACS2 narrowpeak"
-    },
-    "bfilt_npeak": {
-      "path": "peak/rep${i+1}/pseudorep1/${basename}",
-      "table": "Peak/Replicate ${i+1}/Pseudoreplicate 1/Blacklist-filtered MACS2 narrowpeak"
-    },
-    "bfilt_npeak_bb": {
-      "path": "peak/rep${i+1}/pseudorep1/${basename}",
-      "table": "Peak/Replicate ${i+1}/Pseudoreplicate 1/Blacklist-filtered MACS2 narrowpeak (BigBed)"
-    },
-    "bfilt_npeak_hammock": {
-      "path": "peak/rep${i+1}/pseudorep1/${basename}",
-      "table": "Peak/Replicate ${i+1}/Pseudoreplicate 1/Blacklist-filtered MACS2 narrowpeak (hammock)"
-    },
-    "frip_qc": {
-      "path": "qc/rep${i+1}/pseudorep1/${basename}",
-      "table": "QC and logs/Replicate ${i+1}/Pseudoreplicate 1/Fraction of MACS2 peaks in reads"
-    }
-  },
-  "atac.macs2_pr2": {
-    "npeak": {
-      "path": "peak/rep${i+1}/pseudorep2/${basename}",
-      "table": "Peak/Replicate ${i+1}/Pseudoreplicate 2/Raw MACS2 narrowpeak"
-    },
-    "bfilt_npeak": {
-      "path": "peak/rep${i+1}/pseudorep2/${basename}",
-      "table": "Peak/Replicate ${i+1}/Pseudoreplicate 2/Blacklist-filtered MACS2 narrowpeak"
-    },
-    "bfilt_npeak_bb": {
-      "path": "peak/rep${i+1}/pseudorep2/${basename}",
-      "table": "Peak/Replicate ${i+1}/Pseudoreplicate 2/Blacklist-filtered MACS2 narrowpeak (BigBed)"
-    },
-    "bfilt_npeak_hammock": {
-      "path": "peak/rep${i+1}/pseudorep2/${basename}",
-      "table": "Peak/Replicate ${i+1}/Pseudoreplicate 2/Blacklist-filtered MACS2 narrowpeak (hammock)"
-    },
-    "frip_qc": {
-      "path": "qc/rep${i+1}/pseudorep2/${basename}",
-      "table": "QC and logs/Replicate ${i+1}/Pseudoreplicate 2/Fraction of MACS2 peaks in reads"
-    }
-  },
-  "atac.macs2_pooled": {
-    "npeak": {
-      "path": "peak/pooled-rep/${basename}",
-      "table": "Peak/Pooled replicate/Raw MACS2 narrowpeak"
-    },
-    "bfilt_npeak": {
-      "path": "peak/pooled-rep/${basename}",
-      "table": "Peak/Pooled replicate/Blacklist-filtered MACS2 narrowpeak"
-    },
-    "bfilt_npeak_bb": {
-      "path": "peak/pooled-rep/${basename}",
-      "table": "Peak/Pooled replicate/Blacklist-filtered MACS2 narrowpeak (BigBed)"
-    },
-    "bfilt_npeak_hammock": {
-      "path": "peak/pooled-rep/${basename}",
-      "table": "Peak/Pooled replicate/Blacklist-filtered MACS2 narrowpeak (hammock)"
-    },
-    "frip_qc": {
-      "path": "qc/pooled-rep/${basename}",
-      "table": "QC and logs/Pooled replicate/Fraction of MACS2 peaks in reads"
-    }
-  },
-  "atac.macs2_ppr1": {
-    "npeak": {
-      "path": "peak/pooled-rep/pseudorep1/${basename}",
-      "table": "Peak/Pooled replicate/Pseudoreplicate 1/Raw MACS2 narrowpeak"
-    },
-    "bfilt_npeak": {
-      "path": "peak/pooled-rep/pseudorep1/${basename}",
-      "table": "Peak/Pooled replicate/Pseudoreplicate 1/Blacklist-filtered MACS2 narrowpeak"
-    },
-    "bfilt_npeak_bb": {
-      "path": "peak/pooled-rep/pseudorep1/${basename}",
-      "table": "Peak/Pooled replicate/Pseudoreplicate 1/Blacklist-filtered MACS2 narrowpeak (BigBed)"
-    },
-    "bfilt_npeak_hammock": {
-      "path": "peak/pooled-rep/pseudorep1/${basename}",
-      "table": "Peak/Pooled replicate/Pseudoreplicate 1/Blacklist-filtered MACS2 narrowpeak (hammock)"
-    },
-    "frip_qc": {
-      "path": "qc/pooled-rep/pseudorep1/${basename}",
-      "table": "QC and logs/Pooled replicate/Pseudoreplicate 1/Fraction of MACS2 peaks in reads"
-    }
-  },
-  "atac.macs2_ppr2": {
-    "npeak": {
-      "path": "peak/pooled-rep/pseudorep2/${basename}",
-      "table": "Peak/Pooled replicate/Pseudoreplicate 2/Raw MACS2 narrowpeak"
-    },
-    "bfilt_npeak": {
-      "path": "peak/pooled-rep/pseudorep2/${basename}",
-      "table": "Peak/Pooled replicate/Pseudoreplicate 2/Blacklist-filtered MACS2 narrowpeak"
-    },
-    "bfilt_npeak_bb": {
-      "path": "peak/pooled-rep/pseudorep2/${basename}",
-      "table": "Peak/Pooled replicate/Pseudoreplicate 2/Blacklist-filtered MACS2 narrowpeak (BigBed)"
-    },
-    "bfilt_npeak_hammock": {
-      "path": "peak/pooled-rep/pseudorep2/${basename}",
-      "table": "Peak/Pooled replicate/Pseudoreplicate 2/Blacklist-filtered MACS2 narrowpeak (hammock)"
-    },
-    "frip_qc": {
-      "path": "qc/pooled-rep/pseudorep2/${basename}",
-      "table": "QC and logs/Pooled replicate/Pseudoreplicate 2/Fraction of MACS2 peaks in reads"
     }
   },
   "atac.call_peak": {
@@ -687,16 +541,6 @@
       "path": "qc/${basename}",
       "table": "QC and logs/Reproducibility QC for IDR peaks",
       "node": "[shape=oval style=\"filled\" fillcolor=gainsboro fontsize=6 margin=0 label=\"Overlap\\nreproducibility\"]"
-    }
-  },
-  "atac.ataqc": {
-    "html": {
-      "path": "qc/rep${i+1}/${basename}",
-      "table": "QC and logs/Replicate ${i+1}/ATAqC summary report"
-    },
-    "txt": {
-      "path": "qc/rep${i+1}/${basename}",
-      "table": "QC and logs/Replicate ${i+1}/ATAqC summary txt"
     }
   },
   "atac.qc_report": {
