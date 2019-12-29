@@ -17,7 +17,7 @@ RUN apt-get update && apt-get install -y \
     libncurses5-dev libcurl4-openssl-dev libfreetype6-dev zlib1g-dev \
     python python-setuptools python-pip python3 python3-setuptools python3-pip \
     git wget unzip ghostscript pkg-config libboost-dev \
-    default-jre apt-transport-https tabix \
+    openjdk-8-jre apt-transport-https tabix \
     r-base \
     && rm -rf /var/lib/apt/lists/*
 
