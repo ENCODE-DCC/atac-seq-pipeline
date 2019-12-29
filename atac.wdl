@@ -137,10 +137,10 @@ workflow atac {
 
 	Int preseq_mem_mb = 16000
 
-	String filter_picard_java_heap = '4G'
-	String preseq_picard_java_heap = '6G'
-	String fraglen_stat_picard_java_heap = '6G'
-	String gc_bias_picard_java_heap = '6G'
+	String? filter_picard_java_heap
+	String? preseq_picard_java_heap
+	String? fraglen_stat_picard_java_heap
+	String? gc_bias_picard_java_heap
 
 	# input file definition
 	# supported types: fastq, bam, nodup_bam (or filtered bam), ta (tagAlign), peak
@@ -1187,7 +1187,7 @@ task filter {
 
 	Int cpu
 	Int mem_mb
-	String picard_java_heap
+	String? picard_java_heap
 	Int time_hr
 	String disks
 
@@ -1203,7 +1203,7 @@ task filter {
 			${if no_dup_removal then '--no-dup-removal' else ''} \
 			${'--mito-chr-name ' + mito_chr_name} \
 			${'--nth ' + cpu} \
-			${'--picard-java-heap ' + picard_java_heap}
+			${'--picard-java-heap ' + if defined(picard_java_heap) then picard_java_heap else (mem_mb + 'M')}
 	}
 	output {
 		File nodup_bam = glob('*.bam')[0]
@@ -1621,14 +1621,14 @@ task preseq {
 	Boolean paired_end
 
 	Int mem_mb
-	String picard_java_heap	
+	String? picard_java_heap
 
 	File? null_f
 	command {
 		python3 $(which encode_task_preseq.py) \
 			${if paired_end then '--paired-end' else ''} \
 			${'--bam ' + bam} \
-			${'--picard-java-heap ' + picard_java_heap}
+			${'--picard-java-heap ' + if defined(picard_java_heap) then picard_java_heap else (mem_mb + 'M')}
 	}
 	output {
 		File? picard_est_lib_size_qc = if paired_end then 
@@ -1702,12 +1702,12 @@ task fraglen_stat_pe {
 	# for PE only
 	File nodup_bam
 
-	String picard_java_heap
+	String? picard_java_heap
 
 	command {
 		python3 $(which encode_task_fraglen_stat_pe.py) \
 			${'--nodup-bam ' + nodup_bam} \
-			${'--picard-java-heap ' + picard_java_heap}
+			${'--picard-java-heap ' + if defined(picard_java_heap) then picard_java_heap else '6G'}
 	}
 	output {
 		File nucleosomal_qc = glob('*nucleosomal.qc')[0]
@@ -1725,13 +1725,13 @@ task gc_bias {
 	File nodup_bam
 	File ref_fa
 
-	String picard_java_heap
+	String? picard_java_heap
 
 	command {
 		python3 $(which encode_task_gc_bias.py) \
 			${'--nodup-bam ' + nodup_bam} \
 			${'--ref-fa ' + ref_fa} \
-			${'--picard-java-heap ' + picard_java_heap}
+			${'--picard-java-heap ' + if defined(picard_java_heap) then picard_java_heap else '10G'}
 	}
 	output {
 		File gc_plot = glob('*.gc_plot.png')[0]
@@ -1739,7 +1739,7 @@ task gc_bias {
 	}
 	runtime {
 		cpu : 1
-		memory : '8000 MB'
+		memory : '10000 MB'
 		time : 1
 		disks : 'local-disk 100 HDD'
 	}
