@@ -41,6 +41,8 @@ def blacklist_filter(peak, blacklist, regex_bfilt_peak_chr_name, out_dir):
         os.path.basename(strip_ext(peak)))
     peak_ext = get_ext(peak)
     filtered = '{}.bfilt.{}.gz'.format(prefix, peak_ext)
+    if regex_bfilt_peak_chr_name is None:
+        regex_bfilt_peak_chr_name = ''
 
     if blacklist is None or blacklist == '' or get_num_lines(peak) == 0 \
             or get_num_lines(blacklist) == 0:

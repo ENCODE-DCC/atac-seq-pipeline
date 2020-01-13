@@ -4,11 +4,6 @@
 
 > **WARNING**: DO NOT SKIP ANY OF THE FOLLOWING STEPS OR PIPELINE'S ENVIRONMENT WILL BE MESSED UP WITH YOUR LOCAL PYTHON/GLOBAL CONDA.
 
-0) MacOS users: **MAKE SURE THAT YOU HAVE GNU `grep` INSTALLED ON YOUR SYSTEM**. Check if your `grep` has a `-P` parameter.
-  ```bash
-  $ grep --help  # check if a parameter "-P" exists
-  ```
-
 1) Download [Miniconda installer](https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh). Use default answers to all questions except for the first and last.
   ```bash
   $ wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh

@@ -271,10 +271,10 @@ There are special parameters to control maximum Java heap memory (e.g. `java -Xm
 
 Parameter|Default
 ---------|-------
-`atac.filter_picard_java_heap` | `4G`
-`atac.preseq_picard_java_heap` | `6G`
+`atac.filter_picard_java_heap` | = `atac.filter_mem_mb`
+`atac.preseq_picard_java_heap` | = `atac.preseq_mem_mb`
 `atac.fraglen_stat_picard_java_heap` | `6G`
-`atac.gc_bias_picard_java_heap` | `6G`
+`atac.gc_bias_picard_java_heap` | `10G`
 
 
 ## How to use a custom aligner

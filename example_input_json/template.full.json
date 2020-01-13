@@ -84,8 +84,6 @@
 
     "atac.preseq_mem_mb" : 16000,
 
-    "atac.filter_picard_java_heap" : "4G",
-    "atac.preseq_picard_java_heap" : "6G",
     "atac.fraglen_stat_picard_java_heap" : "6G",
-    "atac.gc_bias_picard_java_heap" : "6G"
+    "atac.gc_bias_picard_java_heap" : "10G"
 }

@@ -140,7 +140,12 @@ elif [[ "${GENOME}" == "YOUR_OWN_GENOME" ]]; then
   # so that b-filt peak file (.bfilt.*Peak.gz) will only have chromosomes matching with this pattern
   # this reg-ex will work even without a blacklist.
   # you will still be able to find a .bfilt. peak file
-  REGEX_BFILT_PEAK_CHR_NAME="chr[\dXY]+"
+  # use ".*", which means ALL CHARACTERS, if you want to keep all chromosomes
+  # use "chr[\dXY]+" to allow chr[NUMBERS], chrX and chrY only
+  # this is important to make your final output peak file (bigBed) work with genome browsers
+  REGEX_BFILT_PEAK_CHR_NAME=".*"
+  # REGEX_BFILT_PEAK_CHR_NAME="chr[\dXY]+"
+
   # mitochondrial chromosome name (e.g. chrM, MT)
   MITO_CHR_NAME="chrM"
   # URL for your reference FASTA (fasta, fasta.gz, fa, fa.gz, 2bit)
@@ -274,12 +279,12 @@ fi
 echo -e "chrsz\t${DEST_DIR}/$(basename ${CHRSZ})" >> ${TSV}
 echo -e "gensz\t${GENSZ}" >> ${TSV}
 if [[ ${BUILD_BWT2_IDX} == 1 ]]; then
-  echo -e "bowtie2_idx_tar\t${DEST_DIR}/bowtie2_index/${REF_FA_PREFIX}.tar" >> ${TSV}
-  echo -e "bowtie2_mito_idx_tar\t${DEST_DIR}/bowtie2_index/${REF_MITO_FA_PREFIX}.tar" >> ${TSV}
+  echo -e "bowtie2_idx_tar\t${DEST_DIR}/bowtie2_index/${REF_FA_PREFIX}.tar.gz" >> ${TSV}
+  echo -e "bowtie2_mito_idx_tar\t${DEST_DIR}/bowtie2_index/${REF_MITO_FA_PREFIX}.tar.gz" >> ${TSV}
 fi
 if [[ ${BUILD_BWA_IDX} == 1 ]]; then
-  echo -e "bwa_idx_tar\t${DEST_DIR}/bwa_index/${REF_FA_PREFIX}.tar" >> ${TSV}
-  echo -e "bwa_mito_idx_tar\t${DEST_DIR}/bwa_index/${REF_MITO_FA_PREFIX}.tar" >> ${TSV}
+  echo -e "bwa_idx_tar\t${DEST_DIR}/bwa_index/${REF_FA_PREFIX}.tar.gz" >> ${TSV}
+  echo -e "bwa_mito_idx_tar\t${DEST_DIR}/bwa_index/${REF_MITO_FA_PREFIX}.tar.gz" >> ${TSV}
 fi
 
 echo "=== Downloading ATAQC file... (${TSV})"

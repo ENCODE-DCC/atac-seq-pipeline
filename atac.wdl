@@ -1,13 +1,13 @@
 # ENCODE ATAC-Seq/DNase-Seq pipeline
 # Author: Jin Lee (leepc12@gmail.com)
 
-#CAPER docker quay.io/encode-dcc/atac-seq-pipeline:v1.5.4
-#CAPER singularity docker://quay.io/encode-dcc/atac-seq-pipeline:v1.5.4
-#CROO out_def https://storage.googleapis.com/encode-pipeline-output-definition/atac.croo.json
+#CAPER docker quay.io/encode-dcc/atac-seq-pipeline:v1.6.0.1
+#CAPER singularity docker://quay.io/encode-dcc/atac-seq-pipeline:v1.6.0.1
+#CROO out_def https://storage.googleapis.com/encode-pipeline-output-definition/atac.croo.v3.json
 
 workflow atac {
 	# pipeline version
-	String pipeline_ver = 'v1.5.4'
+	String pipeline_ver = 'v1.6.0.1'
 
 	# general sample information
 	String title = 'Untitled'
@@ -137,10 +137,10 @@ workflow atac {
 
 	Int preseq_mem_mb = 16000
 
-	String filter_picard_java_heap = '4G'
-	String preseq_picard_java_heap = '6G'
-	String fraglen_stat_picard_java_heap = '6G'
-	String gc_bias_picard_java_heap = '6G'
+	String? filter_picard_java_heap
+	String? preseq_picard_java_heap
+	String? fraglen_stat_picard_java_heap
+	String? gc_bias_picard_java_heap
 
 	# input file definition
 	# supported types: fastq, bam, nodup_bam (or filtered bam), ta (tagAlign), peak
@@ -690,6 +690,7 @@ workflow atac {
 		# pool tagaligns from true replicates
 		call pool_ta { input :
 			tas = ta_,
+			prefix = 'rep',			
 		}
 	}
 
@@ -699,6 +700,7 @@ workflow atac {
 		# pool tagaligns from pseudo replicate 1
 		call pool_ta as pool_ta_pr1 { input :
 			tas = spr.ta_pr1,
+			prefix = 'rep-pr1',
 		}
 	}
 
@@ -708,6 +710,7 @@ workflow atac {
 		# pool tagaligns from pseudo replicate 2
 		call pool_ta as pool_ta_pr2 { input :
 			tas = spr.ta_pr2,
+			prefix = 'rep-pr2',
 		}
 	}
 
@@ -1184,7 +1187,7 @@ task filter {
 
 	Int cpu
 	Int mem_mb
-	String picard_java_heap
+	String? picard_java_heap
 	Int time_hr
 	String disks
 
@@ -1200,7 +1203,7 @@ task filter {
 			${if no_dup_removal then '--no-dup-removal' else ''} \
 			${'--mito-chr-name ' + mito_chr_name} \
 			${'--nth ' + cpu} \
-			${'--picard-java-heap ' + picard_java_heap}
+			${'--picard-java-heap ' + if defined(picard_java_heap) then picard_java_heap else (mem_mb + 'M')}
 	}
 	output {
 		File nodup_bam = glob('*.bam')[0]
@@ -1275,10 +1278,12 @@ task spr { # make two self pseudo replicates
 task pool_ta {
 	Array[File?] tas 	# TAG-ALIGNs to be merged
 	Int? col 			# number of columns in pooled TA
+	String? prefix 		# basename prefix
 
 	command {
 		python3 $(which encode_task_pool_ta.py) \
 			${sep=' ' tas} \
+			${'--prefix ' + prefix} \
 			${'--col ' + col}
 	}
 	output {
@@ -1616,14 +1621,14 @@ task preseq {
 	Boolean paired_end
 
 	Int mem_mb
-	String picard_java_heap	
+	String? picard_java_heap
 
 	File? null_f
 	command {
 		python3 $(which encode_task_preseq.py) \
 			${if paired_end then '--paired-end' else ''} \
 			${'--bam ' + bam} \
-			${'--picard-java-heap ' + picard_java_heap}
+			${'--picard-java-heap ' + if defined(picard_java_heap) then picard_java_heap else (mem_mb + 'M')}
 	}
 	output {
 		File? picard_est_lib_size_qc = if paired_end then 
@@ -1697,12 +1702,12 @@ task fraglen_stat_pe {
 	# for PE only
 	File nodup_bam
 
-	String picard_java_heap
+	String? picard_java_heap
 
 	command {
 		python3 $(which encode_task_fraglen_stat_pe.py) \
 			${'--nodup-bam ' + nodup_bam} \
-			${'--picard-java-heap ' + picard_java_heap}
+			${'--picard-java-heap ' + if defined(picard_java_heap) then picard_java_heap else '6G'}
 	}
 	output {
 		File nucleosomal_qc = glob('*nucleosomal.qc')[0]
@@ -1720,13 +1725,13 @@ task gc_bias {
 	File nodup_bam
 	File ref_fa
 
-	String picard_java_heap
+	String? picard_java_heap
 
 	command {
 		python3 $(which encode_task_gc_bias.py) \
 			${'--nodup-bam ' + nodup_bam} \
 			${'--ref-fa ' + ref_fa} \
-			${'--picard-java-heap ' + picard_java_heap}
+			${'--picard-java-heap ' + if defined(picard_java_heap) then picard_java_heap else '10G'}
 	}
 	output {
 		File gc_plot = glob('*.gc_plot.png')[0]
@@ -1734,7 +1739,7 @@ task gc_bias {
 	}
 	runtime {
 		cpu : 1
-		memory : '8000 MB'
+		memory : '10000 MB'
 		time : 1
 		disks : 'local-disk 100 HDD'
 	}
