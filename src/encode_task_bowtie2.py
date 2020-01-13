@@ -58,9 +58,8 @@ def bowtie2_se(fastq, ref_index_prefix,
     basename = os.path.basename(strip_ext_fastq(fastq))
     prefix = os.path.join(out_dir, basename)
     bam = '{}.bam'.format(prefix)
-    align_log = '{}.align.log'.format(prefix)
 
-    cmd = 'bowtie2 {} --mm --threads {} -x {} -U {} 2> {} '
+    cmd = 'bowtie2 {} --mm --threads {} -x {} -U {} '
     cmd += '| samtools view -Su /dev/stdin '
     cmd += '| samtools sort /dev/stdin -o {} -T {}'
     cmd = cmd.format(
@@ -68,14 +67,11 @@ def bowtie2_se(fastq, ref_index_prefix,
         nth,
         ref_index_prefix,
         fastq,
-        align_log,
         bam,
         prefix)
     run_shell_cmd(cmd)
 
-    cmd2 = 'cat {}'.format(align_log)
-    run_shell_cmd(cmd2)
-    return bam, align_log
+    return bam
 
 
 def bowtie2_pe(fastq1, fastq2, ref_index_prefix,
@@ -83,10 +79,9 @@ def bowtie2_pe(fastq1, fastq2, ref_index_prefix,
     basename = os.path.basename(strip_ext_fastq(fastq1))
     prefix = os.path.join(out_dir, basename)
     bam = '{}.bam'.format(prefix)
-    align_log = '{}.align.log'.format(prefix)
 
     cmd = 'bowtie2 {} -X2000 --mm --threads {} -x {} '
-    cmd += '-1 {} -2 {} 2>{} | '
+    cmd += '-1 {} -2 {} | '
     cmd += 'samtools view -Su /dev/stdin | '
     cmd += 'samtools sort /dev/stdin -o {} -T {}'
     cmd = cmd.format(
@@ -95,14 +90,11 @@ def bowtie2_pe(fastq1, fastq2, ref_index_prefix,
         ref_index_prefix,
         fastq1,
         fastq2,
-        align_log,
         bam,
         prefix)
     run_shell_cmd(cmd)
 
-    cmd2 = 'cat {}'.format(align_log)
-    run_shell_cmd(cmd2)
-    return bam, align_log
+    return bam
 
 
 def chk_bowtie2_index(prefix):
@@ -159,13 +151,13 @@ def main():
     # bowtie2
     log.info('Running bowtie2...')
     if args.paired_end:
-        bam, align_log = bowtie2_pe(
+        bam = bowtie2_pe(
             args.fastqs[0], args.fastqs[1],
             bowtie2_index_prefix,
             args.multimapping, args.nth,
             args.out_dir)
     else:
-        bam, align_log = bowtie2_se(
+        bam = bowtie2_se(
             args.fastqs[0],
             bowtie2_index_prefix,
             args.multimapping, args.nth,
@@ -174,9 +166,6 @@ def main():
     log.info('Removing temporary files...')
     print(temp_files)
     rm_f(temp_files)
-
-    log.info('Showing align log...')
-    run_shell_cmd('cat {}'.format(align_log))
 
     log.info('Checking if BAM file is empty...')
     if not int(run_shell_cmd('samtools view -c {}'.format(bam))):
