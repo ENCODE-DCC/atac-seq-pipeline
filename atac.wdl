@@ -1716,7 +1716,7 @@ task fraglen_stat_pe {
 	runtime {
 		cpu : 1
 		memory : '8000 MB'
-		time : 1
+		time : 6
 		disks : 'local-disk 100 HDD'
 	}
 }
@@ -1740,7 +1740,7 @@ task gc_bias {
 	runtime {
 		cpu : 1
 		memory : '10000 MB'
-		time : 1
+		time : 6
 		disks : 'local-disk 100 HDD'
 	}
 }
