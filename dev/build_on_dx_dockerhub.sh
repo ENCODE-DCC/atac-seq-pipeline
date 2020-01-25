@@ -2,7 +2,7 @@
 set -e
 
 VER=$(cat atac.wdl | grep "#CAPER docker" | awk 'BEGIN{FS=":"} {print $2}')
-DOCKER=leepc12/atac-seq-pipeline:$VER
+DOCKER=encodedcc/atac-seq-pipeline:$VER
 
 # general
 java -jar ~/dxWDL-0.79.1.jar compile atac.wdl -project "ENCODE Uniform Processing Pipelines" -extras <(echo "{\"default_runtime_attributes\":{\"docker\":\"${DOCKER}\"}}") -f -folder /ATAC-seq/workflows/$VER-dockerhub/general -defaults example_input_json/dx/template_general.json
