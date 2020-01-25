@@ -95,7 +95,9 @@ def main():
                 args.nth, args.out_dir)
 
     log.info('Checking if output is empty...')
-    assert_file_not_empty(rpeak)
+    assert_file_not_empty(rpeak, help=
+        'No peaks found. FDR threshold (fdr_thresh in your input JSON) '
+        'might be too stringent or poor quality sample?')
 
     log.info('List all files in output directory...')
     ls_l(args.out_dir)
