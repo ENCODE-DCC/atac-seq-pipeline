@@ -15,8 +15,10 @@ This document describes instruction for the item 2).
 
 3. Move to one of the following workflow directories according to the platform you have chosen for your project (AWS or Azure). These DX workflows are pre-built with all parameters defined.
 
-* [AWS test workflow](https://platform.DNAnexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/ATAC-seq/workflows): Use `[LATEST_VER]/test_ENCSR356KRQ_subsampled`.
-* [Azure test workflow](https://platform.DNAnexus.com/projects/F6K911Q9xyfgJ36JFzv03Z5J/data/ATAC-seq/workflows): Use `[LATEST_VER]/test_ENCSR356KRQ_subsampled`.
+* [AWS test workflow](https://platform.DNAnexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/ATAC-seq/workflows): Use `[LATEST_VER]-dockerhub/test_ENCSR356KRQ_subsampled`.
+* [Azure test workflow](https://platform.DNAnexus.com/projects/F6K911Q9xyfgJ36JFzv03Z5J/data/ATAC-seq/workflows): Use `[LATEST_VER]-dockerhub/test_ENCSR356KRQ_subsampled`.
+
+> **WARNING**: If your pipeline fails at the beginning (`read_genome_tsv` step) then it fails to find pipeline's docker image on `quay.io`. Use workflow versions suffixed with `-dockerhub` until we fix this `quay.io` issue.
 
 4. Copy it to your project by right-clicking on the DX workflow `atac` and choose "Copy". 
 
