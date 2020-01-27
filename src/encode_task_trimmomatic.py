@@ -120,14 +120,14 @@ def main():
 
     log.info('Cropping fastqs ({} bp) with Trimmomatic...'.format(args.crop_length))
     if args.paired_end:
-        trimmomatic_pe(
+        cropped_R1, cropped_R2 = trimmomatic_pe(
             args.fastq1, args.fastq2,
             args.crop_length,
             args.out_dir_R1, args.out_dir_R2,
             args.nth,
             args.trimmomatic_java_heap)
     else:
-        trimmomatic_se(
+        cropped_R1 = trimmomatic_se(
             args.fastq1,
             args.crop_length,
             args.out_dir_R1,
@@ -138,6 +138,12 @@ def main():
     ls_l(args.out_dir_R1)
     if args.paired_end:
         ls_l(args.out_dir_R2)
+
+    log.info('Checking if output is empty...')
+    assert_file_not_empty(cropped_R1, help=
+        'No reads in FASTQ after cropping. crop_length might be too high? '
+        'While cropping, Trimmomatic (with MINLEN) excludes all reads '
+        'SHORTER than crop_length.')
 
     log.info('All done.')
 
