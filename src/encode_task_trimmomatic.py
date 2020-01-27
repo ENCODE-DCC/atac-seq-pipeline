@@ -7,7 +7,7 @@ import sys
 import os
 import argparse
 from encode_lib_common import (
-    log, ls_l, mkdir_p, rm_f,
+    assert_file_not_empty, log, ls_l, mkdir_p, rm_f,
     run_shell_cmd, strip_ext_fastq)
 from encode_lib_genomic import (
     locate_trimmomatic)
