@@ -105,6 +105,9 @@ RUN git clone https://github.com/ENCODE-DCC/kentUtils_bin_v377
 ENV PATH=${PATH}:/software/kentUtils_bin_v377/bin
 ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/software/kentUtils_bin_v377/lib
 
+# Instal Trimmomatic JAR
+RUN wget http://www.usadellab.org/cms/uploads/supplementary/Trimmomatic/Trimmomatic-0.39.zip && unzip Trimmomatic-0.39.zip && mv Trimmomatic-0.39/trimmomatic-0.39.jar trimmomatic.jar && chmod +rx trimmomatic.jar && rm -rf Trimmomatic-0.39.zip Trimmomatic-0.39/
+
 # Prevent conflict with locally installed python outside of singularity container
 ENV PYTHONNOUSERSITE=True
 
