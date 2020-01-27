@@ -192,6 +192,35 @@ def locate_picard():
             raise Exception(msg)
 
 
+def locate_trimmomatic():
+    try:
+        cmd = 'which trimmomatic.jar'
+        ret = run_shell_cmd(cmd)
+        return ret
+    except:
+        try:
+            # If trimmomatic.jar cannot be found, try with conda installed binary
+            # This relies on that trimmomatic is correctly installed with a link
+            # to the folder containing trimmomatic.jar
+            cmd = 'which trimmomatic'
+            trimmomatic = run_shell_cmd(cmd)
+            ret = os.path.realpath(trimmomatic) + '.jar'
+            if os.path.isfile(ret) and os.access(ret, os.R_OK):
+                return ret
+            else:
+                msg = 'Potential bioconda installation of trimmomatic'
+                msg += ' located at:\n'
+                msg += trimmomatic + '\n'
+                msg += 'but the associated jar file:\n'
+                msg += ret + '\n'
+                msg += 'cannot be found.'
+                raise Exception(msg)
+        except:
+            msg = 'Cannot find trimmomatic.jar or conda installation '\
+                  'of trimmomatic'
+            raise Exception(msg)
+
+
 def subsample_ta_se(ta, subsample, non_mito, mito_chr_name, out_dir):
     prefix = os.path.join(out_dir,
                           os.path.basename(strip_ext_ta(ta)))
