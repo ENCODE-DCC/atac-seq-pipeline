@@ -19,7 +19,7 @@ make_tag: &make_tag
   name: make docker image tag
   command: |
     echo "export TAG=quay.io/encode-dcc/atac-seq-pipeline:${CIRCLE_BRANCH}_${CIRCLE_WORKFLOW_ID}" > ${BASH_ENV}
-    echo "export TAG_DOCKERHUB=encodedcc/atac-seq-pipeline:${CIRCLE_BRANCH}_${CIRCLE_WORKFLOW_ID}" > ${BASH_ENV}
+    echo "export TAG_DOCKERHUB=encodedcc/atac-seq-pipeline:${CIRCLE_BRANCH}_${CIRCLE_WORKFLOW_ID}" >> ${BASH_ENV}
 
 install_singularity: &install_singularity
   name: install singularity
