@@ -1,13 +1,13 @@
 # ENCODE ATAC-Seq/DNase-Seq pipeline
 # Author: Jin Lee (leepc12@gmail.com)
 
-#CAPER docker quay.io/encode-dcc/atac-seq-pipeline:v1.6.0.1
-#CAPER singularity docker://quay.io/encode-dcc/atac-seq-pipeline:v1.6.0.1
+#CAPER docker quay.io/encode-dcc/atac-seq-pipeline:dev-v1.6.1
+#CAPER singularity docker://quay.io/encode-dcc/atac-seq-pipeline:dev-v1.6.1
 #CROO out_def https://storage.googleapis.com/encode-pipeline-output-definition/atac.croo.v3.json
 
 workflow atac {
 	# pipeline version
-	String pipeline_ver = 'v1.6.0.1'
+	String pipeline_ver = 'dev-v1.6.1'
 
 	# general sample information
 	String title = 'Untitled'
@@ -1716,7 +1716,7 @@ task fraglen_stat_pe {
 	runtime {
 		cpu : 1
 		memory : '8000 MB'
-		time : 1
+		time : 6
 		disks : 'local-disk 100 HDD'
 	}
 }
@@ -1740,7 +1740,7 @@ task gc_bias {
 	runtime {
 		cpu : 1
 		memory : '10000 MB'
-		time : 1
+		time : 6
 		disks : 'local-disk 100 HDD'
 	}
 }
