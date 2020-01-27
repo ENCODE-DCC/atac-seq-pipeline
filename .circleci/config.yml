@@ -58,7 +58,7 @@ jobs:
             docker login -u=${QUAY_ROBOT_USER} -p=${QUAY_ROBOT_USER_TOKEN} quay.io
             docker build --cache-from quay.io/encode-dcc/atac-seq-pipeline:${DOCKER_CACHE_TAG} --build-arg GIT_COMMIT_HASH=${CIRCLE_SHA1} --build-arg BRANCH=${CIRCLE_BRANCH} --build-arg BUILD_TAG=${TAG} -t $TAG -f dev/docker_image/Dockerfile .
             docker push ${TAG}
-            docker push ${TAG_DOCKERHUB}
+            #docker push ${TAG_DOCKERHUB}
             docker logout
   test_tasks:
     <<: *machine_defaults
