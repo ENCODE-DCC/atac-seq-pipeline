@@ -11,6 +11,7 @@ sambamba ==0.6.6
 samstats ==0.2.1
 bedtools ==2.29.0
 picard ==2.20.7
+trimmomatic ==0.39
 
 ucsc-fetchchromsizes ==357  # 377 in docker/singularity image
 ucsc-wigtobigwig ==357
@@ -27,7 +28,7 @@ r-snowfall
 r-bitops
 r-catools
 bioconductor-rsamtools
-r-spp  # 1.15 in docker/singularity image
+r-spp ==1.15.5  # 1.14 in docker/singularity image, 1.16 has lwcc() error
 libiconv
 
 bwa ==0.7.17

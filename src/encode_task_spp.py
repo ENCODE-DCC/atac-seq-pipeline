@@ -21,6 +21,8 @@ def parse_arguments():
                         help='2-col chromosome sizes file.')
     parser.add_argument('--fraglen', type=int, required=True,
                         help='Fragment length.')
+    parser.add_argument('--fdr-thresh', default=0.01, type=float,
+                        help='FDR threshold for run_spp.R -fdr parameter.')
     parser.add_argument('--cap-num-peak', default=300000, type=int,
                         help='Capping number of peaks by taking top N peaks.')
     parser.add_argument('--nth', type=int, default=1,
@@ -39,7 +41,7 @@ def parse_arguments():
     return args
 
 
-def spp(ta, ctl_ta, fraglen, cap_num_peak, nth, out_dir):
+def spp(ta, ctl_ta, fraglen, cap_num_peak, fdr_thresh, nth, out_dir):
     basename_ta = os.path.basename(strip_ext_ta(ta))
     basename_ctl_ta = os.path.basename(strip_ext_ta(ctl_ta))
     basename_prefix = '{}_x_{}'.format(basename_ta, basename_ctl_ta)
@@ -54,7 +56,7 @@ def spp(ta, ctl_ta, fraglen, cap_num_peak, nth, out_dir):
     rpeak_tmp_gz = '{}.tmp.gz'.format(rpeak)
 
     cmd0 = 'Rscript --max-ppsize=500000 $(which run_spp.R) -c={} -i={} '
-    cmd0 += '-npeak={} -odir={} -speak={} -savr={} -rf {}'
+    cmd0 += '-npeak={} -odir={} -speak={} -savr={} -fdr={} -rf {}'
     cmd0 = cmd0.format(
         ta,
         ctl_ta,
@@ -62,6 +64,7 @@ def spp(ta, ctl_ta, fraglen, cap_num_peak, nth, out_dir):
         os.path.abspath(out_dir),
         fraglen,
         rpeak_tmp,
+        fdr_thresh,
         nth_param)
     run_shell_cmd(cmd0)
 
@@ -88,10 +91,13 @@ def main():
 
     log.info('Calling peaks with spp...')
     rpeak = spp(args.tas[0], args.tas[1],
-                args.fraglen, args.cap_num_peak, args.nth, args.out_dir)
+                args.fraglen, args.cap_num_peak, args.fdr_thresh,
+                args.nth, args.out_dir)
 
     log.info('Checking if output is empty...')
-    assert_file_not_empty(rpeak)
+    assert_file_not_empty(rpeak, help=
+        'No peaks found. FDR threshold (fdr_thresh in your input JSON) '
+        'might be too stringent or poor quality sample?')
 
     log.info('List all files in output directory...')
     ls_l(args.out_dir)

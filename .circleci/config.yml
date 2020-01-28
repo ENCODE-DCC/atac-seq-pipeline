@@ -19,6 +19,7 @@ make_tag: &make_tag
   name: make docker image tag
   command: |
     echo "export TAG=quay.io/encode-dcc/atac-seq-pipeline:${CIRCLE_BRANCH}_${CIRCLE_WORKFLOW_ID}" > ${BASH_ENV}
+    echo "export TAG_DOCKERHUB=encodedcc/atac-seq-pipeline:${CIRCLE_BRANCH}_${CIRCLE_WORKFLOW_ID}" >> ${BASH_ENV}
 
 install_singularity: &install_singularity
   name: install singularity
@@ -57,7 +58,7 @@ jobs:
             docker login -u=${QUAY_ROBOT_USER} -p=${QUAY_ROBOT_USER_TOKEN} quay.io
             docker build --cache-from quay.io/encode-dcc/atac-seq-pipeline:${DOCKER_CACHE_TAG} --build-arg GIT_COMMIT_HASH=${CIRCLE_SHA1} --build-arg BRANCH=${CIRCLE_BRANCH} --build-arg BUILD_TAG=${TAG} -t $TAG -f dev/docker_image/Dockerfile .
             docker push ${TAG}
-            # docker push quay.io/encode-dcc/atac-seq-pipeline:template
+            #docker push ${TAG_DOCKERHUB}
             docker logout
   test_tasks:
     <<: *machine_defaults

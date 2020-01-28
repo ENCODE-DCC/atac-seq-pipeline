@@ -58,7 +58,7 @@ def parse_arguments():
                         help='IDR threshold.')
     parser.add_argument('--pval-thresh', type=float,
                         help='pValue threshold for MACS2 peak caller.')
-    parser.add_argument('--xcor-pe-trim-bp', type=int,
+    parser.add_argument('--xcor-trim-bp', type=int,
                         help='FASTQs are trimmed to this for cross-correlation '
                              'analysis only.')
     parser.add_argument('--xcor-subsample-reads', type=int,
@@ -628,15 +628,15 @@ def make_cat_align_enrich(args, cat_root):
     if args.pipeline_type in ('tf', 'histone'):
         html_head_xcor = '<h2>Strand cross-correlation measures (trimmed/filtered SE BAM)</h2>'
         html_foot_xcor = """
-            <br><p>Performed on subsampled ({xcor_subsample_reads}) reads mapped from FASTQs that are trimmed to {xcor_pe_trim_bp}.
+            <br><p>Performed on subsampled ({xcor_subsample_reads}) reads mapped from FASTQs that are trimmed to {xcor_trim_bp}.
             Such FASTQ trimming and subsampling reads are for cross-corrleation analysis only. 
             Untrimmed FASTQs are used for all the other analyses.</p>
             <div id='help-xcor'><p>
             NOTE1: For SE datasets, reads from replicates are randomly subsampled to {xcor_subsample_reads}.<br>
-            NOTE2: For PE datasets, the first end (R1) of each read-pair is selected and trimmed to {xcor_pe_trim_bp} the reads are then randomly subsampled to {xcor_subsample_reads}.<br>
+            NOTE2: For PE datasets, the first end (R1) of each read-pair is selected and trimmed to {xcor_trim_bp} the reads are then randomly subsampled to {xcor_subsample_reads}.<br>
         """.format(
             xcor_subsample_reads=args.xcor_subsample_reads,
-            xcor_pe_trim_bp=args.xcor_pe_trim_bp,
+            xcor_trim_bp=args.xcor_trim_bp,
         )
     else:
         html_head_xcor = '<h2>Strand cross-correlation measures (filtered BAM)</h2>'
