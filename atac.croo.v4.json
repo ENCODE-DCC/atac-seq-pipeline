@@ -295,7 +295,7 @@
       "path": "signal/rep${i+1}/${basename}",
       "table": "Signal/Replicate ${i+1}/Count signal track (negative)",
       "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"Count -\\nSignal\"]",
-      "subgraph": "cluster_pooled_rep"
+      "subgraph": "cluster_rep${i+1}"
     }
   },
   "atac.count_signal_track_pooled": {
@@ -303,7 +303,7 @@
       "path": "signal/pooled-rep/${basename}",
       "table": "Signal/Pooled replicate/Count signal track (positive)",
       "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"Count +\\nSignal\"]",
-      "subgraph": "cluster_rep${i+1}"
+      "subgraph": "cluster_pooled_rep"
     },
     "neg_bw": {
       "path": "signal/pooled-rep/${basename}",
