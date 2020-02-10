@@ -25,6 +25,13 @@ Mandatory parameters:
     * We provide a genome TSV file that defines all genome-specific parameters and reference data files. Caper will automatically download big reference data files from our ENCODE repository.
     * However, we also have reference data mirrors for [some platforms](input_details.md/#reference-genome) (GCP, AWS, Sherlock, SCG, ...). On these platforms, you can use a different TSV file to prevent downloading such big reference data.
     * To build a new TSV file from use your own FASTA (`.fa` and `.2bit`) see [this](build_genome_database.md).
+    * You can also define genome specific parameters (defined in a genome TSV file) in an input JSON file. Parameters defined in an input JSON file will override those defined in a genome TSV file. For example, you can simply replace a blacklist file while keeping all other parameters in a genome TSV file for `hg38`.
+        ```javascript
+        {
+            "atac.genome_tsv" : "/somewhere/hg38.tsv",
+            "atac.blacklist": "/new/genome/data/new_blacklist.bed.gz"
+        }
+        ```
 
 5) [Input files](#input-files) and [adapters](#adapters)
     * See [this](#input-files) for how to define FASTQ/BAM/TAG-ALIGNs for your sample.
