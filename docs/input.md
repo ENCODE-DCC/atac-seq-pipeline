@@ -169,7 +169,8 @@ Parameter|Default|Description
 Parameter|Default|Description
 ---------|-------|-----------
 `atac.cap_num_peak` | 500000 | Cap number of peaks called from a peak-caller (MACS2)
-`atac.pval_thresh` | 0.01 | P-value threshold for MACS2 (macs2 callpeak -p)
+`atac.pval_thresh` | 0.01 | P-value threshold for MACS2 (macs2 callpeak -p).
+`atac.smooth_win` | 150 | Size of smoothing window for MACS2 (macs2 callpeak --shift [-smooth_win/2] --extsize [smooth_win]).
 `atac.enable_idr` | true | Enable IDR (irreproducible discovery rate)
 `atac.idr_thresh` | 0.05 | Threshold for IDR
 `atac.custom_call_peak_py` | File | Python script for your custom peak caller. See details about [how to use a custom peak caller](#how-to-use-a-peak-caller)

@@ -14,6 +14,7 @@
     ],
     "atac.paired_end" : false,
     "atac.auto_detect_adapter" : true,
+    "atac.smooth_win" : 73,
     "atac.enable_xcor" : true,
     "atac.enable_tss_enrich" : false,
     "atac.title" : "ENCSR889WQX (subsampled 1/400 reads, chr19_chrM only)",

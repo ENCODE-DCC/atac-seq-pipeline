@@ -34,6 +34,8 @@ Mandatory parameters:
     * `atac.auto_detect_adapter`: Automatically detect [some adapters](#adapters) and trim them in FASTQs.
     * `atac.multimapping`: Set it as 0 if you don't have multimapping reads. It's 4 by default.
     * `atac.read_len`: Array of Integers. Read length for each bio replicate. If you start from FASTQs simply forget about this parameter. Otherwise you want to get a TSS enrichment plot, then you must define it (e.g. `[75, 50]` means 75 for rep1 and 50 for rep2).
+    * `atac.pval_thresh`: P-value threshold for MACS2 (macs2 callpeak -p).
+    * `atac.smooth_win`: Size of smoothing window for MACS2 (macs2 callpeak --shift [-smooth_win/2] --extsize [smooth_win]).
 
 7) [Resources](#resources)
     * If your FASTQs/BAMs are big (>10GB) then try with higher resource settings, especially for memory (`atac.[TASK_NAME]_mem_mb`).

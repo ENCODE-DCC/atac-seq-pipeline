@@ -93,7 +93,7 @@ workflow atac {
 	# parameters for peak calling
 	Int cap_num_peak = 300000		# cap number of raw peaks for each replicate
 	Float pval_thresh = 0.01		# p.value threshold for peak caller
-	Int smooth_win = 73				# size of smoothing window for peak caller
+	Int smooth_win = 150			# size of smoothing window for peak caller
 	Float idr_thresh = 0.05			# IDR threshold
 
 	# resources

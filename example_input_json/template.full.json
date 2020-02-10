@@ -37,7 +37,7 @@
 
     "atac.cap_num_peak" : 300000,
     "atac.pval_thresh" : 0.01,
-    "atac.smooth_win" : 73,
+    "atac.smooth_win" : 150,
 
     "atac.enable_idr" : true,
     "atac.idr_thresh" : 0.05,
