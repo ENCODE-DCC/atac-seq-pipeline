@@ -11,5 +11,5 @@
     
     "test_macs2.cap_num_peak" : 300000,
     "test_macs2.pval_thresh" : 0.01,
-    "test_macs2.smooth_win" : 73
+    "test_macs2.smooth_win" : 150
 }

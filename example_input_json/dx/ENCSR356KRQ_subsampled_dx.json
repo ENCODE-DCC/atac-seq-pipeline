@@ -26,13 +26,9 @@
          "dx://project-BKpvFg00VBPV975PgJ6Q03v6:pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ/fastq_subsampled/rep2/pair2/ENCFF573UXK.subsampled.400.fastq.gz"
     ],
     "atac.paired_end" : true,
-    "atac.multimapping" : 4,
     "atac.auto_detect_adapter" : true,
     "atac.enable_tss_enrich" : false,
-
-    "atac.smooth_win" : 73,
     "atac.enable_xcor" : true,
-
     "atac.title" : "ENCSR356KRQ (subsampled 1/400)",
     "atac.description" : "ATAC-seq on primary keratinocytes in day 0.0 of differentiation"
 }

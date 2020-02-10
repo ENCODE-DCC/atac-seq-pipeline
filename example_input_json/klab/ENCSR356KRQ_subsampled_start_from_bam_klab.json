@@ -8,7 +8,6 @@
     "atac.read_len" : [76, 76],
     "atac.paired_end" : true,
     "atac.auto_detect_adapter" : true,
-    "atac.smooth_win" : 73,
     "atac.enable_xcor" : true,
     "atac.title" : "ENCSR356KRQ (subsampled 1/400, staring from NODUP_BAMs with specified read_len)",
     "atac.description" : "ATAC-seq on primary keratinocytes in day 0.0 of differentiation"
