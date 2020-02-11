@@ -1,13 +1,13 @@
 # ENCODE ATAC-Seq/DNase-Seq pipeline
 # Author: Jin Lee (leepc12@gmail.com)
 
-#CAPER docker quay.io/encode-dcc/atac-seq-pipeline:v1.6.1
-#CAPER singularity docker://quay.io/encode-dcc/atac-seq-pipeline:v1.6.1
-#CROO out_def https://storage.googleapis.com/encode-pipeline-output-definition/atac.croo.v3.json
+#CAPER docker quay.io/encode-dcc/atac-seq-pipeline:v1.7.0
+#CAPER singularity docker://quay.io/encode-dcc/atac-seq-pipeline:v1.7.0
+#CROO out_def https://storage.googleapis.com/encode-pipeline-output-definition/atac.croo.v4.json
 
 workflow atac {
 	# pipeline version
-	String pipeline_ver = 'v1.6.1'
+	String pipeline_ver = 'v1.7.0'
 
 	# general sample information
 	String title = 'Untitled'
@@ -93,7 +93,7 @@ workflow atac {
 	# parameters for peak calling
 	Int cap_num_peak = 300000		# cap number of raw peaks for each replicate
 	Float pval_thresh = 0.01		# p.value threshold for peak caller
-	Int smooth_win = 73				# size of smoothing window for peak caller
+	Int smooth_win = 150			# size of smoothing window for peak caller
 	Float idr_thresh = 0.05			# IDR threshold
 
 	# resources

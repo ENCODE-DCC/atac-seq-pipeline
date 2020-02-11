@@ -22,7 +22,7 @@ def parse_arguments():
                             chr. sizes file, or hs for human, ms for mouse).')
     parser.add_argument('--pval-thresh', default=0.01, type=float,
                         help='P-Value threshold.')
-    parser.add_argument('--smooth-win', default=73, type=int,
+    parser.add_argument('--smooth-win', default=150, type=int,
                         help='Smoothing window size.')
     parser.add_argument('--out-dir', default='', type=str,
                         help='Output directory.')
