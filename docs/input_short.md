@@ -25,6 +25,13 @@ Mandatory parameters:
     * We provide a genome TSV file that defines all genome-specific parameters and reference data files. Caper will automatically download big reference data files from our ENCODE repository.
     * However, we also have reference data mirrors for [some platforms](input_details.md/#reference-genome) (GCP, AWS, Sherlock, SCG, ...). On these platforms, you can use a different TSV file to prevent downloading such big reference data.
     * To build a new TSV file from use your own FASTA (`.fa` and `.2bit`) see [this](build_genome_database.md).
+    * You can also define genome specific parameters (defined in a genome TSV file) in an input JSON file. Parameters defined in an input JSON file will override those defined in a genome TSV file. For example, you can simply replace a blacklist file while keeping all other parameters in a genome TSV file for `hg38`.
+        ```javascript
+        {
+            "atac.genome_tsv" : "/somewhere/hg38.tsv",
+            "atac.blacklist": "/new/genome/data/new_blacklist.bed.gz"
+        }
+        ```
 
 5) [Input files](#input-files) and [adapters](#adapters)
     * See [this](#input-files) for how to define FASTQ/BAM/TAG-ALIGNs for your sample.
@@ -34,6 +41,8 @@ Mandatory parameters:
     * `atac.auto_detect_adapter`: Automatically detect [some adapters](#adapters) and trim them in FASTQs.
     * `atac.multimapping`: Set it as 0 if you don't have multimapping reads. It's 4 by default.
     * `atac.read_len`: Array of Integers. Read length for each bio replicate. If you start from FASTQs simply forget about this parameter. Otherwise you want to get a TSS enrichment plot, then you must define it (e.g. `[75, 50]` means 75 for rep1 and 50 for rep2).
+    * `atac.pval_thresh`: P-value threshold for MACS2 (macs2 callpeak -p).
+    * `atac.smooth_win`: Size of smoothing window for MACS2 (macs2 callpeak --shift [-smooth_win/2] --extsize [smooth_win]).
 
 7) [Resources](#resources)
     * If your FASTQs/BAMs are big (>10GB) then try with higher resource settings, especially for memory (`atac.[TASK_NAME]_mem_mb`).

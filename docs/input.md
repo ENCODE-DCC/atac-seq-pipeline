@@ -36,7 +36,8 @@ Parameter|Type|Description
 `atac.custom_aligner_idx_tar` | File | Index TAR file (uncompressed) for your own aligner. See details about [how to use a custom aligner](#how-to-use-a-custom-aligner)
 `atac.custom_aligner_mito_idx_tar` | File | Mito-only index TAR file (uncompressed) for your own aligner. See details about [how to use a custom aligner](#how-to-use-a-custom-aligner)
 `atac.chrsz`| File | 2-col chromosome sizes file built from FASTA file with `faidx`
-`atac.blacklist`| File | 3-col BED file. Peaks overlapping these regions will be filtered out
+`atac.blacklist`| File | BED file. Peaks overlapping these regions will be filtered out
+`atac.blacklist2`| File | Second blacklist. Two blacklist files (`atac.blacklist` and `atac.blacklist2`) will be merged.
 `atac.gensz`| String | MACS2's genome sizes (hs for human, mm for mouse or sum of 2nd col in chrsz)
 `atac.mito_chr_name`| String | Name of mitochondrial chromosome (e.g. chrM)
 `atac.regex_bfilt_peak_chr_name`| String | Perl style reg-ex to keep peaks on selected chromosomes only matching with this pattern (default: `chr[\dXY]+`. This will keep chr1, chr2, ... chrX and chrY in `.bfilt.` peaks file. chrM is not included here)
@@ -169,7 +170,8 @@ Parameter|Default|Description
 Parameter|Default|Description
 ---------|-------|-----------
 `atac.cap_num_peak` | 500000 | Cap number of peaks called from a peak-caller (MACS2)
-`atac.pval_thresh` | 0.01 | P-value threshold for MACS2 (macs2 callpeak -p)
+`atac.pval_thresh` | 0.01 | P-value threshold for MACS2 (macs2 callpeak -p).
+`atac.smooth_win` | 150 | Size of smoothing window for MACS2 (macs2 callpeak --shift [-smooth_win/2] --extsize [smooth_win]).
 `atac.enable_idr` | true | Enable IDR (irreproducible discovery rate)
 `atac.idr_thresh` | 0.05 | Threshold for IDR
 `atac.custom_call_peak_py` | File | Python script for your custom peak caller. See details about [how to use a custom peak caller](#how-to-use-a-peak-caller)

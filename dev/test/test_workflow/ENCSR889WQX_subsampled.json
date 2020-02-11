@@ -1,5 +1,5 @@
 {
-    "atac.qc_report.qc_json_ref" : "gs://encode-pipeline-test-samples/encode-atac-seq-pipeline/ref_output/v1.6.0/ENCSR889WQX_subsampled/qc.json",
+    "atac.qc_report.qc_json_ref" : "gs://encode-pipeline-test-samples/encode-atac-seq-pipeline/ref_output/v1.7.0/ENCSR889WQX_subsampled/qc.json",
     "atac.pipeline_type" : "atac",
     "atac.genome_tsv" : "gs://encode-pipeline-genome-data/genome_tsv/v1/mm10_gcp.tsv",
     "atac.fastqs_rep1_R1" : [
