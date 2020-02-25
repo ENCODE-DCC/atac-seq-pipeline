@@ -41,14 +41,21 @@ This document describes instruction for the item 1).
       $ INPUT=example_input_json/dx_azure/ENCSR356KRQ_subsampled_dx_azure.json
       ```
 
-7. Compile `atac.wdl` with an input JSON for the SUBSAMPLED (1/400) paired-end sample of [ENCSR356KRQ](https://www.encodeproject.org/experiments/ENCSR356KRQ/).
+7. Make a WDL for DNAnexus use only. The original WDL will not work with inputs (e.g. BAMs, TAs) other than FASTQs. Then compile `atac.dx.wdl` with an input JSON for the SUBSAMPLED (1/400) paired-end sample of [ENCSR356KRQ](https://www.encodeproject.org/experiments/ENCSR356KRQ/).
     ```bash
-    $ WDL=atac.wdl
+    $ cp atac.wdl atac.dx.wdl
+    $ sed -i 's/Array\[File?\] bams = \[\]/Array\[File\] bams = \[\]/g' atac.dx.wdl
+    $ sed -i 's/Array\[File?\] nodup_bams = \[\]/Array\[File\] nodup_bams = \[\]/g' atac.dx.wdl
+    $ sed -i 's/Array\[File?\] tas = \[\]/Array\[File\] tas = \[\]/g' atac.dx.wdl
+    ```
+
+    ```bash
+    $ WDL=atac.dx.wdl
     $ PROJECT=[YOUR_PROJECT_NAME]
     $ OUT_FOLDER=/test_sample_atac_ENCSR356KRQ_subsampled
     $ DOCKER=$(cat ${WDL} | grep "#CAPER docker" | awk '{print $3}')
 
-    $ java -jar dxWDL-0.77.jar compile ${WDL} -project ${PROJECT} -f -folder ${OUT_FOLDER} -defaults ${INPUT} -extras <(echo "{\"default_runtime_attributes\":{\"docker\":\"${DOCKER}\"}}")
+    $ java -jar dxWDL-0.81.6.jar compile ${WDL} -project ${PROJECT} -f -folder ${OUT_FOLDER} -defaults ${INPUT} -extras <(echo "{\"default_runtime_attributes\":{\"docker\":\"${DOCKER}\"}}")
     ```
 
 8. Go to DNAnexus [project page](https://platform.DNAnexus.com/projects) and click on your project.
