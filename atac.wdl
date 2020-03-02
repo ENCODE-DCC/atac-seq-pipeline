@@ -674,9 +674,11 @@ workflow atac {
 			}
 		}
 		if ( enable_compare_to_roadmap && defined(macs2_signal_track.pval_bw) &&
-			 defined(reg2map_) && defined(roadmap_meta_) ) {
+			 defined(reg2map_) && defined(roadmap_meta_) &&
+			 ( defined(reg2map_bed_) || defined(dnase_) ) ) {
 			call compare_signal_to_roadmap { input :
 				pval_bw = macs2_signal_track.pval_bw,
+				dnase = dnase_,
 				reg2map_bed = reg2map_bed_,
 				reg2map = reg2map_,
 				roadmap_meta = roadmap_meta_,
@@ -1747,13 +1749,15 @@ task gc_bias {
 
 task compare_signal_to_roadmap {
 	File pval_bw
-	File reg2map_bed
+	File? dnase
+	File? reg2map_bed
 	File reg2map
 	File roadmap_meta
 
 	command {
 		python3 $(which encode_task_compare_signal_to_roadmap.py) \
 			${'--bigwig ' + pval_bw} \
+			${'--dnase ' + dnase} \
 			${'--reg2map-bed ' + reg2map_bed} \
 			${'--reg2map ' + reg2map} \
 			${'--roadmap-meta ' + roadmap_meta}
