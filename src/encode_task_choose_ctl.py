@@ -7,7 +7,7 @@ import sys
 import os
 import argparse
 from encode_lib_common import (
-    copy_f_to_f, get_num_lines, log, ls_l, mkdir_p)
+    copy_f_to_f, get_num_lines, log, ls_l, mkdir_p, write_txt)
 
 
 def parse_arguments():
@@ -15,7 +15,9 @@ def parse_arguments():
         prog='ENCODE DCC Choose control.',
         description='Choose appropriate control for each IP replicate.'
                     'ctl_for_repN.tagAlign.gz will be generated for each '
-                    'IP replicate on --out-dir.')
+                    'IP replicate on --out-dir. '
+                    'This outputs a file with integers '
+                    '(chosen control index for each replicate per line).')
     parser.add_argument('--tas', type=str, nargs='+', required=True,
                         help='List of experiment TAG-ALIGN per IP replicate.')
     parser.add_argument('--ctl-tas', type=str, nargs='+', required=True,
@@ -29,6 +31,11 @@ def parse_arguments():
     parser.add_argument('--always-use-pooled-ctl', action="store_true",
                         help='Always use pooled control for all IP '
                              'replicates.')
+    parser.add_argument('--out-tsv-basename', default='chosen_ctl.tsv', type=str,
+                        help='Output TSV basename '
+                             '(will be written on directory --out-dir). '
+                             'This TSV file has chosen control index per line '
+                             '(for each replicate).')
     parser.add_argument('--out-dir', default='', type=str,
                         help='Output directory.')
     parser.add_argument('--log-level', default='INFO',
@@ -103,19 +110,9 @@ def main():
                 else:
                     ctl_ta_idx[i] = i
 
-    # log.info('Writing idx.txt...')
-    # out_txt = os.path.join(args.out_dir, 'idx.txt')
-    # write_txt(out_txt, ctl_ta_idx)
-    log.info('Writing ctl_for_repN.tagAlign.gz files...')
-    for i, ctl_id in enumerate(ctl_ta_idx):
-        rep_id = i+1
-        dest = os.path.join(
-            args.out_dir, 'ctl_for_rep{}.tagAlign.gz'.format(rep_id))
-        if ctl_id == -1:
-            src = args.ctl_ta_pooled[0]
-        else:
-            src = args.ctl_tas[ctl_id]
-        copy_f_to_f(src, dest)
+    log.info('Writing idx.txt...')
+    out_txt = os.path.join(args.out_dir, args.out_tsv_basename)
+    write_txt(out_txt, ctl_ta_idx)
 
     log.info('List all files in output directory...')
     ls_l(args.out_dir)
