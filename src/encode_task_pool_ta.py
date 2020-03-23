@@ -53,7 +53,7 @@ def pool_ta(tas, col, basename_prefix, out_dir):
         run_shell_cmd(cmd)
         return pooled_ta
     else:
-        raise Exception('Needs at least two TAs (or BEDs) to be pooled.')
+        raise ValueError('Needs at least two TAs (or BEDs) to be pooled.')
 
 
 def main():
