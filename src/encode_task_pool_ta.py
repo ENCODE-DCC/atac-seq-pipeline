@@ -36,7 +36,7 @@ def parse_arguments():
 
 def pool_ta(tas, col, basename_prefix, out_dir):
     if len(tas) > 1:
-        if basename_prefix is not None:
+        if basename_prefix is None:
             prefix = os.path.join(out_dir,'basename_prefix')
         else:
             prefix = os.path.join(out_dir,
@@ -53,7 +53,7 @@ def pool_ta(tas, col, basename_prefix, out_dir):
         run_shell_cmd(cmd)
         return pooled_ta
     else:
-        return make_hard_link(tas[0], out_dir)
+        raise Exception('Needs at least two TAs (or BEDs) to be pooled.')
 
 
 def main():
