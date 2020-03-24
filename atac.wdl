@@ -1206,7 +1206,7 @@ task filter {
 			${if no_dup_removal then '--no-dup-removal' else ''} \
 			${'--mito-chr-name ' + mito_chr_name} \
 			${'--nth ' + cpu} \
-			${'--picard-java-heap ' + if defined(picard_java_heap) then picard_java_heap else (mem_mb * picard_java_heap_factor + 'M')}
+			${'--picard-java-heap ' + if defined(picard_java_heap) then picard_java_heap else (round(mem_mb * picard_java_heap_factor) + 'M')}
 	}
 	output {
 		File nodup_bam = glob('*.bam')[0]
@@ -1632,7 +1632,7 @@ task preseq {
 		python3 $(which encode_task_preseq.py) \
 			${if paired_end then '--paired-end' else ''} \
 			${'--bam ' + bam} \
-			${'--picard-java-heap ' + if defined(picard_java_heap) then picard_java_heap else (mem_mb * picard_java_heap_factor + 'M')}
+			${'--picard-java-heap ' + if defined(picard_java_heap) then picard_java_heap else (round(mem_mb * picard_java_heap_factor) + 'M')}
 	}
 	output {
 		File? picard_est_lib_size_qc = if paired_end then 
@@ -1713,7 +1713,7 @@ task fraglen_stat_pe {
 	command {
 		python3 $(which encode_task_fraglen_stat_pe.py) \
 			${'--nodup-bam ' + nodup_bam} \
-			${'--picard-java-heap ' + if defined(picard_java_heap) then picard_java_heap else (mem_mb * picard_java_heap_factor + 'M')}
+			${'--picard-java-heap ' + if defined(picard_java_heap) then picard_java_heap else (round(mem_mb * picard_java_heap_factor) + 'M')}
 	}
 	output {
 		File nucleosomal_qc = glob('*nucleosomal.qc')[0]
@@ -1739,7 +1739,7 @@ task gc_bias {
 		python3 $(which encode_task_gc_bias.py) \
 			${'--nodup-bam ' + nodup_bam} \
 			${'--ref-fa ' + ref_fa} \
-			${'--picard-java-heap ' + if defined(picard_java_heap) then picard_java_heap else (mem_mb * picard_java_heap_factor + 'M')}
+			${'--picard-java-heap ' + if defined(picard_java_heap) then picard_java_heap else (round(mem_mb * picard_java_heap_factor) + 'M')}
 	}
 	output {
 		File gc_plot = glob('*.gc_plot.png')[0]
