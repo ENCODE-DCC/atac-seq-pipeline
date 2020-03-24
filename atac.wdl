@@ -1189,6 +1189,7 @@ task filter {
 
 	Int cpu
 	Int mem_mb
+	Float picard_java_heap_factor = 0.9
 	String? picard_java_heap
 	Int time_hr
 	String disks
@@ -1205,7 +1206,7 @@ task filter {
 			${if no_dup_removal then '--no-dup-removal' else ''} \
 			${'--mito-chr-name ' + mito_chr_name} \
 			${'--nth ' + cpu} \
-			${'--picard-java-heap ' + if defined(picard_java_heap) then picard_java_heap else (mem_mb + 'M')}
+			${'--picard-java-heap ' + if defined(picard_java_heap) then picard_java_heap else (mem_mb * picard_java_heap_factor + 'M')}
 	}
 	output {
 		File nodup_bam = glob('*.bam')[0]
@@ -1623,6 +1624,7 @@ task preseq {
 	Boolean paired_end
 
 	Int mem_mb
+	Float picard_java_heap_factor = 0.9
 	String? picard_java_heap
 
 	File? null_f
@@ -1630,7 +1632,7 @@ task preseq {
 		python3 $(which encode_task_preseq.py) \
 			${if paired_end then '--paired-end' else ''} \
 			${'--bam ' + bam} \
-			${'--picard-java-heap ' + if defined(picard_java_heap) then picard_java_heap else (mem_mb + 'M')}
+			${'--picard-java-heap ' + if defined(picard_java_heap) then picard_java_heap else (mem_mb * picard_java_heap_factor + 'M')}
 	}
 	output {
 		File? picard_est_lib_size_qc = if paired_end then 
@@ -1704,12 +1706,14 @@ task fraglen_stat_pe {
 	# for PE only
 	File nodup_bam
 
+	Int mem_mb = 8000
+	Float picard_java_heap_factor = 0.9
 	String? picard_java_heap
 
 	command {
 		python3 $(which encode_task_fraglen_stat_pe.py) \
 			${'--nodup-bam ' + nodup_bam} \
-			${'--picard-java-heap ' + if defined(picard_java_heap) then picard_java_heap else '6G'}
+			${'--picard-java-heap ' + if defined(picard_java_heap) then picard_java_heap else (mem_mb * picard_java_heap_factor + 'M')}
 	}
 	output {
 		File nucleosomal_qc = glob('*nucleosomal.qc')[0]
@@ -1717,7 +1721,7 @@ task fraglen_stat_pe {
 	}
 	runtime {
 		cpu : 1
-		memory : '8000 MB'
+		memory : '${mem_mb} MB'
 		time : 6
 		disks : 'local-disk 100 HDD'
 	}
@@ -1727,13 +1731,15 @@ task gc_bias {
 	File nodup_bam
 	File ref_fa
 
+	Int mem_mb = 10000
+	Float picard_java_heap_factor = 0.9
 	String? picard_java_heap
 
 	command {
 		python3 $(which encode_task_gc_bias.py) \
 			${'--nodup-bam ' + nodup_bam} \
 			${'--ref-fa ' + ref_fa} \
-			${'--picard-java-heap ' + if defined(picard_java_heap) then picard_java_heap else '10G'}
+			${'--picard-java-heap ' + if defined(picard_java_heap) then picard_java_heap else (mem_mb * picard_java_heap_factor + 'M')}
 	}
 	output {
 		File gc_plot = glob('*.gc_plot.png')[0]
@@ -1741,7 +1747,7 @@ task gc_bias {
 	}
 	runtime {
 		cpu : 1
-		memory : '10000 MB'
+		memory : '${mem_mb} MB'
 		time : 6
 		disks : 'local-disk 100 HDD'
 	}
