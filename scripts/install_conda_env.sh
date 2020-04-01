@@ -16,8 +16,8 @@ conda create -n ${CONDA_ENV_PY3} --file ${REQ_TXT_PY3} -y -c defaults -c r -c bi
 conda create -n ${CONDA_ENV_PY2} --file ${REQ_TXT_PY2} -y -c defaults -c r -c bioconda -c conda-forge
 
 echo "=== Configuring for pipeline's Conda environments ==="
-CONDA_PREFIX_PY3=$(conda env list | grep -P "\b${CONDA_ENV_PY3}\s" | awk '{if (NF==3) print $3; else print $2}')
-CONDA_PREFIX_PY2=$(conda env list | grep -P "\b${CONDA_ENV_PY2}\s" | awk '{if (NF==3) print $3; else print $2}')
+CONDA_PREFIX_PY3=$(conda env list | grep -E "\b${CONDA_ENV_PY3}[[:space:]]" | awk '{if (NF==3) print $3; else print $2}')
+CONDA_PREFIX_PY2=$(conda env list | grep -E "\b${CONDA_ENV_PY2}[[:space:]]" | awk '{if (NF==3) print $3; else print $2}')
 
 if [ ! "${CONDA_PREFIX_PY3}" -o ! "${CONDA_PREFIX_PY2}" ];
 then
