@@ -9,6 +9,7 @@ import argparse
 from encode_lib_common import (
     assert_file_not_empty, human_readable_number, log,
     ls_l, mkdir_p, rm_f, run_shell_cmd, strip_ext_ta)
+from encode_lib_genomic import subsample_ta_se, subsample_ta_pe
 
 
 def parse_arguments():
@@ -25,6 +26,11 @@ def parse_arguments():
                         help='FDR threshold for run_spp.R -fdr parameter.')
     parser.add_argument('--cap-num-peak', default=300000, type=int,
                         help='Capping number of peaks by taking top N peaks.')
+    parser.add_argument('--ctl-subsample', default=0, type=int,
+                        help='Subsample control to this read depth '
+                             '(0: no subsampling).')
+    parser.add_argument('--ctl-paired-end', action="store_true",
+                        help='Paired-end control TA.')
     parser.add_argument('--nth', type=int, default=1,
                         help='Number of threads to parallelize.')
     parser.add_argument('--out-dir', default='', type=str,
@@ -41,8 +47,21 @@ def parse_arguments():
     return args
 
 
-def spp(ta, ctl_ta, fraglen, cap_num_peak, fdr_thresh, nth, out_dir):
+def spp(ta, ctl_ta, fraglen, cap_num_peak, fdr_thresh,
+        ctl_subsample, ctl_paired_end, nth, out_dir):
     basename_ta = os.path.basename(strip_ext_ta(ta))
+
+    if ctl_subsample:
+        if ctl_paired_end:
+            ctl_ta = subsample_ta_pe(
+                ctl_ta, ctl_subsample,
+                non_mito=False, mito_chr_name=None, r1_only=False,
+                out_dir=out_dir)
+        else:
+            ctl_ta = subsample_ta_se(
+                ctl_ta, ctl_subsample,
+                non_mito=False, mito_chr_name=None,
+                out_dir=out_dir)
     basename_ctl_ta = os.path.basename(strip_ext_ta(ctl_ta))
     basename_prefix = '{}_x_{}'.format(basename_ta, basename_ctl_ta)
     if len(basename_prefix) > 200:  # UNIX cannot have filename > 255
@@ -92,7 +111,7 @@ def main():
     log.info('Calling peaks with spp...')
     rpeak = spp(args.tas[0], args.tas[1],
                 args.fraglen, args.cap_num_peak, args.fdr_thresh,
-                args.nth, args.out_dir)
+                args.ctl_subsample, args.ctl_paired_end, args.nth, args.out_dir)
 
     log.info('Checking if output is empty...')
     assert_file_not_empty(rpeak, help=
