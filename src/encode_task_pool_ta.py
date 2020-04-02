@@ -36,8 +36,8 @@ def parse_arguments():
 
 def pool_ta(tas, col, basename_prefix, out_dir):
     if len(tas) > 1:
-        if basename_prefix is None:
-            prefix = os.path.join(out_dir,'basename_prefix')
+        if basename_prefix is not None:
+            prefix = os.path.join(out_dir, basename_prefix)
         else:
             prefix = os.path.join(out_dir,
                               os.path.basename(strip_ext_ta(tas[0])))
