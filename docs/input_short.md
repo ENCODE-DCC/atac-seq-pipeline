@@ -50,7 +50,7 @@ Mandatory parameters:
 Optional parameters:
 
 8) Useful parameters
-    * `atac.subsample_reads`: Subsample reads. This will affect all downsteam analyses including peak-calling. It's 0 by default, which means no subsampling.
+    * `atac.subsample_reads`: Subsample reads. For PE dataset, this is not a number of read pairs but number of reads. This will affect all downsteam analyses including peak-calling. It's 0 by default, which means no subsampling.
 
 9) Flags
     * `atac.align_only`: Peak calling and its downstream analyses will be disabled. Useful if you just want to align your FASTQs into filtered BAMs/TAG-ALIGNs and don't want to call peaks on them.
