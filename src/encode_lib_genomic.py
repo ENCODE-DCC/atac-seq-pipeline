@@ -281,7 +281,7 @@ def subsample_ta_pe(ta, subsample, non_mito, mito_chr_name, r1_only, out_dir):
         cmd0 += '</dev/zero 2>/dev/null) > {}'
         cmd0 = cmd0.format(
             ta,
-            subsample % 2,
+            int(subsample / 2),
             ta,
             ta_tmp)
     else:
