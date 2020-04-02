@@ -8,7 +8,7 @@ SRC_DIR=${SH_SCRIPT_DIR}/../src
 
 conda --version  # check if conda exists
 
-CONDA_PREFIX_PY3=$(conda env list | grep -P "\b${CONDA_ENV_PY3}\s" | awk '{if (NF==3) print $3; else print $2}')
+CONDA_PREFIX_PY3=$(conda env list | grep -E "\b${CONDA_ENV_PY3}[[:space:]]" | awk '{if (NF==3) print $3; else print $2}')
 
 if [ ! "${CONDA_PREFIX_PY3}" ];
 then
