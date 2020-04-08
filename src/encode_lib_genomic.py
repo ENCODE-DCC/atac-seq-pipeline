@@ -258,6 +258,10 @@ def subsample_ta_se(ta, subsample, non_mito, mito_chr_name, out_dir):
 def subsample_ta_pe(ta, subsample, non_mito, mito_chr_name, r1_only, out_dir):
     prefix = os.path.join(out_dir,
                           os.path.basename(strip_ext_ta(ta)))
+    if subsample % 2:
+        raise ValueError(
+            'Number of reads to subsample should be an even number '
+            'for paired end TAG-ALIGN (BED) file. n={n}'.format(n=subsample))
     ta_subsampled = '{}.{}{}{}tagAlign.gz'.format(
         prefix,
         'no_chrM.' if non_mito else '',
@@ -277,7 +281,7 @@ def subsample_ta_pe(ta, subsample, non_mito, mito_chr_name, r1_only, out_dir):
         cmd0 += '</dev/zero 2>/dev/null) > {}'
         cmd0 = cmd0.format(
             ta,
-            subsample,
+            int(subsample / 2),
             ta,
             ta_tmp)
     else:
