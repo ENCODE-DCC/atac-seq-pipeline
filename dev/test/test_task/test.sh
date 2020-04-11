@@ -50,6 +50,6 @@ fi
 java -Dconfig.file=${BACKEND_CONF} -Dbackend.default=${BACKEND} ${EXTRA_PARAM} -jar ${CROMWELL_JAR} run ${WDL} -i ${INPUT} ${WF_OPT} -m ${METADATA}
 
 # parse output metadata json
-cat ${METADATA} | python -c "import json,sys;obj=json.load(sys.stdin);print(obj['outputs']['${PREFIX}.compare_md5sum.json_str'])" > ${RESULT}
+cat ${METADATA} | python -c "import json,sys;obj=json.load(sys.stdin);key='${PREFIX}.compare_md5sum.json_str';print(obj['outputs'][key] if key in obj['outputs'] else '')" > ${RESULT}
 cat ${RESULT}
 rm -f ${METADATA} ${TMP_WF_OPT}

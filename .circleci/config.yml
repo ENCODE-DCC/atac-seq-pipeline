@@ -79,7 +79,9 @@ jobs:
               json=${wdl%.*}.json
               result=${wdl%.*}.result.json
               ./test.sh ${wdl} ${json} ${TAG}
-              python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'match_overall']))" < ${result}
+              if [[ $(wc -l "${result}" | awk '{print $1}') > 1 ]]; then
+                python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'match_overall']))" < ${result}
+              fi
               rm -f ${result}
             done
             

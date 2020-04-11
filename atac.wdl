@@ -1,13 +1,18 @@
-# ENCODE ATAC-Seq/DNase-Seq pipeline
-# Author: Jin Lee (leepc12@gmail.com)
-
-#CAPER docker quay.io/encode-dcc/atac-seq-pipeline:v1.7.0
-#CAPER singularity docker://quay.io/encode-dcc/atac-seq-pipeline:v1.7.0
+#CAPER docker quay.io/encode-dcc/atac-seq-pipeline:v1.7.1
+#CAPER singularity docker://quay.io/encode-dcc/atac-seq-pipeline:v1.7.1
 #CROO out_def https://storage.googleapis.com/encode-pipeline-output-definition/atac.croo.v4.json
 
 workflow atac {
+	meta {
+		author: 'Jin wook Lee (leepc12@gmail.com) at ENCODE-DCC'
+		description: 'ATAC-Seq/DNase-Seq pipeline'
+
+		caper_docker: 'quay.io/encode-dcc/atac-seq-pipeline:v1.7.1'
+		caper_singularity: 'docker://quay.io/encode-dcc/atac-seq-pipeline:v1.7.1'
+		croo_out_def: 'https://storage.googleapis.com/encode-pipeline-output-definition/atac.croo.v4.json'
+	}
 	# pipeline version
-	String pipeline_ver = 'v1.7.0'
+	String pipeline_ver = 'v1.7.1'
 
 	# general sample information
 	String title = 'Untitled'
@@ -674,9 +679,11 @@ workflow atac {
 			}
 		}
 		if ( enable_compare_to_roadmap && defined(macs2_signal_track.pval_bw) &&
-			 defined(reg2map_) && defined(roadmap_meta_) ) {
+			 defined(reg2map_) && defined(roadmap_meta_) &&
+			 ( defined(reg2map_bed_) || defined(dnase_) ) ) {
 			call compare_signal_to_roadmap { input :
 				pval_bw = macs2_signal_track.pval_bw,
+				dnase = dnase_,
 				reg2map_bed = reg2map_bed_,
 				reg2map = reg2map_,
 				roadmap_meta = roadmap_meta_,
@@ -1187,6 +1194,7 @@ task filter {
 
 	Int cpu
 	Int mem_mb
+	Float picard_java_heap_factor = 0.9
 	String? picard_java_heap
 	Int time_hr
 	String disks
@@ -1203,7 +1211,7 @@ task filter {
 			${if no_dup_removal then '--no-dup-removal' else ''} \
 			${'--mito-chr-name ' + mito_chr_name} \
 			${'--nth ' + cpu} \
-			${'--picard-java-heap ' + if defined(picard_java_heap) then picard_java_heap else (mem_mb + 'M')}
+			${'--picard-java-heap ' + if defined(picard_java_heap) then picard_java_heap else (round(mem_mb * picard_java_heap_factor) + 'M')}
 	}
 	output {
 		File nodup_bam = glob('*.bam')[0]
@@ -1621,6 +1629,7 @@ task preseq {
 	Boolean paired_end
 
 	Int mem_mb
+	Float picard_java_heap_factor = 0.9
 	String? picard_java_heap
 
 	File? null_f
@@ -1628,7 +1637,7 @@ task preseq {
 		python3 $(which encode_task_preseq.py) \
 			${if paired_end then '--paired-end' else ''} \
 			${'--bam ' + bam} \
-			${'--picard-java-heap ' + if defined(picard_java_heap) then picard_java_heap else (mem_mb + 'M')}
+			${'--picard-java-heap ' + if defined(picard_java_heap) then picard_java_heap else (round(mem_mb * picard_java_heap_factor) + 'M')}
 	}
 	output {
 		File? picard_est_lib_size_qc = if paired_end then 
@@ -1702,12 +1711,14 @@ task fraglen_stat_pe {
 	# for PE only
 	File nodup_bam
 
+	Int mem_mb = 8000
+	Float picard_java_heap_factor = 0.9
 	String? picard_java_heap
 
 	command {
 		python3 $(which encode_task_fraglen_stat_pe.py) \
 			${'--nodup-bam ' + nodup_bam} \
-			${'--picard-java-heap ' + if defined(picard_java_heap) then picard_java_heap else '6G'}
+			${'--picard-java-heap ' + if defined(picard_java_heap) then picard_java_heap else (round(mem_mb * picard_java_heap_factor) + 'M')}
 	}
 	output {
 		File nucleosomal_qc = glob('*nucleosomal.qc')[0]
@@ -1715,7 +1726,7 @@ task fraglen_stat_pe {
 	}
 	runtime {
 		cpu : 1
-		memory : '8000 MB'
+		memory : '${mem_mb} MB'
 		time : 6
 		disks : 'local-disk 100 HDD'
 	}
@@ -1725,13 +1736,15 @@ task gc_bias {
 	File nodup_bam
 	File ref_fa
 
+	Int mem_mb = 10000
+	Float picard_java_heap_factor = 0.9
 	String? picard_java_heap
 
 	command {
 		python3 $(which encode_task_gc_bias.py) \
 			${'--nodup-bam ' + nodup_bam} \
 			${'--ref-fa ' + ref_fa} \
-			${'--picard-java-heap ' + if defined(picard_java_heap) then picard_java_heap else '10G'}
+			${'--picard-java-heap ' + if defined(picard_java_heap) then picard_java_heap else (round(mem_mb * picard_java_heap_factor) + 'M')}
 	}
 	output {
 		File gc_plot = glob('*.gc_plot.png')[0]
@@ -1739,7 +1752,7 @@ task gc_bias {
 	}
 	runtime {
 		cpu : 1
-		memory : '10000 MB'
+		memory : '${mem_mb} MB'
 		time : 6
 		disks : 'local-disk 100 HDD'
 	}
@@ -1747,13 +1760,15 @@ task gc_bias {
 
 task compare_signal_to_roadmap {
 	File pval_bw
-	File reg2map_bed
+	File? dnase
+	File? reg2map_bed
 	File reg2map
 	File roadmap_meta
 
 	command {
 		python3 $(which encode_task_compare_signal_to_roadmap.py) \
 			${'--bigwig ' + pval_bw} \
+			${'--dnase ' + dnase} \
 			${'--reg2map-bed ' + reg2map_bed} \
 			${'--reg2map ' + reg2map} \
 			${'--roadmap-meta ' + roadmap_meta}

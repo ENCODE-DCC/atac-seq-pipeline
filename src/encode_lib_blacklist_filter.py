@@ -80,7 +80,7 @@ def blacklist_filter_bam(bam, blacklist, out_dir):
     filtered = '{}.bfilt.bam'.format(prefix)
 
     if blacklist == '' or get_num_lines(blacklist) == 0:
-        cmd = 'zcat -f {} | gzip -nc > {}'.format(bam, filtered)
+        cmd = 'cp -f {b} {f}'.format(b=bam, f=filtered)
         run_shell_cmd(cmd)
     else:
         # due to bedtools bug when .gz is given for -a and -b
