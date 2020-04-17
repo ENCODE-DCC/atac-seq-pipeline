@@ -1718,6 +1718,7 @@ task frac_mito {
     }
 
     command {
+        set -e
         python3 $(which encode_task_frac_mito.py) \
             ${non_mito_samstat} ${mito_samstat}
     }
@@ -1754,6 +1755,7 @@ task filter {
     Float picard_java_heap_factor = 0.9
 
     command {
+        set -e
         python3 $(which encode_task_filter.py) \
             ${bam} \
             ${if paired_end then '--paired-end' else ''} \
@@ -1797,6 +1799,7 @@ task bam2ta {
     }
 
     command {
+        set -e
         python3 $(which encode_task_bam2ta.py) \
             ${bam} \
             ${if paired_end then '--paired-end' else ''} \
@@ -1826,6 +1829,7 @@ task spr {
     }
 
     command {
+        set -e
         python3 $(which encode_task_spr.py) \
             ${ta} \
             ${if paired_end then '--paired-end' else ''}
@@ -1849,6 +1853,7 @@ task pool_ta {
         String? prefix         # basename prefix
     }
     command {
+        set -e
         python3 $(which encode_task_pool_ta.py) \
             ${sep=' ' select_all(tas)} \
             ${'--prefix ' + prefix} \
@@ -1880,6 +1885,7 @@ task xcor {
     }
 
     command {
+        set -e
         python3 $(which encode_task_xcor.py) \
             ${ta} \
             ${if paired_end then '--paired-end' else ''} \
@@ -1914,6 +1920,7 @@ task jsd {
     }
 
     command {
+        set -e
         python3 $(which encode_task_jsd.py) \
             ${sep=' ' select_all(nodup_bams)} \
             ${'--mapq-thresh '+ mapq_thresh} \
@@ -1938,6 +1945,7 @@ task count_signal_track {
         File chrsz            # 2-col chromosome sizes file
     }
     command {
+        set -e
         python3 $(which encode_task_count_signal_track.py) \
             ${ta} \
             ${'--chrsz ' + chrsz}
@@ -2030,6 +2038,7 @@ task macs2_signal_track {
         String disks
     }
     command {
+        set -e
         python3 $(which encode_task_macs2_signal_track_atac.py) \
             ${ta} \
             ${'--gensz '+ gensz} \
@@ -2066,7 +2075,7 @@ task idr {
         String rank
     }
     command {
-        ${if defined(ta) then '' else 'touch null.frip.qc'}
+        set -e
         touch null
         python3 $(which encode_task_idr.py) \
             ${peak1} ${peak2} ${peak_pooled} \
@@ -2111,7 +2120,7 @@ task overlap {
         String peak_type
     }
     command {
-        ${if defined(ta) then '' else 'touch null.frip.qc'}
+        set -e
         touch null 
         python3 $(which encode_task_overlap.py) \
             ${peak1} ${peak2} ${peak_pooled} \
@@ -2152,6 +2161,7 @@ task reproducibility {
         File chrsz            # 2-col chromosome sizes file
     }
     command {
+        set -e
         python3 $(which encode_task_reproducibility.py) \
             ${sep=' ' peaks} \
             --peaks-pr ${sep=' ' peaks_pr} \
@@ -2195,6 +2205,7 @@ task preseq {
     Float picard_java_heap_factor = 0.9
 
     command {
+        set -e
         python3 $(which encode_task_preseq.py) \
             ${if paired_end then '--paired-end' else ''} \
             ${'--bam ' + bam} \
@@ -2225,6 +2236,7 @@ task annot_enrich {
         File? enh
     }
     command {
+        set -e
         python3 $(which encode_task_annot_enrich.py) \
             ${'--ta ' + ta} \
             ${'--blacklist ' + blacklist} \
@@ -2251,6 +2263,7 @@ task tss_enrich {
         File chrsz
     }
     command {
+        set -e
         python2 $(which encode_task_tss_enrich.py) \
             ${'--read-len ' + read_len} \
             ${'--nodup-bam ' + nodup_bam} \
@@ -2281,6 +2294,7 @@ task fraglen_stat_pe {
     Float picard_java_heap_factor = 0.9
 
     command {
+        set -e
         python3 $(which encode_task_fraglen_stat_pe.py) \
             ${'--nodup-bam ' + nodup_bam} \
             ${'--picard-java-heap ' + if defined(picard_java_heap) then picard_java_heap else (round(mem_mb * picard_java_heap_factor) + 'M')}
@@ -2308,6 +2322,7 @@ task gc_bias {
     Float picard_java_heap_factor = 0.9
 
     command {
+        set -e
         python3 $(which encode_task_gc_bias.py) \
             ${'--nodup-bam ' + nodup_bam} \
             ${'--ref-fa ' + ref_fa} \
@@ -2334,6 +2349,7 @@ task compare_signal_to_roadmap {
         File? roadmap_meta
     }
     command {
+        set -e
         python3 $(which encode_task_compare_signal_to_roadmap.py) \
             ${'--bigwig ' + pval_bw} \
             ${'--dnase ' + dnase} \
@@ -2425,6 +2441,7 @@ task qc_report {
         File? qc_json_ref
     }
     command {
+        set -e
         python3 $(which encode_task_qc_report.py) \
             ${'--pipeline-ver ' + pipeline_ver} \
             ${"--title '" + sub(title,"'","_") + "'"} \
