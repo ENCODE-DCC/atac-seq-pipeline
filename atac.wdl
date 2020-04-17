@@ -1820,7 +1820,6 @@ task bam2ta {
 }
 
 task spr {
-    # make two self pseudo replicates
     input {
         File? ta
         Boolean paired_end
@@ -2369,9 +2368,6 @@ task compare_signal_to_roadmap {
     }
 }
 
-# gather all outputs and generate 
-# - qc.html        : organized final HTML report
-# - qc.json        : all QCs
 task qc_report {
     input {
         String pipeline_ver
