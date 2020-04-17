@@ -278,7 +278,7 @@ workflow atac {
             help: 'Define if you want to start pipeline from FASTQs files. Pipeline can start from any type of inputs (e.g. FASTQs, BAMs, ...). Choose one type and fill paramters for that type and leave other undefined. Especially for FASTQs, we have individual variable for each biological replicate to allow FASTQs of technical replicates can be merged. Make sure that they are consistent with read2 FASTQs (atac.fastqs_rep1_R2). These FASTQs are usually technical replicates to be merged.'
         }
         fastqs_rep1_R1: {
-            description: 'Adapter sequences for read2 FASTQs to be merged for a biological replicate 1.',
+            description: 'Read2 FASTQs to be merged for a biological replicate 1.',
             group: 'input_genomic_data',
             help: 'Make sure that they are consistent with read1 FASTQs (atac.fastqs_rep1_R1). These FASTQs are usually technical replicates to be merged.'
         }
@@ -288,7 +288,7 @@ workflow atac {
             help: 'Make sure that they are consistent with read2 FASTQs (atac.fastqs_rep2_R2). These FASTQs are usually technical replicates to be merged.'
         }
         fastqs_rep2_R1: {
-            description: 'Adapter sequences for read2 FASTQs to be merged for a biological replicate 2.',
+            description: 'Read2 FASTQs to be merged for a biological replicate 2.',
             group: 'input_genomic_data',
             help: 'Make sure that they are consistent with read1 FASTQs (atac.fastqs_rep2_R1). These FASTQs are usually technical replicates to be merged.'
         }
@@ -298,7 +298,7 @@ workflow atac {
             help: 'Make sure that they are consistent with read2 FASTQs (atac.fastqs_rep3_R2). These FASTQs are usually technical replicates to be merged.'
         }
         fastqs_rep3_R1: {
-            description: 'Adapter sequences for read2 FASTQs to be merged for a biological replicate 3.',
+            description: 'Read2 FASTQs to be merged for a biological replicate 3.',
             group: 'input_genomic_data',
             help: 'Make sure that they are consistent with read1 FASTQs (atac.fastqs_rep3_R1). These FASTQs are usually technical replicates to be merged.'
         }
@@ -308,7 +308,7 @@ workflow atac {
             help: 'Make sure that they are consistent with read2 FASTQs (atac.fastqs_rep4_R2). These FASTQs are usually technical replicates to be merged.'
         }
         fastqs_rep4_R1: {
-            description: 'Adapter sequences for read2 FASTQs to be merged for a biological replicate 4.',
+            description: 'Read2 FASTQs to be merged for a biological replicate 4.',
             group: 'input_genomic_data',
             help: 'Make sure that they are consistent with read1 FASTQs (atac.fastqs_rep4_R1). These FASTQs are usually technical replicates to be merged.'
         }
@@ -318,7 +318,7 @@ workflow atac {
             help: 'Make sure that they are consistent with read2 FASTQs (atac.fastqs_rep5_R2). These FASTQs are usually technical replicates to be merged.'
         }
         fastqs_rep5_R1: {
-            description: 'Adapter sequences for read2 FASTQs to be merged for a biological replicate 5.',
+            description: 'Read2 FASTQs to be merged for a biological replicate 5.',
             group: 'input_genomic_data',
             help: 'Make sure that they are consistent with read1 FASTQs (atac.fastqs_rep5_R1). These FASTQs are usually technical replicates to be merged.'
         }
@@ -328,7 +328,7 @@ workflow atac {
             help: 'Make sure that they are consistent with read2 FASTQs (atac.fastqs_rep6_R2). These FASTQs are usually technical replicates to be merged.'
         }
         fastqs_rep6_R1: {
-            description: 'Adapter sequences for read2 FASTQs to be merged for a biological replicate 6.',
+            description: 'Read2 FASTQs to be merged for a biological replicate 6.',
             group: 'input_genomic_data',
             help: 'Make sure that they are consistent with read1 FASTQs (atac.fastqs_rep6_R1). These FASTQs are usually technical replicates to be merged.'
         }
@@ -338,7 +338,7 @@ workflow atac {
             help: 'Make sure that they are consistent with read2 FASTQs (atac.fastqs_rep7_R2). These FASTQs are usually technical replicates to be merged.'
         }
         fastqs_rep7_R2: {
-            description: 'Adapter sequences for read2 FASTQs to be merged for a biological replicate 7.',
+            description: 'Read2 FASTQs to be merged for a biological replicate 7.',
             group: 'input_genomic_data',
             help: 'Make sure that they are consistent with read1 FASTQs (atac.fastqs_rep7_R1). These FASTQs are usually technical replicates to be merged.'
         }
@@ -348,7 +348,7 @@ workflow atac {
             help: 'Make sure that they are consistent with read2 FASTQs (atac.fastqs_rep8_R2). These FASTQs are usually technical replicates to be merged.'
         }
         fastqs_rep8_R2: {
-            description: 'Adapter sequences for read2 FASTQs to be merged for a biological replicate 8.',
+            description: 'Read2 FASTQs to be merged for a biological replicate 8.',
             group: 'input_genomic_data',
             help: 'Make sure that they are consistent with read1 FASTQs (atac.fastqs_rep8_R1). These FASTQs are usually technical replicates to be merged.'
         }
@@ -358,7 +358,7 @@ workflow atac {
             help: 'Make sure that they are consistent with read2 FASTQs (atac.fastqs_rep9_R2). These FASTQs are usually technical replicates to be merged.'
         }
         fastqs_rep9_R2: {
-            description: 'Adapter sequences for read2 FASTQs to be merged for a biological replicate 9.',
+            description: 'Read2 FASTQs to be merged for a biological replicate 9.',
             group: 'input_genomic_data',
             help: 'Make sure that they are consistent with read1 FASTQs (atac.fastqs_rep9_R1). These FASTQs are usually technical replicates to be merged.'
         }
@@ -368,7 +368,7 @@ workflow atac {
             help: 'Make sure that they are consistent with read2 FASTQs (atac.fastqs_rep10_R2). These FASTQs are usually technical replicates to be merged.'
         }
         fastqs_rep10_R2: {
-            description: 'Adapter sequences for read2 FASTQs to be merged for a biological replicate 10.',
+            description: 'Read2 FASTQs to be merged for a biological replicate 10.',
             group: 'input_genomic_data',
             help: 'Make sure that they are consistent with read1 FASTQs (atac.fastqs_rep10_R1). These FASTQs are usually technical replicates to be merged.'
         }
@@ -501,92 +501,92 @@ workflow atac {
             help: 'Make sure that they are consistent with read1 FASTQs (atac.adapters_rep1_R1).'
         }
         adapters_rep2_R1: {
-            description: 'Adapter sequences for read1 FASTQs to be merged for a biological replicate 1.',
+            description: 'Adapter sequences for read1 FASTQs to be merged for a biological replicate 2.',
             group: 'adapter_trimming',
             help: 'Make sure that they are consistent with read2 FASTQs (atac.adapters_rep2_R2).'
         }
         adapters_rep2_R1: {
-            description: 'Adapter sequences for read2 FASTQs to be merged for a biological replicate 1.',
+            description: 'Adapter sequences for read2 FASTQs to be merged for a biological replicate 2.',
             group: 'adapter_trimming',
             help: 'Make sure that they are consistent with read1 FASTQs (atac.adapters_rep2_R1).'
         }
         adapters_rep3_R1: {
-            description: 'Adapter sequences for read1 FASTQs to be merged for a biological replicate 1.',
+            description: 'Adapter sequences for read1 FASTQs to be merged for a biological replicate 3.',
             group: 'adapter_trimming',
             help: 'Make sure that they are consistent with read2 FASTQs (atac.adapters_rep3_R2).'
         }
         adapters_rep3_R1: {
-            description: 'Adapter sequences for read2 FASTQs to be merged for a biological replicate 1.',
+            description: 'Adapter sequences for read2 FASTQs to be merged for a biological replicate 3.',
             group: 'adapter_trimming',
             help: 'Make sure that they are consistent with read1 FASTQs (atac.adapters_rep3_R1).'
         }
         adapters_rep4_R1: {
-            description: 'Adapter sequences for read1 FASTQs to be merged for a biological replicate 1.',
+            description: 'Adapter sequences for read1 FASTQs to be merged for a biological replicate 4.',
             group: 'adapter_trimming',
             help: 'Make sure that they are consistent with read2 FASTQs (atac.adapters_rep4_R2).'
         }
         adapters_rep4_R1: {
-            description: 'Adapter sequences for read2 FASTQs to be merged for a biological replicate 1.',
+            description: 'Adapter sequences for read2 FASTQs to be merged for a biological replicate 4.',
             group: 'adapter_trimming',
             help: 'Make sure that they are consistent with read1 FASTQs (atac.adapters_rep4_R1).'
         }
         adapters_rep5_R1: {
-            description: 'Adapter sequences for read1 FASTQs to be merged for a biological replicate 1.',
+            description: 'Adapter sequences for read1 FASTQs to be merged for a biological replicate 5.',
             group: 'adapter_trimming',
             help: 'Make sure that they are consistent with read2 FASTQs (atac.adapters_rep5_R2).'
         }
         adapters_rep5_R1: {
-            description: 'Adapter sequences for read2 FASTQs to be merged for a biological replicate 1.',
+            description: 'Adapter sequences for read2 FASTQs to be merged for a biological replicate 5.',
             group: 'adapter_trimming',
             help: 'Make sure that they are consistent with read1 FASTQs (atac.adapters_rep5_R1).'
         }
         adapters_rep6_R1: {
-            description: 'Adapter sequences for read1 FASTQs to be merged for a biological replicate 1.',
+            description: 'Adapter sequences for read1 FASTQs to be merged for a biological replicate 6.',
             group: 'adapter_trimming',
             help: 'Make sure that they are consistent with read2 FASTQs (atac.adapters_rep6_R2).'
         }
         adapters_rep6_R1: {
-            description: 'Adapter sequences for read2 FASTQs to be merged for a biological replicate 1.',
+            description: 'Adapter sequences for read2 FASTQs to be merged for a biological replicate 6.',
             group: 'adapter_trimming',
             help: 'Make sure that they are consistent with read1 FASTQs (atac.adapters_rep6_R1).'
         }
         adapters_rep7_R1: {
-            description: 'Adapter sequences for read1 FASTQs to be merged for a biological replicate 1.',
+            description: 'Adapter sequences for read1 FASTQs to be merged for a biological replicate 7.',
             group: 'adapter_trimming',
             help: 'Make sure that they are consistent with read2 FASTQs (atac.adapters_rep7_R2).'
         }
         adapters_rep7_R2: {
-            description: 'Adapter sequences for read2 FASTQs to be merged for a biological replicate 1.',
+            description: 'Adapter sequences for read2 FASTQs to be merged for a biological replicate 7.',
             group: 'adapter_trimming',
             help: 'Make sure that they are consistent with read1 FASTQs (atac.adapters_rep7_R1).'
         }
         adapters_rep8_R1: {
-            description: 'Adapter sequences for read1 FASTQs to be merged for a biological replicate 1.',
+            description: 'Adapter sequences for read1 FASTQs to be merged for a biological replicate 8.',
             group: 'adapter_trimming',
             help: 'Make sure that they are consistent with read2 FASTQs (atac.adapters_rep8_R2).'
         }
         adapters_rep8_R2: {
-            description: 'Adapter sequences for read2 FASTQs to be merged for a biological replicate 1.',
+            description: 'Adapter sequences for read2 FASTQs to be merged for a biological replicate 8.',
             group: 'adapter_trimming',
             help: 'Make sure that they are consistent with read1 FASTQs (atac.adapters_rep8_R1).'
         }
         adapters_rep9_R1: {
-            description: 'Adapter sequences for read1 FASTQs to be merged for a biological replicate 1.',
+            description: 'Adapter sequences for read1 FASTQs to be merged for a biological replicate 9.',
             group: 'adapter_trimming',
             help: 'Make sure that they are consistent with read2 FASTQs (atac.adapters_rep9_R2).'
         }
         adapters_rep9_R2: {
-            description: 'Adapter sequences for read2 FASTQs to be merged for a biological replicate 1.',
+            description: 'Adapter sequences for read2 FASTQs to be merged for a biological replicate 9.',
             group: 'adapter_trimming',
             help: 'Make sure that they are consistent with read1 FASTQs (atac.adapters_rep9_R1).'
         }
         adapters_rep10_R1: {
-            description: 'Adapter sequences for read1 FASTQs to be merged for a biological replicate 1.',
+            description: 'Adapter sequences for read1 FASTQs to be merged for a biological replicate 10.',
             group: 'adapter_trimming',
             help: 'Make sure that they are consistent with read2 FASTQs (atac.adapters_rep10_R2).'
         }
         adapters_rep10_R2: {
-            description: 'Adapter sequences for read2 FASTQs to be merged for a biological replicate 1.',
+            description: 'Adapter sequences for read2 FASTQs to be merged for a biological replicate 10.',
             group: 'adapter_trimming',
             help: 'Make sure that they are consistent with read1 FASTQs (atac.adapters_rep10_R1).'
         }
