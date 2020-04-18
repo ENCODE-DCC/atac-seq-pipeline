@@ -39,7 +39,9 @@ workflow test_gc_bias {
 }
 
 task remove_comments_from_gc_log {
-    File gc_log
+    input {
+        File gc_log
+    }
     command {
         zcat -f ${gc_log} | grep -v '# ' \
             > ${basename(gc_log) + '.date_filt_out'}

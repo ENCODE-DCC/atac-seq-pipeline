@@ -70,7 +70,9 @@ workflow test_jsd {
 }
 
 task take_8_cols {
-    File f
+    input {
+        File f
+    }
     command {
         cut -f 1-8 ${f} > out.txt
     }
