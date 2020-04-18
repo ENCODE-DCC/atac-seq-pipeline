@@ -410,12 +410,12 @@ workflow atac {
         peak_ppr1: {
             description: 'NARROWPEAK file for pooled pseudo replicate 1.',
             group: 'input_genomic_data',
-            help: 'Define if you want to start pipeline from PEAK files. Define if you have multiple biological replicates and atac.truerep_only flag is off. PPR1 means analysis on pooled 1st pseudo replicates. Each biological replicate is shuf/split into two pseudos. This is a pooling of each replicate\'s 1st pseudos.'
+            help: 'Define if you want to start pipeline from PEAK files. Define if you have multiple biological replicates and atac.true_rep_only flag is off. PPR1 means analysis on pooled 1st pseudo replicates. Each biological replicate is shuf/split into two pseudos. This is a pooling of each replicate\'s 1st pseudos.'
         }
         peak_ppr2: {
             description: 'NARROWPEAK file for pooled pseudo replicate 2.',
             group: 'input_genomic_data',
-            help: 'Define if you want to start pipeline from PEAK files. Define if you have multiple biological replicates and atac.truerep_only flag is off. PPR1 means analysis on pooled 2nd pseudo replicates. Each biological replicate is shuf/split into two pseudos. This is a pooling of each replicate\'s 2nd pseudos.'
+            help: 'Define if you want to start pipeline from PEAK files. Define if you have multiple biological replicates and atac.true_rep_only flag is off. PPR1 means analysis on pooled 2nd pseudo replicates. Each biological replicate is shuf/split into two pseudos. This is a pooling of each replicate\'s 2nd pseudos.'
         }
 
         pipeline_type: {
@@ -619,12 +619,12 @@ workflow atac {
         subsample_reads: {
             description: 'Subsample reads. Shuffle and subsample reads.',
             group: 'alignment',
-            help: 'This affects all downstream analyses after filtering BAM. (e.g. all TAG-ALIGN files, peak-calling). Reads will be shuffled only if actual number of reads in BAM exceeds this number.'
+            help: 'This affects all downstream analyses after filtering BAM. (e.g. all TAG-ALIGN files, peak-calling). Reads will be shuffled only if actual number of reads in BAM exceeds this number.  0 means disabled.'
         }
         xcor_subsample_reads: {
             description: 'Subsample reads for cross-corrlelation analysis only.',
             group: 'alignment',
-            help: 'This does not affect downstream analyses after filtering BAM. It is for cross-correlation analysis only.'
+            help: 'This does not affect downstream analyses after filtering BAM. It is for cross-correlation analysis only. 0 means disabled.'
         }
         read_len: {
             description: 'Read length per biological replicate.',
