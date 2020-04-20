@@ -175,11 +175,11 @@ workflow atac {
     parameter_meta {
         title: {
             description: 'Experiment title.',
-            group: 'pipeline_metadata',
+            group: 'pipeline_metadata'
         }
         description: {
             description: 'Experiment description.',
-            group: 'pipeline_metadata',
+            group: 'pipeline_metadata'
         }
         genome_tsv: {
             description: 'Reference genome database TSV.',
@@ -275,9 +275,9 @@ workflow atac {
         fastqs_rep1_R1: {
             description: 'Read1 FASTQs to be merged for a biological replicate 1.',
             group: 'input_genomic_data',
-            help: 'Define if you want to start pipeline from FASTQs files. Pipeline can start from any type of inputs (e.g. FASTQs, BAMs, ...). Choose one type and fill paramters for that type and leave other undefined. Especially for FASTQs, we have individual variable for each biological replicate to allow FASTQs of technical replicates can be merged. Make sure that they are consistent with read2 FASTQs (atac.fastqs_rep1_R2). These FASTQs are usually technical replicates to be merged.'
+            help: 'Define if you want to start pipeline from FASTQ files. Pipeline can start from any type of inputs (e.g. FASTQs, BAMs, ...). Choose one type and fill paramters for that type and leave other undefined. Especially for FASTQs, we have individual variable for each biological replicate to allow FASTQs of technical replicates can be merged. Make sure that they are consistent with read2 FASTQs (atac.fastqs_rep1_R2). These FASTQs are usually technical replicates to be merged.'
         }
-        fastqs_rep1_R1: {
+        fastqs_rep1_R2: {
             description: 'Read2 FASTQs to be merged for a biological replicate 1.',
             group: 'input_genomic_data',
             help: 'Make sure that they are consistent with read1 FASTQs (atac.fastqs_rep1_R1). These FASTQs are usually technical replicates to be merged.'
@@ -287,7 +287,7 @@ workflow atac {
             group: 'input_genomic_data',
             help: 'Make sure that they are consistent with read2 FASTQs (atac.fastqs_rep2_R2). These FASTQs are usually technical replicates to be merged.'
         }
-        fastqs_rep2_R1: {
+        fastqs_rep2_R2: {
             description: 'Read2 FASTQs to be merged for a biological replicate 2.',
             group: 'input_genomic_data',
             help: 'Make sure that they are consistent with read1 FASTQs (atac.fastqs_rep2_R1). These FASTQs are usually technical replicates to be merged.'
@@ -297,7 +297,7 @@ workflow atac {
             group: 'input_genomic_data',
             help: 'Make sure that they are consistent with read2 FASTQs (atac.fastqs_rep3_R2). These FASTQs are usually technical replicates to be merged.'
         }
-        fastqs_rep3_R1: {
+        fastqs_rep3_R2: {
             description: 'Read2 FASTQs to be merged for a biological replicate 3.',
             group: 'input_genomic_data',
             help: 'Make sure that they are consistent with read1 FASTQs (atac.fastqs_rep3_R1). These FASTQs are usually technical replicates to be merged.'
@@ -307,7 +307,7 @@ workflow atac {
             group: 'input_genomic_data',
             help: 'Make sure that they are consistent with read2 FASTQs (atac.fastqs_rep4_R2). These FASTQs are usually technical replicates to be merged.'
         }
-        fastqs_rep4_R1: {
+        fastqs_rep4_R2: {
             description: 'Read2 FASTQs to be merged for a biological replicate 4.',
             group: 'input_genomic_data',
             help: 'Make sure that they are consistent with read1 FASTQs (atac.fastqs_rep4_R1). These FASTQs are usually technical replicates to be merged.'
@@ -317,7 +317,7 @@ workflow atac {
             group: 'input_genomic_data',
             help: 'Make sure that they are consistent with read2 FASTQs (atac.fastqs_rep5_R2). These FASTQs are usually technical replicates to be merged.'
         }
-        fastqs_rep5_R1: {
+        fastqs_rep5_R2: {
             description: 'Read2 FASTQs to be merged for a biological replicate 5.',
             group: 'input_genomic_data',
             help: 'Make sure that they are consistent with read1 FASTQs (atac.fastqs_rep5_R1). These FASTQs are usually technical replicates to be merged.'
@@ -327,7 +327,7 @@ workflow atac {
             group: 'input_genomic_data',
             help: 'Make sure that they are consistent with read2 FASTQs (atac.fastqs_rep6_R2). These FASTQs are usually technical replicates to be merged.'
         }
-        fastqs_rep6_R1: {
+        fastqs_rep6_R2: {
             description: 'Read2 FASTQs to be merged for a biological replicate 6.',
             group: 'input_genomic_data',
             help: 'Make sure that they are consistent with read1 FASTQs (atac.fastqs_rep6_R1). These FASTQs are usually technical replicates to be merged.'
@@ -458,8 +458,8 @@ workflow atac {
             description: 'Enables TSS enrichment plot generation.',
             group: 'pipeline_parameter'
         }
-        enable_tss_enrich: {
-            description: 'Enables annotation enrichment analysis.',
+        enable_annot_enrich: {
+            description: 'Enables annotated regions enrichment analysis.',
             group: 'pipeline_parameter'
         }
         enable_jsd: {
@@ -483,19 +483,19 @@ workflow atac {
         auto_detect_adapter: {
             description: 'Auto-detect/trim adapter sequences.',
             group: 'adapter_trimming',
-            help: 'Can detect three types of adapter sequences. Illumina: AGATCGGAAGAGC, Nextera: CTGTCTCTTATA, smallRNA: TGGAATTCTCGG.'
+            help: 'Can detect/trim three types of adapter sequences. Illumina: AGATCGGAAGAGC, Nextera: CTGTCTCTTATA, smallRNA: TGGAATTCTCGG.'
         }
         adapter: {
             description: 'Adapter for all FASTQs.',
             group: 'adapter_trimming',
-            help: 'Define if all FASTQs have the same adapter sequence. Otherwise define adapter sequence for individual FASTQ in atac.adapters_repX_R1 and atac.adapters_repX_R2 instead. Use atac.auto_detect_adapter if you want to detect adapters automatically.'
+            help: 'Define if all FASTQs have the same adapter sequence. Otherwise define adapter sequence for individual FASTQ in atac.adapters_repX_R1 and atac.adapters_repX_R2 instead. Use atac.auto_detect_adapter if you want to detect adapters automatically. If all of your FASTQs are already trimmed then leave all adapter-related parameters undefined/empty.'
         }
         adapters_rep1_R1: {
             description: 'Adapter sequences for read1 FASTQs to be merged for a biological replicate 1.',
             group: 'adapter_trimming',
             help: 'Make sure that they are consistent with read2 FASTQs (atac.adapters_rep1_R2). You can combine this with atac.auto_detect_adapter. Pipeline will auto-detect/trim adapter sequences for null entry in this list. e.g. ["AAGGCCTT", null, "AAGGCCTT"].'
         }
-        adapters_rep1_R1: {
+        adapters_rep1_R2: {
             description: 'Adapter sequences for read2 FASTQs to be merged for a biological replicate 1.',
             group: 'adapter_trimming',
             help: 'Make sure that they are consistent with read1 FASTQs (atac.adapters_rep1_R1).'
@@ -505,7 +505,7 @@ workflow atac {
             group: 'adapter_trimming',
             help: 'Make sure that they are consistent with read2 FASTQs (atac.adapters_rep2_R2).'
         }
-        adapters_rep2_R1: {
+        adapters_rep2_R2: {
             description: 'Adapter sequences for read2 FASTQs to be merged for a biological replicate 2.',
             group: 'adapter_trimming',
             help: 'Make sure that they are consistent with read1 FASTQs (atac.adapters_rep2_R1).'
@@ -515,7 +515,7 @@ workflow atac {
             group: 'adapter_trimming',
             help: 'Make sure that they are consistent with read2 FASTQs (atac.adapters_rep3_R2).'
         }
-        adapters_rep3_R1: {
+        adapters_rep3_R2: {
             description: 'Adapter sequences for read2 FASTQs to be merged for a biological replicate 3.',
             group: 'adapter_trimming',
             help: 'Make sure that they are consistent with read1 FASTQs (atac.adapters_rep3_R1).'
@@ -525,7 +525,7 @@ workflow atac {
             group: 'adapter_trimming',
             help: 'Make sure that they are consistent with read2 FASTQs (atac.adapters_rep4_R2).'
         }
-        adapters_rep4_R1: {
+        adapters_rep4_R2: {
             description: 'Adapter sequences for read2 FASTQs to be merged for a biological replicate 4.',
             group: 'adapter_trimming',
             help: 'Make sure that they are consistent with read1 FASTQs (atac.adapters_rep4_R1).'
@@ -535,7 +535,7 @@ workflow atac {
             group: 'adapter_trimming',
             help: 'Make sure that they are consistent with read2 FASTQs (atac.adapters_rep5_R2).'
         }
-        adapters_rep5_R1: {
+        adapters_rep5_R2: {
             description: 'Adapter sequences for read2 FASTQs to be merged for a biological replicate 5.',
             group: 'adapter_trimming',
             help: 'Make sure that they are consistent with read1 FASTQs (atac.adapters_rep5_R1).'
@@ -545,7 +545,7 @@ workflow atac {
             group: 'adapter_trimming',
             help: 'Make sure that they are consistent with read2 FASTQs (atac.adapters_rep6_R2).'
         }
-        adapters_rep6_R1: {
+        adapters_rep6_R2: {
             description: 'Adapter sequences for read2 FASTQs to be merged for a biological replicate 6.',
             group: 'adapter_trimming',
             help: 'Make sure that they are consistent with read1 FASTQs (atac.adapters_rep6_R1).'
@@ -607,9 +607,9 @@ workflow atac {
             help: 'Duplicate reads are filtererd out during filtering BAMs to gerenate NODUP_BAM. This flag will keep all duplicate reads in NODUP_BAM. This flag does not affect naming of NODUP_BAM. NODUP_BAM will still have .nodup. suffix in its filename.'
         }
         mapq_thresh: {
-            description: 'Threshold for low MAPQ reads removal',
+            description: 'Threshold for low MAPQ reads removal.',
             group: 'alignment',
-            help: 'Low MAPQ reads are filtered out while filtering BAM.',
+            help: 'Low MAPQ reads are filtered out while filtering BAM.'
         }
         filter_chrs: {
             description: 'List of chromosomes to be filtered out while filtering BAM.',
