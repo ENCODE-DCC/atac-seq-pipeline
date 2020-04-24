@@ -216,7 +216,7 @@ Parameter|Default
 
 > **IMPORTANT**: If you see memory Java errors, check the following resource parameters.
 
-There are special parameters to control maximum Java heap memory (e.g. `java -Xmx4G`) for Picard tools. They are strings including size units. Such string will be directly appended to Java's parameter `-Xmx`.
+There are special parameters to control maximum Java heap memory (e.g. `java -Xmx4G`) for Picard tools. They are strings including size units. Such string will be directly appended to Java's parameter `-Xmx`. If these parameters are not defined then pipeline uses 90% of each task's memory (e.g. `atac.filter_mem_mb`).
 
 Parameter|Default
 ---------|-------
