@@ -71,9 +71,17 @@ def naive_overlap(basename_prefix, peak1, peak2, peak_pooled, peak_type,
 
     nonamecheck_param = '-nonamecheck' if nonamecheck else ''
     # narrowpeak, regionpeak only
-    awk_param = '{s1=$3-$2; s2=$13-$12; '
-    awk_param += 'if (($21/s1 >= 0.5) || ($21/s2 >= 0.5)) {print $0}}'
-    cut_param = '1-10'
+    if peak_type.lower() == 'narrowpeak':
+        awk_param = '{s1=$3-$2; s2=$13-$12; if (($21/s1 >= 0.5) || ($21/s2 >= 0.5)) {print $0}}'
+        cut_param = '1-10'
+    elif peak_type.lower() == 'broadpeak':
+        awk_param = '{s1=$3-$2; s2=$12-$11; if (($19/s1 >= 0.5) || ($19/s2 >= 0.5)) {print $0}}'
+        cut_param = '1-9'
+    elif peak_type.lower() == 'gappedpeak':
+        awk_param = '{s1=$3-$2; s2=$18-$17; if (($31/s1 >= 0.5) || ($31/s2 >= 0.5)) {print $0}}'
+        cut_param = '1-15'
+    else:
+        raise ValueError('Unsupported peak_type.')
 
     # due to bedtools bug when .gz is given for -a and -b
     tmp1 = gunzip(peak1, 'tmp1', out_dir)
