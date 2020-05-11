@@ -70,8 +70,7 @@ def naive_overlap(basename_prefix, peak1, peak2, peak_pooled, peak_type,
     overlap_peak = '{}.{}.gz'.format(prefix, peak_type)
 
     nonamecheck_param = '-nonamecheck' if nonamecheck else ''
-    # narrowpeak, regionpeak only
-    if peak_type.lower() == 'narrowpeak':
+    if peak_type.lower() in ('narrowpeak', 'regionpeak'):
         awk_param = '{s1=$3-$2; s2=$13-$12; if (($21/s1 >= 0.5) || ($21/s2 >= 0.5)) {print $0}}'
         cut_param = '1-10'
     elif peak_type.lower() == 'broadpeak':
