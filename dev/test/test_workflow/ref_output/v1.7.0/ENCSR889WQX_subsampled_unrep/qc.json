@@ -86,6 +86,14 @@
                 "diff_chroms": 0,
                 "diff_chroms_qc_failed": 0
             }
+        },
+        "frac_reads_in_annot": {
+            "rep1": {
+                "fri_dhs": 0.5476435949798759,
+                "fri_blacklist": 0.003142534250649325,
+                "fri_prom": 0.1236294783591411,
+                "fri_enh": 0.4222991058151754
+            }
         }
     },
     "lib_complexity": {
@@ -209,14 +217,6 @@
                 "rep1-pr1_vs_rep1-pr2": {
                     "frip": 0.010637032337371375
                 }
-            }
-        },
-        "frac_reads_in_annot": {
-            "rep1": {
-                "fri_dhs": 0.5476435949798759,
-                "fri_blacklist": 0.003142534250649325,
-                "fri_prom": 0.1236294783591411,
-                "fri_enh": 0.4222991058151754
             }
         }
     }

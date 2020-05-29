@@ -177,6 +177,20 @@
                 "mono_nuc_peak_exists": true,
                 "di_nuc_peak_exists": true
             }
+        },
+        "frac_reads_in_annot": {
+            "rep1": {
+                "fri_dhs": 0.46376173645293495,
+                "fri_blacklist": 0.0006613613201205629,
+                "fri_prom": 0.15181603313311795,
+                "fri_enh": 0.3902769043953423
+            },
+            "rep2": {
+                "fri_dhs": 0.4277004116780054,
+                "fri_blacklist": 0.0007532908828206115,
+                "fri_prom": 0.13602799700861837,
+                "fri_enh": 0.372750110724684
+            }
         }
     },
     "lib_complexity": {
@@ -385,20 +399,6 @@
                 "pooled-pr1_vs_pooled-pr2": {
                     "frip": 0.014580776732412067
                 }
-            }
-        },
-        "frac_reads_in_annot": {
-            "rep1": {
-                "fri_dhs": 0.46376173645293495,
-                "fri_blacklist": 0.0006613613201205629,
-                "fri_prom": 0.15181603313311795,
-                "fri_enh": 0.3902769043953423
-            },
-            "rep2": {
-                "fri_dhs": 0.4277004116780054,
-                "fri_blacklist": 0.0007532908828206115,
-                "fri_prom": 0.13602799700861837,
-                "fri_enh": 0.372750110724684
             }
         }
     }

@@ -11,6 +11,48 @@ workflow atac {
         caper_docker: 'quay.io/encode-dcc/atac-seq-pipeline:dev-v1.7.2'
         caper_singularity: 'docker://quay.io/encode-dcc/atac-seq-pipeline:dev-v1.7.2'
         croo_out_def: 'https://storage.googleapis.com/encode-pipeline-output-definition/atac.croo.v4.json'
+
+        parameter_group: {
+            pipeline_metadata: {
+                title: 'Pipeline metadata',
+                description: 'Metadata for a pipeline (e.g. title and description).'
+            },
+            reference_genome: {
+                title: 'Reference genome',
+                description: 'Genome specific files. e.g. reference FASTA, bowtie2 index, chromosome sizes file.',
+                help: 'Choose one atac.genome_tsv file that defines all genome specific parameters in it or define each genome specific parameter in input JSON to override those defined in genome TSV file. If you use Caper then use https://storage.googleapis.com/encode-pipeline-genome-data/genome_tsv/v1/[GENOME]_caper.tsv. Caper will automatically download/install all files defined in such TSV. Otherwise download genome TSV file by using a shell script (scripts/download_genome_data.sh [GENOME] [DEST_DIR]). Supported genomes are hg38, hg19, mm10 and mm9. See pipeline documentation if you want to build genome database from your own FASTA file. If some genome data are missing then analyses using such data will be skipped.'
+            },
+            input_genomic_data: {
+                title: 'Input genomic data',
+                description: 'Genomic input files for experiment.',
+                help: 'Pipeline can start with any types of experiment data (e.g. FASTQ, BAM, NODUP_BAM, TAG-ALIGN, PEAK). Choose one type and leave others empty. FASTQs have a variable for each biological replicate. e.g. atac.fastqs_rep1_R1 and atac.fastqs_rep2_R1. You can define up to 10 experiment replicates. For other types, there is an array to define file for each biological replicate. e.g. atac.bams: ["rep1.bam", "rep1.bam"]. Define sequential endedness with atac.paired_end, if you have mixed SE and PE replicates then define atac.paired_ends instead for each replicate. e.g. atac.paired_ends: [false, true].'
+            },
+            adapter_trimming: {
+                title: 'Adapter trimming',
+                description: 'Parameters for adapter trimming.',
+                help: 'Use atac.auto_detect_adapter to automatically detect/trim 3 adapters (Illumina: AGATCGGAAGAGC, Nextera: CTGTCTCTTATA, smallRNA: TGGAATTCTCGG) or manually define adapter sequence to be trimmed (atac.adapter or atac.adapters_repX_RY). Leave all parameters undefined/empty if your FASTQs are already trimmed.'
+            },
+            pipeline_parameter: {
+                title: 'Pipeline parameter',
+                description: 'Pipeline type and flags to turn on/off analyses.',
+                help: 'Pipeline can run as DNAse-seq mode. The only difference is TN5-shifting of read in ATAC-seq mode. Use atac.align_only to align FASTQs without peak calling.'
+            },
+            alignment: {
+                title: 'Alignment',
+                description: 'Parameters for alignment.',
+                help: 'Pipeline calculates mitochondrial fraction of reads in raw BAM. But after that it filters out mitochondrial reads (e.g. chrM, MT) from NODUP_BAMs (filtered/deduped). It is controlled by atac.filter_chrs array. If you want to keep mitochondrial reads then make this array empty.'
+            },
+            peak_calling: {
+                title: 'Peak calling',
+                description: 'Parameters for peak calling.',
+                help: 'This group includes statistical thresholds for peak-calling or post-peak-calling analyses: p-val, FDR, IDR.'
+            },
+            resource_parameter: {
+                title: 'Resource parameter',
+                description: 'Number of CPUs (threads), max. memory and walltime for tasks.',
+                help: 'Resource settings are used for determining an instance type on cloud backends (e.g. GCP, AWS) and used for submitting tasks to a cluster engine (e.g. SLURM, SGE, ...). Walltime (atac.*_time_hr) is only used for cluster engines. Other tasks default to use 1 CPU and 4GB of memory.'
+            }
+        }
     }
     input {
         # group: pipeline_metadata
@@ -175,16 +217,19 @@ workflow atac {
     parameter_meta {
         title: {
             description: 'Experiment title.',
-            group: 'pipeline_metadata'
+            group: 'pipeline_metadata',
+            example: 'ENCSR356KRQ (subsampled 1/400)'
         }
         description: {
             description: 'Experiment description.',
-            group: 'pipeline_metadata'
+            group: 'pipeline_metadata',
+            example: 'ATAC-seq on primary keratinocytes in day 0.0 of differentiation (subsampled 1/400)'
         }
         genome_tsv: {
             description: 'Reference genome database TSV.',
             group: 'reference_genome',
-            help: 'This TSV files includes all genome specific parameters (e.g. reference FASTA, bowtie2 index). You can still invidiaully define any parameters in it. Parameters defined in input JSON will override those defined in genome TSV.'
+            help: 'This TSV files includes all genome specific parameters (e.g. reference FASTA, bowtie2 index). You can still invidiaully define any parameters in it. Parameters defined in input JSON will override those defined in genome TSV.',
+            example: 'https://storage.googleapis.com/encode-pipeline-genome-data/genome_tsv/v1/hg38_caper.tsv'
         }
         genome_name: {
             description: 'Genome name.',
@@ -265,7 +310,8 @@ workflow atac {
         paired_end: {
             description: 'Sequencing endedness.',
             group: 'input_genomic_data',
-            help: 'Setting this on means that all replicates are paired ended. For mixed samples, use atac.paired_ends array instead.'
+            help: 'Setting this on means that all replicates are paired ended. For mixed samples, use atac.paired_ends array instead.',
+            example: true
         }
         paired_ends: {
             description: 'Sequencing endedness array (for mixed SE/PE datasets).',
@@ -275,22 +321,46 @@ workflow atac {
         fastqs_rep1_R1: {
             description: 'Read1 FASTQs to be merged for a biological replicate 1.',
             group: 'input_genomic_data',
-            help: 'Define if you want to start pipeline from FASTQ files. Pipeline can start from any type of inputs (e.g. FASTQs, BAMs, ...). Choose one type and fill paramters for that type and leave other undefined. Especially for FASTQs, we have individual variable for each biological replicate to allow FASTQs of technical replicates can be merged. Make sure that they are consistent with read2 FASTQs (atac.fastqs_rep1_R2). These FASTQs are usually technical replicates to be merged.'
+            help: 'Define if you want to start pipeline from FASTQ files. Pipeline can start from any type of inputs (e.g. FASTQs, BAMs, ...). Choose one type and fill paramters for that type and leave other undefined. Especially for FASTQs, we have individual variable for each biological replicate to allow FASTQs of technical replicates can be merged. Make sure that they are consistent with read2 FASTQs (atac.fastqs_rep1_R2). These FASTQs are usually technical replicates to be merged.',
+            example: [
+                "https://storage.googleapis.com/encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ/fastq_subsampled/rep1/pair1/ENCFF341MYG.subsampled.400.fastq.gz",
+                "https://storage.googleapis.com/encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ/fastq_subsampled/rep1/pair1/ENCFF106QGY.subsampled.400.fastq.gz"
+            ]
         }
         fastqs_rep1_R2: {
             description: 'Read2 FASTQs to be merged for a biological replicate 1.',
             group: 'input_genomic_data',
-            help: 'Make sure that they are consistent with read1 FASTQs (atac.fastqs_rep1_R1). These FASTQs are usually technical replicates to be merged.'
+            help: 'Make sure that they are consistent with read1 FASTQs (atac.fastqs_rep1_R1). These FASTQs are usually technical replicates to be merged.',
+            example: [
+                "https://storage.googleapis.com/encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ/fastq_subsampled/rep1/pair2/ENCFF248EJF.subsampled.400.fastq.gz",
+                "https://storage.googleapis.com/encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ/fastq_subsampled/rep1/pair2/ENCFF368TYI.subsampled.400.fastq.gz"
+            ]
         }
         fastqs_rep2_R1: {
             description: 'Read1 FASTQs to be merged for a biological replicate 2.',
             group: 'input_genomic_data',
-            help: 'Make sure that they are consistent with read2 FASTQs (atac.fastqs_rep2_R2). These FASTQs are usually technical replicates to be merged.'
+            help: 'Make sure that they are consistent with read2 FASTQs (atac.fastqs_rep2_R2). These FASTQs are usually technical replicates to be merged.',
+            example: [
+                "https://storage.googleapis.com/encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ/fastq_subsampled/rep2/pair1/ENCFF641SFZ.subsampled.400.fastq.gz",
+                "https://storage.googleapis.com/encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ/fastq_subsampled/rep2/pair1/ENCFF751XTV.subsampled.400.fastq.gz",
+                "https://storage.googleapis.com/encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ/fastq_subsampled/rep2/pair1/ENCFF927LSG.subsampled.400.fastq.gz",
+                "https://storage.googleapis.com/encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ/fastq_subsampled/rep2/pair1/ENCFF859BDM.subsampled.400.fastq.gz",
+                "https://storage.googleapis.com/encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ/fastq_subsampled/rep2/pair1/ENCFF193RRC.subsampled.400.fastq.gz",
+                "https://storage.googleapis.com/encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ/fastq_subsampled/rep2/pair1/ENCFF366DFI.subsampled.400.fastq.gz"
+            ]
         }
         fastqs_rep2_R2: {
             description: 'Read2 FASTQs to be merged for a biological replicate 2.',
             group: 'input_genomic_data',
-            help: 'Make sure that they are consistent with read1 FASTQs (atac.fastqs_rep2_R1). These FASTQs are usually technical replicates to be merged.'
+            help: 'Make sure that they are consistent with read1 FASTQs (atac.fastqs_rep2_R1). These FASTQs are usually technical replicates to be merged.',
+            example: [
+                "https://storage.googleapis.com/encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ/fastq_subsampled/rep2/pair2/ENCFF031ARQ.subsampled.400.fastq.gz",
+                "https://storage.googleapis.com/encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ/fastq_subsampled/rep2/pair2/ENCFF590SYZ.subsampled.400.fastq.gz",
+                "https://storage.googleapis.com/encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ/fastq_subsampled/rep2/pair2/ENCFF734PEQ.subsampled.400.fastq.gz",
+                "https://storage.googleapis.com/encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ/fastq_subsampled/rep2/pair2/ENCFF007USV.subsampled.400.fastq.gz",
+                "https://storage.googleapis.com/encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ/fastq_subsampled/rep2/pair2/ENCFF886FSC.subsampled.400.fastq.gz",
+                "https://storage.googleapis.com/encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ/fastq_subsampled/rep2/pair2/ENCFF573UXK.subsampled.400.fastq.gz"
+            ]
         }
         fastqs_rep3_R1: {
             description: 'Read1 FASTQs to be merged for a biological replicate 3.',
@@ -421,7 +491,9 @@ workflow atac {
         pipeline_type: {
             description: 'Pipeline type. atac for ATAC-Seq or dnase for DNase-Seq.',
             group: 'pipeline_parameter',
-            help: 'The only difference of two types is that TN5 shifting of TAG-ALIGN is done for atac. TAG-ALIGN is in 6-col BED format. It is a simplified version of BAM.'
+            help: 'The only difference of two types is that TN5 shifting of TAG-ALIGN is done for atac. TAG-ALIGN is in 6-col BED format. It is a simplified version of BAM.',
+            choices: ['atac', 'dnase'],
+            example: 'atac'
         }
         align_only: {
             description: 'Align only mode.',
@@ -483,7 +555,8 @@ workflow atac {
         auto_detect_adapter: {
             description: 'Auto-detect/trim adapter sequences.',
             group: 'adapter_trimming',
-            help: 'Can detect/trim three types of adapter sequences. Illumina: AGATCGGAAGAGC, Nextera: CTGTCTCTTATA, smallRNA: TGGAATTCTCGG.'
+            help: 'Can detect/trim three types of adapter sequences. Illumina: AGATCGGAAGAGC, Nextera: CTGTCTCTTATA, smallRNA: TGGAATTCTCGG.',
+            example: true
         }
         adapter: {
             description: 'Adapter for all FASTQs.',

@@ -41,6 +41,20 @@
                 "mono_nuc_peak_exists": true,
                 "di_nuc_peak_exists": true
             }
+        },
+        "frac_reads_in_annot": {
+            "rep1": {
+                "fri_dhs": 0.46616961177166133,
+                "fri_blacklist": 0.0005758829840811053,
+                "fri_prom": 0.15275788828308043,
+                "fri_enh": 0.39283540257067157
+            },
+            "rep2": {
+                "fri_dhs": 0.43002061885928544,
+                "fri_blacklist": 0.000680569109866968,
+                "fri_prom": 0.13694297894821805,
+                "fri_enh": 0.3754631905666884
+            }
         }
     },
     "replication": {
@@ -205,20 +219,6 @@
                 "pooled-pr1_vs_pooled-pr2": {
                     "frip": 0.013782887578831369
                 }
-            }
-        },
-        "frac_reads_in_annot": {
-            "rep1": {
-                "fri_dhs": 0.46616961177166133,
-                "fri_blacklist": 0.0005758829840811053,
-                "fri_prom": 0.15275788828308043,
-                "fri_enh": 0.39283540257067157
-            },
-            "rep2": {
-                "fri_dhs": 0.43002061885928544,
-                "fri_blacklist": 0.000680569109866968,
-                "fri_prom": 0.13694297894821805,
-                "fri_enh": 0.3754631905666884
             }
         }
     }
