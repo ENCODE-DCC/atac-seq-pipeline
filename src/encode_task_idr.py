@@ -10,7 +10,7 @@ import math
 from encode_lib_common import (
     assert_file_not_empty, log, ls_l, mkdir_p, rm_f, run_shell_cmd)
 from encode_lib_genomic import (
-    peak_to_bigbed, peak_to_hammock)
+    peak_to_bigbed, peak_to_hammock, bed_clip)
 from encode_lib_blacklist_filter import blacklist_filter
 from encode_lib_frip import frip, frip_shifted
 
@@ -77,17 +77,18 @@ def get_npeak_col_by_rank(rank):
 # only for narrowPeak (or regionPeak) type
 
 
-def idr(basename_prefix, peak1, peak2, peak_pooled, peak_type,
+def idr(basename_prefix, peak1, peak2, peak_pooled, peak_type, chrsz,
         thresh, rank, out_dir):
     prefix = os.path.join(out_dir, basename_prefix)
     prefix += '.idr{}'.format(thresh)
     idr_peak = '{}.{}.gz'.format(prefix, peak_type)
-    idr_out_gz = '{}.unthresholded-peaks.txt.gz'.format(prefix)
     idr_plot = '{}.unthresholded-peaks.txt.png'.format(prefix)
     idr_stdout = '{}.log'.format(prefix)
     # temporary
     idr_12col_bed = '{}.12-col.bed.gz'.format(peak_type)
     idr_out = '{}.unthresholded-peaks.txt'.format(prefix)
+    idr_tmp = '{}.unthresholded-peaks.txt.tmp'.format(prefix)
+    idr_out_gz = '{}.unthresholded-peaks.txt.gz'.format(prefix)
 
     cmd1 = 'idr --samples {} {} --peak-list {} --input-file-type narrowPeak '
     cmd1 += '--output-file {} --rank {} --soft-idr-threshold {} '
@@ -102,6 +103,9 @@ def idr(basename_prefix, peak1, peak2, peak_pooled, peak_type,
         idr_stdout)
     run_shell_cmd(cmd1)
 
+    # clip peaks between 0-chromSize.
+    bed_clip(idr_out, chrsz, idr_tmp, no_gz=True)
+
     col = get_npeak_col_by_rank(rank)
     neg_log10_thresh = -math.log10(thresh)
     # LC_COLLATE=C
@@ -111,7 +115,7 @@ def idr(basename_prefix, peak1, peak2, peak_pooled, peak_type,
     cmd2 += '| sort | uniq | sort -grk{},{} | gzip -nc > {}'
     cmd2 = cmd2.format(
         neg_log10_thresh,
-        idr_out,
+        idr_tmp,
         col,
         col,
         idr_12col_bed)
@@ -126,10 +130,10 @@ def idr(basename_prefix, peak1, peak2, peak_pooled, peak_type,
         idr_peak)
     run_shell_cmd(cmd3)
 
-    cmd4 = 'gzip -f {}'.format(idr_out)
+    cmd4 = 'cat {} | gzip -nc > {}'.format(idr_tmp, idr_out_gz)
     run_shell_cmd(cmd4)
 
-    rm_f([idr_out, idr_12col_bed])
+    rm_f([idr_out, idr_tmp, idr_12col_bed])
     rm_f('{}.*.noalternatesummitpeaks.png'.format(prefix))
     return idr_peak, idr_plot, idr_out_gz, idr_stdout
 
@@ -145,6 +149,7 @@ def main():
     idr_peak, idr_plot, idr_out_gz, idr_stdout = idr(
         args.prefix,
         args.peak1, args.peak2, args.peak_pooled, args.peak_type,
+        args.chrsz,
         args.idr_thresh, args.idr_rank, args.out_dir)
 
     log.info('Checking if output is empty...')

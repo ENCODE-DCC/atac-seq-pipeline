@@ -9,6 +9,7 @@ import argparse
 from encode_lib_common import (
     assert_file_not_empty, human_readable_number,
     log, ls_l, mkdir_p, rm_f, run_shell_cmd, strip_ext_ta)
+from encode_lib_genomic import bed_clip
 
 
 def parse_arguments():
@@ -51,6 +52,7 @@ def macs2(ta, chrsz, gensz, pval_thresh, smooth_win, cap_num_peak,
         human_readable_number(cap_num_peak))
     # temporary files
     npeak_tmp = '{}.tmp'.format(npeak)
+    npeak_tmp2 = '{}.tmp2'.format(npeak)
 
     shiftsize = -int(round(float(smooth_win)/2.0))
     temp_files = []
@@ -78,12 +80,16 @@ def macs2(ta, chrsz, gensz, pval_thresh, smooth_win, cap_num_peak,
         npeak_tmp)
     run_shell_cmd(cmd1)
 
-    cmd2 = 'head -n {} {} | gzip -nc > {}'.format(
+    cmd2 = 'head -n {} {} > {}'.format(
         cap_num_peak,
         npeak_tmp,
-        npeak)
+        npeak_tmp2)
     run_shell_cmd(cmd2)
-    rm_f(npeak_tmp)
+
+    # clip peaks between 0-chromSize.
+    bed_clip(npeak_tmp2, chrsz, npeak)
+
+    rm_f([npeak_tmp, npeak_tmp2])
 
     # remove temporary files
     temp_files.append("{}_*".format(prefix))

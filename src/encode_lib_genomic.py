@@ -599,3 +599,30 @@ def determine_paired(bam):
         return True
     else:
         return False
+
+
+def bed_clip(bed, chrsz, out_clipped_bed, no_gz=False):
+    '''
+    Make sure that bedClip (in USCS tools) is installed.
+    Clip a BED file between 0 and chromSize (taken from 2-col chrsz file).
+    bedClip exits with 255 if both start/end coordinates are
+    out of valid range (0-chromSize). Otherwise, reads/peaks will be truncated.
+
+    Args:
+        no_gz:
+            Do not gzip output.
+    '''
+    tmp_out = out_clipped_bed +  '.clip_tmp'
+    cmd = 'bedClip {bed} {chrsz} {tmp_out} -truncate -verbose=2'.format(
+        bed=bed,
+        chrsz=chrsz,
+        tmp_out=out_clipped_bed if no_gz else tmp_out)
+    run_shell_cmd(cmd)
+
+    if not no_gz:
+        cmd2 = 'cat {tmp_out} | gzip -nc > {out_clipped_bed}'.format(
+            tmp_out=tmp_out,
+            out_clipped_bed=out_clipped_bed)
+        run_shell_cmd(cmd2)
+
+        rm_f(tmp_out)
