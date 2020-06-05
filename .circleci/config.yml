@@ -44,8 +44,6 @@ jobs:
           no_output_timeout: 300m
           command: |
             source ${BASH_ENV}
-            # use python 3.7 for unittest
-            pyenv global 3.7.0
 
             cd dev/test/test_task/
             rm -rf atac-seq-pipeline-test-data
