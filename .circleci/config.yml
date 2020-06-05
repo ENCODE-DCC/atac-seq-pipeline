@@ -48,20 +48,20 @@ jobs:
             pyenv global 3.7.0
 
             cd dev/test/test_task/
-            #rm -rf atac-seq-pipeline-test-data
-            #export BOTO_CONFIG=/dev/null
-            #gsutil -m cp -r gs://encode-pipeline-test-samples/encode-atac-seq-pipeline/atac-seq-pipeline-test-data .
-            #./download_hg38_fasta_for_test_ataqc.sh
-            #for wdl in test_*.wdl
-            #do
-            #  json=${wdl%.*}.json
-            #  result=${wdl%.*}.result.json
-            #  ./test.sh ${wdl} ${json} ${TAG}
-            #  if [[ $(wc -l "${result}" | awk '{print $1}') > 1 ]]; then
-            #    python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'match_overall']))" < ${result}
-            #  fi
-            #  rm -f ${result}
-            #done
+            rm -rf atac-seq-pipeline-test-data
+            export BOTO_CONFIG=/dev/null
+            gsutil -m cp -r gs://encode-pipeline-test-samples/encode-atac-seq-pipeline/atac-seq-pipeline-test-data .
+            ./download_hg38_fasta_for_test_ataqc.sh
+            for wdl in test_*.wdl
+            do
+              json=${wdl%.*}.json
+              result=${wdl%.*}.result.json
+              ./test.sh ${wdl} ${json} ${TAG}
+              if [[ $(wc -l "${result}" | awk '{print $1}') > 1 ]]; then
+                python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'match_overall']))" < ${result}
+              fi
+              rm -f ${result}
+            done
             
   test_workflow_se:
     <<: *machine_defaults
@@ -133,15 +133,15 @@ workflows:
       - test_tasks:
           requires:
             - build
-#      - test_workflow_se:
-#          requires:
-#            - build
-#      - test_workflow_unrep_se:
-#          requires:
-#            - build
-#      - test_workflow_pe:
-#          requires:
-#            - build
-#      - test_workflow_pe_start_from_bam:
-#          requires:
-#            - build
+      - test_workflow_se:
+          requires:
+            - build
+      - test_workflow_unrep_se:
+          requires:
+            - build
+      - test_workflow_pe:
+          requires:
+            - build
+      - test_workflow_pe_start_from_bam:
+          requires:
+            - build
