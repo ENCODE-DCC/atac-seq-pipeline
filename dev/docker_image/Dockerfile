@@ -108,6 +108,9 @@ ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/software/kentUtils_bin_v377/lib
 # Instal Trimmomatic JAR
 RUN wget http://www.usadellab.org/cms/uploads/supplementary/Trimmomatic/Trimmomatic-0.39.zip && unzip Trimmomatic-0.39.zip && mv Trimmomatic-0.39/trimmomatic-0.39.jar trimmomatic.jar && chmod +rx trimmomatic.jar && rm -rf Trimmomatic-0.39.zip Trimmomatic-0.39/
 
+# Install pytest for testing environment
+RUN pip3 install --no-cache-dir pytest
+
 # Prevent conflict with locally installed python outside of singularity container
 ENV PYTHONNOUSERSITE=True
 
@@ -121,6 +124,8 @@ RUN mkdir -p /mnt/ext_{0..9}
 # make pipeline src directory to store py's
 RUN mkdir -p atac-seq-pipeline/src
 ENV PATH="/software/atac-seq-pipeline:/software/atac-seq-pipeline/src:${PATH}"
+RUN mkdir -p atac-seq-pipeline/dev/test/test_py
+ENV PYTHONPATH="/software/atac-seq-pipeline/src"
 
 # Get ENCODE atac-seq-pipeline container repository
 # This COPY assumes the build context is the root of the atac-seq-pipeline repo
@@ -129,4 +134,5 @@ ENV PATH="/software/atac-seq-pipeline:/software/atac-seq-pipeline/src:${PATH}"
 # cd [GIT_REPO_DIR] && docker build -f dev/docker_image/Dockerfile .
 COPY src atac-seq-pipeline/src/
 COPY atac.wdl atac-seq-pipeline/
+COPY dev/test/test_py atac-seq-pipeline/dev/test/test_py/
 

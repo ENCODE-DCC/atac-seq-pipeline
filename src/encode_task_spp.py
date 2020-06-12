@@ -9,7 +9,8 @@ import argparse
 from encode_lib_common import (
     assert_file_not_empty, human_readable_number, log,
     ls_l, mkdir_p, rm_f, run_shell_cmd, strip_ext_ta)
-from encode_lib_genomic import subsample_ta_se, subsample_ta_pe
+from encode_lib_genomic import (
+    subsample_ta_se, subsample_ta_pe, bed_clip)
 
 
 def parse_arguments():
@@ -47,7 +48,7 @@ def parse_arguments():
     return args
 
 
-def spp(ta, ctl_ta, fraglen, cap_num_peak, fdr_thresh,
+def spp(ta, ctl_ta, chrsz, fraglen, cap_num_peak, fdr_thresh,
         ctl_subsample, ctl_paired_end, nth, out_dir):
     basename_ta = os.path.basename(strip_ext_ta(ta))
 
@@ -71,8 +72,9 @@ def spp(ta, ctl_ta, fraglen, cap_num_peak, fdr_thresh,
     rpeak = '{}.{}.regionPeak.gz'.format(
         prefix,
         human_readable_number(cap_num_peak))
-    rpeak_tmp = '{}.tmp'.format(rpeak)
+    rpeak_tmp_prefix = '{}.tmp'.format(rpeak)
     rpeak_tmp_gz = '{}.tmp.gz'.format(rpeak)
+    rpeak_tmp2 = '{}.tmp2'.format(rpeak)
 
     cmd0 = 'Rscript --max-ppsize=500000 $(which run_spp.R) -c={} -i={} '
     cmd0 += '-npeak={} -odir={} -speak={} -savr={} -fdr={} -rf {}'
@@ -82,7 +84,7 @@ def spp(ta, ctl_ta, fraglen, cap_num_peak, fdr_thresh,
         cap_num_peak,
         os.path.abspath(out_dir),
         fraglen,
-        rpeak_tmp,
+        rpeak_tmp_prefix,
         fdr_thresh,
         nth_param)
     run_shell_cmd(cmd0)
@@ -90,13 +92,16 @@ def spp(ta, ctl_ta, fraglen, cap_num_peak, fdr_thresh,
     # if we have scientific representation of chr coord. then convert it to int
     cmd1 = 'zcat -f {} | awk \'BEGIN{{OFS="\\t"}}'
     cmd1 += '{{if ($2<0) $2=0; '
-    cmd1 += 'print $1,int($2),int($3),$4,$5,$6,$7,$8,$9,$10;}}\' | '
-    cmd1 += 'gzip -f -nc > {}'
+    cmd1 += 'print $1,int($2),int($3),$4,$5,$6,$7,$8,$9,$10;}}\' > {}'
     cmd1 = cmd1.format(
-        rpeak_tmp,
-        rpeak)
+        rpeak_tmp_gz,
+        rpeak_tmp2)
     run_shell_cmd(cmd1)
-    rm_f([rpeak_tmp, rpeak_tmp_gz])
+    rm_f(rpeak_tmp_gz)
+
+    # clip peaks between 0-chromSize.
+    bed_clip(rpeak_tmp2, chrsz, rpeak)
+    rm_f(rpeak_tmp2)
 
     return rpeak
 
@@ -109,7 +114,7 @@ def main():
     mkdir_p(args.out_dir)
 
     log.info('Calling peaks with spp...')
-    rpeak = spp(args.tas[0], args.tas[1],
+    rpeak = spp(args.tas[0], args.tas[1], args.chrsz,
                 args.fraglen, args.cap_num_peak, args.fdr_thresh,
                 args.ctl_subsample, args.ctl_paired_end, args.nth, args.out_dir)
 

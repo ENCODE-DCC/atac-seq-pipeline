@@ -8,8 +8,8 @@ workflow atac {
         description: 'ATAC-Seq/DNase-Seq pipeline'
         specification_document: 'https://docs.google.com/document/d/1f0Cm4vRyDQDu0bMehHD7P7KOMxTOP-HiNoIvL1VcBt8/edit?usp=sharing'
 
-        caper_docker: 'quay.io/encode-dcc/atac-seq-pipeline:dev-v1.7.2'
-        caper_singularity: 'docker://quay.io/encode-dcc/atac-seq-pipeline:dev-v1.7.2'
+        caper_docker: 'encodedcc/atac-seq-pipeline:dev-v1.7.2'
+        caper_singularity: 'docker://encodedcc/atac-seq-pipeline:dev-v1.7.2'
         croo_out_def: 'https://storage.googleapis.com/encode-pipeline-output-definition/atac.croo.v4.json'
 
         parameter_group: {
