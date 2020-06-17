@@ -16,8 +16,8 @@ This document describes instruction for the item 1).
 3. Download dxWDL.
     ```bash
     $ cd
-    $ wget https://github.com/DNAnexus/dxWDL/releases/download/0.77/dxWDL-0.77.jar
-    $ chmod +rx dxWDL-0.77.jar
+    $ wget https://github.com/dnanexus/dxWDL/releases/download/v1.46.4/dxWDL-v1.46.4.jar
+    $ chmod +rx dxWDL-v1.46.4.jar
     ```
 
 4. Git clone this pipeline.
@@ -51,11 +51,12 @@ This document describes instruction for the item 1).
 
     ```bash
     $ WDL=atac.dx.wdl
+    $ DXWDL=dxWDL-v1.46.4.jar    
     $ PROJECT=[YOUR_PROJECT_NAME]
     $ OUT_FOLDER=/test_sample_atac_ENCSR356KRQ_subsampled
-    $ DOCKER=$(cat ${WDL} | grep "#CAPER docker" | awk '{print $3}')
+    $ DOCKER=$(cat ${WDL} | grep caper_docker | awk 'BEGIN{FS="'\''"} {print $2}')
 
-    $ java -jar dxWDL-0.81.6.jar compile ${WDL} -project ${PROJECT} -f -folder ${OUT_FOLDER} -defaults ${INPUT} -extras <(echo "{\"default_runtime_attributes\":{\"docker\":\"${DOCKER}\"}}")
+    $ java -jar ${DXWDL} compile ${WDL} -project ${PROJECT} -f -folder ${OUT_FOLDER} -defaults ${INPUT} -extras <(echo "{\"default_runtime_attributes\":{\"docker\":\"${DOCKER}\"}}")
     ```
 
 8. Go to DNAnexus [project page](https://platform.DNAnexus.com/projects) and click on your project.

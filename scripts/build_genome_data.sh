@@ -246,18 +246,18 @@ if [[ "${BUILD_BWT2_IDX}" == 1 ]]; then
   ln -s ../${REF_FA_PREFIX} ${REF_FA_PREFIX}
   bowtie2-build ${REF_FA_PREFIX} ${REF_FA_PREFIX} --threads ${BUILD_BWT2_NTHREADS}
   rm -f ${REF_FA_PREFIX}
-  tar cvf ${REF_FA_PREFIX}.tar ${REF_FA_PREFIX}.*.bt2 --sort=name --owner=root:0 --group=root:0 --mtime="UTC 2019-01-01"
-  gzip -n ${REF_FA_PREFIX}.tar
-  rm -f ${REF_FA_PREFIX}.*.bt2
+  tar cvf ${REF_FA_PREFIX}.tar "${REF_FA_PREFIX}".*.bt2 --sort=name --owner=root:0 --group=root:0 --mtime="UTC 2019-01-01"
+  gzip -f -n ${REF_FA_PREFIX}.tar
+  rm -f "${REF_FA_PREFIX}".*.bt2
 
   # mito chr only
   rm -f ${REF_MITO_FA_PREFIX}
   ln -s ../${REF_MITO_FA_PREFIX} ${REF_MITO_FA_PREFIX}
   bowtie2-build ${REF_MITO_FA_PREFIX} ${REF_MITO_FA_PREFIX} --threads ${BUILD_BWT2_NTHREADS}
   rm -f ${REF_MITO_FA_PREFIX}
-  tar cvf ${REF_MITO_FA_PREFIX}.tar ${REF_MITO_FA_PREFIX}.*.bt2 --sort=name --owner=root:0 --group=root:0 --mtime="UTC 2019-01-01"
-  gzip -n ${REF_MITO_FA_PREFIX}.tar
-  rm -f ${REF_MITO_FA_PREFIX}.*.bt2
+  tar cvf ${REF_MITO_FA_PREFIX}.tar "${REF_MITO_FA_PREFIX}".*.bt2 --sort=name --owner=root:0 --group=root:0 --mtime="UTC 2019-01-01"
+  gzip -f -n ${REF_MITO_FA_PREFIX}.tar
+  rm -f "${REF_MITO_FA_PREFIX}".*.bt2
 fi
 
 if [[ "${BUILD_BWA_IDX}" == 1 ]]; then
@@ -270,8 +270,8 @@ if [[ "${BUILD_BWA_IDX}" == 1 ]]; then
   ln -s ../${REF_FA_PREFIX} ${REF_FA_PREFIX}
   bwa index ${REF_FA_PREFIX}
   rm -f ${REF_FA_PREFIX}
-  tar cvf ${REF_FA_PREFIX}.tar ${REF_FA_PREFIX}.* --sort=name --owner=root:0 --group=root:0 --mtime="UTC 2019-01-01"
-  gzip -n ${REF_FA_PREFIX}.tar
+  tar cvf ${REF_FA_PREFIX}.tar "${REF_FA_PREFIX}".* --sort=name --owner=root:0 --group=root:0 --mtime="UTC 2019-01-01"
+  gzip -f -n ${REF_FA_PREFIX}.tar
   rm -f ${REF_FA_PREFIX}.amb ${REF_FA_PREFIX}.ann ${REF_FA_PREFIX}.bwt
   rm -f ${REF_FA_PREFIX}.pac ${REF_FA_PREFIX}.sa
 
@@ -280,8 +280,8 @@ if [[ "${BUILD_BWA_IDX}" == 1 ]]; then
   ln -s ../${REF_MITO_FA_PREFIX} ${REF_MITO_FA_PREFIX}
   bwa index ${REF_MITO_FA_PREFIX}
   rm -f ${REF_MITO_FA_PREFIX}
-  tar cvf ${REF_MITO_FA_PREFIX}.tar ${REF_MITO_FA_PREFIX}.* --sort=name --owner=root:0 --group=root:0 --mtime="UTC 2019-01-01"
-  gzip -n ${REF_MITO_FA_PREFIX}.tar
+  tar cvf ${REF_MITO_FA_PREFIX}.tar "${REF_MITO_FA_PREFIX}".* --sort=name --owner=root:0 --group=root:0 --mtime="UTC 2019-01-01"
+  gzip -f -n ${REF_MITO_FA_PREFIX}.tar
   rm -f ${REF_MITO_FA_PREFIX}.amb ${REF_MITO_FA_PREFIX}.ann ${REF_MITO_FA_PREFIX}.bwt
   rm -f ${REF_MITO_FA_PREFIX}.pac ${REF_MITO_FA_PREFIX}.sa
 fi
