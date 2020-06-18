@@ -27,6 +27,14 @@ commands:
             gsutil -m cp -r gs://encode-pipeline-test-samples/encode-atac-seq-pipeline/atac-seq-pipeline-test-data .
             ./download_hg38_fasta_for_test_ataqc.sh
 
+  gcloud_auth_service_account_py2:
+    description: "Activate service account. This is based on py2 so run this before installing py3."
+    steps:      
+      - run:
+          command: |
+            source ${BASH_ENV}
+            gcloud auth activate-service-account --key-file <(echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON})
+
   install_python3_caper_gcs:
     description: "Install py3, caper and gcs. Set py3 as default python."
     steps:      
@@ -79,25 +87,37 @@ jobs:
               fi
               rm -f ${metadata}
             done
-            
+
   test_workflow_se:
     <<: *machine_defaults
     steps:
       - checkout
+      - gcloud_auth_service_account_py2
+      - install_python3_caper_gcs
       - run: *make_tag
       - run:
           no_output_timeout: 300m
           command: |
+            INPUT=ENCSR889WQX_subsampled.json
+
             cd dev/test/test_workflow/
             source ${BASH_ENV}
-            echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_key.json
-            ./test_atac.sh ENCSR889WQX_subsampled.json tmp_key.json ${TAG}
-            python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'outputs'][u'atac.qc_json_ref_match']))" < ENCSR889WQX_subsampled.metadata.json
+            # tmp_secret_key.json is hard-coded in backend_gcp_service_account
+            echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_secret_key.json
+            caper run ../../../atac.wdl \
+              --backend gcp --gcp-prj ${GOOGLE_PROJECT_ID} \
+              --backend-file backend_gcp_service_account.conf \
+              --out-gcs-bucket ${CAPER_OUT_DIR} --tmp-gcs-bucket ${CAPER_TMP_DIR} \
+              -i ${INPUT} -m metadata.json --docker ${TAG}
+
+            res=$(jq '.outputs["atac.qc_json_ref_match"]' metadata.json)
+            [[ "$res" == false ]] && exit 1
 
   test_workflow_unrep_se:
     <<: *machine_defaults
     steps:
       - checkout
+      - gcloud_auth_service_account_py2
       - install_python3_caper_gcs
       - run: *make_tag
       - run:
@@ -107,13 +127,13 @@ jobs:
 
             cd dev/test/test_workflow/
             source ${BASH_ENV}
-
+            # tmp_secret_key.json is hard-coded in backend_gcp_service_account
             echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_secret_key.json
             caper run ../../../atac.wdl \
               --backend gcp --gcp-prj ${GOOGLE_PROJECT_ID} \
               --backend-file backend_gcp_service_account.conf \
-              --out-gcs-bucket gs://encode-pipeline-test-runs/circleci \
-              -i ${INPUT} -m metadata.json --docker ${TAG} \
+              --out-gcs-bucket ${CAPER_OUT_DIR} --tmp-gcs-bucket ${CAPER_TMP_DIR} \
+              -i ${INPUT} -m metadata.json --docker ${TAG}
 
             res=$(jq '.outputs["atac.qc_json_ref_match"]' metadata.json)
             [[ "$res" == false ]] && exit 1
@@ -122,34 +142,54 @@ jobs:
     <<: *machine_defaults
     steps:
       - checkout
+      - gcloud_auth_service_account_py2
+      - install_python3_caper_gcs
       - run: *make_tag
       - run:
           no_output_timeout: 300m
           command: |
-            source ${BASH_ENV}
+            INPUT=ENCSR356KRQ_subsampled.json
+
             cd dev/test/test_workflow/
-            echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_key.json
-            ./test_atac.sh ENCSR356KRQ_subsampled.json tmp_key.json ${TAG}
-            python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'outputs'][u'atac.qc_json_ref_match']))" < ENCSR356KRQ_subsampled.metadata.json
+            source ${BASH_ENV}
+            # tmp_secret_key.json is hard-coded in backend_gcp_service_account
+            echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_secret_key.json
+            caper run ../../../atac.wdl \
+              --backend gcp --gcp-prj ${GOOGLE_PROJECT_ID} \
+              --backend-file backend_gcp_service_account.conf \
+              --out-gcs-bucket ${CAPER_OUT_DIR} --tmp-gcs-bucket ${CAPER_TMP_DIR} \
+              -i ${INPUT} -m metadata.json --docker ${TAG}
+
+            res=$(jq '.outputs["atac.qc_json_ref_match"]' metadata.json)
+            [[ "$res" == false ]] && exit 1
 
   test_workflow_pe_start_from_bam:
     <<: *machine_defaults
     steps:
       - checkout
+      - gcloud_auth_service_account_py2
+      - install_python3_caper_gcs
       - run: *make_tag
       - run:
           no_output_timeout: 300m
           command: |
-            source ${BASH_ENV}
+            INPUT=ENCSR356KRQ_subsampled_start_from_bam.json
+
             cd dev/test/test_workflow/
-            echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_key.json
-            ./test_atac.sh ENCSR356KRQ_subsampled_start_from_bam.json tmp_key.json ${TAG}
-            python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'outputs'][u'atac.qc_json_ref_match']))" < ENCSR356KRQ_subsampled_start_from_bam.metadata.json
+            source ${BASH_ENV}
+            # tmp_secret_key.json is hard-coded in backend_gcp_service_account
+            echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_secret_key.json
+            caper run ../../../atac.wdl \
+              --backend gcp --gcp-prj ${GOOGLE_PROJECT_ID} \
+              --backend-file backend_gcp_service_account.conf \
+              --out-gcs-bucket ${CAPER_OUT_DIR} --tmp-gcs-bucket ${CAPER_TMP_DIR} \
+              -i ${INPUT} -m metadata.json --docker ${TAG}
 
+            res=$(jq '.outputs["atac.qc_json_ref_match"]' metadata.json)
+            [[ "$res" == false ]] && exit 1
 
-# Define workflow here
 workflows:
-  version: 2
+  version: 2.1
   build_workflow:
     jobs:
       - build
