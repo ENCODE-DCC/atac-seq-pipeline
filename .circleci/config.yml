@@ -27,15 +27,6 @@ commands:
             gsutil -m cp -r gs://encode-pipeline-test-samples/encode-atac-seq-pipeline/atac-seq-pipeline-test-data .
             ./download_hg38_fasta_for_test_ataqc.sh
 
-  gcloud_auth_service_account_py2:
-    description: "Activate service account. This is based on py2 so run this before installing py3."
-    steps:      
-      - run:
-          command: |
-            echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_secret_key.json
-            gcloud auth activate-service-account --key-file tmp_secret_key.json
-            rm -f tmp_secret_key.json
-
   install_python3_caper_gcs:
     description: "Install py3, caper and gcs. Set py3 as default python."
     steps:      
@@ -93,7 +84,6 @@ jobs:
     <<: *machine_defaults
     steps:
       - checkout
-      - gcloud_auth_service_account_py2
       - install_python3_caper_gcs
       - run: *make_tag
       - run:
@@ -103,8 +93,9 @@ jobs:
 
             cd dev/test/test_workflow/
             source ${BASH_ENV}
-            # tmp_secret_key.json is hard-coded in backend_gcp_service_account
+
             echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_secret_key.json
+            export GOOGLE_APPLICATION_CREDENTIALS=$PWD/tmp_secret_key.json
             caper run ../../../atac.wdl \
               --backend gcp --gcp-prj ${GOOGLE_PROJECT_ID} \
               --backend-file backend_gcp_service_account.conf \
@@ -118,7 +109,6 @@ jobs:
     <<: *machine_defaults
     steps:
       - checkout
-      - gcloud_auth_service_account_py2
       - install_python3_caper_gcs
       - run: *make_tag
       - run:
@@ -128,7 +118,7 @@ jobs:
 
             cd dev/test/test_workflow/
             source ${BASH_ENV}
-            # tmp_secret_key.json is hard-coded in backend_gcp_service_account
+
             echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_secret_key.json
             export GOOGLE_APPLICATION_CREDENTIALS=$PWD/tmp_secret_key.json
             caper run ../../../atac.wdl \
@@ -144,7 +134,6 @@ jobs:
     <<: *machine_defaults
     steps:
       - checkout
-      - gcloud_auth_service_account_py2
       - install_python3_caper_gcs
       - run: *make_tag
       - run:
@@ -154,8 +143,9 @@ jobs:
 
             cd dev/test/test_workflow/
             source ${BASH_ENV}
-            # tmp_secret_key.json is hard-coded in backend_gcp_service_account
+
             echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_secret_key.json
+            export GOOGLE_APPLICATION_CREDENTIALS=$PWD/tmp_secret_key.json
             caper run ../../../atac.wdl \
               --backend gcp --gcp-prj ${GOOGLE_PROJECT_ID} \
               --backend-file backend_gcp_service_account.conf \
@@ -169,7 +159,6 @@ jobs:
     <<: *machine_defaults
     steps:
       - checkout
-      - gcloud_auth_service_account_py2
       - install_python3_caper_gcs
       - run: *make_tag
       - run:
@@ -179,8 +168,9 @@ jobs:
 
             cd dev/test/test_workflow/
             source ${BASH_ENV}
-            # tmp_secret_key.json is hard-coded in backend_gcp_service_account
+
             echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_secret_key.json
+            export GOOGLE_APPLICATION_CREDENTIALS=$PWD/tmp_secret_key.json
             caper run ../../../atac.wdl \
               --backend gcp --gcp-prj ${GOOGLE_PROJECT_ID} \
               --backend-file backend_gcp_service_account.conf \
