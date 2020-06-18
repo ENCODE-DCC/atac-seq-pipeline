@@ -130,6 +130,7 @@ jobs:
             source ${BASH_ENV}
             # tmp_secret_key.json is hard-coded in backend_gcp_service_account
             echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_secret_key.json
+            export GOOGLE_APPLICATION_CREDENTIALS=$PWD/tmp_secret_key.json
             caper run ../../../atac.wdl \
               --backend gcp --gcp-prj ${GOOGLE_PROJECT_ID} \
               --backend-file backend_gcp_service_account.conf \
