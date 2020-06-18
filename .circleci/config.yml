@@ -99,7 +99,6 @@ jobs:
     steps:
       - checkout
       - install_python3_caper_gcs
-      - install_gcloud
       - run: *make_tag
       - run:
           no_output_timeout: 300m
