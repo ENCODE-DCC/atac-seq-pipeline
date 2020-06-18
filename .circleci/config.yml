@@ -28,7 +28,7 @@ commands:
             gsutil -m cp -r gs://encode-pipeline-test-samples/encode-atac-seq-pipeline/atac-seq-pipeline-test-data .
             ./download_hg38_fasta_for_test_ataqc.sh
 
-  install_python3_and_caper:
+  install_python3_caper:
     description: "Install py3 and caper. Set py3 as default python."
     steps:      
       - run:
@@ -37,6 +37,13 @@ commands:
             pip install --upgrade pip
             pip install caper
 
+  install_gcloud:
+    steps:
+      - run:
+          command: |
+            echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+            curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+            sudo apt-get update && sudo apt-get install google-cloud-sdk -y
 
 jobs:
   build:
@@ -74,7 +81,7 @@ jobs:
               prefix=${wdl%.*}
               json=${prefix}.json
               metadata=${prefix}.metadata.json
-              caper run ../../../atac.wdl -i ${json} -m ${metadata} --docker ${TAG}
+              caper run ${wdl} -i ${json} -m ${metadata} --docker ${TAG}
               if [[ "${wdl}" != "test_choose_ctl.wdl" ]]; then
                 res=$(jq '.outputs["'${prefix}'.compare_md5sum.match_overall"]' "${metadata}")
                 [[ "$res" == false ]] && exit 1
@@ -102,6 +109,7 @@ jobs:
     steps:
       - checkout
       - install_python3_and_caper
+      - install_gcloud
       - run: *make_tag
       - run:
           no_output_timeout: 300m
