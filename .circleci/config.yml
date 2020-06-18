@@ -16,12 +16,33 @@ make_tag: &make_tag
     echo "export TAG=encodedcc/atac-seq-pipeline:${CIRCLE_BRANCH}_${CIRCLE_WORKFLOW_ID}" >> ${BASH_ENV}
 
 commands:
-  install_python3_and_caper:
-    description: "Install python workflow requirements"
+
+  download_task_test_data:  
+    description: "Download task test data (using gsutil which is based on py2)"
     steps:
-      - run: pyenv global 3.7.0
-      - run: pip install --upgrade pip
-      - run: pip install caper
+      - run:
+          command: |
+            pyenv global 2.7.0
+            cd dev/test/test_task/
+            rm -rf atac-seq-pipeline-test-data
+            gsutil -m cp -r gs://encode-pipeline-test-samples/encode-atac-seq-pipeline/atac-seq-pipeline-test-data .
+            ./download_hg38_fasta_for_test_ataqc.sh
+
+  install_python3_and_caper:
+    description: "Install py3 and caper"
+    steps:      
+      - run:
+          command: |
+            pyenv global 3.7.0
+            pip install --upgrade pip
+            pip install caper
+
+  configure_gcloud:
+    steps:
+      - run:
+          command: |
+            export CLOUDSDK_PYTHON=$(which python)
+            export BOTO_CONFIG=/dev/null
 
 jobs:
   build:
@@ -45,18 +66,14 @@ jobs:
     <<: *machine_defaults
     steps:
       - checkout
+      - configure_gcloud
+      - download_task_test_data
       - install_python3_and_caper
       - run: *make_tag
       - run:
           no_output_timeout: 300m
           command: |
             source ${BASH_ENV}
-
-            cd dev/test/test_task/
-            rm -rf atac-seq-pipeline-test-data
-            export BOTO_CONFIG=/dev/null
-            gsutil -m cp -r gs://encode-pipeline-test-samples/encode-atac-seq-pipeline/atac-seq-pipeline-test-data .
-            ./download_hg38_fasta_for_test_ataqc.sh
 
             for wdl in test_*.wdl
             do
@@ -65,7 +82,8 @@ jobs:
               metadata=${prefix}.metadata.json
               caper run ../../../chip.wdl -i ${json} -m ${metadata} --docker ${TAG}
               if [[ "${wdl}" != "test_choose_ctl.wdl" ]]; then
-                (($(jq '.outputs["${prefix}.compare_md5sum.match_overall"]' "${metadata}")==false)) && exit 1
+                res=$(jq '.outputs["'${prefix}'.compare_md5sum.match_overall"]' "${metadata}")
+                [[ "$res" == false ]] && exit 1
               fi
               rm -f ${metadata}
             done
@@ -89,6 +107,7 @@ jobs:
     <<: *machine_defaults
     steps:
       - checkout
+      - configure_gcloud
       - install_python3_and_caper
       - run: *make_tag
       - run:
@@ -99,8 +118,11 @@ jobs:
             gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
             cd dev/test/test_workflow/
             echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_secret_key.json
+
             caper run ../../../chip.wdl --backend gcp --out-gcs-bucket gs://encode-pipeline-test-runs/circleci -i ${INPUT} --docker ${TAG} -m metadata.json --backend-file backend_gcp_service_account.conf
-            (($(jq '.outputs["chip.qc_json_ref_match"]' metadata.json)==false)) && exit 1
+
+            res=$(jq '.outputs["chip.qc_json_ref_match"]' metadata.json)
+            [[ "$res" == false ]] && exit 1
 
   test_workflow_pe:
     <<: *machine_defaults
