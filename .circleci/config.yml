@@ -2,7 +2,7 @@ version: 2.1
 
 defaults: &defaults
   docker:
-    - image: google/cloud-sdk:latest #circleci/buildpack-deps:xenial-scm
+    - image: google/cloud-sdk:latest
   working_directory: ~/atac-seq-pipeline
 
 machine_defaults: &machine_defaults
@@ -16,9 +16,8 @@ make_tag: &make_tag
     echo "export TAG=encodedcc/atac-seq-pipeline:${CIRCLE_BRANCH}_${CIRCLE_WORKFLOW_ID}" >> ${BASH_ENV}
 
 commands:
-
   download_task_test_data:
-    description: "Download task test data (using gsutil based on py2). Run this before installing py3 and caper."
+    description: "Download task test data. This is based on py2 so run this before installing py3."
     steps:
       - run:
           command: |
@@ -28,22 +27,14 @@ commands:
             gsutil -m cp -r gs://encode-pipeline-test-samples/encode-atac-seq-pipeline/atac-seq-pipeline-test-data .
             ./download_hg38_fasta_for_test_ataqc.sh
 
-  install_python3_and_caper:
-    description: "Install py3 and caper. Set py3 as default python."
+  install_python3_caper_gcs:
+    description: "Install py3, caper and gcs. Set py3 as default python."
     steps:      
       - run:
           command: |
             pyenv global 3.7.0
             pip install --upgrade pip
-            pip install caper
-
-  install_gcloud:
-    steps:
-      - run:
-          command: |
-            echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
-            curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
-            sudo apt-get update && sudo apt-get install google-cloud-sdk -y
+            pip install caper google-cloud-storage
 
 jobs:
   build:
@@ -68,7 +59,7 @@ jobs:
     steps:
       - checkout
       - download_task_test_data
-      - install_python3_and_caper
+      - install_python3_caper_gcs
       - run: *make_tag
       - run:
           no_output_timeout: 300m
@@ -99,7 +90,6 @@ jobs:
           command: |
             cd dev/test/test_workflow/
             source ${BASH_ENV}
-            gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
             echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_key.json
             ./test_atac.sh ENCSR889WQX_subsampled.json tmp_key.json ${TAG}
             python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'outputs'][u'atac.qc_json_ref_match']))" < ENCSR889WQX_subsampled.metadata.json
@@ -108,7 +98,7 @@ jobs:
     <<: *machine_defaults
     steps:
       - checkout
-      - install_python3_and_caper
+      - install_python3_caper_gcs
       - install_gcloud
       - run: *make_tag
       - run:
@@ -120,7 +110,6 @@ jobs:
             source ${BASH_ENV}
 
             export CLOUDSDK_PYTHON=$(which python)
-            gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
             echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_secret_key.json
 
             caper run ../../../atac.wdl --backend gcp --out-gcs-bucket gs://encode-pipeline-test-runs/circleci -i ${INPUT} --docker ${TAG} -m metadata.json --backend-file backend_gcp_service_account.conf
@@ -137,7 +126,6 @@ jobs:
           no_output_timeout: 300m
           command: |
             source ${BASH_ENV}
-            gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
             cd dev/test/test_workflow/
             echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_key.json
             ./test_atac.sh ENCSR356KRQ_subsampled.json tmp_key.json ${TAG}
@@ -152,7 +140,6 @@ jobs:
           no_output_timeout: 300m
           command: |
             source ${BASH_ENV}
-            gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
             cd dev/test/test_workflow/
             echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_key.json
             ./test_atac.sh ENCSR356KRQ_subsampled_start_from_bam.json tmp_key.json ${TAG}
@@ -165,9 +152,9 @@ workflows:
   build_workflow:
     jobs:
       - build
-      - test_tasks:
-          requires:
-            - build
+      #- test_tasks:
+      #    requires:
+      #      - build
       #- test_workflow_se:
       #    requires:
       #      - build
