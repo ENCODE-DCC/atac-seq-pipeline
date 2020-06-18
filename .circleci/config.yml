@@ -108,10 +108,12 @@ jobs:
             cd dev/test/test_workflow/
             source ${BASH_ENV}
 
-            export CLOUDSDK_PYTHON=$(which python)
             echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_secret_key.json
-
-            caper run ../../../atac.wdl --backend gcp --out-gcs-bucket gs://encode-pipeline-test-runs/circleci -i ${INPUT} --docker ${TAG} -m metadata.json --backend-file backend_gcp_service_account.conf
+            caper run ../../../atac.wdl \
+              --backend gcp --gcp-prj ${GOOGLE_PROJECT_ID} \
+              --backend-file backend_gcp_service_account.conf \
+              --out-gcs-bucket gs://encode-pipeline-test-runs/circleci \
+              -i ${INPUT} -m metadata.json --docker ${TAG} \
 
             res=$(jq '.outputs["atac.qc_json_ref_match"]' metadata.json)
             [[ "$res" == false ]] && exit 1
