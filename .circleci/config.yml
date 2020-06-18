@@ -15,6 +15,14 @@ make_tag: &make_tag
   command: |
     echo "export TAG=encodedcc/atac-seq-pipeline:${CIRCLE_BRANCH}_${CIRCLE_WORKFLOW_ID}" >> ${BASH_ENV}
 
+commands:
+  install_python3_and_caper:
+    description: "Install python workflow requirements"
+    steps:
+      - run: pyenv global 3.7.0
+      - run: pip install --upgrade pip
+      - run: pip install caper
+
 # Define jobs here
 version: 2
 jobs:
@@ -80,11 +88,11 @@ jobs:
     <<: *machine_defaults
     steps:
       - checkout
+      - install_python3_and_caper
       - run: *make_tag
       - run:
           no_output_timeout: 300m
           command: |
-            pip3 install caper
             INPUT=ENCSR889WQX_subsampled_unrep.json
             source ${BASH_ENV}
             gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
