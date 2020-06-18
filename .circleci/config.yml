@@ -73,6 +73,8 @@ jobs:
           no_output_timeout: 300m
           command: |
             source ${BASH_ENV}
+            cd dev/test/test_task/
+
             for wdl in test_*.wdl
             do
               prefix=${wdl%.*}
@@ -105,13 +107,14 @@ jobs:
     <<: *machine_defaults
     steps:
       - checkout
-      - configure_gcloud
       - install_python3_and_caper
+      - configure_gcloud
       - run: *make_tag
       - run:
           no_output_timeout: 300m
           command: |
             INPUT=ENCSR889WQX_subsampled_unrep.json
+
             cd dev/test/test_workflow/
             source ${BASH_ENV}
             gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
