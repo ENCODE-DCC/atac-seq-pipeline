@@ -33,7 +33,9 @@ commands:
       - run:
           command: |
             source ${BASH_ENV}
-            gcloud auth activate-service-account --key-file <(echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON})
+            echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_secret_key.json
+            gcloud auth activate-service-account --key-file tmp_secret_key.json
+            rm -f tmp_secret_key.json
 
   install_python3_caper_gcs:
     description: "Install py3, caper and gcs. Set py3 as default python."
