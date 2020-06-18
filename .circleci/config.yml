@@ -37,12 +37,6 @@ commands:
             pip install --upgrade pip
             pip install caper
 
-  configure_gcloud:
-    description: "Configure gcloud with python3. Run this after installing py3 and caper."
-    steps:
-      - run:
-          command: |
-            export CLOUDSDK_PYTHON=$(which python3)
 
 jobs:
   build:
@@ -80,7 +74,7 @@ jobs:
               prefix=${wdl%.*}
               json=${prefix}.json
               metadata=${prefix}.metadata.json
-              caper run ../../../chip.wdl -i ${json} -m ${metadata} --docker ${TAG}
+              caper run ../../../atac.wdl -i ${json} -m ${metadata} --docker ${TAG}
               if [[ "${wdl}" != "test_choose_ctl.wdl" ]]; then
                 res=$(jq '.outputs["'${prefix}'.compare_md5sum.match_overall"]' "${metadata}")
                 [[ "$res" == false ]] && exit 1
@@ -108,7 +102,6 @@ jobs:
     steps:
       - checkout
       - install_python3_and_caper
-      - configure_gcloud
       - run: *make_tag
       - run:
           no_output_timeout: 300m
@@ -117,12 +110,14 @@ jobs:
 
             cd dev/test/test_workflow/
             source ${BASH_ENV}
+
+            export CLOUDSDK_PYTHON=$(which python)
             gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
             echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_secret_key.json
 
-            caper run ../../../chip.wdl --backend gcp --out-gcs-bucket gs://encode-pipeline-test-runs/circleci -i ${INPUT} --docker ${TAG} -m metadata.json --backend-file backend_gcp_service_account.conf
+            caper run ../../../atac.wdl --backend gcp --out-gcs-bucket gs://encode-pipeline-test-runs/circleci -i ${INPUT} --docker ${TAG} -m metadata.json --backend-file backend_gcp_service_account.conf
 
-            res=$(jq '.outputs["chip.qc_json_ref_match"]' metadata.json)
+            res=$(jq '.outputs["atac.qc_json_ref_match"]' metadata.json)
             [[ "$res" == false ]] && exit 1
 
   test_workflow_pe:
