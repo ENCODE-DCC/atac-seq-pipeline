@@ -1,4 +1,4 @@
-# Define action tags here
+version: 2.1
 
 defaults: &defaults
   docker:
@@ -23,8 +23,6 @@ commands:
       - run: pip install --upgrade pip
       - run: pip install caper
 
-# Define jobs here
-version: 2
 jobs:
   build:
     <<: *defaults
@@ -138,9 +136,9 @@ workflows:
   build_workflow:
     jobs:
       - build
-      - test_tasks:
-          requires:
-            - build
+      #- test_tasks:
+      #    requires:
+      #      - build
       #- test_workflow_se:
       #    requires:
       #      - build
