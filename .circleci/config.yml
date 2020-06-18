@@ -32,7 +32,6 @@ commands:
     steps:      
       - run:
           command: |
-            source ${BASH_ENV}
             echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_secret_key.json
             gcloud auth activate-service-account --key-file tmp_secret_key.json
             rm -f tmp_secret_key.json
