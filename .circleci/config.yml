@@ -74,8 +74,9 @@ jobs:
               metadata=${prefix}.metadata.json
               caper run ${wdl} -i ${input} -m ${metadata} --docker ${TAG}
               if [[ "${wdl}" != "test_choose_ctl.wdl" ]]; then
+                echo "Validating outputs of ${prefix}"
                 res=$(jq '.outputs["'${prefix}'.compare_md5sum.match_overall"]' "${metadata}")
-                [[ "$res" == false ]] && exit 1
+                [[ "$res" != true ]] && exit 100
               fi
               rm -f ${metadata}
             done
@@ -103,7 +104,7 @@ jobs:
               -i ${INPUT} -m metadata.json --docker ${TAG}
 
             res=$(jq '.outputs["atac.qc_json_ref_match"]' metadata.json)
-            [[ "$res" == false ]] && exit 1
+            [[ "$res" != true ]] && exit 100
 
   test_workflow_unrep_se:
     <<: *machine_defaults
@@ -127,8 +128,10 @@ jobs:
               --out-gcs-bucket ${CAPER_OUT_DIR} --tmp-gcs-bucket ${CAPER_TMP_DIR} \
               -i ${INPUT} -m metadata.json --docker ${TAG}
 
+            echo jq '.outputs' metadata.json
             res=$(jq '.outputs["atac.qc_json_ref_match"]' metadata.json)
-            [[ "$res" == false ]] && exit 1
+            echo $res
+            [[ "$res" != true ]] && exit 100
 
   test_workflow_pe:
     <<: *machine_defaults
@@ -153,7 +156,7 @@ jobs:
               -i ${INPUT} -m metadata.json --docker ${TAG}
 
             res=$(jq '.outputs["atac.qc_json_ref_match"]' metadata.json)
-            [[ "$res" == false ]] && exit 1
+            [[ "$res" != true ]] && exit 100
 
   test_workflow_pe_start_from_bam:
     <<: *machine_defaults
@@ -178,25 +181,25 @@ jobs:
               -i ${INPUT} -m metadata.json --docker ${TAG}
 
             res=$(jq '.outputs["atac.qc_json_ref_match"]' metadata.json)
-            [[ "$res" == false ]] && exit 100
+            [[ "$res" != true ]] && exit 100
 
 workflows:
   version: 2.1
   build_workflow:
     jobs:
       - build
-      # - test_tasks:
-      #    requires:
-      #      - build
+      - test_tasks:
+         requires:
+           - build
       # - test_workflow_se:
       #    requires:
       #      - build
-      # - test_workflow_unrep_se:
-      #     requires:
-      #       - build
+      - test_workflow_unrep_se:
+          requires:
+            - build
       # - test_workflow_pe:
       #    requires:
       #      - build
-      - test_workflow_pe_start_from_bam:
-         requires:
-           - build
+      # - test_workflow_pe_start_from_bam:
+      #    requires:
+      #      - build
