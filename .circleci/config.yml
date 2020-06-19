@@ -105,6 +105,7 @@ jobs:
 
             res=$(jq '.outputs["atac.qc_json_ref_match"]' metadata.json)
             [[ "$res" != true ]] && exit 100
+            rm -f metadata.json
 
   test_workflow_unrep_se:
     <<: *machine_defaults
@@ -128,11 +129,9 @@ jobs:
               --out-gcs-bucket ${CAPER_OUT_DIR} --tmp-gcs-bucket ${CAPER_TMP_DIR} \
               -i ${INPUT} -m metadata.json --docker ${TAG}
 
-            jq '.outputs' metadata.json
             res=$(jq '.outputs["atac.qc_json_ref_match"]' metadata.json)
-            echo $res
             [[ "$res" != true ]] && exit 100
-            echo "hello i got here."
+            rm -f metadata.json
 
   test_workflow_pe:
     <<: *machine_defaults
@@ -158,6 +157,7 @@ jobs:
 
             res=$(jq '.outputs["atac.qc_json_ref_match"]' metadata.json)
             [[ "$res" != true ]] && exit 100
+            rm -f metadata.json
 
   test_workflow_pe_start_from_bam:
     <<: *machine_defaults
@@ -183,6 +183,7 @@ jobs:
 
             res=$(jq '.outputs["atac.qc_json_ref_match"]' metadata.json)
             [[ "$res" != true ]] && exit 100
+            rm -f metadata.json
 
 workflows:
   version: 2.1
@@ -192,15 +193,15 @@ workflows:
       - test_tasks:
          requires:
            - build
-      # - test_workflow_se:
-      #    requires:
-      #      - build
+      - test_workflow_se:
+         requires:
+           - build
       - test_workflow_unrep_se:
           requires:
             - build
-      # - test_workflow_pe:
-      #    requires:
-      #      - build
-      # - test_workflow_pe_start_from_bam:
-      #    requires:
-      #      - build
+      - test_workflow_pe:
+         requires:
+           - build
+      - test_workflow_pe_start_from_bam:
+         requires:
+           - build
