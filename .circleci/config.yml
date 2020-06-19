@@ -13,7 +13,7 @@ machine_defaults: &machine_defaults
 make_tag: &make_tag
   name: make docker image tag
   command: |
-    echo "export TAG=encodedcc/atac-seq-pipeline:${CIRCLE_BRANCH}_${CIRCLE_WORKFLOW_ID}" >> ${BASH_ENV}
+    echo "export TAG=encodedcc/atac-seq-pipeline:${CIRCLE_BRANCH}_${CIRCLE_WORKFLOW_ID}" > ${BASH_ENV}
 
 commands:
   download_task_test_data:
@@ -132,6 +132,7 @@ jobs:
             res=$(jq '.outputs["atac.qc_json_ref_match"]' metadata.json)
             echo $res
             [[ "$res" != true ]] && exit 100
+            echo "hello i got here."
 
   test_workflow_pe:
     <<: *machine_defaults
