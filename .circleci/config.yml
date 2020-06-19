@@ -128,7 +128,7 @@ jobs:
               --out-gcs-bucket ${CAPER_OUT_DIR} --tmp-gcs-bucket ${CAPER_TMP_DIR} \
               -i ${INPUT} -m metadata.json --docker ${TAG}
 
-            echo jq '.outputs' metadata.json
+            jq '.outputs' metadata.json
             res=$(jq '.outputs["atac.qc_json_ref_match"]' metadata.json)
             echo $res
             [[ "$res" != true ]] && exit 100
