@@ -178,7 +178,7 @@ jobs:
               -i ${INPUT} -m metadata.json --docker ${TAG}
 
             res=$(jq '.outputs["atac.qc_json_ref_match"]' metadata.json)
-            [[ "$res" == false ]] && exit 1
+            [[ "$res" == false ]] && exit 100
 
 workflows:
   version: 2.1
