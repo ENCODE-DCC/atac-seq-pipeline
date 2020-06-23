@@ -20,38 +20,10 @@ Mandatory parameters:
     * (Optional) `atac.paired_ends`: For samples with mixed read ends, you can define read endedness for each biological replicate (e.g. `[true, false]` means paired-ended biorep-1 and single-ended biorep-2).
 
 4) Reference genome
-    * `atac.genome_tsv`: Choose one from the following genome TSVs. `v3` is a standard for >=ENCODE4.
-        Genome|URL
-        -|-
-        hg38|`https://storage.googleapis.com/encode-pipeline-genome-data/genome_tsv/v3/hg38.tsv`
-        mm10|`https://storage.googleapis.com/encode-pipeline-genome-data/genome_tsv/v3/mm10.tsv`
-        hg19|`https://storage.googleapis.com/encode-pipeline-genome-data/genome_tsv/v1/hg19_caper.tsv`
-        mm9|`https://storage.googleapis.com/encode-pipeline-genome-data/genome_tsv/v1/mm9_caper.tsv`
-
-        For DNAnexus CLI (AWS project):
-        Genome|DX URI
-        -|-
-        hg38|`dx://project-BKpvFg00VBPV975PgJ6Q03v6:pipeline-genome-data/genome_tsv/v3/hg38.dx.tsv`
-        mm10|`dx://project-BKpvFg00VBPV975PgJ6Q03v6:pipeline-genome-data/genome_tsv/v3/mm10.dx.tsv`
-
-        For DNAnexus CLI (Azure project): 
-        Genome|DX URI
-        -|-
-        hg38|`dx://project-F6K911Q9xyfgJ36JFzv03Z5J:pipeline-genome-data/genome_tsv/v3/hg38.dx_azure.tsv`
-        mm10|`dx://project-F6K911Q9xyfgJ36JFzv03Z5J:pipeline-genome-data/genome_tsv/v3/mm10.dx_azure.tsv`
-
-        For DNAnexus Web UI (AWS project): Choose one of the following TSV file on `https://platform.DNAnexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/pipeline-genome-data/genome_tsv/v3`.
-        Genome|File name
-        -|-
-        hg38|`hg38.dx.tsv`
-        mm10|`mm10.dx.tsv`
-
-        For DNAnexus Web UI (Azure project): Choose one of the following TSV file on `https://platform.DNAnexus.com/projects/F6K911Q9xyfgJ36JFzv03Z5J/data/pipeline-genome-data/genome_tsv/v3`.
-        Genome|File name
-        -|-
-        hg38|`hg38.dx_azure.tsv`
-        mm10|`mm10.dx_azure.tsv`
-
+    * `atac.genome_tsv`: Use `https://storage.googleapis.com/encode-pipeline-genome-data/genome_tsv/v1/[GENOME]_caper.tsv`.
+    * Supported `GENOME`s: are hg38, mm10, hg19 and mm9.
+    * We provide a genome TSV file that defines all genome-specific parameters and reference data files. Caper will automatically download big reference data files from our ENCODE repository.
+    * However, we also have reference data mirrors for [some platforms](input_details.md/#reference-genome) (GCP, AWS, Sherlock, SCG, ...). On these platforms, you can use a different TSV file to prevent downloading such big reference data.
     * To build a new TSV file from use your own FASTA (`.fa` and `.2bit`) see [this](build_genome_database.md).
     * You can also define genome specific parameters (defined in a genome TSV file) in an input JSON file. Parameters defined in an input JSON file will override those defined in a genome TSV file. For example, you can simply replace a blacklist file while keeping all other parameters in a genome TSV file for `hg38`.
         ```javascript

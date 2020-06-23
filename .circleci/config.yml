@@ -1,8 +1,8 @@
-version: 2.1
+# Define action tags here
 
 defaults: &defaults
   docker:
-    - image: google/cloud-sdk:latest
+    - image: google/cloud-sdk:latest #circleci/buildpack-deps:xenial-scm
   working_directory: ~/atac-seq-pipeline
 
 machine_defaults: &machine_defaults
@@ -13,50 +13,10 @@ machine_defaults: &machine_defaults
 make_tag: &make_tag
   name: make docker image tag
   command: |
-    echo "export TAG=encodedcc/atac-seq-pipeline:${CIRCLE_BRANCH}_${CIRCLE_WORKFLOW_ID}" > ${BASH_ENV}
+    echo "export TAG=encodedcc/atac-seq-pipeline:${CIRCLE_BRANCH}_${CIRCLE_WORKFLOW_ID}" >> ${BASH_ENV}
 
-commands:
-  download_task_test_data:
-    description: "Download task test data. This is based on py2 so run this before installing py3."
-    steps:
-      - run:
-          command: |
-            cd dev/test/test_task/
-            rm -rf atac-seq-pipeline-test-data
-            export BOTO_CONFIG=/dev/null
-            gsutil -m cp -r gs://encode-pipeline-test-samples/encode-atac-seq-pipeline/atac-seq-pipeline-test-data .
-            ./download_hg38_fasta_for_test_ataqc.sh
-
-  install_python3_caper_gcs:
-    description: "Install py3, caper and gcs. Set py3 as default python."
-    steps:      
-      - run:
-          command: |
-            pyenv global 3.7.0
-            pip install --upgrade pip
-            pip install caper google-cloud-storage
-
-  run_workflow_test:
-    description: "Run workflow test. This requires an env var INPUT as input JSON's basename."
-    steps:
-      - run:
-          no_output_timeout: 300m
-          command: |
-            cd dev/test/test_workflow/
-            source ${BASH_ENV}
-
-            echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_secret_key.json
-            export GOOGLE_APPLICATION_CREDENTIALS=$PWD/tmp_secret_key.json
-            caper run ../../../atac.wdl \
-              --backend gcp --gcp-prj ${GOOGLE_PROJECT_ID} \
-              --backend-file backend_gcp_service_account.conf \
-              --out-gcs-bucket ${CAPER_OUT_DIR} --tmp-gcs-bucket ${CAPER_TMP_DIR} \
-              -i ${INPUT} -m metadata.json --docker ${TAG}
-
-            res=$(jq '.outputs["atac.qc_json_ref_match"]' metadata.json)
-            [[ "$res" != true ]] && exit 100
-            rm -f metadata.json
-
+# Define jobs here
+version: 2
 jobs:
   build:
     <<: *defaults
@@ -79,91 +39,107 @@ jobs:
     <<: *machine_defaults
     steps:
       - checkout
-      - download_task_test_data
-      - install_python3_caper_gcs
       - run: *make_tag
       - run:
           no_output_timeout: 300m
           command: |
             source ${BASH_ENV}
-            cd dev/test/test_task/
 
+            cd dev/test/test_task/
+            rm -rf atac-seq-pipeline-test-data
+            export BOTO_CONFIG=/dev/null
+            gsutil -m cp -r gs://encode-pipeline-test-samples/encode-atac-seq-pipeline/atac-seq-pipeline-test-data .
+            ./download_hg38_fasta_for_test_ataqc.sh
             for wdl in test_*.wdl
             do
-              prefix=${wdl%.*}
-              export INPUT=${prefix}.json
-              metadata=${prefix}.metadata.json
-              caper run ${wdl} -i ${input} -m ${metadata} --docker ${TAG}
-              if [[ "${wdl}" != "test_choose_ctl.wdl" ]]; then
-                echo "Validating outputs of ${prefix}"
-                res=$(jq '.outputs["'${prefix}'.compare_md5sum.match_overall"]' "${metadata}")
-                [[ "$res" != true ]] && exit 100
+              json=${wdl%.*}.json
+              result=${wdl%.*}.result.json
+              ./test.sh ${wdl} ${json} ${TAG}
+              if [[ $(wc -l "${result}" | awk '{print $1}') > 1 ]]; then
+                python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'match_overall']))" < ${result}
               fi
-              rm -f ${metadata}
+              rm -f ${result}
             done
-
+            
   test_workflow_se:
     <<: *machine_defaults
     steps:
       - checkout
-      - install_python3_caper_gcs
       - run: *make_tag
       - run:
+          no_output_timeout: 300m
           command: |
-            echo "export INPUT=ENCSR889WQX_subsampled.json" >> ${BASH_ENV}
-      - run_workflow_test
-
+            source ${BASH_ENV}
+            gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
+            cd dev/test/test_workflow/
+            echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_key.json
+            ./test_atac.sh ENCSR889WQX_subsampled.json tmp_key.json ${TAG}
+            python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'outputs'][u'atac.qc_json_ref_match']))" < ENCSR889WQX_subsampled.metadata.json
 
   test_workflow_unrep_se:
     <<: *machine_defaults
     steps:
       - checkout
-      - install_python3_caper_gcs
       - run: *make_tag
       - run:
+          no_output_timeout: 300m
           command: |
-            echo "export INPUT=ENCSR889WQX_subsampled_unrep.json" >> ${BASH_ENV}
-      - run_workflow_test
+            source ${BASH_ENV}
+            gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
+            cd dev/test/test_workflow/
+            echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_key.json
+            ./test_atac.sh ENCSR889WQX_subsampled_unrep.json tmp_key.json ${TAG}
+            python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'outputs'][u'atac.qc_json_ref_match']))" < ENCSR889WQX_subsampled_unrep.metadata.json
 
   test_workflow_pe:
     <<: *machine_defaults
     steps:
       - checkout
-      - install_python3_caper_gcs
       - run: *make_tag
       - run:
+          no_output_timeout: 300m
           command: |
-            echo "export INPUT=ENCSR356KRQ_subsampled.json" >> ${BASH_ENV}
-      - run_workflow_test
+            source ${BASH_ENV}
+            gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
+            cd dev/test/test_workflow/
+            echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_key.json
+            ./test_atac.sh ENCSR356KRQ_subsampled.json tmp_key.json ${TAG}
+            python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'outputs'][u'atac.qc_json_ref_match']))" < ENCSR356KRQ_subsampled.metadata.json
 
   test_workflow_pe_start_from_bam:
     <<: *machine_defaults
     steps:
       - checkout
-      - install_python3_caper_gcs
       - run: *make_tag
       - run:
+          no_output_timeout: 300m
           command: |
-            echo "export INPUT=ENCSR356KRQ_subsampled_start_from_bam.json" >> ${BASH_ENV}
-      - run_workflow_test
+            source ${BASH_ENV}
+            gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
+            cd dev/test/test_workflow/
+            echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_key.json
+            ./test_atac.sh ENCSR356KRQ_subsampled_start_from_bam.json tmp_key.json ${TAG}
+            python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'outputs'][u'atac.qc_json_ref_match']))" < ENCSR356KRQ_subsampled_start_from_bam.metadata.json
 
+
+# Define workflow here
 workflows:
-  version: 2.1
+  version: 2
   build_workflow:
     jobs:
       - build
       - test_tasks:
-         requires:
-           - build
+          requires:
+            - build
       - test_workflow_se:
-         requires:
-           - build
+          requires:
+            - build
       - test_workflow_unrep_se:
           requires:
             - build
       - test_workflow_pe:
-         requires:
-           - build
+          requires:
+            - build
       - test_workflow_pe_start_from_bam:
-         requires:
-           - build
+          requires:
+            - build

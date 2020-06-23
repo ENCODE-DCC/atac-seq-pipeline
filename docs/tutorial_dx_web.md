@@ -49,6 +49,8 @@ This document describes instruction for the item 2).
   * general: General workflow without pre-defined reference genome.
   * hg38: Worfklow with pre-defined hg38 reference genome.
   * hg19: Worfklow with pre-defined hg19 reference genome.
+  * mm10: Worfklow with pre-defined mm10 reference genome.
+  * mm9: Worfklow with pre-defined mm9 reference genome.
 
 5. Click on the DX workflow `atac`.
 
