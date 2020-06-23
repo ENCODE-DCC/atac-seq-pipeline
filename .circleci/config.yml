@@ -91,7 +91,7 @@ jobs:
             for wdl in test_*.wdl
             do
               prefix=${wdl%.*}
-              export INPUT=${prefix}.json
+              input=${prefix}.json
               metadata=${prefix}.metadata.json
               caper run ${wdl} -i ${input} -m ${metadata} --docker ${TAG}
               if [[ "${wdl}" != "test_choose_ctl.wdl" ]]; then
