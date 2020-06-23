@@ -40,7 +40,6 @@ Parameter|Type|Description
 `atac.mito_chr_name`| String | Name of mitochondrial chromosome (e.g. chrM)
 `atac.regex_bfilt_peak_chr_name`| String | Perl style reg-ex to keep peaks on selected chromosomes only matching with this pattern (default: `chr[\dXY]+`. This will keep chr1, chr2, ... chrX and chrY in `.bfilt.` peaks file. chrM is not included here)
 
-
 Additional annotated genome data:
 
 Parameter|Type|Description
@@ -53,18 +52,40 @@ Parameter|Type|Description
 `atac.reg2map_bed` | File | File of regions used to generate reg2map signals
 `atac.roadmap_meta` | File | Roadmap metadata
 
-We currently provide TSV files for 4 genomes as shown in the below table. `GENOME` should be `hg38`, `mm10`, `hg19` or `mm9`. You can [download/build](build_genome_database.md) it on your local computer. You can also [build a genome database for your own genome](build_genome_database.md).
+We assume that users run pipeline with [Caper](https://github.com/ENCODE-DCC/caper/tree/master/caper). These TSVs work with Caper only since they have URLs instead of local paths or cloud bucket URIs. Caper will automatically download those URLs to a local temporary directory (`caper run ... --tmp-dir`).
 
-Platform|Path/URI
+We currently provide TSV files for 4 genomes as shown in the below table. You can [download/build](build_genome_database.md) them on your local computer. You can also [build a genome database for your own genome](build_genome_database.md).
+
+Genome|URL
 -|-
-Google Cloud Platform|`gs://encode-pipeline-genome-data/genome_tsv/v1/[GENOME]_gcp.tsv`
-Stanford Sherlock|`/home/groups/cherry/encode/pipeline_genome_data/genome_tsv/v1/[GENOME]_sherlock.tsv`
-Stanford SCG|`/reference/ENCODE/pipeline_genome_data/genome_tsv/v1/[GENOME]_scg.tsv`
-Local/SLURM/SGE|You need to [build](build_genome_database.md) or [download]() a genome database]. 
-DNAnexus (CLI)|`dx://project-BKpvFg00VBPV975PgJ6Q03v6:pipeline-genome-data/genome_tsv/v1/[GENOME]_dx.tsv`
-DNAnexus (CLI, Azure)|`dx://project-F6K911Q9xyfgJ36JFzv03Z5J:pipeline-genome-data/genome_tsv/v1/[GENOME]_dx_azure.tsv`
-DNAnexus (Web)|Choose `[GENOME]_dx.tsv` from [here](https://platform.DNAnexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/pipeline-genome-data/genome_tsv/v1)
-DNAnexus (Web, Azure)|Choose `[GENOME]_dx.tsv` from [here](https://platform.DNAnexus.com/projects/F6K911Q9xyfgJ36JFzv03Z5J/data/pipeline-genome-data/genome_tsv/v1)
+hg38|`https://storage.googleapis.com/encode-pipeline-genome-data/genome_tsv/v3/hg38.tsv`
+mm10|`https://storage.googleapis.com/encode-pipeline-genome-data/genome_tsv/v3/mm10.tsv`
+hg19|`https://storage.googleapis.com/encode-pipeline-genome-data/genome_tsv/v1/hg19_caper.tsv`
+mm9|`https://storage.googleapis.com/encode-pipeline-genome-data/genome_tsv/v1/mm9_caper.tsv`
+
+For DNAnexus CLI (AWS project):
+Genome|DX URI
+-|-
+hg38|`dx://project-BKpvFg00VBPV975PgJ6Q03v6:pipeline-genome-data/genome_tsv/v3/hg38.dx.tsv`
+mm10|`dx://project-BKpvFg00VBPV975PgJ6Q03v6:pipeline-genome-data/genome_tsv/v3/mm10.dx.tsv`
+
+For DNAnexus CLI (Azure project): 
+Genome|DX URI
+-|-
+hg38|`dx://project-F6K911Q9xyfgJ36JFzv03Z5J:pipeline-genome-data/genome_tsv/v3/hg38.dx_azure.tsv`
+mm10|`dx://project-F6K911Q9xyfgJ36JFzv03Z5J:pipeline-genome-data/genome_tsv/v3/mm10.dx_azure.tsv`
+
+For DNAnexus Web UI (AWS project): Choose one of the following TSV file on `https://platform.DNAnexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/pipeline-genome-data/genome_tsv/v3`.
+Genome|File name
+-|-
+hg38|`hg38.dx.tsv`
+mm10|`mm10.dx.tsv`
+
+For DNAnexus Web UI (Azure project): Choose one of the following TSV file on `https://platform.DNAnexus.com/projects/F6K911Q9xyfgJ36JFzv03Z5J/data/pipeline-genome-data/genome_tsv/v3`.
+Genome|File name
+-|-
+hg38|`hg38.dx_azure.tsv`
+mm10|`mm10.dx_azure.tsv`
 
 Additional information about each genome:
 
@@ -205,7 +226,7 @@ Parameter|Default|Description
 
 > **WARNING**: It is recommened not to change the following parameters unless you get resource-related errors for a certain task and you want to increase resources for such task. The following parameters are provided for users who want to run our pipeline with Caper's `local` on HPCs and 2).
 
-Resources defined here are PER REPLICATE. Therefore, total number of cores will be approximately `atac.align_cpu` x `NUMBER_OF_REPLICATES because `align` is a bottlenecking task of the pipeline. Use this total number of cores if you manually `qsub` or `sbatch` your job (using local mode of Caper). `disks` is used for Google Cloud and DNAnexus only.
+Resources defined here are PER REPLICATE. Therefore, total number of cores will be approximately `atac.align_cpu` x `NUMBER_OF_REPLICATES` because `align` is a bottlenecking task of the pipeline. Use this total number of cores if you manually `qsub` or `sbatch` your job (using local mode of Caper). `disks` is used for Google Cloud and DNAnexus only.
 
 Parameter|Default
 ---------|-------

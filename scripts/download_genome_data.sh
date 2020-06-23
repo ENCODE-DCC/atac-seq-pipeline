@@ -15,8 +15,8 @@ if [[ "$#" -lt 2 ]]; then
   exit 2
 fi
 
-# parameters for genome database version (v1: <ENCODE4, v2: >=ENCODE4)
-VER=v1
+# parameters for genome database version (v1: <ENCODE4, v3: >=ENCODE4)
+VER=v3
 
 GENOME=$1
 DEST_DIR=$(cd $(dirname $2) && pwd -P)/$(basename $2)
@@ -71,25 +71,36 @@ elif [[ "${GENOME}" == "hg38" ]]; then
   REF_FA="https://www.encodeproject.org/files/GRCh38_no_alt_analysis_set_GCA_000001405.15/@@download/GRCh38_no_alt_analysis_set_GCA_000001405.15.fasta.gz"
   REF_MITO_FA="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/GRCh38_no_alt_analysis_set_GCA_000001405.15.chrM.fa.gz"
   CHRSZ="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/hg38.chrom.sizes"
+  BWT2_IDX="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/bowtie2_index/GRCh38_no_alt_analysis_set_GCA_000001405.15.fasta.tar"
   BWT2_MITO_IDX="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/bowtie2_index/GRCh38_no_alt_analysis_set_GCA_000001405.15.chrM.fa.tar"
+  BWA_IDX="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/bwa_index/GRCh38_no_alt_analysis_set_GCA_000001405.15.fasta.tar"
   BWA_MITO_IDX="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/bwa_index/GRCh38_no_alt_analysis_set_GCA_000001405.15.chrM.fa.tar"
-  if [[ "${VER}" == "v2" ]]; then
-    BWT2_IDX="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/bowtie2_index/ENCFF110MCL.tar.gz"
-    BWA_IDX="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/bwa_index/ENCFF643CGH.tar.gz"
-    BLACKLIST="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/ENCFF419RSJ.bed.gz"
-    TSS="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/ataqc/tss.pc.gencode.v29.bed.gz"
-  else
-    BWT2_IDX="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/bowtie2_index/GRCh38_no_alt_analysis_set_GCA_000001405.15.fasta.tar"
-    BWA_IDX="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/bwa_index/GRCh38_no_alt_analysis_set_GCA_000001405.15.fasta.tar"
-    BLACKLIST="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/hg38.blacklist.bed.gz"
-    TSS="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/ataqc/hg38_gencode_tss_unique.bed.gz"
-  fi
+  BLACKLIST="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/hg38.blacklist.bed.gz"
+  TSS="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/ataqc/hg38_gencode_tss_unique.bed.gz"
   DNASE="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/ataqc/reg2map_honeybadger2_dnase_all_p10_ucsc.hg19_to_hg38.bed.gz"
   PROM="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/ataqc/reg2map_honeybadger2_dnase_prom_p2.hg19_to_hg38.bed.gz"
   ENH="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/ataqc/reg2map_honeybadger2_dnase_enh_p2.hg19_to_hg38.bed.gz"
   REG2MAP_BED="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/ataqc/hg38_celltype_compare_subsample.bed.gz"
   REG2MAP="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/ataqc/hg38_dnase_avg_fseq_signal_formatted.txt.gz"
   ROADMAP_META="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/ataqc/hg38_dnase_avg_fseq_signal_metadata.txt"
+  if [[ "${VER}" == "v2" ]]; then
+    BWT2_IDX="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/bowtie2_index/ENCFF110MCL.tar.gz"
+    BWA_IDX="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/bwa_index/ENCFF643CGH.tar.gz"
+    BLACKLIST="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/ENCFF419RSJ.bed.gz"
+    TSS="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/ataqc/tss.pc.gencode.v29.bed.gz"
+  elif [[ "${VER}" == "v3" ]]; then
+    REF_MITO_FA="https://www.encodeproject.org/files/GRCh38_no_alt_analysis_set_GCA_000001405.15_mito_only/@@download/GRCh38_no_alt_analysis_set_GCA_000001405.15_mito_only.fasta.gz"
+    BWT2_IDX="https://www.encodeproject.org/files/ENCFF110MCL/@@download/ENCFF110MCL.tar.gz"
+    BWT2_MITO_IDX="https://www.encodeproject.org/files/GRCh38_no_alt_analysis_set_GCA_000001405.15_mito_only_bowtie2_index/@@download/GRCh38_no_alt_analysis_set_GCA_000001405.15_mito_only_bowtie2_index.tar.gz"
+    BWA_IDX="https://www.encodeproject.org/files/ENCFF643CGH/@@download/ENCFF643CGH.tar.gz"
+    BWA_MITO_IDX="https://www.encodeproject.org/files/GRCh38_no_alt_analysis_set_GCA_000001405.15_mito_only_bwa_index/@@download/GRCh38_no_alt_analysis_set_GCA_000001405.15_mito_only_bwa_index.tar.gz"
+    CHRSZ="https://www.encodeproject.org/files/GRCh38_EBV.chrom.sizes/@@download/GRCh38_EBV.chrom.sizes.tsv"
+    BLACKLIST="https://www.encodeproject.org/files/ENCFF356LFX/@@download/ENCFF356LFX.bed.gz"
+    TSS="https://www.encodeproject.org/files/ENCFF493CCB/@@download/ENCFF493CCB.bed.gz"
+    DNASE="https://www.encodeproject.org/files/ENCFF304XEX/@@download/ENCFF304XEX.bed.gz"
+    PROM="https://www.encodeproject.org/files/ENCFF140XLU/@@download/ENCFF140XLU.bed.gz"
+    ENH="https://www.encodeproject.org/files/ENCFF212UAV/@@download/ENCFF212UAV.bed.gz"
+  fi
 
 elif [[ "${GENOME}" == "mm10" ]]; then
   REGEX_BFILT_PEAK_CHR_NAME="chr[\dXY]+"
@@ -97,17 +108,11 @@ elif [[ "${GENOME}" == "mm10" ]]; then
   REF_FA="https://www.encodeproject.org/files/mm10_no_alt_analysis_set_ENCODE/@@download/mm10_no_alt_analysis_set_ENCODE.fasta.gz"
   REF_MITO_FA="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/mm10_no_alt_analysis_set_ENCODE.chrM.fa.gz"
   CHRSZ="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/mm10.chrom.sizes"
+  BWT2_IDX="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/bowtie2_index/mm10_no_alt_analysis_set_ENCODE.fasta.tar"
   BWT2_MITO_IDX="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/bowtie2_index/mm10_no_alt_analysis_set_ENCODE.chrM.fa.tar"
+  BWA_IDX="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/bwa_index/mm10_no_alt_analysis_set_ENCODE.fasta.tar"
   BWA_MITO_IDX="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/bwa_index/mm10_no_alt_analysis_set_ENCODE.chrM.fa.tar"
-  if [[ "${VER}" == "v2" ]]; then
-    BWT2_IDX="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/bowtie2_index/ENCFF309GLL.tar.gz"
-    BWA_IDX="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/bwa_index/ENCFF018NEO.tar.gz"
-    BLACKLIST="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/ENCFF547MET.bed.gz"
-  else
-    BWT2_IDX="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/bowtie2_index/mm10_no_alt_analysis_set_ENCODE.fasta.tar"
-    BWA_IDX="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/bwa_index/mm10_no_alt_analysis_set_ENCODE.fasta.tar"
-    BLACKLIST="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/mm10.blacklist.bed.gz"
-  fi
+  BLACKLIST="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/mm10.blacklist.bed.gz"
   TSS="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/ataqc/mm10_gencode_tss_unique.bed.gz"
   DNASE="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/ataqc/mm10_univ_dhs_ucsc.bed.gz"
   PROM="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/ataqc/tss_mm10_master.bed.gz"
@@ -115,6 +120,23 @@ elif [[ "${GENOME}" == "mm10" ]]; then
   REG2MAP_BED="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/ataqc/mm10_celltype_compare_subsample.bed.gz"
   REG2MAP="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/ataqc/mm10_dnase_avg_fseq_signal_formatted.txt.gz"
   ROADMAP_META="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/ataqc/mm10_dnase_avg_fseq_signal_metadata.txt"
+  if [[ "${VER}" == "v2" ]]; then
+    BWT2_IDX="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/bowtie2_index/ENCFF309GLL.tar.gz"
+    BWA_IDX="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/bwa_index/ENCFF018NEO.tar.gz"
+    BLACKLIST="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/ENCFF547MET.bed.gz"
+  elif [[ "${VER}" == "v3" ]]; then
+    REF_MITO_FA="https://www.encodeproject.org/files/mm10_no_alt_analysis_set_ENCODE_mito_only/@@download/mm10_no_alt_analysis_set_ENCODE_mito_only.fasta.gz"
+    BWT2_IDX="https://www.encodeproject.org/files/ENCFF309GLL/@@download/ENCFF309GLL.tar.gz"
+    BWT2_MITO_IDX="https://www.encodeproject.org/files/mm10_no_alt_analysis_set_ENCODE_mito_only_bowtie2_index/@@download/mm10_no_alt_analysis_set_ENCODE_mito_only_bowtie2_index.tar.gz"
+    BWA_IDX="https://www.encodeproject.org/files/ENCFF018NEO/@@download/ENCFF018NEO.tar.gz"
+    BWA_MITO_IDX="https://www.encodeproject.org/files/mm10_no_alt_analysis_set_ENCODE_mito_only_bwa_index/@@download/mm10_no_alt_analysis_set_ENCODE_mito_only_bwa_index.tar.gz"
+    CHRSZ="https://www.encodeproject.org/files/mm10_no_alt.chrom.sizes/@@download/mm10_no_alt.chrom.sizes.tsv"
+    BLACKLIST="https://www.encodeproject.org/files/ENCFF547MET/@@download/ENCFF547MET.bed.gz"
+    TSS="https://www.encodeproject.org/files/ENCFF498BEJ/@@download/ENCFF498BEJ.bed.gz"
+    DNASE="https://www.encodeproject.org/files/ENCFF015KVI/@@download/ENCFF015KVI.bed.gz"
+    PROM="https://www.encodeproject.org/files/ENCFF206BQS/@@download/ENCFF206BQS.bed.gz"
+    ENH="https://www.encodeproject.org/files/ENCFF580RGZ/@@download/ENCFF580RGZ.bed.gz"
+  fi
 
 elif [[ "${GENOME}" == "hg38_chr19_chrM" ]]; then
   REGEX_BFILT_PEAK_CHR_NAME="chr[\dXY]+"
@@ -126,19 +148,24 @@ elif [[ "${GENOME}" == "hg38_chr19_chrM" ]]; then
   BWT2_MITO_IDX="https://storage.googleapis.com/encode-pipeline-genome-data/hg38_chr19_chrM/bowtie2_index/GRCh38_no_alt_analysis_set_GCA_000001405.15.chr19_chrM.chrM.fa.tar"
   BWA_IDX="https://storage.googleapis.com/encode-pipeline-genome-data/hg38_chr19_chrM/bwa_index/GRCh38_no_alt_analysis_set_GCA_000001405.15.chr19_chrM.fasta.tar"
   BWA_MITO_IDX="https://storage.googleapis.com/encode-pipeline-genome-data/hg38_chr19_chrM/bwa_index/GRCh38_no_alt_analysis_set_GCA_000001405.15.chr19_chrM.chrM.fa.tar"
-  if [[ "${VER}" == "v2" ]]; then
-    BLACKLIST="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/ENCFF419RSJ.bed.gz"
-    TSS="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/ataqc/tss.pc.gencode.v29.bed.gz"
-  else
-    BLACKLIST="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/hg38.blacklist.bed.gz"
-    TSS="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/ataqc/hg38_gencode_tss_unique.bed.gz"
-  fi
+  BLACKLIST="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/hg38.blacklist.bed.gz"
+  TSS="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/ataqc/hg38_gencode_tss_unique.bed.gz"
   DNASE="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/ataqc/reg2map_honeybadger2_dnase_all_p10_ucsc.hg19_to_hg38.bed.gz"
   PROM="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/ataqc/reg2map_honeybadger2_dnase_prom_p2.hg19_to_hg38.bed.gz"
   ENH="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/ataqc/reg2map_honeybadger2_dnase_enh_p2.hg19_to_hg38.bed.gz"
   REG2MAP_BED="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/ataqc/hg38_celltype_compare_subsample.bed.gz"
   REG2MAP="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/ataqc/hg38_dnase_avg_fseq_signal_formatted.txt.gz"
   ROADMAP_META="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/ataqc/hg38_dnase_avg_fseq_signal_metadata.txt"
+  if [[ "${VER}" == "v2" ]]; then
+    BLACKLIST="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/ENCFF419RSJ.bed.gz"
+    TSS="https://storage.googleapis.com/encode-pipeline-genome-data/hg38/ataqc/tss.pc.gencode.v29.bed.gz"
+  elif [[ "${VER}" == "v3" ]]; then
+    BLACKLIST="https://www.encodeproject.org/files/ENCFF356LFX/@@download/ENCFF356LFX.bed.gz"
+    TSS="https://www.encodeproject.org/files/ENCFF493CCB/@@download/ENCFF493CCB.bed.gz"
+    DNASE="https://www.encodeproject.org/files/ENCFF304XEX/@@download/ENCFF304XEX.bed.gz"
+    PROM="https://www.encodeproject.org/files/ENCFF140XLU/@@download/ENCFF140XLU.bed.gz"
+    ENH="https://www.encodeproject.org/files/ENCFF212UAV/@@download/ENCFF212UAV.bed.gz"
+  fi
 
 elif [[ "${GENOME}" == "mm10_chr19_chrM" ]]; then
   REGEX_BFILT_PEAK_CHR_NAME="chr[\dXY]+"
@@ -150,11 +177,7 @@ elif [[ "${GENOME}" == "mm10_chr19_chrM" ]]; then
   BWT2_MITO_IDX="https://storage.googleapis.com/encode-pipeline-genome-data/mm10_chr19_chrM/bowtie2_index/mm10_no_alt_analysis_set_ENCODE.chr19_chrM.chrM.fa.tar"
   BWA_IDX="https://storage.googleapis.com/encode-pipeline-genome-data/mm10_chr19_chrM/bwa_index/mm10_no_alt_analysis_set_ENCODE.chr19_chrM.fasta.tar"
   BWA_MITO_IDX="https://storage.googleapis.com/encode-pipeline-genome-data/mm10_chr19_chrM/bwa_index/mm10_no_alt_analysis_set_ENCODE.chr19_chrM.chrM.fa.tar"
-  if [[ "${VER}" == "v2" ]]; then
-    BLACKLIST="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/ENCFF547MET.bed.gz"
-  else
-    BLACKLIST="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/mm10.blacklist.bed.gz"
-  fi
+  BLACKLIST="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/mm10.blacklist.bed.gz"
   TSS="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/ataqc/mm10_gencode_tss_unique.bed.gz"
   DNASE="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/ataqc/mm10_univ_dhs_ucsc.bed.gz"
   PROM="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/ataqc/tss_mm10_master.bed.gz"
@@ -162,6 +185,15 @@ elif [[ "${GENOME}" == "mm10_chr19_chrM" ]]; then
   REG2MAP_BED="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/ataqc/mm10_celltype_compare_subsample.bed.gz"
   REG2MAP="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/ataqc/mm10_dnase_avg_fseq_signal_formatted.txt.gz"
   ROADMAP_META="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/ataqc/mm10_dnase_avg_fseq_signal_metadata.txt"
+  if [[ "${VER}" == "v2" ]]; then
+    BLACKLIST="https://storage.googleapis.com/encode-pipeline-genome-data/mm10/ENCFF547MET.bed.gz"
+  elif [[ "${VER}" == "v3" ]]; then
+    BLACKLIST="https://www.encodeproject.org/files/ENCFF547MET/@@download/ENCFF547MET.bed.gz"
+    TSS="https://www.encodeproject.org/files/ENCFF498BEJ/@@download/ENCFF498BEJ.bed.gz"
+    DNASE="https://www.encodeproject.org/files/ENCFF015KVI/@@download/ENCFF015KVI.bed.gz"
+    PROM="https://www.encodeproject.org/files/ENCFF206BQS/@@download/ENCFF206BQS.bed.gz"
+    ENH="https://www.encodeproject.org/files/ENCFF580RGZ/@@download/ENCFF580RGZ.bed.gz"
+  fi
 fi
 
 if [[ -z "${REF_FA}" ]]; then
