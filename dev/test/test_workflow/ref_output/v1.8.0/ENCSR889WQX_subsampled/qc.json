@@ -1,9 +1,9 @@
 {
     "general": {
-        "date": "2020-02-10 18:12:58",
+        "date": "2020-06-19 02:52:15",
         "title": "ENCSR889WQX (subsampled 1/400 reads)",
         "description": "ATAC-seq on Mus musculus C57BL/6 frontal cortex adult",
-        "pipeline_ver": "v1.6.1",
+        "pipeline_ver": "v1.8.0",
         "pipeline_type": "atac",
         "genome": "mm10",
         "aligner": "bowtie2",

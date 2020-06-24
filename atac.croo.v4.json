@@ -106,10 +106,6 @@
     "score": {
       "path": "qc/rep${i+1}/${basename}",
       "table": "QC and logs/Replicate ${i+1}/Cross-correlation score"
-    },
-    "fraglen": {
-      "path": "qc/rep${i+1}/${basename}",
-      "table": "QC and logs/Replicate ${i+1}/Estimated fragment length"
     }
   },
   "atac.call_peak": {

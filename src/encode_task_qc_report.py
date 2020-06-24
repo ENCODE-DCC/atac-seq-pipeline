@@ -418,6 +418,28 @@ def make_cat_align(args, cat_root):
                 cat_gc_bias.add_plot(plot,
                                      key=str_rep(i), size_pct=60)
 
+    cat_annot_enrich = QCCategory(
+        'frac_reads_in_annot',
+        html_head='<h2>Annotated genomic region enrichment</h2>',
+        html_foot="""
+            <p>Signal to noise can be assessed by considering whether reads are falling into
+            known open regions (such as DHS regions) or not. A high fraction of reads
+            should fall into the universal (across cell type) DHS set. A small fraction
+            should fall into the blacklist regions. A high set (though not all) should
+            fall into the promoter regions. A high set (though not all) should fall into
+            the enhancer regions. The promoter regions should not take up all reads, as
+            it is known that there is a bias for promoters in open chromatin assays.</p><br>
+        """,
+        parser=parse_annot_enrich_qc,
+        map_key_desc=MAP_KEY_DESC_ANNOT_ENRICH_QC,
+        parent=cat_align,
+    )
+
+    if args.annot_enrich_qcs:
+        for i, qc in enumerate(args.annot_enrich_qcs):
+            if qc:
+                cat_annot_enrich.add_log(qc, key=str_rep(i))
+
     return cat_align
 
 
@@ -822,28 +844,6 @@ def make_cat_peak_enrich(args, cat_root):
     if args.frip_idr_qc_ppr:
         cat_frip_idr.add_log(args.frip_idr_qc_ppr[0],
                              key='pooled-pr1_vs_pooled-pr2')
-
-    cat_annot_enrich = QCCategory(
-        'frac_reads_in_annot',
-        html_head='<h2>Annotated genomic region enrichment</h2>',
-        html_foot="""
-            <p>Signal to noise can be assessed by considering whether reads are falling into
-            known open regions (such as DHS regions) or not. A high fraction of reads
-            should fall into the universal (across cell type) DHS set. A small fraction
-            should fall into the blacklist regions. A high set (though not all) should
-            fall into the promoter regions. A high set (though not all) should fall into
-            the enhancer regions. The promoter regions should not take up all reads, as
-            it is known that there is a bias for promoters in open chromatin assays.</p><br>
-        """,
-        parser=parse_annot_enrich_qc,
-        map_key_desc=MAP_KEY_DESC_ANNOT_ENRICH_QC,
-        parent=cat_peak_enrich,
-    )
-
-    if args.annot_enrich_qcs:
-        for i, qc in enumerate(args.annot_enrich_qcs):
-            if qc:
-                cat_annot_enrich.add_log(qc, key=str_rep(i))
 
     return cat_peak_enrich
 

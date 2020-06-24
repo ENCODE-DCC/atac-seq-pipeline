@@ -40,7 +40,7 @@
 
 2. Get a URL for your reference genome. You may need to upload it to somewhere on the internet.
 
-3. Get a URL for a gzipped blacklist BED file for your genome. If you don't have one then skip this step. An example blacklist for hg38 is [here](http://mitra.stanford.edu/kundaje/genome_data/hg38/hg38.blacklist.bed.gz).
+3. Get a URL for a gzipped blacklist BED file for your genome. If you don't have one then skip this step. An example blacklist for hg38 is [here](https://www.encodeproject.org/files/ENCFF356LFX/@@download/ENCFF356LFX.bed.gz).
 
 4. Find the following lines in `scripts/build_genome_data.sh` and modify them as follows. Give a good name `[YOUR_OWN_GENOME]` for your genome. For `MITO_CHR_NAME` use a correct mitochondrial chromosome name of your genome (e.g. `chrM` or `MT`). For `REGEX_BFILT_PEAK_CHR_NAME` Perl style regular expression must be used to keep regular chromosome names only in a blacklist filtered (`.bfilt.`) peaks files. This `.bfilt.` peak files are considered final peaks output of the pipeline and peaks BED files for genome browser tracks (`.bigBed` and `.hammock.gz`) are converted from these `.bfilt.` peaks files. Chromosome name filtering with `REGEX_BFILT_PEAK_CHR_NAME` will be done even without the blacklist itself.
     ```bash
