@@ -42,7 +42,6 @@ commands:
       - run:
           no_output_timeout: 300m
           command: |
-            sleep $(( $RANDOM % 60 ))
             cd dev/test/test_workflow/
             source ${BASH_ENV}
 
@@ -110,10 +109,25 @@ jobs:
       - install_python3_caper_gcs
       - run: *make_tag
       - run:
+          no_output_timeout: 300m
           command: |
-            echo "export INPUT=ENCSR889WQX_subsampled.json" >> ${BASH_ENV}
-      - run_workflow_test
+            #echo "export INPUT=ENCSR889WQX_subsampled.json" >> ${BASH_ENV}
+            export INPUT=ENCSR889WQX_subsampled.json
 
+            cd dev/test/test_workflow/
+            source ${BASH_ENV}
+
+            echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_secret_key.json
+            export GOOGLE_APPLICATION_CREDENTIALS=$PWD/tmp_secret_key.json
+            caper run ../../../atac.wdl \
+              --backend gcp --gcp-prj ${GOOGLE_PROJECT_ID} \
+              --backend-file backend_gcp_service_account.conf \
+              --out-gcs-bucket ${CAPER_OUT_DIR} --tmp-gcs-bucket ${CAPER_TMP_DIR} \
+              -i ${INPUT} -m metadata.json --docker ${TAG}
+
+            res=$(jq '.outputs["atac.qc_json_ref_match"]' metadata.json)
+            [[ "$res" != true ]] && exit 100
+            rm -f metadata.json
 
   test_workflow_unrep_se:
     <<: *machine_defaults
@@ -153,18 +167,18 @@ workflows:
   build_workflow:
     jobs:
       - build
-      - test_tasks:
-         requires:
-           - build
+      # - test_tasks:
+      #    requires:
+      #      - build
       - test_workflow_se:
          requires:
            - build
-      - test_workflow_unrep_se:
-          requires:
-            - build
-      - test_workflow_pe:
-         requires:
-           - build
-      - test_workflow_pe_start_from_bam:
-         requires:
-           - build
+      # - test_workflow_unrep_se:
+      #     requires:
+      #       - build
+      # - test_workflow_pe:
+      #    requires:
+      #      - build
+      # - test_workflow_pe_start_from_bam:
+      #    requires:
+      #      - build
