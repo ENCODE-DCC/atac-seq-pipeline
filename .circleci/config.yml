@@ -42,6 +42,7 @@ commands:
       - run:
           no_output_timeout: 300m
           command: |
+            sleep $(( $RANDOM % 60 ))
             cd dev/test/test_workflow/
             source ${BASH_ENV}
 
