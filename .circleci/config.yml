@@ -109,24 +109,10 @@ jobs:
       - install_python3_caper_gcs
       - run: *make_tag
       - run:
-          no_output_timeout: 300m
           command: |
-            export INPUT=ENCSR889WQX_subsampled.json
+            echo "export INPUT=ENCSR889WQX_subsampled.json" >> ${BASH_ENV}
+      - run_workflow_test
 
-            cd dev/test/test_workflow/
-            source ${BASH_ENV}
-
-            echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_secret_key.json
-            export GOOGLE_APPLICATION_CREDENTIALS=$PWD/tmp_secret_key.json
-            caper run ../../../atac.wdl \
-              --backend gcp --gcp-prj ${GOOGLE_PROJECT_ID} \
-              --backend-file backend_gcp_service_account.conf \
-              --out-gcs-bucket ${CAPER_OUT_DIR} --tmp-gcs-bucket ${CAPER_TMP_DIR} \
-              -i ${INPUT} -m metadata.json --docker ${TAG}
-
-            res=$(jq '.outputs["atac.qc_json_ref_match"]' metadata.json)
-            [[ "$res" != true ]] && exit 100
-            rm -f metadata.json
 
   test_workflow_unrep_se:
     <<: *machine_defaults
@@ -135,24 +121,9 @@ jobs:
       - install_python3_caper_gcs
       - run: *make_tag
       - run:
-          no_output_timeout: 300m
           command: |
-            export INPUT=ENCSR889WQX_subsampled_unrep.json
-
-            cd dev/test/test_workflow/
-            source ${BASH_ENV}
-
-            echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_secret_key.json
-            export GOOGLE_APPLICATION_CREDENTIALS=$PWD/tmp_secret_key.json
-            caper run ../../../atac.wdl \
-              --backend gcp --gcp-prj ${GOOGLE_PROJECT_ID} \
-              --backend-file backend_gcp_service_account.conf \
-              --out-gcs-bucket ${CAPER_OUT_DIR} --tmp-gcs-bucket ${CAPER_TMP_DIR} \
-              -i ${INPUT} -m metadata.json --docker ${TAG}
-
-            res=$(jq '.outputs["atac.qc_json_ref_match"]' metadata.json)
-            [[ "$res" != true ]] && exit 100
-            rm -f metadata.json
+            echo "export INPUT=ENCSR889WQX_subsampled_unrep.json" >> ${BASH_ENV}
+      - run_workflow_test
 
   test_workflow_pe:
     <<: *machine_defaults
@@ -161,24 +132,9 @@ jobs:
       - install_python3_caper_gcs
       - run: *make_tag
       - run:
-          no_output_timeout: 300m
           command: |
-            export INPUT=ENCSR356KRQ_subsampled.json
-
-            cd dev/test/test_workflow/
-            source ${BASH_ENV}
-
-            echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_secret_key.json
-            export GOOGLE_APPLICATION_CREDENTIALS=$PWD/tmp_secret_key.json
-            caper run ../../../atac.wdl \
-              --backend gcp --gcp-prj ${GOOGLE_PROJECT_ID} \
-              --backend-file backend_gcp_service_account.conf \
-              --out-gcs-bucket ${CAPER_OUT_DIR} --tmp-gcs-bucket ${CAPER_TMP_DIR} \
-              -i ${INPUT} -m metadata.json --docker ${TAG}
-
-            res=$(jq '.outputs["atac.qc_json_ref_match"]' metadata.json)
-            [[ "$res" != true ]] && exit 100
-            rm -f metadata.json
+            echo "export INPUT=ENCSR356KRQ_subsampled.json" >> ${BASH_ENV}
+      - run_workflow_test
 
   test_workflow_pe_start_from_bam:
     <<: *machine_defaults
@@ -187,42 +143,27 @@ jobs:
       - install_python3_caper_gcs
       - run: *make_tag
       - run:
-          no_output_timeout: 300m
           command: |
-            export INPUT=ENCSR356KRQ_subsampled_start_from_bam.json
-
-            cd dev/test/test_workflow/
-            source ${BASH_ENV}
-
-            echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_secret_key.json
-            export GOOGLE_APPLICATION_CREDENTIALS=$PWD/tmp_secret_key.json
-            caper run ../../../atac.wdl \
-              --backend gcp --gcp-prj ${GOOGLE_PROJECT_ID} \
-              --backend-file backend_gcp_service_account.conf \
-              --out-gcs-bucket ${CAPER_OUT_DIR} --tmp-gcs-bucket ${CAPER_TMP_DIR} \
-              -i ${INPUT} -m metadata.json --docker ${TAG}
-
-            res=$(jq '.outputs["atac.qc_json_ref_match"]' metadata.json)
-            [[ "$res" != true ]] && exit 100
-            rm -f metadata.json
+            echo "export INPUT=ENCSR356KRQ_subsampled_start_from_bam.json" >> ${BASH_ENV}
+      - run_workflow_test
 
 workflows:
   version: 2.1
   build_workflow:
     jobs:
       - build
-      - test_tasks:
-         requires:
-           - build
-      - test_workflow_se:
-         requires:
-           - build
+      # - test_tasks:
+      #    requires:
+      #      - build
+      # - test_workflow_se:
+      #    requires:
+      #      - build
       - test_workflow_unrep_se:
           requires:
             - build
-      - test_workflow_pe:
-         requires:
-           - build
+      # - test_workflow_pe:
+      #    requires:
+      #      - build
       - test_workflow_pe_start_from_bam:
          requires:
            - build
