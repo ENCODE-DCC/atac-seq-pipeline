@@ -28,7 +28,7 @@ The ATAC-seq pipeline protocol specification is [here](https://docs.google.com/d
 	> **IMPORTANT*: use `encode-atac-seq-pipeline` as `[PIPELINE_CONDA_ENV]` in Caper's documentation.
 
 3) **Skip this step if you have installed pipeline's Conda environment**. Caper is already included in the Conda environment. [Install Caper](https://github.com/ENCODE-DCC/caper#installation). Caper is a python wrapper for [Cromwell](https://github.com/broadinstitute/cromwell).
-	> **IMPORTANT**: Make sure that you have python3(> 3.4.1) installed on your system.
+	> **IMPORTANT**: Make sure that you have python3(>= 3.6.0) installed on your system.
 
 	```bash
 	$ pip install caper  # use pip3 if it doesn't work
