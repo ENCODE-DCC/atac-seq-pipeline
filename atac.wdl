@@ -1840,6 +1840,7 @@ task filter {
         Int time_hr
         Float disk_factor
     }
+    Float input_file_size = size(bam)
     Float picard_java_heap_factor = 0.9
     Float mem_gb = 17.0 + mem_factor * input_file_size
     Int disk_gb = round(20.0 + disk_factor * input_file_size)
@@ -1920,7 +1921,7 @@ task spr {
         Float mem_factor
         Float disk_factor
     }
-    Float input_file_size = size(fastqs_R1) + size(fastqs_R2)
+    Float input_file_size = size(ta)
     Float mem_gb = 4.0 + mem_factor * input_file_size
     Int disk_gb = round(20.0 + disk_factor * input_file_size)
 
