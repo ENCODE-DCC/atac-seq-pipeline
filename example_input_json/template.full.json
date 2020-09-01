@@ -78,7 +78,7 @@
     "atac.xcor_cpu" : 2,
     "atac.xcor_mem_factor" : 1.0,
     "atac.xcor_time_hr" : 6,
-    "atac.xcor_disk_factor" : 1.5,
+    "atac.xcor_disk_factor" : 4.5,
 
     "atac.call_peak_cpu" : 2,
     "atac.call_peak_mem_factor" : 2.0,

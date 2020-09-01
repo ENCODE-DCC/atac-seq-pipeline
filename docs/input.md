@@ -266,7 +266,7 @@ Parameter|Default|Description
 `atac.xcor_cpu` | 2 |
 `atac.xcor_mem_factor` | 1.0 | Multiplied to size of TAG-ALIGN BED to determine required memory
 `atac.xcor_time_hr` | 6 | Walltime (HPCs only)
-`atac.xcor_disk_factor` | 1.5 | Multiplied to size of TAG-ALIGN BED to determine required disk (GCP/AWS only)
+`atac.xcor_disk_factor` | 4.5 | Multiplied to size of TAG-ALIGN BED to determine required disk (GCP/AWS only)
 
 Parameter|Default|Description
 ---------|-------|-----------

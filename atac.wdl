@@ -196,7 +196,7 @@ workflow atac {
         Int xcor_cpu = 2
         Float xcor_mem_factor = 1.0
         Int xcor_time_hr = 6
-        Float xcor_disk_factor = 1.5
+        Float xcor_disk_factor = 4.5
 
         Int call_peak_cpu = 2
         Float call_peak_mem_factor = 2.0
@@ -1730,9 +1730,9 @@ task align {
         Int time_hr
         Float disk_factor
     }
-    Float input_file_size = size(fastqs_R1) + size(fastqs_R2)
-    Float mem_gb = 2.0 + mem_factor * input_file_size
-    Int disk_gb = round(20.0 + disk_factor * input_file_size)
+    Float input_file_size_gb = size(fastqs_R1, "G") + size(fastqs_R2, "G")
+    Float mem_gb = (2.0 + mem_factor * input_file_size_gb)
+    Int disk_gb = round(20.0 + disk_factor * input_file_size_gb)
 
     # tmp vars for task trim_adapter
     Array[Array[File]] tmp_fastqs = if paired_end then transpose([fastqs_R1, fastqs_R2])
@@ -1840,10 +1840,10 @@ task filter {
         Int time_hr
         Float disk_factor
     }
-    Float input_file_size = size(bam)
+    Float input_file_size_gb = size(bam, "G")
     Float picard_java_heap_factor = 0.9
-    Float mem_gb = 17.0 + mem_factor * input_file_size
-    Int disk_gb = round(20.0 + disk_factor * input_file_size)
+    Float mem_gb = 17.0 + mem_factor * input_file_size_gb
+    Int disk_gb = round(20.0 + disk_factor * input_file_size_gb)
 
     command {
         set -e
@@ -1888,9 +1888,9 @@ task bam2ta {
         Int time_hr
         Float disk_factor
     }
-    Float input_file_size = size(bam)
-    Float mem_gb = 4.0 + mem_factor * input_file_size
-    Int disk_gb = round(20.0 + disk_factor * input_file_size)
+    Float input_file_size_gb = size(bam, "G")
+    Float mem_gb = 4.0 + mem_factor * input_file_size_gb
+    Int disk_gb = round(20.0 + disk_factor * input_file_size_gb)
 
     command {
         set -e
@@ -1921,9 +1921,9 @@ task spr {
         Float mem_factor
         Float disk_factor
     }
-    Float input_file_size = size(ta)
-    Float mem_gb = 4.0 + mem_factor * input_file_size
-    Int disk_gb = round(20.0 + disk_factor * input_file_size)
+    Float input_file_size_gb = size(ta, "G")
+    Float mem_gb = 4.0 + mem_factor * input_file_size_gb
+    Int disk_gb = round(20.0 + disk_factor * input_file_size_gb)
 
     command {
         set -e
@@ -1980,9 +1980,9 @@ task xcor {
         Int time_hr
         Float disk_factor
     }
-    Float input_file_size = size(ta)
-    Float mem_gb = 8.0 + mem_factor * input_file_size
-    Int disk_gb = round(20.0 + disk_factor * input_file_size)
+    Float input_file_size_gb = size(ta, "G")
+    Float mem_gb = 8.0 + mem_factor * input_file_size_gb
+    Int disk_gb = round(20.0 + disk_factor * input_file_size_gb)
 
     command {
         set -e
@@ -2018,9 +2018,9 @@ task jsd {
         Int time_hr
         Float disk_factor
     }
-    Float input_file_size = size(nodup_bams)
-    Float mem_gb = 5.0 + mem_factor * input_file_size
-    Int disk_gb = round(20.0 + disk_factor * input_file_size)
+    Float input_file_size_gb = size(nodup_bams, "G")
+    Float mem_gb = 5.0 + mem_factor * input_file_size_gb
+    Int disk_gb = round(20.0 + disk_factor * input_file_size_gb)
 
     command {
         set -e
@@ -2085,9 +2085,9 @@ task call_peak {
         Int time_hr
         Float disk_factor
     }
-    Float input_file_size = size(ta)
-    Float mem_gb = 4.0 + mem_factor * input_file_size
-    Int disk_gb = round(20.0 + disk_factor * input_file_size)
+    Float input_file_size_gb = size(ta, "G")
+    Float mem_gb = 4.0 + mem_factor * input_file_size_gb
+    Int disk_gb = round(20.0 + disk_factor * input_file_size_gb)
 
     command {
         set -e
@@ -2144,9 +2144,9 @@ task macs2_signal_track {
         Int time_hr
         Float disk_factor
     }
-    Float input_file_size = size(ta)
-    Float mem_gb = 4.0 + mem_factor * input_file_size
-    Int disk_gb = round(20.0 + disk_factor * input_file_size)
+    Float input_file_size_gb = size(ta, "G")
+    Float mem_gb = 4.0 + mem_factor * input_file_size_gb
+    Int disk_gb = round(20.0 + disk_factor * input_file_size_gb)
 
     command {
         set -e
@@ -2314,9 +2314,9 @@ task preseq {
         String? picard_java_heap
         File? null
     }
-    Float input_file_size = size(bam)
-    Float mem_gb = 4.0 + mem_factor * input_file_size
-    Int disk_gb = round(20.0 + disk_factor * input_file_size)
+    Float input_file_size_gb = size(bam, "G")
+    Float mem_gb = 4.0 + mem_factor * input_file_size_gb
+    Int disk_gb = round(20.0 + disk_factor * input_file_size_gb)
     Float picard_java_heap_factor = 0.9
 
     command {
@@ -2405,7 +2405,7 @@ task fraglen_stat_pe {
         File? nodup_bam
         String? picard_java_heap
     }
-    Float input_file_size = size(nodup_bam)
+    Float input_file_size_gb = size(nodup_bam, "G")
     Float mem_gb = 8.0
     Float picard_java_heap_factor = 0.9
 
@@ -2434,7 +2434,7 @@ task gc_bias {
 
         String? picard_java_heap
     }
-    Float input_file_size = size(nodup_bam)
+    Float input_file_size_gb = size(nodup_bam, "G")
     Float mem_gb = 8.0
     Float picard_java_heap_factor = 0.9
 
