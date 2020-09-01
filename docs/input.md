@@ -226,71 +226,73 @@ Parameter|Default|Description
 
 > **WARNING**: It is recommened not to change the following parameters unless you get resource-related errors for a certain task and you want to increase resources for such task. The following parameters are provided for users who want to run our pipeline with Caper's `local` on HPCs and 2).
 
-Resources defined here are PER REPLICATE. Therefore, total number of cores will be approximately `atac.align_cpu` x `NUMBER_OF_REPLICATES` because `align` is a bottlenecking task of the pipeline. Use this total number of cores if you manually `qsub` or `sbatch` your job (using local mode of Caper). `disks` is used for Google Cloud and DNAnexus only.
+Resources defined here are PER REPLICATE. Therefore, total number of cores will be approximately `atac.align_cpu` x `NUMBER_OF_REPLICATES` because `align` is a bottlenecking task of the pipeline. Use this total number of cores if you manually `qsub` or `sbatch` your job (using local mode of Caper). `disk_factor` is used for Google Cloud and DNAnexus only.
 
-Parameter|Default
----------|-------
-`atac.align_cpu` | 4
-`atac.align_mem_mb` | 20000
-`atac.align_time_hr` | 48
-`atac.align_disks` | `local-disk 400 HDD`
+Parameter|Default|Description
+---------|-------|-----------
+`atac.align_cpu` | 4 |
+`atac.align_mem_factor` | 0.05 | Multiplied to size of FASTQs to determine required memory
+`atac.align_time_hr` | 48 | Walltime (HPCs only)
+`atac.align_disk_factor` | 6.0 | Multiplied to size of FASTQs to determine required disk (GCP/AWS only)
 
-Parameter|Default
----------|-------
-`atac.filter_cpu` | 2
-`atac.filter_mem_mb` | 20000
-`atac.filter_time_hr` | 24
-`atac.filter_disks` | `local-disk 400 HDD`
+Parameter|Default|Description
+---------|-------|-----------
+`atac.filter_cpu` | 2 |
+`atac.filter_mem_factor` | 0.2 | Multiplied to size of BAM to determine required memory
+`atac.filter_time_hr` | 24 | Walltime (HPCs only)
+`atac.filter_disk_factor` | 4.0 | Multiplied to size of BAM to determine required disk (GCP/AWS only)
 
-Parameter|Default
----------|-------
-`atac.bam2ta_cpu` | 2
-`atac.bam2ta_mem_mb` | 10000
-`atac.bam2ta_time_hr` | 6
-`atac.bam2ta_disks` | `local-disk 100 HDD`
+Parameter|Default|Description
+---------|-------|-----------
+`atac.bam2ta_cpu` | 2 |
+`atac.bam2ta_mem_factor` | 0.3 | Multiplied to size of filtered BAM to determine required memory
+`atac.bam2ta_time_hr` | 6 | Walltime (HPCs only)
+`atac.bam2ta_disk_factor` | 4.0 | Multiplied to size of filtered BAM to determine required disk (GCP/AWS only)
 
-Parameter|Default
----------|-------
-`atac.spr_mem_mb` | 16000
+Parameter|Default|Description
+---------|-------|-----------
+`atac.spr_mem_factor` | 4.5 | Multiplied to size of filtered BAM to determine required memory
+`atac.spr_disk_factor` | 6.0 | Multiplied to size of filtered BAM to determine required disk (GCP/AWS only)
 
-Parameter|Default
----------|-------
-`atac.jsd_cpu` | 2
-`atac.jsd_mem_mb` | 12000
-`atac.jsd_time_hr` | 6
-`atac.jsd_disks` | `local-disk 200 HDD`
+Parameter|Default|Description
+---------|-------|-----------
+`atac.jsd_cpu` | 2 |
+`atac.jsd_mem_factor` | 0.1 | Multiplied to size of filtered BAM to determine required memory
+`atac.jsd_time_hr` | 6 | Walltime (HPCs only)
+`atac.jsd_disk_factor` | 2.0 | Multiplied to size of filtered BAM to determine required disk (GCP/AWS only)
 
-Parameter|Default
----------|-------
-`atac.xcor_cpu` | 2
-`atac.xcor_mem_mb` | 16000
-`atac.xcor_time_hr` | 6
-`atac.xcor_disks` | `local-disk 100 HDD`
+Parameter|Default|Description
+---------|-------|-----------
+`atac.xcor_cpu` | 2 |
+`atac.xcor_mem_factor` | 1.0 | Multiplied to size of TAG-ALIGN BED to determine required memory
+`atac.xcor_time_hr` | 6 | Walltime (HPCs only)
+`atac.xcor_disk_factor` | 1.5 | Multiplied to size of TAG-ALIGN BED to determine required disk (GCP/AWS only)
 
-Parameter|Default
----------|-------
-`atac.call_peak_cpu` | 1
-`atac.call_peak_mem_mb` | 16000
-`atac.call_peak_time_hr` | 24
-`atac.call_peak_disks` | `local-disk 200 HDD`
+Parameter|Default|Description
+---------|-------|-----------
+`atac.call_peak_cpu` | 2 | MACS2 is single-threaded. More than 2 is not required.
+`atac.call_peak_mem_factor` | 2.0 | Multiplied to size of TAG-ALIGN BED to determine required memory
+`atac.call_peak_time_hr` | 24 | Walltime (HPCs only)
+`atac.call_peak_disk_factor` | 15.0 | Multiplied to size of TAG-ALIGN BED to determine required disk (GCP/AWS only)
 
-Parameter|Default
----------|-------
-`atac.macs2_signal_track_mem_mb` | 16000
-`atac.macs2_signal_track_time_hr` | 24
-`atac.macs2_signal_track_disks` | `local-disk 400 HDD`
+Parameter|Default|Description
+---------|-------|-----------
+`atac.macs2_signal_track_mem_factor` | 6.0 | Multiplied to size of TAG-ALIGN BED to determine required memory
+`atac.macs2_signal_track_time_hr` | 24 | Walltime (HPCs only)
+`atac.macs2_signal_track_disk_factor` | 40.0 | Multiplied to size of TAG-ALIGN BED to determine required disk (GCP/AWS only)
 
-Parameter|Default
----------|-------
-`atac.preseq_mem_mb` | 16000
+Parameter|Default|Description
+---------|-------|-----------
+`atac.preseq_mem_factor` | 0.5 | Multiplied to size of BAM to determine required memory
+`atac.preseq_disk_factor` | 5.0 | Multiplied to size of BAM to determine required disk (GCP/AWS only)
 
 > **IMPORTANT**: If you see memory Java errors, check the following resource parameters.
 
-There are special parameters to control maximum Java heap memory (e.g. `java -Xmx4G`) for Picard tools. They are strings including size units. Such string will be directly appended to Java's parameter `-Xmx`. If these parameters are not defined then pipeline uses 90% of each task's memory (e.g. `atac.filter_mem_mb`).
+There are special parameters to control maximum Java heap memory (e.g. `java -Xmx4G`) for Picard tools. They are strings including size units. Such string will be directly appended to Java's parameter `-Xmx`. If these parameters are not defined then pipeline uses 90% of each task's memory.
 
 Parameter|Default
 ---------|-------
-`atac.filter_picard_java_heap` | = `atac.filter_mem_mb`
-`atac.preseq_picard_java_heap` | = `atac.preseq_mem_mb`
-`atac.fraglen_stat_picard_java_heap` | `6G`
-`atac.gc_bias_picard_java_heap` | `10G`
+`atac.filter_picard_java_heap` | = 90% of memory for `atac.filter` (dynamic)
+`atac.preseq_picard_java_heap` | = 90% of memory for `atac.preseq` (dynamic)
+`atac.fraglen_stat_picard_java_heap` | 90% of memory for `atac.fraglen_stat_pe` (8GB)
+`atac.gc_bias_picard_java_heap` | 90% of memory for `atac.gc_bias` (8GB)
