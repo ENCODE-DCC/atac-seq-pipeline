@@ -27,7 +27,6 @@ The ATAC-seq pipeline protocol specification is [here](https://docs.google.com/d
 2) Install pipeline's [Conda environment](docs/install_conda.md) if you want to use Conda instead of Docker/Singularity. Conda is recommneded on local computer and HPCs (e.g. Stanford Sherlock/SCG).
 	> **IMPORTANT*: use `encode-atac-seq-pipeline` as `[PIPELINE_CONDA_ENV]` in Caper's documentation.
 
-
 3) **Skip this step if you have installed pipeline's Conda environment**. Caper is already included in the Conda environment. [Install Caper](https://github.com/ENCODE-DCC/caper#installation). Caper is a python wrapper for [Cromwell](https://github.com/broadinstitute/cromwell).
 	> **IMPORTANT**: Make sure that you have python3(> 3.4.1) installed on your system.
 
@@ -40,7 +39,7 @@ The ATAC-seq pipeline protocol specification is [here](https://docs.google.com/d
 
 ## Test input JSON file
 
-Use `https://storage.googleapis.com/encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ_subsampled_caper.json` as `[INPUT_JSON]` in Caper's documentation.
+Use `https://storage.googleapis.com/encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ_subsampled.json` as `[INPUT_JSON]` in Caper's documentation.
 
 ## Input JSON file
 
