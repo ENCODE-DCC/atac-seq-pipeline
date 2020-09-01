@@ -16,10 +16,10 @@ workflow test_xcor {
         String ref_se_xcor_log_subsample
         String mito_chr_name = 'chrM'
 
-        Int xcor_cpu = 1
-        Int xcor_mem_mb = 16000
+        Int xcor_cpu = 2
+        Float xcor_mem_factor = 1.0
         Int xcor_time_hr = 6
-        String xcor_disks = 'local-disk 100 HDD'
+        Float xcor_disk_factor = 1.5
     }
     call atac.xcor as pe_xcor { input :
         ta = pe_ta,
@@ -28,9 +28,9 @@ workflow test_xcor {
         mito_chr_name = mito_chr_name,
 
         cpu = xcor_cpu,
-        mem_mb = xcor_mem_mb,
+        mem_factor = xcor_mem_factor,
         time_hr = xcor_time_hr,
-        disks = xcor_disks,
+        disk_factor = xcor_disk_factor,
     }
     call atac.xcor as pe_xcor_subsample { input :
         ta = pe_ta,
@@ -39,9 +39,9 @@ workflow test_xcor {
         mito_chr_name = mito_chr_name,
 
         cpu = xcor_cpu,
-        mem_mb = xcor_mem_mb,
+        mem_factor = xcor_mem_factor,
         time_hr = xcor_time_hr,
-        disks = xcor_disks,
+        disk_factor = xcor_disk_factor,
     }
     call atac.xcor as se_xcor { input :
         ta = se_ta,
@@ -50,9 +50,9 @@ workflow test_xcor {
         mito_chr_name = mito_chr_name,
 
         cpu = xcor_cpu,
-        mem_mb = xcor_mem_mb,
+        mem_factor = xcor_mem_factor,
         time_hr = xcor_time_hr,
-        disks = xcor_disks,
+        disk_factor = xcor_disk_factor,
     }
     call atac.xcor as se_xcor_subsample { input :
         ta = se_ta,
@@ -61,9 +61,9 @@ workflow test_xcor {
         mito_chr_name = mito_chr_name,
 
         cpu = xcor_cpu,
-        mem_mb = xcor_mem_mb,
+        mem_factor = xcor_mem_factor,
         time_hr = xcor_time_hr,
-        disks = xcor_disks,
+        disk_factor = xcor_disk_factor,
     }
 
     call compare_md5sum.compare_md5sum { input :

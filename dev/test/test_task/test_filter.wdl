@@ -26,9 +26,9 @@ workflow test_filter {
         String mito_chr_name = 'chrM'
 
         Int filter_cpu = 1
-        Int filter_mem_mb = 20000
+        Float filter_mem_factor = 0.2
         Int filter_time_hr = 24
-        String filter_disks = 'local-disk 100 HDD'
+        Float filter_disk_factor = 4.0
     }
 
     call atac.filter as pe_filter { input :
@@ -44,10 +44,10 @@ workflow test_filter {
         no_dup_removal = false,
 
         cpu = filter_cpu,
-        mem_mb = filter_mem_mb,
+        mem_factor = filter_mem_factor,
         picard_java_heap = '4G',
         time_hr = filter_time_hr,
-        disks = filter_disks,
+        disk_factor = filter_disk_factor,
     }
     call atac.filter as pe_filter_no_multimapping { input :
         bam = pe_bam_no_multimapping,
@@ -62,10 +62,10 @@ workflow test_filter {
         no_dup_removal = false,
 
         cpu = filter_cpu,
-        mem_mb = filter_mem_mb,
+        mem_factor = filter_mem_factor,
         picard_java_heap = '4G',
         time_hr = filter_time_hr,
-        disks = filter_disks,
+        disk_factor = filter_disk_factor,
     }
     call atac.filter as pe_filter_no_dup_removal { input :
         bam = pe_bam,
@@ -80,10 +80,10 @@ workflow test_filter {
         no_dup_removal = true,
 
         cpu = filter_cpu,
-        mem_mb = filter_mem_mb,
+        mem_factor = filter_mem_factor,
         picard_java_heap = '4G',
         time_hr = filter_time_hr,
-        disks = filter_disks,
+        disk_factor = filter_disk_factor,
     }
     call atac.filter as se_filter { input :
         bam = se_bam,
@@ -98,10 +98,10 @@ workflow test_filter {
         no_dup_removal = false,
 
         cpu = filter_cpu,
-        mem_mb = filter_mem_mb,
+        mem_factor = filter_mem_factor,
         picard_java_heap = '4G',
         time_hr = filter_time_hr,
-        disks = filter_disks,
+        disk_factor = filter_disk_factor,
     }
     call atac.filter as se_filter_no_multimapping { input :
         bam = se_bam_no_multimapping,
@@ -116,10 +116,10 @@ workflow test_filter {
         no_dup_removal = false,
 
         cpu = filter_cpu,
-        mem_mb = filter_mem_mb,
+        mem_factor = filter_mem_factor,
         picard_java_heap = '4G',
         time_hr = filter_time_hr,
-        disks = filter_disks,
+        disk_factor = filter_disk_factor,
     }
     call atac.filter as se_filter_no_dup_removal { input :
         bam = se_bam,
@@ -134,10 +134,10 @@ workflow test_filter {
         no_dup_removal = true,
 
         cpu = filter_cpu,
-        mem_mb = filter_mem_mb,
+        mem_factor = filter_mem_factor,
         picard_java_heap = '4G',
         time_hr = filter_time_hr,
-        disks = filter_disks,
+        disk_factor = filter_disk_factor,
     }
 
     call compare_md5sum.compare_md5sum { input :

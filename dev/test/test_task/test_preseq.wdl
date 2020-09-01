@@ -9,12 +9,16 @@ workflow test_preseq {
 
         File ref_picard_est_lib_size_qc
         File ref_preseq_log
+
+        Float preseq_mem_factor = 0.5
+        Float preseq_disk_factor = 5.0
     }
 
     call atac.preseq { input : 
         paired_end = paired_end,
         bam = bam,
-        mem_mb = 4000,
+        mem_factor = preseq_mem_factor,
+        disk_factor = preseq_disk_factor,
         picard_java_heap = '4G',
     }
 

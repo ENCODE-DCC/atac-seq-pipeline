@@ -26,9 +26,9 @@ workflow test_bowtie2 {
         String se_bowtie2_idx_tar
 
         Int bowtie2_cpu = 1
-        Int bowtie2_mem_mb = 20000
+        Float bowtie2_mem_factor = 0.05
         Int bowtie2_time_hr = 48
-        String bowtie2_disks = 'local-disk 100 HDD'
+        Float bowtie2_disk_factor = 6.0
     }
 
     call atac.align as pe_bowtie2 { input :
@@ -46,9 +46,9 @@ workflow test_bowtie2 {
         auto_detect_adapter = true,
 
         cpu = bowtie2_cpu,
-        mem_mb = bowtie2_mem_mb,
+        mem_factor = bowtie2_mem_factor,
         time_hr = bowtie2_time_hr,
-        disks = bowtie2_disks,
+        disk_factor = bowtie2_disk_factor,
     }
     call atac.align as pe_bowtie2_no_multimapping { input :
         aligner = 'bowtie2',
@@ -65,9 +65,9 @@ workflow test_bowtie2 {
         auto_detect_adapter = true,
 
         cpu = bowtie2_cpu,
-        mem_mb = bowtie2_mem_mb,
+        mem_factor = bowtie2_mem_factor,
         time_hr = bowtie2_time_hr,
-        disks = bowtie2_disks,
+        disk_factor = bowtie2_disk_factor,
     }
     call atac.align as se_bowtie2 { input :
         aligner = 'bowtie2',
@@ -84,9 +84,9 @@ workflow test_bowtie2 {
         auto_detect_adapter = true,
 
         cpu = bowtie2_cpu,
-        mem_mb = bowtie2_mem_mb,
+        mem_factor = bowtie2_mem_factor,
         time_hr = bowtie2_time_hr,
-        disks = bowtie2_disks,
+        disk_factor = bowtie2_disk_factor,
     }
     call atac.align as se_bowtie2_no_multimapping { input :
         aligner = 'bowtie2',
@@ -103,9 +103,9 @@ workflow test_bowtie2 {
         auto_detect_adapter = true,
 
         cpu = bowtie2_cpu,
-        mem_mb = bowtie2_mem_mb,
+        mem_factor = bowtie2_mem_factor,
         time_hr = bowtie2_time_hr,
-        disks = bowtie2_disks,
+        disk_factor = bowtie2_disk_factor,
     }
 
     call compare_md5sum.compare_md5sum { input :
