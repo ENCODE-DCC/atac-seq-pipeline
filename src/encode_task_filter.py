@@ -11,7 +11,7 @@ from encode_lib_common import (
     strip_ext_bam)
 from encode_lib_genomic import (
     locate_picard, remove_chrs_from_bam, samstat, samtools_index,
-    samtools_name_sort, check_bam_not_empty)
+    samtools_name_sort)
 
 
 def parse_arguments():
