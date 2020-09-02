@@ -11,7 +11,7 @@ from encode_lib_common import (
     strip_ext_bam)
 from encode_lib_genomic import (
     locate_picard, remove_chrs_from_bam, samstat, samtools_index,
-    samtools_name_sort)
+    samtools_name_sort, check_bam_not_empty)
 
 
 def parse_arguments():
@@ -299,6 +299,22 @@ def main():
             args.bam, args.multimapping, args.mapq_thresh,
             args.nth, args.out_dir)
 
+    log.info('Checking if filtered BAM file is empty...')
+    if not int(run_shell_cmd('samtools view -c {}'.format(filt_bam))):
+        help_msg = (
+            'No reads found in filtered BAM. '
+            'Low quality sample? '
+            'Or no reads passing criteria "samtools view -F 1804"? '
+            'Check samtools flags at '
+            'https://broadinstitute.github.io/picard/explain-flags.html '
+        )
+        if args.paired_end:
+            help_msg += (
+                'Or is this truely PE BAM? '
+                'All unpaired SE reads could be removed by samtools view -f 2. '
+            )
+        raise ValueError(help_msg)
+
     log.info('Marking dupes with {}...'.format(args.dup_marker))
     if args.dup_marker == 'picard':
         dupmark_bam, dup_qc = mark_dup_picard(
@@ -332,6 +348,14 @@ def main():
         temp_files.append(nodup_bam)
     else:
         final_bam = nodup_bam
+
+    log.info('Checking if final BAM file is empty...')
+    if not int(run_shell_cmd('samtools view -c {}'.format(final_bam))):
+        raise ValueError(
+            'No reads found in final (filtered/deduped) BAM. '
+            'Low quality sample? '
+            'Or BAM with duplicates only? '
+        )
 
     log.info('samtools index (final_bam)...')
     samtools_index(final_bam, args.nth, args.out_dir)
