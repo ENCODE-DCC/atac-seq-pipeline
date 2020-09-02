@@ -306,12 +306,12 @@ def main():
             'Low quality sample? '
             'Or no reads passing criteria "samtools view -F 1804"? '
             'Check samtools flags at '
-            'https://broadinstitute.github.io/picard/explain-flags.html '
+            'https://broadinstitute.github.io/picard/explain-flags.html. '
         )
         if args.paired_end:
             help_msg += (
                 'Or is this truely PE BAM? '
-                'All unpaired SE reads could be removed by samtools view -f 2. '
+                'All unpaired SE reads could be removed by "samtools view -f 2". '
             )
         raise ValueError(help_msg)
 
