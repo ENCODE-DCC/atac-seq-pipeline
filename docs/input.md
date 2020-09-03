@@ -228,71 +228,77 @@ Parameter|Default|Description
 
 Resources defined here are PER REPLICATE. Therefore, total number of cores will be approximately `atac.align_cpu` x `NUMBER_OF_REPLICATES` because `align` is a bottlenecking task of the pipeline. Use this total number of cores if you manually `qsub` or `sbatch` your job (using local mode of Caper). `disk_factor` is used for Google Cloud and DNAnexus only.
 
+For example, if sum of your FASTQs are 20GB then 4GB (base) + `atac.align_mem_factor` x 20GB = 5GB will be used for `align` task's instance memory.
+
+If sum of your TAG-ALIGN BEDs (intermediate outputs) are 5GB then 4GB (base) + `atac.macs2_signal_track_mem_factor` x 5GB = 34GB will be used for `macs2_signal_track` task's instance memory.
+
+Base memory/disk is 4GB/20GB for most tasks.
+
 Parameter|Default|Description
 ---------|-------|-----------
 `atac.align_cpu` | 4 |
 `atac.align_mem_factor` | 0.05 | Multiplied to size of FASTQs to determine required memory
 `atac.align_time_hr` | 48 | Walltime (HPCs only)
-`atac.align_disk_factor` | 6.0 | Multiplied to size of FASTQs to determine required disk (GCP/AWS only)
+`atac.align_disk_factor` | 6.0 | Multiplied to size of FASTQs to determine required disk
 
 Parameter|Default|Description
 ---------|-------|-----------
 `atac.filter_cpu` | 2 |
 `atac.filter_mem_factor` | 0.2 | Multiplied to size of BAM to determine required memory
 `atac.filter_time_hr` | 24 | Walltime (HPCs only)
-`atac.filter_disk_factor` | 4.0 | Multiplied to size of BAM to determine required disk (GCP/AWS only)
+`atac.filter_disk_factor` | 4.0 | Multiplied to size of BAM to determine required disk
 
 Parameter|Default|Description
 ---------|-------|-----------
 `atac.bam2ta_cpu` | 2 |
 `atac.bam2ta_mem_factor` | 0.3 | Multiplied to size of filtered BAM to determine required memory
 `atac.bam2ta_time_hr` | 6 | Walltime (HPCs only)
-`atac.bam2ta_disk_factor` | 4.0 | Multiplied to size of filtered BAM to determine required disk (GCP/AWS only)
+`atac.bam2ta_disk_factor` | 4.0 | Multiplied to size of filtered BAM to determine required disk
 
 Parameter|Default|Description
 ---------|-------|-----------
 `atac.spr_mem_factor` | 4.5 | Multiplied to size of filtered BAM to determine required memory
-`atac.spr_disk_factor` | 6.0 | Multiplied to size of filtered BAM to determine required disk (GCP/AWS only)
+`atac.spr_disk_factor` | 6.0 | Multiplied to size of filtered BAM to determine required disk
 
 Parameter|Default|Description
 ---------|-------|-----------
 `atac.jsd_cpu` | 2 |
 `atac.jsd_mem_factor` | 0.1 | Multiplied to size of filtered BAM to determine required memory
 `atac.jsd_time_hr` | 6 | Walltime (HPCs only)
-`atac.jsd_disk_factor` | 2.0 | Multiplied to size of filtered BAM to determine required disk (GCP/AWS only)
+`atac.jsd_disk_factor` | 2.0 | Multiplied to size of filtered BAM to determine required disk
 
 Parameter|Default|Description
 ---------|-------|-----------
 `atac.xcor_cpu` | 2 |
 `atac.xcor_mem_factor` | 1.0 | Multiplied to size of TAG-ALIGN BED to determine required memory
 `atac.xcor_time_hr` | 6 | Walltime (HPCs only)
-`atac.xcor_disk_factor` | 4.5 | Multiplied to size of TAG-ALIGN BED to determine required disk (GCP/AWS only)
+`atac.xcor_disk_factor` | 4.5 | Multiplied to size of TAG-ALIGN BED to determine required disk
 
 Parameter|Default|Description
 ---------|-------|-----------
 `atac.call_peak_cpu` | 2 | MACS2 is single-threaded. More than 2 is not required.
 `atac.call_peak_mem_factor` | 2.0 | Multiplied to size of TAG-ALIGN BED to determine required memory
 `atac.call_peak_time_hr` | 24 | Walltime (HPCs only)
-`atac.call_peak_disk_factor` | 15.0 | Multiplied to size of TAG-ALIGN BED to determine required disk (GCP/AWS only)
+`atac.call_peak_disk_factor` | 15.0 | Multiplied to size of TAG-ALIGN BED to determine required disk
 
 Parameter|Default|Description
 ---------|-------|-----------
 `atac.macs2_signal_track_mem_factor` | 6.0 | Multiplied to size of TAG-ALIGN BED to determine required memory
 `atac.macs2_signal_track_time_hr` | 24 | Walltime (HPCs only)
-`atac.macs2_signal_track_disk_factor` | 40.0 | Multiplied to size of TAG-ALIGN BED to determine required disk (GCP/AWS only)
+`atac.macs2_signal_track_disk_factor` | 40.0 | Multiplied to size of TAG-ALIGN BED to determine required disk
 
 Parameter|Default|Description
 ---------|-------|-----------
 `atac.preseq_mem_factor` | 0.5 | Multiplied to size of BAM to determine required memory
-`atac.preseq_disk_factor` | 5.0 | Multiplied to size of BAM to determine required disk (GCP/AWS only)
+`atac.preseq_disk_factor` | 5.0 | Multiplied to size of BAM to determine required disk
 
-> **IMPORTANT**: If you see memory Java errors, check the following resource parameters.
+If your system/cluster does not allow large memory allocation for Java applications, check the following resource parameters to manually define Java memory. It is **NOT RECOMMENDED** for most users to change these parameters since pipeline automatically takes 90% of task's memory for Java apps.
 
-There are special parameters to control maximum Java heap memory (e.g. `java -Xmx4G`) for Picard tools. They are strings including size units. Such string will be directly appended to Java's parameter `-Xmx`. If these parameters are not defined then pipeline uses 90% of each task's memory.
+There are special parameters to control maximum Java heap memory (e.g. `java -Xmx4G`) for Java applications (e.g. Picard tools). They are strings including size units. Such string will be directly appended to Java's parameter `-Xmx`. If these parameters are not defined then pipeline uses 90% of each task's memory.
 
 Parameter|Default
 ---------|-------
-`atac.filter_picard_java_heap` | = 90% of memory for `atac.filter` (dynamic)
-`atac.preseq_picard_java_heap` | = 90% of memory for `atac.preseq` (dynamic)
+`atac.filter_picard_java_heap` | 90% of memory for `atac.filter` (dynamic)
+`atac.preseq_picard_java_heap` | 90% of memory for `atac.preseq` (dynamic)
 `atac.fraglen_stat_picard_java_heap` | 90% of memory for `atac.fraglen_stat_pe` (8GB)
 `atac.gc_bias_picard_java_heap` | 90% of memory for `atac.gc_bias` (8GB)

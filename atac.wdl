@@ -2212,7 +2212,7 @@ task idr {
     }
     runtime {
         cpu : 1
-        memory : '8 GB'
+        memory : '4 GB'
         time : 1
         disks : 'local-disk 50 SSD'
     }

@@ -73,7 +73,7 @@ Mandatory parameters:
     * `atac.smooth_win`: Size of smoothing window for MACS2 (macs2 callpeak --shift [-smooth_win/2] --extsize [smooth_win]).
 
 7) [Resources](#resources)
-    * If your FASTQs/BAMs are big (>10GB) then try with higher resource settings, especially for memory (`atac.[TASK_NAME]_mem_mb`).
+    * It is recommened not to change the following parameters unless you get resource-related errors for a certain task and you want to increase resources for such task.
 
 Optional parameters:
 
@@ -184,6 +184,6 @@ You can also mix up different data types for individual bio replicate. For examp
 
 > **WARNING**: It is recommened not to change the following parameters unless you get resource-related errors for a certain task and you want to increase resources for such task. The following parameters are provided for users who want to run our pipeline with Caper's `local` on HPCs and 2).
 
-Resources defined here are **PER BIO REPLICATE**. Therefore, total number of cores will be approximately `atac.align_cpu` x `NUMBER_OF_BIO_REPLICATES` because `align` is a bottlenecking task of the pipeline. This total number of cores will be useful **ONLY** when you use a `local` backend of Caper and manually `qsub` or `sbatch` your job. `disk_factor` is used for Google Cloud and DNAnexus only.
+Resources defined here are **PER BIO REPLICATE**. Therefore, total number of cores will be approximately `atac.align_cpu` x `NUMBER_OF_BIO_REPLICATES` because `align` is a bottlenecking task of the pipeline. This total number of cores will be useful **ONLY** when you use a `local` backend of Caper and manually `qsub` or `sbatch` your job. `disk_factor` is used for GCP/AWS/DNAnexus only.
 
 See [this](input.md#resource-parameters) for details.
