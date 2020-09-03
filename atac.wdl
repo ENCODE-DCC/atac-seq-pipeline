@@ -1731,7 +1731,7 @@ task align {
         Float disk_factor
     }
     Float input_file_size_gb = size(fastqs_R1, "G") + size(fastqs_R2, "G")
-    Float mem_gb = (2.0 + mem_factor * input_file_size_gb)
+    Float mem_gb = 5.0 + mem_factor * input_file_size_gb
     Int disk_gb = round(20.0 + disk_factor * input_file_size_gb)
 
     # tmp vars for task trim_adapter
@@ -1815,9 +1815,9 @@ task frac_mito {
     }
     runtime {
         cpu : 1
-        memory : '8 GB'
+        memory : '4 GB'
         time : 1
-        disks : 'local-disk 100 SSD'
+        disks : 'local-disk 10 SSD'
     }
 }
 
@@ -2683,9 +2683,9 @@ task read_genome_tsv {
     runtime {
         maxRetries : 0
         cpu : 1
-        memory : '4 GB'
+        memory : '2 GB'
         time : 1
-        disks : 'local-disk 50 SSD'
+        disks : 'local-disk 10 SSD'
     }
 }
 
