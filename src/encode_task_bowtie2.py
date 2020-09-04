@@ -58,19 +58,28 @@ def bowtie2_se(fastq, ref_index_prefix,
     basename = os.path.basename(strip_ext_fastq(fastq))
     prefix = os.path.join(out_dir, basename)
     bam = '{}.bam'.format(prefix)
+    sam = '{}.sam'.format(prefix)
 
-    cmd = 'bowtie2 {} --mm --threads {} -x {} -U {} '
-    cmd += '| samtools view -Su /dev/stdin '
-    cmd += '| samtools sort /dev/stdin -o {} -T {}'
-    cmd = cmd.format(
-        '-k {}'.format(multimapping+1) if multimapping else '',
-        nth,
-        ref_index_prefix,
-        fastq,
-        bam,
-        prefix)
+    cmd = (
+        'bowtie2 {multimapping} --mm --threads {nth} -x {ref} '
+        '-U {fastq} -S {sam}'
+    ).format(
+        multimapping='-k {}'.format(multimapping+1) if multimapping else '',
+        nth=nth,
+        ref=ref_index_prefix,
+        fastq=fastq,
+        sam=sam,
+    )
     run_shell_cmd(cmd)
 
+    cmd2 = 'samtools sort {sam} -o {bam} -T {prefix}'.format(
+        sam=sam,
+        bam=bam,
+        prefix=prefix,
+    )
+    run_shell_cmd(cmd2)
+
+    rm_f(sam)
     return bam
 
 
@@ -79,21 +88,29 @@ def bowtie2_pe(fastq1, fastq2, ref_index_prefix,
     basename = os.path.basename(strip_ext_fastq(fastq1))
     prefix = os.path.join(out_dir, basename)
     bam = '{}.bam'.format(prefix)
+    sam = '{}.sam'.format(prefix)
 
-    cmd = 'bowtie2 {} -X2000 --mm --threads {} -x {} '
-    cmd += '-1 {} -2 {} | '
-    cmd += 'samtools view -Su /dev/stdin | '
-    cmd += 'samtools sort /dev/stdin -o {} -T {}'
-    cmd = cmd.format(
-        '-k {}'.format(multimapping+1) if multimapping else '',
-        nth,
-        ref_index_prefix,
-        fastq1,
-        fastq2,
-        bam,
-        prefix)
+    cmd = (
+        'bowtie2 {multimapping} -X2000 --mm --threads {nth} -x {ref} '
+        '-1 {fastq1} -2 {fastq2} -S {sam}'
+    ).format(
+        multimapping='-k {}'.format(multimapping+1) if multimapping else '',
+        nth=nth,
+        ref=ref_index_prefix,
+        fastq1=fastq1,
+        fastq2=fastq2,
+        sam=sam,
+    )
     run_shell_cmd(cmd)
 
+    cmd2 = 'samtools sort {sam} -o {bam} -T {prefix}'.format(
+        sam=sam,
+        bam=bam,
+        prefix=prefix,
+    )
+    run_shell_cmd(cmd2)
+
+    rm_f(sam)
     return bam
 
 
