@@ -31,5 +31,6 @@
     "atac.enable_xcor" : true,
     "atac.enable_tss_enrich" : true,
     "atac.title" : "ENCSR356KRQ",
-    "atac.description" : "ATAC-seq on primary keratinocytes in day 0.0 of differentiation"
+    "atac.description" : "ATAC-seq on primary keratinocytes in day 0.0 of differentiation",
+    "atac.align_cpu" : 8
 }
