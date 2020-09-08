@@ -31,6 +31,9 @@ def parse_arguments():
                         help='Output directory.')
     parser.add_argument('--nth', type=int, default=1,
                         help='Number of threads to parallelize.')
+    parser.add_argument('--mem-gb', type=float,
+                        help='Max. memory for samtools sort in GB. '
+                        'It should be total memory for this task (not memory per thread).')
     parser.add_argument('--log-level', default='INFO',
                         choices=['NOTSET', 'DEBUG', 'INFO',
                                  'WARNING', 'CRITICAL', 'ERROR',

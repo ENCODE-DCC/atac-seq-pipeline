@@ -3,6 +3,7 @@
 # ENCODE DCC common functions
 # Author: Jin Lee (leepc12@gmail.com)
 
+import math
 import os
 import gzip
 import re
@@ -35,11 +36,11 @@ def remove_chrs_from_bam(bam, chrs, chrsz, nth=1, out_dir=''):
     run_shell_cmd(cmd0)
 
     # remove chrs from BAM
-    cmd1 = 'samtools view -b -L {tmp_chrsz} {bam} -@ {nth} > {final_bam}'
+    cmd1 = 'samtools view -b -L {tmp_chrsz} {bam} {res_param} > {final_bam}'
     cmd1 = cmd1.format(
         tmp_chrsz=tmp_chrsz,
         bam=bam,
-        nth=nth,
+        res_param=get_samtools_view_res_param(nth=nth),
         final_bam=final_bam)
     run_shell_cmd(cmd1)
     rm_f(tmp_chrsz)
@@ -47,25 +48,31 @@ def remove_chrs_from_bam(bam, chrs, chrsz, nth=1, out_dir=''):
     return final_bam
 
 
-def samstat(bam, nth=1, out_dir=''):
+def samstat(bam, nth=1, mem_gb=None, out_dir=''):
     prefix = os.path.join(out_dir,
                           os.path.basename(strip_ext_bam(bam)))
     samstat_qc = '{}.samstats.qc'.format(prefix)
 
-    cmd = 'samtools sort -n {bam} -T {prefix}.tmp -O sam | '
-    cmd += 'SAMstats --sorted_sam_file - --outf {samstat_qc}'
-    cmd = cmd.format(
-        bam=bam,
-        prefix=prefix,
-        samstat_qc=samstat_qc)
-    run_shell_cmd(cmd)
+    run_shell_cmd(
+        'samtools sort -n {bam} -T {prefix}.tmp {res_param} -O sam | '
+        'SAMstats --sorted_sam_file - --outf {samstat_qc}'.format(
+            bam=bam,
+            prefix=prefix,
+            res_param=get_samtools_sort_res_param(nth=nth, mem_gb=mem_gb),
+            samstat_qc=samstat_qc,
+        )
+    )
     return samstat_qc
 
 
 def samtools_index(bam, nth=1, out_dir=''):
     bai = '{}.bai'.format(bam)
-    cmd = 'samtools index {}'.format(bam)
-    run_shell_cmd(cmd)
+    run_shell_cmd(
+        'samtools index {bam} {res_param}'.format(
+            bam=bam,
+            res_param=get_samtools_view_res_param(nth=nth),
+        )
+    )
     if os.path.abspath(out_dir) != \
             os.path.abspath(os.path.dirname(bam)):
         return os.path.join(out_dir, os.path.basename(bai))
@@ -73,94 +80,84 @@ def samtools_index(bam, nth=1, out_dir=''):
         return bai
 
 
-def sambamba_index(bam, nth, out_dir=''):
-    bai = '{}.bai'.format(bam)
-    cmd = 'sambamba index {} -t {}'.format(bam, nth)
-    run_shell_cmd(cmd)
-    if os.path.abspath(out_dir) != \
-            os.path.abspath(os.path.dirname(bam)):
-        return os.path.join(out_dir, os.path.basename(bai))
-    else:
-        return bai
+def get_samtools_view_res_param(nth=1):
+    """Make resource parameters (-@) for samtools view/index/fixmate.
+        -@ means number of additional threads (samtools 1.9).
+
+    Args:
+        nth:
+            Number of additional threads.
+            Tested with samtools 1.9.
+            Lower version of samtools work a bit differently.
+            For such lower versions, -@ is number of threads (not -1).
+            Run `samtools view --help` with your version and check if
+            it is based on `nth - 1`.
+    """
+    res_param = ''
+    if nth:
+        res_param += '-@ {additional_threads} '.format(
+            additional_threads=nth - 1
+        )
+    return res_param
 
 
-def samtools_flagstat(bam, out_dir):
-    prefix = os.path.join(out_dir,
-                          os.path.basename(strip_ext_bam(bam)))
-    flagstat_qc = '{}.flagstat.qc'.format(prefix)
+def get_samtools_sort_res_param(nth=1, mem_gb=None):
+    """Make resource parameters (-@, -m) for samtools sort.
+        -@ means number of additional threads (samtools 1.9).
+        -m means memory per thread.
 
-    cmd = 'samtools flagstat {} > {}'.format(
-        bam,
-        flagstat_qc)
-    run_shell_cmd(cmd)
-    return flagstat_qc
-
-
-def sambamba_flagstat(bam, nth, out_dir):
-    prefix = os.path.join(out_dir,
-                          os.path.basename(strip_ext_bam(bam)))
-    flagstat_qc = '{}.flagstat.qc'.format(prefix)
-
-    cmd = 'sambamba flagstat {} -t {} > {}'.format(
-        bam,
-        nth,
-        flagstat_qc)
-    run_shell_cmd(cmd)
-    return flagstat_qc
+    Args:
+        nth:
+            Number of additional threads.
+        mem_gb:
+            Total memory in GBs.
+    """
+    res_param = get_samtools_view_res_param(nth=nth)
+    if nth and mem_gb:
+        res_param += '-m {mem}M '.format(
+            mem=math.floor(mem_gb * 1024.0 / nth)
+        )
+    return res_param
 
 
-def samtools_sort(bam, nth, out_dir):
-    prefix = os.path.join(out_dir,
-                          os.path.basename(strip_ext_bam(bam)))
-    srt_bam = '{}.srt.bam'.format(prefix)
-
-    cmd = 'samtools sort {} -o {} -T {} -@ {}'.format(
-        bam,
-        srt_bam,
-        prefix,
-        nth)
-    run_shell_cmd(cmd)
-    return srt_bam
-
-
-def sambamba_sort(bam, nth, out_dir):
+def samtools_sort(bam, nth=1, mem_gb=None, out_dir=''):
     prefix = os.path.join(out_dir,
                           os.path.basename(strip_ext_bam(bam)))
     srt_bam = '{}.srt.bam'.format(prefix)
 
-    cmd = 'sambamba sort {} -o {} -t {}'.format(
-        bam,
-        srt_bam,
-        nth)
-    run_shell_cmd(cmd)
+    run_shell_cmd(
+        'samtools sort {bam} -o {srt_bam} -T {prefix} {res_param}'.format(
+            bam=bam,
+            srt_bam=srt_bam,
+            prefix=prefix,
+            res_param=get_samtools_sort_res_param(nth=nth, mem_gb=mem_gb),
+        )
+    )
     return srt_bam
 
 
-def samtools_name_sort(bam, nth, out_dir):
+def samtools_name_sort(bam, nth=1, mem_gb=None, out_dir=''):
     prefix = os.path.join(out_dir,
                           os.path.basename(strip_ext_bam(bam)))
     nmsrt_bam = '{}.nmsrt.bam'.format(prefix)
 
-    cmd = 'samtools sort -n {} -o {} -T {} -@ {}'.format(
-        bam,
-        nmsrt_bam,
-        prefix,
-        nth)
-    run_shell_cmd(cmd)
+    run_shell_cmd(
+        'samtools sort -n {bam} -o {nmsrt_bam} -T {prefix} {res_param}'.format(
+            bam=bam,
+            nmsrt_bam=nmsrt_bam,
+            prefix=prefix,
+            res_param=get_samtools_sort_res_param(nth=nth, mem_gb=mem_gb),
+        )
+    )
     return nmsrt_bam
 
 
-def sambamba_name_sort(bam, nth, out_dir):
-    prefix = os.path.join(out_dir,
-                          os.path.basename(strip_ext_bam(bam)))
-    nmsrt_bam = '{}.nmsrt.bam'.format(prefix)
-
-    cmd = 'sambamba sort -n {} -o {} -t {}'.format(
-        bam,
-        nmsrt_bam,
-        nth)
-    run_shell_cmd(cmd)
-    return nmsrt_bam
+def bam_is_empty(bam, nth=1):
+    cmd = 'samtools view -c {bam} {res_param}'.format(
+        bam=bam,
+        res_param=get_samtools_view_res_param(nth=nth),
+    )
+    return int(run_shell_cmd(cmd)) == 0
 
 
 def locate_picard():
