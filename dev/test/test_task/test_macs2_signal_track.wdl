@@ -15,7 +15,7 @@ workflow test_macs2_signal_track {
         String se_chrsz
         String se_gensz
 
-        Float macs2_mem_factor = 6.0
+        Float macs2_mem_factor = 0.0
         Int macs2_time_hr = 24
         Float macs2_disk_factor = 40.0
     }

@@ -10,7 +10,7 @@ workflow test_preseq {
         File ref_picard_est_lib_size_qc
         File ref_preseq_log
 
-        Float preseq_mem_factor = 0.5
+        Float preseq_mem_factor = 0.0
         Float preseq_disk_factor = 5.0
     }
 

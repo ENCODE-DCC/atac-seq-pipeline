@@ -12,7 +12,7 @@ workflow test_spr {
         String ref_se_ta_pr1
         String ref_se_ta_pr2
 
-        Float spr_mem_factor = 4.5
+        Float spr_mem_factor = 0.0
         Float spr_disk_factor = 6.0
     }
 

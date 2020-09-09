@@ -18,7 +18,7 @@ workflow test_bam2ta {
         String mito_chr_name = 'chrM'
 
         Int bam2ta_cpu = 1
-        Float bam2ta_mem_factor = 0.3
+        Float bam2ta_mem_factor = 0.0
         Int bam2ta_time_hr = 6
         Float bam2ta_disk_factor = 4.0
     }

@@ -26,7 +26,7 @@ workflow test_bowtie2 {
         String se_bowtie2_idx_tar
 
         Int bowtie2_cpu = 1
-        Float bowtie2_mem_factor = 0.05
+        Float bowtie2_mem_factor = 0.0
         Int bowtie2_time_hr = 48
         Float bowtie2_disk_factor = 6.0
     }

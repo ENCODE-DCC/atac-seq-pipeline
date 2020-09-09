@@ -14,7 +14,7 @@ workflow test_jsd {
         Int mapq_thresh = 30
 
         Int jsd_cpu = 1
-        Float jsd_mem_factor = 0.1
+        Float jsd_mem_factor = 0.0
         Int jsd_time_hr = 12
         Float jsd_disk_factor = 2.0
     }

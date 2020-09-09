@@ -26,7 +26,7 @@ workflow test_filter {
         String mito_chr_name = 'chrM'
 
         Int filter_cpu = 1
-        Float filter_mem_factor = 0.2
+        Float filter_mem_factor = 0.0
         Int filter_time_hr = 24
         Float filter_disk_factor = 4.0
     }
