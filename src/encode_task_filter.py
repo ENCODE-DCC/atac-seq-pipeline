@@ -12,7 +12,7 @@ from encode_lib_common import (
 from encode_lib_genomic import (
     locate_picard, remove_chrs_from_bam, samstat, samtools_index,
     samtools_name_sort, bam_is_empty,
-    get_samtools_view_res_param, get_samtools_sort_res_param)
+    get_samtools_res_param)
 
 
 def parse_arguments():
@@ -69,7 +69,6 @@ def rm_unmapped_lowq_reads_se(bam, multimapping, mapq_thresh, nth, mem_gb, out_d
     prefix = os.path.join(out_dir,
                           os.path.basename(strip_ext_bam(bam)))
     filt_bam = '{}.filt.bam'.format(prefix)
-    sort_res_param = get_samtools_sort_res_param(nth=nth, mem_gb=mem_gb)
 
     if multimapping:
         qname_sort_bam = samtools_name_sort(bam, nth, mem_gb, out_dir)
@@ -83,7 +82,7 @@ def rm_unmapped_lowq_reads_se(bam, multimapping, mapq_thresh, nth, mem_gb, out_d
                 multimapping=multimapping,
                 filt_bam=filt_bam,
                 prefix=prefix,
-                res_param=sort_res_param,
+                res_param=get_samtools_res_param('sort', nth=nth, mem_gb=mem_gb),
             )
         )
         rm_f(qname_sort_bam)  # remove temporary files
@@ -95,7 +94,7 @@ def rm_unmapped_lowq_reads_se(bam, multimapping, mapq_thresh, nth, mem_gb, out_d
                 bam=bam,
                 filt_bam=filt_bam,
                 prefix=prefix,
-                res_param=sort_res_param,
+                res_param=get_samtools_res_param('sort', nth=nth, mem_gb=mem_gb),
             )
         )
 
@@ -113,9 +112,6 @@ def rm_unmapped_lowq_reads_pe(bam, multimapping, mapq_thresh, nth, mem_gb, out_d
     tmp_filt_bam = '{}.tmp_filt.bam'.format(prefix)
     fixmate_bam = '{}.fixmate.bam'.format(prefix)
 
-    res_param = get_samtools_view_res_param(nth=nth)
-    sort_res_param = get_samtools_sort_res_param(nth=nth, mem_gb=mem_gb)
-
     if multimapping:
         run_shell_cmd(
             'samtools view -F 524 -f 2 -u {bam} | '
@@ -123,7 +119,7 @@ def rm_unmapped_lowq_reads_pe(bam, multimapping, mapq_thresh, nth, mem_gb, out_d
                 bam=bam,
                 tmp_filt_bam=tmp_filt_bam,
                 prefix=prefix,
-                res_param=sort_res_param,
+                res_param=get_samtools_res_param('view', nth=nth),
             )
         )
 
@@ -134,7 +130,7 @@ def rm_unmapped_lowq_reads_pe(bam, multimapping, mapq_thresh, nth, mem_gb, out_d
                 tmp_filt_bam=tmp_filt_bam,
                 multimapping=multimapping,
                 fixmate_bam=fixmate_bam,
-                res_param=res_param,
+                res_param=get_samtools_res_param('fixmate', nth=nth),
             )
         )
     else:
@@ -145,14 +141,14 @@ def rm_unmapped_lowq_reads_pe(bam, multimapping, mapq_thresh, nth, mem_gb, out_d
                 bam=bam,
                 tmp_filt_bam=tmp_filt_bam,
                 prefix=prefix,
-                res_param=sort_res_param,
+                res_param=get_samtools_res_param('sort', nth=nth, mem_gb=mem_gb),
             )
         )
         run_shell_cmd(
             'samtools fixmate -r {tmp_filt_bam} {fixmate_bam} {res_param}'.format(
                 tmp_filt_bam=tmp_filt_bam,
                 fixmate_bam=fixmate_bam,
-                res_param=res_param,
+                res_param=get_samtools_res_param('fixmate', nth=nth),
             )
         )
 
@@ -164,7 +160,7 @@ def rm_unmapped_lowq_reads_pe(bam, multimapping, mapq_thresh, nth, mem_gb, out_d
             fixmate_bam=fixmate_bam,
             filt_bam=filt_bam,
             prefix=prefix,
-            res_param=sort_res_param,
+            res_param=get_samtools_res_param('sort', nth=nth, mem_gb=mem_gb),
         )
     )
 
@@ -230,7 +226,7 @@ def rm_dup_se(dupmark_bam, nth, out_dir):
     run_shell_cmd(
         'samtools view -F 1804 -b {dupmark_bam} {res_param} > {nodup_bam}'.format(
             dupmark_bam=dupmark_bam,
-            res_param=get_samtools_view_res_param(nth=nth),
+            res_param=get_samtools_res_param('view', nth=nth),
             nodup_bam=nodup_bam,
         )
     )
@@ -247,7 +243,7 @@ def rm_dup_pe(dupmark_bam, nth, out_dir):
     run_shell_cmd(
         'samtools view -F 1804 -f 2 -b {dupmark_bam} {res_param} > {nodup_bam}'.format(
             dupmark_bam=dupmark_bam,
-            res_param=get_samtools_view_res_param(nth=nth),
+            res_param=get_samtools_res_param('view', nth=nth),
             nodup_bam=nodup_bam,
         )
     )

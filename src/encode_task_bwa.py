@@ -11,7 +11,7 @@ from encode_lib_common import (
     get_num_lines, log, ls_l, mkdir_p, rm_f, run_shell_cmd, strip_ext_fastq,
     strip_ext_tar, untar)
 from encode_lib_genomic import (
-    get_read_length, samtools_sort, bam_is_empty, get_samtools_sort_res_param)
+    get_read_length, samtools_sort, bam_is_empty, get_samtools_res_param)
 
 
 def parse_arguments():
@@ -83,7 +83,7 @@ def bwa_se(fastq, ref_index_prefix, nth, mem_gb, out_dir):
             ref=ref_index_prefix,
             sai=sai,
             fastq=fastq,
-            res_param=get_samtools_view_res_param(nth=nth),
+            res_param=get_samtools_res_param('view', nth=nth),
             tmp_bam=tmp_bam,
         )
     )
@@ -143,7 +143,7 @@ def bwa_pe(fastq1, fastq2, ref_index_prefix, nth, mem_gb, use_bwa_mem_for_pe, ou
                 badcigar=badcigar,
                 bam=bam,
                 prefix=prefix,
-                res_param=get_samtools_sort_res_param(nth=nth, mem_gb=mem_gb),
+                res_param=get_samtools_res_param('sort', nth=nth, mem_gb=mem_gb),
             )
         )
     else:
@@ -152,7 +152,7 @@ def bwa_pe(fastq1, fastq2, ref_index_prefix, nth, mem_gb, use_bwa_mem_for_pe, ou
                 sam=sam,
                 bam=bam,
                 prefix=prefix,
-                res_param=get_samtools_sort_res_param(nth=nth, mem_gb=mem_gb),
+                res_param=get_samtools_res_param('sort', nth=nth, mem_gb=mem_gb),
             )
         )
     run_shell_cmd(cmd3)

@@ -62,7 +62,7 @@ def samstat(bam, nth=1, mem_gb=None, out_dir=''):
         'SAMstats --sorted_sam_file - --outf {samstat_qc}'.format(
             bam=bam,
             prefix=prefix,
-            res_param=get_samtools_sort_res_param(nth=nth, mem_gb=mem_gb),
+            res_param=get_samtools_res_param('sort', nth=nth, mem_gb=mem_gb),
             samstat_qc=samstat_qc,
         )
     )
@@ -74,7 +74,7 @@ def samtools_index(bam, nth=1, out_dir=''):
     run_shell_cmd(
         'samtools index {bam} {res_param}'.format(
             bam=bam,
-            res_param=get_samtools_view_res_param(nth=nth),
+            res_param=get_samtools_res_param('index', nth=nth),
         )
     )
     if os.path.abspath(out_dir) != \
@@ -84,45 +84,46 @@ def samtools_index(bam, nth=1, out_dir=''):
         return bai
 
 
-def get_samtools_view_res_param(nth=1):
-    """Make resource parameters (-@) for samtools view/index/fixmate.
-        -@ means number of additional threads (samtools 1.9).
+def get_samtools_res_param(subcmd, nth=1, mem_gb=None):
+    """Make resource parameters (-@, -m) for samtools.
+        -@:
+            This means number of total/additional threads.
+        -m:
+            This means memory per thread (for samtools sort only).
+            It's clipped between 1 and DEFAULT_SAMTOOLS_MAX_MEM_MB_PER_THREAD MBs.
+
+    Tested with samtools 1.9.
+    Lower version of samtools work a bit differently.
+    For such lower versions, -@ is number of threads.
+    Run `samtools view --help` with your version and check if
+    it is based on total or additional number of threads.
 
     Args:
         nth:
-            Number of additional threads.
-            Tested with samtools 1.9.
-            Lower version of samtools work a bit differently.
-            For such lower versions, -@ is number of threads (not -1).
-            Run `samtools view --help` with your version and check if
-            it is based on `nth - 1`.
-    """
-    res_param = ''
-    if nth:
-        res_param += '-@ {additional_threads} '.format(
-            additional_threads=nth - 1
-        )
-    return res_param
-
-
-def get_samtools_sort_res_param(nth=1, mem_gb=None):
-    """Make resource parameters (-@, -m) for samtools sort.
-        -@ means number of additional threads (samtools 1.9).
-        -m means memory per thread.
-
-    Args:
-        nth:
-            Number of additional threads.
+            Number of threads.
+                - index: total threads.
+                - all other sub-commands: additional threads.
         mem_gb:
             Total memory in GBs.
     """
-    res_param = get_samtools_view_res_param(nth=nth)
-    if nth and mem_gb:
-        mem_mb_per_thread = min(
-            math.floor(mem_gb * 1024.0 / nth),
-            DEFAULT_SAMTOOLS_MAX_MEM_MB_PER_THREAD
+    res_param = ''
+    if subcmd == 'index':
+        res_param += '-@ {num_total_threads} '.format(
+            num_total_threads=nth,
         )
-        res_param += '-m {mem}M '.format(mem=mem_mb_per_thread)
+    else:
+        res_param += '-@ {num_additional_threads} '.format(
+            num_additional_threads=nth - 1,
+        )
+
+    if subcmd == 'sort':
+        if nth and mem_gb:
+            mem_mb_per_thread = min(
+                math.floor(mem_gb * 1024.0 / nth),
+                DEFAULT_SAMTOOLS_MAX_MEM_MB_PER_THREAD
+            )
+            res_param += '-m {mem}M '.format(mem=mem_mb_per_thread)
+
     return res_param
 
 
@@ -136,7 +137,7 @@ def samtools_sort(bam, nth=1, mem_gb=None, out_dir=''):
             bam=bam,
             srt_bam=srt_bam,
             prefix=prefix,
-            res_param=get_samtools_sort_res_param(nth=nth, mem_gb=mem_gb),
+            res_param=get_samtools_res_param('sort', nth=nth, mem_gb=mem_gb),
         )
     )
     return srt_bam
@@ -152,7 +153,7 @@ def samtools_name_sort(bam, nth=1, mem_gb=None, out_dir=''):
             bam=bam,
             nmsrt_bam=nmsrt_bam,
             prefix=prefix,
-            res_param=get_samtools_sort_res_param(nth=nth, mem_gb=mem_gb),
+            res_param=get_samtools_res_param('sort', nth=nth, mem_gb=mem_gb),
         )
     )
     return nmsrt_bam
