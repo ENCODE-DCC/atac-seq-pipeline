@@ -176,7 +176,7 @@ workflow atac {
         Float align_disk_factor = 8.0
 
         Int filter_cpu = 2
-        Float filter_mem_factor = 0.2
+        Float filter_mem_factor = 0.4
         Int filter_time_hr = 24
         Float filter_disk_factor = 4.0
 
@@ -1845,7 +1845,7 @@ task filter {
     }
     Float input_file_size_gb = size(bam, "G")
     Float picard_java_heap_factor = 0.9
-    Float mem_gb = 17.0 + mem_factor * input_file_size_gb
+    Float mem_gb = 4.0 + mem_factor * input_file_size_gb
     Float samtools_mem_gb = 0.9 * mem_gb
     Int disk_gb = round(20.0 + disk_factor * input_file_size_gb)
 

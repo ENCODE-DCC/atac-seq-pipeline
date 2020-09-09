@@ -244,7 +244,7 @@ Parameter|Default|Description
 Parameter|Default|Description
 ---------|-------|-----------
 `atac.filter_cpu` | 2 |
-`atac.filter_mem_factor` | 0.2 | Multiplied to size of BAM to determine required memory
+`atac.filter_mem_factor` | 0.4 | Multiplied to size of BAM to determine required memory
 `atac.filter_time_hr` | 24 | Walltime (HPCs only)
 `atac.filter_disk_factor` | 4.0 | Multiplied to size of BAM to determine required disk
 
