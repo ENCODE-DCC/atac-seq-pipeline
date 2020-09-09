@@ -158,12 +158,12 @@ workflows:
       #- test_workflow_se:
       #   requires:
       #     - build
-      - test_workflow_unrep_se:
-          requires:
-            - build
-      - test_workflow_pe:
-         requires:
-           - build
+      #- test_workflow_unrep_se:
+      #    requires:
+      #      - build
+      #- test_workflow_pe:
+      #   requires:
+      #     - build
       #- test_workflow_pe_start_from_bam:
       #   requires:
       #     - build
