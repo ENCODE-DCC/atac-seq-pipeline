@@ -1773,7 +1773,7 @@ task align {
                 ${if paired_end then 'R2/*.fastq.gz' else ''} \
                 ${if paired_end then '--paired-end' else ''} \
                 ${'--multimapping ' + multimapping} \
-                ${if mem_factor > 0.0 then ('--mem-gb ' + samtools_mem_gb) else ''} \
+                ${if mem_factor > 0 then ('--mem-gb ' + samtools_mem_gb) else ''} \
                 ${'--nth ' + cpu}
         fi
 
@@ -1781,7 +1781,7 @@ task align {
             R1/*.fastq.gz $(ls *.bam) \
             ${'--mito-chr-name ' + mito_chr_name} \
             ${'--chrsz ' + chrsz} \
-            ${if mem_factor > 0.0 then ('--mem-gb ' + samtools_mem_gb) else ''} \
+            ${if mem_factor > 0 then ('--mem-gb ' + samtools_mem_gb) else ''} \
             ${'--nth ' + cpu}
         rm -rf R1 R2
     }
@@ -1861,7 +1861,7 @@ task filter {
             ${'--chrsz ' + chrsz} \
             ${if no_dup_removal then '--no-dup-removal' else ''} \
             ${'--mito-chr-name ' + mito_chr_name} \
-            ${if mem_factor > 0.0 then ('--mem-gb ' + samtools_mem_gb) else ''} \
+            ${if mem_factor > 0 then ('--mem-gb ' + samtools_mem_gb) else ''} \
             ${'--nth ' + cpu} \
             ${'--picard-java-heap ' + if defined(picard_java_heap) then picard_java_heap else (round(mem_gb * picard_java_heap_factor) + 'G')}
     }
@@ -1906,7 +1906,7 @@ task bam2ta {
             ${if disable_tn5_shift then '--disable-tn5-shift' else ''} \
             ${'--mito-chr-name ' + mito_chr_name} \
             ${'--subsample ' + subsample} \
-            ${if mem_factor > 0.0 then ('--mem-gb ' + samtools_mem_gb) else ''} \
+            ${if mem_factor > 0 then ('--mem-gb ' + samtools_mem_gb) else ''} \
             ${'--nth ' + cpu}
     }
     output {
@@ -2332,7 +2332,7 @@ task preseq {
         python3 $(which encode_task_preseq.py) \
             ${if paired_end then '--paired-end' else ''} \
             ${'--bam ' + bam} \
-            ${if mem_factor > 0.0 then ('--mem-gb ' + samtools_mem_gb) else ''} \
+            ${if mem_factor > 0 then ('--mem-gb ' + samtools_mem_gb) else ''} \
             ${'--picard-java-heap ' + if defined(picard_java_heap) then picard_java_heap else (round(mem_gb * picard_java_heap_factor) + 'G')}
         ${if !paired_end then 'touch null.picard_est_lib_size' else ''}
     }
