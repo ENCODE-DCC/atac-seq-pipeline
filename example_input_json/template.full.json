@@ -53,7 +53,7 @@
     "atac.enable_gc_bias" : true,
 
     "atac.align_cpu" : 4,
-    "atac.align_mem_factor" : 0.1,
+    "atac.align_mem_factor" : 0.15,
     "atac.align_time_hr" : 48,
     "atac.align_disk_factor" : 8.0,
 
