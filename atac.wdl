@@ -1732,7 +1732,7 @@ task align {
     }
     Float input_file_size_gb = size(fastqs_R1, "G") + size(fastqs_R2, "G")
     Float mem_gb = 5.0 + mem_factor * input_file_size_gb
-    Float samtools_mem_gb = 0.8 * mem_gb
+    Float samtools_mem_gb = 0.9 * mem_gb
     Int disk_gb = round(50.0 + disk_factor * input_file_size_gb)
 
     # tmp vars for task trim_adapter
@@ -1846,7 +1846,7 @@ task filter {
     Float input_file_size_gb = size(bam, "G")
     Float picard_java_heap_factor = 0.9
     Float mem_gb = 17.0 + mem_factor * input_file_size_gb
-    Float samtools_mem_gb = 0.8 * mem_gb
+    Float samtools_mem_gb = 0.9 * mem_gb
     Int disk_gb = round(20.0 + disk_factor * input_file_size_gb)
 
     command {
@@ -1895,7 +1895,7 @@ task bam2ta {
     }
     Float input_file_size_gb = size(bam, "G")
     Float mem_gb = 4.0 + mem_factor * input_file_size_gb
-    Float samtools_mem_gb = 0.8 * mem_gb
+    Float samtools_mem_gb = 0.9 * mem_gb
     Int disk_gb = round(20.0 + disk_factor * input_file_size_gb)
 
     command {
@@ -2323,7 +2323,7 @@ task preseq {
     }
     Float input_file_size_gb = size(bam, "G")
     Float mem_gb = 4.0 + mem_factor * input_file_size_gb
-    Float samtools_mem_gb = 0.8 * mem_gb
+    Float samtools_mem_gb = 0.9 * mem_gb
     Int disk_gb = round(20.0 + disk_factor * input_file_size_gb)
     Float picard_java_heap_factor = 0.9
 
