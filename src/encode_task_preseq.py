@@ -10,7 +10,7 @@ import sys
 import os
 import argparse
 from encode_lib_common import (
-    strip_ext_bam, ls_l, log, logging, rm_f)
+    strip_ext_bam, ls_l, log, logging, rm_f, run_shell_cmd)
 from encode_lib_genomic import (
     remove_read_group, locate_picard, samtools_sort)
 import matplotlib as mpl
