@@ -44,7 +44,7 @@ def remove_chrs_from_bam(bam, chrs, chrsz, nth=1, out_dir=''):
     cmd1 = cmd1.format(
         tmp_chrsz=tmp_chrsz,
         bam=bam,
-        res_param=get_samtools_view_res_param(nth=nth),
+        res_param=get_samtools_res_param('view', nth=nth),
         final_bam=final_bam)
     run_shell_cmd(cmd1)
     rm_f(tmp_chrsz)
@@ -162,7 +162,7 @@ def samtools_name_sort(bam, nth=1, mem_gb=None, out_dir=''):
 def bam_is_empty(bam, nth=1):
     cmd = 'samtools view -c {bam} {res_param}'.format(
         bam=bam,
-        res_param=get_samtools_view_res_param(nth=nth),
+        res_param=get_samtools_res_param('view', nth=nth),
     )
     return int(run_shell_cmd(cmd)) == 0
 
