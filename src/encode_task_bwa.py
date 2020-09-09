@@ -155,7 +155,6 @@ def bwa_pe(fastq1, fastq2, ref_index_prefix, nth, mem_gb, use_bwa_mem_for_pe, ou
                 res_param=get_samtools_res_param('sort', nth=nth, mem_gb=mem_gb),
             )
         )
-    run_shell_cmd(cmd3)
 
     rm_f(temp_files)
     return bam
