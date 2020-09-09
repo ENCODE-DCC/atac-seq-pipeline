@@ -15,6 +15,10 @@ from encode_lib_common import (
     strip_ext_peak, strip_ext_ta)
 
 
+# https://github.com/samtools/samtools/blob/1.9/bam_sort.c#L70
+DEFAULT_SAMTOOLS_MAX_MEM_MB_PER_THREAD = 768
+
+
 def remove_chrs_from_bam(bam, chrs, chrsz, nth=1, out_dir=''):
     if len(chrs) == 0:
         raise ValueError('There must be at least one chromosome, zero found.')
@@ -114,9 +118,11 @@ def get_samtools_sort_res_param(nth=1, mem_gb=None):
     """
     res_param = get_samtools_view_res_param(nth=nth)
     if nth and mem_gb:
-        res_param += '-m {mem}M '.format(
-            mem=math.floor(mem_gb * 1024.0 / nth)
+        mem_mb_per_thread = min(
+            math.floor(mem_gb * 1024.0 / nth),
+            DEFAULT_SAMTOOLS_MAX_MEM_MB_PER_THREAD
         )
+        res_param += '-m {mem}M '.format(mem=mem_mb_per_thread)
     return res_param
 
 
