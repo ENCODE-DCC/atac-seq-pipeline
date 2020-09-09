@@ -68,16 +68,16 @@ def main():
     log.info('Running samtools index...')
     samtools_index(args.bam, args.nth, args.out_dir)
 
-    log.info('SAMstat on raw BAM...')
+    log.info('SAMstats on raw BAM...')
     samstat(args.bam, args.nth, args.mem_gb, args.out_dir)
 
     if args.chrsz:
-        log.info('SAMstat on non-mito BAM...')
+        log.info('SAMstats on non-mito BAM...')
         non_mito_out_dir = os.path.join(args.out_dir, 'non_mito')
         mkdir_p(non_mito_out_dir)
         non_mito_bam = remove_chrs_from_bam(args.bam, [args.mito_chr_name],
                                             args.chrsz,
-                                            args.nth, args.mem_gb,
+                                            args.nth,
                                             non_mito_out_dir)
         samstat(non_mito_bam, args.nth, args.mem_gb, non_mito_out_dir)
         rm_f(non_mito_bam)

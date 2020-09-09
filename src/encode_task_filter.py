@@ -320,11 +320,11 @@ def main():
     if args.paired_end:
         filt_bam = rm_unmapped_lowq_reads_pe(
             args.bam, args.multimapping, args.mapq_thresh,
-            args.nth, args.out_dir)
+            args.nth, args.mem_gb, args.out_dir)
     else:
         filt_bam = rm_unmapped_lowq_reads_se(
             args.bam, args.multimapping, args.mapq_thresh,
-            args.nth, args.out_dir)
+            args.nth, args.mem_gb, args.out_dir)
 
     log.info('Checking if filtered BAM file is empty...')
 
