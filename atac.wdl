@@ -1845,7 +1845,7 @@ task filter {
     }
     Float input_file_size_gb = size(bam, "G")
     Float picard_java_heap_factor = 0.9
-    Float mem_gb = 4.0 + mem_factor * input_file_size_gb
+    Float mem_gb = 6.0 + mem_factor * input_file_size_gb
     Float samtools_mem_gb = 0.9 * mem_gb
     Int disk_gb = round(20.0 + disk_factor * input_file_size_gb)
 
@@ -2443,8 +2443,9 @@ task gc_bias {
 
         String? picard_java_heap
     }
+    Float mem_factor = 0.3
     Float input_file_size_gb = size(nodup_bam, "G")
-    Float mem_gb = 8.0
+    Float mem_gb = 4.0 + mem_factor * input_file_size_gb
     Float picard_java_heap_factor = 0.9
 
     command {
