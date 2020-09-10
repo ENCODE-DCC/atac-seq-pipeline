@@ -305,10 +305,16 @@ def run_shell_cmd(cmd):
     pid = p.pid
     pgid = os.getpgid(pid)
     log.info('run_shell_cmd: PID={}, PGID={}, CMD={}'.format(pid, pgid, cmd))
+    t0 = time.perf_counter()
     stdout, stderr = p.communicate(cmd)
     rc = p.returncode
-    err_str = 'PID={}, PGID={}, RC={}\nSTDERR={}\nSTDOUT={}'.format(
-        pid, pgid, rc, stderr.strip(), stdout.strip())
+    t1 = time.perf_counter()
+    err_str = (
+        'PID={pid}, PGID={pgid}, RC={rc}, DURATION_SEC={dur}\n'
+        'STDERR={stde}\nSTDOUT={stdo}'
+    ).format(
+        pid=pid, pgid=pgid, rc=rc, dur=t1 - t0, stde=stderr.strip(), stdo=stdout.strip()
+    )
     if rc:
         # kill all child processes
         try:
