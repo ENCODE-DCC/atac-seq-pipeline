@@ -170,12 +170,12 @@ workflow atac {
         Float idr_thresh = 0.05
 
         # group: resource_parameter
-        Int align_cpu = 4
+        Int align_cpu = 6
         Float align_mem_factor = 0.15
         Int align_time_hr = 48
         Float align_disk_factor = 8.0
 
-        Int filter_cpu = 2
+        Int filter_cpu = 4
         Float filter_mem_factor = 0.4
         Int filter_time_hr = 24
         Float filter_disk_factor = 4.0
@@ -188,7 +188,7 @@ workflow atac {
         Float spr_mem_factor = 4.5
         Float spr_disk_factor = 6.0
 
-        Int jsd_cpu = 2
+        Int jsd_cpu = 4
         Float jsd_mem_factor = 0.1
         Int jsd_time_hr = 12
         Float jsd_disk_factor = 2.0

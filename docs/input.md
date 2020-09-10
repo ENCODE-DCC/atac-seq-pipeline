@@ -236,14 +236,14 @@ Base memory/disk is 4GB/20GB for most tasks.
 
 Parameter|Default|Description
 ---------|-------|-----------
-`atac.align_cpu` | 4 |
+`atac.align_cpu` | 6 |
 `atac.align_mem_factor` | 0.15 | Multiplied to size of FASTQs to determine required memory
 `atac.align_time_hr` | 48 | Walltime (HPCs only)
 `atac.align_disk_factor` | 8.0 | Multiplied to size of FASTQs to determine required disk
 
 Parameter|Default|Description
 ---------|-------|-----------
-`atac.filter_cpu` | 2 |
+`atac.filter_cpu` | 4 |
 `atac.filter_mem_factor` | 0.4 | Multiplied to size of BAM to determine required memory
 `atac.filter_time_hr` | 24 | Walltime (HPCs only)
 `atac.filter_disk_factor` | 4.0 | Multiplied to size of BAM to determine required disk
@@ -262,7 +262,7 @@ Parameter|Default|Description
 
 Parameter|Default|Description
 ---------|-------|-----------
-`atac.jsd_cpu` | 2 |
+`atac.jsd_cpu` | 4 |
 `atac.jsd_mem_factor` | 0.1 | Multiplied to size of filtered BAM to determine required memory
 `atac.jsd_time_hr` | 6 | Walltime (HPCs only)
 `atac.jsd_disk_factor` | 2.0 | Multiplied to size of filtered BAM to determine required disk
