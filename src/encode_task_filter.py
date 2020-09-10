@@ -180,19 +180,24 @@ def mark_dup_picard(bam, out_dir, java_heap=None):  # shared by both se and pe
     else:
         java_heap_param = '-Xmx{}'.format(java_heap)
 
-    cmd = 'java {} -XX:ParallelGCThreads=1 -jar '.format(java_heap_param)
-    cmd += locate_picard()
-    cmd += ' MarkDuplicates '
-    # cmd = 'picard MarkDuplicates '
-    cmd += 'INPUT={} OUTPUT={} '
-    cmd += 'METRICS_FILE={} VALIDATION_STRINGENCY=LENIENT '
-    cmd += 'USE_JDK_DEFLATER=TRUE USE_JDK_INFLATER=TRUE '
-    cmd += 'ASSUME_SORTED=true REMOVE_DUPLICATES=false'
-    cmd = cmd.format(
-        bam,
-        dupmark_bam,
-        dup_qc)
-    run_shell_cmd(cmd)
+    run_shell_cmd(
+        'java {java_heap_param} -XX:ParallelGCThreads=1 '
+        '{picard} -jar MarkDuplicates '
+        '-INPUT {bam} '
+        '-OUTPUT {dupmark_bam} '
+        '-METRICS_FILE {dup_qc} '
+        '-VALIDATION_STRINGENCY LENIENT '
+        '-USE_JDK_DEFLATER TRUE '
+        '-USE_JDK_INFLATER TRUE '
+        '-ASSUME_SORTED TRUE '
+        '-REMOVE_DUPLICATES FALSE '.format(
+            java_heap_param=java_heap_param,
+            picard=locate_picard(),
+            bam=bam,
+            dupmark_bam=dupmark_bam,
+            dup_qc=dup_qc,
+        )
+    )
     return dupmark_bam, dup_qc
 
 
