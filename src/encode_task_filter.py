@@ -182,7 +182,7 @@ def mark_dup_picard(bam, out_dir, java_heap=None):  # shared by both se and pe
 
     run_shell_cmd(
         'java {java_heap_param} -XX:ParallelGCThreads=1 '
-        '{picard} -jar MarkDuplicates '
+        '-jar {picard} MarkDuplicates '
         '-INPUT {bam} '
         '-OUTPUT {dupmark_bam} '
         '-METRICS_FILE {dup_qc} '
