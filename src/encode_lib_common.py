@@ -22,6 +22,12 @@ log = logging.getLogger(__name__)
 BIG_INT = 99999999
 
 # string/system functions
+def get_ticks():
+    """Returns ticks.
+        - Python3: Use time.perf_counter().
+        - Python2: Use time.time().
+    """
+    return getattr(time, 'perf_counter', getattr(time, 'time'))()
 
 
 def strip_ext_fastq(fastq):
@@ -305,12 +311,12 @@ def run_shell_cmd(cmd):
     pid = p.pid
     pgid = os.getpgid(pid)
     log.info('run_shell_cmd: PID={}, PGID={}, CMD={}'.format(pid, pgid, cmd))
-    t0 = time.perf_counter()
+    t0 = get_ticks()
     stdout, stderr = p.communicate(cmd)
     rc = p.returncode
-    t1 = time.perf_counter()
+    t1 = get_ticks()
     err_str = (
-        'PID={pid}, PGID={pgid}, RC={rc}, DURATION_SEC={dur}\n'
+        'PID={pid}, PGID={pgid}, RC={rc}, DURATION_SEC={dur:.1f}\n'
         'STDERR={stde}\nSTDOUT={stdo}'
     ).format(
         pid=pid, pgid=pgid, rc=rc, dur=t1 - t0, stde=stderr.strip(), stdo=stdout.strip()
