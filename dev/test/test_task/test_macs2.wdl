@@ -21,9 +21,9 @@ workflow test_macs2 {
 
         String regex_bfilt_peak_chr_name = 'chr[\\dXY]+'
 
-        Int macs2_mem_mb = 16000
+        Float macs2_mem_factor = 2.0
         Int macs2_time_hr = 24
-        String macs2_disks = 'local-disk 100 HDD'
+        Float macs2_disk_factor = 15.0
     }
 
     call atac.call_peak as se_macs2 { input :
@@ -38,10 +38,10 @@ workflow test_macs2 {
         blacklist = se_blacklist,
         regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name,
 
-        cpu = 1,
-        mem_mb = macs2_mem_mb,
+        cpu = 2,
+        mem_factor = macs2_mem_factor,
         time_hr = macs2_time_hr,
-        disks = macs2_disks,
+        disk_factor = macs2_disk_factor,
     }
 
     call compare_md5sum.compare_md5sum { input :

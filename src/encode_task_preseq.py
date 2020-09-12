@@ -10,9 +10,9 @@ import sys
 import os
 import argparse
 from encode_lib_common import (
-    strip_ext_bam, ls_l, log, logging, rm_f)
+    strip_ext_bam, ls_l, log, logging, rm_f, run_shell_cmd)
 from encode_lib_genomic import (
-    remove_read_group, locate_picard)
+    remove_read_group, locate_picard, samtools_sort)
 import matplotlib as mpl
 mpl.use('Agg')
 
@@ -27,6 +27,11 @@ def parse_arguments():
     parser.add_argument('--picard-java-heap',
                         help='Picard\'s Java max. heap: java -jar picard.jar '
                              '-Xmx[MAX_HEAP]')
+    parser.add_argument('--nth', type=int, default=1,
+                        help='Number of threads to parallelize.')
+    parser.add_argument('--mem-gb', type=float,
+                        help='Max. memory for samtools sort in GB. '
+                        'It should be total memory for this task (not memory per thread).')
     parser.add_argument('--out-dir', default='', type=str,
                         help='Output directory.')
     parser.add_argument('--log-level', default='INFO', help='Log level',
@@ -73,24 +78,28 @@ def get_picard_complexity_metrics(aligned_bam, prefix, java_heap=None):
     return est_library_size
 
 
-def run_preseq(bam_w_dups, prefix):
+def run_preseq(bam_w_dups, prefix, nth=1, mem_gb=None):
     '''
     Runs preseq. Look at preseq data output to get PBC/NRF.
     '''
     # First sort because this file no longer exists...
-    sort_bam = 'samtools sort -o {1}.sorted.bam -T {1} -@ 2 {0}'.format(
-        bam_w_dups, prefix)
-    os.system(sort_bam)
+
+    sort_bam = samtools_sort(bam_w_dups, nth, mem_gb)
 
     logging.info('Running preseq...')
     preseq_data = '{0}.preseq.dat'.format(prefix)
     preseq_log = '{0}.preseq.log'.format(prefix)
-    preseq = ('preseq lc_extrap '
-              '-P -B -o {0} {1}.sorted.bam -seed 1 -v 2> {2}').format(
-              preseq_data, prefix, preseq_log)
-    logging.info(preseq)
-    os.system(preseq)
-    os.system('rm {0}.sorted.bam'.format(prefix))
+
+    run_shell_cmd(
+        'preseq lc_extrap -P -B -o {preseq_data} {sort_bam} '
+        '-seed 1 -v 2> {preseq_log}'.format(
+            preseq_data=preseq_data,
+            sort_bam=sort_bam,
+            preseq_log=preseq_log,
+        )
+    )
+    rm_f(sort_bam)
+
     return preseq_data, preseq_log
 
 
@@ -143,7 +152,7 @@ def main():
     else:
         picard_est_lib_size = None
     preseq_data, preseq_log = run_preseq(
-        ALIGNED_BAM, OUTPUT_PREFIX)  # SORTED BAM
+        ALIGNED_BAM, OUTPUT_PREFIX, args.nth, args.mem_gb)  # SORTED BAM
 
     get_preseq_plot(preseq_data, OUTPUT_PREFIX)
 

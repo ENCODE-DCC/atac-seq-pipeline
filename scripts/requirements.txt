@@ -55,6 +55,8 @@ wget
 pyopenssl  # for caper/croo to presign bucket URIs
 grep
 tar
+sed
+coreutils  # GNU split and shuf
 
 numpy
 scipy

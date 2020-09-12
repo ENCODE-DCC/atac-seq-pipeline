@@ -14,9 +14,9 @@ workflow test_jsd {
         Int mapq_thresh = 30
 
         Int jsd_cpu = 1
-        Int jsd_mem_mb = 12000
-        Int jsd_time_hr = 6
-        String jsd_disks = 'local-disk 100 HDD'
+        Float jsd_mem_factor = 0.0
+        Int jsd_time_hr = 12
+        Float jsd_disk_factor = 2.0
     }
 
     call atac.jsd as se_jsd { input :
@@ -25,9 +25,9 @@ workflow test_jsd {
         mapq_thresh = mapq_thresh,
 
         cpu = jsd_cpu,
-        mem_mb = jsd_mem_mb,
+        mem_factor = jsd_mem_factor,
         time_hr = jsd_time_hr,
-        disks = jsd_disks,
+        disk_factor = jsd_disk_factor,
     }
 
     call atac.jsd as se_jsd_fake_blacklist { input :
@@ -36,9 +36,9 @@ workflow test_jsd {
         mapq_thresh = mapq_thresh,
 
         cpu = jsd_cpu,
-        mem_mb = jsd_mem_mb,
+        mem_factor = jsd_mem_factor,
         time_hr = jsd_time_hr,
-        disks = jsd_disks,
+        disk_factor = jsd_disk_factor,
     }
 
     # take first 8 columns (vaule in other columns are random)
