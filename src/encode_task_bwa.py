@@ -11,7 +11,7 @@ from encode_lib_common import (
     get_num_lines, log, ls_l, mkdir_p, rm_f, run_shell_cmd, strip_ext_fastq,
     strip_ext_tar, untar)
 from encode_lib_genomic import (
-    get_read_length)
+    get_read_length, samtools_sort, bam_is_empty, get_samtools_res_param)
 
 
 def parse_arguments():
@@ -33,6 +33,9 @@ def parse_arguments():
                         help='Paired-end FASTQs.')
     parser.add_argument('--nth', type=int, default=1,
                         help='Number of threads to parallelize.')
+    parser.add_argument('--mem-gb', type=float,
+                        help='Max. memory for samtools sort in GB. '
+                        'It should be total memory for this task (not memory per thread).')
     parser.add_argument('--out-dir', default='', type=str,
                         help='Output directory.')
     parser.add_argument('--log-level', default='INFO',
@@ -58,37 +61,41 @@ def bwa_aln(fastq, ref_index_prefix, nth, out_dir):
     prefix = os.path.join(out_dir, basename)
     sai = '{}.sai'.format(prefix)
 
-    cmd = 'bwa aln -q 5 -l 32 -k 2 -t {} {} {} > {}'.format(
-        nth,
-        ref_index_prefix,
-        fastq,
-        sai)
+    cmd = 'bwa aln -q 5 -l 32 -k 2 -t {nth} {ref} {fastq} > {sai}'.format(
+        nth=nth,
+        ref=ref_index_prefix,
+        fastq=fastq,
+        sai=sai)
     run_shell_cmd(cmd)
     return sai
 
 
-def bwa_se(fastq, ref_index_prefix, nth, out_dir):
+def bwa_se(fastq, ref_index_prefix, nth, mem_gb, out_dir):
     basename = os.path.basename(strip_ext_fastq(fastq))
     prefix = os.path.join(out_dir, basename)
-    bam = '{}.bam'.format(prefix)
+    tmp_bam = '{}.bam'.format(prefix)
 
     sai = bwa_aln(fastq, ref_index_prefix, nth, out_dir)
 
-    cmd = 'bwa samse {} {} {} | '
-    cmd += 'samtools view -Su - | samtools sort - -o {} -T {}'
-    cmd = cmd.format(
-        ref_index_prefix,
-        sai,
-        fastq,
-        bam,
-        prefix)
-    run_shell_cmd(cmd)
-
+    run_shell_cmd(
+        'bwa samse {ref} {sai} {fastq} | '
+        'samtools view -bS /dev/stdin {res_param} > {tmp_bam}'.format(
+            ref=ref_index_prefix,
+            sai=sai,
+            fastq=fastq,
+            res_param=get_samtools_res_param('view', nth=nth),
+            tmp_bam=tmp_bam,
+        )
+    )
     rm_f(sai)
+
+    bam = samtools_sort(tmp_bam, nth, mem_gb)
+    rm_f(tmp_bam)
+
     return bam
 
 
-def bwa_pe(fastq1, fastq2, ref_index_prefix, nth, use_bwa_mem_for_pe, out_dir):
+def bwa_pe(fastq1, fastq2, ref_index_prefix, nth, mem_gb, use_bwa_mem_for_pe, out_dir):
     basename = os.path.basename(strip_ext_fastq(fastq1))
     prefix = os.path.join(out_dir, basename)
     sam = '{}.sam'.format(prefix)
@@ -129,20 +136,25 @@ def bwa_pe(fastq1, fastq2, ref_index_prefix, nth, use_bwa_mem_for_pe, out_dir):
 
     # Remove bad CIGAR read pairs
     if get_num_lines(badcigar) > 0:
-        cmd3 = 'zcat -f {} | grep -v -F -f {} | '
-        cmd3 += 'samtools view -Su - | samtools sort - -o {} -T {}'
-        cmd3 = cmd3.format(
-            sam,
-            badcigar,
-            bam,
-            prefix)
+        run_shell_cmd(
+            'zcat -f {sam} | grep -v -F -f {badcigar} | '
+            'samtools view -Su /dev/stdin | samtools sort /dev/stdin -o {bam} -T {prefix} {res_param}'.format(
+                sam=sam,
+                badcigar=badcigar,
+                bam=bam,
+                prefix=prefix,
+                res_param=get_samtools_res_param('sort', nth=nth, mem_gb=mem_gb),
+            )
+        )
     else:
-        cmd3 = 'samtools view -Su {} | samtools sort - -o {} -T {}'
-        cmd3 = cmd3.format(
-            sam,
-            bam,
-            prefix)
-    run_shell_cmd(cmd3)
+        run_shell_cmd(
+            'samtools view -Su {sam} | samtools sort /dev/stdin -o {bam} -T {prefix} {res_param}'.format(
+                sam=sam,
+                bam=bam,
+                prefix=prefix,
+                res_param=get_samtools_res_param('sort', nth=nth, mem_gb=mem_gb),
+            )
+        )
 
     rm_f(temp_files)
     return bam
@@ -201,19 +213,19 @@ def main():
     if args.paired_end:
         bam = bwa_pe(
             args.fastqs[0], args.fastqs[1],
-            bwa_index_prefix, args.nth, args.use_bwa_mem_for_pe,
+            bwa_index_prefix, args.nth, args.mem_gb, args.use_bwa_mem_for_pe,
             args.out_dir)
     else:
         bam = bwa_se(
             args.fastqs[0],
-            bwa_index_prefix, args.nth,
+            bwa_index_prefix, args.nth, args.mem_gb,
             args.out_dir)
 
     log.info('Removing temporary files...')
     rm_f(temp_files)
 
     log.info('Checking if BAM file is empty...')
-    if not int(run_shell_cmd('samtools view -c {}'.format(bam))):
+    if bam_is_empty(bam, args.nth):
         raise ValueError('BAM file is empty, no reads found.')
 
     log.info('List all files in output directory...')

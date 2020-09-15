@@ -15,9 +15,9 @@ workflow test_macs2_signal_track {
         String se_chrsz
         String se_gensz
 
-        Int macs2_mem_mb = 16000
+        Float macs2_mem_factor = 0.0
         Int macs2_time_hr = 24
-        String macs2_disks = 'local-disk 100 HDD'
+        Float macs2_disk_factor = 40.0
     }
 
     call atac.macs2_signal_track as se_macs2_signal_track { input :
@@ -27,9 +27,9 @@ workflow test_macs2_signal_track {
         pval_thresh = pval_thresh,
         smooth_win = smooth_win,
 
-        mem_mb = macs2_mem_mb,
+        mem_factor = macs2_mem_factor,
         time_hr = macs2_time_hr,
-        disks = macs2_disks,
+        disk_factor = macs2_disk_factor,
     }
 
     call compare_md5sum.compare_md5sum { input :

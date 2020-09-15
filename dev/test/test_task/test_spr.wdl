@@ -11,21 +11,24 @@ workflow test_spr {
         String ref_pe_ta_pr2
         String ref_se_ta_pr1
         String ref_se_ta_pr2
-    }
 
-    Int spr_mem_mb = 16000
+        Float spr_mem_factor = 0.0
+        Float spr_disk_factor = 6.0
+    }
 
     call atac.spr as pe_spr { input :
         ta = pe_ta,
         paired_end = true,
 
-        mem_mb = spr_mem_mb,
+        mem_factor = spr_mem_factor,
+        disk_factor = spr_disk_factor,
     }    
     call atac.spr as se_spr { input :
         ta = se_ta,
         paired_end = false,
 
-        mem_mb = spr_mem_mb,
+        mem_factor = spr_mem_factor,
+        disk_factor = spr_disk_factor,
     }
 
     call compare_md5sum.compare_md5sum { input :

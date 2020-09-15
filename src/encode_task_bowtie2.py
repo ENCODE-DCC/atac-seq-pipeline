@@ -10,6 +10,7 @@ import argparse
 from encode_lib_common import (
     log, ls_l, mkdir_p, rm_f, run_shell_cmd, strip_ext_fastq, strip_ext_tar,
     untar)
+from encode_lib_genomic import samtools_sort, bam_is_empty
 
 
 def parse_arguments():
@@ -33,6 +34,9 @@ def parse_arguments():
              'e.g. --multimapping 3 will be bowtie2 -k 4')
     parser.add_argument('--nth', type=int, default=1,
                         help='Number of threads to parallelize.')
+    parser.add_argument('--mem-gb', type=float,
+                        help='Max. memory for samtools sort in GB. '
+                        'It should be total memory for this task (not memory per thread).')
     parser.add_argument('--out-dir', default='', type=str,
                         help='Output directory.')
     parser.add_argument('--log-level', default='INFO',
@@ -54,45 +58,46 @@ def parse_arguments():
 
 
 def bowtie2_se(fastq, ref_index_prefix,
-               multimapping, nth, out_dir):
+               multimapping, nth, mem_gb, out_dir):
     basename = os.path.basename(strip_ext_fastq(fastq))
     prefix = os.path.join(out_dir, basename)
-    bam = '{}.bam'.format(prefix)
+    tmp_bam = '{}.bam'.format(prefix)
 
-    cmd = 'bowtie2 {} --mm --threads {} -x {} -U {} '
-    cmd += '| samtools view -Su /dev/stdin '
-    cmd += '| samtools sort /dev/stdin -o {} -T {}'
-    cmd = cmd.format(
-        '-k {}'.format(multimapping+1) if multimapping else '',
-        nth,
-        ref_index_prefix,
-        fastq,
-        bam,
-        prefix)
-    run_shell_cmd(cmd)
+    run_shell_cmd(
+        'bowtie2 {multimapping} --mm --threads {nth} -x {ref} '
+        '-U {fastq} | samtools view -1 -S /dev/stdin > {tmp_bam}'.format(
+            multimapping='-k {mm}'.format(mm=multimapping + 1) if multimapping else '',
+            nth=nth,
+            ref=ref_index_prefix,
+            fastq=fastq,
+            tmp_bam=tmp_bam,
+        )
+    )
+    bam = samtools_sort(tmp_bam, nth, mem_gb, out_dir)
+    rm_f(tmp_bam)
 
     return bam
 
 
 def bowtie2_pe(fastq1, fastq2, ref_index_prefix,
-               multimapping, nth, out_dir):
+               multimapping, nth, mem_gb, out_dir):
     basename = os.path.basename(strip_ext_fastq(fastq1))
     prefix = os.path.join(out_dir, basename)
-    bam = '{}.bam'.format(prefix)
+    tmp_bam = '{}.bam'.format(prefix)
 
-    cmd = 'bowtie2 {} -X2000 --mm --threads {} -x {} '
-    cmd += '-1 {} -2 {} | '
-    cmd += 'samtools view -Su /dev/stdin | '
-    cmd += 'samtools sort /dev/stdin -o {} -T {}'
-    cmd = cmd.format(
-        '-k {}'.format(multimapping+1) if multimapping else '',
-        nth,
-        ref_index_prefix,
-        fastq1,
-        fastq2,
-        bam,
-        prefix)
-    run_shell_cmd(cmd)
+    run_shell_cmd(
+        'bowtie2 {multimapping} -X2000 --mm --threads {nth} -x {ref} '
+        '-1 {fastq1} -2 {fastq2} | samtools view -1 -S /dev/stdin > {tmp_bam}'.format(
+            multimapping='-k {mm}'.format(mm=multimapping + 1) if multimapping else '',
+            nth=nth,
+            ref=ref_index_prefix,
+            fastq1=fastq1,
+            fastq2=fastq2,
+            tmp_bam=tmp_bam,
+        )
+    )
+    bam = samtools_sort(tmp_bam, nth, mem_gb, out_dir)
+    rm_f(tmp_bam)
 
     return bam
 
@@ -154,13 +159,13 @@ def main():
         bam = bowtie2_pe(
             args.fastqs[0], args.fastqs[1],
             bowtie2_index_prefix,
-            args.multimapping, args.nth,
+            args.multimapping, args.nth, args.mem_gb,
             args.out_dir)
     else:
         bam = bowtie2_se(
             args.fastqs[0],
             bowtie2_index_prefix,
-            args.multimapping, args.nth,
+            args.multimapping, args.nth, args.mem_gb,
             args.out_dir)
 
     log.info('Removing temporary files...')
@@ -168,7 +173,7 @@ def main():
     rm_f(temp_files)
 
     log.info('Checking if BAM file is empty...')
-    if not int(run_shell_cmd('samtools view -c {}'.format(bam))):
+    if bam_is_empty(bam, args.nth):
         raise ValueError('BAM file is empty, no reads found.')
 
     log.info('List all files in output directory...')

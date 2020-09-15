@@ -49,7 +49,7 @@ commands:
             export GOOGLE_APPLICATION_CREDENTIALS=$PWD/tmp_secret_key.json
             caper run ../../../atac.wdl \
               --backend gcp --gcp-prj ${GOOGLE_PROJECT_ID} \
-              --backend-file backend_gcp_service_account.conf \
+              --gcp-service-account-key-json $PWD/tmp_secret_key.json \
               --out-gcs-bucket ${CAPER_OUT_DIR} --tmp-gcs-bucket ${CAPER_TMP_DIR} \
               -i ${INPUT} -m metadata.json --docker ${TAG}
 

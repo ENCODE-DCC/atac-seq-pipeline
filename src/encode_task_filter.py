@@ -11,7 +11,8 @@ from encode_lib_common import (
     strip_ext_bam)
 from encode_lib_genomic import (
     locate_picard, remove_chrs_from_bam, samstat, samtools_index,
-    samtools_name_sort)
+    samtools_name_sort, bam_is_empty,
+    get_samtools_res_param)
 
 
 def parse_arguments():
@@ -40,6 +41,9 @@ def parse_arguments():
                         help='Mito chromosome name.')
     parser.add_argument('--nth', type=int, default=1,
                         help='Number of threads to parallelize.')
+    parser.add_argument('--mem-gb', type=float,
+                        help='Max. memory for samtools sort in GB. '
+                        'It should be total memory for this task (not memory per thread).')
     parser.add_argument('--picard-java-heap',
                         help='Picard\'s Java max. heap: java -jar picard.jar '
                              '-Xmx[MAX_HEAP]')
@@ -57,41 +61,51 @@ def parse_arguments():
     return args
 
 
-def rm_unmapped_lowq_reads_se(bam, multimapping, mapq_thresh, nth, out_dir):
+def rm_unmapped_lowq_reads_se(bam, multimapping, mapq_thresh, nth, mem_gb, out_dir):
+    """There are pipes with multiple samtools commands.
+    For such pipes, use multiple threads (-@) for only one of them.
+    Priority is on sort > index > fixmate > view.
+    """
     prefix = os.path.join(out_dir,
                           os.path.basename(strip_ext_bam(bam)))
     filt_bam = '{}.filt.bam'.format(prefix)
 
     if multimapping:
-        qname_sort_bam = samtools_name_sort(bam, nth, out_dir)
+        qname_sort_bam = samtools_name_sort(bam, nth, mem_gb, out_dir)
 
-        cmd2 = 'samtools view -h {} | '
-        cmd2 += '$(which assign_multimappers.py) -k {} | '
-        cmd2 += 'samtools view -F 1804 -Su /dev/stdin | '
-        cmd2 += 'samtools sort /dev/stdin -o {} -T {} -@ {}'
-        cmd2 = cmd2.format(
-            qname_sort_bam,
-            multimapping,
-            filt_bam,
-            prefix,
-            nth)
-        run_shell_cmd(cmd2)
+        run_shell_cmd(
+            'samtools view -h {qname_sort_bam} | '
+            '$(which assign_multimappers.py) -k {multimapping} | '
+            'samtools view -F 1804 -Su /dev/stdin | '
+            'samtools sort /dev/stdin -o {filt_bam} -T {prefix} {res_param}'.format(
+                qname_sort_bam=qname_sort_bam,
+                multimapping=multimapping,
+                filt_bam=filt_bam,
+                prefix=prefix,
+                res_param=get_samtools_res_param('sort', nth=nth, mem_gb=mem_gb),
+            )
+        )
         rm_f(qname_sort_bam)  # remove temporary files
     else:
-        cmd = 'samtools view -F 1804 -q {} -u {} | '
-        cmd += 'samtools sort /dev/stdin -o {} -T {} -@ {}'
-        cmd = cmd.format(
-            mapq_thresh,
-            bam,
-            filt_bam,
-            prefix,
-            nth)
-        run_shell_cmd(cmd)
+        run_shell_cmd(
+            'samtools view -F 1804 -q {mapq_thresh} -u {bam} | '
+            'samtools sort /dev/stdin -o {filt_bam} -T {prefix} {res_param}'.format(
+                mapq_thresh=mapq_thresh,
+                bam=bam,
+                filt_bam=filt_bam,
+                prefix=prefix,
+                res_param=get_samtools_res_param('sort', nth=nth, mem_gb=mem_gb),
+            )
+        )
 
     return filt_bam
 
 
-def rm_unmapped_lowq_reads_pe(bam, multimapping, mapq_thresh, nth, out_dir):
+def rm_unmapped_lowq_reads_pe(bam, multimapping, mapq_thresh, nth, mem_gb, out_dir):
+    """There are pipes with multiple samtools commands.
+    For such pipes, use multiple threads (-@) for only one of them.
+    Priority is on sort > index > fixmate > view.
+    """
     prefix = os.path.join(out_dir,
                           os.path.basename(strip_ext_bam(bam)))
     filt_bam = '{}.filt.bam'.format(prefix)
@@ -99,50 +113,57 @@ def rm_unmapped_lowq_reads_pe(bam, multimapping, mapq_thresh, nth, out_dir):
     fixmate_bam = '{}.fixmate.bam'.format(prefix)
 
     if multimapping:
-        cmd1 = 'samtools view -F 524 -f 2 -u {} | '
-        cmd1 += 'samtools sort -n /dev/stdin -o {} -T {} -@ {} '
-        cmd1 = cmd1.format(
-            bam,
-            tmp_filt_bam,
-            prefix,
-            nth)
-        run_shell_cmd(cmd1)
+        run_shell_cmd(
+            'samtools view -F 524 -f 2 -u {bam} | '
+            'samtools sort -n /dev/stdin -o {tmp_filt_bam} -T {prefix} {res_param} '.format(
+                bam=bam,
+                tmp_filt_bam=tmp_filt_bam,
+                prefix=prefix,
+                res_param=get_samtools_res_param('view', nth=nth),
+            )
+        )
 
-        cmd2 = 'samtools view -h {} -@ {} | '
-        cmd2 += '$(which assign_multimappers.py) -k {} --paired-end | '
-        cmd2 += 'samtools fixmate -r /dev/stdin {}'
-        cmd2 = cmd2.format(
-            tmp_filt_bam,
-            nth,
-            multimapping,
-            fixmate_bam)
-        run_shell_cmd(cmd2)
+        run_shell_cmd(
+            'samtools view -h {tmp_filt_bam} | '
+            '$(which assign_multimappers.py) -k {multimapping} --paired-end | '
+            'samtools fixmate -r /dev/stdin {fixmate_bam} {res_param}'.format(
+                tmp_filt_bam=tmp_filt_bam,
+                multimapping=multimapping,
+                fixmate_bam=fixmate_bam,
+                res_param=get_samtools_res_param('fixmate', nth=nth),
+            )
+        )
     else:
-        cmd1 = 'samtools view -F 1804 -f 2 -q {} -u {} | '
-        cmd1 += 'samtools sort -n /dev/stdin -o {} -T {} -@ {}'
-        cmd1 = cmd1.format(
-            mapq_thresh,
-            bam,
-            tmp_filt_bam,
-            prefix,
-            nth)
-        run_shell_cmd(cmd1)
+        run_shell_cmd(
+            'samtools view -F 1804 -f 2 -q {mapq_thresh} -u {bam} | '
+            'samtools sort -n /dev/stdin -o {tmp_filt_bam} -T {prefix} {res_param}'.format(
+                mapq_thresh=mapq_thresh,
+                bam=bam,
+                tmp_filt_bam=tmp_filt_bam,
+                prefix=prefix,
+                res_param=get_samtools_res_param('sort', nth=nth, mem_gb=mem_gb),
+            )
+        )
+        run_shell_cmd(
+            'samtools fixmate -r {tmp_filt_bam} {fixmate_bam} {res_param}'.format(
+                tmp_filt_bam=tmp_filt_bam,
+                fixmate_bam=fixmate_bam,
+                res_param=get_samtools_res_param('fixmate', nth=nth),
+            )
+        )
 
-        cmd2 = 'samtools fixmate -r {} {}'
-        cmd2 = cmd2.format(
-            tmp_filt_bam,
-            fixmate_bam)
-        run_shell_cmd(cmd2)
     rm_f(tmp_filt_bam)
 
-    cmd = 'samtools view -F 1804 -f 2 -u {} | '
-    cmd += 'samtools sort /dev/stdin -o {} -T {} -@ {}'
-    cmd = cmd.format(
-        fixmate_bam,
-        filt_bam,
-        prefix,
-        nth)
-    run_shell_cmd(cmd)
+    run_shell_cmd(
+        'samtools view -F 1804 -f 2 -u {fixmate_bam} | '
+        'samtools sort /dev/stdin -o {filt_bam} -T {prefix} {res_param}'.format(
+            fixmate_bam=fixmate_bam,
+            filt_bam=filt_bam,
+            prefix=prefix,
+            res_param=get_samtools_res_param('sort', nth=nth, mem_gb=mem_gb),
+        )
+    )
+
     rm_f(fixmate_bam)
     return filt_bam
 
@@ -159,19 +180,24 @@ def mark_dup_picard(bam, out_dir, java_heap=None):  # shared by both se and pe
     else:
         java_heap_param = '-Xmx{}'.format(java_heap)
 
-    cmd = 'java {} -XX:ParallelGCThreads=1 -jar '.format(java_heap_param)
-    cmd += locate_picard()
-    cmd += ' MarkDuplicates '
-    # cmd = 'picard MarkDuplicates '
-    cmd += 'INPUT={} OUTPUT={} '
-    cmd += 'METRICS_FILE={} VALIDATION_STRINGENCY=LENIENT '
-    cmd += 'USE_JDK_DEFLATER=TRUE USE_JDK_INFLATER=TRUE '
-    cmd += 'ASSUME_SORTED=true REMOVE_DUPLICATES=false'
-    cmd = cmd.format(
-        bam,
-        dupmark_bam,
-        dup_qc)
-    run_shell_cmd(cmd)
+    run_shell_cmd(
+        'java {java_heap_param} -XX:ParallelGCThreads=1 '
+        '-jar {picard} MarkDuplicates '
+        'INPUT={bam} '
+        'OUTPUT={dupmark_bam} '
+        'METRICS_FILE={dup_qc} '
+        'VALIDATION_STRINGENCY=LENIENT '
+        'USE_JDK_DEFLATER=TRUE '
+        'USE_JDK_INFLATER=TRUE '
+        'ASSUME_SORTED=TRUE '
+        'REMOVE_DUPLICATES=FALSE '.format(
+            java_heap_param=java_heap_param,
+            picard=locate_picard(),
+            bam=bam,
+            dupmark_bam=dupmark_bam,
+            dup_qc=dup_qc,
+        )
+    )
     return dupmark_bam, dup_qc
 
 
@@ -202,12 +228,13 @@ def rm_dup_se(dupmark_bam, nth, out_dir):
     prefix = strip_ext(prefix, 'dupmark')
     nodup_bam = '{}.nodup.bam'.format(prefix)
 
-    cmd1 = 'samtools view -@ {} -F 1804 -b {} > {}'
-    cmd1 = cmd1.format(
-        nth,
-        dupmark_bam,
-        nodup_bam)
-    run_shell_cmd(cmd1)
+    run_shell_cmd(
+        'samtools view -F 1804 -b {dupmark_bam} {res_param} > {nodup_bam}'.format(
+            dupmark_bam=dupmark_bam,
+            res_param=get_samtools_res_param('view', nth=nth),
+            nodup_bam=nodup_bam,
+        )
+    )
     return nodup_bam
 
 
@@ -218,12 +245,13 @@ def rm_dup_pe(dupmark_bam, nth, out_dir):
     prefix = strip_ext(prefix, 'dupmark')
     nodup_bam = '{}.nodup.bam'.format(prefix)
 
-    cmd1 = 'samtools view -@ {} -F 1804 -f 2 -b {} > {}'
-    cmd1 = cmd1.format(
-        nth,
-        dupmark_bam,
-        nodup_bam)
-    run_shell_cmd(cmd1)
+    run_shell_cmd(
+        'samtools view -F 1804 -f 2 -b {dupmark_bam} {res_param} > {nodup_bam}'.format(
+            dupmark_bam=dupmark_bam,
+            res_param=get_samtools_res_param('view', nth=nth),
+            nodup_bam=nodup_bam,
+        )
+    )
     return nodup_bam
 
 
@@ -293,11 +321,28 @@ def main():
     if args.paired_end:
         filt_bam = rm_unmapped_lowq_reads_pe(
             args.bam, args.multimapping, args.mapq_thresh,
-            args.nth, args.out_dir)
+            args.nth, args.mem_gb, args.out_dir)
     else:
         filt_bam = rm_unmapped_lowq_reads_se(
             args.bam, args.multimapping, args.mapq_thresh,
-            args.nth, args.out_dir)
+            args.nth, args.mem_gb, args.out_dir)
+
+    log.info('Checking if filtered BAM file is empty...')
+
+    if bam_is_empty(filt_bam, args.nth):
+        help_msg = (
+            'No reads found in filtered BAM. '
+            'Low quality sample? '
+            'Or no reads passing criteria "samtools view -F 1804"? '
+            'Check samtools flags at '
+            'https://broadinstitute.github.io/picard/explain-flags.html. '
+        )
+        if args.paired_end:
+            help_msg += (
+                'Or is this truely PE BAM? '
+                'All unpaired SE reads could be removed by "samtools view -f 2". '
+            )
+        raise ValueError(help_msg)
 
     log.info('Marking dupes with {}...'.format(args.dup_marker))
     if args.dup_marker == 'picard':
@@ -333,11 +378,19 @@ def main():
     else:
         final_bam = nodup_bam
 
+    log.info('Checking if final BAM file is empty...')
+    if bam_is_empty(final_bam, args.nth):
+        raise ValueError(
+            'No reads found in final (filtered/deduped) BAM. '
+            'Low quality sample? '
+            'Or BAM with duplicates only? '
+        )
+
     log.info('samtools index (final_bam)...')
     samtools_index(final_bam, args.nth, args.out_dir)
 
     log.info('samstat...')
-    samstat(final_bam, args.nth, args.out_dir)
+    samstat(final_bam, args.nth, args.mem_gb, args.out_dir)
 
     log.info('Generating PBC QC log...')
     if args.paired_end:
