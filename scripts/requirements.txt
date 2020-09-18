@@ -64,7 +64,6 @@ pandas
 jinja2
 gsl
 matplotlib
-scikit-learn
 
 java-jdk
 
