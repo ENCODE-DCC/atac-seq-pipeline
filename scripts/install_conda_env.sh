@@ -12,7 +12,7 @@ SRC_DIR=${SH_SCRIPT_DIR}/../src
 conda --version  # check if conda exists
 
 echo "=== Installing pipeline's Conda environments ==="
-conda create -n ${CONDA_ENV_PY3} --file ${REQ_TXT_PY3} -y -c defaults -c r -c bioconda -c conda-forge
+conda create -n ${CONDA_ENV_PY3} --file ${REQ_TXT_PY3} -y -strict-channel-priority --override-channels --channel conda-forge --channel bioconda -c r -c defaults
 conda create -n ${CONDA_ENV_PY2} --file ${REQ_TXT_PY2} -y -c defaults -c r -c bioconda -c conda-forge
 
 echo "=== Configuring for pipeline's Conda environments ==="
