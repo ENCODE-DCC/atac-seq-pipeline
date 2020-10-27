@@ -1,5 +1,7 @@
 # for python3
-# conda repos: defaults, r, bioconda, conda-forge
+# conda repos: defaults, r, conda-forge, bioconda
+
+python == 3.7.9
 
 nomkl  # using MKL can change MACS2 output randomly on different platforms
 
