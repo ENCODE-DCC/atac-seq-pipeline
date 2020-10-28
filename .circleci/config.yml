@@ -7,7 +7,7 @@ defaults: &defaults
 
 machine_defaults: &machine_defaults
   machine: 
-    image: ubuntu-2004:202010-01
+    image: ubuntu-1604:202007-01
   working_directory: ~/atac-seq-pipeline
 
 make_tag: &make_tag
@@ -27,12 +27,18 @@ commands:
             gsutil -m cp -r gs://encode-pipeline-test-samples/encode-atac-seq-pipeline/atac-seq-pipeline-test-data .
             ./download_hg38_fasta_for_test_ataqc.sh
 
+
   install_python3_caper_gcs:
     description: "Install py3, caper and gcs. Set py3 as default python."
     steps:      
       - run:
           command: |
-            pyenv global 3.6
+            sudo apt-get install software-properties-common git wget curl default-jre -y
+            sudo add-apt-repository ppa:deadsnakes/ppa -y
+            sudo apt-get update && sudo apt-get install python3.6 -y
+            sudo wget --no-check-certificate https://bootstrap.pypa.io/get-pip.py
+            sudo python3.6 get-pip.py
+            sudo ln -s /usr/bin/python3.6 /usr/local/bin/python3
             pip install --upgrade pip
             pip install caper google-cloud-storage
 
@@ -152,18 +158,18 @@ workflows:
   build_workflow:
     jobs:
       - build
-      - test_tasks:
-         requires:
-           - build
-      - test_workflow_se:
-         requires:
-           - build
+      #- test_tasks:
+      #   requires:
+      #     - build
+      #- test_workflow_se:
+      #   requires:
+      #     - build
       - test_workflow_unrep_se:
           requires:
             - build
-      - test_workflow_pe:
-         requires:
-           - build
-      - test_workflow_pe_start_from_bam:
-         requires:
-           - build
+      #- test_workflow_pe:
+      #   requires:
+      #     - build
+      #- test_workflow_pe_start_from_bam:
+      #   requires:
+      #     - build
