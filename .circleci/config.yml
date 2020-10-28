@@ -7,7 +7,7 @@ defaults: &defaults
 
 machine_defaults: &machine_defaults
   machine: 
-    image: circleci/classic:201808-01
+    image: ubuntu-1604:202007-01
   working_directory: ~/atac-seq-pipeline
 
 make_tag: &make_tag
