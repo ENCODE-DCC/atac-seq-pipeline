@@ -33,7 +33,7 @@ commands:
     steps:      
       - run:
           command: |
-            sudo apt-get install software-properties-common git wget curl default-jre -y
+            sudo apt-get update && sudo apt-get install software-properties-common git wget curl default-jre -y
             sudo add-apt-repository ppa:deadsnakes/ppa -y
             sudo apt-get update && sudo apt-get install python3.6 -y
             sudo wget --no-check-certificate https://bootstrap.pypa.io/get-pip.py
