@@ -402,7 +402,7 @@ def peak_to_starch(peak, out_dir):
     )
     starch = '{}.starch'.format(prefix)
     run_shell_cmd(
-        'zcat -f {peak} | sort-bed - | starch > {starch}'.format(
+        'zcat -f {peak} | sort-bed - | starch - > {starch}'.format(
             peak=peak,
             starch=starch,
         )
