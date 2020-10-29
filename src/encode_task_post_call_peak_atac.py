@@ -5,9 +5,18 @@
 import sys
 import argparse
 from encode_lib_common import (
-    assert_file_not_empty, log, ls_l, mkdir_p)
+    assert_file_not_empty,
+    log,
+    ls_l,
+    mkdir_p,
+)
 from encode_lib_genomic import (
-    peak_to_bigbed, peak_to_hammock, get_region_size_metrics, get_num_peaks)
+    peak_to_bigbed,
+    peak_to_hammock,
+    get_region_size_metrics,
+    get_num_peaks,
+    peak_to_starch,
+)
 from encode_lib_blacklist_filter import blacklist_filter
 from encode_lib_frip import frip
 
@@ -65,6 +74,9 @@ def main():
     log.info('Converting peak to bigbed...')
     peak_to_bigbed(bfilt_peak, args.peak_type, args.chrsz,
                    args.out_dir)
+
+    log.info('Converting peak to starch...')
+    peak_to_starch(bfilt_peak, args.out_dir)
 
     log.info('Converting peak to hammock...')
     peak_to_hammock(bfilt_peak, args.out_dir)

@@ -392,6 +392,41 @@ def peak_to_hammock(peak, out_dir):
     return (hammock_gz, hammock_gz_tbi)
 
 
+def peak_to_starch(peak, out_dir):
+    """Convert peak (BED) into starch.
+    Required softwares:
+        BEDOPS (tested with v2.4.39): sort-bed, starch
+    """
+    prefix = os.path.join(
+        out_dir, os.path.basename(strip_ext(peak))
+    )
+    starch = '{}.starch'.format(prefix)
+    run_shell_cmd(
+        'zcat -f {peak} | sort-bed - | starch > {starch}'.format(
+            peak=peak,
+            starch=starch,
+        )
+    )
+    return starch
+
+def starch_to_bed_gz(starch, out_dir):
+    """Convert starch into gzipped BED.
+    Required softwares:
+        BEDOPS (tested with v2.4.39): unstarch
+    """
+    prefix = os.path.join(
+        out_dir, os.path.basename(strip_ext(starch))
+    )
+    bed_gz = '{}.bed.gz'.format(prefix)
+    run_shell_cmd(
+        'unstarch {starch} | gzip -nc > {bed_gz}'.format(
+            starch=starch,
+            bed_gz=bed_gz,
+        )
+    )
+    return bed_gz
+
+
 def peak_to_bigbed(peak, peak_type, chrsz, out_dir):
     prefix = os.path.join(out_dir,
                           os.path.basename(strip_ext(peak)))
