@@ -280,12 +280,12 @@ def pbc_qc_se(bam, mito_chr_name, out_dir):
     return pbc_qc
 
 
-def pbc_qc_pe(bam, mito_chr_name, nth, out_dir):
+def pbc_qc_pe(bam, mito_chr_name, nth, mem_gb, out_dir):
     prefix = os.path.join(out_dir,
                           os.path.basename(strip_ext_bam(bam)))
     pbc_qc = '{}.lib_complexity.qc'.format(prefix)
 
-    nmsrt_bam = samtools_name_sort(bam, nth, out_dir)
+    nmsrt_bam = samtools_name_sort(bam, nth, mem_gb, out_dir)
     cmd3 = 'bedtools bamtobed -bedpe -i {} | '
     cmd3 += 'awk \'BEGIN{{OFS="\\t"}}{{print $1,$2,$4,$6,$9,$10}}\' | '
     cmd3 += 'grep -v "^{}\\s" | sort | uniq -c | '
@@ -394,7 +394,7 @@ def main():
 
     log.info('Generating PBC QC log...')
     if args.paired_end:
-        pbc_qc_pe(dupmark_bam, args.mito_chr_name, args.nth,
+        pbc_qc_pe(dupmark_bam, args.mito_chr_name, args.nth, args.mem_gb,
                   args.out_dir)
     else:
         pbc_qc_se(dupmark_bam, args.mito_chr_name, args.out_dir)
