@@ -10,9 +10,17 @@ import re
 import subprocess
 
 from encode_lib_common import (
-    get_num_lines, get_peak_type, human_readable_number,
-    rm_f, run_shell_cmd, strip_ext, strip_ext_bam,
-    strip_ext_peak, strip_ext_ta)
+    get_num_lines,
+    get_peak_type,
+    human_readable_number,
+    rm_f,
+    run_shell_cmd,
+    strip_ext,
+    strip_ext_bam,
+    strip_ext_peak,
+    strip_ext_ta,
+    strip_ext_gz,
+)
 
 
 # https://github.com/samtools/samtools/blob/1.9/bam_sort.c#L70
@@ -398,7 +406,7 @@ def peak_to_starch(peak, out_dir):
         BEDOPS (tested with v2.4.39): sort-bed, starch
     """
     prefix = os.path.join(
-        out_dir, os.path.basename(strip_ext(peak))
+        out_dir, os.path.basename(strip_ext_gz(peak))
     )
     starch = '{}.starch'.format(prefix)
     run_shell_cmd(
