@@ -60,6 +60,7 @@ sed
 coreutils  # GNU split and shuf
 
 numpy
+scikit-learn
 scipy
 pandas
 jinja2
