@@ -42,6 +42,7 @@ deeptools ==3.3.1
 cutadapt ==2.5
 preseq ==2.0.3
 pyfaidx ==0.5.5.2
+bedops ==2.4.39
 
 macs2 ==2.2.4
 
@@ -59,6 +60,7 @@ sed
 coreutils  # GNU split and shuf
 
 numpy
+scikit-learn
 scipy
 pandas
 jinja2

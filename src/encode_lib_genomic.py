@@ -10,9 +10,17 @@ import re
 import subprocess
 
 from encode_lib_common import (
-    get_num_lines, get_peak_type, human_readable_number,
-    rm_f, run_shell_cmd, strip_ext, strip_ext_bam,
-    strip_ext_peak, strip_ext_ta)
+    get_num_lines,
+    get_peak_type,
+    human_readable_number,
+    rm_f,
+    run_shell_cmd,
+    strip_ext,
+    strip_ext_bam,
+    strip_ext_peak,
+    strip_ext_ta,
+    strip_ext_gz,
+)
 
 
 # https://github.com/samtools/samtools/blob/1.9/bam_sort.c#L70
@@ -390,6 +398,41 @@ def peak_to_hammock(peak, out_dir):
 
         rm_f([hammock, hammock_tmp, hammock_tmp2])
     return (hammock_gz, hammock_gz_tbi)
+
+
+def peak_to_starch(peak, out_dir):
+    """Convert peak (BED) into starch.
+    Required softwares:
+        BEDOPS (tested with v2.4.39): sort-bed, starch
+    """
+    prefix = os.path.join(
+        out_dir, os.path.basename(strip_ext_gz(peak))
+    )
+    starch = '{}.starch'.format(prefix)
+    run_shell_cmd(
+        'zcat -f {peak} | sort-bed - | starch - > {starch}'.format(
+            peak=peak,
+            starch=starch,
+        )
+    )
+    return starch
+
+def starch_to_bed_gz(starch, out_dir):
+    """Convert starch into gzipped BED.
+    Required softwares:
+        BEDOPS (tested with v2.4.39): unstarch
+    """
+    prefix = os.path.join(
+        out_dir, os.path.basename(strip_ext(starch))
+    )
+    bed_gz = '{}.bed.gz'.format(prefix)
+    run_shell_cmd(
+        'unstarch {starch} | gzip -nc > {bed_gz}'.format(
+            starch=starch,
+            bed_gz=bed_gz,
+        )
+    )
+    return bed_gz
 
 
 def peak_to_bigbed(peak, peak_type, chrsz, out_dir):

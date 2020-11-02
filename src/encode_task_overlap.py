@@ -7,8 +7,19 @@ import sys
 import os
 import argparse
 from encode_lib_common import (
-    assert_file_not_empty, gunzip, log, ls_l, mkdir_p, rm_f, run_shell_cmd)
-from encode_lib_genomic import peak_to_bigbed, peak_to_hammock
+    assert_file_not_empty,
+    gunzip,
+    log,
+    ls_l,
+    mkdir_p,
+    rm_f,
+    run_shell_cmd,
+)
+from encode_lib_genomic import (
+    peak_to_bigbed,
+    peak_to_hammock,
+    peak_to_starch,
+)
 from encode_lib_blacklist_filter import blacklist_filter
 from encode_lib_frip import frip, frip_shifted
 
@@ -136,6 +147,9 @@ def main():
     log.info('Converting peak to bigbed...')
     peak_to_bigbed(bfilt_overlap_peak, args.peak_type,
                    args.chrsz, args.out_dir)
+
+    log.info('Converting peak to starch...')
+    peak_to_starch(bfilt_overlap_peak, args.out_dir)
 
     log.info('Converting peak to hammock...')
     peak_to_hammock(bfilt_overlap_peak, args.out_dir)
