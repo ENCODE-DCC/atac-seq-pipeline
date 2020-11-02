@@ -7,11 +7,20 @@ import sys
 import os
 import argparse
 from encode_lib_common import (
-    copy_f_to_f, get_num_lines, infer_n_from_nC2,
-    infer_pair_label_from_idx, log, mkdir_p)
+    copy_f_to_f,
+    get_num_lines,
+    infer_n_from_nC2,
+    infer_pair_label_from_idx,
+    log,
+    mkdir_p,
+)
 from encode_lib_genomic import (
-    peak_to_bigbed, peak_to_hammock, get_region_size_metrics,
-    get_num_peaks)
+    peak_to_bigbed,
+    peak_to_hammock,
+    get_region_size_metrics,
+    get_num_peaks,
+    peak_to_starch,
+)
 
 
 def parse_arguments():
@@ -130,6 +139,10 @@ def main():
                        args.chrsz, args.out_dir)
         peak_to_bigbed(conservative_peak_file, args.peak_type,
                        args.chrsz, args.out_dir)
+
+        log.info('Converting peak to starch...')
+        peak_to_starch(optimal_peak_file, args.out_dir)
+        peak_to_starch(conservative_peak_file, args.out_dir)
 
         log.info('Converting peak to hammock...')
         peak_to_hammock(optimal_peak_file,
