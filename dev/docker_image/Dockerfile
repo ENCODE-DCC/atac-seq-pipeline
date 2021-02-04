@@ -115,6 +115,9 @@ RUN pip3 install --no-cache-dir pytest
 RUN mkdir bedops_2.4.39 && cd bedops_2.4.39 && wget https://github.com/bedops/bedops/releases/download/v2.4.39/bedops_linux_x86_64-v2.4.39.tar.bz2 && tar -xvjf bedops_linux_x86_64-v2.4.39.tar.bz2 && rm -f bedops_linux_x86_64-v2.4.39.tar.bz2
 ENV PATH="/software/bedops_2.4.39/bin:${PATH}"
 
+# Install ptools_bin 0.0.4 (https://github.com/ENCODE-DCC/ptools_bin)
+RUN pip3 install --no-cache-dir ptools_bin==0.0.4
+
 # Prevent conflict with locally installed python outside of singularity container
 ENV PYTHONNOUSERSITE=True
 

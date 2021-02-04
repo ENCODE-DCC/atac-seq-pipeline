@@ -43,8 +43,8 @@ cutadapt ==2.5
 preseq ==2.0.3
 pyfaidx ==0.5.5.2
 bedops ==2.4.39
-
 macs2 ==2.2.4
+ptools_bin
 
 jsondiff ==1.1.1
 libgcc
@@ -69,5 +69,3 @@ matplotlib
 
 java-jdk
 
-caper
-croo

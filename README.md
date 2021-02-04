@@ -2,6 +2,20 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.156534.svg)](https://doi.org/10.5281/zenodo.156534)[![CircleCI](https://circleci.com/gh/ENCODE-DCC/atac-seq-pipeline/tree/master.svg?style=svg)](https://circleci.com/gh/ENCODE-DCC/atac-seq-pipeline/tree/master)
 
+## Important notice for Conda users
+
+For every new pipeline release, Conda users always need to update pipeline's Conda environment (`encode-atac-seq-pipeline`) even though they don't use new added features.
+```bash
+$ cd atac-seq-pipeline
+$ scripts/update_conda_env.sh
+```
+
+For pipelines >= v1.4.0, Conda users also need to manually install Caper and Croo **INSIDE** the environment. These two tools have been removed from pipeline's Conda environment since v1.9.2.
+```bash
+$ source activate encode-atac-seq-pipeline
+$ pip install caper croo
+```
+
 ## Introduction
 
 This pipeline is designed for automated end-to-end quality control and processing of ATAC-seq and DNase-seq data. The pipeline can be run on compute clusters with job submission engines as well as on stand alone machines. It inherently makes uses of parallelized/distributed computing. Pipeline installation is also easy as most dependencies are automatically installed. The pipeline can be run end-to-end, starting from raw FASTQ files all the way to peak calling and signal track generation using a single caper submit command. One can also start the pipeline from intermediate stages (for example, using alignment files as input). The pipeline supports both single-end and paired-end data as well as replicated or non-replicated datasets. The outputs produced by the pipeline include 1) formatted HTML reports that include quality control measures specifically designed for ATAC-seq and DNase-seq data, 2) analysis of reproducibility, 3) stringent and relaxed thresholding of peaks, 4) fold-enrichment and pvalue signal tracks. The pipeline also supports detailed error reporting and allows for easy resumption of interrupted runs. It has been tested on some human, mouse and yeast ATAC-seq datasets as well as on human and mouse DNase-seq datasets.

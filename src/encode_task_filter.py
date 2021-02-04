@@ -165,6 +165,18 @@ def rm_unmapped_lowq_reads_pe(bam, multimapping, mapq_thresh, nth, mem_gb, out_d
     )
 
     rm_f(fixmate_bam)
+
+    log.info(
+        'Checking if filtered (but not deduped) BAM is empty '
+        'after filtering with "samtools view -F 1804 -f 2".'
+    )
+    if bam_is_empty(filt_bam, nth):
+        raise ValueError(
+            'No reads found aftering filtering "samtools fixmate"d PE BAM with '
+            '"samtools view -F 1804 -f 2". '
+            'Reads are not properly paired even though mapping rate is good? '
+        )
+
     return filt_bam
 
 

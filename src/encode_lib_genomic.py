@@ -673,3 +673,52 @@ def bed_clip(bed, chrsz, out_clipped_bed, no_gz=False):
         run_shell_cmd(cmd2)
 
         rm_f(tmp_out)
+
+
+def bam_to_pbam(bam, ref_fa, out_dir='.'):
+    '''Convert BAM into pBAM.
+
+    Requirements:
+        - Python package `ptools_bin`
+        - `samtools`
+    '''
+    prefix = os.path.join(
+        out_dir,
+        os.path.basename(strip_ext_bam(bam))
+    )
+
+    pbam_tmp = '{}.sorted.p.bam'.format(prefix)
+    pbam = '{}.p.bam'.format(prefix)
+
+    temp_files = []
+
+    if ref_fa.endswith('.gz'):
+        gunzipped_ref_fa = '{}.fasta'.format(
+            os.path.join(out_dir, os.path.basename(strip_ext_gz(ref_fa)))
+        )
+        run_shell_cmd(
+            'zcat -f {ref_fa} > {gunzipped_ref_fa}'.format(
+                ref_fa=ref_fa,
+                gunzipped_ref_fa=gunzipped_ref_fa,
+            )
+        )
+        temp_files.append(gunzipped_ref_fa)
+    else:
+        gunzipped_ref_fa = ref_fa
+
+    run_shell_cmd(
+        'makepBAM_genome.sh {bam} {gunzipped_ref_fa}'.format(
+            bam=bam,
+            gunzipped_ref_fa=gunzipped_ref_fa,
+        )
+    )
+
+    run_shell_cmd(
+        'mv {pbam_tmp} {pbam}'.format(
+            pbam_tmp=pbam_tmp,
+            pbam=pbam,
+        )
+    )
+    rm_f(temp_files)
+
+    return pbam
