@@ -39,7 +39,7 @@ The ATAC-seq pipeline protocol specification is [here](https://docs.google.com/d
 	```
 
 2) Install pipeline's [Conda environment](docs/install_conda.md) if you want to use Conda instead of Docker/Singularity. Conda is recommneded on local computer and HPCs (e.g. Stanford Sherlock/SCG).
-	> **IMPORTANT*: use `encode-atac-seq-pipeline` as `[PIPELINE_CONDA_ENV]` in Caper's documentation.
+	> **IMPORTANT**: use `encode-atac-seq-pipeline` as `[PIPELINE_CONDA_ENV]` in Caper's documentation.
 
 3) **Skip this step if you have installed pipeline's Conda environment**. Caper is already included in the Conda environment. [Install Caper](https://github.com/ENCODE-DCC/caper#installation). Caper is a python wrapper for [Cromwell](https://github.com/broadinstitute/cromwell).
 	> **IMPORTANT**: Make sure that you have python3(>= 3.6.0) installed on your system.
@@ -63,6 +63,13 @@ An input JSON file specifies all the input parameters and files that are necessa
 
 1) [Input JSON file specification (short)](docs/input_short.md)
 2) [Input JSON file specification (long)](docs/input.md)
+
+
+## Running and sharing on Truwl
+You can run this pipeline on [truwl.com](https://truwl.com/). This provides a web interface that allows you to define inputs and parameters, run the job on GCP, and monitor progress. To run it you will need to create an account on the platform then request early access by emailing [info@truwl.com](mailto:info@truwl.com) to get the right permissions. You can see the example case from this repo at [https://truwl.com/workflows/instance/WF_e85df4.f10.8880/command](https://truwl.com/workflows/instance/WF_e85df4.f10.8880/command). The example job (or other jobs) can be forked to pre-populate the inputs for your own job.
+
+If you do not run the pipeline on Truwl, you can still share your use-case/job on the platform by getting in touch at [info@truwl.com](mailto:info@truwl.com) and providing your inputs.json file.
+
 
 ## Running a pipeline on DNAnexus
 
