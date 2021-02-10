@@ -30,6 +30,12 @@ def parse_arguments(debug=False):
                              'around the crop length. '
                              'Trimmomatic\'s parameter MINLEN will be --crop-length '
                              '- abs(--crop-length-tol).')
+    parser.add_argument('--phred-score-format',
+                        default='auto',
+                        choices=['auto', 'phred33', 'phred64'],
+                        help='Base encoding for Phred scores in FASTQs. '
+                             'If it is not auto then -phred33 or -phred64 to '
+                             'Trimmomatic\'s command line.')
     parser.add_argument('--out-dir-R1', default='', type=str,
                         help='Output directory for cropped R1 fastq.')
     parser.add_argument('--out-dir-R2', default='', type=str,
@@ -53,7 +59,8 @@ def parse_arguments(debug=False):
     return args
 
 
-def trimmomatic_se(fastq1, crop_length, crop_length_tol, out_dir,
+def trimmomatic_se(fastq1, crop_length, crop_length_tol,
+                   phred_score_format, out_dir,
                    nth=1, java_heap=None):
     prefix = os.path.join(out_dir,
                           os.path.basename(strip_ext_fastq(fastq1)))
@@ -67,22 +74,34 @@ def trimmomatic_se(fastq1, crop_length, crop_length_tol, out_dir,
     else:
         java_heap_param = '-Xmx{}'.format(java_heap)
 
-    cmd = 'java -XX:ParallelGCThreads=1 {param} -jar {jar} SE -threads {nth} '
-    cmd += '{fq1} {cropped} MINLEN:{ml} CROP:{cl}'
-    cmd = cmd.format(
+    phred_score_format = phred_score_format.lower()
+    if phred_score_format == 'auto':
+        phred_score_param = ''
+    elif phred_score_format == 'phred33':
+        phred_score_param = '-phred33'
+    elif phred_score_format == 'phred64':
+        phred_score_param = '-phred64'
+    else:
+        raise ValueError('Wrong phred_score_format!')
+
+    cmd = 'java -XX:ParallelGCThreads=1 {param} -jar {jar} SE -threads {nth} {phred_score_param} ' \
+          '{fq1} {cropped} MINLEN:{ml} CROP:{cl}'.format(
         param=java_heap_param,
         jar=locate_trimmomatic(),
         nth=nth,
+        phred_score_param=phred_score_param,
         fq1=fastq1,
         cropped=cropped,
         ml=min_length,
-        cl=crop_length)
+        cl=crop_length,
+    )
     run_shell_cmd(cmd)
 
     return cropped
 
 
-def trimmomatic_pe(fastq1, fastq2, crop_length, crop_length_tol, out_dir_R1, out_dir_R2,
+def trimmomatic_pe(fastq1, fastq2, crop_length, crop_length_tol,
+                   phred_score_format, out_dir_R1, out_dir_R2,
                    nth=1, java_heap=None):
     prefix_R1 = os.path.join(
         out_dir_R1, os.path.basename(strip_ext_fastq(fastq1)))
@@ -104,13 +123,23 @@ def trimmomatic_pe(fastq1, fastq2, crop_length, crop_length_tol, out_dir_R1, out
     else:
         java_heap_param = '-Xmx{}'.format(java_heap)
 
-    cmd = 'java -XX:ParallelGCThreads=1 {param} -jar {jar} PE -threads {nth} '
-    cmd += '{fq1} {fq2} {cropped1} {tmp_cropped1} {cropped2} {tmp_cropped2} '
-    cmd += 'MINLEN:{ml} CROP:{cl}'
-    cmd = cmd.format(
+    phred_score_format = phred_score_format.lower()
+    if phred_score_format == 'auto':
+        phred_score_param = ''
+    elif phred_score_format == 'phred33':
+        phred_score_param = '-phred33'
+    elif phred_score_format == 'phred64':
+        phred_score_param = '-phred64'
+    else:
+        raise ValueError('Wrong phred_score_format!')
+
+    cmd = 'java -XX:ParallelGCThreads=1 {param} -jar {jar} PE -threads {nth} {phred_score_param} ' \
+          '{fq1} {fq2} {cropped1} {tmp_cropped1} {cropped2} {tmp_cropped2} ' \
+          'MINLEN:{ml} CROP:{cl}'.format(
         param=java_heap_param,
         jar=locate_trimmomatic(),
         nth=nth,
+        phred_score_param=phred_score_param,
         fq1=fastq1,
         fq2=fastq2,
         cropped1=cropped_R1,
@@ -118,7 +147,8 @@ def trimmomatic_pe(fastq1, fastq2, crop_length, crop_length_tol, out_dir_R1, out
         cropped2=cropped_R2,
         tmp_cropped2=tmp_cropped_R2,
         ml=min_length,
-        cl=crop_length)
+        cl=crop_length,
+    )
     run_shell_cmd(cmd)
     rm_f([tmp_cropped_R1, tmp_cropped_R2])
 
@@ -143,6 +173,7 @@ def main():
         cropped_R1, cropped_R2 = trimmomatic_pe(
             args.fastq1, args.fastq2,
             args.crop_length, args.crop_length_tol,
+            args.phred_score_format,
             args.out_dir_R1, args.out_dir_R2,
             args.nth,
             args.trimmomatic_java_heap)
@@ -150,6 +181,7 @@ def main():
         cropped_R1 = trimmomatic_se(
             args.fastq1,
             args.crop_length, args.crop_length_tol,
+            args.phred_score_format,
             args.out_dir_R1,
             args.nth,
             args.trimmomatic_java_heap)
