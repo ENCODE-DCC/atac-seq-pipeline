@@ -185,8 +185,8 @@ workflow atac {
         Int bam2ta_time_hr = 12
         Float bam2ta_disk_factor = 4.0
 
-        Float spr_mem_factor = 4.5
-        Float spr_disk_factor = 6.0
+        Float spr_mem_factor = 13.5
+        Float spr_disk_factor = 18.0
 
         Int jsd_cpu = 4
         Float jsd_mem_factor = 0.1
@@ -199,13 +199,13 @@ workflow atac {
         Float xcor_disk_factor = 4.5
 
         Int call_peak_cpu = 2
-        Float call_peak_mem_factor = 2.0
+        Float call_peak_mem_factor = 4.0
         Int call_peak_time_hr = 24
-        Float call_peak_disk_factor = 15.0
+        Float call_peak_disk_factor = 30.0
 
-        Float macs2_signal_track_mem_factor = 6.0
+        Float macs2_signal_track_mem_factor = 12.0
         Int macs2_signal_track_time_hr = 24
-        Float macs2_signal_track_disk_factor = 40.0
+        Float macs2_signal_track_disk_factor = 80.0
 
         Float preseq_mem_factor = 0.5
         Float preseq_disk_factor = 5.0
