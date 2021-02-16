@@ -93,6 +93,10 @@ RUN git clone --branch 2.0.4.2 --single-branch https://github.com/kundajelab/idr
 # Install system/math python packages (python2)
 RUN pip2 install --no-cache-dir numpy matplotlib==2.2.4
 
+# Install biopython 1.76 (this version works for both python2 and python3)
+RUN pip2 install --no-cache-dir biopython==1.76
+RUN pip3 install --no-cache-dir biopython==1.76
+
 # Install genomic python packages (python2)
 RUN pip2 install --no-cache-dir metaseq==0.5.6
 
