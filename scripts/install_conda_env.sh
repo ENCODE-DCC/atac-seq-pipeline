@@ -10,10 +10,11 @@ REQ_TXT_PY2=${SH_SCRIPT_DIR}/requirements_py2.txt
 SRC_DIR=${SH_SCRIPT_DIR}/../src
 
 conda --version  # check if conda exists
+conda install -y mamba # mamba drastically reduces the resolving time
 
 echo "=== Installing pipeline's Conda environments ==="
-conda create -n ${CONDA_ENV_PY3} --file ${REQ_TXT_PY3} -y -c defaults -c r -c bioconda -c conda-forge
-conda create -n ${CONDA_ENV_PY2} --file ${REQ_TXT_PY2} -y -c defaults -c r -c bioconda -c conda-forge
+mamba create -n ${CONDA_ENV_PY3} --file ${REQ_TXT_PY3} -y -c defaults -c r -c bioconda -c conda-forge
+mamba create -n ${CONDA_ENV_PY2} --file ${REQ_TXT_PY2} -y -c defaults -c r -c bioconda -c conda-forge
 
 echo "=== Configuring for pipeline's Conda environments ==="
 CONDA_PREFIX_PY3=$(conda env list | grep -E "\b${CONDA_ENV_PY3}[[:space:]]" | awk '{if (NF==3) print $3; else print $2}')
