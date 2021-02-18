@@ -95,7 +95,7 @@ RUN pip2 install --no-cache-dir biopython==1.76
 RUN pip3 install --no-cache-dir biopython==1.76
 
 # Install system/math python packages (python2)
-RUN pip2 install --no-cache-dir numpy scipy matplotlib==2.2.4
+RUN pip2 install --no-cache-dir numpy==1.16.5 scipy==1.2.2 matplotlib==2.2.4
 
 # Install genomic python packages (python2)
 RUN pip2 install --no-cache-dir metaseq==0.5.6
