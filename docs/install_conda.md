@@ -32,11 +32,11 @@ If you do not have miniconda (or anaconda) installed, follow the instructions be
 
 4) **IMPORTANT**: Close your session and re-login.
 
-5) Install pipeline's Conda environment.
+5) Install pipeline's Conda environment. Add `mamba` to the install command line to resolve conflicts much faster.
 
   ```bash
   $ bash scripts/uninstall_conda_env.sh  # uninstall it for clean-install
-  $ bash scripts/install_conda_env.sh
+  $ bash scripts/install_conda_env.sh mamba  # remove mamba if it does not work
   ```
 
 > **WARNING**: DO NOT PROCEED TO RUN PIPELINES UNTIL YOU SEE THE FOLLOWING SUCCESS MESSAGE OR PIPELINE WILL NOT WORK.
