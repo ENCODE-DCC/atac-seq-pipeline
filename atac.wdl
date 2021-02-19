@@ -4,6 +4,7 @@ workflow atac {
     String pipeline_ver = 'v1.9.2'
 
     meta {
+        version: 'v1.9.2'
         author: 'Jin wook Lee (leepc12@gmail.com) at ENCODE-DCC'
         description: 'ATAC-Seq/DNase-Seq pipeline'
         specification_document: 'https://docs.google.com/document/d/1f0Cm4vRyDQDu0bMehHD7P7KOMxTOP-HiNoIvL1VcBt8/edit?usp=sharing'
