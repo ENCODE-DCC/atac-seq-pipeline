@@ -91,7 +91,7 @@ RUN git clone --branch 2.0.4.2 --single-branch https://github.com/kundajelab/idr
     cd idr && python3 setup.py install && cd ../ && rm -rf idr*
 
 # Install system/math python packages and biopython
-RUN pip2 install --no-cache-dir numpy scipy matplotlib==2.2.4 bx-python==0.8.2 biopython==1.7.6
+RUN pip2 install --no-cache-dir numpy scipy matplotlib==2.2.4 bx-python==0.8.2 biopython==1.76
 RUN pip3 install --no-cache-dir biopython==1.76
 
 # Install genomic python packages (python2)
