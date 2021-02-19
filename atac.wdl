@@ -2409,7 +2409,7 @@ task tss_enrich {
         cpu : 1
         memory : '8 GB'
         time : 1
-        disks : 'local-disk 50 SSD'
+        disks : 'local-disk 150 SSD'
     }
 }
 
@@ -2437,7 +2437,7 @@ task fraglen_stat_pe {
         cpu : 1
         memory : '${mem_gb} GB'
         time : 6
-        disks : 'local-disk 50 SSD'
+        disks : 'local-disk 150 SSD'
     }
 }
 
@@ -2468,7 +2468,7 @@ task gc_bias {
         cpu : 1
         memory : '${mem_gb} GB'
         time : 6
-        disks : 'local-disk 50 SSD'
+        disks : 'local-disk 150 SSD'
     }
 }
 
