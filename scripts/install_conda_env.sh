@@ -20,10 +20,13 @@ if [[ "$1" == mamba ]]; then
   mamba create -n ${CONDA_ENV_PY2} --file ${REQ_TXT_PY2} -y -c defaults -c r -c bioconda -c conda-forge
 else
   echo
-  echo "If it takes too long to resolve conflicts, then try with 'bash install_conda_env.sh mamba'."
-  echo "Then this installer will install/use mamba to resolve conflicts much faster then the original conda."
+  echo "If it takes too long to resolve conflicts, then try with mamba."
+  echo
+  echo "Usage: ./install_conda_env.sh mamba"
+  echo
+  echo "mamba will resolve conflicts much faster then the original conda."
   echo "If you get another conflict in the mamba installation step itself "
-  echo "Then you may need to clean-install conda (miniconda3) and re-login."
+  echo "Then you may need to clean-install miniconda3 and re-login."
   echo
   conda create -n ${CONDA_ENV_PY3} --file ${REQ_TXT_PY3} -y -c defaults -c r -c bioconda -c conda-forge
   conda create -n ${CONDA_ENV_PY2} --file ${REQ_TXT_PY2} -y -c defaults -c r -c bioconda -c conda-forge
