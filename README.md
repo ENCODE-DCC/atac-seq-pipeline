@@ -4,6 +4,11 @@
 
 ## Important notice for Conda users
 
+If it takes too long to resolve Conda package conflicts while installing pipeline's Conda environment, then try with `mamba` instead. Add `mamba` to the install command line.
+```bash
+$ scripts/install_conda_env.sh mamba
+```
+
 For every new pipeline release, Conda users always need to update pipeline's Conda environment (`encode-atac-seq-pipeline`) even though they don't use new added features.
 ```bash
 $ cd atac-seq-pipeline
