@@ -90,8 +90,9 @@ RUN pip3 install --no-cache-dir SAMstats==0.2.1
 RUN git clone --branch 2.0.4.2 --single-branch https://github.com/kundajelab/idr && \
     cd idr && python3 setup.py install && cd ../ && rm -rf idr*
 
-# Install system/math python packages (python2)
-RUN pip2 install --no-cache-dir numpy matplotlib==2.2.4
+# Install system/math python packages and biopython
+RUN pip2 install --no-cache-dir numpy scipy matplotlib==2.2.4 bx-python==0.8.2 biopython==1.76
+RUN pip3 install --no-cache-dir biopython==1.76
 
 # Install genomic python packages (python2)
 RUN pip2 install --no-cache-dir metaseq==0.5.6
@@ -114,6 +115,9 @@ RUN pip3 install --no-cache-dir pytest
 # Install bedops 2.4.39
 RUN mkdir bedops_2.4.39 && cd bedops_2.4.39 && wget https://github.com/bedops/bedops/releases/download/v2.4.39/bedops_linux_x86_64-v2.4.39.tar.bz2 && tar -xvjf bedops_linux_x86_64-v2.4.39.tar.bz2 && rm -f bedops_linux_x86_64-v2.4.39.tar.bz2
 ENV PATH="/software/bedops_2.4.39/bin:${PATH}"
+
+# Install ptools_bin 0.0.4 (https://github.com/ENCODE-DCC/ptools_bin)
+RUN pip3 install --no-cache-dir ptools_bin==0.0.4
 
 # Prevent conflict with locally installed python outside of singularity container
 ENV PYTHONNOUSERSITE=True

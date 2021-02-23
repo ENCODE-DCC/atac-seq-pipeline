@@ -9,11 +9,28 @@ REQ_TXT_PY3=${SH_SCRIPT_DIR}/requirements.txt
 REQ_TXT_PY2=${SH_SCRIPT_DIR}/requirements_py2.txt
 SRC_DIR=${SH_SCRIPT_DIR}/../src
 
-conda --version  # check if conda exists
+echo "=== Checking conda version ==="
+conda --version
 
 echo "=== Installing pipeline's Conda environments ==="
-conda create -n ${CONDA_ENV_PY3} --file ${REQ_TXT_PY3} -y -c defaults -c r -c bioconda -c conda-forge
-conda create -n ${CONDA_ENV_PY2} --file ${REQ_TXT_PY2} -y -c defaults -c r -c bioconda -c conda-forge
+
+if [[ "$1" == mamba ]]; then
+  conda install mamba -y -c conda-forge
+  mamba create -n ${CONDA_ENV_PY3} --file ${REQ_TXT_PY3} -y -c defaults -c r -c bioconda -c conda-forge
+  mamba create -n ${CONDA_ENV_PY2} --file ${REQ_TXT_PY2} -y -c defaults -c r -c bioconda -c conda-forge
+else
+  echo
+  echo "If it takes too long to resolve conflicts, then try with mamba."
+  echo
+  echo "Usage: ./install_conda_env.sh mamba"
+  echo
+  echo "mamba will resolve conflicts much faster then the original conda."
+  echo "If you get another conflict in the mamba installation step itself "
+  echo "Then you may need to clean-install miniconda3 and re-login."
+  echo
+  conda create -n ${CONDA_ENV_PY3} --file ${REQ_TXT_PY3} -y -c defaults -c r -c bioconda -c conda-forge
+  conda create -n ${CONDA_ENV_PY2} --file ${REQ_TXT_PY2} -y -c defaults -c r -c bioconda -c conda-forge
+fi
 
 echo "=== Configuring for pipeline's Conda environments ==="
 CONDA_PREFIX_PY3=$(conda env list | grep -E "\b${CONDA_ENV_PY3}[[:space:]]" | awk '{if (NF==3) print $3; else print $2}')

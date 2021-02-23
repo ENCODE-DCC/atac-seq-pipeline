@@ -1,15 +1,16 @@
 version 1.0
 
 workflow atac {
-    String pipeline_ver = 'v1.9.1'
+    String pipeline_ver = 'v1.9.2'
 
     meta {
+        version: 'v1.9.2'
         author: 'Jin wook Lee (leepc12@gmail.com) at ENCODE-DCC'
         description: 'ATAC-Seq/DNase-Seq pipeline'
         specification_document: 'https://docs.google.com/document/d/1f0Cm4vRyDQDu0bMehHD7P7KOMxTOP-HiNoIvL1VcBt8/edit?usp=sharing'
 
-        caper_docker: 'encodedcc/atac-seq-pipeline:v1.9.1'
-        caper_singularity: 'docker://encodedcc/atac-seq-pipeline:v1.9.1'
+        caper_docker: 'encodedcc/atac-seq-pipeline:v1.9.2'
+        caper_singularity: 'docker://encodedcc/atac-seq-pipeline:v1.9.2'
         croo_out_def: 'https://storage.googleapis.com/encode-pipeline-output-definition/atac.croo.v5.json'
 
         parameter_group: {
@@ -178,15 +179,15 @@ workflow atac {
         Int filter_cpu = 4
         Float filter_mem_factor = 0.4
         Int filter_time_hr = 24
-        Float filter_disk_factor = 4.0
+        Float filter_disk_factor = 8.0
 
         Int bam2ta_cpu = 2
         Float bam2ta_mem_factor = 0.3
         Int bam2ta_time_hr = 12
         Float bam2ta_disk_factor = 4.0
 
-        Float spr_mem_factor = 4.5
-        Float spr_disk_factor = 6.0
+        Float spr_mem_factor = 13.5
+        Float spr_disk_factor = 18.0
 
         Int jsd_cpu = 4
         Float jsd_mem_factor = 0.1
@@ -199,13 +200,13 @@ workflow atac {
         Float xcor_disk_factor = 4.5
 
         Int call_peak_cpu = 2
-        Float call_peak_mem_factor = 2.0
+        Float call_peak_mem_factor = 4.0
         Int call_peak_time_hr = 24
-        Float call_peak_disk_factor = 15.0
+        Float call_peak_disk_factor = 30.0
 
-        Float macs2_signal_track_mem_factor = 6.0
+        Float macs2_signal_track_mem_factor = 12.0
         Int macs2_signal_track_time_hr = 24
-        Float macs2_signal_track_disk_factor = 40.0
+        Float macs2_signal_track_disk_factor = 80.0
 
         Float preseq_mem_factor = 0.5
         Float preseq_disk_factor = 5.0
@@ -2409,7 +2410,7 @@ task tss_enrich {
         cpu : 1
         memory : '8 GB'
         time : 1
-        disks : 'local-disk 50 SSD'
+        disks : 'local-disk 150 SSD'
     }
 }
 
@@ -2437,7 +2438,7 @@ task fraglen_stat_pe {
         cpu : 1
         memory : '${mem_gb} GB'
         time : 6
-        disks : 'local-disk 50 SSD'
+        disks : 'local-disk 150 SSD'
     }
 }
 
@@ -2468,7 +2469,7 @@ task gc_bias {
         cpu : 1
         memory : '${mem_gb} GB'
         time : 6
-        disks : 'local-disk 50 SSD'
+        disks : 'local-disk 150 SSD'
     }
 }
 
