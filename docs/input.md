@@ -246,7 +246,7 @@ Parameter|Default|Description
 `atac.filter_cpu` | 4 |
 `atac.filter_mem_factor` | 0.4 | Multiplied to size of BAM to determine required memory
 `atac.filter_time_hr` | 24 | Walltime (HPCs only)
-`atac.filter_disk_factor` | 4.0 | Multiplied to size of BAM to determine required disk
+`atac.filter_disk_factor` | 8.0 | Multiplied to size of BAM to determine required disk
 
 Parameter|Default|Description
 ---------|-------|-----------
@@ -257,8 +257,8 @@ Parameter|Default|Description
 
 Parameter|Default|Description
 ---------|-------|-----------
-`atac.spr_mem_factor` | 4.5 | Multiplied to size of filtered BAM to determine required memory
-`atac.spr_disk_factor` | 6.0 | Multiplied to size of filtered BAM to determine required disk
+`atac.spr_mem_factor` | 13.5 | Multiplied to size of filtered BAM to determine required memory
+`atac.spr_disk_factor` | 18.0 | Multiplied to size of filtered BAM to determine required disk
 
 Parameter|Default|Description
 ---------|-------|-----------
@@ -277,15 +277,15 @@ Parameter|Default|Description
 Parameter|Default|Description
 ---------|-------|-----------
 `atac.call_peak_cpu` | 2 | MACS2 is single-threaded. More than 2 is not required.
-`atac.call_peak_mem_factor` | 2.0 | Multiplied to size of TAG-ALIGN BED to determine required memory
+`atac.call_peak_mem_factor` | 4.0 | Multiplied to size of TAG-ALIGN BED to determine required memory
 `atac.call_peak_time_hr` | 24 | Walltime (HPCs only)
-`atac.call_peak_disk_factor` | 15.0 | Multiplied to size of TAG-ALIGN BED to determine required disk
+`atac.call_peak_disk_factor` | 30.0 | Multiplied to size of TAG-ALIGN BED to determine required disk
 
 Parameter|Default|Description
 ---------|-------|-----------
-`atac.macs2_signal_track_mem_factor` | 6.0 | Multiplied to size of TAG-ALIGN BED to determine required memory
+`atac.macs2_signal_track_mem_factor` | 12.0 | Multiplied to size of TAG-ALIGN BED to determine required memory
 `atac.macs2_signal_track_time_hr` | 24 | Walltime (HPCs only)
-`atac.macs2_signal_track_disk_factor` | 40.0 | Multiplied to size of TAG-ALIGN BED to determine required disk
+`atac.macs2_signal_track_disk_factor` | 80.0 | Multiplied to size of TAG-ALIGN BED to determine required disk
 
 Parameter|Default|Description
 ---------|-------|-----------
