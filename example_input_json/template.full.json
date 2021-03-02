@@ -60,15 +60,15 @@
     "atac.filter_cpu" : 4,
     "atac.filter_mem_factor" : 0.4,
     "atac.filter_time_hr" : 24,
-    "atac.filter_disk_factor" : 4.0,
+    "atac.filter_disk_factor" : 8.0,
 
     "atac.bam2ta_cpu" : 2,
     "atac.bam2ta_mem_factor" : 0.3,
     "atac.bam2ta_time_hr" : 12,
     "atac.bam2ta_disk_factor" : 4.0,
 
-    "atac.spr_mem_factor" : 4.5,
-    "atac.spr_disk_factor" : 6.0,
+    "atac.spr_mem_factor" : 13.5,
+    "atac.spr_disk_factor" : 18.0,
 
     "atac.jsd_cpu" : 4,
     "atac.jsd_mem_factor" : 0.1,
@@ -83,11 +83,11 @@
     "atac.call_peak_cpu" : 2,
     "atac.call_peak_mem_factor" : 2.0,
     "atac.call_peak_time_hr" : 24,
-    "atac.call_peak_disk_factor" : 15.0,
+    "atac.call_peak_disk_factor" : 30.0,
 
-    "atac.macs2_signal_track_mem_factor" : 6.0,
+    "atac.macs2_signal_track_mem_factor" : 12.0,
     "atac.macs2_signal_track_time_hr" : 24,
-    "atac.macs2_signal_track_disk_factor" : 40.0,
+    "atac.macs2_signal_track_disk_factor" : 80.0,
 
     "atac.preseq_mem_factor" : 0.5,
     "atac.preseq_disk_factor" : 5.0
