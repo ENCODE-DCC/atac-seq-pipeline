@@ -1,16 +1,16 @@
 version 1.0
 
 workflow atac {
-    String pipeline_ver = 'v1.9.2'
+    String pipeline_ver = 'v1.9.3'
 
     meta {
-        version: 'v1.9.2'
+        version: 'v1.9.3'
         author: 'Jin wook Lee (leepc12@gmail.com) at ENCODE-DCC'
         description: 'ATAC-Seq/DNase-Seq pipeline'
         specification_document: 'https://docs.google.com/document/d/1f0Cm4vRyDQDu0bMehHD7P7KOMxTOP-HiNoIvL1VcBt8/edit?usp=sharing'
 
-        caper_docker: 'encodedcc/atac-seq-pipeline:v1.9.2'
-        caper_singularity: 'docker://encodedcc/atac-seq-pipeline:v1.9.2'
+        caper_docker: 'encodedcc/atac-seq-pipeline:v1.9.3'
+        caper_singularity: 'docker://encodedcc/atac-seq-pipeline:v1.9.3'
         croo_out_def: 'https://storage.googleapis.com/encode-pipeline-output-definition/atac.croo.v5.json'
 
         parameter_group: {
@@ -1732,7 +1732,7 @@ task align {
         Float disk_factor
     }
     Float input_file_size_gb = size(fastqs_R1, "G") + size(fastqs_R2, "G")
-    Float mem_gb = 5.0 + mem_factor * input_file_size_gb
+    Float mem_gb = 5.0 + size(idx_tar, "G") + mem_factor * input_file_size_gb
     Float samtools_mem_gb = 0.8 * mem_gb
     Int disk_gb = round(40.0 + disk_factor * input_file_size_gb)
 

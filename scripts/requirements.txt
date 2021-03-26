@@ -48,6 +48,7 @@ ptools_bin
 
 jsondiff ==1.1.1
 libgcc
+tbb ==2021.1.1
 requests
 ncurses
 gnuplot
