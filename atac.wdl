@@ -1,16 +1,16 @@
 version 1.0
 
 workflow atac {
-    String pipeline_ver = 'v1.9.3'
+    String pipeline_ver = 'dev-v1.9.3'
 
     meta {
-        version: 'v1.9.3'
+        version: 'dev-v1.9.3'
         author: 'Jin wook Lee (leepc12@gmail.com) at ENCODE-DCC'
         description: 'ATAC-Seq/DNase-Seq pipeline'
         specification_document: 'https://docs.google.com/document/d/1f0Cm4vRyDQDu0bMehHD7P7KOMxTOP-HiNoIvL1VcBt8/edit?usp=sharing'
 
-        caper_docker: 'encodedcc/atac-seq-pipeline:v1.9.3'
-        caper_singularity: 'docker://encodedcc/atac-seq-pipeline:v1.9.3'
+        caper_docker: 'encodedcc/atac-seq-pipeline:dev-v1.9.3'
+        caper_singularity: 'docker://encodedcc/atac-seq-pipeline:dev-v1.9.3'
         croo_out_def: 'https://storage.googleapis.com/encode-pipeline-output-definition/atac.croo.v5.json'
 
         parameter_group: {
