@@ -121,7 +121,6 @@ def naive_overlap(basename_prefix, peak1, peak2, peak_pooled, peak_type,
             awk_param=awk_param,
             cut_param=cut_param,
             sort_param=get_gnu_sort_param(mem_gb * 1024 ** 3, ratio=0.5),
-            nonamecheck_param=nonamecheck_param,
             tmp2=tmp2, # peak2
             overlap_peak=overlap_peak,
         )
