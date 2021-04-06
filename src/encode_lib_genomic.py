@@ -10,6 +10,7 @@ import re
 import subprocess
 
 from encode_lib_common import (
+    get_gnu_sort_param,
     get_num_lines,
     get_peak_type,
     human_readable_number,
@@ -324,7 +325,7 @@ def subsample_ta_pe(ta, subsample, non_mito, mito_chr_name, r1_only, out_dir):
 # convert encode peak file to hammock (for Wash U browser track)
 
 
-def peak_to_hammock(peak, out_dir):
+def peak_to_hammock(peak, mem_gb, out_dir):
     peak_type = get_peak_type(peak)
     prefix = os.path.join(out_dir, os.path.basename(
         strip_ext_peak(peak)))
@@ -335,14 +336,26 @@ def peak_to_hammock(peak, out_dir):
     hammock_gz_tbi = '{}.gz.tbi'.format(hammock)
 
     if get_num_lines(peak) == 0:
-        cmd = 'zcat -f {} | gzip -nc > {}'.format(peak, hammock_gz)
-        run_shell_cmd(cmd)
-        cmd2 = 'touch {}'.format(hammock_gz_tbi)
+        run_shell_cmd(
+            'zcat -f {peak} | gzip -nc > {hammock_gz}'.format(
+                peak=peak,
+                hammock_gz=hammock_gz,
+            )
+        )
+        run_shell_cmd(
+            'touch {hammock_gz_tbi}'.format(
+                hammock_gz_tbi=hammock_gz_tbi,
+            )
+        )
     else:
-        cmd = "zcat -f {} | "
-        cmd += "LC_COLLATE=C sort -k1,1V -k2,2n > {}"
-        cmd = cmd.format(peak, hammock_tmp)
-        run_shell_cmd(cmd)
+        run_shell_cmd(
+            'zcat -f {peak} | '
+            'LC_COLLATE=C sort -k1,1V -k2,2n {sort_param} > {hammock_tmp}'.format(
+                peak=peak,
+                sort_param=get_gnu_sort_param(mem_gb * 1024 ** 3, ratio=0.5),
+                hammock_tmp=hammock_tmp,
+            )
+        )
 
         with open(hammock_tmp, 'r') as fin, open(hammock_tmp2, 'w') as fout:
             id = 1
@@ -390,13 +403,22 @@ def peak_to_hammock(peak, out_dir):
 
                 fout.write('\n')
 
-        cmd2 = 'zcat -f {} | sort -k1,1 -k2,2n | bgzip -cf > {}'
-        cmd2 = cmd2.format(hammock_tmp2, hammock_gz)
-        run_shell_cmd(cmd2)
-        cmd3 = 'tabix -f -p bed {}'.format(hammock_gz)
-        run_shell_cmd(cmd3)
+        run_shell_cmd(
+            'zcat -f {hammock_tmp2} | sort -k1,1 -k2,2n {sort_param} | '
+            'bgzip -cf > {hammock_gz}'.format(
+                hammock_tmp2=hammock_tmp2,
+                sort_param=get_gnu_sort_param(mem_gb * 1024 ** 3, ratio=0.5),
+                hammock_gz=hammock_gz,
+            )
+        )
+        run_shell_cmd(
+            'tabix -f -p bed {hammock_gz}'.format(
+                hammock_gz=hammock_gz,
+            )
+        )
 
         rm_f([hammock, hammock_tmp, hammock_tmp2])
+
     return (hammock_gz, hammock_gz_tbi)
 
 
@@ -435,7 +457,7 @@ def starch_to_bed_gz(starch, out_dir):
     return bed_gz
 
 
-def peak_to_bigbed(peak, peak_type, chrsz, out_dir):
+def peak_to_bigbed(peak, peak_type, chrsz, mem_gb, out_dir):
     prefix = os.path.join(out_dir,
                           os.path.basename(strip_ext(peak)))
     bigbed = '{}.{}.bb'.format(prefix, peak_type)
@@ -460,7 +482,7 @@ def peak_to_bigbed(peak, peak_type, chrsz, out_dir):
     int   peak;         "Point-source called for this peak; 0-based offset from chromStart. Set to -1 if no point-source called."
 )
 '''
-        bed_param = '-type=bed6+4 -as={}'.format(as_file)
+        bed_param = '-type=bed6+4 -as={as_file}'.format(as_file=as_file)
     elif peak_type.lower() == 'broadpeak':
         as_file_contents = '''table broadPeak
 "BED6+3 Peaks of signal enrichment based on pooled, normalized (interpreted) data."
@@ -476,7 +498,7 @@ def peak_to_bigbed(peak, peak_type, chrsz, out_dir):
     float  qValue;       "Statistical significance with multiple-test correction applied (FDR -log10). Set to -1 if not used."
 )
 '''
-        bed_param = '-type=bed6+3 -as={}'.format(as_file)
+        bed_param = '-type=bed6+3 -as={as_file}'.format(as_file=as_file)
     elif peak_type.lower() == 'gappedpeak':
         as_file_contents = '''table gappedPeak
 "This format is used to provide called regions of signal enrichment based on pooled, normalized (interpreted) data where the regions may be spliced or incorporate gaps in the genomic sequence. It is a BED12+3 format."
@@ -498,26 +520,47 @@ def peak_to_bigbed(peak, peak_type, chrsz, out_dir):
     float  qValue;       "Statistical significance with multiple-test correction applied (FDR). Set to -1 if not used."
 )
 '''
-        bed_param = '-type=bed12+3 -as={}'.format(as_file)
+        bed_param = '-type=bed12+3 -as={as_file}'.format(as_file=as_file)
     else:
-        raise Exception('Unsupported peak file type {}!'.format(peak_type))
+        raise Exception('Unsupported peak file type {peak_type}!'.format(peak_type=peak_type))
 
     # create temporary .as file
     with open(as_file, 'w') as fp:
         fp.write(as_file_contents)
 
-    cmd1 = "cat {} > {}".format(chrsz, chrsz_tmp)
-    run_shell_cmd(cmd1)
-    cmd2 = "zcat -f {} | LC_COLLATE=C sort -k1,1 -k2,2n | "
-    cmd2 += 'awk \'BEGIN{{OFS="\\t"}} {{if ($5>1000) $5=1000; '
-    cmd2 += 'if ($5<0) $5=0; print $0}}\' > {}'
-    cmd2 = cmd2.format(peak, bigbed_tmp)
-    run_shell_cmd(cmd2)
-    cmd3 = "bedClip {} {} {}".format(bigbed_tmp, chrsz_tmp, bigbed_tmp2)
-    run_shell_cmd(cmd3)
-    cmd4 = "bedToBigBed {} {} {} {}".format(
-        bed_param, bigbed_tmp2, chrsz_tmp, bigbed)
-    run_shell_cmd(cmd4)
+    run_shell_cmd(
+        'cat {chrsz} > {chrsz_tmp}'.format(
+            chrsz=chrsz,
+            chrsz_tmp=chrsz_tmp,
+        )
+    )
+
+    run_shell_cmd(
+        'zcat -f {peak} | LC_COLLATE=C sort -k1,1 -k2,2n {sort_param} | '
+        'awk \'BEGIN{{OFS="\\t"}} {{if ($5>1000) $5=1000; '
+        'if ($5<0) $5=0; print $0}}\' > {bigbed_tmp}'.format(
+            peak=peak,
+            sort_param=get_gnu_sort_param(mem_gb * 1024 ** 3, ratio=0.5),
+            bigbed_tmp=bigbed_tmp,
+        )
+    )
+
+    run_shell_cmd(
+        'bedClip {bigbed_tmp} {chrsz_tmp} {bigbed_tmp2}'.format(
+            bigbed_tmp=bigbed_tmp,
+            chrsz_tmp=chrsz_tmp,
+            bigbed_tmp2=bigbed_tmp2,
+        )
+    )
+
+    run_shell_cmd(
+        'bedToBigBed {bed_param} {bigbed_tmp2} {chrsz_tmp} {bigbed}'.format(
+            bed_param=bed_param,
+            bigbed_tmp2=bigbed_tmp2,
+            chrsz_tmp=chrsz_tmp,
+            bigbed=bigbed,
+        )
+    )
 
     # remove temporary files
     rm_f([as_file, chrsz_tmp, bigbed_tmp, bigbed_tmp2])

@@ -14,6 +14,7 @@ from encode_lib_common import (
     mkdir_p,
     rm_f,
     run_shell_cmd,
+    get_gnu_sort_param,
 )
 from encode_lib_genomic import (
     peak_to_bigbed,
@@ -56,6 +57,10 @@ def parse_arguments():
     parser.add_argument('--fraglen', type=int, default=0,
                         help='Fragment length for TAGALIGN file. \
                         If given, do shifted FRiP (for ChIP-Seq).')
+    parser.add_argument('--mem-gb', type=float, default=4.0,
+                        help='Max. memory for this job in GB. '
+                        'This will be used to determine GNU sort -S (defaulting to 0.5 of this value). '
+                        'It should be total memory for this task (not memory per thread).')
     parser.add_argument('--out-dir', default='', type=str,
                         help='Output directory.')
     parser.add_argument('--log-level', default='INFO',
@@ -75,7 +80,7 @@ def parse_arguments():
 
 
 def naive_overlap(basename_prefix, peak1, peak2, peak_pooled, peak_type,
-                  nonamecheck, out_dir):
+                  nonamecheck, mem_gb, out_dir):
     prefix = os.path.join(out_dir, basename_prefix)
     prefix += '.overlap'
     overlap_peak = '{}.{}.gz'.format(prefix, peak_type)
@@ -101,26 +106,26 @@ def naive_overlap(basename_prefix, peak1, peak2, peak_pooled, peak_type,
     # Find pooled peaks that overlap peak1 and peak2
     # where overlap is defined as the fractional overlap
     # wrt any one of the overlapping peak pairs >= 0.5
-    cmd1 = 'intersectBed {} -wo '
-    cmd1 += '-a {} -b {} | '
-    cmd1 += 'awk \'BEGIN{{FS="\\t";OFS="\\t"}} {}\' | '
-    cmd1 += 'cut -f {} | sort | uniq | '
-    cmd1 += 'intersectBed {} -wo '
-    cmd1 += '-a stdin -b {} | '
-    cmd1 += 'awk \'BEGIN{{FS="\\t";OFS="\\t"}} {}\' | '
-    cmd1 += 'cut -f {} | sort | uniq | gzip -nc > {}'
-    cmd1 = cmd1.format(
-        nonamecheck_param,
-        tmp_pooled,  # peak_pooled
-        tmp1,  # peak1
-        awk_param,
-        cut_param,
-        nonamecheck_param,
-        tmp2,  # peak2
-        awk_param,
-        cut_param,
-        overlap_peak)
-    run_shell_cmd(cmd1)
+    run_shell_cmd(
+        'intersectBed {nonamecheck_param} -wo '
+        '-a {tmp_pooled} -b {tmp1} | '
+        'awk \'BEGIN{{FS="\\t";OFS="\\t"}} {awk_param}\' | '
+        'cut -f {cut_param} | sort {sort_param} | uniq | '
+        'intersectBed {nonamecheck_param} -wo '
+        '-a stdin -b {tmp2} | '
+        'awk \'BEGIN{{FS="\\t";OFS="\\t"}} {awk_param}\' | '
+        'cut -f {cut_param} | sort {sort_param} | uniq | gzip -nc > {overlap_peak}'.format(
+            nonamecheck_param=nonamecheck_param,
+            tmp_pooled=tmp_pooled, # peak_pooled
+            tmp1=tmp1, # peak1
+            awk_param=awk_param,
+            cut_param=cut_param,
+            sort_param=get_gnu_sort_param(mem_gb * 1024 ** 3, ratio=0.5),
+            nonamecheck_param=nonamecheck_param,
+            tmp2=tmp2, # peak2
+            overlap_peak=overlap_peak,
+        )
+    )
     rm_f([tmp1, tmp2, tmp_pooled])
     return overlap_peak
 
@@ -135,7 +140,8 @@ def main():
     log.info('Do naive overlap...')
     overlap_peak = naive_overlap(
         args.prefix, args.peak1, args.peak2, args.peak_pooled,
-        args.peak_type, args.nonamecheck, args.out_dir)
+        args.peak_type, args.nonamecheck, args.mem_gb, args.out_dir,
+    )
 
     log.info('Blacklist-filtering peaks...')
     bfilt_overlap_peak = blacklist_filter(
@@ -146,13 +152,13 @@ def main():
 
     log.info('Converting peak to bigbed...')
     peak_to_bigbed(bfilt_overlap_peak, args.peak_type,
-                   args.chrsz, args.out_dir)
+                   args.chrsz, args.mem_gb, args.out_dir)
 
     log.info('Converting peak to starch...')
     peak_to_starch(bfilt_overlap_peak, args.out_dir)
 
     log.info('Converting peak to hammock...')
-    peak_to_hammock(bfilt_overlap_peak, args.out_dir)
+    peak_to_hammock(bfilt_overlap_peak, args.mem_gb, args.out_dir)
 
     if args.ta:  # if TAG-ALIGN is given
         if args.fraglen:  # chip-seq

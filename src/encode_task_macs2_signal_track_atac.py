@@ -7,7 +7,9 @@ import sys
 import os
 import argparse
 from encode_lib_common import (
-    get_num_lines, log, ls_l, mkdir_p, rm_f, run_shell_cmd, strip_ext_ta)
+    get_num_lines, log, ls_l, mkdir_p, rm_f, run_shell_cmd, strip_ext_ta,
+    get_gnu_sort_param,
+)
 
 
 def parse_arguments():
@@ -24,6 +26,10 @@ def parse_arguments():
                         help='P-Value threshold.')
     parser.add_argument('--smooth-win', default=150, type=int,
                         help='Smoothing window size.')
+    parser.add_argument('--mem-gb', type=float, default=4.0,
+                        help='Max. memory for this job in GB. '
+                        'This will be used to determine GNU sort -S (defaulting to 0.5 of this value). '
+                        'It should be total memory for this task (not memory per thread).')
     parser.add_argument('--out-dir', default='', type=str,
                         help='Output directory.')
     parser.add_argument('--log-level', default='INFO',
@@ -38,7 +44,7 @@ def parse_arguments():
     return args
 
 
-def macs2_signal_track(ta, chrsz, gensz, pval_thresh, smooth_win, out_dir):
+def macs2_signal_track(ta, chrsz, gensz, pval_thresh, smooth_win, mem_gb, out_dir):
     prefix = os.path.join(out_dir,
                           os.path.basename(strip_ext_ta(ta)))
     fc_bigwig = '{}.fc.signal.bigwig'.format(prefix)
@@ -52,98 +58,105 @@ def macs2_signal_track(ta, chrsz, gensz, pval_thresh, smooth_win, out_dir):
     shiftsize = -int(round(float(smooth_win)/2.0))
     temp_files = []
 
-    cmd0 = 'macs2 callpeak '
-    cmd0 += '-t {} -f BED -n {} -g {} -p {} '
-    cmd0 += '--shift {} --extsize {} '
-    cmd0 += '--nomodel -B --SPMR '
-    cmd0 += '--keep-dup all --call-summits '
-    cmd0 = cmd0.format(
-        ta,
-        prefix,
-        gensz,
-        pval_thresh,
-        shiftsize,
-        smooth_win)
-    run_shell_cmd(cmd0)
+    run_shell_cmd(
+        'macs2 callpeak '
+        '-t {ta} -f BED -n {prefix} -g {gensz} -p {pval_thresh} '
+        '--shift {shiftsize} --extsize {extsize} '
+        '--nomodel -B --SPMR '
+        '--keep-dup all --call-summits '.format(
+            ta=ta,
+            prefix=prefix,
+            gensz=gensz,
+            pval_thresh=pval_thresh,
+            shiftsize=shiftsize,
+            extsize=smooth_win,
+        )
+    )
 
-    cmd3 = 'macs2 bdgcmp -t "{}"_treat_pileup.bdg '
-    cmd3 += '-c "{}"_control_lambda.bdg '
-    cmd3 += '--o-prefix "{}" -m FE '
-    cmd3 = cmd3.format(
-        prefix,
-        prefix,
-        prefix)
-    run_shell_cmd(cmd3)
+    run_shell_cmd(
+        'macs2 bdgcmp -t "{prefix}"_treat_pileup.bdg '
+        '-c "{prefix}"_control_lambda.bdg '
+        '--o-prefix "{prefix}" -m FE '.format(
+            prefix=prefix,
+        )
+    )
 
-    cmd4 = 'bedtools slop -i "{}"_FE.bdg -g {} -b 0 | '
-    cmd4 += 'bedClip stdin {} {}'
-    cmd4 = cmd4.format(
-        prefix,
-        chrsz,
-        chrsz,
-        fc_bedgraph)
-    run_shell_cmd(cmd4)
+    run_shell_cmd(
+        'bedtools slop -i "{prefix}"_FE.bdg -g {chrsz} -b 0 | '
+        'bedClip stdin {chrsz} {fc_bedgraph}'.format(
+            prefix=prefix,
+            chrsz=chrsz,
+            fc_bedgraph=fc_bedgraph,
+        )
+    )
 
     # sort and remove any overlapping regions in bedgraph by comparing two lines in a row
-    cmd5 = 'LC_COLLATE=C sort -k1,1 -k2,2n {} | ' \
-        'awk \'BEGIN{{OFS="\\t"}}{{if (NR==1 || NR>1 && (prev_chr!=$1 '\
-        '|| prev_chr==$1 && prev_chr_e<=$2)) ' \
-        '{{print $0}}; prev_chr=$1; prev_chr_e=$3;}}\' > {}'.format(
-            fc_bedgraph,
-            fc_bedgraph_srt)
-    run_shell_cmd(cmd5)
+    run_shell_cmd(
+        'LC_COLLATE=C sort -k1,1 -k2,2n {sort_param} {fc_bedgraph} | '
+        'awk \'BEGIN{{OFS="\\t"}}{{if (NR==1 || NR>1 && (prev_chr!=$1 '
+        '|| prev_chr==$1 && prev_chr_e<=$2)) '
+        '{{print $0}}; prev_chr=$1; prev_chr_e=$3;}}\' > {fc_bedgraph_srt}'.format(
+            sort_param=get_gnu_sort_param(mem_gb * 1024 ** 3, ratio=0.5),
+            fc_bedgraph=fc_bedgraph,
+            fc_bedgraph_srt=fc_bedgraph_srt
+        )
+    )
     rm_f(fc_bedgraph)
 
-    cmd6 = 'bedGraphToBigWig {} {} {}'
-    cmd6 = cmd6.format(
-        fc_bedgraph_srt,
-        chrsz,
-        fc_bigwig)
-    run_shell_cmd(cmd6)
+    run_shell_cmd(
+        'bedGraphToBigWig {fc_bedgraph_srt} {chrsz} {fc_bigwig}'.format(
+            fc_bedgraph_srt=fc_bedgraph_srt,
+            chrsz=chrsz,
+            fc_bigwig=fc_bigwig,
+        )
+    )
     rm_f(fc_bedgraph_srt)
 
     # sval counts the number of tags per million in the (compressed) BED file
     sval = float(get_num_lines(ta))/1000000.0
 
-    cmd7 = 'macs2 bdgcmp -t "{}"_treat_pileup.bdg '
-    cmd7 += '-c "{}"_control_lambda.bdg '
-    cmd7 += '--o-prefix {} -m ppois -S {}'
-    cmd7 = cmd7.format(
-        prefix,
-        prefix,
-        prefix,
-        sval)
-    run_shell_cmd(cmd7)
+    run_shell_cmd(
+        'macs2 bdgcmp -t "{prefix}"_treat_pileup.bdg '
+        '-c "{prefix}"_control_lambda.bdg '
+        '--o-prefix {prefix} -m ppois -S {sval}'.format(
+            prefix=prefix,
+            sval=sval,
+        )
+    )
 
-    cmd8 = 'bedtools slop -i "{}"_ppois.bdg -g {} -b 0 | '
-    cmd8 += 'bedClip stdin {} {}'
-    cmd8 = cmd8.format(
-        prefix,
-        chrsz,
-        chrsz,
-        pval_bedgraph)
-    run_shell_cmd(cmd8)
+    run_shell_cmd(
+        'bedtools slop -i "{prefix}"_ppois.bdg -g {chrsz} -b 0 | '
+        'bedClip stdin {chrsz} {pval_bedgraph}'.format(
+            prefix=prefix,
+            chrsz=chrsz,
+            pval_bedgraph=pval_bedgraph,
+        )
+    )
 
     # sort and remove any overlapping regions in bedgraph by comparing two lines in a row
-    cmd9 = 'LC_COLLATE=C sort -k1,1 -k2,2n {} | ' \
-        'awk \'BEGIN{{OFS="\\t"}}{{if (NR==1 || NR>1 && (prev_chr!=$1 '\
-        '|| prev_chr==$1 && prev_chr_e<=$2)) ' \
-        '{{print $0}}; prev_chr=$1; prev_chr_e=$3;}}\' > {}'.format(
-            pval_bedgraph,
-            pval_bedgraph_srt)
-    run_shell_cmd(cmd9)
+    run_shell_cmd(
+        'LC_COLLATE=C sort -k1,1 -k2,2n {sort_param} {pval_bedgraph} | '
+        'awk \'BEGIN{{OFS="\\t"}}{{if (NR==1 || NR>1 && (prev_chr!=$1 '
+        '|| prev_chr==$1 && prev_chr_e<=$2)) '
+        '{{print $0}}; prev_chr=$1; prev_chr_e=$3;}}\' > {pval_bedgraph_srt}'.format(
+            sort_param=get_gnu_sort_param(mem_gb * 1024 ** 3, ratio=0.5),
+            pval_bedgraph=pval_bedgraph,
+            pval_bedgraph_srt=pval_bedgraph_srt,
+        )
+    )
     rm_f(pval_bedgraph)
 
-    cmd10 = 'bedGraphToBigWig {} {} {}'
-    cmd10 = cmd10.format(
-        pval_bedgraph_srt,
-        chrsz,
-        pval_bigwig)
-    run_shell_cmd(cmd10)
+    run_shell_cmd(
+        'bedGraphToBigWig {pval_bedgraph_srt} {chrsz} {pval_bigwig}'.format(
+            pval_bedgraph_srt=pval_bedgraph_srt,
+            chrsz=chrsz,
+            pval_bigwig=pval_bigwig,
+        )
+    )
     rm_f(pval_bedgraph_srt)
 
     # remove temporary files
-    temp_files.append("{}_*".format(prefix))
+    temp_files.append("{prefix}_*".format(prefix=prefix))
     rm_f(temp_files)
 
     return fc_bigwig, pval_bigwig
@@ -158,8 +171,14 @@ def main():
 
     log.info('Calling peaks and generating signal tracks with MACS2...')
     fc_bigwig, pval_bigwig = macs2_signal_track(
-        args.ta, args.chrsz, args.gensz, args.pval_thresh,
-        args.smooth_win, args.out_dir)
+        args.ta,
+        args.chrsz,
+        args.gensz,
+        args.pval_thresh,
+        args.smooth_win,
+        args.mem_gb,
+        args.out_dir,
+    )
 
     log.info('List all files in output directory...')
     ls_l(args.out_dir)
