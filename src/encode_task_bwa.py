@@ -9,7 +9,9 @@ import re
 import argparse
 from encode_lib_common import (
     get_num_lines, log, ls_l, mkdir_p, rm_f, run_shell_cmd, strip_ext_fastq,
-    strip_ext_tar, untar)
+    strip_ext_tar, untar,
+    get_gnu_sort_param,
+)
 from encode_lib_genomic import (
     get_read_length, samtools_sort, bam_is_empty, get_samtools_res_param)
 
@@ -28,13 +30,23 @@ def parse_arguments():
                             FASTQs must be compressed with gzip (with .gz).')
     parser.add_argument(
         '--use-bwa-mem-for-pe', action="store_true",
-        help='Use "bwa mem" for paired end dataset with read length >=70bp.')
+        help='Use "bwa mem" for PAIRED-ENDED dataset with R1 FASTQ\'s read length >= --bwa-mem-read-len-limit. '
+             'For shorter reads, bwa aln will be used. ')
+    parser.add_argument(
+        '--rescue-reads-for-bwa-mem', action="store_true",
+        help='Use -P for "bwa mem" to rescue missing hits only (by using SW algorithm) '
+             'but do not try to find hits that fit a proper pair.'
+    )
+    parser.add_argument('--bwa-mem-read-len-limit', type=int, default=70,
+                        help='Read length limit for bwa mem (for paired-ended FASTQs only). '
+                             'bwa aln will be used instead of bwa mem if R1 reads are shorter than this.')
     parser.add_argument('--paired-end', action="store_true",
                         help='Paired-end FASTQs.')
     parser.add_argument('--nth', type=int, default=1,
                         help='Number of threads to parallelize.')
     parser.add_argument('--mem-gb', type=float,
-                        help='Max. memory for samtools sort in GB. '
+                        help='Max. memory for samtools sort and GNU sort -S '
+                        '(half of this value will be used for GNU sort) in GB. '
                         'It should be total memory for this task (not memory per thread).')
     parser.add_argument('--out-dir', default='', type=str,
                         help='Output directory.')
@@ -50,6 +62,15 @@ def parse_arguments():
         raise argparse.ArgumentTypeError('Need 2 fastqs for paired end.')
     if not args.paired_end and len(args.fastqs) != 1:
         raise argparse.ArgumentTypeError('Need 1 fastq for single end.')
+
+    if args.use_bwa_mem_for_pe and not args.paired_end:
+        raise ValueError(
+            '--use-bwa-mem-for-pe is for paired ended FASTQs only.'
+        )
+    if not args.use_bwa_mem_for_pe and args.rescue_reads_for_bwa_mem:
+        raise ValueError(
+            '--rescue-reads-for-bwa-mem is available only when --use-bwa-mem-for-pe is activated.'
+        )
 
     log.setLevel(args.log_level)
     log.info(sys.argv)
@@ -95,7 +116,8 @@ def bwa_se(fastq, ref_index_prefix, nth, mem_gb, out_dir):
     return bam
 
 
-def bwa_pe(fastq1, fastq2, ref_index_prefix, nth, mem_gb, use_bwa_mem_for_pe, out_dir):
+def bwa_pe(fastq1, fastq2, ref_index_prefix, nth, mem_gb, use_bwa_mem_for_pe,
+           bwa_mem_read_len_limit, rescue_reads_for_bwa_mem, out_dir):
     basename = os.path.basename(strip_ext_fastq(fastq1))
     prefix = os.path.join(out_dir, basename)
     sam = '{}.sam'.format(prefix)
@@ -104,35 +126,54 @@ def bwa_pe(fastq1, fastq2, ref_index_prefix, nth, mem_gb, use_bwa_mem_for_pe, ou
 
     temp_files = []
     read_len = get_read_length(fastq1)
-    if use_bwa_mem_for_pe and read_len >= 70:
-        cmd = 'bwa mem -M -t {} {} {} {} | gzip -nc > {}'
-        cmd = cmd.format(nth, ref_index_prefix, fastq1, fastq2, sam)
+
+    log.info(
+        'Guessed read length of R1 FASTQ: {read_len}'.format(
+            read_len=read_len,
+        )
+    )
+    if use_bwa_mem_for_pe and read_len >= bwa_mem_read_len_limit:
+        log.info('Use bwa mem.')
+
+        cmd = 'bwa mem -M {extra_param} -t {nth} {ref_index_prefix} {fastq1} {fastq2} | gzip -nc > {sam}'.format(
+            extra_param='-P' if rescue_reads_for_bwa_mem else '',
+            nth=nth,
+            ref_index_prefix=ref_index_prefix,
+            fastq1=fastq1,
+            fastq2=fastq2,
+            sam=sam,
+        )
         temp_files.append(sam)
+
     else:
+        log.info('Use bwa aln for each (R1 and R2) and then bwa sampe.')
         sai1 = bwa_aln(fastq1, ref_index_prefix, nth, out_dir)
         sai2 = bwa_aln(fastq2, ref_index_prefix, nth, out_dir)
 
-        cmd = 'bwa sampe {} {} {} {} {} | gzip -nc > {}'.format(
-            ref_index_prefix,
-            sai1,
-            sai2,
-            fastq1,
-            fastq2,
-            sam)
+        cmd = 'bwa sampe {ref_index_prefix} {sai1} {sai2} {fastq1} {fastq2} | gzip -nc > {sam}'.format(
+            ref_index_prefix=ref_index_prefix,
+            sai1=sai1,
+            sai2=sai2,
+            fastq1=fastq1,
+            fastq2=fastq2,
+            sam=sam,
+        )
         temp_files.extend([sai1, sai2, sam])
     run_shell_cmd(cmd)
 
-    cmd2 = 'zcat -f {} | '
-    cmd2 += 'awk \'BEGIN {{FS="\\t" ; OFS="\\t"}} ! /^@/ && $6!="*" '
-    cmd2 += '{{ cigar=$6; gsub("[0-9]+D","",cigar); '
-    cmd2 += 'n = split(cigar,vals,"[A-Z]"); s = 0; '
-    cmd2 += 'for (i=1;i<=n;i++) s=s+vals[i]; seqlen=length($10); '
-    cmd2 += 'if (s!=seqlen) print $1"\\t"; }}\' | '
-    cmd2 += 'sort | uniq > {}'
-    cmd2 = cmd2.format(
-        sam,
-        badcigar)
-    run_shell_cmd(cmd2)
+    run_shell_cmd(
+        'zcat -f {sam} | '
+        'awk \'BEGIN {{FS="\\t" ; OFS="\\t"}} ! /^@/ && $6!="*" '
+        '{{ cigar=$6; gsub("[0-9]+D","",cigar); '
+        'n = split(cigar,vals,"[A-Z]"); s = 0; '
+        'for (i=1;i<=n;i++) s=s+vals[i]; seqlen=length($10); '
+        'if (s!=seqlen) print $1"\\t"; }}\' | '
+        'sort {sort_param} | uniq > {badcigar}'.format(
+            sam=sam,
+            sort_param=get_gnu_sort_param(mem_gb * 1024 ** 3, ratio=0.5),
+            badcigar=badcigar,
+        )
+    )
 
     # Remove bad CIGAR read pairs
     if get_num_lines(badcigar) > 0:
@@ -214,6 +255,7 @@ def main():
         bam = bwa_pe(
             args.fastqs[0], args.fastqs[1],
             bwa_index_prefix, args.nth, args.mem_gb, args.use_bwa_mem_for_pe,
+            args.bwa_mem_read_len_limit, args.rescue_reads_for_bwa_mem,
             args.out_dir)
     else:
         bam = bwa_se(

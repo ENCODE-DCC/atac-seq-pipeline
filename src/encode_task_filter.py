@@ -8,11 +8,13 @@ import os
 import argparse
 from encode_lib_common import (
     copy_f_to_dir, log, ls_l, mkdir_p, rm_f, run_shell_cmd, strip_ext,
-    strip_ext_bam)
+    strip_ext_bam, get_gnu_sort_param,
+)
 from encode_lib_genomic import (
     locate_picard, remove_chrs_from_bam, samstat, samtools_index,
     samtools_name_sort, bam_is_empty,
-    get_samtools_res_param)
+    get_samtools_res_param
+)
 
 
 def parse_arguments():
@@ -42,7 +44,8 @@ def parse_arguments():
     parser.add_argument('--nth', type=int, default=1,
                         help='Number of threads to parallelize.')
     parser.add_argument('--mem-gb', type=float,
-                        help='Max. memory for samtools sort in GB. '
+                        help='Max. memory for samtools sort and GNU sort -S '
+                        '(half of this value will be used for GNU sort) in GB. '
                         'It should be total memory for this task (not memory per thread).')
     parser.add_argument('--picard-java-heap',
                         help='Picard\'s Java max. heap: java -jar picard.jar '
@@ -267,28 +270,30 @@ def rm_dup_pe(dupmark_bam, nth, out_dir):
     return nodup_bam
 
 
-def pbc_qc_se(bam, mito_chr_name, out_dir):
+def pbc_qc_se(bam, mito_chr_name, mem_gb, out_dir):
     prefix = os.path.join(out_dir,
                           os.path.basename(strip_ext_bam(bam)))
     # strip extension appended in the previous step
     prefix = strip_ext(prefix, 'dupmark')
     pbc_qc = '{}.lib_complexity.qc'.format(prefix)
 
-    cmd2 = 'bedtools bamtobed -i {} | '
-    cmd2 += 'awk \'BEGIN{{OFS="\\t"}}{{print $1,$2,$3,$6}}\' | '
-    cmd2 += 'grep -v "^{}\\s" | sort | uniq -c | '
-    cmd2 += 'awk \'BEGIN{{mt=0;m0=0;m1=0;m2=0}} ($1==1){{m1=m1+1}} '
-    cmd2 += '($1==2){{m2=m2+1}} {{m0=m0+1}} '
-    cmd2 += '{{mt=mt+$1}} END{{m1_m2=-1.0; '
-    cmd2 += 'if(m2>0) m1_m2=m1/m2; m0_mt=0; '
-    cmd2 += 'if (mt>0) m0_mt=m0/mt; m1_m0=0; if (m0>0) m1_m0=m1/m0; '
-    cmd2 += 'printf "%d\\t%d\\t%d\\t%d\\t%f\\t%f\\t%f\\n",'
-    cmd2 += 'mt,m0,m1,m2,m0_mt,m1_m0,m1_m2}}\' > {}'
-    cmd2 = cmd2.format(
-        bam,
-        mito_chr_name,
-        pbc_qc)
-    run_shell_cmd(cmd2)
+    run_shell_cmd(
+        'bedtools bamtobed -i {bam} | '
+        'awk \'BEGIN{{OFS="\\t"}}{{print $1,$2,$3,$6}}\' | '
+        'grep -v "^{mito_chr_name}\\s" | sort {sort_param} | uniq -c | '
+        'awk \'BEGIN{{mt=0;m0=0;m1=0;m2=0}} ($1==1){{m1=m1+1}} '
+        '($1==2){{m2=m2+1}} {{m0=m0+1}} '
+        '{{mt=mt+$1}} END{{m1_m2=-1.0; '
+        'if(m2>0) m1_m2=m1/m2; m0_mt=0; '
+        'if (mt>0) m0_mt=m0/mt; m1_m0=0; if (m0>0) m1_m0=m1/m0; '
+        'printf "%d\\t%d\\t%d\\t%d\\t%f\\t%f\\t%f\\n",'
+        'mt,m0,m1,m2,m0_mt,m1_m0,m1_m2}}\' > {pbc_qc}'.format(
+            bam=bam,
+            mito_chr_name=mito_chr_name,
+            sort_param=get_gnu_sort_param(mem_gb * 1024 ** 3, ratio=0.5),
+            pbc_qc=pbc_qc,
+        )
+    )
     return pbc_qc
 
 
@@ -298,20 +303,23 @@ def pbc_qc_pe(bam, mito_chr_name, nth, mem_gb, out_dir):
     pbc_qc = '{}.lib_complexity.qc'.format(prefix)
 
     nmsrt_bam = samtools_name_sort(bam, nth, mem_gb, out_dir)
-    cmd3 = 'bedtools bamtobed -bedpe -i {} | '
-    cmd3 += 'awk \'BEGIN{{OFS="\\t"}}{{print $1,$2,$4,$6,$9,$10}}\' | '
-    cmd3 += 'grep -v "^{}\\s" | sort | uniq -c | '
-    cmd3 += 'awk \'BEGIN{{mt=0;m0=0;m1=0;m2=0}} ($1==1){{m1=m1+1}} '
-    cmd3 += '($1==2){{m2=m2+1}} {{m0=m0+1}} {{mt=mt+$1}} END{{m1_m2=-1.0; '
-    cmd3 += 'if(m2>0) m1_m2=m1/m2; m0_mt=0; '
-    cmd3 += 'if (mt>0) m0_mt=m0/mt; m1_m0=0; if (m0>0) m1_m0=m1/m0; '
-    cmd3 += 'printf "%d\\t%d\\t%d\\t%d\\t%f\\t%f\\t%f\\n"'
-    cmd3 += ',mt,m0,m1,m2,m0_mt,m1_m0,m1_m2}}\' > {}'
-    cmd3 = cmd3.format(
-        nmsrt_bam,
-        mito_chr_name,
-        pbc_qc)
-    run_shell_cmd(cmd3)
+
+    run_shell_cmd(
+        'bedtools bamtobed -bedpe -i {nmsrt_bam} | '
+        'awk \'BEGIN{{OFS="\\t"}}{{print $1,$2,$4,$6,$9,$10}}\' | '
+        'grep -v "^{mito_chr_name}\\s" | sort {sort_param} | uniq -c | '
+        'awk \'BEGIN{{mt=0;m0=0;m1=0;m2=0}} ($1==1){{m1=m1+1}} '
+        '($1==2){{m2=m2+1}} {{m0=m0+1}} {{mt=mt+$1}} END{{m1_m2=-1.0; '
+        'if(m2>0) m1_m2=m1/m2; m0_mt=0; '
+        'if (mt>0) m0_mt=m0/mt; m1_m0=0; if (m0>0) m1_m0=m1/m0; '
+        'printf "%d\\t%d\\t%d\\t%d\\t%f\\t%f\\t%f\\n"'
+        ',mt,m0,m1,m2,m0_mt,m1_m0,m1_m2}}\' > {pbc_qc}'.format(
+            nmsrt_bam=nmsrt_bam,
+            mito_chr_name=mito_chr_name,
+            sort_param=get_gnu_sort_param(mem_gb * 1024 ** 3, ratio=0.5),
+            pbc_qc=pbc_qc,
+        )
+    )
     rm_f(nmsrt_bam)
     return pbc_qc
 
@@ -406,10 +414,11 @@ def main():
 
     log.info('Generating PBC QC log...')
     if args.paired_end:
-        pbc_qc_pe(dupmark_bam, args.mito_chr_name, args.nth, args.mem_gb,
-                  args.out_dir)
+        pbc_qc_pe(dupmark_bam, args.mito_chr_name, args.nth,
+                  args.mem_gb, args.out_dir)
     else:
-        pbc_qc_se(dupmark_bam, args.mito_chr_name, args.out_dir)
+        pbc_qc_se(dupmark_bam, args.mito_chr_name,
+                  args.mem_gb, args.out_dir)
 
     log.info('samtools index (raw bam)...')
     bam = copy_f_to_dir(args.bam, args.out_dir)
