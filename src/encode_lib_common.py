@@ -280,6 +280,34 @@ def copy_f_to_dir(f, out_dir):  # copy 'f' to 'out_dir'/'f'
     return copy_f_to_f(f, dest)
 
 
+def get_gnu_sort_param(max_mem_job, ratio=0.5):
+    """Get a string of parameters for GNU sort according to maximum memory of a job/instance.
+
+    For GNU `sort`, `-S` or `--buffer-size` defines the buffer size for the sorting,
+    which defaults to max(available_mem, 1/8 * total_mem) of a node/instance.
+
+    sort -S [SIZE][UNIT] ...
+
+    See the following link for details.
+    https://github.com/coreutils/coreutils/blob/master/src/sort.c#L1492
+
+    This can be a problem if a job is assigned with a limited amount of memory,
+    but the job runs on a large node (e.g. 256GB of memory).
+
+    `-S` defines an INITIAL buffer size and it will automatically grow
+    if more memory is needed by `sort`.
+
+
+    Args:
+        max_mem_job:
+            Maximum amount of memory for a job/instance in bytes.
+        ratio:
+            Ratio to define the buffer size according to `max_mem_job`.
+    """
+    mem_mb = int(math.ceil(max_mem_job * ratio / (1024 * 1024)))
+    return '-S {mem_mb}M'.format(mem_mb=mem_mb)
+
+
 def now():
     return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 

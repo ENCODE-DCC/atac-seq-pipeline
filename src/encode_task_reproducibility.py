@@ -45,6 +45,10 @@ def parse_arguments():
                         help='2-col chromosome sizes file.')
     parser.add_argument('--prefix', type=str,
                         help='Basename prefix for reproducibility QC file.')
+    parser.add_argument('--mem-gb', type=float, default=4.0,
+                        help='Max. memory for this job in GB. '
+                        'This will be used to determine GNU sort -S (defaulting to 0.5 of this value). '
+                        'It should be total memory for this task (not memory per thread).')
     parser.add_argument('--out-dir', default='', type=str,
                         help='Output directory.')
     parser.add_argument('--log-level', default='INFO',
@@ -136,9 +140,9 @@ def main():
     if args.chrsz:
         log.info('Converting peak to bigbed...')
         peak_to_bigbed(optimal_peak_file, args.peak_type,
-                       args.chrsz, args.out_dir)
+                       args.chrsz, args.mem_gb, args.out_dir)
         peak_to_bigbed(conservative_peak_file, args.peak_type,
-                       args.chrsz, args.out_dir)
+                       args.chrsz, args.mem_gb, args.out_dir)
 
         log.info('Converting peak to starch...')
         peak_to_starch(optimal_peak_file, args.out_dir)
@@ -146,8 +150,10 @@ def main():
 
         log.info('Converting peak to hammock...')
         peak_to_hammock(optimal_peak_file,
+                        args.mem_gb,
                         args.out_dir)
         peak_to_hammock(conservative_peak_file,
+                        args.mem_gb,
                         args.out_dir)
 
     log.info('Writing reproducibility QC log...')
