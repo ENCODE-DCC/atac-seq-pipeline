@@ -47,14 +47,18 @@ def spr_se(ta, pseudoreplication_random_seed, out_dir):
     nlines = int((get_num_lines(ta)+1)/2)
 
     if pseudoreplication_random_seed == 0:
-        random_seed = os.path.getsize(ta)
+        random_seed = run_shell_cmd('zcat -f {ta} | wc -c'.format(ta=ta))
         log.info(
-            'Using input file\'s size {seed} as random seed for pseudoreplication.'.format(seed=seed)
+            'Using input file\'s size {random_seed} as random seed for pseudoreplication.'.format(
+                random_seed=random_seed,
+            )
         )
     else:
         random_seed = pseudoreplication_random_seed
         log.info(
-            'Using a fixed integer {seed} as random seed for pseudoreplication.'.format(seed=seed)
+            'Using a fixed integer {random_seed} as random seed for pseudoreplication.'.format(
+                random_seed=random_seed,
+            )
         )
 
     # bash-only
@@ -87,21 +91,25 @@ def spr_pe(ta, pseudoreplication_random_seed, out_dir):
     nlines = int((get_num_lines(ta)/2+1)/2)
 
     if pseudoreplication_random_seed == 0:
-        random_seed = os.path.getsize(ta)
+        random_seed = run_shell_cmd('zcat -f {ta} | wc -c'.format(ta=ta))
         log.info(
-            'Using input file\'s size {seed} as random seed for pseudoreplication.'.format(seed=seed)
+            'Using input file\'s size {random_seed} as random seed for pseudoreplication.'.format(
+                random_seed=random_seed,
+            )
         )
     else:
         random_seed = pseudoreplication_random_seed
         log.info(
-            'Using a fixed integer {seed} as random seed for pseudoreplication.'.format(seed=seed)
+            'Using a fixed integer {random_seed} as random seed for pseudoreplication.'.format(
+                random_seed=random_seed,
+            )
         )
 
     # bash-only
     run_shell_cmd(
         'zcat -f {ta} | sed \'N;s/\\n/\\t/\' | '
         'shuf --random-source=<(openssl enc -aes-256-ctr '
-        '-pass pass:${random_seed} -nosalt </dev/zero 2>/dev/null) | '
+        '-pass pass:{random_seed} -nosalt </dev/zero 2>/dev/null) | '
         'split -d -l {nlines} - {prefix}.'.format(
             ta=ta,
             random_seed=random_seed,
