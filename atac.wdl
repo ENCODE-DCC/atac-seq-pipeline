@@ -163,6 +163,7 @@ workflow atac {
         Int subsample_reads = 0
         Int xcor_subsample_reads = 25000000
         Array[Int?] read_len = []
+        Int pseudoreplication_random_seed = 0
 
         # group: peak_calling
         Int cap_num_peak = 300000
@@ -707,6 +708,11 @@ workflow atac {
             group: 'alignment',
             help: 'Pipeline can estimate read length from FASTQs. If you start pipeline from other types (BAM, NODUP_BAM, TA, ...) than FASTQ. Then provide this for some analyses that require read length (e.g. TSS enrichment plot).'
         }
+        pseudoreplication_random_seed: {
+            description: 'Random seed (positive integer) used for pseudo-replication (shuffling reads in TAG-ALIGN and then split it into two).',
+            group: 'alignment',
+            help: 'Pseudo-replication (task spr) is done by using GNU "shuf --random-source=sha256(random_seed)". If this parameter == 0, then pipeline uses input TAG-ALIGN file\'s size (in bytes) for the random_seed.'
+        }
         cap_num_peak: {
             description: 'Upper limit on the number of peaks.',
             group: 'peak_calling',
@@ -1224,6 +1230,7 @@ workflow atac {
             call spr { input :
                 ta = ta_,
                 paired_end = paired_end_,
+                pseudoreplication_random_seed = pseudoreplication_random_seed,
                 mem_factor = spr_mem_factor,
                 disk_factor = spr_disk_factor,
             }
@@ -1925,6 +1932,7 @@ task spr {
     input {
         File? ta
         Boolean paired_end
+        Int pseudoreplication_random_seed
 
         Float mem_factor
         Float disk_factor
@@ -1937,6 +1945,7 @@ task spr {
         set -e
         python3 $(which encode_task_spr.py) \
             ${ta} \
+            ${'--pseudoreplication-random-seed ' + pseudoreplication_random_seed} \
             ${if paired_end then '--paired-end' else ''}
     }
     output {
