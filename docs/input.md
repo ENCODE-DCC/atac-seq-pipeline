@@ -219,6 +219,8 @@ Parameter|Type | Description
 Parameter|Default|Description
 ---------|-------|-----------
 `atac.filter_chrs` | `["chrM", "MT"]` | Array of chromosome names to be filtered out from a final (filtered/nodup) BAM. Mitochondrial chromosomes are filtered out by default.
+`atac.pseudoreplication_random_seed` | `0` | Random seed (positive integer) used for pseudo-replication (shuffling reads in TAG-ALIGN and then split it into two). If `0` then TAG-ALIGN file's size (in bytes) is used for random seed.
+
 
 > **WARNING**: If your custom genome's mitochondrial chromosome name is different from `chrM` or `MT`, then define it correctly here. This parameter has nothing to do with a mito-chromosome name parameter `atac.mito_chr_name`. Changing `atac.mito_chr_name` does not affect this parameter.
 

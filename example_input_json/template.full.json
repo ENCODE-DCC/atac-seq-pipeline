@@ -17,6 +17,7 @@
     "atac.fastqs_rep2_R2" : [ "rep2_R2_L1.fastq.gz", "rep2_R2_L2.fastq.gz" ],
 
     "atac.read_len" : [],
+    "atac.pseudoreplication_random_seed" : 0,
 
     "atac.auto_detect_adapter" : false,
     "atac.adapter" : "AATTCCGG",
