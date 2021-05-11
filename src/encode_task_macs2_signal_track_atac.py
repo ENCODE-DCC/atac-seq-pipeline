@@ -74,15 +74,15 @@ def macs2_signal_track(ta, chrsz, gensz, pval_thresh, smooth_win, mem_gb, out_di
     )
 
     run_shell_cmd(
-        'macs2 bdgcmp -t "{prefix}"_treat_pileup.bdg '
-        '-c "{prefix}"_control_lambda.bdg '
+        'macs2 bdgcmp -t "{prefix}_treat_pileup.bdg" '
+        '-c "{prefix}_control_lambda.bdg" '
         '--o-prefix "{prefix}" -m FE '.format(
             prefix=prefix,
         )
     )
 
     run_shell_cmd(
-        'bedtools slop -i "{prefix}"_FE.bdg -g {chrsz} -b 0 | '
+        'bedtools slop -i "{prefix}_FE.bdg" -g {chrsz} -b 0 | '
         'bedClip stdin {chrsz} {fc_bedgraph}'.format(
             prefix=prefix,
             chrsz=chrsz,
@@ -116,8 +116,8 @@ def macs2_signal_track(ta, chrsz, gensz, pval_thresh, smooth_win, mem_gb, out_di
     sval = float(get_num_lines(ta))/1000000.0
 
     run_shell_cmd(
-        'macs2 bdgcmp -t "{prefix}"_treat_pileup.bdg '
-        '-c "{prefix}"_control_lambda.bdg '
+        'macs2 bdgcmp -t "{prefix}_treat_pileup.bdg" '
+        '-c "{prefix}_control_lambda.bdg" '
         '--o-prefix {prefix} -m ppois -S {sval}'.format(
             prefix=prefix,
             sval=sval,
@@ -125,7 +125,7 @@ def macs2_signal_track(ta, chrsz, gensz, pval_thresh, smooth_win, mem_gb, out_di
     )
 
     run_shell_cmd(
-        'bedtools slop -i "{prefix}"_ppois.bdg -g {chrsz} -b 0 | '
+        'bedtools slop -i "{prefix}_ppois.bdg" -g {chrsz} -b 0 | '
         'bedClip stdin {chrsz} {pval_bedgraph}'.format(
             prefix=prefix,
             chrsz=chrsz,
