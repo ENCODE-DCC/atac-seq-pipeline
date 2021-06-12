@@ -13,10 +13,9 @@ echo "=== Checking conda version ==="
 conda --version
 
 echo "=== Installing pipeline's Conda environments ==="
-
 if [[ "$1" == mamba ]]; then
   conda install mamba -y -c conda-forge
-  mamba create -n ${CONDA_ENV_PY3} --file ${REQ_TXT_PY3} -y -c defaults -c r -c bioconda -c conda-forge
+  mamba create -n ${CONDA_ENV_PY3} --file ${REQ_TXT_PY3} -y -strict-channel-priority --override-channels  -c default -c -r --c conda-forge -c bioconda 
   mamba create -n ${CONDA_ENV_PY2} --file ${REQ_TXT_PY2} -y -c defaults -c r -c bioconda -c conda-forge
 else
   echo
@@ -28,7 +27,7 @@ else
   echo "If you get another conflict in the mamba installation step itself "
   echo "Then you may need to clean-install miniconda3 and re-login."
   echo
-  conda create -n ${CONDA_ENV_PY3} --file ${REQ_TXT_PY3} -y -c defaults -c r -c bioconda -c conda-forge
+  conda create -n ${CONDA_ENV_PY3} --file ${REQ_TXT_PY3} -y -strict-channel-priority --override-channels  -c default -c -r --c conda-forge -c bioconda
   conda create -n ${CONDA_ENV_PY2} --file ${REQ_TXT_PY2} -y -c defaults -c r -c bioconda -c conda-forge
 fi
 
