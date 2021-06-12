@@ -1,16 +1,17 @@
 version 1.0
 
 workflow atac {
-    String pipeline_ver = 'v1.9.0'
+    String pipeline_ver = 'v1.10.0'
 
     meta {
+        version: 'v1.10.0'
         author: 'Jin wook Lee (leepc12@gmail.com) at ENCODE-DCC'
         description: 'ATAC-Seq/DNase-Seq pipeline'
         specification_document: 'https://docs.google.com/document/d/1f0Cm4vRyDQDu0bMehHD7P7KOMxTOP-HiNoIvL1VcBt8/edit?usp=sharing'
 
-        caper_docker: 'encodedcc/atac-seq-pipeline:v1.9.0'
-        caper_singularity: 'docker://encodedcc/atac-seq-pipeline:v1.9.0'
-        croo_out_def: 'https://storage.googleapis.com/encode-pipeline-output-definition/atac.croo.v4.json'
+        caper_docker: 'encodedcc/atac-seq-pipeline:v1.10.0'
+        caper_singularity: 'docker://encodedcc/atac-seq-pipeline:v1.10.0'
+        croo_out_def: 'https://storage.googleapis.com/encode-pipeline-output-definition/atac.croo.v5.json'
 
         parameter_group: {
             pipeline_metadata: {
@@ -162,6 +163,7 @@ workflow atac {
         Int subsample_reads = 0
         Int xcor_subsample_reads = 25000000
         Array[Int?] read_len = []
+        Int pseudoreplication_random_seed = 0
 
         # group: peak_calling
         Int cap_num_peak = 300000
@@ -178,15 +180,15 @@ workflow atac {
         Int filter_cpu = 4
         Float filter_mem_factor = 0.4
         Int filter_time_hr = 24
-        Float filter_disk_factor = 4.0
+        Float filter_disk_factor = 8.0
 
         Int bam2ta_cpu = 2
         Float bam2ta_mem_factor = 0.3
         Int bam2ta_time_hr = 12
         Float bam2ta_disk_factor = 4.0
 
-        Float spr_mem_factor = 4.5
-        Float spr_disk_factor = 6.0
+        Float spr_mem_factor = 13.5
+        Float spr_disk_factor = 18.0
 
         Int jsd_cpu = 4
         Float jsd_mem_factor = 0.1
@@ -199,13 +201,13 @@ workflow atac {
         Float xcor_disk_factor = 4.5
 
         Int call_peak_cpu = 2
-        Float call_peak_mem_factor = 2.0
+        Float call_peak_mem_factor = 4.0
         Int call_peak_time_hr = 24
-        Float call_peak_disk_factor = 15.0
+        Float call_peak_disk_factor = 30.0
 
-        Float macs2_signal_track_mem_factor = 6.0
+        Float macs2_signal_track_mem_factor = 12.0
         Int macs2_signal_track_time_hr = 24
-        Float macs2_signal_track_disk_factor = 40.0
+        Float macs2_signal_track_disk_factor = 80.0
 
         Float preseq_mem_factor = 0.5
         Float preseq_disk_factor = 5.0
@@ -705,6 +707,11 @@ workflow atac {
             description: 'Read length per biological replicate.',
             group: 'alignment',
             help: 'Pipeline can estimate read length from FASTQs. If you start pipeline from other types (BAM, NODUP_BAM, TA, ...) than FASTQ. Then provide this for some analyses that require read length (e.g. TSS enrichment plot).'
+        }
+        pseudoreplication_random_seed: {
+            description: 'Random seed (positive integer) used for pseudo-replication (shuffling reads in TAG-ALIGN and then split it into two).',
+            group: 'alignment',
+            help: 'Pseudo-replication (task spr) is done by using GNU "shuf --random-source=sha256(random_seed)". If this parameter == 0, then pipeline uses input TAG-ALIGN file\'s size (in bytes) for the random_seed.'
         }
         cap_num_peak: {
             description: 'Upper limit on the number of peaks.',
@@ -1223,6 +1230,7 @@ workflow atac {
             call spr { input :
                 ta = ta_,
                 paired_end = paired_end_,
+                pseudoreplication_random_seed = pseudoreplication_random_seed,
                 mem_factor = spr_mem_factor,
                 disk_factor = spr_disk_factor,
             }
@@ -1731,7 +1739,7 @@ task align {
         Float disk_factor
     }
     Float input_file_size_gb = size(fastqs_R1, "G") + size(fastqs_R2, "G")
-    Float mem_gb = 5.0 + mem_factor * input_file_size_gb
+    Float mem_gb = 5.0 + size(idx_tar, "G") + mem_factor * input_file_size_gb
     Float samtools_mem_gb = 0.8 * mem_gb
     Int disk_gb = round(40.0 + disk_factor * input_file_size_gb)
 
@@ -1924,6 +1932,7 @@ task spr {
     input {
         File? ta
         Boolean paired_end
+        Int pseudoreplication_random_seed
 
         Float mem_factor
         Float disk_factor
@@ -1936,6 +1945,7 @@ task spr {
         set -e
         python3 $(which encode_task_spr.py) \
             ${ta} \
+            ${'--pseudoreplication-random-seed ' + pseudoreplication_random_seed} \
             ${if paired_end then '--paired-end' else ''}
     }
     output {
@@ -2054,11 +2064,13 @@ task count_signal_track {
         File? ta             # tag-align
         File chrsz            # 2-col chromosome sizes file
     }
+    Float mem_gb = 8.0
     command {
         set -e
         python3 $(which encode_task_count_signal_track.py) \
             ${ta} \
-            ${'--chrsz ' + chrsz}
+            ${'--chrsz ' + chrsz} \
+            ${'--mem-gb ' + mem_gb}
     }
     output {
         File pos_bw = glob('*.positive.bigwig')[0]
@@ -2066,7 +2078,7 @@ task count_signal_track {
     }
     runtime {
         cpu : 1
-        memory : '8 GB'
+        memory : '${mem_gb} GB'
         time : 4
         disks : 'local-disk 50 SSD'
     }
@@ -2106,7 +2118,8 @@ task call_peak {
                 ${'--chrsz ' + chrsz} \
                 ${'--cap-num-peak ' + cap_num_peak} \
                 ${'--pval-thresh '+ pval_thresh} \
-                ${'--smooth-win '+ smooth_win}
+                ${'--smooth-win '+ smooth_win} \
+                ${'--mem-gb ' + mem_gb}
         fi
 
         python3 $(which encode_task_post_call_peak_atac.py) \
@@ -2122,6 +2135,7 @@ task call_peak {
         # generated by post_call_peak py
         File bfilt_peak = glob('*.bfilt.'+peak_type+'.gz')[0]
         File bfilt_peak_bb = glob('*.bfilt.'+peak_type+'.bb')[0]
+        File bfilt_peak_starch = glob('*.bfilt.'+peak_type+'.starch')[0]
         File bfilt_peak_hammock = glob('*.bfilt.'+peak_type+'.hammock.gz*')[0]
         File bfilt_peak_hammock_tbi = glob('*.bfilt.'+peak_type+'.hammock.gz*')[1]
         File frip_qc = glob('*.frip.qc')[0]
@@ -2162,7 +2176,8 @@ task macs2_signal_track {
             ${'--gensz '+ gensz} \
             ${'--chrsz ' + chrsz} \
             ${'--pval-thresh '+ pval_thresh} \
-            ${'--smooth-win '+ smooth_win}
+            ${'--smooth-win '+ smooth_win} \
+            ${'--mem-gb ' + mem_gb}
     }
     output {
         File pval_bw = glob('*.pval.signal.bigwig')[0]
@@ -2210,6 +2225,7 @@ task idr {
         File idr_peak = glob('*[!.][!b][!f][!i][!l][!t].'+peak_type+'.gz')[0]
         File bfilt_idr_peak = glob('*.bfilt.'+peak_type+'.gz')[0]
         File bfilt_idr_peak_bb = glob('*.bfilt.'+peak_type+'.bb')[0]
+        File bfilt_idr_peak_starch = glob('*.bfilt.'+peak_type+'.starch')[0]
         File bfilt_idr_peak_hammock = glob('*.bfilt.'+peak_type+'.hammock.gz*')[0]
         File bfilt_idr_peak_hammock_tbi = glob('*.bfilt.'+peak_type+'.hammock.gz*')[1]
         File idr_plot = glob('*.txt.png')[0]
@@ -2254,6 +2270,7 @@ task overlap {
         File overlap_peak = glob('*[!.][!b][!f][!i][!l][!t].'+peak_type+'.gz')[0]
         File bfilt_overlap_peak = glob('*.bfilt.'+peak_type+'.gz')[0]
         File bfilt_overlap_peak_bb = glob('*.bfilt.'+peak_type+'.bb')[0]
+        File bfilt_overlap_peak_starch = glob('*.bfilt.'+peak_type+'.starch')[0]
         File bfilt_overlap_peak_hammock = glob('*.bfilt.'+peak_type+'.hammock.gz*')[0]
         File bfilt_overlap_peak_hammock_tbi = glob('*.bfilt.'+peak_type+'.hammock.gz*')[1]
         File frip_qc = if defined(ta) then glob('*.frip.qc')[0] else glob('null')[0]
@@ -2291,10 +2308,12 @@ task reproducibility {
     output {
         File optimal_peak = glob('*optimal_peak.*.gz')[0]
         File optimal_peak_bb = glob('*optimal_peak.*.bb')[0]
+        File optimal_peak_starch = glob('*optimal_peak.*.starch')[0]
         File optimal_peak_hammock = glob('*optimal_peak.*.hammock.gz*')[0]
         File optimal_peak_hammock_tbi = glob('*optimal_peak.*.hammock.gz*')[1]
         File conservative_peak = glob('*conservative_peak.*.gz')[0]
         File conservative_peak_bb = glob('*conservative_peak.*.bb')[0]
+        File conservative_peak_starch = glob('*conservative_peak.*.starch')[0]
         File conservative_peak_hammock = glob('*conservative_peak.*.hammock.gz*')[0]
         File conservative_peak_hammock_tbi = glob('*conservative_peak.*.hammock.gz*')[1]
         File reproducibility_qc = glob('*reproducibility.qc')[0]
@@ -2404,7 +2423,7 @@ task tss_enrich {
         cpu : 1
         memory : '8 GB'
         time : 1
-        disks : 'local-disk 50 SSD'
+        disks : 'local-disk 150 SSD'
     }
 }
 
@@ -2432,7 +2451,7 @@ task fraglen_stat_pe {
         cpu : 1
         memory : '${mem_gb} GB'
         time : 6
-        disks : 'local-disk 50 SSD'
+        disks : 'local-disk 150 SSD'
     }
 }
 
@@ -2463,7 +2482,7 @@ task gc_bias {
         cpu : 1
         memory : '${mem_gb} GB'
         time : 6
-        disks : 'local-disk 50 SSD'
+        disks : 'local-disk 150 SSD'
     }
 }
 

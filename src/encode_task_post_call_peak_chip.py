@@ -6,9 +6,18 @@ import sys
 import os
 import argparse
 from encode_lib_common import (
-    assert_file_not_empty, log, ls_l, mkdir_p)
+    assert_file_not_empty,
+    log,
+    ls_l,
+    mkdir_p,
+)
 from encode_lib_genomic import (
-peak_to_bigbed, peak_to_hammock, get_region_size_metrics, get_num_peaks)
+    peak_to_bigbed,
+    peak_to_hammock,
+    get_region_size_metrics,
+    get_num_peaks,
+    peak_to_starch,
+)
 from encode_lib_blacklist_filter import blacklist_filter
 from encode_lib_frip import frip_shifted
 
@@ -34,6 +43,10 @@ def parse_arguments():
     parser.add_argument('--regex-bfilt-peak-chr-name',
                         help='Keep chromosomes matching this pattern only '
                              'in .bfilt. peak files.')
+    parser.add_argument('--mem-gb', type=float, default=4.0,
+                        help='Max. memory for this job in GB. '
+                        'This will be used to determine GNU sort -S (defaulting to 0.5 of this value). '
+                        'It should be total memory for this task (not memory per thread).')
     parser.add_argument('--out-dir', default='', type=str,
                         help='Output directory.')
     parser.add_argument('--log-level', default='INFO',
@@ -66,10 +79,13 @@ def main():
 
     log.info('Converting peak to bigbed...')
     peak_to_bigbed(bfilt_peak, args.peak_type, args.chrsz,
-                   args.out_dir)
+                   args.mem_gb, args.out_dir)
+
+    log.info('Converting peak to starch...')
+    peak_to_starch(bfilt_peak, args.out_dir)
 
     log.info('Converting peak to hammock...')
-    peak_to_hammock(bfilt_peak, args.out_dir)
+    peak_to_hammock(bfilt_peak, args.mem_gb, args.out_dir)
 
     log.info('Shifted FRiP with fragment length...')
     frip_qc = frip_shifted(args.ta, bfilt_peak,

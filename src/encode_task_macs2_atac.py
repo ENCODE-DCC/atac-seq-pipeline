@@ -8,7 +8,9 @@ import os
 import argparse
 from encode_lib_common import (
     assert_file_not_empty, human_readable_number,
-    log, ls_l, mkdir_p, rm_f, run_shell_cmd, strip_ext_ta)
+    log, ls_l, mkdir_p, rm_f, run_shell_cmd, strip_ext_ta,
+    get_gnu_sort_param,
+)
 from encode_lib_genomic import bed_clip
 
 
@@ -28,6 +30,10 @@ def parse_arguments():
                         help='Smoothing window size.')
     parser.add_argument('--cap-num-peak', default=300000, type=int,
                         help='Capping number of peaks by taking top N peaks.')
+    parser.add_argument('--mem-gb', type=float, default=4.0,
+                        help='Max. memory for this job in GB. '
+                        'This will be used to determine GNU sort -S (defaulting to 0.5 of this value). '
+                        'It should be total memory for this task (not memory per thread).')
     parser.add_argument('--out-dir', default='', type=str,
                         help='Output directory.')
     parser.add_argument('--log-level', default='INFO',
@@ -43,7 +49,7 @@ def parse_arguments():
 
 
 def macs2(ta, chrsz, gensz, pval_thresh, smooth_win, cap_num_peak,
-          out_dir):
+          mem_gb, out_dir):
     prefix = os.path.join(out_dir,
                           os.path.basename(strip_ext_ta(ta)))
     npeak = '{}.{}.{}.narrowPeak.gz'.format(
@@ -57,34 +63,38 @@ def macs2(ta, chrsz, gensz, pval_thresh, smooth_win, cap_num_peak,
     shiftsize = -int(round(float(smooth_win)/2.0))
     temp_files = []
 
-    cmd0 = 'macs2 callpeak '
-    cmd0 += '-t {} -f BED -n {} -g {} -p {} '
-    cmd0 += '--shift {} --extsize {} '
-    cmd0 += '--nomodel -B --SPMR '
-    cmd0 += '--keep-dup all --call-summits '
-    cmd0 = cmd0.format(
-        ta,
-        prefix,
-        gensz,
-        pval_thresh,
-        shiftsize,
-        smooth_win)
-    run_shell_cmd(cmd0)
+    run_shell_cmd(
+        'macs2 callpeak '
+        '-t {ta} -f BED -n {prefix} -g {gensz} -p {pval_thresh} '
+        '--shift {shiftsize} --extsize {extsize} '
+        '--nomodel -B --SPMR --keep-dup all --call-summits'.format(
+            ta=ta,
+            prefix=prefix,
+            gensz=gensz,
+            pval_thresh=pval_thresh,
+            shiftsize=shiftsize,
+            extsize=smooth_win,
+        )
+    )
 
-    cmd1 = 'LC_COLLATE=C sort -k 8gr,8gr "{}"_peaks.narrowPeak | '
-    cmd1 += 'awk \'BEGIN{{OFS="\\t"}}'
-    cmd1 += '{{$4="Peak_"NR; if ($2<0) $2=0; if ($3<0) $3=0; if ($10==-1) '
-    cmd1 += '$10=$2+int(($3-$2+1)/2.0); print $0}}\' > {}'
-    cmd1 = cmd1.format(
-        prefix,
-        npeak_tmp)
-    run_shell_cmd(cmd1)
+    run_shell_cmd(
+        'LC_COLLATE=C sort -k 8gr,8gr {sort_param} "{prefix}_peaks.narrowPeak" | '
+        'awk \'BEGIN{{OFS="\\t"}}'
+        '{{$4="Peak_"NR; if ($2<0) $2=0; if ($3<0) $3=0; if ($10==-1) '
+        '$10=$2+int(($3-$2+1)/2.0); print $0}}\' > {npeak_tmp}'.format(
+            sort_param=get_gnu_sort_param(mem_gb * 1024 ** 3, ratio=0.5),
+            prefix=prefix,
+            npeak_tmp=npeak_tmp,
+        )
+    )
 
-    cmd2 = 'head -n {} {} > {}'.format(
-        cap_num_peak,
-        npeak_tmp,
-        npeak_tmp2)
-    run_shell_cmd(cmd2)
+    run_shell_cmd(
+        'head -n {cap_num_peak} {npeak_tmp} > {npeak_tmp2}'.format(
+            cap_num_peak=cap_num_peak,
+            npeak_tmp=npeak_tmp,
+            npeak_tmp2=npeak_tmp2,
+        )
+    )
 
     # clip peaks between 0-chromSize.
     bed_clip(npeak_tmp2, chrsz, npeak)
@@ -92,7 +102,7 @@ def macs2(ta, chrsz, gensz, pval_thresh, smooth_win, cap_num_peak,
     rm_f([npeak_tmp, npeak_tmp2])
 
     # remove temporary files
-    temp_files.append("{}_*".format(prefix))
+    temp_files.append("{prefix}_*".format(prefix=prefix))
     rm_f(temp_files)
 
     return npeak
@@ -107,9 +117,14 @@ def main():
 
     log.info('Calling peaks macs2...')
     npeak = macs2(
-        args.ta, args.chrsz, args.gensz, args.pval_thresh,
+        args.ta,
+        args.chrsz,
+        args.gensz,
+        args.pval_thresh,
         args.smooth_win, args.cap_num_peak,
-        args.out_dir)
+        args.mem_gb,
+        args.out_dir,
+    )
 
     log.info('Checking if output is empty...')
     assert_file_not_empty(npeak)

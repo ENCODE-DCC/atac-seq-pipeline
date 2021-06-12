@@ -8,8 +8,12 @@ import os
 import argparse
 from encode_lib_common import (
     assert_file_not_empty, human_readable_number,
-    log, ls_l, mkdir_p, rm_f, run_shell_cmd, strip_ext_ta)
-from encode_lib_genomic import subsample_ta_se, subsample_ta_pe, bed_clip
+    log, ls_l, mkdir_p, rm_f, run_shell_cmd, strip_ext_ta,
+    get_gnu_sort_param,
+)
+from encode_lib_genomic import (
+    subsample_ta_se, subsample_ta_pe, bed_clip,
+)
 
 
 def parse_arguments():
@@ -37,6 +41,10 @@ def parse_arguments():
                              '(0: no subsampling).')
     parser.add_argument('--ctl-paired-end', action="store_true",
                         help='Paired-end control TA.')
+    parser.add_argument('--mem-gb', type=float, default=4.0,
+                        help='Max. memory for this job in GB. '
+                        'This will be used to determine GNU sort -S (defaulting to 0.5 of this value). '
+                        'It should be total memory for this task (not memory per thread).')
     parser.add_argument('--out-dir', default='', type=str,
                         help='Output directory.')
     parser.add_argument('--log-level', default='INFO',
@@ -53,7 +61,7 @@ def parse_arguments():
 
 
 def macs2(ta, ctl_ta, chrsz, gensz, pval_thresh, shift, fraglen, cap_num_peak,
-          ctl_subsample, ctl_paired_end, out_dir):
+          ctl_subsample, ctl_paired_end, mem_gb, out_dir):
     basename_ta = os.path.basename(strip_ext_ta(ta))
     if ctl_ta:
         if ctl_subsample:
@@ -83,33 +91,38 @@ def macs2(ta, ctl_ta, chrsz, gensz, pval_thresh, shift, fraglen, cap_num_peak,
     npeak_tmp2 = '{}.tmp2'.format(npeak)
     temp_files = []
 
-    cmd0 = ' macs2 callpeak '
-    cmd0 += '-t {} {} -f BED -n {} -g {} -p {} '
-    cmd0 += '--nomodel --shift {} --extsize {} --keep-dup all -B --SPMR'
-    cmd0 = cmd0.format(
-        ta,
-        '-c {}'.format(ctl_ta) if ctl_ta else '',
-        prefix,
-        gensz,
-        pval_thresh,
-        0,
-        fraglen)
-    run_shell_cmd(cmd0)
+    run_shell_cmd(
+        ' macs2 callpeak '
+        '-t {ta} {ctl_param} -f BED -n {prefix} -g {gensz} -p {pval_thresh} '
+        '--nomodel --shift {shiftsize} --extsize {extsize} --keep-dup all -B --SPMR'.format(
+            ta=ta,
+            ctl_param='-c {ctl_ta}'.format(ctl_ta=ctl_ta) if ctl_ta else '',
+            prefix=prefix,
+            gensz=gensz,
+            pval_thresh=pval_thresh,
+            shiftsize=0,
+            extsize=fraglen,
+        )
+    )
 
-    cmd1 = 'LC_COLLATE=C sort -k 8gr,8gr "{}"_peaks.narrowPeak | '
-    cmd1 += 'awk \'BEGIN{{OFS="\\t"}}'
-    cmd1 += '{{$4="Peak_"NR; if ($2<0) $2=0; if ($3<0) $3=0; if ($10==-1) '
-    cmd1 += '$10=$2+int(($3-$2+1)/2.0); print $0}}\' > {}'
-    cmd1 = cmd1.format(
-        prefix,
-        npeak_tmp)
-    run_shell_cmd(cmd1)
+    run_shell_cmd(
+        'LC_COLLATE=C sort -k 8gr,8gr {sort_param} "{prefix}_peaks.narrowPeak" | '
+        'awk \'BEGIN{{OFS="\\t"}}'
+        '{{$4="Peak_"NR; if ($2<0) $2=0; if ($3<0) $3=0; if ($10==-1) '
+        '$10=$2+int(($3-$2+1)/2.0); print $0}}\' > {npeak_tmp}'.format(
+            sort_param=get_gnu_sort_param(mem_gb * 1024 ** 3, ratio=0.5),
+            prefix=prefix,
+            npeak_tmp=npeak_tmp,
+        )
+    )
 
-    cmd2 = 'head -n {} {} > {}'.format(
-        cap_num_peak,
-        npeak_tmp,
-        npeak_tmp2)
-    run_shell_cmd(cmd2)
+    run_shell_cmd(
+        'head -n {cap_num_peak} {npeak_tmp} > {npeak_tmp2}'.format(
+            cap_num_peak=cap_num_peak,
+            npeak_tmp=npeak_tmp,
+            npeak_tmp2=npeak_tmp2,
+        )
+    )
 
     # clip peaks between 0-chromSize.
     bed_clip(npeak_tmp2, chrsz, npeak)
@@ -117,7 +130,7 @@ def macs2(ta, ctl_ta, chrsz, gensz, pval_thresh, shift, fraglen, cap_num_peak,
     rm_f([npeak_tmp, npeak_tmp2])
 
     # remove temporary files
-    temp_files.append("{}_*".format(prefix))
+    temp_files.append("{prefix}_*".format(prefix=prefix))
     rm_f(temp_files)
 
     return npeak
@@ -132,9 +145,19 @@ def main():
 
     log.info('Calling peaks with macs2...')
     npeak = macs2(
-        args.tas[0], args.tas[1], args.chrsz, args.gensz, args.pval_thresh,
-        args.shift, args.fraglen, args.cap_num_peak,
-        args.ctl_subsample, args.ctl_paired_end, args.out_dir)
+        args.tas[0],
+        args.tas[1],
+        args.chrsz,
+        args.gensz,
+        args.pval_thresh,
+        args.shift,
+        args.fraglen,
+        args.cap_num_peak,
+        args.ctl_subsample,
+        args.ctl_paired_end,
+        args.mem_gb,
+        args.out_dir,
+    )
 
     log.info('Checking if output is empty...')
     assert_file_not_empty(npeak)

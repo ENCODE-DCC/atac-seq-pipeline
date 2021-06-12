@@ -27,6 +27,10 @@ def parse_arguments():
                             FASTQs must be compressed with gzip (with .gz).')
     parser.add_argument('--paired-end', action="store_true",
                         help='Paired-end FASTQs.')
+    parser.add_argument('--local', action="store_true",
+                        help='Activate the local mode (soft-clipping) of bowtie2'
+                             '--local will be added to bowtie2 command line. '
+                             'Otherwise --end-to-end (default) will be used.')
     parser.add_argument(
         '--multimapping', default=0, type=int,
         help='Multimapping reads (for bowtie2 -k(m+1). '
@@ -58,15 +62,16 @@ def parse_arguments():
 
 
 def bowtie2_se(fastq, ref_index_prefix,
-               multimapping, nth, mem_gb, out_dir):
+               multimapping, local, nth, mem_gb, out_dir):
     basename = os.path.basename(strip_ext_fastq(fastq))
     prefix = os.path.join(out_dir, basename)
     tmp_bam = '{}.bam'.format(prefix)
 
     run_shell_cmd(
-        'bowtie2 {multimapping} --mm --threads {nth} -x {ref} '
+        'bowtie2 {multimapping} {mode_param} --mm --threads {nth} -x {ref} '
         '-U {fastq} | samtools view -1 -S /dev/stdin > {tmp_bam}'.format(
             multimapping='-k {mm}'.format(mm=multimapping + 1) if multimapping else '',
+            mode_param='--local ' if local else '',
             nth=nth,
             ref=ref_index_prefix,
             fastq=fastq,
@@ -80,15 +85,16 @@ def bowtie2_se(fastq, ref_index_prefix,
 
 
 def bowtie2_pe(fastq1, fastq2, ref_index_prefix,
-               multimapping, nth, mem_gb, out_dir):
+               multimapping, local, nth, mem_gb, out_dir):
     basename = os.path.basename(strip_ext_fastq(fastq1))
     prefix = os.path.join(out_dir, basename)
     tmp_bam = '{}.bam'.format(prefix)
 
     run_shell_cmd(
-        'bowtie2 {multimapping} -X2000 --mm --threads {nth} -x {ref} '
+        'bowtie2 {multimapping} -X2000 {mode_param} --mm --threads {nth} -x {ref} '
         '-1 {fastq1} -2 {fastq2} | samtools view -1 -S /dev/stdin > {tmp_bam}'.format(
             multimapping='-k {mm}'.format(mm=multimapping + 1) if multimapping else '',
+            mode_param='--local ' if local else '',
             nth=nth,
             ref=ref_index_prefix,
             fastq1=fastq1,
@@ -159,13 +165,13 @@ def main():
         bam = bowtie2_pe(
             args.fastqs[0], args.fastqs[1],
             bowtie2_index_prefix,
-            args.multimapping, args.nth, args.mem_gb,
+            args.multimapping, args.local, args.nth, args.mem_gb,
             args.out_dir)
     else:
         bam = bowtie2_se(
             args.fastqs[0],
             bowtie2_index_prefix,
-            args.multimapping, args.nth, args.mem_gb,
+            args.multimapping, args.local, args.nth, args.mem_gb,
             args.out_dir)
 
     log.info('Removing temporary files...')

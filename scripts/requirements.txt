@@ -44,11 +44,13 @@ deeptools ==3.3.1
 cutadapt ==2.5
 preseq ==2.0.3
 pyfaidx ==0.5.5.2
-
+bedops ==2.4.39
 macs2 ==2.2.4
+ptools_bin
 
 jsondiff ==1.1.1
 libgcc
+tbb ==2021.1.1
 requests
 ncurses
 gnuplot
@@ -61,6 +63,7 @@ sed
 coreutils  # GNU split and shuf
 
 numpy
+scikit-learn
 scipy
 pandas
 jinja2
@@ -69,5 +72,3 @@ matplotlib
 
 java-jdk
 
-caper
-croo
