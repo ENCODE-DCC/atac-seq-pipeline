@@ -74,7 +74,7 @@ jobs:
           name: build image
           command: |
             source ${BASH_ENV}
-            export DOCKER_CACHE_TAG=v1.7.1
+            export DOCKER_CACHE_TAG=v1.9.3
             echo "pulling ${DOCKER_CACHE_TAG}!"
             docker pull encodedcc/atac-seq-pipeline:${DOCKER_CACHE_TAG}
             docker login -u=${DOCKERHUB_USER} -p=${DOCKERHUB_PASS}
