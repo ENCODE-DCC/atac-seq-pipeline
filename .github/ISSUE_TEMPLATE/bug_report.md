@@ -7,23 +7,34 @@ assignees: ''
 
 ---
 
-**Describe the bug**
+## **Describe the bug**
 A clear and concise description of what the problem is.
 
-**OS/Platform**
-- OS/Platform: [e.g. Ubuntu 16.04, Google Cloud, Stanford Sherlock/SCG cluster, ...]
+## **OS/Platform**
+- OS/Platform: [e.g. Ubuntu 18.04, Google Cloud, Stanford Sherlock/SCG cluster, ...]
 - Conda version: If you used Conda (`$ conda --version`).
-- Pipeline version: [e.g. v1.5.3]
-- Caper version: [e.g. v0.6.0]
+- Pipeline version: [e.g. v1.8.0]
+- Caper version: [e.g. v1.2.0]
 
-**Caper configuration file**
+## **Caper configuration file**
 Paste contents of `~/.caper/default.conf`.
-
-**Input JSON file**
-Paste contents of your input JSON file.
-
-**Error log**
-Caper automatically runs a troubleshooter for failed workflows. If it doesn't then get a `WORKFLOW_ID` of your failed workflow with `caper list` or directly use a `metadata.json` file on Caper's output directory.
+```ini
+PASTE CAPER CONF CONTENTS HERE
 ```
-$ caper debug [WORKFLOW_ID_OR_METADATA_JSON_FILE]
+
+## **Input JSON file**
+Paste contents of your input JSON file.
+```json
+PASTE INPUT JSON CONTENTS HERE
+```
+
+## **Troubleshooting result**
+
+If you ran `caper run` without Caper server then Caper automatically runs a troubleshooter for failed workflows. Find troubleshooting result in the bottom of Caper's screen log.
+
+If you ran `caper submit` with a running Caper server then first find your workflow ID (1st column) with `caper list` and run `caper debug [WORKFLOW_ID]`.
+
+Paste troubleshooting result.
+```
+PASTE TROUBLESHOOTING RESULT HERE
 ```
