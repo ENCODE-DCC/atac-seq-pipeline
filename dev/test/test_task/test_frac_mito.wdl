@@ -8,11 +8,18 @@ workflow test_frac_mito {
         File mito_samstat
 
         File ref_frac_mito_qc
+        String docker
+    }
+    RuntimeEnvironment runtime_environment = {
+        "docker": docker,
+        "singularity": "",
+        "conda": ""
     }
 
     call atac.frac_mito as frac_mito { input:
         non_mito_samstat = non_mito_samstat,
         mito_samstat = mito_samstat,
+        runtime_environment = runtime_environment,
     }
 
     call compare_md5sum.compare_md5sum { input :

@@ -21,6 +21,12 @@ workflow test_bam2ta {
         Float bam2ta_mem_factor = 0.0
         Int bam2ta_time_hr = 6
         Float bam2ta_disk_factor = 4.0
+        String docker
+    }
+    RuntimeEnvironment runtime_environment = {
+        "docker": docker,
+        "singularity": "",
+        "conda": ""
     }
 
     call atac.bam2ta as pe_bam2ta { input :
@@ -34,6 +40,7 @@ workflow test_bam2ta {
         mem_factor = bam2ta_mem_factor,
         time_hr = bam2ta_time_hr,
         disk_factor = bam2ta_disk_factor,
+        runtime_environment = runtime_environment,
     }
     call atac.bam2ta as pe_bam2ta_disable_tn5_shift { input :
         bam = pe_nodup_bam,
@@ -46,6 +53,7 @@ workflow test_bam2ta {
         mem_factor = bam2ta_mem_factor,
         time_hr = bam2ta_time_hr,
         disk_factor = bam2ta_disk_factor,
+        runtime_environment = runtime_environment,
     }
     call atac.bam2ta as pe_bam2ta_subsample { input :
         bam = pe_nodup_bam,
@@ -58,6 +66,7 @@ workflow test_bam2ta {
         mem_factor = bam2ta_mem_factor,
         time_hr = bam2ta_time_hr,
         disk_factor = bam2ta_disk_factor,
+        runtime_environment = runtime_environment,
     }
     call atac.bam2ta as se_bam2ta { input :
         bam = se_nodup_bam,
@@ -70,6 +79,7 @@ workflow test_bam2ta {
         mem_factor = bam2ta_mem_factor,
         time_hr = bam2ta_time_hr,
         disk_factor = bam2ta_disk_factor,
+        runtime_environment = runtime_environment,
     }
     call atac.bam2ta as se_bam2ta_disable_tn5_shift { input :
         bam = se_nodup_bam,
@@ -82,6 +92,7 @@ workflow test_bam2ta {
         mem_factor = bam2ta_mem_factor,
         time_hr = bam2ta_time_hr,
         disk_factor = bam2ta_disk_factor,
+        runtime_environment = runtime_environment,
     }
     call atac.bam2ta as se_bam2ta_subsample { input :
         bam = se_nodup_bam,
@@ -94,6 +105,7 @@ workflow test_bam2ta {
         mem_factor = bam2ta_mem_factor,
         time_hr = bam2ta_time_hr,
         disk_factor = bam2ta_disk_factor,
+        runtime_environment = runtime_environment,
     }
 
     call compare_md5sum.compare_md5sum { input :

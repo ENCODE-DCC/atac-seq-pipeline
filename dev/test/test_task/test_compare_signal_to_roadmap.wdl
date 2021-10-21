@@ -10,6 +10,12 @@ workflow test_compare_signal_to_roadmap {
         File roadmap_meta
 
         File ref_roadmap_compare_log
+        String docker
+    }
+    RuntimeEnvironment runtime_environment = {
+        "docker": docker,
+        "singularity": "",
+        "conda": ""
     }
 
     call atac.compare_signal_to_roadmap { input : 
@@ -18,6 +24,7 @@ workflow test_compare_signal_to_roadmap {
         reg2map_bed = reg2map_bed,
         reg2map = reg2map,
         roadmap_meta = roadmap_meta,
+        runtime_environment = runtime_environment,
     }
 
     call compare_md5sum.compare_md5sum { input :

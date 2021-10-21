@@ -7,11 +7,18 @@ workflow test_fraglen_stat_pe {
         File nodup_bam
 
         File ref_nucleosomal_qc
+        String docker
+    }
+    RuntimeEnvironment runtime_environment = {
+        "docker": docker,
+        "singularity": "",
+        "conda": ""
     }
 
     call atac.fraglen_stat_pe { input : 
         nodup_bam = nodup_bam,
         picard_java_heap = '4G',
+        runtime_environment = runtime_environment,
     }
 
     call compare_md5sum.compare_md5sum { input :

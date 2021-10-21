@@ -69,7 +69,7 @@ workflow atac {
     input {
         # group: runtime_environment
         String docker = 'encodedcc/atac-seq-pipeline:dev-v2.0.0'
-        String singularity = 'docker://encodedcc/atac-seq-pipeline:dev-v2.0.0'
+        String singularity = 'library://leepc12/default/atac-seq-pipeline:dev-v2.0.0'
         String conda = 'encode-atac-seq-pipeline'
         String conda_macs2 = 'encode-atac-seq-pipeline-macs2'
         String conda_spp = 'encode-atac-seq-pipeline-spp'
@@ -123,9 +123,9 @@ workflow atac {
         Array[File] fastqs_rep9_R2 = []
         Array[File] fastqs_rep10_R1 = []
         Array[File] fastqs_rep10_R2 = []
-        Array[File?] bams = []
-        Array[File?] nodup_bams = []
-        Array[File?] tas = []
+        Array[File] bams = []
+        Array[File] nodup_bams = []
+        Array[File] tas = []
         Array[File?] peaks = []
         Array[File?] peaks_pr1 = []
         Array[File?] peaks_pr2 = []

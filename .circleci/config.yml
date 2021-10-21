@@ -53,6 +53,7 @@ commands:
 
             echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_secret_key.json
             export GOOGLE_APPLICATION_CREDENTIALS=$PWD/tmp_secret_key.json
+
             caper run ../../../atac.wdl \
               --backend gcp --gcp-prj ${GOOGLE_PROJECT_ID} \
               --gcp-service-account-key-json $PWD/tmp_secret_key.json \
@@ -98,8 +99,13 @@ jobs:
             do
               prefix=${wdl%.*}
               input=${prefix}.json
+              input_with_docker=${prefix}.docker.json
               metadata=${prefix}.metadata.json
-              caper run ${wdl} -i ${input} -m ${metadata} --docker ${TAG}
+
+              # add docker image to input JSON
+              cat ${input} | jq ".+{\"${prefix}.docker\": \"${TAG}\"}" > ${input_with_docker}
+
+              caper run ${wdl} -i ${input_with_docker} -m ${metadata}
               if [[ "${wdl}" != "test_choose_ctl.wdl" ]]; then
                 echo "Validating outputs of ${prefix}"
                 res=$(jq '.outputs["'${prefix}'.compare_md5sum.match_overall"]' "${metadata}")

@@ -17,6 +17,12 @@ workflow test_overlap {
         String se_chrsz
 
         String regex_bfilt_peak_chr_name = 'chr[\\dXY]+'
+        String docker
+    }
+    RuntimeEnvironment runtime_environment = {
+        "docker": docker,
+        "singularity": "",
+        "conda": ""
     }
 
     call atac.overlap as se_overlap { input :
@@ -29,6 +35,7 @@ workflow test_overlap {
         regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name,
         chrsz = se_chrsz,
         ta = se_ta_pooled,
+        runtime_environment = runtime_environment,
     }
 
     call compare_md5sum.compare_md5sum { input :
