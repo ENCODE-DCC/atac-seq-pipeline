@@ -1,0 +1,18 @@
+nomkl # using MKL can change MACS2 output randomly on different platforms
+python >=3
+
+macs2 ==2.2.4
+bedtools ==2.29.0
+bedops ==2.4.39
+ucsc-fetchchromsizes # 377 in docker/singularity image
+ucsc-wigtobigwig
+ucsc-bedgraphtobigwig
+ucsc-bigwiginfo
+ucsc-bedclip
+ucsc-bedtobigbed
+ucsc-twobittofa
+ucsc-bigWigAverageOverBed
+pybedtools ==0.8.0
+pybigwig ==0.3.13
+
+matplotlib

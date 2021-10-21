@@ -1,72 +1,48 @@
-# for python3
-# conda repos: defaults, r, bioconda, conda-forge
-
-nomkl  # using MKL can change MACS2 output randomly on different platforms
-
-idr ==2.0.4.2
-tabix
-samtools ==1.9
-htslib ==1.9
-sambamba ==0.6.6
-samstats ==0.2.1
-bedtools ==2.29.0
-picard ==2.20.7
-trimmomatic ==0.39
-
-ucsc-fetchchromsizes ==357  # 377 in docker/singularity image
-ucsc-wigtobigwig ==357
-ucsc-bedgraphtobigwig ==357
-ucsc-bigwiginfo ==357
-ucsc-bedclip ==357
-ucsc-bedtobigbed ==357
-ucsc-twobittofa ==357
-ucsc-bigWigAverageOverBed ==357
-
-r ==3.5.1  # 3.4.4 in docker/singularity image
-r-snow
-r-snowfall
-r-bitops
-r-catools
-bioconductor-rsamtools
-r-spp ==1.15.5  # 1.14 in docker/singularity image, 1.16 has lwcc() error
-libiconv
-
+python >=3
 bwa ==0.7.17
 bowtie2 ==2.3.4.3
+tbb ==2020.2 # use old version to fix libtbb.so.2 error for bowtie2
+samtools ==1.9
+htslib ==1.9
+bedtools ==2.29.0
+sambamba ==0.6.6
+
 pysam ==0.15.3
 pybedtools ==0.8.0
-phantompeakqualtools ==1.2.2
 pybigwig ==0.3.13
-openssl ==1.0.2t  # important to get the same random seed for "shuf"
+
+ucsc-fetchchromsizes # 377 in docker/singularity image
+ucsc-wigtobigwig
+ucsc-bedgraphtobigwig
+ucsc-bigwiginfo
+ucsc-bedclip
+ucsc-bedtobigbed
+ucsc-twobittofa
+ucsc-bigWigAverageOverBed
+
 deeptools ==3.3.1
 cutadapt ==2.5
 preseq ==2.0.3
 pyfaidx ==0.5.5.2
 bedops ==2.4.39
-macs2 ==2.2.4
+
 ptools_bin
 
 jsondiff ==1.1.1
-libgcc
-tbb ==2020.2
-requests
-ncurses
-gnuplot
 ghostscript
-wget
-pyopenssl  # for caper/croo to presign bucket URIs
-grep
-tar
-sed
-coreutils  # GNU split and shuf
-
+tabix
+matplotlib
 numpy
 scikit-learn
 scipy
 pandas
 jinja2
 gsl
-matplotlib
+
+samstats ==0.2.1
+idr ==2.0.4.2
 
 java-jdk
 
+picard ==2.20.7
+trimmomatic ==0.39
