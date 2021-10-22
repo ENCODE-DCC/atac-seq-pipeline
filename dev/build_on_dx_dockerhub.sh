@@ -58,5 +58,3 @@ java -jar ${DXWDL} compile ${WDL} -project "ENCODE Uniform Processing Pipelines 
 # test sample
 java -jar ${DXWDL} compile ${WDL} -project "ENCODE Uniform Processing Pipelines Azure" -f -folder \
 /ATAC-seq/workflows/$VER/test_ENCSR356KRQ_subsampled -defaults example_input_json/dx_azure/ENCSR356KRQ_subsampled_dx_azure.json
-
-rm -f ${WDL}
