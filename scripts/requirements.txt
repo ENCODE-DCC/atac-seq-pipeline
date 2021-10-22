@@ -1,3 +1,5 @@
+# default Conda environment for atac/chip
+
 python >=3
 bwa ==0.7.17
 bowtie2 ==2.3.4.3
@@ -46,3 +48,5 @@ java-jdk
 
 picard ==2.20.7
 trimmomatic ==0.39
+
+openssl ==1.0.2u # to fix missing libssl.so.1.0.0 for UCSC tools (bedClip, ...)

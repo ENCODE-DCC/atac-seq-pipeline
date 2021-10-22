@@ -1,3 +1,5 @@
+# Conda environment for tasks (macs2, macs2_signal_track) in atac/chip 
+
 nomkl # using MKL can change MACS2 output randomly on different platforms
 python >=3
 
@@ -16,3 +18,6 @@ pybedtools ==0.8.0
 pybigwig ==0.3.13
 
 matplotlib
+ghostscript
+
+openssl ==1.0.2u # to fix missing libssl.so.1.0.0 for UCSC tools (bedClip, ...)
