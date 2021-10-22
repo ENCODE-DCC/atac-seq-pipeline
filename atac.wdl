@@ -206,8 +206,8 @@ workflow atac {
         Int bam2ta_time_hr = 12
         Float bam2ta_disk_factor = 4.0
 
-        Float spr_mem_factor = 13.5
-        Float spr_disk_factor = 18.0
+        Float spr_mem_factor = 20.0
+        Float spr_disk_factor = 30.0
 
         Int jsd_cpu = 4
         Float jsd_mem_factor = 0.1
@@ -2728,7 +2728,7 @@ task gc_bias {
         cpu : 1
         memory : '${mem_gb} GB'
         time : 6
-        disks : 'local-disk 150 SSD'
+        disks : 'local-disk 250 SSD'
 
         docker : runtime_environment.docker
         singularity : runtime_environment.singularity
