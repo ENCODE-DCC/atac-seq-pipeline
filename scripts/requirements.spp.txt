@@ -12,6 +12,7 @@ r-bitops
 r-catools
 bioconductor-rsamtools
 r-spp <1.16 #==1.15.5  # previously 1.15.5, and 1.14 in docker/singularity image, 1.16 has lwcc() error
+tabix
 
 matplotlib
 pandas

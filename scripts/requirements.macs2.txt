@@ -16,6 +16,7 @@ ucsc-twobittofa
 ucsc-bigWigAverageOverBed
 pybedtools ==0.8.0
 pybigwig ==0.3.13
+tabix
 
 matplotlib
 ghostscript
