@@ -11,6 +11,12 @@ workflow test_reproducibility {
         String se_chrsz
 
         String ref_se_reproducibility_qc
+        String docker
+    }
+    RuntimeEnvironment runtime_environment = {
+        "docker": docker,
+        "singularity": "",
+        "conda": ""
     }
 
     call atac.reproducibility as se_reproducibility { input :
@@ -20,6 +26,7 @@ workflow test_reproducibility {
         peak_ppr = se_overlap_peak_ppr,
         peak_type = 'narrowPeak',
         chrsz = se_chrsz,        
+        runtime_environment = runtime_environment,
     }
 
     call compare_md5sum.compare_md5sum { input :

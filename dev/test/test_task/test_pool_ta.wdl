@@ -8,10 +8,17 @@ workflow test_pool_ta {
         String se_ta_rep2
 
         String ref_se_pooled_ta
+        String docker
+    }
+    RuntimeEnvironment runtime_environment = {
+        "docker": docker,
+        "singularity": "",
+        "conda": ""
     }
 
     call atac.pool_ta as se_pool_ta { input :
         tas = [se_ta_rep1, se_ta_rep2],
+        runtime_environment = runtime_environment,
     }
 
     call compare_md5sum.compare_md5sum { input :

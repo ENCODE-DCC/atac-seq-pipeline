@@ -1,19 +1,30 @@
 version 1.0
 
+struct RuntimeEnvironment {
+    String docker
+    String singularity
+    String conda
+}
+
 workflow atac {
-    String pipeline_ver = 'v1.10.1'
+    String pipeline_ver = 'dev-v2.0.0'
 
     meta {
-        version: 'v1.10.1'
+        version: 'dev-v2.0.0'
         author: 'Jin wook Lee (leepc12@gmail.com) at ENCODE-DCC'
         description: 'ATAC-Seq/DNase-Seq pipeline'
         specification_document: 'https://docs.google.com/document/d/1f0Cm4vRyDQDu0bMehHD7P7KOMxTOP-HiNoIvL1VcBt8/edit?usp=sharing'
 
-        caper_docker: 'encodedcc/atac-seq-pipeline:v1.10.1'
-        caper_singularity: 'docker://encodedcc/atac-seq-pipeline:v1.10.1'
+        default_docker: 'encodedcc/atac-seq-pipeline:dev-v2.0.0'
+        default_singularity: 'library://leepc12/default/atac-seq-pipeline:dev-v2.0.0'
+        default_conda: 'encode-atac-seq-pipeline'
         croo_out_def: 'https://storage.googleapis.com/encode-pipeline-output-definition/atac.croo.v5.json'
 
         parameter_group: {
+            runtime_environment: {
+                title: 'Runtime environment',
+                description: 'Runtime environment such as container URIs (Docker, Singularity) and Conda environment name.'
+            },
             pipeline_metadata: {
                 title: 'Pipeline metadata',
                 description: 'Metadata for a pipeline (e.g. title and description).'
@@ -56,6 +67,14 @@ workflow atac {
         }
     }
     input {
+        # group: runtime_environment
+        String docker = 'encodedcc/atac-seq-pipeline:dev-v2.0.0'
+        String singularity = 'library://leepc12/default/atac-seq-pipeline:dev-v2.0.0'
+        String conda = 'encode-atac-seq-pipeline'
+        String conda_macs2 = 'encode-atac-seq-pipeline-macs2'
+        String conda_spp = 'encode-atac-seq-pipeline-spp'
+        String conda_python2 = 'encode-atac-seq-pipeline-python2'
+
         # group: pipeline_metadata
         String title = 'Untitled'
         String description = 'No description'
@@ -104,9 +123,9 @@ workflow atac {
         Array[File] fastqs_rep9_R2 = []
         Array[File] fastqs_rep10_R1 = []
         Array[File] fastqs_rep10_R2 = []
-        Array[File?] bams = []
-        Array[File?] nodup_bams = []
-        Array[File?] tas = []
+        Array[File] bams = []
+        Array[File] nodup_bams = []
+        Array[File] tas = []
         Array[File?] peaks = []
         Array[File?] peaks_pr1 = []
         Array[File?] peaks_pr2 = []
@@ -187,8 +206,8 @@ workflow atac {
         Int bam2ta_time_hr = 12
         Float bam2ta_disk_factor = 4.0
 
-        Float spr_mem_factor = 13.5
-        Float spr_disk_factor = 18.0
+        Float spr_mem_factor = 20.0
+        Float spr_disk_factor = 30.0
 
         Int jsd_cpu = 4
         Float jsd_mem_factor = 0.1
@@ -219,6 +238,36 @@ workflow atac {
     }
 
     parameter_meta {
+        docker: {
+            description: 'Default Docker image URI to run WDL tasks.',
+            group: 'runtime_environment',
+            example: 'ubuntu:20.04'
+        }
+        singularity: {
+            description: 'Default Singularity image URI to run WDL tasks. For Singularity users only.',
+            group: 'runtime_environment',
+            example: 'docker://ubuntu:20.04'
+        }
+        conda: {
+            description: 'Default Conda environment name to run WDL tasks. For Conda users only.',
+            group: 'runtime_environment',
+            example: 'encode-atac-seq-pipeline'
+        }
+        conda_macs2: {
+            description: 'Conda environment name for task macs2. For Conda users only.',
+            group: 'runtime_environment',
+            example: 'encode-atac-seq-pipeline-macs2'
+        }
+        conda_spp: {
+            description: 'Conda environment name for tasks spp/xcor. For Conda users only.',
+            group: 'runtime_environment',
+            example: 'encode-atac-seq-pipeline-spp'
+        }
+        conda_python2: {
+            description: 'Conda environment name for tasks with python2 wrappers (tss_enrich). For Conda users only.',
+            group: 'runtime_environment',
+            example: 'encode-atac-seq-pipeline-python2'
+        }
         title: {
             description: 'Experiment title.',
             group: 'pipeline_metadata',
@@ -908,6 +957,18 @@ workflow atac {
             help: 'Maximum memory for Picard tools CollectGcBiasMetrics. If not defined, 90% of gc_bias tasks\'s memory will be used.'
         }
     }
+    RuntimeEnvironment runtime_environment = {
+        'docker': docker, 'singularity': singularity, 'conda': conda
+    }
+    RuntimeEnvironment runtime_environment_spp = {
+        'docker': docker, 'singularity': singularity, 'conda': conda_spp
+    }
+    RuntimeEnvironment runtime_environment_macs2 = {
+        'docker': docker, 'singularity': singularity, 'conda': conda_macs2
+    }
+    RuntimeEnvironment runtime_environment_python2 = {
+        'docker': docker, 'singularity': singularity, 'conda': conda_python2
+    }
 
     String aligner = 'bowtie2'
     String peak_caller = 'macs2'
@@ -915,7 +976,10 @@ workflow atac {
     
     # read genome data and paths
     if ( defined(genome_tsv) ) {
-        call read_genome_tsv { input: genome_tsv = genome_tsv }
+        call read_genome_tsv { input:
+            genome_tsv = genome_tsv,
+            runtime_environment = runtime_environment
+        }
     }
     File ref_fa_ = select_first([ref_fa, read_genome_tsv.ref_fa])
     File bowtie2_idx_tar_ = select_first([bowtie2_idx_tar, read_genome_tsv.bowtie2_idx_tar])
@@ -934,6 +998,7 @@ workflow atac {
         call pool_ta as pool_blacklist { input:
             tas = blacklists,
             col = 3,
+            runtime_environment = runtime_environment
         }
     }
     File? blacklist_ = if length(blacklists) > 1 then pool_blacklist.ta_pooled
@@ -1026,7 +1091,8 @@ workflow atac {
     # sanity check for inputs
     if ( num_rep == 0 ) {
         call raise_exception as error_input_data  { input:
-            msg = 'No FASTQ/BAM/TAG-ALIGN/PEAK defined in your input JSON. Check if your FASTQs are defined as "atac.fastqs_repX_RY". DO NOT MISS suffix _R1 even for single ended FASTQ.'
+            msg = 'No FASTQ/BAM/TAG-ALIGN/PEAK defined in your input JSON. Check if your FASTQs are defined as "atac.fastqs_repX_RY". DO NOT MISS suffix _R1 even for single ended FASTQ.',
+            runtime_environment = runtime_environment
         }
     }
 
@@ -1060,6 +1126,7 @@ workflow atac {
                 mem_factor = align_mem_factor,
                 time_hr = align_time_hr,
                 disk_factor = align_disk_factor,
+                runtime_environment = runtime_environment
             }
         }
         File? bam_ = if has_output_of_align then bams[i] else align.bam
@@ -1088,6 +1155,7 @@ workflow atac {
                 mem_factor = align_mem_factor,
                 time_hr = align_time_hr,
                 disk_factor = align_disk_factor,
+                runtime_environment = runtime_environment
             }
         }
 
@@ -1095,6 +1163,7 @@ workflow atac {
             call frac_mito { input:
                 non_mito_samstat = align.non_mito_samstat_qc,
                 mito_samstat = align_mito.samstat_qc,
+                runtime_environment = runtime_environment
             }
         }
 
@@ -1118,6 +1187,7 @@ workflow atac {
                 picard_java_heap = filter_picard_java_heap,
                 time_hr = filter_time_hr,
                 disk_factor = filter_disk_factor,
+                runtime_environment = runtime_environment
             }
         }
         File? nodup_bam_ = if has_output_of_filter then nodup_bams[i] else filter.nodup_bam
@@ -1136,6 +1206,7 @@ workflow atac {
                 mem_factor = bam2ta_mem_factor,
                 time_hr = bam2ta_time_hr,
                 disk_factor = bam2ta_disk_factor,
+                runtime_environment = runtime_environment
             }
         }
         File? ta_ = if has_output_of_bam2ta then tas[i] else bam2ta.ta
@@ -1158,6 +1229,7 @@ workflow atac {
                 picard_java_heap = filter_picard_java_heap,
                 time_hr = filter_time_hr,
                 disk_factor = filter_disk_factor,
+                runtime_environment = runtime_environment
             }
             call bam2ta as bam2ta_no_dedup { input :
                 bam = filter_no_dedup.nodup_bam,  # output name is nodup but it's not deduped
@@ -1170,6 +1242,7 @@ workflow atac {
                 mem_factor = bam2ta_mem_factor,
                 time_hr = bam2ta_time_hr,
                 disk_factor = bam2ta_disk_factor,
+                runtime_environment = runtime_environment
             }
             # subsample tagalign (non-mito) and cross-correlation analysis
             call xcor { input :
@@ -1182,6 +1255,7 @@ workflow atac {
                 mem_factor = xcor_mem_factor,
                 time_hr = xcor_time_hr,
                 disk_factor = xcor_disk_factor,
+                runtime_environment = runtime_environment_spp
             }
         }
 
@@ -1198,6 +1272,8 @@ workflow atac {
                 mem_factor = macs2_signal_track_mem_factor,
                 disk_factor = macs2_signal_track_disk_factor,
                 time_hr = macs2_signal_track_time_hr,
+
+                runtime_environment = runtime_environment_macs2
             }
         }
 
@@ -1221,6 +1297,10 @@ workflow atac {
                 mem_factor = call_peak_mem_factor,
                 disk_factor = call_peak_disk_factor,
                 time_hr = call_peak_time_hr,
+
+                runtime_environment = if peak_caller == 'spp' then runtime_environment_spp
+                    else if peak_caller == 'macs2' then runtime_environment_macs2
+                    else runtime_environment
             }
         }
         File? peak_ = if has_output_of_call_peak then peaks[i] else call_peak.peak
@@ -1233,6 +1313,7 @@ workflow atac {
                 pseudoreplication_random_seed = pseudoreplication_random_seed,
                 mem_factor = spr_mem_factor,
                 disk_factor = spr_disk_factor,
+                runtime_environment = runtime_environment
             }
         }
 
@@ -1257,6 +1338,10 @@ workflow atac {
                 mem_factor = call_peak_mem_factor,
                 disk_factor = call_peak_disk_factor,
                 time_hr = call_peak_time_hr,
+
+                runtime_environment = if peak_caller == 'spp' then runtime_environment_spp
+                    else if peak_caller == 'macs2' then runtime_environment_macs2
+                    else runtime_environment
             }
         }
         File? peak_pr1_ = if has_output_of_call_peak_pr1 then peaks_pr1[i]
@@ -1283,6 +1368,10 @@ workflow atac {
                 mem_factor = call_peak_mem_factor,
                 disk_factor = call_peak_disk_factor,
                 time_hr = call_peak_time_hr,
+
+                runtime_environment = if peak_caller == 'spp' then runtime_environment_spp
+                    else if peak_caller == 'macs2' then runtime_environment_macs2
+                    else runtime_environment
             }
         }
         File? peak_pr2_ = if has_output_of_call_peak_pr2 then peaks_pr2[i]
@@ -1294,6 +1383,7 @@ workflow atac {
             call count_signal_track { input :
                 ta = ta_,
                 chrsz = chrsz_,
+                runtime_environment = runtime_environment
             }
         }
         # tasks factored out from ATAqC
@@ -1306,12 +1396,14 @@ workflow atac {
                 nodup_bam = nodup_bam_,
                 tss = tss_,
                 chrsz = chrsz_,
+                runtime_environment = runtime_environment_python2
             }
         }
         if ( enable_fraglen_stat && paired_end_ && defined(nodup_bam_) ) {
             call fraglen_stat_pe { input :
                 nodup_bam = nodup_bam_,
                 picard_java_heap = fraglen_stat_picard_java_heap,
+                runtime_environment = runtime_environment
             }
         }
         if ( enable_preseq && defined(bam_) ) {
@@ -1321,6 +1413,7 @@ workflow atac {
                 mem_factor = preseq_mem_factor,
                 disk_factor = preseq_disk_factor,
                 picard_java_heap = preseq_picard_java_heap,
+                runtime_environment = runtime_environment
             }
         }
         if ( enable_gc_bias && defined(nodup_bam_) && defined(ref_fa_) ) {
@@ -1328,6 +1421,7 @@ workflow atac {
                 nodup_bam = nodup_bam_,
                 ref_fa = ref_fa_,
                 picard_java_heap = gc_bias_picard_java_heap,
+                runtime_environment = runtime_environment
             }
         }
         if ( enable_annot_enrich && defined(ta_) && defined(blacklist_) && defined(dnase_) && defined(prom_) && defined(enh_) ) {
@@ -1337,6 +1431,7 @@ workflow atac {
                 dnase = dnase_,
                 prom = prom_,
                 enh = enh_,
+                runtime_environment = runtime_environment
             }
         }
         if ( enable_compare_to_roadmap && defined(macs2_signal_track.pval_bw) &&
@@ -1348,6 +1443,7 @@ workflow atac {
                 reg2map_bed = reg2map_bed_,
                 reg2map = reg2map_,
                 roadmap_meta = roadmap_meta_,
+                runtime_environment = runtime_environment
             }
         }
     }
@@ -1359,6 +1455,8 @@ workflow atac {
         call pool_ta { input :
             tas = ta_,
             prefix = 'rep',
+
+            runtime_environment = runtime_environment
         }
     }
 
@@ -1369,6 +1467,7 @@ workflow atac {
         call pool_ta as pool_ta_pr1 { input :
             tas = spr.ta_pr1,
             prefix = 'rep-pr1',
+            runtime_environment = runtime_environment
         }
     }
 
@@ -1379,6 +1478,7 @@ workflow atac {
         call pool_ta as pool_ta_pr2 { input :
             tas = spr.ta_pr2,
             prefix = 'rep-pr2',
+            runtime_environment = runtime_environment
         }
     }
 
@@ -1403,6 +1503,10 @@ workflow atac {
             mem_factor = call_peak_mem_factor,
             disk_factor = call_peak_disk_factor,
             time_hr = call_peak_time_hr,
+
+            runtime_environment = if peak_caller == 'spp' then runtime_environment_spp
+                else if peak_caller == 'macs2' then runtime_environment_macs2
+                else runtime_environment
         }
     }
     File? peak_pooled_ = if has_output_of_call_peak_pooled then peak_pooled
@@ -1413,6 +1517,7 @@ workflow atac {
         call count_signal_track as count_signal_track_pooled { input :
             ta = pool_ta.ta_pooled,
             chrsz = chrsz_,
+            runtime_environment = runtime_environment
         }
     }
 
@@ -1428,6 +1533,7 @@ workflow atac {
             mem_factor = macs2_signal_track_mem_factor,
             disk_factor = macs2_signal_track_disk_factor,
             time_hr = macs2_signal_track_time_hr,
+            runtime_environment = runtime_environment_macs2
         }
     }
 
@@ -1444,6 +1550,7 @@ workflow atac {
             mem_factor = jsd_mem_factor,
             time_hr = jsd_time_hr,
             disk_factor = jsd_disk_factor,
+            runtime_environment = runtime_environment
         }
     }
 
@@ -1468,6 +1575,10 @@ workflow atac {
             mem_factor = call_peak_mem_factor,
             disk_factor = call_peak_disk_factor,
             time_hr = call_peak_time_hr,
+
+            runtime_environment = if peak_caller == 'spp' then runtime_environment_spp
+                else if peak_caller == 'macs2' then runtime_environment_macs2
+                else runtime_environment
         }
     }
     File? peak_ppr1_ = if has_output_of_call_peak_ppr1 then peak_ppr1
@@ -1494,6 +1605,9 @@ workflow atac {
             mem_factor = call_peak_mem_factor,
             disk_factor = call_peak_disk_factor,
             time_hr = call_peak_time_hr,
+            runtime_environment = if peak_caller == 'spp' then runtime_environment_spp
+                else if peak_caller == 'macs2' then runtime_environment_macs2
+                else runtime_environment
         }
     }
     File? peak_ppr2_ = if has_output_of_call_peak_ppr2 then peak_ppr2
@@ -1518,6 +1632,7 @@ workflow atac {
                 chrsz = chrsz_,
                 regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
                 ta = pool_ta.ta_pooled,
+                runtime_environment = runtime_environment
             }
         }
         if ( enable_idr && !align_only && pair.left<pair.right ) {
@@ -1536,6 +1651,7 @@ workflow atac {
                 chrsz = chrsz_,
                 regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
                 ta = pool_ta.ta_pooled,
+                runtime_environment = runtime_environment
             }
         }
     }
@@ -1553,6 +1669,7 @@ workflow atac {
                 chrsz = chrsz_,
                 regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
                 ta = ta_[i],
+                runtime_environment = runtime_environment
             }
         }
     }
@@ -1572,6 +1689,7 @@ workflow atac {
                 chrsz = chrsz_,
                 regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
                 ta = ta_[i],
+                runtime_environment = runtime_environment
             }
         }
     }
@@ -1588,6 +1706,7 @@ workflow atac {
             chrsz = chrsz_,
             regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
             ta = pool_ta.ta_pooled,
+            runtime_environment = runtime_environment
         }
     }
 
@@ -1605,6 +1724,7 @@ workflow atac {
             chrsz = chrsz_,
             regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
             ta = pool_ta.ta_pooled,
+            runtime_environment = runtime_environment
         }
     }
 
@@ -1618,6 +1738,7 @@ workflow atac {
             peak_ppr = overlap_ppr.bfilt_overlap_peak,
             peak_type = peak_type_,
             chrsz = chrsz_,
+            runtime_environment = runtime_environment
         }
     }
 
@@ -1630,6 +1751,7 @@ workflow atac {
             peak_ppr = idr_ppr.bfilt_idr_peak,
             peak_type = peak_type_,
             chrsz = chrsz_,
+            runtime_environment = runtime_environment
         }
     }
 
@@ -1702,6 +1824,8 @@ workflow atac {
         overlap_opt_peak_region_size_qc = reproducibility_overlap.peak_region_size_qc,
         overlap_opt_peak_region_size_plot = reproducibility_overlap.peak_region_size_plot,
         overlap_opt_num_peak_qc = reproducibility_overlap.num_peak_qc,
+
+        runtime_environment = runtime_environment
     }
 
     output {
@@ -1712,7 +1836,7 @@ workflow atac {
 }
 
 task align {
-    input {
+    input {        
         # for task trim_adapter
         Array[File] fastqs_R1         # [merge_id]
         Array[File] fastqs_R2
@@ -1737,6 +1861,8 @@ task align {
         Float mem_factor
         Int time_hr
         Float disk_factor
+
+        RuntimeEnvironment runtime_environment
     }
     Float input_file_size_gb = size(fastqs_R1, "G") + size(fastqs_R2, "G")
     Float mem_gb = 5.0 + size(idx_tar, "G") + mem_factor * input_file_size_gb
@@ -1754,12 +1880,7 @@ task align {
         # check if pipeline dependencies can be found
         if [[ -z "$(which encode_task_trim_adapter.py 2> /dev/null || true)" ]]
         then
-          echo -e "\n* Error: pipeline dependencies not found." 1>&2
-          echo 'Conda users: Did you activate Conda environment (conda activate encode-atac-seq-pipeline)?' 1>&2
-          echo '    Or did you install Conda and environment correctly (bash scripts/install_conda_env.sh)?' 1>&2
-          echo 'GCP/AWS/Docker users: Did you add --docker flag to Caper command line arg?' 1>&2
-          echo 'Singularity users: Did you add --singularity flag to Caper command line arg?' 1>&2
-          echo -e "\n" 1>&2
+          echo -e "\n* Error: pipeline environment (docker, singularity or conda) not found." 1>&2
           exit 3
         fi
 
@@ -1807,6 +1928,10 @@ task align {
         time : time_hr
         disks : 'local-disk ${disk_gb} SSD'
         preemptible: 0
+
+        docker : runtime_environment.docker
+        singularity : runtime_environment.singularity
+        conda : runtime_environment.conda
     }
 }
 
@@ -1814,6 +1939,8 @@ task frac_mito {
     input {
         File? non_mito_samstat
         File? mito_samstat
+
+        RuntimeEnvironment runtime_environment
     }
 
     command {
@@ -1827,8 +1954,12 @@ task frac_mito {
     runtime {
         cpu : 1
         memory : '4 GB'
-        time : 1
+        time : 4
         disks : 'local-disk 10 SSD'
+
+        docker : runtime_environment.docker
+        singularity : runtime_environment.singularity
+        conda : runtime_environment.conda
     }
 }
 
@@ -1850,6 +1981,8 @@ task filter {
         String? picard_java_heap
         Int time_hr
         Float disk_factor
+        # runtime environment
+        RuntimeEnvironment runtime_environment
     }
     Float input_file_size_gb = size(bam, "G")
     Float picard_java_heap_factor = 0.9
@@ -1885,6 +2018,10 @@ task filter {
         memory : '${mem_gb} GB'
         time : time_hr
         disks : 'local-disk ${disk_gb} SSD'
+
+        docker : runtime_environment.docker
+        singularity : runtime_environment.singularity
+        conda : runtime_environment.conda
     }
 }
 
@@ -1900,6 +2037,8 @@ task bam2ta {
         Float mem_factor
         Int time_hr
         Float disk_factor
+        # runtime environment
+        RuntimeEnvironment runtime_environment
     }
     Float input_file_size_gb = size(bam, "G")
     Float mem_gb = 4.0 + mem_factor * input_file_size_gb
@@ -1925,6 +2064,10 @@ task bam2ta {
         memory : '${mem_gb} GB'
         time : time_hr
         disks : 'local-disk ${disk_gb} SSD'
+
+        docker : runtime_environment.docker
+        singularity : runtime_environment.singularity
+        conda : runtime_environment.conda
     }
 }
 
@@ -1936,6 +2079,9 @@ task spr {
 
         Float mem_factor
         Float disk_factor
+
+        # runtime environment
+        RuntimeEnvironment runtime_environment
     }
     Float input_file_size_gb = size(ta, "G")
     Float mem_gb = 4.0 + mem_factor * input_file_size_gb
@@ -1955,8 +2101,12 @@ task spr {
     runtime {
         cpu : 1
         memory : '${mem_gb} GB'
-        time : 1
+        time : 4
         disks : 'local-disk ${disk_gb} SSD'
+
+        docker : runtime_environment.docker
+        singularity : runtime_environment.singularity
+        conda : runtime_environment.conda
     }
 }
 
@@ -1965,6 +2115,9 @@ task pool_ta {
         Array[File?] tas     # TAG-ALIGNs to be merged
         Int? col             # number of columns in pooled TA
         String? prefix         # basename prefix
+
+        # runtime environment
+        RuntimeEnvironment runtime_environment
     }
     command {
         set -e
@@ -1979,8 +2132,12 @@ task pool_ta {
     runtime {
         cpu : 1
         memory : '8 GB'
-        time : 1
+        time : 4
         disks : 'local-disk 100 SSD'
+
+        docker : runtime_environment.docker
+        singularity : runtime_environment.singularity
+        conda : runtime_environment.conda
     }
 }
 
@@ -1996,6 +2153,9 @@ task xcor {
         Float mem_factor
         Int time_hr
         Float disk_factor
+
+        # runtime environment
+        RuntimeEnvironment runtime_environment
     }
     Float input_file_size_gb = size(ta, "G")
     Float mem_gb = 8.0 + mem_factor * input_file_size_gb
@@ -2021,6 +2181,10 @@ task xcor {
         memory : '${mem_gb} GB'
         time : time_hr
         disks : 'local-disk ${disk_gb} SSD'
+
+        docker : runtime_environment.docker
+        singularity : runtime_environment.singularity
+        conda : runtime_environment.conda
     }
 }
 
@@ -2034,6 +2198,9 @@ task jsd {
         Float mem_factor
         Int time_hr
         Float disk_factor
+
+        # runtime environment
+        RuntimeEnvironment runtime_environment
     }
     Float input_file_size_gb = size(nodup_bams, "G")
     Float mem_gb = 5.0 + mem_factor * input_file_size_gb
@@ -2056,6 +2223,10 @@ task jsd {
         memory : '${mem_gb} GB'
         time : time_hr
         disks : 'local-disk ${disk_gb} SSD'
+
+        docker : runtime_environment.docker
+        singularity : runtime_environment.singularity
+        conda : runtime_environment.conda
     }
 }
 
@@ -2063,6 +2234,9 @@ task count_signal_track {
     input {
         File? ta             # tag-align
         File chrsz            # 2-col chromosome sizes file
+
+        # runtime environment
+        RuntimeEnvironment runtime_environment
     }
     Float mem_gb = 8.0
     command {
@@ -2081,6 +2255,10 @@ task count_signal_track {
         memory : '${mem_gb} GB'
         time : 4
         disks : 'local-disk 50 SSD'
+
+        docker : runtime_environment.docker
+        singularity : runtime_environment.singularity
+        conda : runtime_environment.conda
     }
 }
 
@@ -2103,6 +2281,9 @@ task call_peak {
         Float mem_factor
         Int time_hr
         Float disk_factor
+
+        # runtime environment
+        RuntimeEnvironment runtime_environment
     }
     Float input_file_size_gb = size(ta, "G")
     Float mem_gb = 4.0 + mem_factor * input_file_size_gb
@@ -2149,6 +2330,10 @@ task call_peak {
         time : time_hr
         disks : 'local-disk ${disk_gb} SSD'
         preemptible: 0
+
+        docker : runtime_environment.docker
+        singularity : runtime_environment.singularity
+        conda : runtime_environment.conda
     }
 }
 
@@ -2164,6 +2349,9 @@ task macs2_signal_track {
         Float mem_factor
         Int time_hr
         Float disk_factor
+
+        # runtime environment
+        RuntimeEnvironment runtime_environment
     }
     Float input_file_size_gb = size(ta, "G")
     Float mem_gb = 4.0 + mem_factor * input_file_size_gb
@@ -2189,6 +2377,10 @@ task macs2_signal_track {
         time : time_hr
         disks : 'local-disk ${disk_gb} SSD'
         preemptible: 0
+
+        docker : runtime_environment.docker
+        singularity : runtime_environment.singularity
+        conda : runtime_environment.conda
     }
 }
 
@@ -2206,6 +2398,9 @@ task idr {
         File chrsz            # 2-col chromosome sizes file
         String peak_type
         String rank
+
+        # runtime environment
+        RuntimeEnvironment runtime_environment
     }
     command {
         set -e
@@ -2236,8 +2431,12 @@ task idr {
     runtime {
         cpu : 1
         memory : '4 GB'
-        time : 1
+        time : 4
         disks : 'local-disk 50 SSD'
+
+        docker : runtime_environment.docker
+        singularity : runtime_environment.singularity
+        conda : runtime_environment.conda
     }
 }
 
@@ -2252,6 +2451,9 @@ task overlap {
         File? ta        # to calculate FRiP
         File chrsz            # 2-col chromosome sizes file
         String peak_type
+
+        # runtime environment
+        RuntimeEnvironment runtime_environment
     }
     command {
         set -e
@@ -2278,8 +2480,12 @@ task overlap {
     runtime {
         cpu : 1
         memory : '4 GB'
-        time : 1
+        time : 4
         disks : 'local-disk 50 SSD'
+
+        docker : runtime_environment.docker
+        singularity : runtime_environment.singularity
+        conda : runtime_environment.conda
     }
 }
 
@@ -2294,6 +2500,9 @@ task reproducibility {
         File? peak_ppr            # Peak file from pooled pseudo replicate.
         String peak_type
         File chrsz            # 2-col chromosome sizes file
+
+        # runtime environment
+        RuntimeEnvironment runtime_environment
     }
     command {
         set -e
@@ -2325,8 +2534,12 @@ task reproducibility {
     runtime {
         cpu : 1
         memory : '4 GB'
-        time : 1
+        time : 4
         disks : 'local-disk 50 SSD'
+
+        docker : runtime_environment.docker
+        singularity : runtime_environment.singularity
+        conda : runtime_environment.conda
     }
 }
 
@@ -2339,6 +2552,9 @@ task preseq {
         Float disk_factor
         String? picard_java_heap
         File? null
+
+        # runtime environment
+        RuntimeEnvironment runtime_environment
     }
     Float input_file_size_gb = size(bam, "G")
     Float mem_gb = 4.0 + mem_factor * input_file_size_gb
@@ -2364,8 +2580,12 @@ task preseq {
     runtime {
         cpu : 1
         memory : '${mem_gb} GB'
-        time : 1
+        time : 4
         disks : 'local-disk ${disk_gb} SSD'
+
+        docker : runtime_environment.docker
+        singularity : runtime_environment.singularity
+        conda : runtime_environment.conda
     }
 }
 
@@ -2377,6 +2597,9 @@ task annot_enrich {
         File? dnase
         File? prom
         File? enh
+
+        # runtime environment
+        RuntimeEnvironment runtime_environment
     }
     command {
         set -e
@@ -2393,17 +2616,26 @@ task annot_enrich {
     runtime {
         cpu : 1
         memory : '8 GB'
-        time : 1
+        time : 4
         disks : 'local-disk 50 SSD'
+
+        docker : runtime_environment.docker
+        singularity : runtime_environment.singularity
+        conda : runtime_environment.conda
     }
 }
 
 task tss_enrich {
+    # based on metaseq, which is still in python2
+    # python2 environment is required for this task
     input {
         Int? read_len
         File? nodup_bam
         File? tss
         File chrsz
+
+        # runtime environment
+        RuntimeEnvironment runtime_environment
     }
     command {
         set -e
@@ -2422,8 +2654,12 @@ task tss_enrich {
     runtime {
         cpu : 1
         memory : '8 GB'
-        time : 1
+        time : 4
         disks : 'local-disk 150 SSD'
+
+        docker : runtime_environment.docker
+        singularity : runtime_environment.singularity
+        conda : runtime_environment.conda
     }
 }
 
@@ -2432,6 +2668,9 @@ task fraglen_stat_pe {
     input {
         File? nodup_bam
         String? picard_java_heap
+
+        # runtime environment
+        RuntimeEnvironment runtime_environment
     }
     Float input_file_size_gb = size(nodup_bam, "G")
     Float mem_gb = 8.0
@@ -2452,6 +2691,10 @@ task fraglen_stat_pe {
         memory : '${mem_gb} GB'
         time : 6
         disks : 'local-disk 150 SSD'
+
+        docker : runtime_environment.docker
+        singularity : runtime_environment.singularity
+        conda : runtime_environment.conda
     }
 }
 
@@ -2461,6 +2704,9 @@ task gc_bias {
         File ref_fa
 
         String? picard_java_heap
+
+        # runtime environment
+        RuntimeEnvironment runtime_environment
     }
     Float mem_factor = 0.3
     Float input_file_size_gb = size(nodup_bam, "G")
@@ -2482,7 +2728,11 @@ task gc_bias {
         cpu : 1
         memory : '${mem_gb} GB'
         time : 6
-        disks : 'local-disk 150 SSD'
+        disks : 'local-disk 250 SSD'
+
+        docker : runtime_environment.docker
+        singularity : runtime_environment.singularity
+        conda : runtime_environment.conda
     }
 }
 
@@ -2493,6 +2743,9 @@ task compare_signal_to_roadmap {
         File? reg2map_bed
         File? reg2map
         File? roadmap_meta
+
+        # runtime environment
+        RuntimeEnvironment runtime_environment
     }
     command {
         set -e
@@ -2510,8 +2763,12 @@ task compare_signal_to_roadmap {
     runtime {
         cpu : 1
         memory : '8 GB'
-        time : 1
+        time : 4
         disks : 'local-disk 100 SSD'
+
+        docker : runtime_environment.docker
+        singularity : runtime_environment.singularity
+        conda : runtime_environment.conda
     }
 }
 
@@ -2582,6 +2839,9 @@ task qc_report {
         File? overlap_opt_num_peak_qc
 
         File? qc_json_ref
+
+        # runtime environment
+        RuntimeEnvironment runtime_environment
     }
     command {
         set -e
@@ -2655,8 +2915,12 @@ task qc_report {
     runtime {
         cpu : 1
         memory : '4 GB'
-        time : 1
+        time : 4
         disks : 'local-disk 50 SSD'
+
+        docker : runtime_environment.docker
+        singularity : runtime_environment.singularity
+        conda : runtime_environment.conda
     }
 }
 
@@ -2664,6 +2928,8 @@ task read_genome_tsv {
     input {
         File? genome_tsv
         String? null_s
+
+        RuntimeEnvironment runtime_environment
     }
     command <<<
         echo "$(basename ~{genome_tsv})" > genome_name
@@ -2713,14 +2979,21 @@ task read_genome_tsv {
         maxRetries : 0
         cpu : 1
         memory : '2 GB'
-        time : 1
+        time : 4
         disks : 'local-disk 10 SSD'
+
+        docker : runtime_environment.docker
+        singularity : runtime_environment.singularity
+        conda : runtime_environment.conda
     }
 }
 
 task raise_exception {
     input {
         String msg
+
+        # runtime environment
+        RuntimeEnvironment runtime_environment
     }
     command {
         echo -e "\n* Error: ${msg}\n" >&2
@@ -2733,7 +3006,11 @@ task raise_exception {
         maxRetries : 0
         cpu : 1
         memory : '2 GB'
-        time : 1
+        time : 4
         disks : 'local-disk 10 SSD'
+
+        docker : runtime_environment.docker
+        singularity : runtime_environment.singularity
+        conda : runtime_environment.conda
     }
 }

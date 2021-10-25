@@ -19,6 +19,12 @@ workflow test_idr {
         String se_chrsz
 
         String regex_bfilt_peak_chr_name = 'chr[\\dXY]+'
+        String docker
+    }
+    RuntimeEnvironment runtime_environment = {
+        "docker": docker,
+        "singularity": "",
+        "conda": ""
     }
 
     call atac.idr as se_idr { input : 
@@ -33,6 +39,7 @@ workflow test_idr {
         chrsz = se_chrsz,
         regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name,
         ta = se_ta_pooled,
+        runtime_environment = runtime_environment,
     }
 
     call compare_md5sum.compare_md5sum { input :

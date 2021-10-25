@@ -2,6 +2,8 @@ version 1.0
 import '../../../atac.wdl' as atac
 import 'compare_md5sum.wdl' as compare_md5sum
 
+
+
 workflow test_annot_enrich {
     input {
         File ta
@@ -10,6 +12,12 @@ workflow test_annot_enrich {
         File prom
         File enh
         File ref_annot_enrich_qc
+        String docker
+    }
+    RuntimeEnvironment runtime_environment = {
+        "docker": docker,
+        "singularity": "",
+        "conda": ""
     }
 
     call atac.annot_enrich { input : 
@@ -18,6 +26,7 @@ workflow test_annot_enrich {
         dnase = dnase,
         prom = prom,
         enh = enh,
+        runtime_environment = runtime_environment,
     }
 
     call compare_md5sum.compare_md5sum { input :

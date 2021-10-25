@@ -18,6 +18,12 @@ workflow test_spr {
 
         Float spr_mem_factor = 0.0
         Float spr_disk_factor = 6.0
+        String docker
+    }
+    RuntimeEnvironment runtime_environment = {
+        "docker": docker,
+        "singularity": "",
+        "conda": ""
     }
 
     call atac.spr as pe_spr { input :
@@ -26,6 +32,7 @@ workflow test_spr {
         pseudoreplication_random_seed = 0,
         mem_factor = spr_mem_factor,
         disk_factor = spr_disk_factor,
+        runtime_environment = runtime_environment,
     }    
     call atac.spr as se_spr { input :
         ta = se_ta,
@@ -33,6 +40,7 @@ workflow test_spr {
         pseudoreplication_random_seed = 0,
         mem_factor = spr_mem_factor,
         disk_factor = spr_disk_factor,
+        runtime_environment = runtime_environment,
     }
     call atac.spr as pe_spr_seed_10 { input :
         ta = pe_ta,
@@ -40,6 +48,7 @@ workflow test_spr {
         pseudoreplication_random_seed = 10,
         mem_factor = spr_mem_factor,
         disk_factor = spr_disk_factor,
+        runtime_environment = runtime_environment,
     }
     call atac.spr as se_spr_seed_10 { input :
         ta = se_ta,
@@ -47,6 +56,7 @@ workflow test_spr {
         pseudoreplication_random_seed = 10,
         mem_factor = spr_mem_factor,
         disk_factor = spr_disk_factor,
+        runtime_environment = runtime_environment,
     }
 
     call compare_md5sum.compare_md5sum { input :

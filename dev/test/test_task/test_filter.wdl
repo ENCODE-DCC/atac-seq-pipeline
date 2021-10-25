@@ -29,6 +29,12 @@ workflow test_filter {
         Float filter_mem_factor = 0.0
         Int filter_time_hr = 24
         Float filter_disk_factor = 4.0
+        String docker
+    }
+    RuntimeEnvironment runtime_environment = {
+        "docker": docker,
+        "singularity": "",
+        "conda": ""
     }
 
     call atac.filter as pe_filter { input :
@@ -48,6 +54,7 @@ workflow test_filter {
         picard_java_heap = '4G',
         time_hr = filter_time_hr,
         disk_factor = filter_disk_factor,
+        runtime_environment = runtime_environment,
     }
     call atac.filter as pe_filter_no_multimapping { input :
         bam = pe_bam_no_multimapping,
@@ -66,6 +73,7 @@ workflow test_filter {
         picard_java_heap = '4G',
         time_hr = filter_time_hr,
         disk_factor = filter_disk_factor,
+        runtime_environment = runtime_environment,
     }
     call atac.filter as pe_filter_no_dup_removal { input :
         bam = pe_bam,
@@ -84,6 +92,7 @@ workflow test_filter {
         picard_java_heap = '4G',
         time_hr = filter_time_hr,
         disk_factor = filter_disk_factor,
+        runtime_environment = runtime_environment,
     }
     call atac.filter as se_filter { input :
         bam = se_bam,
@@ -102,6 +111,7 @@ workflow test_filter {
         picard_java_heap = '4G',
         time_hr = filter_time_hr,
         disk_factor = filter_disk_factor,
+        runtime_environment = runtime_environment,
     }
     call atac.filter as se_filter_no_multimapping { input :
         bam = se_bam_no_multimapping,
@@ -120,6 +130,7 @@ workflow test_filter {
         picard_java_heap = '4G',
         time_hr = filter_time_hr,
         disk_factor = filter_disk_factor,
+        runtime_environment = runtime_environment,
     }
     call atac.filter as se_filter_no_dup_removal { input :
         bam = se_bam,
@@ -138,6 +149,7 @@ workflow test_filter {
         picard_java_heap = '4G',
         time_hr = filter_time_hr,
         disk_factor = filter_disk_factor,
+        runtime_environment = runtime_environment,
     }
 
     call compare_md5sum.compare_md5sum { input :

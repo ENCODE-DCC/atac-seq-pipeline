@@ -6,3 +6,4 @@ cromwell*.jar
 *.fasta
 *.fa
 *.gz
+*.docker.json
