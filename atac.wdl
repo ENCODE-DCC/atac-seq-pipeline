@@ -7,16 +7,16 @@ struct RuntimeEnvironment {
 }
 
 workflow atac {
-    String pipeline_ver = 'dev-v2.0.0'
+    String pipeline_ver = 'v2.0.0'
 
     meta {
-        version: 'dev-v2.0.0'
+        version: 'v2.0.0'
         author: 'Jin wook Lee (leepc12@gmail.com) at ENCODE-DCC'
         description: 'ATAC-Seq/DNase-Seq pipeline'
         specification_document: 'https://docs.google.com/document/d/1f0Cm4vRyDQDu0bMehHD7P7KOMxTOP-HiNoIvL1VcBt8/edit?usp=sharing'
 
-        default_docker: 'encodedcc/atac-seq-pipeline:dev-v2.0.0'
-        default_singularity: 'library://leepc12/default/atac-seq-pipeline:dev-v2.0.0'
+        default_docker: 'encodedcc/atac-seq-pipeline:v2.0.0'
+        default_singularity: 'library://leepc12/default/atac-seq-pipeline:v2.0.0'
         default_conda: 'encode-atac-seq-pipeline'
         croo_out_def: 'https://storage.googleapis.com/encode-pipeline-output-definition/atac.croo.v5.json'
 
@@ -68,8 +68,8 @@ workflow atac {
     }
     input {
         # group: runtime_environment
-        String docker = 'encodedcc/atac-seq-pipeline:dev-v2.0.0'
-        String singularity = 'library://leepc12/default/atac-seq-pipeline:dev-v2.0.0'
+        String docker = 'encodedcc/atac-seq-pipeline:v2.0.0'
+        String singularity = 'library://leepc12/default/atac-seq-pipeline:v2.0.0'
         String conda = 'encode-atac-seq-pipeline'
         String conda_macs2 = 'encode-atac-seq-pipeline-macs2'
         String conda_spp = 'encode-atac-seq-pipeline-spp'
