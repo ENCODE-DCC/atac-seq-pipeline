@@ -2,23 +2,12 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.156534.svg)](https://doi.org/10.5281/zenodo.156534)[![CircleCI](https://circleci.com/gh/ENCODE-DCC/atac-seq-pipeline/tree/master.svg?style=svg)](https://circleci.com/gh/ENCODE-DCC/atac-seq-pipeline/tree/master)
 
-## Important notice for Conda users
 
-If it takes too long to resolve Conda package conflicts while installing pipeline's Conda environment, then try with `mamba` instead. Add `mamba` to the install command line.
-```bash
-$ scripts/install_conda_env.sh mamba
-```
+## Download new Caper>=2.0
 
-For every new pipeline release, Conda users always need to update pipeline's Conda environment (`encode-atac-seq-pipeline`) even though they don't use new added features.
+New Caper is out. You need to update your Caper to work with the latest ENCODE ATAC-seq pipeline.
 ```bash
-$ cd atac-seq-pipeline
-$ scripts/update_conda_env.sh
-```
-
-For pipelines >= v1.4.0, Conda users also need to manually install Caper and Croo **INSIDE** the environment. These two tools have been removed from pipeline's Conda environment since v1.9.2.
-```bash
-$ source activate encode-atac-seq-pipeline
-$ pip install caper croo
+$ pip install caper --upgrade
 ```
 
 ## Introduction
@@ -35,7 +24,14 @@ The ATAC-seq pipeline protocol specification is [here](https://docs.google.com/d
 
 ## Installation
 
-1) Git clone this pipeline.
+1) Make sure that you have Python>=3.6. Caper does not work with Python2. Install Caper and check its version >=2.0.
+	```bash
+	$ python --version
+	$ pip install caper
+	$ caper -v
+	```
+
+2) Git clone this pipeline.
 	> **IMPORTANT**: use `~/atac-seq-pipeline/atac.wdl` as `[WDL]` in Caper's documentation.
 
 	```bash
@@ -43,26 +39,38 @@ The ATAC-seq pipeline protocol specification is [here](https://docs.google.com/d
 	$ git clone https://github.com/ENCODE-DCC/atac-seq-pipeline
 	```
 
-2) Install pipeline's [Conda environment](docs/install_conda.md) if you want to use Conda instead of Docker/Singularity. Conda is recommneded on local computer and HPCs (e.g. Stanford Sherlock/SCG).
-	> **IMPORTANT**: use `encode-atac-seq-pipeline` as `[PIPELINE_CONDA_ENV]` in Caper's documentation.
-
-3) **Skip this step if you have installed pipeline's Conda environment**. Caper is already included in the Conda environment. [Install Caper](https://github.com/ENCODE-DCC/caper#installation). Caper is a python wrapper for [Cromwell](https://github.com/broadinstitute/cromwell).
-	> **IMPORTANT**: Make sure that you have python3(>= 3.6.0) installed on your system.
-
+3) (Optional for Conda) Install pipeline's Conda environments if you don't have Singularity or Docker installed on your system. We recommend to use Singularity instead of Conda. If you don't have Conda on your system, install [Miniconda3](https://docs.conda.io/en/latest/miniconda.html).
 	```bash
-	$ pip install caper  # use pip3 if it doesn't work
+	$ cd atac-seq-pipeline
+	$ bash scripts/install_conda_env.sh
 	```
 
-4) Follow [Caper's README](https://github.com/ENCODE-DCC/caper) carefully. Find an instruction for your platform.
-	> **IMPORTANT**: Configure your Caper configuration file `~/.caper/default.conf` correctly for your platform.
+4) Follow [Caper's README](https://github.com/ENCODE-DCC/caper) carefully. Find an instruction for your platform and run `caper init`. Edit the initialized Caper's configuration file (`~/.caper/default.conf`).
+	```bash
+	$ caper init [YOUR_PLATFORM]
+	$ vi ~/.caper/default.conf
+	```
 
-## Test input JSON file
+## Test run
 
-Use `https://storage.googleapis.com/encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ_subsampled.json` as `[INPUT_JSON]` in Caper's documentation.
+You can use URIs(`s3://`, `gs://` and `http(s)://`) in Caper's command lines and input JSON file then Caper will automatically download/localize such files. Input JSON file URL: https://storage.googleapis.com/encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ_subsampled.json
+
+According to your chosen platform of Caper, run Caper or submit Caper command line to the cluster. You can choose other environments like `--singularity` or `--docker` instead of `--conda`. But you must define one of the environments.
+
+The followings are just examples. Please read [Caper's README](https://github.com/ENCODE-DCC/caper) very carefully to find an actual working command line for your chosen platform.
+    ```bash
+    # Run it locally with Conda (You don't need to activate it, make sure to install Conda envs first)
+    $ caper run atac.wdl -i https://storage.googleapis.com/encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ_subsampled.json --conda
+
+    # Or submit it as a leader job (with long/enough resources) to SLURM (Stanford Sherlock) with Singularity
+    # It will fail if you directly run the leader job on login nodes
+    $ sbatch -p [SLURM_PARTITON] -J [WORKFLOW_NAME] --export=ALL --mem 4G -t 4-0 --wrap "caper run atac.wdl -i https://storage.googleapis.com/encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ_subsampled.json --singularity"
+    ```
+
 
 ## Input JSON file
 
-> **IMPORTANT**: DO NOT BLINDLY USE A TEMPLATE/EXAMPLE INPUT JSON. READ THROUGH THE FOLLOWING GUIDE TO MAKE A CORRECT INPUT JSON FILE.
+> **IMPORTANT**: DO NOT BLINDLY USE A TEMPLATE/EXAMPLE INPUT JSON. READ THROUGH THE FOLLOWING GUIDE TO MAKE A CORRECT INPUT JSON FILE. ESPECIALLY FOR ADAPTERS.
 
 An input JSON file specifies all the input parameters and files that are necessary for successfully running this pipeline. This includes a specification of the path to the genome reference files and the raw data fastq file. Please make sure to specify absolute paths rather than relative paths in your input JSON files.
 
@@ -71,6 +79,7 @@ An input JSON file specifies all the input parameters and files that are necessa
 
 
 ## Running and sharing on Truwl
+
 You can run this pipeline on [truwl.com](https://truwl.com/). This provides a web interface that allows you to define inputs and parameters, run the job on GCP, and monitor progress. To run it you will need to create an account on the platform then request early access by emailing [info@truwl.com](mailto:info@truwl.com) to get the right permissions. You can see the example case from this repo at [https://truwl.com/workflows/instance/WF_e85df4.f10.8880/command](https://truwl.com/workflows/instance/WF_e85df4.f10.8880/command). The example job (or other jobs) can be forked to pre-populate the inputs for your own job.
 
 If you do not run the pipeline on Truwl, you can still share your use-case/job on the platform by getting in touch at [info@truwl.com](mailto:info@truwl.com) and providing your inputs.json file.

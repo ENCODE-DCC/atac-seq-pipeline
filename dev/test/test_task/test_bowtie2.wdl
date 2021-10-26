@@ -29,6 +29,12 @@ workflow test_bowtie2 {
         Float bowtie2_mem_factor = 0.0
         Int bowtie2_time_hr = 48
         Float bowtie2_disk_factor = 6.0
+        String docker
+    }
+    RuntimeEnvironment runtime_environment = {
+        "docker": docker,
+        "singularity": "",
+        "conda": ""
     }
 
     call atac.align as pe_bowtie2 { input :
@@ -49,6 +55,7 @@ workflow test_bowtie2 {
         mem_factor = bowtie2_mem_factor,
         time_hr = bowtie2_time_hr,
         disk_factor = bowtie2_disk_factor,
+        runtime_environment = runtime_environment,
     }
     call atac.align as pe_bowtie2_no_multimapping { input :
         aligner = 'bowtie2',
@@ -68,6 +75,7 @@ workflow test_bowtie2 {
         mem_factor = bowtie2_mem_factor,
         time_hr = bowtie2_time_hr,
         disk_factor = bowtie2_disk_factor,
+        runtime_environment = runtime_environment,
     }
     call atac.align as se_bowtie2 { input :
         aligner = 'bowtie2',
@@ -87,6 +95,7 @@ workflow test_bowtie2 {
         mem_factor = bowtie2_mem_factor,
         time_hr = bowtie2_time_hr,
         disk_factor = bowtie2_disk_factor,
+        runtime_environment = runtime_environment,
     }
     call atac.align as se_bowtie2_no_multimapping { input :
         aligner = 'bowtie2',
@@ -106,6 +115,7 @@ workflow test_bowtie2 {
         mem_factor = bowtie2_mem_factor,
         time_hr = bowtie2_time_hr,
         disk_factor = bowtie2_disk_factor,
+        runtime_environment = runtime_environment,
     }
 
     call compare_md5sum.compare_md5sum { input :

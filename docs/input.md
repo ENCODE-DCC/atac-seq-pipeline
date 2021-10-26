@@ -6,6 +6,7 @@ Please read through the following step-by-step instruction to compose a input JS
 
 >**IMPORTANT**: ALWAYS USE ABSOLUTE PATHS.
 
+
 ## Pipeline metadata
 
 Parameter|Description
@@ -259,8 +260,8 @@ Parameter|Default|Description
 
 Parameter|Default|Description
 ---------|-------|-----------
-`atac.spr_mem_factor` | 13.5 | Multiplied to size of filtered BAM to determine required memory
-`atac.spr_disk_factor` | 18.0 | Multiplied to size of filtered BAM to determine required disk
+`atac.spr_mem_factor` | 20.0 | Multiplied to size of filtered BAM to determine required memory
+`atac.spr_disk_factor` | 30.0 | Multiplied to size of filtered BAM to determine required disk
 
 Parameter|Default|Description
 ---------|-------|-----------

@@ -12,6 +12,12 @@ workflow test_preseq {
 
         Float preseq_mem_factor = 0.0
         Float preseq_disk_factor = 5.0
+        String docker
+    }
+    RuntimeEnvironment runtime_environment = {
+        "docker": docker,
+        "singularity": "",
+        "conda": ""
     }
 
     call atac.preseq { input : 
@@ -20,6 +26,7 @@ workflow test_preseq {
         mem_factor = preseq_mem_factor,
         disk_factor = preseq_disk_factor,
         picard_java_heap = '4G',
+        runtime_environment = runtime_environment,
     }
 
     call compare_md5sum.compare_md5sum { input :

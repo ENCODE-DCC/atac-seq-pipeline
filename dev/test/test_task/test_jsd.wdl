@@ -17,6 +17,12 @@ workflow test_jsd {
         Float jsd_mem_factor = 0.0
         Int jsd_time_hr = 12
         Float jsd_disk_factor = 2.0
+        String docker
+    }
+    RuntimeEnvironment runtime_environment = {
+        "docker": docker,
+        "singularity": "",
+        "conda": ""
     }
 
     call atac.jsd as se_jsd { input :
@@ -28,6 +34,7 @@ workflow test_jsd {
         mem_factor = jsd_mem_factor,
         time_hr = jsd_time_hr,
         disk_factor = jsd_disk_factor,
+        runtime_environment = runtime_environment,
     }
 
     call atac.jsd as se_jsd_fake_blacklist { input :
@@ -39,6 +46,7 @@ workflow test_jsd {
         mem_factor = jsd_mem_factor,
         time_hr = jsd_time_hr,
         disk_factor = jsd_disk_factor,
+        runtime_environment = runtime_environment,
     }
 
     # take first 8 columns (vaule in other columns are random)

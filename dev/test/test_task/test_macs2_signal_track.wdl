@@ -18,6 +18,12 @@ workflow test_macs2_signal_track {
         Float macs2_mem_factor = 0.0
         Int macs2_time_hr = 24
         Float macs2_disk_factor = 40.0
+        String docker
+    }
+    RuntimeEnvironment runtime_environment = {
+        "docker": docker,
+        "singularity": "",
+        "conda": ""
     }
 
     call atac.macs2_signal_track as se_macs2_signal_track { input :
@@ -30,6 +36,7 @@ workflow test_macs2_signal_track {
         mem_factor = macs2_mem_factor,
         time_hr = macs2_time_hr,
         disk_factor = macs2_disk_factor,
+        runtime_environment = runtime_environment,
     }
 
     call compare_md5sum.compare_md5sum { input :

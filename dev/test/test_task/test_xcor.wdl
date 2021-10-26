@@ -20,7 +20,14 @@ workflow test_xcor {
         Float xcor_mem_factor = 0.0
         Int xcor_time_hr = 6
         Float xcor_disk_factor = 1.5
+        String docker
     }
+    RuntimeEnvironment runtime_environment = {
+        "docker": docker,
+        "singularity": "",
+        "conda": ""
+    }
+
     call atac.xcor as pe_xcor { input :
         ta = pe_ta,
         subsample = xcor_subsample_default,
@@ -31,6 +38,7 @@ workflow test_xcor {
         mem_factor = xcor_mem_factor,
         time_hr = xcor_time_hr,
         disk_factor = xcor_disk_factor,
+        runtime_environment = runtime_environment,
     }
     call atac.xcor as pe_xcor_subsample { input :
         ta = pe_ta,
@@ -42,6 +50,7 @@ workflow test_xcor {
         mem_factor = xcor_mem_factor,
         time_hr = xcor_time_hr,
         disk_factor = xcor_disk_factor,
+        runtime_environment = runtime_environment,
     }
     call atac.xcor as se_xcor { input :
         ta = se_ta,
@@ -53,6 +62,7 @@ workflow test_xcor {
         mem_factor = xcor_mem_factor,
         time_hr = xcor_time_hr,
         disk_factor = xcor_disk_factor,
+        runtime_environment = runtime_environment,
     }
     call atac.xcor as se_xcor_subsample { input :
         ta = se_ta,
@@ -64,6 +74,7 @@ workflow test_xcor {
         mem_factor = xcor_mem_factor,
         time_hr = xcor_time_hr,
         disk_factor = xcor_disk_factor,
+        runtime_environment = runtime_environment,
     }
 
     call compare_md5sum.compare_md5sum { input :

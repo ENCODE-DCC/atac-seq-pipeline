@@ -1,0 +1,24 @@
+# Conda environment for tasks (macs2, macs2_signal_track) in atac/chip 
+
+nomkl # using MKL can change MACS2 output randomly on different platforms
+python >=3
+
+macs2 ==2.2.4
+bedtools ==2.29.0
+bedops ==2.4.39
+ucsc-fetchchromsizes # 377 in docker/singularity image
+ucsc-wigtobigwig
+ucsc-bedgraphtobigwig
+ucsc-bigwiginfo
+ucsc-bedclip
+ucsc-bedtobigbed
+ucsc-twobittofa
+ucsc-bigWigAverageOverBed
+pybedtools ==0.8.0
+pybigwig ==0.3.13
+tabix
+
+matplotlib
+ghostscript
+
+openssl ==1.0.2u # to fix missing libssl.so.1.0.0 for UCSC tools (bedClip, ...)
