@@ -10,6 +10,27 @@ New Caper is out. You need to update your Caper to work with the latest ENCODE A
 $ pip install caper --upgrade
 ```
 
+## Local/HPC users and new Caper>=2.0
+
+There are tons of changes for local/HPC backends: `local`, `slurm`, `sge`, `pbs` and `lsf`(added). Make a backup of your current Caper configuration file `~/.caper/default.conf` and run `caper init`. Local/HPC users need to reset/initialize Caper's configuration file according to your chosen backend. Edit the configuration file and follow instructions in there.
+```bash
+$ cd ~/.caper
+$ cp default.conf default.conf.bak
+$ caper init [YOUR_BACKEND]
+```
+
+In order to run a pipeline, you need to add one of the following flags to specify the environment to run each task within. i.e. `--conda`, `--singularity` and `--docker`. These flags are not required for cloud backend users (`aws` and `gcp`).
+```bash
+# for example
+$ caper run ... --singularity
+```
+
+For Conda users, **RE-INSTALL PIPELINE'S CONDA ENVIRONMENT AND DO NOT ACTIVATE CONDA ENVIRONMENT BEFORE RUNNING PIPELINES**. Caper will internally call `conda run -n ENV_NAME CROMWELL_JOB_SCRIPT`. Just make sure that pipeline's new Conda environments are correctly installed.
+```bash
+$ scripts/uninstall_conda_env.sh
+$ scripts/install_conda_env.sh
+```
+
 ## Introduction
 
 This pipeline is designed for automated end-to-end quality control and processing of ATAC-seq and DNase-seq data. The pipeline can be run on compute clusters with job submission engines as well as on stand alone machines. It inherently makes uses of parallelized/distributed computing. Pipeline installation is also easy as most dependencies are automatically installed. The pipeline can be run end-to-end, starting from raw FASTQ files all the way to peak calling and signal track generation using a single caper submit command. One can also start the pipeline from intermediate stages (for example, using alignment files as input). The pipeline supports both single-end and paired-end data as well as replicated or non-replicated datasets. The outputs produced by the pipeline include 1) formatted HTML reports that include quality control measures specifically designed for ATAC-seq and DNase-seq data, 2) analysis of reproducibility, 3) stringent and relaxed thresholding of peaks, 4) fold-enrichment and pvalue signal tracks. The pipeline also supports detailed error reporting and allows for easy resumption of interrupted runs. It has been tested on some human, mouse and yeast ATAC-seq datasets as well as on human and mouse DNase-seq datasets.
@@ -28,10 +49,17 @@ The ATAC-seq pipeline protocol specification is [here](https://docs.google.com/d
 	```bash
 	$ python --version
 	$ pip install caper
-	$ caper -v
+	```
+2) Make a backup of your Caper configuration file `~/.caper/default.conf` if you are upgrading from old Caper(<2.0.0). Reset/initialize Caper's configuration file. Read Caper's [README](https://github.com/ENCODE-DCC/caper/blob/master/README.md) carefully to choose a backend for your system. Follow the instruction in the configuration file.
+	```bash
+	# make a backup of ~/.caper/default.conf if you already have it
+	$ caper init [YOUR_BACKEND]
+
+	# then edit ~/.caper/default.conf
+	$ vi ~/.caper/default.conf
 	```
 
-2) Git clone this pipeline.
+3) Git clone this pipeline.
 	> **IMPORTANT**: use `~/atac-seq-pipeline/atac.wdl` as `[WDL]` in Caper's documentation.
 
 	```bash
@@ -39,16 +67,12 @@ The ATAC-seq pipeline protocol specification is [here](https://docs.google.com/d
 	$ git clone https://github.com/ENCODE-DCC/atac-seq-pipeline
 	```
 
-3) (Optional for Conda) Install pipeline's Conda environments if you don't have Singularity or Docker installed on your system. We recommend to use Singularity instead of Conda. If you don't have Conda on your system, install [Miniconda3](https://docs.conda.io/en/latest/miniconda.html).
+4) (Optional for Conda users) Install pipeline's Conda environments if you don't have Singularity or Docker installed on your system. We recommend to use Singularity instead of Conda. If you don't have Conda on your system, install [Miniconda3](https://docs.conda.io/en/latest/miniconda.html).
 	```bash
 	$ cd atac-seq-pipeline
+	# uninstall old environments (<2.0.0)
+	$ bash scripts/uninstall_conda_env.sh
 	$ bash scripts/install_conda_env.sh
-	```
-
-4) Follow [Caper's README](https://github.com/ENCODE-DCC/caper) carefully. Find an instruction for your platform and run `caper init`. Edit the initialized Caper's configuration file (`~/.caper/default.conf`).
-	```bash
-	$ caper init [YOUR_PLATFORM]
-	$ vi ~/.caper/default.conf
 	```
 
 ## Test run
@@ -68,7 +92,39 @@ The followings are just examples. Please read [Caper's README](https://github.co
     ```
 
 
-## Input JSON file
+## Running and sharing on Truwl
+
+You can run this pipeline on [truwl.com](https://truwl.com/). This provides a web interface that allows you to define inputs and parameters, run the job on GCP, and monitor progress. To run it you will need to create an account on the platform then request early access by emailing [info@truwl.com](mailto:info@truwl.com) to get the right permissions. You can see the example case from this repo at [https://truwl.com/workflows/instance/WF_e85df4.f10.8880/command](https://truwl.com/workflows/instance/WF_e85df4.f10.8880/command). The example job (or other jobs) can be forked to pre-populate the inputs for your own job.
+
+If you do not run the pipeline on Truwl, you can still share your use-case/job on the platform by getting in touch at [info@truwl.com](mailto:info@truwl.com) and providing your inputs.json file.
+
+
+## Running a pipeline on Terra/Anvil (using Dockstore)
+
+Visit our pipeline repo on [Dockstore](https://dockstore.org/workflows/github.com/ENCODE-DCC/atac-seq-pipeline). Click on `Terra` or `Anvil`. Follow Terra's instruction to create a workspace on Terra and add Terra's billing bot to your Google Cloud account.
+
+Download this [test input JSON for Terra](https://storage.googleapis.com/encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ_subsampled.terra.json) and upload it to Terra's UI and then run analysis.
+
+If you want to use your own input JSON file, then make sure that all files in the input JSON are on a Google Cloud Storage bucket (`gs://`). URLs will not work.
+
+
+## Running a pipeline on DNAnexus (using Dockstore)
+
+Sign up for a new account on [DNAnexus](https://platform.dnanexus.com/) and create a new project on either AWS or Azure. Visit our pipeline repo on [Dockstore](https://dockstore.org/workflows/github.com/ENCODE-DCC/atac-seq-pipeline). Click on `DNAnexus`. Choose a destination directory on your DNAnexus project. Click on `Submit` and visit DNAnexus. This will submit a conversion job so that you can check status of it on `Monitor` on DNAnexus UI.
+
+Once conversion is done download one of the following input JSON files according to your chosen platform (AWS or Azure) for your DNAnexus project:
+- AWS: https://storage.googleapis.com/encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ_subsampled_dx.json
+- Azure: https://storage.googleapis.com/encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ_subsampled_dx_azure.json
+
+You cannot use these input JSON files directly. Go to the destination directory on DNAnexus and click on the converted workflow `atac`. You will see input file boxes in the left-hand side of the task graph. Expand it and define FASTQs (`fastq_repX_R1`) and `genome_tsv` as in the downloaded input JSON file. Click on the `common` task box and define other non-file pipeline parameters.
+
+
+## Running a pipeline on DNAnexus (using our pre-built workflows)
+
+See [this](docs/tutorial_dx_web.md) for details.
+
+
+## Input JSON file specification
 
 > **IMPORTANT**: DO NOT BLINDLY USE A TEMPLATE/EXAMPLE INPUT JSON. READ THROUGH THE FOLLOWING GUIDE TO MAKE A CORRECT INPUT JSON FILE. ESPECIALLY FOR ADAPTERS.
 
@@ -77,20 +133,6 @@ An input JSON file specifies all the input parameters and files that are necessa
 1) [Input JSON file specification (short)](docs/input_short.md)
 2) [Input JSON file specification (long)](docs/input.md)
 
-
-## Running and sharing on Truwl
-
-You can run this pipeline on [truwl.com](https://truwl.com/). This provides a web interface that allows you to define inputs and parameters, run the job on GCP, and monitor progress. To run it you will need to create an account on the platform then request early access by emailing [info@truwl.com](mailto:info@truwl.com) to get the right permissions. You can see the example case from this repo at [https://truwl.com/workflows/instance/WF_e85df4.f10.8880/command](https://truwl.com/workflows/instance/WF_e85df4.f10.8880/command). The example job (or other jobs) can be forked to pre-populate the inputs for your own job.
-
-If you do not run the pipeline on Truwl, you can still share your use-case/job on the platform by getting in touch at [info@truwl.com](mailto:info@truwl.com) and providing your inputs.json file.
-
-
-## Running a pipeline on DNAnexus
-
-You can also run this pipeline on DNAnexus without using Caper or Cromwell. There are two ways to build a workflow on DNAnexus based on our WDL.
-
-1) [dxWDL CLI](docs/tutorial_dx_cli.md)
-2) [DNAnexus Web UI](docs/tutorial_dx_web.md)
 
 ## How to organize outputs
 
