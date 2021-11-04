@@ -33,12 +33,20 @@ commands:
     steps:      
       - run:
           command: |
-            sudo apt-get update && sudo apt-get install software-properties-common git wget curl default-jre -y
+            sudo apt-get update && sudo apt-get install software-properties-common git wget curl -y
+
+            # install java 11
+            sudo add-apt-repository ppa:openjdk-r/ppa -y
+            sudo apt-get update && sudo apt-get install openjdk-11-jdk -y
+            # automatically set 11 as default java
+            sudo update-java-alternatives -a
+
             sudo add-apt-repository ppa:deadsnakes/ppa -y
             sudo apt-get update && sudo apt-get install python3.6 -y
             sudo wget --no-check-certificate https://bootstrap.pypa.io/get-pip.py
             sudo python3.6 get-pip.py
             sudo ln -s /usr/bin/python3.6 /usr/local/bin/python3
+
             pip3 install --upgrade pip
             pip3 install caper google-cloud-storage
 
@@ -54,11 +62,16 @@ commands:
             echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_secret_key.json
             export GOOGLE_APPLICATION_CREDENTIALS=$PWD/tmp_secret_key.json
 
+            # add docker image to input JSON
+            cat ${INPUT} | jq ".+{\"atac.docker\": \"${TAG}\"}" > input_with_docker.json
+
             caper run ../../../atac.wdl \
               --backend gcp --gcp-prj ${GOOGLE_PROJECT_ID} \
               --gcp-service-account-key-json $PWD/tmp_secret_key.json \
               --out-gcs-bucket ${CAPER_OUT_DIR} --tmp-gcs-bucket ${CAPER_TMP_DIR} \
-              -i ${INPUT} -m metadata.json --docker ${TAG}
+              -i input_with_docker.json -m metadata.json --docker ${TAG}
+
+            rm -f input_with_docker.json
 
             res=$(jq '.outputs["atac.qc_json_ref_match"]' metadata.json)
             [[ "$res" != true ]] && exit 100
