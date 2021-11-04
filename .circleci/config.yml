@@ -62,11 +62,16 @@ commands:
             echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_secret_key.json
             export GOOGLE_APPLICATION_CREDENTIALS=$PWD/tmp_secret_key.json
 
+            # add docker image to input JSON
+            cat ${INPUT} | jq ".+{\"atac.docker\": \"${TAG}\"}" > input_with_docker.json
+
             caper run ../../../atac.wdl \
               --backend gcp --gcp-prj ${GOOGLE_PROJECT_ID} \
               --gcp-service-account-key-json $PWD/tmp_secret_key.json \
               --out-gcs-bucket ${CAPER_OUT_DIR} --tmp-gcs-bucket ${CAPER_TMP_DIR} \
-              -i ${INPUT} -m metadata.json --docker ${TAG}
+              -i input_with_docker.json -m metadata.json --docker ${TAG}
+
+            rm -f input_with_docker.json
 
             res=$(jq '.outputs["atac.qc_json_ref_match"]' metadata.json)
             [[ "$res" != true ]] && exit 100
