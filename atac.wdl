@@ -126,9 +126,9 @@ workflow atac {
         Array[File] bams = []
         Array[File] nodup_bams = []
         Array[File] tas = []
-        Array[File?] peaks = []
-        Array[File?] peaks_pr1 = []
-        Array[File?] peaks_pr2 = []
+        Array[File] peaks = []
+        Array[File] peaks_pr1 = []
+        Array[File] peaks_pr2 = []
         File? peak_pooled
         File? peak_ppr1
         File? peak_ppr2
@@ -1278,7 +1278,7 @@ workflow atac {
         }
 
         Boolean has_input_of_call_peak = has_output_of_bam2ta || defined(bam2ta.ta)
-        Boolean has_output_of_call_peak = i<length(peaks) && defined(peaks[i])
+        Boolean has_output_of_call_peak = i<length(peaks)
         if ( has_input_of_call_peak && !has_output_of_call_peak && !align_only ) {
             # call peaks on tagalign
             call call_peak { input :
@@ -1318,7 +1318,7 @@ workflow atac {
         }
 
         Boolean has_input_of_call_peak_pr1 = defined(spr.ta_pr1)
-        Boolean has_output_of_call_peak_pr1 = i<length(peaks_pr1) && defined(peaks_pr1[i])
+        Boolean has_output_of_call_peak_pr1 = i<length(peaks_pr1)
         if ( has_input_of_call_peak_pr1 && !has_output_of_call_peak_pr1 &&
             !align_only && !true_rep_only ) {
             # call peaks on 1st pseudo replicated tagalign 
@@ -1348,7 +1348,7 @@ workflow atac {
             else call_peak_pr1.peak
 
         Boolean has_input_of_call_peak_pr2 = defined(spr.ta_pr2)
-        Boolean has_output_of_call_peak_pr2 = i<length(peaks_pr2) && defined(peaks_pr2[i])
+        Boolean has_output_of_call_peak_pr2 = i<length(peaks_pr2)
         if ( has_input_of_call_peak_pr2 && !has_output_of_call_peak_pr2 &&
             !align_only && !true_rep_only ) {
             # call peaks on 2nd pseudo replicated tagalign 
@@ -1734,7 +1734,7 @@ workflow atac {
         call reproducibility as reproducibility_overlap { input :
             prefix = 'overlap',
             peaks = select_all(overlap.bfilt_overlap_peak),
-            peaks_pr = overlap_pr.bfilt_overlap_peak,
+            peaks_pr = if defined(overlap_pr.bfilt_overlap_peak) then select_first([overlap_pr.bfilt_overlap_peak]) else [],
             peak_ppr = overlap_ppr.bfilt_overlap_peak,
             peak_type = peak_type_,
             chrsz = chrsz_,
@@ -1747,7 +1747,7 @@ workflow atac {
         call reproducibility as reproducibility_idr { input :
             prefix = 'idr',
             peaks = select_all(idr.bfilt_idr_peak),
-            peaks_pr = idr_pr.bfilt_idr_peak,
+            peaks_pr = if defined(idr_pr.bfilt_idr_peak) then select_first([idr_pr.bfilt_idr_peak]) else [],
             peak_ppr = idr_ppr.bfilt_idr_peak,
             peak_type = peak_type_,
             chrsz = chrsz_,
@@ -1781,7 +1781,7 @@ workflow atac {
         xcor_scores = select_all(xcor.score),
 
         jsd_plot = jsd.plot,
-        jsd_qcs = jsd.jsd_qcs,
+        jsd_qcs = if defined(jsd.jsd_qcs) then select_first([jsd.jsd_qcs]) else [],
 
         frip_qcs = select_all(call_peak.frip_qc),
         frip_qcs_pr1 = select_all(call_peak_pr1.frip_qc),
@@ -1792,13 +1792,13 @@ workflow atac {
         frip_qc_ppr2 = call_peak_ppr2.frip_qc,
 
         idr_plots = select_all(idr.idr_plot),
-        idr_plots_pr = idr_pr.idr_plot,
+        idr_plots_pr = if defined(idr_pr.idr_plot) then select_first([idr_pr.idr_plot]) else [],
         idr_plot_ppr = idr_ppr.idr_plot,
         frip_idr_qcs = select_all(idr.frip_qc),
-        frip_idr_qcs_pr = idr_pr.frip_qc,
+        frip_idr_qcs_pr = if defined(idr_pr.frip_qc) then select_first([idr_pr.frip_qc]) else [],
         frip_idr_qc_ppr = idr_ppr.frip_qc,
         frip_overlap_qcs = select_all(overlap.frip_qc),
-        frip_overlap_qcs_pr = overlap_pr.frip_qc,
+        frip_overlap_qcs_pr = if defined(overlap_pr.frip_qc) then select_first([overlap_pr.frip_qc]) else [],
         frip_overlap_qc_ppr = overlap_ppr.frip_qc,
         idr_reproducibility_qc = reproducibility_idr.reproducibility_qc,
         overlap_reproducibility_qc = reproducibility_overlap.reproducibility_qc,
@@ -2496,7 +2496,7 @@ task reproducibility {
                             # in a sorted order. for example of 4 replicates,
                             # 1,2 1,3 1,4 2,3 2,4 3,4.
                             # x,y means peak file from rep-x vs rep-y
-        Array[File]? peaks_pr    # peak files from pseudo replicates
+        Array[File] peaks_pr    # peak files from pseudo replicates
         File? peak_ppr            # Peak file from pooled pseudo replicate.
         String peak_type
         File chrsz            # 2-col chromosome sizes file
@@ -2797,9 +2797,9 @@ task qc_report {
         Array[File] xcor_plots
         Array[File] xcor_scores
         File? jsd_plot
-        Array[File]? jsd_qcs
+        Array[File] jsd_qcs
         Array[File] idr_plots
-        Array[File]? idr_plots_pr
+        Array[File] idr_plots_pr
         File? idr_plot_ppr
         Array[File] frip_qcs
         Array[File] frip_qcs_pr1
@@ -2808,10 +2808,10 @@ task qc_report {
         File? frip_qc_ppr1
         File? frip_qc_ppr2
         Array[File] frip_idr_qcs
-        Array[File]? frip_idr_qcs_pr
+        Array[File] frip_idr_qcs_pr
         File? frip_idr_qc_ppr
         Array[File] frip_overlap_qcs
-        Array[File]? frip_overlap_qcs_pr
+        Array[File] frip_overlap_qcs_pr
         File? frip_overlap_qc_ppr
         File? idr_reproducibility_qc
         File? overlap_reproducibility_qc
