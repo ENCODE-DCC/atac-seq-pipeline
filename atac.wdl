@@ -11,8 +11,12 @@ workflow atac {
 
     meta {
         version: 'v2.0.1'
-        author: 'Jin wook Lee (leepc12@gmail.com) at ENCODE-DCC'
-        description: 'ATAC-Seq/DNase-Seq pipeline'
+
+        author: 'Jin wook Lee'
+        email: 'leepc12@gmail.com'
+        description: 'ENCODE ATAC-Seq pipeline. See https://github.com/ENCODE-DCC/atac-seq-pipeline for more details. e.g. example input JSON for Terra/Anvil.'
+        organization: 'ENCODE DCC'
+
         specification_document: 'https://docs.google.com/document/d/1f0Cm4vRyDQDu0bMehHD7P7KOMxTOP-HiNoIvL1VcBt8/edit?usp=sharing'
 
         default_docker: 'encodedcc/atac-seq-pipeline:v2.0.1'
