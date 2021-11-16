@@ -7,10 +7,10 @@ struct RuntimeEnvironment {
 }
 
 workflow atac {
-    String pipeline_ver = 'v2.0.1'
+    String pipeline_ver = 'v2.0.2'
 
     meta {
-        version: 'v2.0.1'
+        version: 'v2.0.2'
 
         author: 'Jin wook Lee'
         email: 'leepc12@gmail.com'
@@ -19,8 +19,8 @@ workflow atac {
 
         specification_document: 'https://docs.google.com/document/d/1f0Cm4vRyDQDu0bMehHD7P7KOMxTOP-HiNoIvL1VcBt8/edit?usp=sharing'
 
-        default_docker: 'encodedcc/atac-seq-pipeline:v2.0.1'
-        default_singularity: 'library://leepc12/default/atac-seq-pipeline:v2.0.1'
+        default_docker: 'encodedcc/atac-seq-pipeline:v2.0.2'
+        default_singularity: 'library://leepc12/default/atac-seq-pipeline:v2.0.2'
         default_conda: 'encode-atac-seq-pipeline'
         croo_out_def: 'https://storage.googleapis.com/encode-pipeline-output-definition/atac.croo.v5.json'
 
@@ -72,8 +72,8 @@ workflow atac {
     }
     input {
         # group: runtime_environment
-        String docker = 'encodedcc/atac-seq-pipeline:v2.0.1'
-        String singularity = 'library://leepc12/default/atac-seq-pipeline:v2.0.1'
+        String docker = 'encodedcc/atac-seq-pipeline:v2.0.2'
+        String singularity = 'library://leepc12/default/atac-seq-pipeline:v2.0.2'
         String conda = 'encode-atac-seq-pipeline'
         String conda_macs2 = 'encode-atac-seq-pipeline-macs2'
         String conda_spp = 'encode-atac-seq-pipeline-spp'
@@ -1108,7 +1108,7 @@ workflow atac {
             else select_first([paired_end])
 
         Boolean has_input_of_align = i<length(fastqs_R1) && length(fastqs_R1[i])>0
-        Boolean has_output_of_align = i<length(bams) && defined(bams[i])
+        Boolean has_output_of_align = i<length(bams)
         if ( has_input_of_align && !has_output_of_align ) {
             call align { input :
                 fastqs_R1 = fastqs_R1[i],
@@ -1172,7 +1172,7 @@ workflow atac {
         }
 
         Boolean has_input_of_filter = has_output_of_align || defined(align.bam)
-        Boolean has_output_of_filter = i<length(nodup_bams) && defined(nodup_bams[i])
+        Boolean has_output_of_filter = i<length(nodup_bams)
         # skip if we already have output of this step
         if ( has_input_of_filter && !has_output_of_filter ) {
             call filter { input :
@@ -1197,7 +1197,7 @@ workflow atac {
         File? nodup_bam_ = if has_output_of_filter then nodup_bams[i] else filter.nodup_bam
 
         Boolean has_input_of_bam2ta = has_output_of_filter || defined(filter.nodup_bam)
-        Boolean has_output_of_bam2ta = i<length(tas) && defined(tas[i])
+        Boolean has_output_of_bam2ta = i<length(tas)
         if ( has_input_of_bam2ta && !has_output_of_bam2ta ) {
             call bam2ta { input :
                 bam = nodup_bam_,
@@ -1392,10 +1392,10 @@ workflow atac {
         }
         # tasks factored out from ATAqC
         Boolean has_input_of_tss_enrich = defined(nodup_bam_) && defined(tss_) && (
-            defined(align.read_len) || i<length(read_len) && defined(read_len[i]) )
+            defined(align.read_len) || i<length(read_len) )
         if ( enable_tss_enrich && has_input_of_tss_enrich ) {
             call tss_enrich { input :
-                read_len = if i<length(read_len) && defined(read_len[i]) then read_len[i]
+                read_len = if i<length(read_len) then read_len[i]
                     else align.read_len,
                 nodup_bam = nodup_bam_,
                 tss = tss_,
