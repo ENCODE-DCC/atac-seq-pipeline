@@ -97,6 +97,7 @@ jobs:
             docker logout
   test_tasks:
     <<: *machine_defaults
+    resource_class: large
     steps:
       - checkout
       - download_task_test_data
