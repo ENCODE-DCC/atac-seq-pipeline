@@ -123,7 +123,10 @@ jobs:
               if [[ "${wdl}" != "test_choose_ctl.wdl" ]]; then
                 echo "Validating outputs of ${prefix}"
                 res=$(jq '.outputs["'${prefix}'.compare_md5sum.match_overall"]' "${metadata}")
-                [[ "$res" != true ]] && exit 100
+                if [[ "$res" != true ]]; then
+                  jq '.outputs["'${prefix}'.compare_md5sum.json_str"]' "${metadata}"
+                  exit 100
+                fi
               fi
               rm -f ${metadata}
             done
@@ -181,15 +184,15 @@ workflows:
       - test_tasks:
          requires:
            - build
-      - test_workflow_se:
-         requires:
-           - build
-      - test_workflow_unrep_se:
-          requires:
-            - build
-      - test_workflow_pe:
-         requires:
-           - build
-      - test_workflow_pe_start_from_bam:
-         requires:
-           - build
+      # - test_workflow_se:
+      #    requires:
+      #      - build
+      # - test_workflow_unrep_se:
+      #     requires:
+      #       - build
+      # - test_workflow_pe:
+      #    requires:
+      #      - build
+      # - test_workflow_pe_start_from_bam:
+      #    requires:
+      #      - build
