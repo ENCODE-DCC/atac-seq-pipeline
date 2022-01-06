@@ -59,30 +59,28 @@ We currently provide TSV files for 4 genomes as shown in the below table. You ca
 
 Genome|URL
 -|-
-hg38|`https://storage.googleapis.com/encode-pipeline-genome-data/genome_tsv/v3/hg38.tsv`
-mm10|`https://storage.googleapis.com/encode-pipeline-genome-data/genome_tsv/v3/mm10.tsv`
-hg19|`https://storage.googleapis.com/encode-pipeline-genome-data/genome_tsv/v1/hg19_caper.tsv`
-mm9|`https://storage.googleapis.com/encode-pipeline-genome-data/genome_tsv/v1/mm9_caper.tsv`
+hg38|`https://storage.googleapis.com/encode-pipeline-genome-data/genome_tsv/v4/hg38.tsv`
+mm10|`https://storage.googleapis.com/encode-pipeline-genome-data/genome_tsv/v4/mm10.tsv`
 
 For DNAnexus CLI (AWS project):
 Genome|DX URI
 -|-
-hg38|`dx://project-BKpvFg00VBPV975PgJ6Q03v6:pipeline-genome-data/genome_tsv/v3/hg38.dx.tsv`
-mm10|`dx://project-BKpvFg00VBPV975PgJ6Q03v6:pipeline-genome-data/genome_tsv/v3/mm10.dx.tsv`
+hg38|`dx://project-BKpvFg00VBPV975PgJ6Q03v6:pipeline-genome-data/genome_tsv/v4/hg38.dx.tsv`
+mm10|`dx://project-BKpvFg00VBPV975PgJ6Q03v6:pipeline-genome-data/genome_tsv/v4/mm10.dx.tsv`
 
 For DNAnexus CLI (Azure project): 
 Genome|DX URI
 -|-
-hg38|`dx://project-F6K911Q9xyfgJ36JFzv03Z5J:pipeline-genome-data/genome_tsv/v3/hg38.dx_azure.tsv`
-mm10|`dx://project-F6K911Q9xyfgJ36JFzv03Z5J:pipeline-genome-data/genome_tsv/v3/mm10.dx_azure.tsv`
+hg38|`dx://project-F6K911Q9xyfgJ36JFzv03Z5J:pipeline-genome-data/genome_tsv/v4/hg38.dx_azure.tsv`
+mm10|`dx://project-F6K911Q9xyfgJ36JFzv03Z5J:pipeline-genome-data/genome_tsv/v4/mm10.dx_azure.tsv`
 
-For DNAnexus Web UI (AWS project): Choose one of the following TSV file on `https://platform.DNAnexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/pipeline-genome-data/genome_tsv/v3`.
+For DNAnexus Web UI (AWS project): Choose one of the following TSV file on `https://platform.DNAnexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/pipeline-genome-data/genome_tsv/v4`.
 Genome|File name
 -|-
 hg38|`hg38.dx.tsv`
 mm10|`mm10.dx.tsv`
 
-For DNAnexus Web UI (Azure project): Choose one of the following TSV file on `https://platform.DNAnexus.com/projects/F6K911Q9xyfgJ36JFzv03Z5J/data/pipeline-genome-data/genome_tsv/v3`.
+For DNAnexus Web UI (Azure project): Choose one of the following TSV file on `https://platform.DNAnexus.com/projects/F6K911Q9xyfgJ36JFzv03Z5J/data/pipeline-genome-data/genome_tsv/v4`.
 Genome|File name
 -|-
 hg38|`hg38.dx_azure.tsv`

@@ -16,17 +16,6 @@ make_tag: &make_tag
     echo "export TAG=encodedcc/atac-seq-pipeline:${CIRCLE_BRANCH}_${CIRCLE_WORKFLOW_ID}" > ${BASH_ENV}
 
 commands:
-  download_task_test_data:
-    description: "Download task test data. This is based on py2 so run this before installing py3."
-    steps:
-      - run:
-          command: |
-            cd dev/test/test_task/
-            rm -rf atac-seq-pipeline-test-data
-            export BOTO_CONFIG=/dev/null
-            gsutil -m cp -r gs://encode-pipeline-test-samples/encode-atac-seq-pipeline/atac-seq-pipeline-test-data .
-            ./download_hg38_fasta_for_test_ataqc.sh
-
 
   install_python3_caper_gcs:
     description: "Install py3, caper and gcs. Set py3 as default python."
@@ -88,7 +77,7 @@ jobs:
           name: build image
           command: |
             source ${BASH_ENV}
-            export DOCKER_CACHE_TAG=v1.9.3
+            export DOCKER_CACHE_TAG=v2.0.0
             echo "pulling ${DOCKER_CACHE_TAG}!"
             docker pull encodedcc/atac-seq-pipeline:${DOCKER_CACHE_TAG}
             docker login -u=${DOCKERHUB_USER} -p=${DOCKERHUB_PASS}
@@ -99,7 +88,6 @@ jobs:
     <<: *machine_defaults
     steps:
       - checkout
-      - download_task_test_data
       - install_python3_caper_gcs
       - run: *make_tag
       - run:
@@ -107,6 +95,9 @@ jobs:
           command: |
             source ${BASH_ENV}
             cd dev/test/test_task/
+
+            echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_secret_key.json
+            export GOOGLE_APPLICATION_CREDENTIALS=$PWD/tmp_secret_key.json
 
             for wdl in test_*.wdl
             do
@@ -118,12 +109,17 @@ jobs:
               # add docker image to input JSON
               cat ${input} | jq ".+{\"${prefix}.docker\": \"${TAG}\"}" > ${input_with_docker}
 
-              caper run ${wdl} -i ${input_with_docker} -m ${metadata}
-              if [[ "${wdl}" != "test_choose_ctl.wdl" ]]; then
-                echo "Validating outputs of ${prefix}"
-                res=$(jq '.outputs["'${prefix}'.compare_md5sum.match_overall"]' "${metadata}")
-                [[ "$res" != true ]] && exit 100
+              if [[ "${wdl}" == test_macs2* ]]; then
+                # run heavy MACS2 tasks on GCP
+                caper run ${wdl} -i ${input_with_docker} -m ${metadata} \
+                  --backend gcp --gcp-prj ${GOOGLE_PROJECT_ID} --docker ${TAG} \
+                  --gcp-service-account-key-json $PWD/tmp_secret_key.json \
+                  --out-gcs-bucket ${CAPER_OUT_DIR} --tmp-gcs-bucket ${CAPER_TMP_DIR}
+              else
+                # run other tasks locally
+                caper run ${wdl} -i ${input_with_docker} -m ${metadata}
               fi
+
               rm -f ${metadata}
             done
 

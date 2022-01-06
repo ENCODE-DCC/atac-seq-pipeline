@@ -1,7 +1,7 @@
 {
     "atac.qc_report.qc_json_ref" : "gs://encode-pipeline-test-samples/encode-atac-seq-pipeline/ref_output/v1.1.6/ENCSR889WQX/qc.json",
     "atac.pipeline_type" : "atac",
-    "atac.genome_tsv" : "https://storage.googleapis.com/encode-pipeline-genome-data/genome_tsv/v3/mm10.tsv",
+    "atac.genome_tsv" : "https://storage.googleapis.com/encode-pipeline-genome-data/genome_tsv/v4/mm10.tsv",
     "atac.fastqs_rep1_R1" : [
         "gs://encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR889WQX/fastq/rep1/ENCFF439VSY.fastq.gz",
         "gs://encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR889WQX/fastq/rep1/ENCFF325FCQ.fastq.gz",

@@ -3,6 +3,10 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.156534.svg)](https://doi.org/10.5281/zenodo.156534)[![CircleCI](https://circleci.com/gh/ENCODE-DCC/atac-seq-pipeline/tree/master.svg?style=svg)](https://circleci.com/gh/ENCODE-DCC/atac-seq-pipeline/tree/master)
 
 
+## Updated genome TSV files (v3 -> v4)
+
+
+
 ## Download new Caper>=2.1
 
 New Caper is out. You need to update your Caper to work with the latest ENCODE ATAC-seq pipeline.
@@ -138,8 +142,8 @@ You cannot use these input JSON files directly. Go to the destination directory 
 We have a separate project on DNANexus to provide example FASTQs and `genome_tsv` for `hg38` and `mm10`. We recommend to make copies of these directories on your own project.
 
 `genome_tsv`
-- AWS: https://platform.dnanexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/pipeline-genome-data/genome_tsv/v3
-- Azure: https://platform.dnanexus.com/projects/F6K911Q9xyfgJ36JFzv03Z5J/data/pipeline-genome-data/genome_tsv/v3
+- AWS: https://platform.dnanexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/pipeline-genome-data/genome_tsv/v4
+- Azure: https://platform.dnanexus.com/projects/F6K911Q9xyfgJ36JFzv03Z5J/data/pipeline-genome-data/genome_tsv/v4
 
 Example FASTQs
 - AWS: https://platform.dnanexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ/fastq_subsampled
