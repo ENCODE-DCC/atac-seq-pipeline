@@ -12,6 +12,13 @@ task compare_md5sum {
         import os
         import json
         import hashlib
+        import struct
+
+        def getuncompressedsize(filename):
+            # https://stackoverflow.com/a/22348071
+            with open(filename, 'rb') as f:
+                f.seek(-4, 2)
+                return struct.unpack('I', f.read(4))[0]
 
         def md5sum(filename, blocksize=65536):
             hash = hashlib.md5()
@@ -39,6 +46,10 @@ task compare_md5sum {
             ref_f = ref_files[i]
             md5 = md5sum(f)
             ref_md5 = md5sum(ref_f)
+
+            filesize = os.path.getsize(f)
+            ref_filesize = os.path.getsize(ref_f)
+
             # if text file, read in contents
             if f.endswith('.qc') or f.endswith('.txt') or \
                 f.endswith('.log') or f.endswith('.out'):
@@ -46,9 +57,22 @@ task compare_md5sum {
                     contents = fp.read()
                 with open(ref_f,'r') as fp:
                     ref_contents = fp.read()
+            elif f.endswith('.gz'):
+                uncompressed_filesize = getuncompressedsize(f)
+                ref_uncompressed_filesize = getuncompressedsize(ref_f)
+
+                contents = 'filesize={filesize}, uncompressed_filesize={uncompressed_filesize}'.format(
+                    filesize=filesize,
+                    uncompressed_filesize=uncompressed_filesize,
+                )
+                ref_contents = 'filesize={filesize}, uncompressed_filesize={uncompressed_filesize}'.format(
+                    filesize=ref_filesize,
+                    uncompressed_filesize=ref_uncompressed_filesize,
+                )
             else:
-                contents = ''
-                ref_contents = ''
+                contents = 'filesize={filesize}'.format(filesize=filesize)
+                ref_contents = 'filesize={filesize}'.format(filesize=ref_filesize)
+
             matched = md5==ref_md5
             result['tasks'].append(OrderedDict([
                 ('label', label),

@@ -1,4 +1,4 @@
-# Byte-compiled / optimized / DLL files
+# Byte-compiled / optimized / DLL files/
 __pycache__/
 *.py[cod]
 *$py.class
@@ -121,4 +121,5 @@ tmp_db*
 *.local.json
 temp_db*
 cromwell.out
+cromwell.out.*
 .dev
