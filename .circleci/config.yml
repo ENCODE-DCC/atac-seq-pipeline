@@ -109,7 +109,7 @@ jobs:
               # add docker image to input JSON
               cat ${input} | jq ".+{\"${prefix}.docker\": \"${TAG}\"}" > ${input_with_docker}
 
-              if [[ "${wdl}" != test_macs2* ]]; then
+              if [[ "${wdl}" == test_macs2* ]]; then
                 # run heavy MACS2 tasks on GCP
                 caper run ${wdl} -i ${input_with_docker} -m ${metadata} \
                   --backend gcp --gcp-prj ${GOOGLE_PROJECT_ID} --docker ${TAG} \
