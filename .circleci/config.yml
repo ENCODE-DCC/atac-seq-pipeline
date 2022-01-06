@@ -109,6 +109,9 @@ jobs:
             source ${BASH_ENV}
             cd dev/test/test_task/
 
+            echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_secret_key.json
+            export GOOGLE_APPLICATION_CREDENTIALS=$PWD/tmp_secret_key.json
+
             for wdl in test_*.wdl
             do
               prefix=${wdl%.*}
@@ -119,7 +122,11 @@ jobs:
               # add docker image to input JSON
               cat ${input} | jq ".+{\"${prefix}.docker\": \"${TAG}\"}" > ${input_with_docker}
 
-              caper run ${wdl} -i ${input_with_docker} -m ${metadata}
+              caper run ${wdl} -i ${input_with_docker} -m ${metadata} \
+                --backend gcp --gcp-prj ${GOOGLE_PROJECT_ID} \
+                --gcp-service-account-key-json $PWD/tmp_secret_key.json \
+                --out-gcs-bucket ${CAPER_OUT_DIR} --tmp-gcs-bucket ${CAPER_TMP_DIR}
+
               if [[ "${wdl}" != "test_choose_ctl.wdl" ]]; then
                 echo "Validating outputs of ${prefix}"
                 res=$(jq '.outputs["'${prefix}'.compare_md5sum.match_overall"]' "${metadata}")
