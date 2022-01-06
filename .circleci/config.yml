@@ -7,7 +7,7 @@ defaults: &defaults
 
 machine_defaults: &machine_defaults
   machine: 
-    image: ubuntu-2004:202010-01
+    image: ubuntu-1604:202007-01
   working_directory: ~/atac-seq-pipeline
 
 make_tag: &make_tag
@@ -88,7 +88,7 @@ jobs:
           name: build image
           command: |
             source ${BASH_ENV}
-            export DOCKER_CACHE_TAG=v1.9.3
+            export DOCKER_CACHE_TAG=v2.0.0
             echo "pulling ${DOCKER_CACHE_TAG}!"
             docker pull encodedcc/atac-seq-pipeline:${DOCKER_CACHE_TAG}
             docker login -u=${DOCKERHUB_USER} -p=${DOCKERHUB_PASS}
