@@ -16,7 +16,6 @@ make_tag: &make_tag
     echo "export TAG=encodedcc/atac-seq-pipeline:${CIRCLE_BRANCH}_${CIRCLE_WORKFLOW_ID}" > ${BASH_ENV}
 
 commands:
-
   install_python3_caper_gcs:
     description: "Install py3, caper and gcs. Set py3 as default python."
     steps:      
@@ -169,12 +168,12 @@ workflows:
       - test_workflow_se:
          requires:
            - build
-      # - test_workflow_unrep_se:
-      #     requires:
-      #       - build
-      # - test_workflow_pe:
-      #    requires:
-      #      - build
-      # - test_workflow_pe_start_from_bam:
-      #    requires:
-      #      - build
+      - test_workflow_unrep_se:
+          requires:
+            - build
+      - test_workflow_pe:
+         requires:
+           - build
+      - test_workflow_pe_start_from_bam:
+         requires:
+           - build
