@@ -12,10 +12,10 @@ PIPELINE_CONDA_ENVS=(
 )
 chmod u+rx ${SRC_DIR}/*.py
 
-echo "** Updating WDL task wrappers on each Conda environment..."
+echo "$(date): Updating WDL task wrappers on each Conda environment..."
 for PIPELINE_CONDA_ENV in "${PIPELINE_CONDA_ENVS[@]}"
 do	
   CONDA_BIN=$(dirname $(conda run -n ${PIPELINE_CONDA_ENV} which python))
-  echo -e "** Transferring WDL task wrappers to ${CONDA_BIN}..."
+  echo -e "$(date): Transferring WDL task wrappers to ${CONDA_BIN}..."
   cp -f ${SRC_DIR}/*.py ${CONDA_BIN}/
 done
