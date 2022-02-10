@@ -26,6 +26,7 @@ commands:
             sudo apt-get install -y software-properties-common git wget curl python3 python3-pip default-jre
 
             sudo python3 -m pip install --upgrade pip
+            sudo pip3 install PyYAML --ignore-installed
             sudo pip3 install caper google-cloud-storage
 
   run_workflow_test:
