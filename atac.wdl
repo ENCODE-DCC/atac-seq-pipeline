@@ -7,10 +7,10 @@ struct RuntimeEnvironment {
 }
 
 workflow atac {
-    String pipeline_ver = 'v2.1.0'
+    String pipeline_ver = 'v2.1.1'
 
     meta {
-        version: 'v2.1.0'
+        version: 'v2.1.1'
 
         author: 'Jin wook Lee'
         email: 'leepc12@gmail.com'
@@ -19,8 +19,8 @@ workflow atac {
 
         specification_document: 'https://docs.google.com/document/d/1f0Cm4vRyDQDu0bMehHD7P7KOMxTOP-HiNoIvL1VcBt8/edit?usp=sharing'
 
-        default_docker: 'encodedcc/atac-seq-pipeline:v2.1.0'
-        default_singularity: 'https://encode-pipeline-singularity-image.s3.us-west-2.amazonaws.com/atac-seq-pipeline_v2.1.0.sif'
+        default_docker: 'encodedcc/atac-seq-pipeline:v2.1.1'
+        default_singularity: 'https://encode-pipeline-singularity-image.s3.us-west-2.amazonaws.com/atac-seq-pipeline_v2.1.1.sif'
         default_conda: 'encode-atac-seq-pipeline'
         croo_out_def: 'https://storage.googleapis.com/encode-pipeline-output-definition/atac.croo.v5.json'
 
@@ -72,8 +72,8 @@ workflow atac {
     }
     input {
         # group: runtime_environment
-        String docker = 'encodedcc/atac-seq-pipeline:v2.1.0'
-        String singularity = 'https://encode-pipeline-singularity-image.s3.us-west-2.amazonaws.com/atac-seq-pipeline_v2.1.0.sif'
+        String docker = 'encodedcc/atac-seq-pipeline:v2.1.1'
+        String singularity = 'https://encode-pipeline-singularity-image.s3.us-west-2.amazonaws.com/atac-seq-pipeline_v2.1.1.sif'
         String conda = 'encode-atac-seq-pipeline'
         String conda_macs2 = 'encode-atac-seq-pipeline-macs2'
         String conda_spp = 'encode-atac-seq-pipeline-spp'
@@ -1769,6 +1769,7 @@ workflow atac {
         paired_ends = paired_end_,
         pipeline_type = pipeline_type,
         aligner = aligner_,
+        no_dup_removal = no_dup_removal,
         peak_caller = peak_caller_,
         cap_num_peak = cap_num_peak_,
         idr_thresh = idr_thresh,
@@ -2787,6 +2788,7 @@ task qc_report {
         Array[Boolean] paired_ends
         String pipeline_type
         String aligner
+        Boolean no_dup_removal
         String peak_caller
         Int cap_num_peak
         Float idr_thresh
@@ -2850,6 +2852,7 @@ task qc_report {
     command {
         set -e
         python3 $(which encode_task_qc_report.py) \
+            --pipeline-prefix atac \
             ${'--pipeline-ver ' + pipeline_ver} \
             ${"--title '" + sub(title,"'","_") + "'"} \
             ${"--desc '" + sub(description,"'","_") + "'"} \
@@ -2858,6 +2861,7 @@ task qc_report {
             --paired-ends ${sep=' ' paired_ends} \
             --pipeline-type ${pipeline_type} \
             --aligner ${aligner} \
+            ${if (no_dup_removal) then '--no-dup-removal ' else ''} \
             --peak-caller ${peak_caller} \
             ${'--cap-num-peak ' + cap_num_peak} \
             --idr-thresh ${idr_thresh} \
