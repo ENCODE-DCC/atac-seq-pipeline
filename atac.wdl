@@ -1769,6 +1769,7 @@ workflow atac {
         paired_ends = paired_end_,
         pipeline_type = pipeline_type,
         aligner = aligner_,
+        no_dup_removal = no_dup_removal,
         peak_caller = peak_caller_,
         cap_num_peak = cap_num_peak_,
         idr_thresh = idr_thresh,
@@ -2787,6 +2788,7 @@ task qc_report {
         Array[Boolean] paired_ends
         String pipeline_type
         String aligner
+        Boolean no_dup_removal
         String peak_caller
         Int cap_num_peak
         Float idr_thresh
@@ -2850,6 +2852,7 @@ task qc_report {
     command {
         set -e
         python3 $(which encode_task_qc_report.py) \
+            --pipeline-prefix atac \
             ${'--pipeline-ver ' + pipeline_ver} \
             ${"--title '" + sub(title,"'","_") + "'"} \
             ${"--desc '" + sub(description,"'","_") + "'"} \
@@ -2858,6 +2861,7 @@ task qc_report {
             --paired-ends ${sep=' ' paired_ends} \
             --pipeline-type ${pipeline_type} \
             --aligner ${aligner} \
+            ${if (no_dup_removal) then '--no-dup-removal ' else ''} \
             --peak-caller ${peak_caller} \
             ${'--cap-num-peak ' + cap_num_peak} \
             --idr-thresh ${idr_thresh} \

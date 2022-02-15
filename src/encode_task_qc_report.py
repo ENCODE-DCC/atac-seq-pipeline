@@ -34,6 +34,8 @@ def parse_arguments():
                         help='Description for sample.')
     parser.add_argument('--genome', type=str,
                         help='Reference genome.')
+    parser.add_argument('--pipeline-prefix', type=str, required=True,
+                        help='Pipeline. e.g. atac, chip.')
     parser.add_argument('--pipeline-ver', type=str,
                         help='Pipeline version.')
     parser.add_argument('--multimapping', default=0, type=int,
@@ -50,6 +52,8 @@ def parse_arguments():
                         help='Pipeline type.')
     parser.add_argument('--aligner', type=str, required=True,
                         help='Aligner.')
+    parser.add_argument('--no-dup-removal', action='store_true',
+                        help='No duplicate removal.')
     parser.add_argument('--peak-caller', type=str, required=True,
                         help='Peak caller.')
     parser.add_argument('--cap-num-peak', default=0, type=int,
@@ -302,7 +306,7 @@ def make_cat_align(args, cat_root):
         html_head='<h2>Marking duplicates (filtered BAM)</h2>',
         html_foot="""
             <div id='help-filter'>
-            Filtered out (samtools view -F 1804):
+            Filtered with samtools flag 1804 (samtools view -F 1804):
             <ul>
             <li>read unmapped (0x4)</li>
             <li>mate unmapped (0x8, for paired-end)</li>
@@ -360,8 +364,16 @@ def make_cat_align(args, cat_root):
         'nodup_samstat',
         html_head='<h2>SAMstat (filtered/deduped BAM)</h2>',
         html_foot="""
-            <p>Filtered and duplicates removed</p><br>
-        """,
+            <p>Filtered {dup_removal_detail}.
+            Subsampling with {pipeline_prefix}.{subsample_param_name} is not done in alignment steps.
+            Nodup BAM is converted into a BED type (TAGALIGN) later and then TAGALIGN is subsampled
+            with such parameter in the peak-calling step.<br>
+            </p>
+        """.format(
+            dup_removal_detail='but duplicates are kept' if args.no_dup_removal else 'and duplicates are removed',
+            pipeline_prefix=args.pipeline_prefix,
+            subsample_param_name='subsample_reads',
+        ),
         parser=parse_flagstat_qc,
         map_key_desc=MAP_KEY_DESC_FLAGSTAT_QC,
         parent=cat_align
@@ -465,9 +477,10 @@ def make_cat_lib_complexity(args, cat_root):
         locations with EXACTLY two read pairs. The PBC2 should be significantly
         greater than 1. {pipeline_specific_info}
         </p><br>
-        <p>NRF (non redundant fraction) <br>
-        PBC1 (PCR Bottleneck coefficient 1) <br>
-        PBC2 (PCR Bottleneck coefficient 2) <br>
+        <p>Fragment: read for a single-ended dataset, pair of reads for a paired-ended dataset <br>
+        NRF: non redundant fraction <br>
+        PBC1: PCR Bottleneck coefficient 1 <br>
+        PBC2: PCR Bottleneck coefficient 2 <br>
         PBC1 is the primary measure. Provisionally <br>
         <ul>
         <li>0-0.5 is severe bottlenecking</li>
@@ -580,7 +593,7 @@ def make_cat_replication(args, cat_root):
         'num_peaks',
         html_head='<h2>Number of raw peaks</h2>',
         html_foot="""
-            Top {num_peak} raw peaks from {peak_caller} {extra_info}
+            The number of peaks is capped at {num_peak}<br>Peaks are called from {peak_caller} {extra_info}
         """.format(
             num_peak=args.cap_num_peak,
             peak_caller=args.peak_caller,
@@ -651,7 +664,7 @@ def make_cat_align_enrich(args, cat_root):
         html_head_xcor = '<h2>Strand cross-correlation measures (trimmed/filtered SE BAM)</h2>'
         html_foot_xcor = """
             <br><p>Performed on subsampled ({xcor_subsample_reads}) reads mapped from FASTQs that are trimmed to {xcor_trim_bp}.
-            Such FASTQ trimming and subsampling reads are for cross-corrleation analysis only. 
+            Such FASTQ trimming and subsampling are for the cross-corrleation analysis only and only R1 reads are taken.
             Untrimmed FASTQs are used for all the other analyses.</p>
             <div id='help-xcor'><p>
             NOTE1: For SE datasets, reads from replicates are randomly subsampled to {xcor_subsample_reads}.<br>
@@ -670,6 +683,7 @@ def make_cat_align_enrich(args, cat_root):
             xcor_subsample_reads=args.xcor_subsample_reads
         )
     html_foot_xcor += """<ul>
+        <li>Fragment = read (for single-ended dataset) or pair of reads (for paired-ended dataset) </li>
         <li>Normalized strand cross-correlation coefficient (NSC) = col9 in outFile </li>
         <li>Relative strand cross-correlation coefficient (RSC) = col10 in outFile </li>
         <li>Estimated fragment length = col3 in outFile, take the top value </li>
