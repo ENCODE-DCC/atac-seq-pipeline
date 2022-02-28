@@ -67,7 +67,7 @@ def spp(ta, ctl_ta, chrsz, fraglen, cap_num_peak, fdr_thresh,
     basename_prefix = '{}_x_{}'.format(basename_ta, basename_ctl_ta)
     if len(basename_prefix) > 200:  # UNIX cannot have filename > 255
         basename_prefix = '{}_x_control'.format(basename_ta)
-    nth_param = '-p={}'.format(nth) if nth < 2 else ''
+    nth_param = '-p={}'.format(nth) if nth >= 2 else ''
     prefix = os.path.join(out_dir, basename_prefix)
     rpeak = '{}.{}.regionPeak.gz'.format(
         prefix,
