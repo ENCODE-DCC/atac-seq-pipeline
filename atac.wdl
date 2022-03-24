@@ -7,10 +7,10 @@ struct RuntimeEnvironment {
 }
 
 workflow atac {
-    String pipeline_ver = 'v2.1.2'
+    String pipeline_ver = 'v2.1.3'
 
     meta {
-        version: 'v2.1.2'
+        version: 'v2.1.3'
 
         author: 'Jin wook Lee'
         email: 'leepc12@gmail.com'
@@ -19,8 +19,8 @@ workflow atac {
 
         specification_document: 'https://docs.google.com/document/d/1f0Cm4vRyDQDu0bMehHD7P7KOMxTOP-HiNoIvL1VcBt8/edit?usp=sharing'
 
-        default_docker: 'encodedcc/atac-seq-pipeline:v2.1.2'
-        default_singularity: 'https://encode-pipeline-singularity-image.s3.us-west-2.amazonaws.com/atac-seq-pipeline_v2.1.2.sif'
+        default_docker: 'encodedcc/atac-seq-pipeline:v2.1.3'
+        default_singularity: 'https://encode-pipeline-singularity-image.s3.us-west-2.amazonaws.com/atac-seq-pipeline_v2.1.3.sif'
         default_conda: 'encode-atac-seq-pipeline'
         croo_out_def: 'https://storage.googleapis.com/encode-pipeline-output-definition/atac.croo.v5.json'
 
@@ -72,8 +72,8 @@ workflow atac {
     }
     input {
         # group: runtime_environment
-        String docker = 'encodedcc/atac-seq-pipeline:v2.1.2'
-        String singularity = 'https://encode-pipeline-singularity-image.s3.us-west-2.amazonaws.com/atac-seq-pipeline_v2.1.2.sif'
+        String docker = 'encodedcc/atac-seq-pipeline:v2.1.3'
+        String singularity = 'https://encode-pipeline-singularity-image.s3.us-west-2.amazonaws.com/atac-seq-pipeline_v2.1.3.sif'
         String conda = 'encode-atac-seq-pipeline'
         String conda_macs2 = 'encode-atac-seq-pipeline-macs2'
         String conda_spp = 'encode-atac-seq-pipeline-spp'
