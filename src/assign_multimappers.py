@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 # piped script to take multimappers and randomly assign
 # requires a qname sorted file!!
