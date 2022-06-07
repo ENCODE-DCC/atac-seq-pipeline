@@ -21,7 +21,7 @@ workflow atac {
 
         default_docker: 'encodedcc/atac-seq-pipeline:v2.1.3'
         default_singularity: 'https://encode-pipeline-singularity-image.s3.us-west-2.amazonaws.com/atac-seq-pipeline_v2.1.3.sif'
-        default_conda: 'encode-atac-seq-pipeline'
+        default_conda: 'encd-chip'
         croo_out_def: 'https://storage.googleapis.com/encode-pipeline-output-definition/atac.croo.v5.json'
 
         parameter_group: {
@@ -74,10 +74,10 @@ workflow atac {
         # group: runtime_environment
         String docker = 'encodedcc/atac-seq-pipeline:v2.1.3'
         String singularity = 'https://encode-pipeline-singularity-image.s3.us-west-2.amazonaws.com/atac-seq-pipeline_v2.1.3.sif'
-        String conda = 'encode-atac-seq-pipeline'
-        String conda_macs2 = 'encode-atac-seq-pipeline-macs2'
-        String conda_spp = 'encode-atac-seq-pipeline-spp'
-        String conda_python2 = 'encode-atac-seq-pipeline-python2'
+        String conda = 'encd-chip'
+        String conda_macs2 = 'encd-chip-macs2'
+        String conda_spp = 'encd-chip-spp'
+        String conda_python2 = 'encd-chip-py2'
 
         # group: pipeline_metadata
         String title = 'Untitled'
