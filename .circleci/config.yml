@@ -18,7 +18,7 @@ make_tag: &make_tag
 commands:
   install_python3_caper_gcs:
     description: "Install py3, caper and gcs. Set py3 as default python."
-    steps:      
+    steps:
       - run:
           command: |
             sudo apt-get update && sudo apt-get install software-properties-common git wget curl -y
