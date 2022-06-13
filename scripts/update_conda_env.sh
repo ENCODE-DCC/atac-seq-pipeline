@@ -5,10 +5,10 @@ SH_SCRIPT_DIR=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)
 SRC_DIR=${SH_SCRIPT_DIR}/../src
 
 PIPELINE_CONDA_ENVS=(
-  encode-atac-seq-pipeline
-  encode-atac-seq-pipeline-macs2
-  encode-atac-seq-pipeline-spp
-  encode-atac-seq-pipeline-python2
+  encd-atac
+  encd-atac-macs2
+  encd-atac-spp
+  encd-atac-py2
 )
 chmod u+rx ${SRC_DIR}/*.py
 
