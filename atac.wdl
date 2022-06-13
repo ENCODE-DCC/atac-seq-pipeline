@@ -255,22 +255,22 @@ workflow atac {
         conda: {
             description: 'Default Conda environment name to run WDL tasks. For Conda users only.',
             group: 'runtime_environment',
-            example: 'encode-atac-seq-pipeline'
+            example: 'encd-atac'
         }
         conda_macs2: {
             description: 'Conda environment name for task macs2. For Conda users only.',
             group: 'runtime_environment',
-            example: 'encode-atac-seq-pipeline-macs2'
+            example: 'encd-atac-macs2'
         }
         conda_spp: {
             description: 'Conda environment name for tasks spp/xcor. For Conda users only.',
             group: 'runtime_environment',
-            example: 'encode-atac-seq-pipeline-spp'
+            example: 'encd-atac-spp'
         }
         conda_python2: {
             description: 'Conda environment name for tasks with python2 wrappers (tss_enrich). For Conda users only.',
             group: 'runtime_environment',
-            example: 'encode-atac-seq-pipeline-python2'
+            example: 'encd-atac-py2'
         }
         title: {
             description: 'Experiment title.',
