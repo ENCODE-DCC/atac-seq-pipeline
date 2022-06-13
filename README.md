@@ -67,7 +67,9 @@ The ATAC-seq pipeline protocol specification is [here](https://docs.google.com/d
 	# uninstall old environments
 	$ bash scripts/uninstall_conda_env.sh
 
-	# install new envs, you need to run this for every pipeline version update
+	# install new envs, you need to run this for every pipeline version update.
+	# it may be killed if you run this command line on a login node.
+	# it's recommended to make an interactive node and run it there.
 	$ bash scripts/install_conda_env.sh
 	```
 
@@ -88,13 +90,13 @@ You can use URIs(`s3://`, `gs://` and `http(s)://`) in Caper's command lines and
 
 According to your chosen platform of Caper, run Caper or submit Caper command line to the cluster. You can choose other environments like `--singularity` or `--docker` instead of `--conda`. But you must define one of the environments.
 
-The followings are just examples. Please read [Caper's README](https://github.com/ENCODE-DCC/caper) very carefully to find an actual working command line for your chosen platform.
+PLEASE READ [CAPER'S README](https://github.com/ENCODE-DCC/caper) VERY CAREFULLY BEFORE RUNNING ANY PIPELINES. YOU WILL NEED TO CORRECTLY CONFIGURE CAPER FIRST. These are just example command lines.
+
     ```bash
     # Run it locally with Conda (DO NOT ACTIVATE PIPELINE'S CONDA ENVIRONEMT)
     $ caper run atac.wdl -i https://storage.googleapis.com/encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ_subsampled.json --conda
 
     # On HPC, submit it as a leader job to SLURM with Singularity
-    # It will fail if you directly run the leader job on login nodes
     $ caper hpc submit atac.wdl -i https://storage.googleapis.com/encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ_subsampled.json --singularity --leader-job-name ANY_GOOD_LEADER_JOB_NAME
 
     # Check job ID and status of your leader jobs
