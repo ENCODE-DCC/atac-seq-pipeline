@@ -3,36 +3,17 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.156534.svg)](https://doi.org/10.5281/zenodo.156534)[![CircleCI](https://circleci.com/gh/ENCODE-DCC/atac-seq-pipeline/tree/master.svg?style=svg)](https://circleci.com/gh/ENCODE-DCC/atac-seq-pipeline/tree/master)
 
 
-## Updated genome TSV files (v3 -> v4)
+## Conda environment name change (since v2.2.0 or 6/13/2022)
 
-
-
-## Download new Caper>=2.1
-
-New Caper is out. You need to update your Caper to work with the latest ENCODE ATAC-seq pipeline.
-```bash
-$ pip install caper --upgrade
+Pipeline's Conda environment's names have been shortened to work around the following error:
+```
+PaddingError: Placeholder of length '80' too short in package /XXXXXXXXXXX/miniconda3/envs/
 ```
 
-## Local/HPC users and new Caper>=2.1
-
-There are tons of changes for local/HPC backends: `local`, `slurm`, `sge`, `pbs` and `lsf`(added). Make a backup of your current Caper configuration file `~/.caper/default.conf` and run `caper init`. Local/HPC users need to reset/initialize Caper's configuration file according to your chosen backend. Edit the configuration file and follow instructions in there.
+You need to reinstall pipeline's Conda environment. It's recommended to do this for every version update.
 ```bash
-$ cd ~/.caper
-$ cp default.conf default.conf.bak
-$ caper init [YOUR_BACKEND]
-```
-
-In order to run a pipeline, you need to add one of the following flags to specify the environment to run each task within. i.e. `--conda`, `--singularity` and `--docker`. These flags are not required for cloud backend users (`aws` and `gcp`).
-```bash
-# for example
-$ caper run ... --singularity
-```
-
-For Conda users, **RE-INSTALL PIPELINE'S CONDA ENVIRONMENT AND DO NOT ACTIVATE CONDA ENVIRONMENT BEFORE RUNNING PIPELINES**. Caper will internally call `conda run -n ENV_NAME CROMWELL_JOB_SCRIPT`. Just make sure that pipeline's new Conda environments are correctly installed.
-```bash
-$ scripts/uninstall_conda_env.sh
-$ scripts/install_conda_env.sh
+$ bash scripts/uninstall_conda_env.sh
+$ bash scripts/install_conda_env.sh
 ```
 
 ## Introduction
@@ -51,31 +32,44 @@ The ATAC-seq pipeline protocol specification is [here](https://docs.google.com/d
 
 1) Make sure that you have Python>=3.6. Caper does not work with Python2. Install Caper and check its version >=2.0.
 	```bash
-	$ python --version
 	$ pip install caper
+
+	# use caper version >= 2.3.0 for a new HPC feature (caper hpc submit/list/abort).
+	$ caper -v
 	```
-2) Make a backup of your Caper configuration file `~/.caper/default.conf` if you are upgrading from old Caper(<2.0.0). Reset/initialize Caper's configuration file. Read Caper's [README](https://github.com/ENCODE-DCC/caper/blob/master/README.md) carefully to choose a backend for your system. Follow the instruction in the configuration file.
+2) Read Caper's [README](https://github.com/ENCODE-DCC/caper/blob/master/README.md) carefully to choose a backend for your system. Follow the instruction in the configuration file.
 	```bash
-	# make a backup of ~/.caper/default.conf if you already have it
+	# this will overwrite the existing conf file ~/.caper/default.conf
+	# make a backup of it first if needed
 	$ caper init [YOUR_BACKEND]
 
-	# then edit ~/.caper/default.conf
+	# edit the conf file
 	$ vi ~/.caper/default.conf
 	```
 
 3) Git clone this pipeline.
-	> **IMPORTANT**: use `~/atac-seq-pipeline/atac.wdl` as `[WDL]` in Caper's documentation.
-
 	```bash
 	$ cd
 	$ git clone https://github.com/ENCODE-DCC/atac-seq-pipeline
 	```
 
-4) (Optional for Conda users) Install pipeline's Conda environments if you don't have Singularity or Docker installed on your system. We recommend to use Singularity instead of Conda. If you don't have Conda on your system, install [Miniconda3](https://docs.conda.io/en/latest/miniconda.html).
+4) (Optional for Conda) **DO NOT USE A SHARED CONDA. INSTALL YOUR OWN [MINICONDA3](https://docs.conda.io/en/latest/miniconda.html) AND USE IT.** Install pipeline's Conda environments if you don't have Singularity or Docker installed on your system. We recommend to use Singularity instead of Conda.
 	```bash
+	# check if you have Singularity on your system, if so then it's not recommended to use Conda
+	$ singularity --version
+
+	# check if you are not using a shared conda, if so then delete it or remove it from your PATH
+	$ which conda
+
+	# change directory to pipeline's git repo
 	$ cd atac-seq-pipeline
-	# uninstall old environments (<2.0.0)
+
+	# uninstall old environments
 	$ bash scripts/uninstall_conda_env.sh
+
+	# install new envs, you need to run this for every pipeline version update.
+	# it may be killed if you run this command line on a login node.
+	# it's recommended to make an interactive node and run it there.
 	$ bash scripts/install_conda_env.sh
 	```
 
@@ -96,22 +90,23 @@ You can use URIs(`s3://`, `gs://` and `http(s)://`) in Caper's command lines and
 
 According to your chosen platform of Caper, run Caper or submit Caper command line to the cluster. You can choose other environments like `--singularity` or `--docker` instead of `--conda`. But you must define one of the environments.
 
-The followings are just examples. Please read [Caper's README](https://github.com/ENCODE-DCC/caper) very carefully to find an actual working command line for your chosen platform.
+PLEASE READ [CAPER'S README](https://github.com/ENCODE-DCC/caper) VERY CAREFULLY BEFORE RUNNING ANY PIPELINES. YOU WILL NEED TO CORRECTLY CONFIGURE CAPER FIRST. These are just example command lines.
+
     ```bash
-    # Run it locally with Conda (You don't need to activate it, make sure to install Conda envs first)
+    # Run it locally with Conda (DO NOT ACTIVATE PIPELINE'S CONDA ENVIRONEMT)
     $ caper run atac.wdl -i https://storage.googleapis.com/encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ_subsampled.json --conda
 
-    # Or submit it as a leader job (with long/enough resources) to SLURM (Stanford Sherlock) with Singularity
-    # It will fail if you directly run the leader job on login nodes
-    $ sbatch -p [SLURM_PARTITON] -J [WORKFLOW_NAME] --export=ALL --mem 4G -t 4-0 --wrap "caper run atac.wdl -i https://storage.googleapis.com/encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ_subsampled.json --singularity"
+    # On HPC, submit it as a leader job to SLURM with Singularity
+    $ caper hpc submit atac.wdl -i https://storage.googleapis.com/encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ_subsampled.json --singularity --leader-job-name ANY_GOOD_LEADER_JOB_NAME
 
-    # Check status of your leader job
-    $ squeue -u $USER | grep [WORKFLOW_NAME]
+    # Check job ID and status of your leader jobs
+    $ caper hpc list
 
     # Cancel the leader node to close all of its children jobs
-    $ scancel -j [JOB_ID]
-    ```
-
+    # If you directly use cluster command like scancel or qdel then
+    # child jobs will not be terminated
+    $ caper hpc abort [JOB_ID]
+	```
 
 ## Running and sharing on Truwl
 
