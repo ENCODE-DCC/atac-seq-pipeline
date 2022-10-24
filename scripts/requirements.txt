@@ -13,15 +13,6 @@ pysam ==0.15.3
 pybedtools ==0.8.0
 pybigwig ==0.3.13
 
-ucsc-fetchchromsizes # 377 in docker/singularity image
-ucsc-wigtobigwig
-ucsc-bedgraphtobigwig
-ucsc-bigwiginfo
-ucsc-bedclip
-ucsc-bedtobigbed
-ucsc-twobittofa
-ucsc-bigWigAverageOverBed
-
 deeptools ==3.3.1
 cutadapt ==2.5
 preseq ==2.0.3
@@ -49,4 +40,3 @@ java-jdk
 picard ==2.20.7
 trimmomatic ==0.39
 
-openssl ==1.0.2u # to fix missing libssl.so.1.0.0 for UCSC tools (bedClip, ...)
