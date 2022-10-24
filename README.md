@@ -24,7 +24,8 @@ The ATAC-seq pipeline protocol specification is [here](https://docs.google.com/d
 
 2) **IMPORTANT**: Read Caper's [README](https://github.com/ENCODE-DCC/caper/blob/master/README.md) carefully to choose a backend for your system. Follow the instruction in the configuration file.
 	```bash
-	$ caper init [YOUR_BACKEND] # local by default
+	# backend: local or your HPC type (e.g. slurm, sge, pbs, lsf). read Caper's README carefully.
+	$ caper init [YOUR_BACKEND]
 
 	# IMPORTANT: edit the conf file and follow commented instructions in there
 	$ vi ~/.caper/default.conf
@@ -37,7 +38,7 @@ The ATAC-seq pipeline protocol specification is [here](https://docs.google.com/d
 	$ cd atac-seq-pipeline
 	```
 
-4) Define input JSON.
+4) Define test input JSON.
 	```bash
 	INPUT_JSON="https://storage.googleapis.com/encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ_subsampled.json"
 	```
@@ -45,8 +46,9 @@ The ATAC-seq pipeline protocol specification is [here](https://docs.google.com/d
 5) If you have Docker and want to run pipelines locally on your laptop. `--max-concurrent-tasks 1` is to limit number of concurrent tasks to test-run the pipeline on a laptop. Uncomment it if run it on a workstation/HPC.
 	```bash
 	# check if Docker works on your machine
-	$ docker exec ubuntu:latest echo hello
+	$ docker run ubuntu:latest echo hello
 
+	# --max-concurrent-tasks 1 is for computers with limited resources
 	$ caper run atac.wdl -i "${INPUT_JSON}" --docker --max-concurrent-tasks 1
 	```
 
@@ -55,12 +57,11 @@ The ATAC-seq pipeline protocol specification is [here](https://docs.google.com/d
 	# check if Singularity works on your machine
 	$ singularity exec docker://ubuntu:latest echo hello
 
-	# on your local machine
+	# on your local machine (--max-concurrent-tasks 1 is for computers with limited resources)
 	$ caper run atac.wdl -i "${INPUT_JSON}" --singularity --max-concurrent-tasks 1
 
-    # on HPC, submit it as a leader job to SLURM with Singularity
-
-    # make sure that you already configure Caper's conf ~/.caper/default.conf correctly to work with your HPC
+	# on HPC, make sure that Caper's conf ~/.caper/default.conf is correctly configured to work with your HPC
+    # the following command will submit Caper as a leader job to SLURM with Singularity
     $ caper hpc submit atac.wdl -i "${INPUT_JSON}" --singularity --leader-job-name ANY_GOOD_LEADER_JOB_NAME
 
     # check job ID and status of your leader jobs
@@ -87,12 +88,11 @@ The ATAC-seq pipeline protocol specification is [here](https://docs.google.com/d
 
 	# if installation fails please use Singularity method instead.
 
-	# on your local machine
+	# on your local machine (--max-concurrent-tasks 1 is for computers with limited resources)
 	$ caper run atac.wdl -i "${INPUT_JSON}" --conda --max-concurrent-tasks 1
 
-    # on HPC, submit it as a leader job to SLURM with Singularity
-
-    # make sure that you already configure Caper's conf ~/.caper/default.conf correctly to work with your HPC
+	# on HPC, make sure that Caper's conf ~/.caper/default.conf is correctly configured to work with your HPC
+    # the following command will submit Caper as a leader job to SLURM with Conda
     $ caper hpc submit atac.wdl -i "${INPUT_JSON}" --conda --leader-job-name ANY_GOOD_LEADER_JOB_NAME
 
     # check job ID and status of your leader jobs
