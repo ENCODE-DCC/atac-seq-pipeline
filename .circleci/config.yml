@@ -2,12 +2,12 @@ version: 2.1
 
 defaults: &defaults
   docker:
-    - image: google/cloud-sdk:latest
+    - image: cimg/base@sha256:d75b94c6eae6e660b6db36761709626b93cabe8c8da5b955bfbf7832257e4201
   working_directory: ~/atac-seq-pipeline
 
 machine_defaults: &machine_defaults
   machine: 
-    image: ubuntu-2004:202010-01
+    image: ubuntu-2004:202201-02
   working_directory: ~/atac-seq-pipeline
 
 make_tag: &make_tag

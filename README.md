@@ -3,19 +3,6 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.156534.svg)](https://doi.org/10.5281/zenodo.156534)[![CircleCI](https://circleci.com/gh/ENCODE-DCC/atac-seq-pipeline/tree/master.svg?style=svg)](https://circleci.com/gh/ENCODE-DCC/atac-seq-pipeline/tree/master)
 
 
-## Conda environment name change (since v2.2.0 or 6/13/2022)
-
-Pipeline's Conda environment's names have been shortened to work around the following error:
-```
-PaddingError: Placeholder of length '80' too short in package /XXXXXXXXXXX/miniconda3/envs/
-```
-
-You need to reinstall pipeline's Conda environment. It's recommended to do this for every version update.
-```bash
-$ bash scripts/uninstall_conda_env.sh
-$ bash scripts/install_conda_env.sh
-```
-
 ## Introduction
 
 This pipeline is designed for automated end-to-end quality control and processing of ATAC-seq and DNase-seq data. The pipeline can be run on compute clusters with job submission engines as well as on stand alone machines. It inherently makes uses of parallelized/distributed computing. Pipeline installation is also easy as most dependencies are automatically installed. The pipeline can be run end-to-end, starting from raw FASTQ files all the way to peak calling and signal track generation using a single caper submit command. One can also start the pipeline from intermediate stages (for example, using alignment files as input). The pipeline supports both single-end and paired-end data as well as replicated or non-replicated datasets. The outputs produced by the pipeline include 1) formatted HTML reports that include quality control measures specifically designed for ATAC-seq and DNase-seq data, 2) analysis of reproducibility, 3) stringent and relaxed thresholding of peaks, 4) fold-enrichment and pvalue signal tracks. The pipeline also supports detailed error reporting and allows for easy resumption of interrupted runs. It has been tested on some human, mouse and yeast ATAC-seq datasets as well as on human and mouse DNase-seq datasets.
@@ -30,20 +17,17 @@ The ATAC-seq pipeline protocol specification is [here](https://docs.google.com/d
 
 ## Installation
 
-1) Make sure that you have Python>=3.6. Caper does not work with Python2. Install Caper and check its version >=2.0.
+1) Install Caper (Python Wrapper/CLI for [Cromwell](https://github.com/broadinstitute/cromwell)).
 	```bash
 	$ pip install caper
-
-	# use caper version >= 2.3.0 for a new HPC feature (caper hpc submit/list/abort).
-	$ caper -v
 	```
-2) Read Caper's [README](https://github.com/ENCODE-DCC/caper/blob/master/README.md) carefully to choose a backend for your system. Follow the instruction in the configuration file.
+
+2) **IMPORTANT**: Read Caper's [README](https://github.com/ENCODE-DCC/caper/blob/master/README.md) carefully to choose a backend for your system. Follow the instruction in the configuration file.
 	```bash
-	# this will overwrite the existing conf file ~/.caper/default.conf
-	# make a backup of it first if needed
+	# backend: local or your HPC type (e.g. slurm, sge, pbs, lsf). read Caper's README carefully.
 	$ caper init [YOUR_BACKEND]
 
-	# edit the conf file
+	# IMPORTANT: edit the conf file and follow commented instructions in there
 	$ vi ~/.caper/default.conf
 	```
 
@@ -51,26 +35,73 @@ The ATAC-seq pipeline protocol specification is [here](https://docs.google.com/d
 	```bash
 	$ cd
 	$ git clone https://github.com/ENCODE-DCC/atac-seq-pipeline
+	$ cd atac-seq-pipeline
 	```
 
-4) (Optional for Conda) **DO NOT USE A SHARED CONDA. INSTALL YOUR OWN [MINICONDA3](https://docs.conda.io/en/latest/miniconda.html) AND USE IT.** Install pipeline's Conda environments if you don't have Singularity or Docker installed on your system. We recommend to use Singularity instead of Conda.
+4) Define test input JSON.
 	```bash
-	# check if you have Singularity on your system, if so then it's not recommended to use Conda
-	$ singularity --version
+	INPUT_JSON="https://storage.googleapis.com/encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ_subsampled.json"
+	```
 
+5) If you have Docker and want to run pipelines locally on your laptop. `--max-concurrent-tasks 1` is to limit number of concurrent tasks to test-run the pipeline on a laptop. Uncomment it if run it on a workstation/HPC.
+	```bash
+	# check if Docker works on your machine
+	$ docker run ubuntu:latest echo hello
+
+	# --max-concurrent-tasks 1 is for computers with limited resources
+	$ caper run atac.wdl -i "${INPUT_JSON}" --docker --max-concurrent-tasks 1
+	```
+
+6) Otherwise, install Singularity on your system. Please follow [this instruction](https://neuro.debian.net/install_pkg.html?p=singularity-container) to install Singularity on a Debian-based OS. Or ask your system administrator to install Singularity on your HPC.
+	```bash
+	# check if Singularity works on your machine
+	$ singularity exec docker://ubuntu:latest echo hello
+
+	# on your local machine (--max-concurrent-tasks 1 is for computers with limited resources)
+	$ caper run atac.wdl -i "${INPUT_JSON}" --singularity --max-concurrent-tasks 1
+
+	# on HPC, make sure that Caper's conf ~/.caper/default.conf is correctly configured to work with your HPC
+    # the following command will submit Caper as a leader job to SLURM with Singularity
+    $ caper hpc submit atac.wdl -i "${INPUT_JSON}" --singularity --leader-job-name ANY_GOOD_LEADER_JOB_NAME
+
+    # check job ID and status of your leader jobs
+    $ caper hpc list
+
+    # cancel the leader node to close all of its children jobs
+    # If you directly use cluster command like scancel or qdel then
+    # child jobs will not be terminated
+    $ caper hpc abort [JOB_ID]
+	```
+
+7) (Optional Conda method) **WE DO NOT HELP USERS FIX CONDA DEPENDENCY ISSUES. IF CONDA METHOD FAILS THEN PLEASE USE SINGULARITY METHOD INSTEAD**. **DO NOT USE A SHARED CONDA. INSTALL YOUR OWN [MINICONDA3](https://docs.conda.io/en/latest/miniconda.html) AND USE IT.**
+	```bash
 	# check if you are not using a shared conda, if so then delete it or remove it from your PATH
 	$ which conda
 
-	# change directory to pipeline's git repo
-	$ cd atac-seq-pipeline
-
-	# uninstall old environments
+	# uninstall pipeline's old environments
 	$ bash scripts/uninstall_conda_env.sh
 
 	# install new envs, you need to run this for every pipeline version update.
-	# it may be killed if you run this command line on a login node.
-	# it's recommended to make an interactive node and run it there.
+	# it may be killed if you run this command line on a login node on HPC.
+	# it's recommended to make an interactive node with enough resources and run it there.
 	$ bash scripts/install_conda_env.sh
+
+	# if installation fails please use Singularity method instead.
+
+	# on your local machine (--max-concurrent-tasks 1 is for computers with limited resources)
+	$ caper run atac.wdl -i "${INPUT_JSON}" --conda --max-concurrent-tasks 1
+
+	# on HPC, make sure that Caper's conf ~/.caper/default.conf is correctly configured to work with your HPC
+    # the following command will submit Caper as a leader job to SLURM with Conda
+    $ caper hpc submit atac.wdl -i "${INPUT_JSON}" --conda --leader-job-name ANY_GOOD_LEADER_JOB_NAME
+
+    # check job ID and status of your leader jobs
+    $ caper hpc list
+
+    # cancel the leader node to close all of its children jobs
+    # If you directly use cluster command like scancel or qdel then
+    # child jobs will not be terminated
+    $ caper hpc abort [JOB_ID]
 	```
 
 
@@ -83,30 +114,6 @@ An input JSON file specifies all the input parameters and files that are necessa
 1) [Input JSON file specification (short)](docs/input_short.md)
 2) [Input JSON file specification (long)](docs/input.md)
 
-
-## Running on local computer/HPCs
-
-You can use URIs(`s3://`, `gs://` and `http(s)://`) in Caper's command lines and input JSON file then Caper will automatically download/localize such files. Input JSON file example: https://storage.googleapis.com/encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ_subsampled.json
-
-According to your chosen platform of Caper, run Caper or submit Caper command line to the cluster. You can choose other environments like `--singularity` or `--docker` instead of `--conda`. But you must define one of the environments.
-
-PLEASE READ [CAPER'S README](https://github.com/ENCODE-DCC/caper) VERY CAREFULLY BEFORE RUNNING ANY PIPELINES. YOU WILL NEED TO CORRECTLY CONFIGURE CAPER FIRST. These are just example command lines.
-
-    ```bash
-    # Run it locally with Conda (DO NOT ACTIVATE PIPELINE'S CONDA ENVIRONEMT)
-    $ caper run atac.wdl -i https://storage.googleapis.com/encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ_subsampled.json --conda
-
-    # On HPC, submit it as a leader job to SLURM with Singularity
-    $ caper hpc submit atac.wdl -i https://storage.googleapis.com/encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ_subsampled.json --singularity --leader-job-name ANY_GOOD_LEADER_JOB_NAME
-
-    # Check job ID and status of your leader jobs
-    $ caper hpc list
-
-    # Cancel the leader node to close all of its children jobs
-    # If you directly use cluster command like scancel or qdel then
-    # child jobs will not be terminated
-    $ caper hpc abort [JOB_ID]
-	```
 
 ## Running and sharing on Truwl
 
