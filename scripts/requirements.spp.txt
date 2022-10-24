@@ -1,20 +1,13 @@
 # Conda environment for tasks (spp, xcor) in atac/chip 
+# some packages (phantompeakquals, r-spp) will be installed separately
+# couldn't resolve all conda conflicts
 
 python >=3
 bedtools ==2.29.0
 bedops ==2.4.39
-phantompeakqualtools ==1.2.2
 
-ucsc-bedclip
-ucsc-bedtobigbed
+r-base ==3.6.1
 
-r #==3.5.1  # 3.4.4 in docker/singularity image
-r-snow
-r-snowfall
-r-bitops
-r-catools
-bioconductor-rsamtools
-r-spp <1.16 #==1.15.5  # previously 1.15.5, and 1.14 in docker/singularity image, 1.16 has lwcc() error
 tabix
 
 matplotlib
@@ -22,4 +15,3 @@ pandas
 numpy
 ghostscript
 
-openssl ==1.0.2u # to fix missing libssl.so.1.0.0 for UCSC tools (bedClip, ...)
