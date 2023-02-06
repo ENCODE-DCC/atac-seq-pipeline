@@ -97,14 +97,15 @@ def tn5_shift_ta(ta, out_dir):
                           os.path.basename(strip_ext_ta(ta)))
     shifted_ta = '{}.tn5.tagAlign.gz'.format(prefix)
 
-    cmd = 'zcat -f {} | '
-    cmd += 'awk \'BEGIN {{OFS = "\\t"}}'
-    cmd += '{{ if ($6 == "+") {{$2 = $2 + 4}} '
-    cmd += 'else if ($6 == "-") {{$3 = $3 - 5}} print $0}}\' | '
-    cmd += 'gzip -nc > {}'
-    cmd = cmd.format(
-        ta,
-        shifted_ta)
+    cmd = (
+        'zcat -f {ta} | awk \'BEGIN {{OFS = "\\t"}} {{'
+        'if ($6 == "+") {{$2 = $2 + 4}} else if ($6 == "-") {{$3 = $3 - 5}} '
+        'if ($2 >= $3) {{ if ($6 == "+") {{$2 = $3 - 1}} else {{$3 = $2 + 1}} }} '
+        'print $0}}\' | gzip -nc > {shifted_ta}'
+    ).format(
+        ta=ta,
+        shifted_ta=shifted_ta
+    )
     run_shell_cmd(cmd)
     return shifted_ta
 
