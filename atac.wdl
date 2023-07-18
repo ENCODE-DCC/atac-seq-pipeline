@@ -1837,6 +1837,11 @@ workflow atac {
         File report = qc_report.report
         File qc_json = qc_report.qc_json
         Boolean qc_json_ref_match = qc_report.qc_json_ref_match
+        File peak = call_peak.peak
+        File peak_pr1 = call_peak_pr1.peak
+        File peak_pr2 = call_peak_pr2.peak
+        File pval_bw = macs2_signal_track.pval_bw
+        File fc_bw = macs2_signal_track.fc_bw
     }
 }
 
