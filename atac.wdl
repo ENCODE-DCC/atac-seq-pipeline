@@ -1842,13 +1842,13 @@ workflow atac {
         File qc_json = qc_report.qc_json
 
         # IGVF_SC_JAMBOREE_2023: assuming an unreplicated case
-        File ta_pr1 = spr.ta_pr1[0]
-        File ta_pr2 = spr.ta_pr2[0]
-        File peak = call_peak.peak[0]
-        File peak_pr1 = call_peak_pr1.peak[0]
-        File peak_pr2 = call_peak_pr2.peak[0]
-        File pval_bw = macs2_signal_track.pval_bw[0]
-        File fc_bw = macs2_signal_track.fc_bw[0]
+        File? ta_pr1 = spr.ta_pr1[0]
+        File? ta_pr2 = spr.ta_pr2[0]
+        File? peak = call_peak.peak[0]
+        File? peak_pr1 = call_peak_pr1.peak[0]
+        File? peak_pr2 = call_peak_pr2.peak[0]
+        File? pval_bw = macs2_signal_track.pval_bw[0]
+        File? fc_bw = macs2_signal_track.fc_bw[0]
     }
 }
 
