@@ -1836,7 +1836,8 @@ workflow atac {
     output {
         File report = qc_report.report
         File qc_json = qc_report.qc_json
-        Boolean qc_json_ref_match = qc_report.qc_json_ref_match
+        File ta_pr1 = spr.ta_pr1
+        File ta_pr2 = spr.ta_pr2
         File peak = call_peak.peak
         File peak_pr1 = call_peak_pr1.peak
         File peak_pr2 = call_peak_pr2.peak
