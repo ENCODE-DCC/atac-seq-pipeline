@@ -129,7 +129,11 @@ workflow atac {
         Array[File] fastqs_rep10_R2 = []
         Array[File] bams = []
         Array[File] nodup_bams = []
+
+        # IGVF_SC_JAMBOREE_2023: assuming an unreplicated case
+        # Define a single TAGALIGN file in "tas" array
         Array[File] tas = []
+
         Array[File] peaks = []
         Array[File] peaks_pr1 = []
         Array[File] peaks_pr2 = []
@@ -1836,13 +1840,15 @@ workflow atac {
     output {
         File report = qc_report.report
         File qc_json = qc_report.qc_json
-        File ta_pr1 = spr.ta_pr1
-        File ta_pr2 = spr.ta_pr2
-        File peak = call_peak.peak
-        File peak_pr1 = call_peak_pr1.peak
-        File peak_pr2 = call_peak_pr2.peak
-        File pval_bw = macs2_signal_track.pval_bw
-        File fc_bw = macs2_signal_track.fc_bw
+
+        # IGVF_SC_JAMBOREE_2023: assuming an unreplicated case
+        File ta_pr1 = spr[0].ta_pr1
+        File ta_pr2 = spr[0].ta_pr2
+        File peak = call_peak[0].peak
+        File peak_pr1 = call_peak_pr1[0].peak
+        File peak_pr2 = call_peak_pr2[0].peak
+        File pval_bw = macs2_signal_track[0].pval_bw
+        File fc_bw = macs2_signal_track[0].fc_bw
     }
 }
 
