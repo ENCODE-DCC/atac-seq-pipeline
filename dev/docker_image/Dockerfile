@@ -40,8 +40,9 @@ RUN echo "r <- getOption('repos'); r['CRAN'] <- 'http://cran.r-project.org'; opt
     Rscript -e "install.packages('snow')" && \
     Rscript -e "install.packages('snowfall')" && \
     Rscript -e "install.packages('bitops')" && \
-    Rscript -e "install.packages('caTools')" && \
     Rscript -e "install.packages('Rcpp')"
+
+RUN wget "https://cran.r-project.org/src/contrib/Archive/caTools/caTools_1.17.1.4.tar.gz" && R CMD INSTALL caTools_1.17.1.4.tar.gz && rm -f caTools_1.17.1.4.tar.gz
 
 # Install bioconductor and Rsamtools which is required by spp package
 RUN Rscript -e "source('http://bioconductor.org/biocLite.R'); biocLite('Rsamtools')"
@@ -100,6 +101,7 @@ RUN pip3 install --no-cache-dir macs2==2.2.4
 
 # Install genomic python packages (python2)
 RUN pip2 install --no-cache-dir Cython==0.29.0 versioneer setuptools==44.1.1
+RUN pip2 install --no-cache-dir pybedtools==0.6.9
 RUN pip2 install --no-cache-dir metaseq==0.5.6
 
 # Install UCSC tools (v377)
