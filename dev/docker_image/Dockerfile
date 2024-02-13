@@ -30,7 +30,7 @@ ENV PATH="/software:${PATH}"
 RUN wget https://github.com/openssl/openssl/archive/OpenSSL_1_0_2t.tar.gz && tar zxvf OpenSSL_1_0_2t.tar.gz && cd openssl-OpenSSL_1_0_2t/ && ./config && make && make install && cd ../ && rm -rf openssl-OpenSSL_1_0_2t* && rm /usr/bin/openssl && ln -s /usr/local/ssl/bin/openssl /usr/bin/openssl
 
 # Install system/math python packages (python3)
-RUN pip3 install --no-cache-dir jsondiff==1.1.1 common python-dateutil cython pandas==0.25.1 jinja2==2.10.1 matplotlib==3.1.1
+RUN pip3 install --no-cache-dir jsondiff==1.1.1 common python-dateutil pandas==0.25.1 jinja2==2.10.1 matplotlib==3.1.1
 
 # Install genomic python package (python3)
 RUN pip3 install --no-cache-dir pyBigwig==0.3.13 cutadapt==2.5 pyfaidx==0.5.5.2 pybedtools==0.8.0 pysam==0.15.3 deeptools==3.3.1
@@ -94,12 +94,13 @@ RUN git clone --branch 2.0.4.2 --single-branch https://github.com/kundajelab/idr
 RUN pip2 install --no-cache-dir numpy scipy matplotlib==2.2.4 bx-python==0.8.2 biopython==1.76
 RUN pip3 install --no-cache-dir biopython==1.76
 
-# Install genomic python packages (python2)
-RUN pip2 install --no-cache-dir metaseq==0.5.6
-
 # Install MACS2 (python3)
-RUN pip3 install --no-cache-dir Cython
+RUN pip3 install --no-cache-dir Cython==0.29.0
 RUN pip3 install --no-cache-dir macs2==2.2.4
+
+# Install genomic python packages (python2)
+RUN pip2 install --no-cache-dir Cython==0.29.0 versioneer setuptools==44.1.1
+RUN pip2 install --no-cache-dir metaseq==0.5.6
 
 # Install UCSC tools (v377)
 RUN git clone https://github.com/ENCODE-DCC/kentUtils_bin_v377
@@ -143,4 +144,3 @@ ENV PYTHONPATH="/software/atac-seq-pipeline/src"
 COPY src atac-seq-pipeline/src/
 COPY atac.wdl atac-seq-pipeline/
 COPY dev/test/test_py atac-seq-pipeline/dev/test/test_py/
-
