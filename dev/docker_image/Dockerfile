@@ -103,6 +103,7 @@ RUN pip3 install --no-cache-dir macs2==2.2.4
 RUN pip2 install --no-cache-dir Cython==0.29.0 versioneer setuptools==44.1.1
 RUN pip2 install --no-cache-dir pybedtools==0.6.9
 RUN pip2 install --no-cache-dir metaseq==0.5.6
+RUN pip2 install --no-cache-dir gffutils==0.10.1
 
 # Install UCSC tools (v377)
 RUN git clone https://github.com/ENCODE-DCC/kentUtils_bin_v377
