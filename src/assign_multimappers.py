@@ -71,3 +71,8 @@ if __name__ == "__main__":
                 # First read in file
                 current_reads.append(line)
                 current_qname = read_elems[0]
+                
+    # Write last read
+    if len(current_reads) > 0 and len(current_reads) <= alignment_cutoff:
+        for read in current_reads:
+            sys.stdout.write(str(read))
